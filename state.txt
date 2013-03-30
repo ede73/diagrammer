@@ -1,7 +1,5 @@
 start xstart
-
 idle#00ff00:idle\nevent
-
 xstart>#ff0000idle
 idle>start_forward:on sound
 start_forward>moving_forward

@@ -7,7 +7,7 @@ exports.state=state;
 EOF
 
 echo "testing lexing"
-node testStateLexer.js
+node testStateLexer.js $input
 
 cat state.lex > state.all
 cat >>state.all <<EOF

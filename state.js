@@ -190,12 +190,10 @@ case 7:return 'LABEL';
 break;
 case 8:return 'EOF';
 break;
-case 9:'>'
-break;
 }
 },
-rules: [/^(?:\s+)/,/^(?:group\b)/,/^(?:start\b)/,/^(?:>)/,/^(?:(#[A-Fa-f0-9]{6}))/,/^(?:([A-Za-z_])+([0-9])*)/,/^(?:([0-9])+)/,/^(?::.*)/,/^(?:$)/,/^(?:left\b)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9],"inclusive":true}}
+rules: [/^(?:\s+)/,/^(?:group\b)/,/^(?:start\b)/,/^(?:>)/,/^(?:(#[A-Fa-f0-9]{6}))/,/^(?:([A-Za-z_])+([0-9])*)/,/^(?:([0-9])+)/,/^(?::.*)/,/^(?:$)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8],"inclusive":true}}
 };
 return lexer;
 })();exports.state=state;

@@ -19,6 +19,26 @@ contents
 		{$$ =  $1 + $2;}
 	;
 
+/* process all STATE EVENT .* possibilities */
+targetState
+	: COLOR STATE LABEL
+		{$$=$2+"[color=\""+$1+"\",label=\""+$3+"\"];\n";}
+	| STATE LABEL
+		{$$=$1+"[label=\""+$2+"\"];\n";}
+	| COLOR STATE
+		{$$=$2+"[color=\""+$1+"\"];\n";}
+	| STATE
+		{$$=$1+";\n";}
+	;
+		
+/* process all STATE .* possibilities*/
+colorLabel
+	: COLOR LABEL
+		{$$="[color=\""+$1+"\",label=\""+$2+"\"];\n"}
+	| LABEL
+		{$$="[label=\""+$1+"\"];\n"}
+	;
+
 content
 	: GROUP NUMBER
 		{{$$="subgraph cluster_"+$2+"{\n";}}
@@ -27,18 +47,10 @@ content
 	| GROUP STATE
 		{{$$="};\n";}}
 	| START STATE
-		{$$="{rank = same;null}\n{rank = same; "+$2+"}\nnull [shape = plaintext label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-	| STATE EVENT COLOR STATE LABEL
-		{$$=$1+"->"+$4+"[color=\""+$3+"\",label=\""+$5+"\"];\n";}
-	| STATE EVENT STATE LABEL
-		{$$=$1+"->"+$3+"[label=\""+$4+"\"];\n";}
-	| STATE EVENT COLOR STATE
-		{$$=$1+"->"+$4+"[color=\""+$3+"\"];\n";}
-	| STATE EVENT STATE
-		{$$=$1+"->"+$3+";\n";}
-	| STATE COLOR LABEL
-		{$$=$1+"[color=\""+$2+"\",label=\""+$3+"\"];\n";}
-	| STATE LABEL
-		{$$=$1+"[label=\""+$2+"\"];\n";}
+		{$$="{rank = same;null}\n{rank = same; "+$2+"}\nnull [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
+	| STATE EVENT targetState
+		{$$=$1+"->"+$3;}
+	| STATE colorLabel
+		{$$=$1+$2;}
 	;
 

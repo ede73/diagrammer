@@ -1,0 +1,15 @@
+digraph {
+{rank = same;null}
+{rank = same; s}
+null [shape = plaintext label=""];
+null->s;
+s->c[label=":connect"];
+subgraph cluster_1{
+c->m[label=":turn off mobile data"];
+m->vb[label=":create blackhole VPN"];
+vb->mo[label=":turn on mobile data"];
+mo->b[label=":do bootstrap"];
+b->v[label=":connect vpn"];
+};
+
+}

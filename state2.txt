@@ -1,0 +1,10 @@
+start s
+s>c:connect
+group 1
+	c>m:turn off mobile data
+	m>vb:create blackhole VPN
+	vb>mo:turn on mobile data
+	mo>b:do bootstrap
+	b>v:connect vpn
+group end
+

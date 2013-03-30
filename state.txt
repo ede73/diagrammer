@@ -1,0 +1,9 @@
+
+   s   >    c1   
+
+s > c
+s > c
+c > s
+c > c
+c > s
+c > s

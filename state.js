@@ -180,20 +180,22 @@ case 2:return 'START';
 break;
 case 3:return 'EVENT';
 break;
-case 4:return 'STATE';
+case 4:return 'COLOR';
 break;
-case 5:return 'NUMBER';
+case 5:return 'STATE';
 break;
-case 6:return 'LABEL';
+case 6:return 'NUMBER';
 break;
-case 7:return 'EOF';
+case 7:return 'LABEL';
 break;
-case 8:'>'
+case 8:return 'EOF';
+break;
+case 9:'>'
 break;
 }
 },
-rules: [/^(?:\s+)/,/^(?:group\b)/,/^(?:start\b)/,/^(?:>)/,/^(?:([A-Za-z_])+([0-9])*)/,/^(?:([0-9])+)/,/^(?::.*)/,/^(?:$)/,/^(?:left\b)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8],"inclusive":true}}
+rules: [/^(?:\s+)/,/^(?:group\b)/,/^(?:start\b)/,/^(?:>)/,/^(?:(#[A-Fa-f0-9]{6}))/,/^(?:([A-Za-z_])+([0-9])*)/,/^(?:([0-9])+)/,/^(?::.*)/,/^(?:$)/,/^(?:left\b)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9],"inclusive":true}}
 };
 return lexer;
 })();exports.state=state;

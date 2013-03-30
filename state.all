@@ -1,13 +1,14 @@
 %lex
 D	[0-9]
 C	[A-Za-z_]
-
+COLOR	"#"[A-Fa-f0-9]{6}
 %%
 
 \s+		{ /* skip WS */}
 "group"		{return 'GROUP';}
 "start"		{return 'START';}
 ">"		{return 'EVENT';}
+{COLOR}		{return 'COLOR';}
 {C}+{D}*	{return 'STATE';}
 {D}+		{return 'NUMBER';}
 ":".*		{return 'LABEL';}
@@ -45,8 +46,12 @@ content
 		{{$$="};\n";}}
 	| START STATE
 		{$$="{rank = same;null}\n{rank = same; "+$2+"}\nnull [shape = plaintext label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
+	| STATE EVENT COLOR STATE LABEL
+		{$$=$1+"->"+$4+"[color=\""+$3+"\",label=\""+$5+"\"];\n";}
 	| STATE EVENT STATE LABEL
 		{$$=$1+"->"+$3+"[label=\""+$4+"\"];\n";}
+	| STATE EVENT COLOR STATE
+		{$$=$1+"->"+$4+"[color=\""+$3+"\"];\n";}
 	| STATE EVENT STATE
 		{$$=$1+"->"+$3+";\n";}
 	| STATE

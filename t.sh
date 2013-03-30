@@ -1,4 +1,6 @@
 #!/bin/sh
+input=${1:-state2.txt}
+
 jison-lex state.lex
 cat >> state.js <<EOF
 exports.state=state;
@@ -20,9 +22,12 @@ jison state.all -o parser.js
 [[ "$?" -ne 0 ]] && exit 10
 
 echo "test parser"
-node parser.js state2.txt | tee a.gv
+node parser.js $input | tee a.gv
 # |sed '/digraph/,$!d'
 
 dot -Tpng a.gv >a.png
 [[ -s a.png ]] && open a.png
+
+circo -Tpng a.gv >c.png
+[[ -s c.png ]] && open c.png
 

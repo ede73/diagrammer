@@ -1,6 +1,6 @@
 %lex
 D	[0-9]
-C	[A-Za-z]
+C	[A-Za-z_]
 
 %%
 

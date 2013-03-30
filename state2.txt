@@ -1,10 +1,17 @@
 start s
 s>c:connect
-group 1
+group 1 :connection logic
 	c>m:turn off mobile data
 	m>vb:create blackhole VPN
 	vb>mo:turn on mobile data
 	mo>b:do bootstrap
 	b>v:connect vpn
+group end
+
+group 2 :phonestate listener
+	e>s:wifi connected
+	e>s:wifi disconnected
+	e>s:mobile connected
+	e>s:mobile disconnected
 group end
 

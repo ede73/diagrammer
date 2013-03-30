@@ -1,9 +1,10 @@
-
-   s   >    c1   
-
-s > c
-s > c
-c > s
-c > c
-c > s
-c > s
+start xstart
+xstart>idle
+idle>start_forward:on sound
+start_forward>moving_forward
+moving_forward>stop_motor:on touch
+moving_forward>start_backward:on sound
+start_backward>moving_backward
+moving_backward>start_forward:on sound
+moving_backward>stop_motor:on touch
+stop_motor>idle

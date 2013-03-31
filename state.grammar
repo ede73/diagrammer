@@ -53,4 +53,3 @@ content
 	| STATE colorLabel
 		{$$=$1+$2;}
 	;
-

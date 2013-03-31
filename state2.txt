@@ -1,5 +1,6 @@
 start s
 s>c:connect
+// a comment is a good thing...
 group 1 :connection logic
 	c>m:turn off mobile data
 	m>vb:create blackhole VPN

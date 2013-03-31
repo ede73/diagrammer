@@ -42,6 +42,8 @@ colorLabel
 content
 	: GROUP NUMBER
 		{{$$="subgraph cluster_"+$2+"{\n";}}
+	| COMMENT
+		{{$$="/*"+$1.substring(2)+"*/\n";}}
 	| GROUP NUMBER LABEL
 		{{$$="subgraph cluster_"+$2+"{\nlabel=\""+$3.substring(1)+"\"";}}
 	| GROUP STATE

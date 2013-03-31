@@ -22,9 +22,9 @@ contents
 /* process all STATE EVENT .* possibilities */
 targetState
 	: COLOR STATE LABEL
-		{$$=$2+"[color=\""+$1+"\",label=\""+$3+"\"];\n";}
+		{$$=$2+"[color=\""+$1+"\",label=\""+$3.substring(1)+"\"];\n";}
 	| STATE LABEL
-		{$$=$1+"[label=\""+$2+"\"];\n";}
+		{$$=$1+"[label=\""+$2.substring(1)+"\"];\n";}
 	| COLOR STATE
 		{$$=$2+"[color=\""+$1+"\"];\n";}
 	| STATE
@@ -34,16 +34,16 @@ targetState
 /* process all STATE .* possibilities*/
 colorLabel
 	: COLOR LABEL
-		{$$="[color=\""+$1+"\",label=\""+$2+"\"];\n"}
+		{$$="[color=\""+$1+"\",label=\""+$2.substring(1)+"\"];\n"}
 	| LABEL
-		{$$="[label=\""+$1+"\"];\n"}
+		{$$="[label=\""+$1.substring(1)+"\"];\n"}
 	;
 
 content
 	: GROUP NUMBER
 		{{$$="subgraph cluster_"+$2+"{\n";}}
 	| GROUP NUMBER LABEL
-		{{$$="subgraph cluster_"+$2+"{\nlabel=\""+$3+"\"";}}
+		{{$$="subgraph cluster_"+$2+"{\nlabel=\""+$3.substring(1)+"\"";}}
 	| GROUP STATE
 		{{$$="};\n";}}
 	| START STATE

@@ -8,6 +8,9 @@ COMMENT ^"//"[^\n]*
 
 \s+		{ /* skip WS */}
 {COMMENT}	{return 'COMMENT';}
+"HORIZONTAL"|"LR"		{return 'LEFT_RIGHT';}
+"VERTICAL"|"TD"		{return 'TOP_DOWN';}
+"shape"		{return 'SHAPE';}
 "group"		{return 'GROUP';}
 "start"		{return 'START';}
 ">"		{return 'EVENT';}

@@ -1,0 +1,7 @@
+shape record
+a1;<f0> foo | x | <f1> bar
+b1;a | { <f0> foo | x | <f1> bar } | b
+a2;<f0> foo | x | <f1> bar
+b2;a | { <f0> foo | x | <f1> bar } | b
+a1>b1
+a2:f0>b2:f1

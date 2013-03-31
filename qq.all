@@ -1,0 +1,44 @@
+%lex
+
+%%
+\s+	/*skip*/
+[A-Za-z]+	{return 'STATE';}
+">"		{return 'SIGNAL';}
+";".*		{return 'LABEL';}
+<<EOF>>		{return 'EOF';}
+
+/lex
+
+%left '>'
+
+%start S
+
+%%
+
+S
+        : contents EOF
+                {
+                        console.log($1); 
+                        return $1;
+                }
+        ;
+contents
+        : content
+        {$$ = $1;}
+        | contents content
+        {$$ =  $1 + $2;}
+        ;
+
+content
+	: states
+	{$$=$1+";\n";}
+	;
+states
+	: states SIGNAL STATE LABEL
+		{$$=$1+"->"+$3+"[label="+$4.substring(1)+"]";}
+	| states SIGNAL STATE
+		{$$=$1+"->"+$3;}
+	| STATE
+	{ $$=$1; }
+	;
+

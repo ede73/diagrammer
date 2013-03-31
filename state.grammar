@@ -40,24 +40,24 @@ colorLabel
 	;
 
 content
-	: GROUP NUMBER
-		{{$$="subgraph cluster_"+$2+"{\n";}}
-	| SHAPE STATE
-		{{$$="node [ shape = "+$2+"];\n";}}
+	: SHAPE STATE
+		{{$$="  node [ shape = "+$2+"];\n";}}
 	| LEFT_RIGHT
-		{{$$="rankdir=LR;\n";}}
+		{{$$="  rankdir=LR;\n";}}
 	| TOP_DOWN
-		{{$$="rankdir=TD;\n";}}
+		{{$$="  rankdir=TD;\n";}}
 	| COMMENT
 		{{$$="/*"+$1.substring(2)+"*/\n";}}
 	| GROUP NUMBER LABEL
-		{{$$="subgraph cluster_"+$2+"{\nlabel=\""+$3.substring(1)+"\"";}}
-	| GROUP STATE
-		{{$$="};\n";}}
+		{{$$="  subgraph cluster_"+$2+"{\n  label=\""+$3.substring(1)+"\"\n";}}
+	| GROUP NUMBER
+		{{$$="  subgraph cluster_"+$2+"{\n";}}
+	| GROUP_END
+		{{$$="  };\n";}}
 	| START STATE
-		{$$="{rank = same;null}\n{rank = same; "+$2+"}\nnull [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
+		{$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
 	| STATE EVENT targetState
-		{$$=$1+"->"+$3;}
+		{$$="  "+$1+"->"+$3;}
 	| STATE colorLabel
 		{$$=$1+$2;}
 	| STATE

@@ -1,11 +1,11 @@
 start xstart
-idle#00ff00:idle\nevent
+idle#00ff00;idle\nevent
 xstart>#ff0000idle
-idle>start_forward:on sound
+idle>start_forward;on sound
 start_forward>moving_forward
-moving_forward > stop_motor:on touch
-moving_forward>start_backward:on sound
+moving_forward > stop_motor;on touch
+moving_forward>start_backward;on sound
 start_backward>moving_backward
-moving_backward>start_forward:on sound
-moving_backward>stop_motor:on touch
+moving_backward>start_forward;on sound
+moving_backward>stop_motor;on touch
 stop_motor>idle

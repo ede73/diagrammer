@@ -6,7 +6,8 @@ S
 	: contents EOF
 		{
 			initObjects(yy);
-			digraph(yy);
+			//digraph(yy);
+			actdiag(yy);
 			return $1;
 		}
 	;
@@ -66,12 +67,11 @@ content
 	| COMMENT
 		{{$$="/*"+$1.substring(2)+"*/\n";}}
 	| GROUP NUMBER LABEL
-		{{$$=new Group($1).setLabel($2.substring(1));}}
+		{{$$=getGroup(yy,$2).setLabel($3.substring(1));}}
 	| GROUP NUMBER
-		{{$$=new Group($1);
-		  getGraphRoot(yy).setCurrentContainer($$);}}
+		{{$$=getGroup(yy,$2);}}
 	| GROUP_END
-		{{$$=getGraphRoot(yy).setCurrentContainer(undefined);}}
+		{{$$=getGraphRoot(yy).setCurrentContainer(yy);}}
 	| START NAME
 		//{$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
 		{$$=getGraphRoot(yy).setStart($2);}
@@ -92,6 +92,7 @@ content
 %%
 function getGraphRoot(yy){
 	if (!yy.GRAPHROOT){
+		//console.log("no graphroot,init");
 		initObjects(yy);
 	}
         return yy.GRAPHROOT;
@@ -99,9 +100,11 @@ function getGraphRoot(yy){
 function initObjects(yy){
 	//console.log("Initialize "+yy);
 	if (!yy.GRAPHROOT){
+	//console.log("Initialize emptyroot "+yy);
 	        yy.OBJECTS=new Array();
 	        yy.LINKS=new Array();
         	yy.GRAPHROOT=new GraphRoot();
+		yy.GRAPHROOT.setCurrentContainer(yy);
 	}
 }
 function getNode(yy,name){
@@ -110,12 +113,34 @@ function getNode(yy,name){
                 if (yy.OBJECTS[i].getName()==name){
                         return yy.OBJECTS[i];
                 }
+		if (yy.OBJECTS[i] instanceof Group){
+			var o=yy.OBJECTS[i];
+		        for(var j in o.OBJECTS){
+                		if (o.OBJECTS[j].getName()==name){
+                		        return o.OBJECTS[j];
+               			 }
+			}
+		}
         }
 	var n=new Node(name,getGraphRoot(yy).getCurrentShape());
 	return pushObject(yy,n);
 }
+function getGroup(yy,name){
+	if (yy.OBJECTS==undefined) initObjects(yy);
+        for(var i in yy.OBJECTS){
+                if (yy.OBJECTS[i].getName()==name){
+                        return yy.OBJECTS[i];
+                }
+        }
+	//console.log("NEW GROUP");
+	var n=new Group(name);
+	pushObject(yy,n);
+	getGraphRoot(yy).setCurrentContainer(n);
+	return n;
+}
 function pushObject(yy,o){
-        yy.OBJECTS.push(o);
+        //yy.OBJECTS.push(o);
+	getGraphRoot(yy).getCurrentContainer().OBJECTS.push(o);
 	return o;
 }
 function addLink(yy,l){
@@ -188,7 +213,9 @@ function Node(name,shape){
 }
 Group.prototype=new GraphObject();
 Group.prototype.constructor=Group;
-function Group(){
+function Group(name){
+	this.name=name;
+	this.OBJECTS=new Array();
 	this.toString = function() {
 		return "Group";
     	};
@@ -228,16 +255,65 @@ function digraph(yy){
 	}
 	for(var i in yy.OBJECTS){
 		var o=yy.OBJECTS[i];
-		var s=	getAttrFmt(o,'color',',color="{0}"')+
-			getAttrFmt(o,'shape',',shape="{0}"')+
-			getAttrFmt(o,'label',',label="{0}"');
-		if (s.trim()!="")
-			s="["+s.trim().substring(1)+"]";
-		console.log(o.getName()+s+';');
+		if (o instanceof Group){
+			//console.log(JSON.stringify(o));
+			console.log('subgraph cluster_'+o.getName()+' {');
+			console.log(	getAttrFmt(o,'label','label="{0}";'));
+			for(var j in o.OBJECTS){
+				var z=o.OBJECTS[j];
+				var s=	getAttrFmt(z,'color',',color="{0}"')+
+					getAttrFmt(z,'shape',',shape="{0}"')+
+					getAttrFmt(z,'label',',label="{0}"');
+				if (s.trim()!="")
+					s="["+s.trim().substring(1)+"]";
+				console.log(z.getName()+s+';');
+			}
+			console.log("}");
+		}else{
+			var s=	getAttrFmt(o,'color',',color="{0}"')+
+				getAttrFmt(o,'shape',',shape="{0}"')+
+				getAttrFmt(o,'label',',label="{0}"');
+			if (s.trim()!="")
+				s="["+s.trim().substring(1)+"]";
+			console.log(o.getName()+s+';');
+		}
 	}
 	for(var i in yy.LINKS){
 		var l=yy.LINKS[i];
 		console.log(l.left.getName()+"->"+l.right.getName()+";");
+	}
+	console.log("}");
+}
+function actdiag(yy){
+	console.log("{");
+	var r=getGraphRoot(yy);
+	var s=r.getStart();
+	for(var i in yy.OBJECTS){
+		var o=yy.OBJECTS[i];
+		if (o instanceof Group){
+			console.log('lane "'+o.getLabel()+'"{');
+			for(var j in o.OBJECTS){
+				var z=o.OBJECTS[j];
+				var s=	getAttrFmt(z,'color',',color="{0}"')+
+					getAttrFmt(z,'shape',',shape="{0}"')+
+					getAttrFmt(z,'label',',label="{0}"');
+				if (s.trim()!="")
+					s="["+s.trim().substring(1)+"]";
+				console.log(z.getName()+s+';');
+			}
+			console.log("}");
+		}else{
+			var s=	getAttrFmt(o,'color',',color="{0}"')+
+				getAttrFmt(o,'shape',',shape="{0}"')+
+				getAttrFmt(o,'label',',label="{0}"');
+			if (s.trim()!="")
+				s="["+s.trim().substring(1)+"]";
+			console.log(o.getName()+s+';');
+		}
+	}
+	for(var i in yy.LINKS){
+		var l=yy.LINKS[i];
+		console.log(l.left.getName()+" -> "+l.right.getName()+";");
 	}
 	console.log("}");
 }

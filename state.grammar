@@ -63,3 +63,87 @@ content
 	| STATE
 		{$$=$1+";\n";}
 	;
+
+%%
+function getGraphRoot(yy){
+        return yy.GRAPHROOT;
+}
+function initObjects(yy){
+        yy.OBJECTS=new Array();
+        yy.GRAPHROOT=new GraphRoot();
+}
+function pushObject(yy,o){
+        yy.OBJECTS.push(o);
+}
+function containsObject(yy,o){
+        for(var i in yy.OBJECTS){
+                if (yy.OBJECTS[i]==o){
+                        return true;
+                }
+        }
+        return false;
+}
+function hasObjects(yy,o){
+        return yy.OBJECTS.length!=0;
+}
+function peekObject(yy,o){
+        return yy.OBJECTS[yy.OBJECTS.length-1];
+}
+function popObject(yy){
+        return yy.OBJECTS.pop();
+}
+function setAttr(cl,attr,value){
+        cl[attr]=value;
+        return cl;
+}
+String.prototype.format = function() {
+        var formatted = this;
+        for (arg in arguments) {
+            formatted = formatted.replace("{" + arg + "}", arguments[arg]);
+        }
+        return formatted;
+};
+/* return attribute like prefix="ATTRHERE" with padding at both sides or "" if 0 or undefined */
+function getAttr(cl,attr,prefix){
+        if (cl[attr]==undefined || cl[attr]==0)return "";
+        return ' '+prefix.format(cl[attr])+' ';
+        //return ' '+prefix+'="'+cl[attr]+'" ';
+}
+
+function GraphObject(text){
+	this.setId=function(value){return setAttr(this,'id',value);};
+        this.getId = function() { return getAttr(this,'id','id="{0}"');}
+	this.text=text;
+	this.toString = function() {
+		return "";
+    	};
+}
+
+Node.prototype=new GraphObject();
+Node.prototype.constructor=Node;
+function Node(){
+	this.shape="rectangle";
+	this.setId=function(value){return setAttr(this,'id',value);};
+        this.getId = function() { return getAttr(this,'id','id="{0}"');}
+	this.toString = function() {
+		return "";
+    	};
+}
+GraphRoot.prototype=new GraphObject();
+GraphRoot.prototype.constructor=GraphRoot;
+function GraphRoot(){
+	this.setId=function(value){return setAttr(this,'id',value);};
+        this.getId = function() { return getAttr(this,'id','id="{0}"');}
+	this.toString = function() {
+		return "";
+    	};
+}
+Edge.prototype=new GraphObject();
+Edge.prototype.constructor=Edge;
+function Edge(){
+	this.setId=function(value){return setAttr(this,'id',value);};
+        this.getId = function() { return getAttr(this,'id','id="{0}"');}
+	this.toString = function() {
+		return "";
+    	};
+}

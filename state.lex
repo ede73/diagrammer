@@ -17,7 +17,7 @@ LABEL	";".*
 "start"		{return 'START';}
 ">"		{return 'EVENT';}
 {COLOR}		{return 'COLOR';}
-{NAME}		{return 'STATE';}
+{NAME}		{return 'NAME';}
 {D}+		{return 'NUMBER';}
 {LABEL}		{return 'LABEL';}
 <<EOF>>		{return 'EOF';}

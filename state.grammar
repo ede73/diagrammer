@@ -5,9 +5,8 @@
 S
 	: contents EOF
 		{
-			console.log("digraph {");
-			console.log($1); 
-			console.log("}");
+			initObjects(yy);
+			digraph(yy);
 			return $1;
 		}
 	;
@@ -19,61 +18,109 @@ contents
 		{$$ =  $1 + $2;}
 	;
 
-/* process all STATE EVENT .* possibilities */
-targetState
-	: COLOR STATE LABEL
-		{$$=$2+"[color=\""+$1+"\",label=\""+$3.substring(1)+"\"];\n";}
-	| STATE LABEL
-		{$$=$1+"[label=\""+$2.substring(1)+"\"];\n";}
-	| COLOR STATE
-		{$$=$2+"[color=\""+$1+"\"];\n";}
-	| STATE
-		{$$=$1+";\n";}
+/* process all NAME EVENT .* possibilities 
+So when we end up here, we've got LHS x> and now we're doing RHS
+1)#ff00ffHuiHai;dkkdkdkd
+2)HuiHai;ffddfsdfsa
+3)#ffffe2HuiHai
+4)HuiHai
+*/
+targetName
+	: COLOR NAME LABEL
+		{
+			$$=function(x){new Link(yy,x,getNode(yy,$1).setColor($1).setLabel($3.substring(1)));}
+		}
+	| NAME LABEL
+		{
+			$$=function(x){new Link(yy,x,getNode(yy,$1).setLabel($2.substring(1)));}
+		}
+	| COLOR NAME
+		{
+			$$=function(x){new Link(yy,x.setColor($1),getNode(yy,$2));}
+		}
+	| NAME
+		{
+			$$=function(x){new Link(yy,x,getNode(yy,$1));}
+		}
 	;
 		
-/* process all STATE .* possibilities*/
+/* process all NAME .* possibilities*/
 colorLabel
 	: COLOR LABEL
-		{$$="[color=\""+$1+"\",label=\""+$2.substring(1)+"\"];\n"}
+		{
+			$$=function(x){x.setColor($1).setLabel($2.substring(1));}
+		}
 	| LABEL
-		{$$="[label=\""+$1.substring(1)+"\"];\n"}
+		{
+			$$=function(x){x.setLabel($1.substring(1));}
+		}
 	;
 
 content
-	: SHAPE STATE
-		{{$$="  node [ shape = "+$2+"];\n";}}
+	: SHAPE NAME
+		{{$$=getGraphRoot(yy).setCurrentShape($2);}}
 	| LEFT_RIGHT
-		{{$$="  rankdir=LR;\n";}}
+		{{$$=getGraphRoot(yy).setDirection($1);}}
 	| TOP_DOWN
-		{{$$="  rankdir=TD;\n";}}
+		{{$$=getGraphRoot(yy).setDirection($1);}}
 	| COMMENT
 		{{$$="/*"+$1.substring(2)+"*/\n";}}
 	| GROUP NUMBER LABEL
-		{{$$="  subgraph cluster_"+$2+"{\n  label=\""+$3.substring(1)+"\"\n";}}
+		{{$$=new Group($1).setLabel($2.substring(1));}}
 	| GROUP NUMBER
-		{{$$="  subgraph cluster_"+$2+"{\n";}}
+		{{$$=new Group($1);
+		  getGraphRoot(yy).setCurrentContainer($$);}}
 	| GROUP_END
-		{{$$="  };\n";}}
-	| START STATE
-		{$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-	| STATE EVENT targetState
-		{$$="  "+$1+"->"+$3;}
-	| STATE colorLabel
-		{$$=$1+$2;}
-	| STATE
-		{$$=$1+";\n";}
+		{{$$=getGraphRoot(yy).setCurrentContainer(undefined);}}
+	| START NAME
+		//{$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
+		{$$=getGraphRoot(yy).setStart($2);}
+	| NAME EVENT targetName
+		{
+		$$=getNode(yy,$1);
+		$3($$);
+		}
+	| NAME colorLabel
+		{
+		$$=getNode(yy,$1);
+		$2($$);
+		}
+	| NAME
+		{$$=getNode(yy,$1);}
 	;
 
 %%
 function getGraphRoot(yy){
+	if (!yy.GRAPHROOT){
+		initObjects(yy);
+	}
         return yy.GRAPHROOT;
 }
 function initObjects(yy){
-        yy.OBJECTS=new Array();
-        yy.GRAPHROOT=new GraphRoot();
+	//console.log("Initialize "+yy);
+	if (!yy.GRAPHROOT){
+	        yy.OBJECTS=new Array();
+	        yy.LINKS=new Array();
+        	yy.GRAPHROOT=new GraphRoot();
+	}
+}
+function getNode(yy,name){
+	if (yy.OBJECTS==undefined) initObjects(yy);
+        for(var i in yy.OBJECTS){
+                if (yy.OBJECTS[i].getName()==name){
+                        return yy.OBJECTS[i];
+                }
+        }
+	var n=new Node(name,getGraphRoot(yy).getCurrentShape());
+	return pushObject(yy,n);
 }
 function pushObject(yy,o){
         yy.OBJECTS.push(o);
+	return o;
+}
+function addLink(yy,l){
+        yy.LINKS.push(l);
+	return l;
 }
 function containsObject(yy,o){
         for(var i in yy.OBJECTS){
@@ -104,46 +151,93 @@ String.prototype.format = function() {
         return formatted;
 };
 /* return attribute like prefix="ATTRHERE" with padding at both sides or "" if 0 or undefined */
-function getAttr(cl,attr,prefix){
+function getAttr(cl,attr){
         if (cl[attr]==undefined || cl[attr]==0)return "";
-        return ' '+prefix.format(cl[attr])+' ';
-        //return ' '+prefix+'="'+cl[attr]+'" ';
+        return cl[attr];
+}
+function getAttrFmt(cl,attr,fmt){
+	if (cl[attr]==undefined || cl[attr]==0)return "";
+	return ' '+fmt.format(cl[attr])+' ';
 }
 
-function GraphObject(text){
-	this.setId=function(value){return setAttr(this,'id',value);};
-        this.getId = function() { return getAttr(this,'id','id="{0}"');}
-	this.text=text;
+function GraphObject(label){
+	this.setName=function(value){return setAttr(this,'name',value);};
+        this.getName = function() { return getAttr(this,'name');}
+	this.setColor=function(value){return setAttr(this,'color',value);};
+        this.getColor = function() { return getAttr(this,'color');}
+	this.label=label;
+	this.setLabel=function(value){return setAttr(this,'label',value);};
+        this.getLabel = function() { return getAttr(this,'label');}
 	this.toString = function() {
-		return "";
+		return "GraphObject";
     	};
 }
 
 Node.prototype=new GraphObject();
 Node.prototype.constructor=Node;
-function Node(){
-	this.shape="rectangle";
-	this.setId=function(value){return setAttr(this,'id',value);};
-        this.getId = function() { return getAttr(this,'id','id="{0}"');}
+function Node(name,shape){
+	this.name=name;
+	this.shape=shape;
+	this.setShape=function(value){return setAttr(this,'shape',value);};
+        this.getShape = function() { return getAttr(this,'shape');}
+
+	//this.addLink=function(n){var l=new Link(this,n);return this;}
 	this.toString = function() {
-		return "";
+		return "Node("+this.getName()+")";
+    	};
+}
+Group.prototype=new GraphObject();
+Group.prototype.constructor=Group;
+function Group(){
+	this.toString = function() {
+		return "Group";
     	};
 }
 GraphRoot.prototype=new GraphObject();
 GraphRoot.prototype.constructor=GraphRoot;
 function GraphRoot(){
-	this.setId=function(value){return setAttr(this,'id',value);};
-        this.getId = function() { return getAttr(this,'id','id="{0}"');}
+	this.setCurrentShape=function(value){return setAttr(this,'shape',value);};
+        this.getCurrentShape = function() { return getAttr(this,'shape');}
+	this.setCurrentContainer=function(value){return setAttr(this,'container',value);};
+        this.getCurrentContainer = function() { return getAttr(this,'container');}
+	this.setDirection=function(value){return setAttr(this,'direction',value);};
+        this.getDirection = function() { return getAttr(this,'direction');}
+	this.setStart=function(value){return setAttr(this,'start',value);};
+        this.getStart = function() { return getAttr(this,'start');}
 	this.toString = function() {
-		return "";
+		return "GraphRoot";
     	};
 }
-Edge.prototype=new GraphObject();
-Edge.prototype.constructor=Edge;
-function Edge(){
-	this.setId=function(value){return setAttr(this,'id',value);};
-        this.getId = function() { return getAttr(this,'id','id="{0}"');}
+Link.prototype=new GraphObject();
+Link.prototype.constructor=Link;
+function Link(yy,l,r){
+	this.left=l;
+	this.right=r;
+	addLink(yy,this);
 	this.toString = function() {
-		return "";
+		return "Link("+this.left.toString()+","+this.right.toString()+")";
     	};
+}
+function digraph(yy){
+	console.log("digraph {");
+	var r=getGraphRoot(yy);
+	var s=r.getStart();
+	if (s != undefined && s!=""){
+		//    {$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
+		console.log("{rank = same;null}\n  {rank = same; "+s+"}\n  null [shape=plaintext, label=\"\"];\n"+s+"[shape=doublecircle];\nnull->"+s+";\n");
+	}
+	for(var i in yy.OBJECTS){
+		var o=yy.OBJECTS[i];
+		var s=	getAttrFmt(o,'color',',color="{0}"')+
+			getAttrFmt(o,'shape',',shape="{0}"')+
+			getAttrFmt(o,'label',',label="{0}"');
+		if (s.trim()!="")
+			s="["+s.trim().substring(1)+"]";
+		console.log(o.getName()+s+';');
+	}
+	for(var i in yy.LINKS){
+		var l=yy.LINKS[i];
+		console.log(l.left.getName()+"->"+l.right.getName()+";");
+	}
+	console.log("}");
 }

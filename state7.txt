@@ -1,11 +1,11 @@
-a
+ablack
 b;label
-c#0000ff
-d#ff0000;red with label, c with blue, b has label, a without, e links to f
-e>f
-g>h;g links to h
-i#30ff33>j
-k#22fff0>l;k links to l
-m#0ffff0>#ff5555n
-o#00ff00>#ff00ffp;o p link
-q#f0ff0f>#ff0000r#ffff00;q r link
+cblue#0000ff
+dred#ff0000;red with label, c with blue, b has label, a without, e links to f
+eblack>fblack
+gblack>hblack;g links to h
+iblue#0000ff>j
+klightblue#00ffff>l;k links to l
+myellow#ffff00>#ff00ffn
+ogray#777777>#ff7777p;o p link orange
+qred#ff0000>#00ff00rblue#0000ff;q r link green

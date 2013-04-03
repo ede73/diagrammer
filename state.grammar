@@ -31,16 +31,13 @@ So when we end up here, we've got LHS x> and now we're doing RHS
 
 State:NAME(s) State:COLOR(#ff0000)
 
-State:EVENT(>)
-State:COLOR(#00ff00)
-State:NAME(c)
+targetName State:EVENT(>) State:COLOR(#00ff00) State:NAME(c)
 
-State:COLOR(#0000ff2)
-State:LABEL(;connect
+targetName State:COLOR(#0000ff2) State:LABEL(;connect
 */
 targetName
 	: targetName EVENT COLOR NAME LABEL
-		{
+		{	//USED
 			//console.log("targetName EVENT COLOR NAME LABEL");
 			//this is label the LINK, not the NODE
 			var r=getNode(yy,$4);
@@ -48,16 +45,19 @@ targetName
 		}
 	| targetName EVENT COLOR NAME
 		{
+			//USED
 			//console.log("targetName EVENT COLOR NAME");
 			$$=getLink(yy,$1,getNode(yy,$4)).setColor($3).right;
 		}
 	| targetName COLOR LABEL
 		{
+			//USED
 			//console.log("targetName COLOR LABEL");
 			$$=$1.setColor($2).setLabel($3.substring(1));
 		}
 	| targetName EVENT NAME LABEL 
  		{
+ 			//USED
 			//console.log("targetName EVENT NAME LABEL");
 			//this is LABEL THE LINK not the NODE...
 			//$$=getLink(yy,$1,getNode(yy,$3).setLabel($4.substring(1)));

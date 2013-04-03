@@ -1,1 +1,11 @@
-a>b>c
+a
+b;label
+c#0000ff
+d#ff0000;red with label, c with blue, b has label, a without, e links to f
+e>f
+g>h;g links to h
+i#30ff33>j
+k#22fff0>l;k links to l
+m#0ffff0>#ff5555n
+o#00ff00>#ff00ffp;o p link
+q#f0ff0f>#ff0000r#ffff00;q r link

@@ -10,15 +10,16 @@ echo "test parser"
 node parser.js $input | tee a.gv
 # |sed '/digraph/,$!d'
 
-dot -Tpng a.gv >a.png
-[[ -s a.png ]] && open a.png
+png=${input%.*}.png
+dot -Tpng a.gv >$png
+[[ -s a.png ]] && open $png
 
-circo -Tpng a.gv >c.png
-#[[ -s c.png ]] && open c.png
+#circo -Tpng a.gv >c.png
+##[[ -s c.png ]] && open c.png
 
-twopi -Tpng a.gv >t.png
-#[[ -s t.png ]] && open t.png
+#twopi -Tpng a.gv >t.png
+##[[ -s t.png ]] && open t.png
 
-neato -Tpng a.gv >n.png
-#[[ -s n.png ]] && open n.png
+#neato -Tpng a.gv >n.png
+##[[ -s n.png ]] && open n.png
 

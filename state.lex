@@ -6,8 +6,10 @@ COLOR	"#"[A-Fa-f0-9]{6}
 COMMENT ^"//"[^\n]*
 NAME	[A-Za-z][A-Za-z_:0-9]*
 LABEL	";"[^\n]+(\n)
+/*COLORLABEL	";#"[A-Fa-f0-9]{6}[^\n]+(\n)*/
 %%
 
+/*{COLORLABEL}		return 'COLORLABEL';*/
 {LABEL}		return 'LABEL';
 \s+		 /* skip WS */
 {COMMENT}	return 'COMMENT';

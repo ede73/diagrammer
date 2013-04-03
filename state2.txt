@@ -1,6 +1,6 @@
 start s
 shape actor
-s#ff0000>#00ff00c#0000ff;connect,s=red\nlink=green\n this node=blue
+s#ff0000>#00ff00c#0000ff;#ff00ffconnect,s=red\nlink=green\n this node=blue
 shape box
 //a comment is a good thing
 group#777777;vpn connector

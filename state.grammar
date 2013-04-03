@@ -298,6 +298,14 @@ function digraph(yy){
 				console.log(z.getName()+s+';');
 			}
 			console.log("}");
+		}else if (o instanceof Node){
+			var s=	getAttrFmt(o,'color',',fillcolor="{0}",style="filled"')+
+				getShape(shapes.digraph,o.shape,',shape="{0}"')+
+				/*getAttrFmt(o,'shape',',shape="{0}"')+*/
+				getAttrFmt(o,'label',',label="{0}"');
+			if (s.trim()!="")
+				s="["+s.trim().substring(1)+"]";
+			console.log(o.getName()+s+';');
 		}else{
 			var s=	getAttrFmt(o,'color',',color="{0}"')+
 				getShape(shapes.digraph,o.shape,',shape="{0}"')+

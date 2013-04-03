@@ -6,8 +6,11 @@ S
 	: contents EOF
 		{
 			initObjects(yy);
-			//digraph(yy);
-			actdiag(yy);
+			if ("actdiag" == yy.OUTPUT){
+				actdiag(yy);
+			}else{
+				digraph(yy);
+			}
 			return $1;
 		}
 	;

@@ -1,0 +1,26 @@
+shape Mdiamond
+xstart
+shape Msquare
+end
+
+shape ellipse
+group 1;process #1
+ a0>a1
+ a1>a2
+ a2>a3
+group end
+
+group 2;process #2
+ b0>b1
+ b1>b2
+ b2>b3
+group end
+
+xstart>a0
+xstart>b0
+a1>b3
+b2>a3
+a3>a0
+a3>end
+b3>end
+

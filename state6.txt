@@ -4,13 +4,13 @@ shape Msquare
 end
 
 shape ellipse
-group 1;process #1
+group;process #1
  a0>a1
  a1>a2
  a2>a3
 group end
 
-group 2;process #2
+group;process #2
  b0>b1
  b1>b2
  b2>b3

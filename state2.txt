@@ -1,7 +1,7 @@
 start s
 s>c;connect
 //a comment is a good thing
-group 1;vpn connector
+group;vpn connector
 	c>m;turn off mobile data
 	m>vb;create blackhole VPN
 	vb>mo;turn on mobile data
@@ -9,7 +9,7 @@ group 1;vpn connector
 	b>v;connect vpn
 group end
 
-group 2;Phone state listener
+group;Phone state listener
 	e>s;wifi connected
 	e>s;wifi disconnected
 	e>s;mobile connected

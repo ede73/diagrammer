@@ -29,37 +29,58 @@ So when we end up here, we've got LHS x> and now we're doing RHS
 3)#ffffe2HuiHai
 4)HuiHai
 
+State:NAME(s) State:COLOR(#ff0000)
+
+State:EVENT(>)
+State:COLOR(#00ff00)
+State:NAME(c)
+
+State:COLOR(#0000ff2)
+State:LABEL(;connect
 */
 targetName
 	: targetName EVENT COLOR NAME LABEL
 		{
+			//console.log("targetName EVENT COLOR NAME LABEL");
 			//this is label the LINK, not the NODE
-			$$=getLink(yy,$1,getNode(yy,$4).setColor($3),$5.substring(1));
+			var r=getNode(yy,$4);
+			$$=getLink(yy,$1,r,$5.substring(1)).setColor($3).right;
 		}
 	| targetName EVENT COLOR NAME
 		{
-			$$=getLink(yy,$1.setColor($3),getNode(yy,$4));
+			//console.log("targetName EVENT COLOR NAME");
+			$$=getLink(yy,$1,getNode(yy,$4)).setColor($3).right;
 		}
 	| targetName COLOR LABEL
 		{
+			//console.log("targetName COLOR LABEL");
 			$$=$1.setColor($2).setLabel($3.substring(1));
 		}
-	| targetName EVENT NAME LABEL
-		{
+	| targetName EVENT NAME LABEL 
+ 		{
+			//console.log("targetName EVENT NAME LABEL");
 			//this is LABEL THE LINK not the NODE...
 			//$$=getLink(yy,$1,getNode(yy,$3).setLabel($4.substring(1)));
-			$$=getLink(yy,$1,getNode(yy,$3),$4.substring(1));
+			$$=getLink(yy,$1,getNode(yy,$3),$4.substring(1)).right;
 		}
 	| targetName EVENT NAME
 		{
-			$$=getLink(yy,$1,getNode(yy,$3));
+			//console.log("targetName EVENT NAME");
+			$$=getLink(yy,$1,getNode(yy,$3)).right;
 		}
 	| targetName LABEL
 		{
+			//console.log("targetName LABEL");
 			$$=$1.setLabel($2.substring(1));
+		}
+	| NAME COLOR
+		{
+			//console.log("NAME COLOR");
+			$$=getNode(yy,$1).setColor($2);
 		}
 	| NAME
 		{
+			//console.log("NAME");
 			$$=getNode(yy,$1);
 		}
 	;
@@ -147,7 +168,7 @@ function pushObject(yy,o){
 function getLink(yy,l,r,label){
 	var l=new Link(l,r);
 	if (label!=undefined) l.setLabel(label);
-	return addLink(yy,l).right;
+	return addLink(yy,l);
 }
 function addLink(yy,l){
         yy.LINKS.push(l);
@@ -283,7 +304,10 @@ function digraph(yy){
 	}
 	for(var i in yy.LINKS){
 		var l=yy.LINKS[i];
-		var t=getAttrFmt(l,'label','[label="{0}"]');
+		var t=getAttrFmt(l,'label',',label="{0}"')+
+		getAttrFmt(l,'color',',color="{0}"');
+		if (t.trim()!="")
+			t="["+t.trim().substring(1)+"]";
 		console.log(l.left.getName()+"->"+l.right.getName()+t+";");
 	}
 	console.log("}");

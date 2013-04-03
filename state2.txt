@@ -1,5 +1,6 @@
 start s
-s>c;connect
+s#ff0000>#00ff00c#0000ff;connect,s=red\nlink=green\n this node=blue
+
 //a comment is a good thing
 group;vpn connector
 	c>m;turn off mobile data

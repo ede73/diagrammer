@@ -1,25 +1,10 @@
 #!/bin/sh
-input=${1:-state2.txt}
+./makeLexerAndParser.sh
 
-jison-lex state.lex
-cat >> state.js <<EOF
-exports.state=state;
-EOF
+input=${1:-state2.txt}
 
 echo "testing lexing"
 node testStateLexer.js $input
-
-cat state.lex > state.all
-cat >>state.all <<EOF
-/lex
-EOF
-cat state.grammar >>state.all
-
-#jison state.grammar state.lex -o parser.js
-echo "Make parser"
-jison state.all -o parser.js
-
-[[ "$?" -ne 0 ]] && exit 10
 
 echo "test parser"
 node parser.js $input | tee a.gv

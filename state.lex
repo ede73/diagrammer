@@ -4,11 +4,13 @@ C	[A-Za-z_:]
 COLOR	"#"[A-Fa-f0-9]{6}
 COMMENT ^"//"[^\n]*
 NAME	[A-Za-z][A-Za-z_:0-9]*
-LABEL	";".*
+LABEL	";"[^;]+";"
 %%
 
 \s+		{ /* skip WS */}
 {COMMENT}	{return 'COMMENT';}
+{LABEL}		{return 'LABEL';}
+{COLOR}		{return 'COLOR';}
 "HORIZONTAL"|"LR" {return 'LEFT_RIGHT';}
 "VERTICAL"|"TD"	{return 'TOP_DOWN';}
 "shape"		{return 'SHAPE';}
@@ -16,9 +18,6 @@ LABEL	";".*
 "group"		{return 'GROUP';}
 "start"		{return 'START';}
 ">"		{return 'EVENT';}
-{COLOR}		{return 'COLOR';}
 {NAME}		{return 'NAME';}
 {D}+		{return 'NUMBER';}
-{LABEL}		{return 'LABEL';}
 <<EOF>>		{return 'EOF';}
-

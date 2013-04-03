@@ -28,49 +28,38 @@ So when we end up here, we've got LHS x> and now we're doing RHS
 2)HuiHai;ffddfsdfsa
 3)#ffffe2HuiHai
 4)HuiHai
+
 */
 targetName
 	: targetName EVENT COLOR NAME LABEL
 		{
-			//console.log("tecnl");
-			$$=getLink(yy,$1,getNode(yy,$4).setColor($3).setLabel($5.substring(1)));
-		}
-	| targetName EVENT NAME LABEL
-		{
-			//console.log("tenl");
-			$$=getLink(yy,$1,getNode(yy,$3).setLabel($4.substring(1)));
+			//this is label the LINK, not the NODE
+			$$=getLink(yy,$1,getNode(yy,$4).setColor($3),$5.substring(1));
 		}
 	| targetName EVENT COLOR NAME
 		{
-			//console.log("tecn");
 			$$=getLink(yy,$1.setColor($3),getNode(yy,$4));
-		}
-	| targetName EVENT NAME
-		{
-/*
-NAME:a
-ten:Node(a) to b
-ten:Link(Node(a),Node(b)) to c
-
-a->b;
-->c;
-*/
-			//console.log("ten:"+$1+" to "+$3);
-			$$=getLink(yy,$1,getNode(yy,$3));
 		}
 	| targetName COLOR LABEL
 		{
-			//console.log("tcl");
 			$$=$1.setColor($2).setLabel($3.substring(1));
+		}
+	| targetName EVENT NAME LABEL
+		{
+			//this is LABEL THE LINK not the NODE...
+			//$$=getLink(yy,$1,getNode(yy,$3).setLabel($4.substring(1)));
+			$$=getLink(yy,$1,getNode(yy,$3),$4.substring(1));
+		}
+	| targetName EVENT NAME
+		{
+			$$=getLink(yy,$1,getNode(yy,$3));
 		}
 	| targetName LABEL
 		{
-			//console.log("tl");
 			$$=$1.setLabel($2.substring(1));
 		}
 	| NAME
 		{
-			//console.log("NAME:"+$1);
 			$$=getNode(yy,$1);
 		}
 	;
@@ -154,8 +143,9 @@ function pushObject(yy,o){
 	getGraphRoot(yy).getCurrentContainer().OBJECTS.push(o);
 	return o;
 }
-function getLink(yy,l,r){
+function getLink(yy,l,r,label){
 	var l=new Link(l,r);
+	if (label!=undefined) l.setLabel(label);
 	return addLink(yy,l).right;
 }
 function addLink(yy,l){
@@ -292,7 +282,8 @@ function digraph(yy){
 	}
 	for(var i in yy.LINKS){
 		var l=yy.LINKS[i];
-		console.log(l.left.getName()+"->"+l.right.getName()+";");
+		var t=getAttrFmt(l,'label','[label="{0}"]');
+		console.log(l.left.getName()+"->"+l.right.getName()+t+";");
 	}
 	console.log("}");
 }

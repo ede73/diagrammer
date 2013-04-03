@@ -8,6 +8,8 @@ S
 			initObjects(yy);
 			if ("actdiag" == yy.OUTPUT){
 				actdiag(yy);
+			}else if ("blockdiag" == yy.OUTPUT){
+				blockdiag(yy);
 			}else{
 				digraph(yy);
 			}
@@ -94,6 +96,8 @@ content
 		{{$$=getGraphRoot(yy).setDirection($1);}}
 	| COMMENT
 		{{$$="/*"+$1.substring(2)+"*/\n";}}
+	| GROUP COLOR LABEL
+		{{$$=getGroup(yy).setColor($2).setLabel($3.substring(1));}}
 	| GROUP LABEL
 		{{$$=getGroup(yy).setLabel($2.substring(1));}}
 	/*| GROUP NUMBER
@@ -286,7 +290,8 @@ function digraph(yy){
 			for(var j in o.OBJECTS){
 				var z=o.OBJECTS[j];
 				var s=	getAttrFmt(z,'color',',color="{0}"')+
-					getAttrFmt(z,'shape',',shape="{0}"')+
+					getShape(shapes.digraph,z.shape,',shape="{0}"')+
+					/*getAttrFmt(z,'shape',',shape="{0}"')+*/
 					getAttrFmt(z,'label',',label="{0}"');
 				if (s.trim()!="")
 					s="["+s.trim().substring(1)+"]";
@@ -295,7 +300,8 @@ function digraph(yy){
 			console.log("}");
 		}else{
 			var s=	getAttrFmt(o,'color',',color="{0}"')+
-				getAttrFmt(o,'shape',',shape="{0}"')+
+				getShape(shapes.digraph,o.shape,',shape="{0}"')+
+				/*getAttrFmt(o,'shape',',shape="{0}"')+*/
 				getAttrFmt(o,'label',',label="{0}"');
 			if (s.trim()!="")
 				s="["+s.trim().substring(1)+"]";
@@ -312,6 +318,7 @@ function digraph(yy){
 	}
 	console.log("}");
 }
+//node parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 function actdiag(yy){
 	console.log("{");
 	var r=getGraphRoot(yy);
@@ -323,7 +330,7 @@ function actdiag(yy){
 			for(var j in o.OBJECTS){
 				var z=o.OBJECTS[j];
 				var s=	getAttrFmt(z,'color',',color="{0}"')+
-					getAttrFmt(z,'shape',',shape="{0}"')+
+					getShape(shapes.actdiag,z.shape,',shape="{0}"')+
 					getAttrFmt(z,'label',',label="{0}"');
 				if (s.trim()!="")
 					s="["+s.trim().substring(1)+"]";
@@ -332,7 +339,7 @@ function actdiag(yy){
 			console.log("}");
 		}else{
 			var s=	getAttrFmt(o,'color',',color="{0}"')+
-				getAttrFmt(o,'shape',',shape="{0}"')+
+				getShape(shapes.actdiag,o.shape,',shape="{0}"')+
 				getAttrFmt(o,'label',',label="{0}"');
 			if (s.trim()!="")
 				s="["+s.trim().substring(1)+"]";
@@ -345,3 +352,130 @@ function actdiag(yy){
 	}
 	console.log("}");
 }
+//http://blockdiag.com/en/blockdiag/examples.html#simple-diagram
+//node parse.js state2.txt blockdiag |blockdiag -Tpng -o a.png - && open a.png
+//available shapes
+//box,square,roundedbox,dots
+//circle,ellipse,diamond,minidiamond
+//note,mail,cloud,actor
+//flowchart.beginpoint,flowchart.endpoint
+//flowchart.condition,flowchart.database,flowchart.terminator,flowchart.input
+//flowchart.loopin,flowchart.loopout
+function blockdiag(yy){
+	console.log("{");
+	var r=getGraphRoot(yy);
+	var s=r.getStart();
+	for(var i in yy.OBJECTS){
+		var o=yy.OBJECTS[i];
+		if (o instanceof Group){
+			console.log('group "'+o.getLabel()+'"{');
+			console.log(getAttrFmt(o,'color','color="{0}"'));
+			console.log(getAttrFmt(o,'label','label="{0}"'));
+			if (s.trim()!="")
+				s="["+s.trim().substring(1)+"]";
+			for(var j in o.OBJECTS){
+				var z=o.OBJECTS[j];
+				var s=	getAttrFmt(z,'color',',color="{0}"')+
+					getShape(shapes.blockdiag,z.shape,',shape="{0}"')+
+					getAttrFmt(z,'label',',label="{0}"');
+				if (s.trim()!="")
+					s="["+s.trim().substring(1)+"]";
+				console.log(z.getName()+s+';');
+			}
+			console.log("}");
+		}else{
+			var s=	getAttrFmt(o,'color',',color="{0}"')+
+				getShape(shapes.blockdiag,o.shape,',shape="{0}"')+
+				getAttrFmt(o,'label',',label="{0}"');
+			if (s.trim()!="")
+				s="["+s.trim().substring(1)+"]";
+			console.log(o.getName()+s+';');
+		}
+	}
+	for(var i in yy.LINKS){
+		var l=yy.LINKS[i];
+		console.log(l.left.getName()+" -> "+l.right.getName()+";");
+	}
+	console.log("}");
+}
+function getShape(shapes,o,fmt){
+	if (o==undefined || o==0)return "";
+	if (o in shapes)
+		return ' '+fmt.format(shapes[o])+' ';
+	else
+		return ' '+fmt.format(shapes.default)+' ';
+}
+var shapes={
+blockdiag:{
+	default:"box",
+	doublecircle:"endpoint",
+	box:"box",rect:"box",rectangle:"box",
+	square:"square",
+	roundedbox:"roundedbox",
+	dots:"dots",
+	circle:"circle",
+	ellipse:"ellipse",
+	diamond:"diamond",
+	minidiamond:"mdiamond",
+	note:"note",
+	mail:"mail",
+	cloud:"cloud",
+	actor:"actor",
+	beginpoint:"flowchart.beginpoint",
+	endpoint:"flowchart.endpoint",
+	condition:"flowchart.condition",
+	database:"flowchart.database",
+	terminator:"flowchart.terminator",
+	input:"flowchart.input",
+	loopin:"flowchart.loopin",loop:"flowchart.loopin",loopstart:"flowchart.loopin",
+	loopout:"flowchart.loopout",loopend:"flowchart.loopout"
+	},
+actdiag:{
+	default:"box",
+	doublecircle:"endpoint",
+	box:"box",rect:"box",rectangle:"box",
+	square:"square",
+	roundedbox:"roundedbox",
+	dots:"dots",
+	circle:"circle",
+	ellipse:"ellipse",
+	diamond:"diamond",
+	minidiamond:"mdiamond",
+	note:"note",
+	mail:"mail",
+	cloud:"cloud",
+	actor:"actor",
+	beginpoint:"flowchart.beginpoint",
+	endpoint:"flowchart.endpoint",
+	condition:"flowchart.condition",
+	database:"flowchart.database",
+	terminator:"flowchart.terminator",
+	input:"flowchart.input",
+	loopin:"flowchart.loopin",loop:"flowchart.loopin",loopstart:"flowchart.loopin",
+	loopout:"flowchart.loopout",loopend:"flowchart.loopout"
+	},
+digraph:{
+	default:"box",
+	doublecircle:"doublecircle",
+	box:"box",rect:"box",rectangle:"box",
+	square:"square",
+	roundedbox:"box",
+	dots:"point",
+	circle:"circle",
+	ellipse:"ellipse",
+	diamond:"diamond",
+	minidiamond:"Mdiamond",
+	note:"note",
+	mail:"tab",
+	cloud:"tripleoctagon",
+	actor:"cds",
+	beginpoint:"circle",
+	endpoint:"doublecircle",
+	condition:"Mdiamond",
+	database:"Mcircle",
+	terminator:"ellipse",
+	input:"parallelogram",
+	loopin:"house",loop:"house",loopstart:"house",
+	loopout:"invhouse",loopend:"invhouse"
+}
+};

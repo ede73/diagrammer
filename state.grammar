@@ -30,44 +30,51 @@ So when we end up here, we've got LHS x> and now we're doing RHS
 4)HuiHai
 */
 targetName
-	: EVENT COLOR NAME LABEL
+	: targetName EVENT COLOR NAME LABEL
 		{
-			$$=function(x){new Link(yy,x,getNode(yy,$3).setColor($2).setLabel($4.substring(1)));}
+			//console.log("tecnl");
+			$$=getLink(yy,$1,getNode(yy,$4).setColor($3).setLabel($5.substring(1)));
 		}
-	| EVENT NAME LABEL
+	| targetName EVENT NAME LABEL
 		{
-			$$=function(x){new Link(yy,x,getNode(yy,$2).setLabel($3.substring(1)));}
+			//console.log("tenl");
+			$$=getLink(yy,$1,getNode(yy,$3).setLabel($4.substring(1)));
 		}
-	| EVENT COLOR NAME
+	| targetName EVENT COLOR NAME
 		{
-			$$=function(x){new Link(yy,x.setColor($2),getNode(yy,$3));}
+			//console.log("tecn");
+			$$=getLink(yy,$1.setColor($3),getNode(yy,$4));
 		}
-	| EVENT NAME
+	| targetName EVENT NAME
 		{
-			$$=function(x){new Link(yy,x,getNode(yy,$2));}
+/*
+NAME:a
+ten:Node(a) to b
+ten:Link(Node(a),Node(b)) to c
+
+a->b;
+->c;
+*/
+			//console.log("ten:"+$1+" to "+$3);
+			$$=getLink(yy,$1,getNode(yy,$3));
 		}
-	| COLOR LABEL
+	| targetName COLOR LABEL
 		{
-			$$=function(x){x.setColor($1).setLabel($2.substring(1));}
+			//console.log("tcl");
+			$$=$1.setColor($2).setLabel($3.substring(1));
 		}
-	| LABEL
+	| targetName LABEL
 		{
-			$$=function(x){x.setLabel($1.substring(1));}
+			//console.log("tl");
+			$$=$1.setLabel($2.substring(1));
+		}
+	| NAME
+		{
+			//console.log("NAME:"+$1);
+			$$=getNode(yy,$1);
 		}
 	;
 		
-/* process all NAME .* possibilities*/
-colorLabel
-	: COLOR LABEL
-		{
-			$$=function(x){x.setColor($1).setLabel($2.substring(1));}
-		}
-	| LABEL
-		{
-			$$=function(x){x.setLabel($1.substring(1));}
-		}
-	;
-
 content
 	: SHAPE NAME
 		{{$$=getGraphRoot(yy).setCurrentShape($2);}}
@@ -86,18 +93,11 @@ content
 	| START NAME
 		//{$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
 		{$$=getGraphRoot(yy).setStart($2);}
-	| NAME targetName
+	| targetName
 		{
-		$$=getNode(yy,$1);
-		$2($$);
+		//$$=getNode(yy,$1);
+		//$2($$);
 		}
-	/*| NAME colorLabel
-		{
-		$$=getNode(yy,$1);
-		$2($$);
-		}*/
-	| NAME
-		{$$=getNode(yy,$1);}
 	;
 
 %%
@@ -153,6 +153,10 @@ function pushObject(yy,o){
         //yy.OBJECTS.push(o);
 	getGraphRoot(yy).getCurrentContainer().OBJECTS.push(o);
 	return o;
+}
+function getLink(yy,l,r){
+	var l=new Link(l,r);
+	return addLink(yy,l).right;
 }
 function addLink(yy,l){
         yy.LINKS.push(l);
@@ -216,8 +220,6 @@ function Node(name,shape){
 	this.shape=shape;
 	this.setShape=function(value){return setAttr(this,'shape',value);};
         this.getShape = function() { return getAttr(this,'shape');}
-
-	//this.addLink=function(n){var l=new Link(this,n);return this;}
 	this.toString = function() {
 		return "Node("+this.getName()+")";
     	};
@@ -248,10 +250,9 @@ function GraphRoot(){
 }
 Link.prototype=new GraphObject();
 Link.prototype.constructor=Link;
-function Link(yy,l,r){
+function Link(l,r){
 	this.left=l;
 	this.right=r;
-	addLink(yy,this);
 	this.toString = function() {
 		return "Link("+this.left.toString()+","+this.right.toString()+")";
     	};

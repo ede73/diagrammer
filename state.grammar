@@ -22,7 +22,7 @@ contents
 		{$$ =  $1 + $2;}
 	;
 
-/* process all NAME EVENT .* possibilities 
+/* process all NAME .* possibilities 
 So when we end up here, we've got LHS x> and now we're doing RHS
 1)#ff00ffHuiHai;dkkdkdkd
 2)HuiHai;ffddfsdfsa
@@ -30,21 +30,29 @@ So when we end up here, we've got LHS x> and now we're doing RHS
 4)HuiHai
 */
 targetName
-	: COLOR NAME LABEL
+	: EVENT COLOR NAME LABEL
 		{
-			$$=function(x){new Link(yy,x,getNode(yy,$1).setColor($1).setLabel($3.substring(1)));}
+			$$=function(x){new Link(yy,x,getNode(yy,$3).setColor($2).setLabel($4.substring(1)));}
 		}
-	| NAME LABEL
+	| EVENT NAME LABEL
 		{
-			$$=function(x){new Link(yy,x,getNode(yy,$1).setLabel($2.substring(1)));}
+			$$=function(x){new Link(yy,x,getNode(yy,$2).setLabel($3.substring(1)));}
 		}
-	| COLOR NAME
+	| EVENT COLOR NAME
 		{
-			$$=function(x){new Link(yy,x.setColor($1),getNode(yy,$2));}
+			$$=function(x){new Link(yy,x.setColor($2),getNode(yy,$3));}
 		}
-	| NAME
+	| EVENT NAME
 		{
-			$$=function(x){new Link(yy,x,getNode(yy,$1));}
+			$$=function(x){new Link(yy,x,getNode(yy,$2));}
+		}
+	| COLOR LABEL
+		{
+			$$=function(x){x.setColor($1).setLabel($2.substring(1));}
+		}
+	| LABEL
+		{
+			$$=function(x){x.setLabel($1.substring(1));}
 		}
 	;
 		
@@ -78,16 +86,16 @@ content
 	| START NAME
 		//{$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
 		{$$=getGraphRoot(yy).setStart($2);}
-	| NAME EVENT targetName
-		{
-		$$=getNode(yy,$1);
-		$3($$);
-		}
-	| NAME colorLabel
+	| NAME targetName
 		{
 		$$=getNode(yy,$1);
 		$2($$);
 		}
+	/*| NAME colorLabel
+		{
+		$$=getNode(yy,$1);
+		$2($$);
+		}*/
 	| NAME
 		{$$=getNode(yy,$1);}
 	;

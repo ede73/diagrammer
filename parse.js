@@ -1,3 +1,4 @@
+
 var fs         = require('fs');
 var path       = require('path');
 var myArgs =process.argv.slice(2);
@@ -8,7 +9,7 @@ var myArgs =process.argv.slice(2);
 var raw = fs.readFileSync(path.normalize("./"+myArgs[0]), 'utf8');
 VERBOSE=false;
 if (myArgs[1]==="verbose") VERBOSE=true;
-if (false){
+if (myArgs[1]==="lex"){
 	var lexer=require("./state.js");
 	//LEX
 	var st=lexer.state

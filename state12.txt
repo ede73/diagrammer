@@ -13,3 +13,7 @@ d<-#0000ffc
 d-#00ffffc
 d.#ff00ffc
 
+special<>link
+special<.>link
+special<->link
+

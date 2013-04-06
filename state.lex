@@ -10,6 +10,15 @@ LISTSEP ","
 /*COLORLABEL	";#"[A-Fa-f0-9]{6}[^\n]+(\n)*/
 SHAPES "actor"|"beginpoint"|"box"|"circle"|"cloud"|"condition"|"database"|"default"|"diamond"|"dots"|"doublecircle"|"ellipse"|"endpoint"|"input"|"loopin"|"loopout"|"mail"|"minidiamond"|"minisquare"|"note"|"record"|"roundedbox"|"square"|"terminator"|"loop"|"loopend"|"loopstart"|"rect"|"rectangle"
 STYLES "dotted"|"dashed"|"solid"
+/*
+Could make out
+-> normal
+-< inv
+-. dot
+-.< invdot
+-o odot
+-| tee
+*/
 %%
 
 /*{COLORLABEL}	return 'COLORLABEL';*/
@@ -26,7 +35,7 @@ STYLES "dotted"|"dashed"|"solid"
 "group end"	return 'GROUP_END';
 "group"		return 'GROUP';
 "start"		return 'START';
-"<-"|"<."|"<"|"->"|".>"|">"|"-"|"."	return 'EVENT';
+"<.>"|"<->"|"<>"|"<-"|"<."|"<"|"->"|".>"|">"|"-"|"."	return 'EVENT';
 {NAME}		return 'NAME';
 {D}+		return 'NUMBER';
 <<EOF>>		return 'EOF';

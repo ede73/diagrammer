@@ -325,6 +325,9 @@ function Link(linkType,l,r){
     	};
 }
 function digraph(yy){
+//TODO: See splines control http://www.graphviz.org/doc/info/attrs.html#d:splines
+//TODO: Start note fdp/neato http://www.graphviz.org/doc/info/attrs.html#d:start
+
 	console.log("digraph {");
 	var r=getGraphRoot(yy);
 	var s=r.getStart();
@@ -374,6 +377,9 @@ function digraph(yy){
 		var lt;
 		var lr=l.right;
 		var ll=l.left;
+		//TODO:Assuming producing DIGRAPH
+		//For GRAPH all edges are type --
+		//but we could SET arrow type if we'd like
 		if (t.trim()!="")
 			t=t.trim().substring(1);
 		if (l.linkType.indexOf(".")!==-1){
@@ -381,7 +387,11 @@ function digraph(yy){
 		}else if (l.linkType.indexOf("-")!==-1){
 			t+=' style="dashed" ';
 		}
-		if (l.linkType.indexOf("<")!==-1){
+		if (l.linkType.indexOf("<")!==-1 &&
+		    l.linkType.indexOf(">")!==-1){
+			lt="->";
+			t+="dir=both";
+		}else if (l.linkType.indexOf("<")!==-1){
 			var tmp=ll;
 			ll=lr;
 			lr=tmp;

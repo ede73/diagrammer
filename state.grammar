@@ -25,45 +25,6 @@ contents
 		{$$ =  $1 + $2;}
 	;
 
-/* process all NAME .* possibilities 
-So when we end up here, we've got LHS x> and now we're doing RHS
-1)#ff00ffHuiHai;dkkdkdkd
-2)HuiHai;ffddfsdfsa
-3)#ffffe2HuiHai
-4)HuiHai                                
-
-State:NAME(s) State:COLOR(#ff0000)
-
-targetName State:EVENT(>) State:COLOR(#00ff00) State:NAME(c)
-
-targetName State:COLOR(#0000ff2) State:LABEL(;connect
-
-z1#ff0000,z2#00ff00,z3,z4>q1;Multiple LHS lists
-w1,w2,w3,w4>q1
-
-
-*/
-/*NOT USED..label is either for NODE
-or LINK
-not both..
-readNodeAttrsGOOD
-	: NAME COLOR LABEL {
-		debug("NAME COLOR LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3);
-		$$=getNode(yy,$1).setColor($2).setLabel($3.substring(1));
-	}
-	| NAME COLOR{
-		debug("NAME COLOR"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
-		$$=getNode(yy,$1).setColor($2);
-	}
-	| NAME LABEL {
-		debug("NAME LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
-		$$=getNode(yy,$1).setLabel($2.substring(1));
-	}
-	| NAME {
-		debug("NAME"+" SS="+$$+",S0="+$0+",S1="+$1);
-		$$=getNode(yy,$1);
-	};
-*/
 readNodeAttrs
 	: NAME COLOR{
 		debug("NAME COLOR"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
@@ -186,6 +147,9 @@ function getNode(yy,name){
   	if (name instanceof Node){
   		return name;
   	}
+  	if (name instanceof Array){
+  		return name;
+  	}
         for(var i in yy.OBJECTS){
                 if (yy.OBJECTS[i].getName()==name){
                         return yy.OBJECTS[i];
@@ -229,6 +193,15 @@ function getLink(yy,l,r,label,color){
 		for(var i=0;i<l.length;i++){
 			debug("Get link "+l[i]);
 			lastLink=getLink(yy,l[i],r,label,color);
+		}
+		return lastLink;
+	}
+	if (r instanceof Array){
+		debug("getLink called with RHS array");
+		var lastLink;
+		for(var i=0;i<r.length;i++){
+			debug("Get link "+r[i]);
+			lastLink=getLink(yy,l,r[i],label,color);
 		}
 		return lastLink;
 	}

@@ -15,3 +15,4 @@ test state6.txt
 test state7.txt
 test state8.txt
 test state9.txt
+test state10.txt

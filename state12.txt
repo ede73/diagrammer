@@ -1,3 +1,4 @@
+landscape
 a/wifi.png>#ff0000b
 a.>#00ff00b
 a->#0000ffb

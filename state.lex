@@ -30,8 +30,9 @@ Could make out
 {COMMENT}	return 'COMMENT';
 {LISTSEP}	return 'LISTSEP';
 {COLOR}		return 'COLOR';
-"HORIZONTAL"|"LR" return 'LEFT_RIGHT';
-"VERTICAL"|"TD"	return 'TOP_DOWN';
+^("landscape"|"horizontal"|"lr") return 'LANDSCAPE';
+^("portrait"|"vertical"|"td")	return 'PORTRAIT';
+"same"		return 'SAME';
 "shape"		return 'SHAPE';
 "group end"	return 'GROUP_END';
 "group"		return 'GROUP';

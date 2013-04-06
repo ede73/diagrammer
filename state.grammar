@@ -6,12 +6,12 @@ S
 	: contents EOF
 		{
 			debug("contents EOF");
-			initObjects(yy);
 			if ("actdiag" == yy.OUTPUT){
 				actdiag(yy);
 			}else if ("blockdiag" == yy.OUTPUT){
 				blockdiag(yy);
 			}else{
+				//rankdir available ONLY IN dot
 				digraph(yy);
 			}
 			return $1;
@@ -88,18 +88,16 @@ content
 		{{$$=getGraphRoot(yy).setCurrentShape($2);}}
 	| SHAPE NAME
 		{{throw new Error("Expecing one of the shapes, got ("+$2+")");}}
-	| LEFT_RIGHT
-		{{$$=getGraphRoot(yy).setDirection($1);}}
-	| TOP_DOWN
-		{{$$=getGraphRoot(yy).setDirection($1);}}
+	| LANDSCAPE
+		{{$$=getGraphRoot(yy).setDirection("landscape");}}
+	| PORTRAIT
+		{{$$=getGraphRoot(yy).setDirection("portrait");}}
 	| COMMENT
 		{{$$="/*"+$1.substring(2)+"*/\n";}}
 	| GROUP COLOR LABEL
 		{{$$=getGroup(yy).setColor($2).setLabel($3.substring(1));}}
 	| GROUP LABEL
 		{{$$=getGroup(yy).setLabel($2.substring(1));}}
-	/*| GROUP NUMBER
-		{{$$=getGroup(yy,$2);}}*/
 	| GROUP_END
 		{{$$=getGraphRoot(yy).setCurrentContainer(yy);}}
 	| START NAME
@@ -338,6 +336,11 @@ function digraph(yy){
 
 	console.log("digraph {");
 	var r=getGraphRoot(yy);
+	if (r.getDirection()==="portrait"){
+		console.log("rankdir=LR;");
+	}else{
+		console.log("rankdir=TD;");
+	}
 	var s=r.getStart();
 	if (s != undefined && s!=""){
 		//    {$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
@@ -422,6 +425,12 @@ function digraph(yy){
 function actdiag(yy){
 	console.log("{");
 	var r=getGraphRoot(yy);
+	if (r.getDirection()==="portrait"){
+		console.log("orientation=portrait");
+	}else{
+		//DEFAULT
+		console.log("orientation=landscape");
+	}
 	var s=r.getStart();
 	for(var i in yy.OBJECTS){
 		var o=yy.OBJECTS[i];
@@ -466,6 +475,12 @@ function actdiag(yy){
 function blockdiag(yy){
 	console.log("{");
 	var r=getGraphRoot(yy);
+	if (r.getDirection()==="portrait"){
+		console.log("orientation=portrait");
+	}else{
+		//DEFAULT
+		console.log("orientation=landscape");
+	}
 	var s=r.getStart();
 	for(var i in yy.OBJECTS){
 		var o=yy.OBJECTS[i];

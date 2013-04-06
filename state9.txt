@@ -1,0 +1,2 @@
+z1,z2,z3,z4>q1;Multiple LHS lists
+w1,w2,w3,w4>q1

@@ -50,22 +50,22 @@ targetName
 	: targetName EVENT COLOR readNode LABEL
 		{
 			debug("targetName EVENT COLOR readNode LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3+",S4="+$4);
-			$$=getLink(yy,$1,$4,$5.substring(1),$3).right;
+			$$=getLink(yy,$2,$1,$4,$5.substring(1),$3).right;
 		}
 	| targetName EVENT COLOR readNode
 		{
 			debug("targetName EVENT COLOR readNode"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3+",S4="+$4);
-			$$=getLink(yy,$1,$4,undefined,$3).right;
+			$$=getLink(yy,$2,$1,$4,undefined,$3).right;
 		}
 	| targetName EVENT readNode LABEL
 		{
 			debug("targetName EVENT readNode LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3);
-			$$=getLink(yy,$1,getNode(yy,$3),$4.substring(1)).right;
+			$$=getLink(yy,$2,$1,getNode(yy,$3),$4.substring(1)).right;
 		}
 	| targetName EVENT readNode
 		{
 			debug("targetName EVENT readNode"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3);
-			$$=getLink(yy,$1,getNode(yy,$3)).right;
+			$$=getLink(yy,$2,$1,getNode(yy,$3)).right;
 		}
 	| readNode LABEL
 		{
@@ -188,13 +188,13 @@ function pushObject(yy,o){
 	return o;
 }
 //Get a link such that l links to r, return the added LINK or LINKS
-function getLink(yy,l,r,label,color){
+function getLink(yy,linkType,l,r,label,color){
 	if (l instanceof Array){
 		debug("getLink called with LHS array");
 		var lastLink;
 		for(var i=0;i<l.length;i++){
 			debug("Get link "+l[i]);
-			lastLink=getLink(yy,l[i],r,label,color);
+			lastLink=getLink(yy,linkType,l[i],r,label,color);
 		}
 		return lastLink;
 	}
@@ -203,7 +203,7 @@ function getLink(yy,l,r,label,color){
 		var lastLink;
 		for(var i=0;i<r.length;i++){
 			debug("Get link "+r[i]);
-			lastLink=getLink(yy,l,r[i],label,color);
+			lastLink=getLink(yy,linkType,l,r[i],label,color);
 		}
 		return lastLink;
 	}
@@ -213,7 +213,7 @@ function getLink(yy,l,r,label,color){
 	if (!(r instanceof Node)){
 		throw new Error("RHS not a Node("+r+")");
 	}
-	var l=new Link(l,r);
+	var l=new Link(linkType,l,r);
 	if (label!=undefined) l.setLabel(label);
 	if (color!=undefined) l.setColor(color);
 	return addLink(yy,l);
@@ -316,11 +316,12 @@ function GraphRoot(){
 }
 Link.prototype=new GraphObject();
 Link.prototype.constructor=Link;
-function Link(l,r){
+function Link(linkType,l,r){
+	this.linkType=linkType.trim();
 	this.left=l;
 	this.right=r;
 	this.toString = function() {
-		return "Link("+this.left.toString()+","+this.right.toString()+")";
+		return "Link("+this.linkType+"=="+this.left.toString()+","+this.right.toString()+")";
     	};
 }
 function digraph(yy){
@@ -370,9 +371,31 @@ function digraph(yy){
 		var l=yy.LINKS[i];
 		var t=getAttrFmt(l,'label',',label="{0}"')+
 		getAttrFmt(l,'color',',color="{0}"');
+		var lt;
+		var lr=l.right;
+		var ll=l.left;
 		if (t.trim()!="")
-			t="["+t.trim().substring(1)+"]";
-		console.log(l.left.getName()+"->"+l.right.getName()+t+";");
+			t=t.trim().substring(1);
+		if (l.linkType.indexOf(".")!==-1){
+			t+=' style="dotted" ';
+		}else if (l.linkType.indexOf("-")!==-1){
+			t+=' style="dashed" ';
+		}
+		if (l.linkType.indexOf("<")!==-1){
+			var tmp=ll;
+			ll=lr;
+			lr=tmp;
+			lt="->";
+		}else if (l.linkType.indexOf(">")!==-1){
+			lt="->";
+		}else{
+			//is dotted or dashed no direction
+			lt="->";
+			t+="dir=none";
+		}
+		if (t.trim()!="")
+			t="["+t+"]";
+		console.log(ll.getName()+lt+lr.getName()+t+";");
 	}
 	console.log("}");
 }

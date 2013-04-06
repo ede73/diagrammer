@@ -1,0 +1,15 @@
+a>#ff0000b
+a.>#00ff00b
+a->#0000ffb
+a-#00ffffb
+a.#ff00ffb
+
+c;a
+d;b
+
+d<#ff0000c
+d<.#00ff00c
+d<-#0000ffc
+d-#00ffffc
+d.#ff00ffc
+

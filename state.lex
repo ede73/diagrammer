@@ -26,7 +26,7 @@ STYLES "dotted"|"dashed"|"solid"
 "group end"	return 'GROUP_END';
 "group"		return 'GROUP';
 "start"		return 'START';
-">"		return 'EVENT';
+"<-"|"<."|"<"|"->"|".>"|">"|"-"|"."	return 'EVENT';
 {NAME}		return 'NAME';
 {D}+		return 'NUMBER';
 <<EOF>>		return 'EOF';

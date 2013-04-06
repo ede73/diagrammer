@@ -7,6 +7,7 @@ COMMENT ^"//"[^\n]*
 NAME	[A-Za-z][A-Za-z_:0-9]*
 LABEL	";"[^\n]+(\n)
 LISTSEP ","
+IMAGE	"/"[A-Za-z]+".png"
 /*COLORLABEL	";#"[A-Fa-f0-9]{6}[^\n]+(\n)*/
 SHAPES "actor"|"beginpoint"|"box"|"circle"|"cloud"|"condition"|"database"|"default"|"diamond"|"dots"|"doublecircle"|"ellipse"|"endpoint"|"input"|"loopin"|"loopout"|"mail"|"minidiamond"|"minisquare"|"note"|"record"|"roundedbox"|"square"|"terminator"|"loop"|"loopend"|"loopstart"|"rect"|"rectangle"
 STYLES "dotted"|"dashed"|"solid"
@@ -37,6 +38,7 @@ Could make out
 "start"		return 'START';
 "<.>"|"<->"|"<>"|"<-"|"<."|"<"|"->"|".>"|">"|"-"|"."	return 'EVENT';
 {NAME}		return 'NAME';
+{IMAGE}		return 'IMAGE';
 {D}+		return 'NUMBER';
 <<EOF>>		return 'EOF';
 

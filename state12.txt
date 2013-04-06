@@ -1,10 +1,10 @@
-a>#ff0000b
+a/wifi.png>#ff0000b
 a.>#00ff00b
 a->#0000ffb
 a-#00ffffb
 a.#ff00ffb
 
-c;a
+c/wifi.png;a
 d;b
 
 d<#ff0000c

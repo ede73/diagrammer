@@ -77,10 +77,12 @@ targetName
 			debug("readNode"+" SS="+$$+",S0="+$0+",S1="+$1);
 		}
 	;
-		
+	
 content
-	: SHAPE NAME
+	: SHAPE SHAPES
 		{{$$=getGraphRoot(yy).setCurrentShape($2);}}
+	| SHAPE NAME
+		{{throw new Error("Expecing one of the shapes, got ("+$2+")");}}
 	| LEFT_RIGHT
 		{{$$=getGraphRoot(yy).setDirection($1);}}
 	| TOP_DOWN
@@ -473,7 +475,7 @@ blockdiag:{
 	circle:"circle",
 	ellipse:"ellipse",
 	diamond:"diamond",
-	minidiamond:"mdiamond",
+	minidiamond:"minidiamond",
 	note:"note",
 	mail:"mail",
 	cloud:"cloud",
@@ -498,7 +500,7 @@ actdiag:{
 	circle:"circle",
 	ellipse:"ellipse",
 	diamond:"diamond",
-	minidiamond:"mdiamond",
+	minidiamond:"minidiamond",
 	note:"note",
 	mail:"mail",
 	cloud:"cloud",
@@ -524,6 +526,7 @@ digraph:{
 	ellipse:"ellipse",
 	diamond:"diamond",
 	minidiamond:"Mdiamond",
+	minisquare:"Msquare",
 	note:"note",
 	mail:"tab",
 	cloud:"tripleoctagon",

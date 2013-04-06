@@ -1,6 +1,6 @@
-shape Mdiamond
+shape minidiamond
 xstart
-shape Msquare
+shape minisquare
 end
 
 shape ellipse

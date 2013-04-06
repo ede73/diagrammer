@@ -134,7 +134,10 @@ function getGraphRoot(yy){
 function initObjects(yy){
 	debug("  ...Initialize "+yy);
 	if (!yy.GRAPHROOT){
-	debug("  ...Initialize emptyroot "+yy);
+		if (yy.result===undefined){
+			yy.result=function(str){console.log(str);}
+		}
+		debug("  ...Initialize emptyroot "+yy);
 	        yy.OBJECTS=new Array();
 	        yy.LINKS=new Array();
         	yy.GRAPHROOT=new GraphRoot();
@@ -343,32 +346,31 @@ function Link(linkType,l,r){
 function digraph(yy){
 //TODO: See splines control http://www.graphviz.org/doc/info/attrs.html#d:splines
 //TODO: Start note fdp/neato http://www.graphviz.org/doc/info/attrs.html#d:start
-
-	console.log("digraph {");
+	yy.result("digraph {");
 	var r=getGraphRoot(yy);
 	if (r.getDirection()==="portrait"){
-		console.log("rankdir=LR;");
+		yy.result("rankdir=LR;");
 	}else{
-		console.log("rankdir=TD;");
+		yy.result("rankdir=TD;");
 	}
 	var s=r.getStart();
 	if (s != undefined && s!=""){
 		//    {$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-		console.log("{rank = same;null}\n  {rank = same; "+s+"}\n  null [shape=plaintext, label=\"\"];\n"+s+"[shape=doublecircle];\nnull->"+s+";\n");
+		yy.result("{rank = same;null}\n  {rank = same; "+s+"}\n  null [shape=plaintext, label=\"\"];\n"+s+"[shape=doublecircle];\nnull->"+s+";\n");
 	}
 	if (r.getEqual()!=undefined){
-		console.log("{rank=same;");
+		yy.result("{rank=same;");
 		for(var x=0;x<r.getEqual().length;x++){
-			console.log(r.getEqual()[x].getName()+";");
+			yy.result(r.getEqual()[x].getName()+";");
 		}
-		console.log("}");
+		yy.result("}");
 	}
 	for(var i in yy.OBJECTS){
 		var o=yy.OBJECTS[i];
 		if (o instanceof Group){
 			debug(JSON.stringify(o));
-			console.log('subgraph cluster_'+o.getName()+' {');
-			console.log(	getAttrFmt(o,'label','label="{0}";'));
+			yy.result('subgraph cluster_'+o.getName()+' {');
+			yy.result(	getAttrFmt(o,'label','label="{0}";'));
 			for(var j in o.OBJECTS){
 				var z=o.OBJECTS[j];
 				var s=	getAttrFmt(z,'color',',color="{0}"')+
@@ -377,9 +379,9 @@ function digraph(yy){
 					getAttrFmt(z,'label',',label="{0}"');
 				if (s.trim()!="")
 					s="["+s.trim().substring(1)+"]";
-				console.log(z.getName()+s+';');
+				yy.result(z.getName()+s+';');
 			}
-			console.log("}");
+			yy.result("}");
 		}else if (o instanceof Node){
 			var s=	getAttrFmt(o,'color',',fillcolor="{0}",style="filled"')+
 				getAttrFmt(o,'image',',image="icons{0}"')+
@@ -388,7 +390,7 @@ function digraph(yy){
 				getAttrFmt(o,'label',',label="{0}"');
 			if (s.trim()!="")
 				s="["+s.trim().substring(1)+"]";
-			console.log(o.getName()+s+';');
+			yy.result(o.getName()+s+';');
 		}else{
 			var s=	getAttrFmt(o,'color',',color="{0}"')+
 				getShape(shapes.digraph,o.shape,',shape="{0}"')+
@@ -396,7 +398,7 @@ function digraph(yy){
 				getAttrFmt(o,'label',',label="{0}"');
 			if (s.trim()!="")
 				s="["+s.trim().substring(1)+"]";
-			console.log(o.getName()+s+';');
+			yy.result(o.getName()+s+';');
 		}
 	}
 	for(var i in yy.LINKS){
@@ -434,25 +436,25 @@ function digraph(yy){
 		}
 		if (t.trim()!="")
 			t="["+t+"]";
-		console.log(ll.getName()+lt+lr.getName()+t+";");
+		yy.result(ll.getName()+lt+lr.getName()+t+";");
 	}
-	console.log("}");
+	yy.result("}");
 }
 //node parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 function actdiag(yy){
-	console.log("{");
+	yy.result("{");
 	var r=getGraphRoot(yy);
 	if (r.getDirection()==="portrait"){
-		console.log("orientation=portrait");
+		yy.result("orientation=portrait");
 	}else{
 		//DEFAULT
-		console.log("orientation=landscape");
+		yy.result("orientation=landscape");
 	}
 	var s=r.getStart();
 	for(var i in yy.OBJECTS){
 		var o=yy.OBJECTS[i];
 		if (o instanceof Group){
-			console.log('lane "'+o.getLabel()+'"{');
+			yy.result('lane "'+o.getLabel()+'"{');
 			for(var j in o.OBJECTS){
 				var z=o.OBJECTS[j];
 				var s=	getAttrFmt(z,'color',',color="{0}"')+
@@ -460,9 +462,9 @@ function actdiag(yy){
 					getAttrFmt(z,'label',',label="{0}"');
 				if (s.trim()!="")
 					s="["+s.trim().substring(1)+"]";
-				console.log(z.getName()+s+';');
+				yy.result(z.getName()+s+';');
 			}
-			console.log("}");
+			yy.result("}");
 		}else{
 			//ICON does not work, using background
 			var s=	getAttrFmt(o,'color',',color="{0}"')+
@@ -471,14 +473,14 @@ function actdiag(yy){
 				getAttrFmt(o,'label',',label="{0}"');
 			if (s.trim()!="")
 				s="["+s.trim().substring(1)+"]";
-			console.log(o.getName()+s+';');
+			yy.result(o.getName()+s+';');
 		}
 	}
 	for(var i in yy.LINKS){
 		var l=yy.LINKS[i];
-		console.log(l.left.getName()+" -> "+l.right.getName()+";");
+		yy.result(l.left.getName()+" -> "+l.right.getName()+";");
 	}
-	console.log("}");
+	yy.result("}");
 }
 //http://blockdiag.com/en/blockdiag/examples.html#simple-diagram
 //node parse.js state2.txt blockdiag |blockdiag -Tpng -o a.png - && open a.png
@@ -490,21 +492,21 @@ function actdiag(yy){
 //flowchart.condition,flowchart.database,flowchart.terminator,flowchart.input
 //flowchart.loopin,flowchart.loopout
 function blockdiag(yy){
-	console.log("{");
+	yy.result("{");
 	var r=getGraphRoot(yy);
 	if (r.getDirection()==="portrait"){
-		console.log("orientation=portrait");
+		yy.result("orientation=portrait");
 	}else{
 		//DEFAULT
-		console.log("orientation=landscape");
+		yy.result("orientation=landscape");
 	}
 	var s=r.getStart();
 	for(var i in yy.OBJECTS){
 		var o=yy.OBJECTS[i];
 		if (o instanceof Group){
-			console.log('group "'+o.getLabel()+'"{');
-			console.log(getAttrFmt(o,'color','color="{0}"'));
-			console.log(getAttrFmt(o,'label','label="{0}"'));
+			yy.result('group "'+o.getLabel()+'"{');
+			yy.result(getAttrFmt(o,'color','color="{0}"'));
+			yy.result(getAttrFmt(o,'label','label="{0}"'));
 			if (s.trim()!="")
 				s="["+s.trim().substring(1)+"]";
 			for(var j in o.OBJECTS){
@@ -514,9 +516,9 @@ function blockdiag(yy){
 					getAttrFmt(z,'label',',label="{0}"');
 				if (s.trim()!="")
 					s="["+s.trim().substring(1)+"]";
-				console.log(z.getName()+s+';');
+				yy.result(z.getName()+s+';');
 			}
-			console.log("}");
+			yy.result("}");
 		}else{
 			//ICON does not work, using background
 			var s=	getAttrFmt(o,'color',',color="{0}"')+
@@ -525,14 +527,14 @@ function blockdiag(yy){
 				getAttrFmt(o,'label',',label="{0}"');
 			if (s.trim()!="")
 				s="["+s.trim().substring(1)+"]";
-			console.log(o.getName()+s+';');
+			yy.result(o.getName()+s+';');
 		}
 	}
 	for(var i in yy.LINKS){
 		var l=yy.LINKS[i];
-		console.log(l.left.getName()+" -> "+l.right.getName()+";");
+		yy.result(l.left.getName()+" -> "+l.right.getName()+";");
 	}
-	console.log("}");
+	yy.result("}");
 }
 function getShape(shapes,o,fmt){
 	if (o==undefined || o==0)return "";
@@ -540,6 +542,11 @@ function getShape(shapes,o,fmt){
 		return ' '+fmt.format(shapes[o])+' ';
 	else
 		return ' '+fmt.format(shapes.default)+' ';
+}
+function reset(){
+delete (yy.GRAPHROOT);
+delete (yy.LINKS);
+delete (yy.OBJECTS);
 }
 var shapes={
 blockdiag:{

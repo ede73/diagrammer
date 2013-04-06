@@ -5,6 +5,7 @@
 S
 	: contents EOF
 		{
+			debug("contents EOF");
 			initObjects(yy);
 			if ("actdiag" == yy.OUTPUT){
 				actdiag(yy);
@@ -40,7 +41,7 @@ targetName State:COLOR(#0000ff2) State:LABEL(;connect
 targetName
 	: targetName EVENT COLOR NAME LABEL
 		{	//USED
-			//console.log("targetName EVENT COLOR NAME LABEL");
+			debug("targetName EVENT COLOR NAME LABEL"+" SS="+$$+",S0="+$0+",S1="+$1);
 			//this is label the LINK, not the NODE
 			var r=getNode(yy,$4);
 			$$=getLink(yy,$1,r,$5.substring(1)).setColor($3).right;
@@ -48,41 +49,45 @@ targetName
 	| targetName EVENT COLOR NAME
 		{
 			//USED
-			//console.log("targetName EVENT COLOR NAME");
+			debug("targetName EVENT COLOR NAME"+" SS="+$$+",S0="+$0+",S1="+$1);
 			$$=getLink(yy,$1,getNode(yy,$4)).setColor($3).right;
 		}
 	| targetName COLOR LABEL
 		{
 			//USED
-			//console.log("targetName COLOR LABEL");
+			debug("targetName COLOR LABEL"+" SS="+$$+",S0="+$0+",S1="+$1);
 			$$=$1.setColor($2).setLabel($3.substring(1));
 		}
 	| targetName EVENT NAME LABEL 
  		{
  			//USED
-			//console.log("targetName EVENT NAME LABEL");
+			debug("targetName EVENT NAME LABEL"+" SS="+$$+",S0="+$0+",S1="+$1);
 			//this is LABEL THE LINK not the NODE...
-			//$$=getLink(yy,$1,getNode(yy,$3).setLabel($4.substring(1)));
 			$$=getLink(yy,$1,getNode(yy,$3),$4.substring(1)).right;
 		}
 	| targetName EVENT NAME
 		{
-			//console.log("targetName EVENT NAME");
+			debug("targetName EVENT NAME"+" SS="+$$+",S0="+$0+",S1="+$1);
 			$$=getLink(yy,$1,getNode(yy,$3)).right;
 		}
 	| targetName LABEL
 		{
-			//console.log("targetName LABEL");
+			debug("targetName LABEL"+" SS="+$$+",S0="+$0+",S1="+$1);
 			$$=$1.setLabel($2.substring(1));
+		}
+	| targetName LISTSEP NAME
+		{
+			debug("targetName LISTSEP NAME"+" SS="+$$+",S0="+$0+",S1="+$1+" S2="+$2+" S3="+$3);
+			$$=getList(yy,$1,$3);
 		}
 	| NAME COLOR
 		{
-			//console.log("NAME COLOR");
+			debug("NAME COLOR"+" SS="+$$+",S0="+$0+",S1="+$1);
 			$$=getNode(yy,$1).setColor($2);
 		}
 	| NAME
 		{
-			//console.log("NAME");
+			debug("NAME"+" SS="+$$+",S0="+$0+",S1="+$1);
 			$$=getNode(yy,$1);
 		}
 	;
@@ -109,28 +114,47 @@ content
 		{$$=getGraphRoot(yy).setStart($2);}
 	| targetName
 		{
+		debug("targetName"+" SS="+$$+",S0="+$0+",S1="+$1);
 		//$$=getNode(yy,$1);
 		//$2($$);
 		}
 	;
 
 %%
+function debug(msg){
+	if (true)
+		console.log(msg);
+} 
 function getGraphRoot(yy){
 	if (!yy.GRAPHROOT){
-		//console.log("no graphroot,init");
+		debug("no graphroot,init");
 		initObjects(yy);
 	}
         return yy.GRAPHROOT;
 }
 function initObjects(yy){
-	//console.log("Initialize "+yy);
+	debug("Initialize "+yy);
 	if (!yy.GRAPHROOT){
-	//console.log("Initialize emptyroot "+yy);
+	debug("Initialize emptyroot "+yy);
 	        yy.OBJECTS=new Array();
 	        yy.LINKS=new Array();
         	yy.GRAPHROOT=new GraphRoot();
 		yy.GRAPHROOT.setCurrentContainer(yy);
 	}
+}
+//LHS=Node(z1)
+function getList(yy,LHS,RHS){
+  if (LHS instanceof Node){
+	debug("getList("+LHS+","+RHS);
+  	var x=new Array();
+  	x.push(LHS);
+  	x.push(getNode(yy,RHS));
+  	return x;
+  }
+  debug("getList(["+LHS+"],"+RHS);
+  //LHS not a node..
+  LHS.push(getNode(yy,RHS));
+  return LHS;
 }
 function getNode(yy,name){
 	if (yy.OBJECTS==undefined) initObjects(yy);
@@ -157,7 +181,7 @@ function getGroup(yy){
                         return yy.OBJECTS[i];
                 }
         }*/
-	//console.log("NEW GROUP");
+	debug("NEW GROUP");
 	if (yy.GROUPIDS==undefined)yy.GROUPIDS=0;
 	var n=new Group(yy.GROUPIDS++);
 	pushObject(yy,n);
@@ -169,12 +193,32 @@ function pushObject(yy,o){
 	getGraphRoot(yy).getCurrentContainer().OBJECTS.push(o);
 	return o;
 }
+//Get a link such that l links to r, return RHS
 function getLink(yy,l,r,label){
+	if (l instanceof Array){
+		debug("getLink called with LHS array");
+		for(var i=0;i<l.length;i++){
+			debug("Get link "+l[i]);
+			getLink(yy,l[i],r,label);
+		}
+		return r;
+	}
+	if (!(l instanceof Node)){
+		throw new Error("LHS not a Node("+l+")");
+	}
+	if (!(r instanceof Node)){
+		throw new Error("RHS not a Node("+r+")");
+	}
 	var l=new Link(l,r);
 	if (label!=undefined) l.setLabel(label);
 	return addLink(yy,l);
 }
 function addLink(yy,l){
+	if (l instanceof Array){
+		debug("PUSH LINK ARRAY:"+l);
+	}else{
+		debug("PUSH LINK:"+l);
+	}
         yy.LINKS.push(l);
 	return l;
 }
@@ -284,7 +328,7 @@ function digraph(yy){
 	for(var i in yy.OBJECTS){
 		var o=yy.OBJECTS[i];
 		if (o instanceof Group){
-			//console.log(JSON.stringify(o));
+			debug(JSON.stringify(o));
 			console.log('subgraph cluster_'+o.getName()+' {');
 			console.log(	getAttrFmt(o,'label','label="{0}";'));
 			for(var j in o.OBJECTS){
@@ -416,6 +460,7 @@ function getShape(shapes,o,fmt){
 var shapes={
 blockdiag:{
 	default:"box",
+	record:"box",
 	doublecircle:"endpoint",
 	box:"box",rect:"box",rectangle:"box",
 	square:"square",
@@ -440,6 +485,7 @@ blockdiag:{
 	},
 actdiag:{
 	default:"box",
+	record:"box",
 	doublecircle:"endpoint",
 	box:"box",rect:"box",rectangle:"box",
 	square:"square",
@@ -464,6 +510,7 @@ actdiag:{
 	},
 digraph:{
 	default:"box",
+	record:"record",
 	doublecircle:"doublecircle",
 	box:"box",rect:"box",rectangle:"box",
 	square:"square",

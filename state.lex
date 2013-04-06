@@ -6,13 +6,16 @@ COLOR	"#"[A-Fa-f0-9]{6}
 COMMENT ^"//"[^\n]*
 NAME	[A-Za-z][A-Za-z_:0-9]*
 LABEL	";"[^\n]+(\n)
+LISTSEP ","
 /*COLORLABEL	";#"[A-Fa-f0-9]{6}[^\n]+(\n)*/
+
 %%
 
-/*{COLORLABEL}		return 'COLORLABEL';*/
+/*{COLORLABEL}	return 'COLORLABEL';*/
 {LABEL}		return 'LABEL';
 \s+		 /* skip WS */
 {COMMENT}	return 'COMMENT';
+{LISTSEP}	return 'LISTSEP';
 {COLOR}		return 'COLOR';
 "HORIZONTAL"|"LR" return 'LEFT_RIGHT';
 "VERTICAL"|"TD"	return 'TOP_DOWN';
@@ -24,3 +27,5 @@ LABEL	";"[^\n]+(\n)
 {NAME}		return 'NAME';
 {D}+		return 'NUMBER';
 <<EOF>>		return 'EOF';
+
+

@@ -1,3 +1,20 @@
-c>d
-d>a
+a
+b#ff0000
+c;b is red
+d#00ff00;Green
+e>f
+g>#ff00ffh
+i#ffff00>j
+k>l;moro
+
+
+za
+zb#ff0000
+zc;zb red
+zd#00ff00;this is greeen
+ze>#772222f
+zg>#ff00ffh
+zi#ffff00>#aaaaaaj
+zk>#f0f0f0l;moro
+
 

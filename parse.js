@@ -6,9 +6,8 @@ var myArgs =process.argv.slice(2);
 //The moduleName you specify can also include a namespace, 
 //var parserSource = parser.generate({moduleName: "myCalculator.parser"});
 var raw = fs.readFileSync(path.normalize("./"+myArgs[0]), 'utf8');
-var VERBOSE=false;
-
-
+VERBOSE=false;
+if (myArgs[1]==="verbose") VERBOSE=true;
 if (false){
 	var lexer=require("./state.js");
 	//LEX
@@ -21,7 +20,6 @@ if (false){
 	}
 }else{
 	var parser=require("./parser.js");	
-	VERBOSE=true;
 	parser.parser.yy.OUTPUT=myArgs[1];
 	parser.parser.trace=function(x){console.log("TRACE:"+x);}
 //this.parseError(errStr, 

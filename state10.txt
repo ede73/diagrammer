@@ -1,0 +1,2 @@
+q1>z1,z2,z3,z4;Multiple RHS lists
+q1>w1,w2,w3,w4

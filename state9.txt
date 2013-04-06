@@ -1,2 +1,2 @@
-z1,z2,z3,z4>q1;Multiple LHS lists
-w1,w2,w3,w4>q1
+z1#ff0000,z2#00ff00,z3,z4#0000ff>q1;Multiple LHS lists
+w1,w2,w3,w4>#00ffffq1#ff00ff

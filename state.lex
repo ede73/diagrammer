@@ -32,7 +32,7 @@ Could make out
 {COLOR}		return 'COLOR';
 ^("landscape"|"horizontal"|"lr") return 'LANDSCAPE';
 ^("portrait"|"vertical"|"td")	return 'PORTRAIT';
-"same"		return 'SAME';
+"equal"		return 'EQUAL';
 "shape"		return 'SHAPE';
 "group end"	return 'GROUP_END';
 "group"		return 'GROUP';

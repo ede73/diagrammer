@@ -86,8 +86,16 @@ targetName
 content
 	: SHAPE SHAPES
 		{{$$=getGraphRoot(yy).setCurrentShape($2);}}
+	| EQUAL readNode
+		{{
+			if ($2 instanceof Node){
+				getGraphRoot(yy).setEqual(new Array($2));
+			}else{
+				getGraphRoot(yy).setEqual($2);
+			}
+		}}
 	| SHAPE NAME
-		{{throw new Error("Expecing one of the shapes, got ("+$2+")");}}
+		{{throw new Error("Expecting one of the shapes, got ("+$2+")");}}
 	| LANDSCAPE
 		{{$$=getGraphRoot(yy).setDirection("landscape");}}
 	| PORTRAIT
@@ -316,6 +324,8 @@ function GraphRoot(){
         this.getDirection = function() { return getAttr(this,'direction');}
 	this.setStart=function(value){return setAttr(this,'start',value);};
         this.getStart = function() { return getAttr(this,'start');}
+	this.setEqual=function(value){return setAttr(this,'equal',value);};
+        this.getEqual = function() { return getAttr(this,'equal');}
 	this.toString = function() {
 		return "GraphRoot";
     	};
@@ -345,6 +355,13 @@ function digraph(yy){
 	if (s != undefined && s!=""){
 		//    {$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
 		console.log("{rank = same;null}\n  {rank = same; "+s+"}\n  null [shape=plaintext, label=\"\"];\n"+s+"[shape=doublecircle];\nnull->"+s+";\n");
+	}
+	if (r.getEqual()!=undefined){
+		console.log("{rank=same;");
+		for(var x=0;x<r.getEqual().length;x++){
+			console.log(r.getEqual()[x].getName()+";");
+		}
+		console.log("}");
 	}
 	for(var i in yy.OBJECTS){
 		var o=yy.OBJECTS[i];

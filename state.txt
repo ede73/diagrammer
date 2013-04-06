@@ -1,4 +1,6 @@
 start xstart
+
+
 idle#00ff00;idle\nevent
 xstart>#ff0000idle
 idle>start_forward;on sound
@@ -9,3 +11,6 @@ start_backward>moving_backward
 moving_backward>start_forward;on sound
 moving_backward>stop_motor;on touch
 stop_motor>idle
+
+equal start_forward,moving_backward
+equal start_backward,moving_forward

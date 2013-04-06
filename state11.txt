@@ -1,0 +1,11 @@
+eka#ff0000
+eka#00ff00;my name is
+eka#0000ff;slim shady and blue
+
+toinen#0000ff;On nimeltaan
+toinen;Punainen itseasiassa
+toinen#ff0000
+
+eka>#111111toinen
+
+eka>#ff0000toinen

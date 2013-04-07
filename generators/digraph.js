@@ -2,43 +2,48 @@ function digraph(yy){
 //TODO: See splines control http://www.graphviz.org/doc/info/attrs.html#d:splines
 //TODO: Start note fdp/neato http://www.graphviz.org/doc/info/attrs.html#d:start
 	yy.result("digraph {");
-	yy.result("compound=true;");
+	yy.result("  compound=true;");
 	var r=getGraphRoot(yy);
 	if (r.getDirection()==="portrait"){
-		yy.result("rankdir=LR;");
+		yy.result("  rankdir=LR;");
 	}else{
-		yy.result("rankdir=TD;");
+		yy.result("  rankdir=TD;");
 	}
 	var s=r.getStart();
 	if (s != undefined && s!=""){
 		//    {$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-		yy.result("{rank = same;null}\n  {rank = same; "+s+"}\n  null [shape=plaintext, label=\"\"];\n"+s+"[shape=doublecircle];\nnull->"+s+";\n");
+		yy.result("  {rank = same;null} {rank = same; "+s+"} null [shape=plaintext, label=\"\"];\n"+s+"[shape=doublecircle];\nnull->"+s+";\n");
 	}
 	if (r.getEqual()!=undefined && r.getEqual().length>0){
-		yy.result("{rank=same;");
+		yy.result("  {rank=same;");
 		for(var x=0;x<r.getEqual().length;x++){
 			yy.result(r.getEqual()[x].getName()+";");
 		}
 		yy.result("}");
 	}
-	//Add invisible node to all groups...
-	for(var i in yy.OBJECTS){
-		var o=yy.OBJECTS[i];
-		if (o instanceof Group){
-			if (o.OBJECTS.length==0)
-				//o.OBJECTS.push(new Node("invis_"+o.getName(),"invis"));
-				o.OBJECTS.push(new Node("invis_"+o.getName()).setStyle("invis"));
+	var fixgroup=function(c){
+		for(var i in c.OBJECTS){
+			var o=c.OBJECTS[i];
+			if (o instanceof Group){
+				if (o.OBJECTS.length==0){
+					o.OBJECTS.push(new Node("invis_"+o.getName()).setStyle("invis"));
+				}else{
+					//A group...non empty...parse inside
+					fixgroup(o);
+				}
+			}
 		}
-	}
-	for(var i in yy.OBJECTS){
-		var o=yy.OBJECTS[i];
+	}(r.OBJECTS);
+	
+	for(var i in r.OBJECTS){
+		var o=r.OBJECTS[i];
 		if (o instanceof Group){
 			debug(JSON.stringify(o));
-			yy.result('subgraph cluster_'+o.getName()+' {');
-			yy.result(	getAttrFmt(o,'label','label="{0}";'));
+			yy.result('  subgraph cluster_'+o.getName()+' {');
+			yy.result(getAttrFmt(o,'label','   label="{0}";'));
 			if (o.getColor()!=undefined){
-				yy.result("  style=filled;\n");
-				yy.result(getAttrFmt(o,'color','  color="{0}";\n'));
+				yy.result("    style=filled;");
+				yy.result(getAttrFmt(o,'color','   color="{0}";\n'));
 			}
 			for(var j in o.OBJECTS){
 				var z=o.OBJECTS[j];
@@ -49,9 +54,9 @@ function digraph(yy){
 					getAttrFmt(z,'label',',label="{0}"');
 				if (s.trim()!="")
 					s="["+s.trim().substring(1)+"]";
-				yy.result(z.getName()+s+';');
+				yy.result("    "+z.getName()+s+';');
 			}
-			yy.result("}");
+			yy.result("  }");
 		}else if (o instanceof Node){
 			var s=	getAttrFmt(o,'color',',fillcolor="{0}",style="filled"')+
 				getAttrFmt(o,'image',',image="icons{0}"')+
@@ -61,7 +66,7 @@ function digraph(yy){
 				getAttrFmt(o,'label',',label="{0}"');
 			if (s.trim()!="")
 				s="["+s.trim().substring(1)+"]";
-			yy.result(o.getName()+s+';');
+			yy.result("  "+o.getName()+s+';');
 		}else{
 			var s=	getAttrFmt(o,'color',',color="{0}"')+
 				getShape(shapes.digraph,o.shape,',shape="{0}"')+
@@ -69,7 +74,7 @@ function digraph(yy){
 				getAttrFmt(o,'label',',label="{0}"');
 			if (s.trim()!="")
 				s="["+s.trim().substring(1)+"]";
-			yy.result(o.getName()+s+';');
+			yy.result("  "+o.getName()+s+';');
 		}
 	}
 	for(var i in yy.LINKS){

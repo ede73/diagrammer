@@ -1,5 +1,5 @@
 start LR_0
-LR
+landscape
 shape doublecircle
 
 LR_0 LR_3 LR_4 LR_8

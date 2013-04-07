@@ -1,97 +1,106 @@
 function getGraphRoot(yy){
+	//debug(" getGraphRoot "+yy);
 	if (!yy.GRAPHROOT){
-		debug("no graphroot,init");
-		initObjects(yy);
-	}
-        return yy.GRAPHROOT;
-}
-function initObjects(yy){
-	debug("  ...Initialize "+yy);
-	if (!yy.GRAPHROOT){
+		debug(" no graphroot,init - in getGraphRoot");
 		if (yy.result===undefined){
 			yy.result=function(str){console.log(str);}
 		}
 		debug("  ...Initialize emptyroot "+yy);
-	        yy.OBJECTS=new Array();
 	        yy.LINKS=new Array();
         	yy.GRAPHROOT=new GraphRoot();
-		yy.GRAPHROOT.setCurrentContainer(yy);
+		yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
 	}
+        return yy.GRAPHROOT;
+}
+//Direct accessor, though graphroot governs!
+function getCurrentContainer(yy){
+	//debug(" getCurrentContainer of "+yy);
+	var x=getGraphRoot(yy).getCurrentContainer();
+	if (x==undefined) debug(" ERROR: Container undefined");
+	if (x.OBJECTS==undefined) {
+		if (x instanceof Array) debug(" Container is Array");
+		if (x instanceof Group) debug(" Container is Group");
+		if (x instanceof Node) debug(" Container is Node");
+		if (x instanceof Link) debug(" Container is Link");
+		debug(" ERROR: Containers "+typeof(x)+"object store undefined");
+	}
+	return x;
+}
+//Direct accessor, though graphroot governs!
+function setCurrentContainer(yy,ctr){
+	if (!(ctr instanceof Group || ctr instanceof GraphRoot)){
+		throw new Error("Trying to set container other than Group/GraphRoot:"+typeof(ctr));
+	}
+	debug(" setCurrentContainer "+yy);
+	return getGraphRoot(yy).setCurrentContainer(ctr);
 }
 //LHS=Node(z1)
 function getList(yy,LHS,RHS){
   if (LHS instanceof Node){
-	debug("getList("+LHS+","+RHS+")");
+	debug(" getList("+LHS+","+RHS+")");
   	var x=new Array();
   	x.push(LHS);
 	x.push(getNode(yy,RHS));
   	return x;
   }
-  debug("getList(["+LHS+"],"+RHS);
+  debug(" getList(["+LHS+"],"+RHS);
   //LHS not a node..
   LHS.push(getNode(yy,RHS));
   return LHS;
 }
 function getNode(yy,name){
-	if (yy.OBJECTS==undefined) initObjects(yy);
+	debug(" getNode "+name);
   	if (name instanceof Node){
   		return name;
   	}
   	if (name instanceof Array){
   		return name;
   	}
-        for(var i in yy.OBJECTS){
-                if (yy.OBJECTS[i].getName()==name){
-                        return yy.OBJECTS[i];
-                }
-		if (yy.OBJECTS[i] instanceof Group){
-			var o=yy.OBJECTS[i];
-		        for(var j in o.OBJECTS){
-                		if (o.OBJECTS[j].getName()==name){
-                		        return o.OBJECTS[j];
-               			 }
-			}
-		}
-        }
+
+  	var search=function s(container,name){
+  		for(var i in container.OBJECTS){
+        		var o=container.OBJECTS[i];
+        		if (o instanceof Node && o.getName()==name){
+                	        return o;
+        	        }
+	                if (o instanceof Group){
+				var found=s(o,name);
+				if (found!=undefined)return found;
+        	        }
+	        }
+	        return undefined;
+  	}(getGraphRoot(yy),name);
+  	if (search!=undefined)return search;
+  	debug(" Create new node");
 	var n=new Node(name,getGraphRoot(yy).getCurrentShape());
 	return pushObject(yy,n);
 }
 function getGroup(yy,ref){
 	if (ref instanceof Group) return ref;
-	/*if (yy.OBJECTS==undefined) initObjects(yy);
-        for(var i in yy.OBJECTS){
-                if (yy.OBJECTS[i].getName()==name){
-                        return yy.OBJECTS[i];
-                }
-        }*/
-	debug("NEW GROUP");
-	if (yy.GROUPIDS==undefined)yy.GROUPIDS=0;
-	var n=new Group(yy.GROUPIDS++);
-	pushObject(yy,n);
-	getGraphRoot(yy).setCurrentContainer(n);
-	return n;
-}
-function pushObject(yy,o){
-        //yy.OBJECTS.push(o);
-	getGraphRoot(yy).getCurrentContainer().OBJECTS.push(o);
-	return o;
+	debug(" NEW GROUP:"+yy+"/"+ref);
+	if (yy.GROUPIDS==undefined)yy.GROUPIDS=1;
+	var newGroup=new Group(yy.GROUPIDS++);
+	debug(" push group "+newGroup+" to "+yy);
+	pushObject(yy,newGroup);
+	setCurrentContainer(yy,newGroup);
+	return newGroup;
 }
 //Get a link such that l links to r, return the added LINK or LINKS
 function getLink(yy,linkType,l,r,label,color){
 	if (l instanceof Array){
-		debug("getLink called with LHS array");
+		debug(" getLink called with LHS array");
 		var lastLink;
 		for(var i=0;i<l.length;i++){
-			debug("Get link "+l[i]);
+			debug(" Get link "+l[i]);
 			lastLink=getLink(yy,linkType,l[i],r,label,color);
 		}
 		return lastLink;
 	}
 	if (r instanceof Array){
-		debug("getLink called with RHS array");
+		debug(" getLink called with RHS array");
 		var lastLink;
 		for(var i=0;i<r.length;i++){
-			debug("Get link "+r[i]);
+			debug(" Get link "+r[i]);
 			lastLink=getLink(yy,linkType,l,r[i],label,color);
 		}
 		return lastLink;
@@ -110,29 +119,33 @@ function getLink(yy,linkType,l,r,label,color){
 //Add link to the list of links, return the LINK
 function addLink(yy,l){
 	if (l instanceof Array){
-		debug("PUSH LINK ARRAY:"+l);
+		debug(" PUSH LINK ARRAY:"+l);
 	}else{
-		debug("PUSH LINK:"+l);
+		debug(" PUSH LINK:"+l);
 	}
         yy.LINKS.push(l);
 	return l;
 }
-function containsObject(yy,o){
-        for(var i in yy.OBJECTS){
-                if (yy.OBJECTS[i]==o){
+function pushObject(yy,o){
+	debug("  pushObject "+o+"to "+getCurrentContainer(yy));
+ 	getCurrentContainer(yy).OBJECTS.push(o);
+	return o;
+}
+//test if container has the object
+//TODO: Recurse
+function containsObject(container,o){
+        for(var i in container.OBJECTS){
+        	var c=container.OBJECTS[i];
+                if (c==o){
                         return true;
+                }
+                if (c instanceof Group){
+                	if (containsObject(c,o)){
+                		return true;
+                	}
                 }
         }
         return false;
-}
-function hasObjects(yy,o){
-        return yy.OBJECTS.length!=0;
-}
-function peekObject(yy,o){
-        return yy.OBJECTS[yy.OBJECTS.length-1];
-}
-function popObject(yy){
-        return yy.OBJECTS.pop();
 }
 
 function GraphObject(label){
@@ -170,6 +183,9 @@ Group.prototype.constructor=Group;
 function Group(name){
 	this.name=name;
 	this.OBJECTS=new Array();
+        //Save EQUAL node ranking
+	this.setEqual=function(value){return setAttr(this,'equal',value);};
+        this.getEqual = function() { return getAttr(this,'equal');}
 	this.toString = function() {
 		return "Group("+this.name+")";
     	};
@@ -177,6 +193,7 @@ function Group(name){
 GraphRoot.prototype=new GraphObject();
 GraphRoot.prototype.constructor=GraphRoot;
 function GraphRoot(){
+	this.OBJECTS=new Array();
 	this.setCurrentShape=function(value){return setAttr(this,'shape',value);};
         this.getCurrentShape = function() { return getAttr(this,'shape');}
 	this.setCurrentContainer=function(value){return setAttr(this,'container',value);};
@@ -185,6 +202,7 @@ function GraphRoot(){
         this.getDirection = function() { return getAttr(this,'direction');}
 	this.setStart=function(value){return setAttr(this,'start',value);};
         this.getStart = function() { return getAttr(this,'start');}
+        //Save EQUAL node ranking
 	this.setEqual=function(value){return setAttr(this,'equal',value);};
         this.getEqual = function() { return getAttr(this,'equal');}
 	this.toString = function() {

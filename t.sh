@@ -18,6 +18,7 @@ echo "test parser"
 # |sed '/digraph/,$!d'
 
 png=${input%.*}_${generator}.png
+rm -f $png
 
 case "$generator" in
   nwdiag|actdiag|blockdiag)
@@ -51,4 +52,5 @@ esac
 
 #neato -Tpng a.gv >n.png
 ##[[ -s n.png ]] && [[ $silent = 0 ]] && open n.png
+
 

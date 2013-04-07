@@ -117,9 +117,9 @@ content
 	| EQUAL readNode
 		{{
 			if ($2 instanceof Node){
-				getGraphRoot(yy).setEqual(new Array($2));
+				getCurrentContainer(yy).setEqual(new Array($2));
 			}else{
-				getGraphRoot(yy).setEqual($2);
+				getCurrentContainer(yy).setEqual($2);
 			}
 		}}
 	| SHAPE NAME
@@ -133,7 +133,10 @@ content
 	| GROUP groupTarget
 		{}
 	| GROUP_END
-		{{$$=getGraphRoot(yy).setCurrentContainer(yy);}}
+		{{
+			//TODO:containers should be stack!
+			$$=setCurrentContainer(yy,getGraphRoot(yy));
+		}}
 	| START NAME
 		//{$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
 		{$$=getGraphRoot(yy).setStart($2);}

@@ -8,33 +8,33 @@
 //flowchart.condition,flowchart.database,flowchart.terminator,flowchart.input
 //flowchart.loopin,flowchart.loopout
 function blockdiag(yy){
-	yy.result("blockdiag{\n default_fontsize = 16\n");
+	yy.result("blockdiag{\n default_fontsize = 16");
 	var r=getGraphRoot(yy);
 	if (r.getDirection()==="portrait"){
-		yy.result("orientation=portrait");
+		yy.result("  orientation=portrait");
 	}else{
 		//DEFAULT
-		yy.result("orientation=landscape");
+		yy.result("  orientation=landscape");
 	}
 	var s=r.getStart();
-	for(var i in yy.OBJECTS){
-		var o=yy.OBJECTS[i];
+	for(var i in r.OBJECTS){
+		var o=r.OBJECTS[i];
 		if (o instanceof Group){
-			yy.result('group "'+o.getLabel()+'"{');
-			yy.result(getAttrFmt(o,'color','color="{0}"'));
-			yy.result(getAttrFmt(o,'label','label="{0}"'));
+			yy.result('  group "'+o.getLabel()+'"{');
+			yy.result(getAttrFmt(o,'color','   color="{0}"'));
+			yy.result(getAttrFmt(o,'label','   label="{0}"'));
 			if (s.trim()!="")
 				s="["+s.trim().substring(1)+"]";
 			for(var j in o.OBJECTS){
 				var z=o.OBJECTS[j];
 				var s=	getAttrFmt(z,'color',',color="{0}"')+
-					getShape(shapes.blockdiag,z.shape,',shape="{0}"')+
+					getShape(shapes.blockdiag,z.shape,',shape={0}')+
 					getAttrFmt(z,'label',',label="{0}"');
 				if (s.trim()!="")
 					s="["+s.trim().substring(1)+"]";
-				yy.result(z.getName()+s+';');
+				yy.result("    "+z.getName()+s+';');
 			}
-			yy.result("}");
+			yy.result("  }");
 		}else{
 			//ICON does not work, using background
 			var s=	getAttrFmt(o,'color',',color="{0}"')+
@@ -43,12 +43,12 @@ function blockdiag(yy){
 				getAttrFmt(o,'label',',label="{0}"');
 			if (s.trim()!="")
 				s="["+s.trim().substring(1)+"]";
-			yy.result(o.getName()+s+';');
+			yy.result("  "+o.getName()+s+';');
 		}
 	}
 	for(var i in yy.LINKS){
 		var l=yy.LINKS[i];
-		yy.result(l.left.getName()+" -> "+l.right.getName()+";");
+		yy.result("  "+l.left.getName()+" -> "+l.right.getName()+";");
 	}
 	yy.result("}");
 }

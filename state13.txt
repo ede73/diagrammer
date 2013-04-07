@@ -1,0 +1,13 @@
+group dmz;210.x.x.x/24
+group end
+group internal;172.x.x.x/24
+	db01
+	db02
+group end
+
+web01-dmz;210.x.x.1,210.x.x.20
+web01-internal;172.x.x.1
+
+web02-dmz;210.x.x.2
+web02-internal;172.x.x.2
+

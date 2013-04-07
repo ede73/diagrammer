@@ -56,7 +56,8 @@ function getNode(yy,name){
 	var n=new Node(name,getGraphRoot(yy).getCurrentShape());
 	return pushObject(yy,n);
 }
-function getGroup(yy){
+function getGroup(yy,ref){
+	if (ref instanceof Group) return ref;
 	/*if (yy.OBJECTS==undefined) initObjects(yy);
         for(var i in yy.OBJECTS){
                 if (yy.OBJECTS[i].getName()==name){
@@ -98,8 +99,8 @@ function getLink(yy,linkType,l,r,label,color){
 	if (!(l instanceof Node)){
 		throw new Error("LHS not a Node("+l+")");
 	}
-	if (!(r instanceof Node)){
-		throw new Error("RHS not a Node("+r+")");
+	if (!(r instanceof Node) && !(r instanceof Group)){
+		throw new Error("RHS not a Node or Group("+r+")");
 	}
 	var l=new Link(linkType,l,r);
 	if (label!=undefined) l.setLabel(label);
@@ -167,7 +168,7 @@ function Group(name){
 	this.name=name;
 	this.OBJECTS=new Array();
 	this.toString = function() {
-		return "Group";
+		return "Group("+this.name+")";
     	};
 }
 GraphRoot.prototype=new GraphObject();
@@ -194,7 +195,10 @@ function Link(linkType,l,r){
 	this.left=l;
 	this.right=r;
 	this.toString = function() {
-		return "Link("+this.linkType+"=="+this.left.toString()+","+this.right.toString()+")";
+		return "Link("+this.linkType+"== L"+
+			this.left.toString()+", R"+
+			this.right.toString()+",label="+
+			this.getLabel()+")";
     	};
 }
 function getShape(shapes,o,fmt){

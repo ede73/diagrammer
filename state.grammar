@@ -10,6 +10,8 @@ S
 				actdiag(yy);
 			}else if ("blockdiag" == yy.OUTPUT){
 				blockdiag(yy);
+			}else if ("nwdiag" == yy.OUTPUT){
+				nwdiag(yy);
 			}else{
 				//rankdir available ONLY IN dot
 				digraph(yy);
@@ -65,12 +67,20 @@ targetName
 	| targetName EVENT readNode LABEL
 		{
 			debug("targetName EVENT readNode LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3);
-			$$=getLink(yy,$2,$1,getNode(yy,$3),$4.substring(1)).right;
+			if ($3 instanceof Group){
+				$$=getLink(yy,$2,$1,getGroup(yy,$3),$4.substring(1)).right;
+			}else{
+				$$=getLink(yy,$2,$1,getNode(yy,$3),$4.substring(1)).right;
+			}
 		}
 	| targetName EVENT readNode
 		{
 			debug("targetName EVENT readNode"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3);
-			$$=getLink(yy,$2,$1,getNode(yy,$3)).right;
+			if ($3 instanceof Group){
+				$$=getLink(yy,$2,$1,getGroup(yy,$3)).right;
+			}else{
+				$$=getLink(yy,$2,$1,getNode(yy,$3)).right;
+			}
 		}
 	| readNode LABEL
 		{
@@ -106,6 +116,8 @@ content
 		{{$$=getGroup(yy).setColor($2).setLabel($3.substring(1));}}
 	| GROUP LABEL
 		{{$$=getGroup(yy).setLabel($2.substring(1));}}
+	| GROUP NAME LABEL
+		{{$$=getGroup(yy).setName($2).setLabel($3.substring(1));}}
 	| GROUP_END
 		{{$$=getGraphRoot(yy).setCurrentContainer(yy);}}
 	| START NAME

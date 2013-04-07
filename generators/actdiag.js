@@ -1,6 +1,6 @@
 //node parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 function actdiag(yy){
-	yy.result("{");
+	yy.result("actdiag{\n default_fontsize = 16\n");
 	var r=getGraphRoot(yy);
 	if (r.getDirection()==="portrait"){
 		yy.result("orientation=portrait");

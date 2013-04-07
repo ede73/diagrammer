@@ -3,12 +3,15 @@ var fs         = require('fs');
 var path       = require('path');
 var myArgs =process.argv.slice(2);
 
+VERBOSE=false;
+if (myArgs[0]==="verbose") {
+  VERBOSE=true;
+  myArgs=myArgs.slice(1);
+}
 //var parserSource = generator.generate({moduleName: "state"});
 //The moduleName you specify can also include a namespace, 
 //var parserSource = parser.generate({moduleName: "myCalculator.parser"});
 var raw = fs.readFileSync(path.normalize("./"+myArgs[0]), 'utf8');
-VERBOSE=false;
-if (myArgs[1]==="verbose") VERBOSE=true;
 if (myArgs[1]==="lex"){
 	var lexer=require("./state.js");
 	//LEX

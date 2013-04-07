@@ -8,7 +8,7 @@
 //flowchart.condition,flowchart.database,flowchart.terminator,flowchart.input
 //flowchart.loopin,flowchart.loopout
 function blockdiag(yy){
-	yy.result("{");
+	yy.result("blockdiag{\n default_fontsize = 16\n");
 	var r=getGraphRoot(yy);
 	if (r.getDirection()==="portrait"){
 		yy.result("orientation=portrait");

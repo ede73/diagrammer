@@ -1,0 +1,8 @@
+shape cloud
+inet
+shape default
+group empty;x
+	router web01 web02
+group end
+
+inet - router

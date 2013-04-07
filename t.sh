@@ -20,10 +20,7 @@ echo "test parser"
 png=${input%.*}_${generator}.png
 
 case "$generator" in
-  actdiag)
-    node parse.js "$input" $generator |$generator -a -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" &
-  ;;
-  blockdiag)
+  nwdiag|actdiag|blockdiag)
     node parse.js "$input" $generator |$generator -a -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" &
   ;;
   neato)

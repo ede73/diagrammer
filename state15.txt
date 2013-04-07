@@ -1,0 +1,13 @@
+group dmz;y
+	web01 web02
+group end
+
+group internal;x
+	web01
+	web02
+	db01
+group end
+
+web01,web02-dmz
+web01,web02-internal
+equal web01,web02,db01

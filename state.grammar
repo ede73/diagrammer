@@ -95,7 +95,12 @@ targetName
 	
 content
 	: SHAPE SHAPES
-		{{$$=getGraphRoot(yy).setCurrentShape($2);}}
+		{{
+			if ($2=="default")
+				$$=getGraphRoot(yy).setCurrentShape(undefined);
+			else
+				$$=getGraphRoot(yy).setCurrentShape($2);
+		}}
 	| EQUAL readNode
 		{{
 			if ($2 instanceof Node){

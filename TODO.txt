@@ -1,5 +1,6 @@
--Add ability to connect node to graph in dotty (nwdiag does it already)
--Fix GROUP NAME LABEL parsing (not done from all angles)
+(DONE)-Add ability to connect node to graph in dotty (nwdiag does it already) ltail,lhead dotty only
+-Fix GROUP NAME LABEL parsing (I just added NAME, so expect it to be present
+  - Actually make LABEL optional and name mandatory (it USED to be like this, removed as needless, but with nwdiag it is required)
 -Check if something could be done for network graphs .. 
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
@@ -8,4 +9,17 @@
 - Make group RECURSIVE...ie. real container. Now it is shallow
 - Make EQUAL container property (not it ALWAYS belongs to graphroot, but network diag can have groups inside network..
 	well dotty can have subcluster inside subcluster)
+- Instead of exploding links in GRAMMAR(parser) it could save the link cluster as such and utilize the dotty
+      graph test123 {
+               a -- b -- c;
+               a -- {x y}[label="marks both edges"];
+               x -- c [w=10.0];
+               x -- y [w=5.0,len=3];
+       }
+	The generator could then offload it (but that would make generator bit more complex)
+- Pass the actual visualizing engine information to generator as well (dotty can draw directional graphs and accept
+	> and <, but other visualizing engines accept undirected graphs only - graphviz only)
+(DONE)- RESET default shape (shape default) instead of explicitly adding shape=default that results shape=box to all nodes
+(DONE)- EQUAL (rank same) printed when no declaration, remove it
+(DONE)- replace shape=invis as style=invis
 

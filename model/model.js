@@ -154,8 +154,11 @@ function Node(name,shape){
 	this.name=name;
 	this.shape=shape;
 	this.image;
+	this.style;
 	this.setShape=function(value){return setAttr(this,'shape',value);};
         this.getShape = function() { return getAttr(this,'shape');}
+	this.setStyle=function(value){return setAttr(this,'style',value);};
+        this.getStyle = function() { return getAttr(this,'style');}
 	this.setImage=function(value){return setAttr(this,'image',value);};
         this.getImage = function() { return getAttr(this,'image');}
 	this.toString = function() {
@@ -212,6 +215,7 @@ function getShape(shapes,o,fmt){
 var shapes={
 blockdiag:{
 	default:"box",
+	invis:"invis",/*TODO?*/
 	record:"box",
 	doublecircle:"endpoint",
 	box:"box",rect:"box",rectangle:"box",
@@ -237,6 +241,7 @@ blockdiag:{
 	},
 actdiag:{
 	default:"box",
+	invis:"invis",/*TODO?*/
 	record:"box",
 	doublecircle:"endpoint",
 	box:"box",rect:"box",rectangle:"box",
@@ -262,6 +267,7 @@ actdiag:{
 	},
 digraph:{
 	default:"box",
+	invis:"invis",
 	record:"record",
 	doublecircle:"doublecircle",
 	box:"box",rect:"box",rectangle:"box",

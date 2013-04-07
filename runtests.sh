@@ -1,9 +1,9 @@
 x=${1:-dot}
 test(){
-./t.sh $1 $x
-png=${1%.*}.png
-diff $png ref/$png
-[ $? -ne 0 ] && echo "ERROR: at $1, image $png and ref/$png differ"
+ ./t.sh $1 $x
+ png=${1%.*}_${x}.png
+ diff $png ref/$x/$png
+ [ $? -ne 0 ] && echo "ERROR: at $1, image $png and ref/$x/$png differ" >&2
 }
 
 test state.txt

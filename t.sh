@@ -11,7 +11,7 @@ echo "test parser"
 #node parser.js $input $func | tee a.gv
 # |sed '/digraph/,$!d'
 
-png=${input%.*}.png
+png=${input%.*}_${generator}.png
 
 case "$generator" in
   actdiag)

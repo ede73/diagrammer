@@ -10,6 +10,9 @@ cat >>state.all <<EOF
 /lex
 EOF
 cat state.grammar >>state.all
+cat model/support.js >>state.all
+cat model/model.js >>state.all
+cat generators/*.js >>state.all
 
 echo make parser
 jison state.all -o parser.js 

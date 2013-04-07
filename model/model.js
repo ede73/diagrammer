@@ -197,6 +197,13 @@ function Link(linkType,l,r){
 		return "Link("+this.linkType+"=="+this.left.toString()+","+this.right.toString()+")";
     	};
 }
+function getShape(shapes,o,fmt){
+	if (o==undefined || o==0)return "";
+	if (o in shapes)
+		return ' '+fmt.format(shapes[o])+' ';
+	else
+		return ' '+fmt.format(shapes.default)+' ';
+}
 
 var shapes={
 blockdiag:{

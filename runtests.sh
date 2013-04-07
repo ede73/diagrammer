@@ -9,7 +9,6 @@ test(){
    ls -l $png
  fi
 }
-
 tests=${1:-dot actdiag blockdiag}
 
 for test in $tests; do
@@ -30,3 +29,9 @@ test state12.txt
 test state_cluster_edge.txt
 test state_dual_node.txt
 done
+
+x=nwdiag
+test state13.txt
+test state14.txt
+test state15.txt
+test state16.txt

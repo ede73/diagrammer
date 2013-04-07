@@ -48,6 +48,11 @@ function getList(yy,LHS,RHS){
   LHS.push(getNode(yy,RHS));
   return LHS;
 }
+/**
+See readNodeOrGroup in grammar
+
+Must be able to return Group as wlel..if NAME matches...
+*/
 function getNode(yy,name){
 	debug(" getNode "+name);
   	if (name instanceof Node){
@@ -58,6 +63,7 @@ function getNode(yy,name){
   	}
 
   	var search=function s(container,name){
+  		if (container.getName()==name) return container;
   		for(var i in container.OBJECTS){
         		var o=container.OBJECTS[i];
         		if (o instanceof Node && o.getName()==name){

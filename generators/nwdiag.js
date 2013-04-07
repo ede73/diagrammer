@@ -3,8 +3,8 @@ function nwdiag(yy){
 	yy.result("nwdiag{\n default_fontsize = 16\n");
 	var r=getGraphRoot(yy);
 	var s=r.getStart();
-	for(var i in yy.OBJECTS){
-		var o=yy.OBJECTS[i];
+	for(var i in r.OBJECTS){
+		var o=r.OBJECTS[i];
 		if (o instanceof Group){
 			//split the label to two, NAME and address
 			yy.result('  network '+o.getName()+'{');

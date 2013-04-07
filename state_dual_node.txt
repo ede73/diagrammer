@@ -1,0 +1,5 @@
+shape actor
+s
+group dummy
+ a>s
+group end

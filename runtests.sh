@@ -1,4 +1,3 @@
-x=${1:-dot}
 test(){
  ./t.sh silent $1 $x
  png=${1%.*}_${x}.png
@@ -6,6 +5,10 @@ test(){
  [ $? -ne 0 ] && echo "ERROR: at $1, image $png and ref/$x/$png differ" >&2 open $png && open ref/$x/$png
 }
 
+tests=${1:-dot actdiag blockdiag}
+
+for test in $tests; do
+x=$test
 test state.txt
 test state2.txt
 test state3.txt
@@ -18,3 +21,4 @@ test state9.txt
 test state10.txt
 test state11.txt
 test state12.txt
+done

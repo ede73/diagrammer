@@ -36,6 +36,10 @@ function digraph(yy){
 			debug(JSON.stringify(o));
 			yy.result('subgraph cluster_'+o.getName()+' {');
 			yy.result(	getAttrFmt(o,'label','label="{0}";'));
+			if (o.getColor()!=undefined){
+				yy.result("  style=filled;\n");
+				yy.result(getAttrFmt(o,'color','  color="{0}";\n'));
+			}
 			for(var j in o.OBJECTS){
 				var z=o.OBJECTS[j];
 				var s=	getAttrFmt(z,'color',',color="{0}"')+

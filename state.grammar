@@ -92,7 +92,20 @@ targetName
 			debug("readNode"+" SS="+$$+",S0="+$0+",S1="+$1);
 		}
 	;
-	
+groupTarget
+	: NAME COLOR LABEL
+		{{$$=getGroup(yy).setName($1).setColor($2).setLabel($3.substring(1));}}
+	| COLOR LABEL
+		{{$$=getGroup(yy).setColor($1).setLabel($2.substring(1));}}
+	| LABEL
+		{{$$=getGroup(yy).setLabel($1.substring(1));}}
+	| NAME LABEL
+		{{$$=getGroup(yy).setName($1).setLabel($2.substring(1));}}
+	| NAME COLOR
+		{{$$=getGroup(yy).setName($1).setColor($2);}}
+	| NAME
+		{{$$=getGroup(yy).setName($1);}}
+	;
 content
 	: SHAPE SHAPES
 		{{
@@ -117,12 +130,8 @@ content
 		{{$$=getGraphRoot(yy).setDirection("portrait");}}
 	| COMMENT
 		{{$$="/*"+$1.substring(2)+"*/\n";}}
-	| GROUP COLOR LABEL
-		{{$$=getGroup(yy).setColor($2).setLabel($3.substring(1));}}
-	| GROUP LABEL
-		{{$$=getGroup(yy).setLabel($2.substring(1));}}
-	| GROUP NAME LABEL
-		{{$$=getGroup(yy).setName($2).setLabel($3.substring(1));}}
+	| GROUP groupTarget
+		{}
 	| GROUP_END
 		{{$$=getGraphRoot(yy).setCurrentContainer(yy);}}
 	| START NAME

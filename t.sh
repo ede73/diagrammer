@@ -22,25 +22,25 @@ rm -f $png
 
 case "$generator" in
   nwdiag|actdiag|blockdiag)
-    node parse.js "$input" $generator |$generator -a -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" &
+    node parse.js "$input" $generator |$generator -a -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" 
   ;;
   neato)
-    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" &
+    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
   ;;
   twopi)
-    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" &
+    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
   ;;
   circo)
-    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" &
+    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
   ;;
   fdp)
-    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" &
+    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
   ;;
   sfdp)
-    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" &
+    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
   ;;
   *)
-    node parse.js "$input" digraph |dot -Tpng -o $png  && [[ $silent = 0 ]] && open "$png" &
+    node parse.js "$input" digraph |dot -Tpng -o $png  && [[ $silent = 0 ]] && open "$png" 
   ;;
 esac
 

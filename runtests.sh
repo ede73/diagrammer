@@ -1,11 +1,12 @@
 test(){
  ./t.sh silent $1 $x
  png=${1%.*}_${x}.png
- if [ ! -s $png ]; then
-   echo "ERROR: Could not produce output $1"
- else
+ if [ -f "$png" ]; then
    diff $png ref/$x/$png
    [ $? -ne 0 ] && echo "ERROR: at $1, image $png ref/$x/$png differ" >&2 && open -Fn $png ref/$x/$png && exit 1
+ else
+   echo "ERROR: Could not produce output $1 as $png is non existent" >&2
+   ls -l $png
  fi
 }
 

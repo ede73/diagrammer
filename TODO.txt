@@ -1,0 +1,11 @@
+-Add ability to connect node to graph in dotty (nwdiag does it already)
+-Fix GROUP NAME LABEL parsing (not done from all angles)
+-Check if something could be done for network graphs .. 
+	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
+	not mandatory, but would be NICE
+- Make LIST (nodelist,grouplist what ever list) actual object, not array kludge
+	- one could then map setLabel to all contained objects in one call
+- Make group RECURSIVE...ie. real container. Now it is shallow
+- Make EQUAL container property (not it ALWAYS belongs to graphroot, but network diag can have groups inside network..
+	well dotty can have subcluster inside subcluster)
+

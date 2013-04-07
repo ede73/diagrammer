@@ -21,4 +21,5 @@ test state9.txt
 test state10.txt
 test state11.txt
 test state12.txt
+test state_cluster_edge.txt
 done

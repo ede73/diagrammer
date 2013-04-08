@@ -26,12 +26,35 @@ parser.trace=function(x){console.log("TRACE:"+x);}
       <option value="actdiag">Activity Diagram</option>
       <option value="blockdiag">Block diagram</option>
       <option value="nwdiag">Network diagram</option>
+      <option value="mscgen">MSCGEN</option>
+    </select>
+    <select id="example" onChange="exampleChanged()">
+<option value="state.txt">state.txt</option>
+<option value="state10.txt">state10.txt</option>
+<option value="state11.txt">state11.txt</option>
+<option value="state12.txt">state12.txt</option>
+<option value="state13.txt">state13.txt</option>
+<option value="state14.txt">state14.txt</option>
+<option value="state15.txt">state15.txt</option>
+<option value="state16.txt">state16.txt</option>
+<option value="state2.txt">state2.txt</option>
+<option value="state3.txt">state3.txt</option>
+<option value="state4.txt">state4.txt</option>
+<option value="state5.txt">state5.txt</option>
+<option value="state6.txt">state6.txt</option>
+<option value="state7.txt">state7.txt</option>
+<option value="state8.txt">state8.txt</option>
+<option value="state9.txt">state9.txt</option>
+<option value="state_cluster_edge.txt">state_cluster_edge.txt</option>
+<option value="state_dual_node.txt">state_dual_node.txt</option>
+<option value="state_sequence.txt">state_sequence.txt</option>
     </select>
     <br/>
-    <textarea name="source" id="source" rows="30" cols="60"></textarea>
-    <textarea name="result" id="result" rows="30" cols="60"></textarea>
+    <textarea name="source" id="source" rows="50" cols="60"></textarea>
+    <textarea name="result" id="result" rows="50" cols="60"></textarea>
 </form>
 </body>
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <script type="text/javascript">
 result= document.getElementById("result");
 function parse(textArea){
@@ -46,6 +69,18 @@ function parse(textArea){
 function generatorChanged()
 {
 	parse(document.getElementById("source"));
+}
+function exampleChanged()
+{
+	//read the example...place to textArea(overwrite)
+	var e = document.getElementById("example");
+	var doc=e.options[e.selectedIndex].value;
+$.ajax({
+  url: doc
+}).done(function(data) {
+	document.getElementById("source").value=data;
+	generatorChanged();
+});
 }
 
 function addTextAreaCallback(textArea, callback, delay) {

@@ -1,0 +1,19 @@
+//unvonventional
+a<>a;broadcast
+a-a;jotain kay tassanain
+a.a;ja aikaa palaa
+//end test
+a>b;ab()
+b>c;bc(TRUE)
+c>c;process(1)
+c>c;process(2)
+//...
+c>c;process(n)
+c>c;process(END)
+a<c;callback()
+//--- if more to run
+a>a;next()
+a>a;ac1()\nac2()
+b<c;cb(TRUE)
+b>b;stalled(...)
+a<b;ab()=FALSE

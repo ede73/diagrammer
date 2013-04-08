@@ -35,3 +35,7 @@ test state13.txt
 test state14.txt
 test state15.txt
 test state16.txt
+
+x=mscgen
+test state_sequence.txt
+

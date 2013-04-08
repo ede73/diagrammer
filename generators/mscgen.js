@@ -24,7 +24,7 @@ function mscgen(yy){
 			}
 			yy.result("  }");
 		}else if (o instanceof Node){
-			var s=	getAttrFmt(o,'color',',fillcolor="{0}",style="filled"')+
+			var s=	getAttrFmt(o,'color',',textbgcolor="{0}"')+
 				getAttrFmt(o,'image',',image="icons{0}"')+
 				getShape(shapes.digraph,o.shape,',shape="{0}"')+
 				getAttrFmt(o,'style',',style={0}')+
@@ -39,7 +39,7 @@ function mscgen(yy){
 	for(var i in yy.LINKS){
 		var l=yy.LINKS[i];
 		var t=getAttrFmt(l,'label',',label="{0}"')+
-		getAttrFmt(l,'color',',color="{0}"');
+		getAttrFmt(l,'color',',linecolor="{0}"');
 		var lt;
 		var lr=l.right;
 		var ll=l.left;
@@ -57,32 +57,53 @@ function mscgen(yy){
 		//TODO:Assuming producing DIGRAPH
 		//For GRAPH all edges are type --
 		//but we could SET arrow type if we'd like
+		var rightName=lr.getName();
 		if (t.trim()!="")
 			t=t.trim().substring(1);
+
+		var dot=false;var dash=false;
 		if (l.linkType.indexOf(".")!==-1){
-			t+=' style="dotted" ';
+			dot=true;
 		}else if (l.linkType.indexOf("-")!==-1){
-			t+=' style="dashed" ';
+			dash=true;
 		}
 		if (l.linkType.indexOf("<")!==-1 &&
 		    l.linkType.indexOf(">")!==-1){
+			//Broadcast type (<>)
 			lt="->";
-			t+="dir=both";
+			rightName="*";
 		}else if (l.linkType.indexOf("<")!==-1){
 			var tmp=ll;
 			ll=lr;
 			lr=tmp;
-			lt="->";
+			if (dot)
+				lt=">>";
+			else if (dash)
+				lt="->";
+			else
+				lt="=>";
+			rightName=lr.getName();
 		}else if (l.linkType.indexOf(">")!==-1){
-			lt="->";
+			if (dot)
+				lt=">>";
+			else if (dash)
+				lt="->";
+			else
+				lt="=>";
+		}else if(dot){
+			//dotted
+			yy.result(getAttrFmt(l,'label','...[label="{0}"];'));
+			continue;
+		}else if(dash){
+			//dashed
+			yy.result(getAttrFmt(l,'label','---[label="{0}"];'));
+			continue;
 		}else{
-			//is dotted or dashed no direction
-			lt="->";
-			t+="dir=none";
+			yy.result("ERROR: SHOULD NOT HAPPEN");
 		}
 		if (t.trim()!="")
 			t="["+t+"]";
-		yy.result(ll.getName()+lt+lr.getName()+t+";");
+		yy.result(ll.getName()+lt+rightName+t+";");
 	}
 	yy.result("}");
 }

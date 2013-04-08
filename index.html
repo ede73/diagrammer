@@ -7,6 +7,7 @@ parser.yy.parseError=function(str,hash){
 	console.log("Parsing error:");
 	console.log(str);
 	console.log(hash);
+	cancelVTimer();
 	throw new Error(str);
 };
 //called line by line...
@@ -59,6 +60,8 @@ parser.trace=function(x){console.log("TRACE:"+x);}
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <script type="text/javascript">
 result= document.getElementById("result");
+var vtimer = null;
+var vdelay=2000;
 function reloadImg(id) {
    var obj = document.getElementById(id);
    var src = obj.src;
@@ -102,6 +105,11 @@ function getGenerator(){
 	var e = document.getElementById("generator");
 	return e.options[e.selectedIndex].value;
 }
+function cancelVTimer(){
+        if (vtimer) {
+            window.clearTimeout(vtimer);
+        }
+}
 function parse(textArea){
 	parsingStarted=true;
 	delete (parser.yy.GRAPHROOT);
@@ -109,6 +117,11 @@ function parse(textArea){
 	delete (parser.yy.OBJECTS);
 	parser.yy.OUTPUT=getGenerator();
 	parser.parse(textArea.value+"\n");
+        cancelVTimer();
+        vtimer = window.setTimeout( function() {
+            vtimer = null;
+            visualize();
+        }, vdelay );
 }
 function generatorChanged()
 {

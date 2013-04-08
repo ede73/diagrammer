@@ -28,6 +28,7 @@ parser.trace=function(x){console.log("TRACE:"+x);}
       <option value="digraph:twopi">Graphviz - twopi</option>
       <option value="digraph:neato">Graphviz - neato</option>
       <option value="digraph:fdp">Graphviz - fdp</option>
+      <option value="digraph:sfdp">Graphviz - sfdp</option>
       <option value="actdiag">Activity Diagram</option>
       <option value="blockdiag">Block diagram</option>
       <option value="nwdiag">Network diagram</option>
@@ -54,6 +55,7 @@ parser.trace=function(x){console.log("TRACE:"+x);}
 <option value="state_cluster_edge.txt">state_cluster_edge.txt</option>
 <option value="state_dual_node.txt">state_dual_node.txt</option>
 <option value="state_sequence.txt">state_sequence.txt</option>
+<option value="state_sequence2.txt">state_sequence2.txt</option>
     </select>
     <button onClick="visualize(1);return false;">Visualize</button>
     <br/>
@@ -147,7 +149,8 @@ function exampleChanged()
 	var e = document.getElementById("example");
 	var doc=e.options[e.selectedIndex].value;
 $.ajax({
-  url: doc
+  url: doc,
+  cache:false
 }).done(function(data) {
 	document.getElementById("source").value=data;
 	generatorChanged();

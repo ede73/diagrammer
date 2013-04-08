@@ -36,6 +36,9 @@ switch($_REQUEST["visualizer"]){
   case "fdp":
     exec("/usr/local/bin/fdp -Tpng -o result.png post.txt");
   break;
+  case "sfdp":
+    exec("/usr/local/bin/sfdp -Tpng -o result.png post.txt");
+  break;
   case "neato":
     exec("/usr/local/bin/neato -Tpng -o result.png post.txt");
   break;

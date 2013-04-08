@@ -60,11 +60,19 @@ function mscgen(yy){
 		}else if (l.linkType.indexOf("-")!==-1){
 			dash=true;
 		}
+		var swap=false;
 		if (l.linkType.indexOf("<")!==-1 &&
 		    l.linkType.indexOf(">")!==-1){
 			//Broadcast type (<>)
-			lt="->";
-			rightName="*";
+			//hmh..since seqdiag uses a<>a as broadcast and
+			//a<>b as autoreturn, could we do as well?
+			if (ll==lr){
+				lt="->";
+				rightName="*";
+			}else{
+				lt="=>";
+				swap=true;
+			}
 		}else if (l.linkType.indexOf("<")!==-1){
 			var tmp=ll;
 			ll=lr;
@@ -93,10 +101,12 @@ function mscgen(yy){
 			continue;
 		}else{
 			yy.result("ERROR: SHOULD NOT HAPPEN");
-		}
+		}              
 		if (t.trim()!="")
 			t="["+t+"]";
 		yy.result(ll.getName()+lt+rightName+t+";");
+		if (swap)
+			yy.result(lr.getName()+lt+ll.getName()+t+";");
 	}
 	yy.result("}");
 }

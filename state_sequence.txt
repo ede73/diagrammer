@@ -1,5 +1,8 @@
-//unvonventional
-a<>a;broadcast
+//unconventional
+a<>a;A initiated broadcast
+b<>b;B initiated broadcast
+a<>b;Auto return edge
+b<>c;Auto return edge
 a-a;jotain kay tassanain
 a.a;ja aikaa palaa
 //end test

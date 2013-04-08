@@ -49,6 +49,7 @@ parser.trace=function(x){console.log("TRACE:"+x);}
 <option value="state_dual_node.txt">state_dual_node.txt</option>
 <option value="state_sequence.txt">state_sequence.txt</option>
     </select>
+<button onClick="visualize()">Visualize</button>
     <br/>
     <textarea name="source" id="source" rows="50" cols="60"></textarea>
     <textarea name="result" id="result" rows="50" cols="60"></textarea>
@@ -57,6 +58,19 @@ parser.trace=function(x){console.log("TRACE:"+x);}
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <script type="text/javascript">
 result= document.getElementById("result");
+function visualize(){
+	var visualizeUrl="visualize.php";
+	var statelang= document.getElementById("source").value;
+	$.ajax({
+	  type:"POST",
+	  url: visualizeUrl,
+	  data: statelang
+	}).done(function(data) {
+		//document.getElementById("source").value=data;
+		//generatorChanged();
+		alert("Visualized");
+	});
+}
 function parse(textArea){
 	parsingStarted=true;
 	delete (parser.yy.GRAPHROOT);
@@ -83,7 +97,7 @@ $.ajax({
 });
 }
 
-function addTextAreaCallback(textArea, callback, delay) {
+function delayedParsingCallback(textArea, callback, delay) {
     var timer = null;
     var tt=textArea;
     textArea.onkeypress = function() {
@@ -97,7 +111,7 @@ function addTextAreaCallback(textArea, callback, delay) {
     };
     textArea = null;
 }
-addTextAreaCallback( document.getElementById("source"), parse, 250 );
+delayedParsingCallback( document.getElementById("source"), parse, 250 );
 </script>
 </html>
 

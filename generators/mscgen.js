@@ -2,31 +2,24 @@ function mscgen(yy){
 	yy.result("msc {");
 	var r=getGraphRoot(yy);
 	var comma=false;
+	
+	//print out all node declarations FIRST (if any)
 	for(var i in r.OBJECTS){
 		var o=r.OBJECTS[i];
 		if (o instanceof Group){
-			yy.result('  subgraph cluster_'+o.getName()+' {');
-			yy.result(getAttrFmt(o,'label','   label="{0}";'));
-			if (o.getColor()!=undefined){
-				yy.result("    style=filled;");
-				yy.result(getAttrFmt(o,'color','   color="{0}";\n'));
-			}
+			yy.result(' /*'+o.getName()+getAttrFmt(o,'label',' {0}*/'));
 			for(var j in o.OBJECTS){
 				var z=o.OBJECTS[j];
 				var s=	getAttrFmt(z,'color',',color="{0}"')+
-					getShape(shapes.digraph,z.shape,',shape="{0}"')+
 					getAttrFmt(z,'style',',style={0}')+
 					getAttrFmt(z,'label',',label="{0}"');
 				if (s.trim()!="")
 					s="["+s.trim().substring(1)+"]";
-				yy.result((comma?",":":")+"    "+z.getName()+s+';');
+				yy.result((comma?",":"")+"    "+z.getName()+s);
 				comma=true;
 			}
-			yy.result("  }");
 		}else if (o instanceof Node){
 			var s=	getAttrFmt(o,'color',',textbgcolor="{0}"')+
-				getAttrFmt(o,'image',',image="icons{0}"')+
-				getShape(shapes.digraph,o.shape,',shape="{0}"')+
 				getAttrFmt(o,'style',',style={0}')+
 				getAttrFmt(o,'label',',label="{0}"');
 			if (s.trim()!="")
@@ -79,7 +72,7 @@ function mscgen(yy){
 			if (dot)
 				lt=">>";
 			else if (dash)
-				lt="->";
+ 				lt="->";
 			else
 				lt="=>";
 			rightName=lr.getName();

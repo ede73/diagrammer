@@ -61,7 +61,7 @@ parser.trace=function(x){console.log("TRACE:"+x);}
 <script type="text/javascript">
 result= document.getElementById("result");
 var vtimer = null;
-var vdelay=2000;
+var vdelay=1000;
 function reloadImg(id) {
    var obj = document.getElementById(id);
    var src = obj.src;
@@ -154,7 +154,7 @@ function delayedParsingCallback(textArea, callback, delay) {
     };
     textArea = null;
 }
-delayedParsingCallback( document.getElementById("source"), parse, 250 );
+delayedParsingCallback( document.getElementById("source"), parse, 150 );
 </script>
 </html>
 

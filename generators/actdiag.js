@@ -2,12 +2,13 @@
 function actdiag(yy){
 	yy.result("actdiag{\n  default_fontsize = 16");
 	var r=getGraphRoot(yy);
+	/* does not really work..but portrait mode
 	if (r.getDirection()==="portrait"){
 		yy.result("  orientation=portrait");
 	}else{
 		//DEFAULT
 		yy.result("  orientation=landscape");
-	}
+	}*/
 	var s=r.getStart();
 	for(var i in r.OBJECTS){
 		var o=r.OBJECTS[i];

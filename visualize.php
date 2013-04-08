@@ -8,7 +8,7 @@ file_put_contents("/Users/ede/jison/state/post.txt",$postText);
 //header("Content-Type: image/png");
 //passthru("cat state_dot.png");
 
-switch($_REQUEST["generator"]){
+switch($_REQUEST["visualizer"]){
   case "mscgen":
     exec("/usr/local/bin/mscgen -Tpng -o result.png post.txt");
   break;
@@ -20,6 +20,24 @@ switch($_REQUEST["generator"]){
   break;
   case "nwdiag":
     exec("/usr/local/bin/nwdiag -Tpng -a -o result.png post.txt");
+  break;
+  case "seqdiag":
+    exec("/usr/local/bin/seqdiag -Tpng -a -o result.png post.txt");
+  break;
+  case "dot":
+    exec("/usr/local/bin/dot -Tpng -o result.png post.txt");
+  break;
+  case "twopi":
+    exec("/usr/local/bin/twopi -Tpng -o result.png post.txt");
+  break;
+  case "circo":
+    exec("/usr/local/bin/circo -Tpng -o result.png post.txt");
+  break;
+  case "fdp":
+    exec("/usr/local/bin/fdp -Tpng -o result.png post.txt");
+  break;
+  case "neato":
+    exec("/usr/local/bin/neato -Tpng -o result.png post.txt");
   break;
   default:
     exec("/usr/local/bin/dot -Tpng -o result.png post.txt");

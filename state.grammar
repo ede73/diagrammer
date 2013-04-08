@@ -12,6 +12,8 @@ S
 				blockdiag(yy);
 			}else if ("nwdiag" == yy.OUTPUT){
 				nwdiag(yy);
+			}else if ("mscgen" == yy.OUTPUT){
+				mscgen(yy);
 			}else{
 				//rankdir available ONLY IN dot
 				digraph(yy);

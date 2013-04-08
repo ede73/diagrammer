@@ -24,6 +24,9 @@ case "$generator" in
   nwdiag|actdiag|blockdiag)
     node parse.js "$input" $generator |$generator -a -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" 
   ;;
+  mscgen)
+    node parse.js "$input" $generator |$generator -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" 
+  ;;
   neato)
     node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
   ;;

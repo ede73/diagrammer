@@ -53,7 +53,7 @@ parser.trace=function(x){console.log("TRACE:"+x);}
     <br/>
     <textarea name="source" id="source" rows="50" cols="60"></textarea>
     <textarea name="result" id="result" rows="50" cols="60"></textarea>
-    <img id="image" src="result.png"/>
+    <img align="top" id="image" src="result.png"/>
 	</form>
 </body>
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
@@ -73,13 +73,13 @@ function reloadImg(id) {
 function visualize(){
 	//var statelang= document.getElementById("source").value;
 	var statelang= document.getElementById("result").value;
-	var visualizeUrl="visualize.php";
+	var visualizeUrl="visualize.php?generator="+getGenerator();
 	$.ajax({
 	  type:"POST",
 	  async:true,
 	  cache:false,
 	  url: visualizeUrl,
-	data:statelang,
+	  data:statelang,
 	  //data: {body:statelang},
           //contentType: "application/json; charset=utf-8",
           //dataType: "json",
@@ -97,13 +97,17 @@ function visualize(){
     	  }
 	});
 }
+//Get currently selected generator
+function getGenerator(){
+	var e = document.getElementById("generator");
+	return e.options[e.selectedIndex].value;
+}
 function parse(textArea){
 	parsingStarted=true;
 	delete (parser.yy.GRAPHROOT);
 	delete (parser.yy.LINKS);
 	delete (parser.yy.OBJECTS);
-	var e = document.getElementById("generator");
-	parser.yy.OUTPUT=e.options[e.selectedIndex].value;
+	parser.yy.OUTPUT=getGenerator();
 	parser.parse(textArea.value+"\n");
 }
 function generatorChanged()

@@ -1,0 +1,13 @@
+b;browser
+d;database
+w;webserver
+
+
+b>w;GET /index.html
+b<.w
+b>w;POST /blog/comment
+w.>d;INSERT comment
+w<.d
+b<w
+
+

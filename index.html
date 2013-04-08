@@ -49,26 +49,52 @@ parser.trace=function(x){console.log("TRACE:"+x);}
 <option value="state_dual_node.txt">state_dual_node.txt</option>
 <option value="state_sequence.txt">state_sequence.txt</option>
     </select>
-<button onClick="visualize()">Visualize</button>
+    <button onClick="visualize();return false;">Visualize</button>
     <br/>
     <textarea name="source" id="source" rows="50" cols="60"></textarea>
     <textarea name="result" id="result" rows="50" cols="60"></textarea>
-</form>
+    <img id="image" src="result.png"/>
+	</form>
 </body>
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <script type="text/javascript">
 result= document.getElementById("result");
+function reloadImg(id) {
+   var obj = document.getElementById(id);
+   var src = obj.src;
+   var pos = src.indexOf('?');
+   if (pos >= 0) {
+      src = src.substr(0, pos);
+   }
+   var date = new Date();
+   obj.src = src + '?v=' + date.getTime();
+   return false;
+}
 function visualize(){
+	//var statelang= document.getElementById("source").value;
+	var statelang= document.getElementById("result").value;
 	var visualizeUrl="visualize.php";
-	var statelang= document.getElementById("source").value;
 	$.ajax({
 	  type:"POST",
+	  async:true,
+	  cache:false,
 	  url: visualizeUrl,
-	  data: statelang
-	}).done(function(data) {
-		//document.getElementById("source").value=data;
-		//generatorChanged();
-		alert("Visualized");
+	data:statelang,
+	  //data: {body:statelang},
+          //contentType: "application/json; charset=utf-8",
+          //dataType: "json",
+	  success: function(msg) {
+	    //UseReturnedData(msg.d);
+		//alert(msg);
+		document.getElementById("image").setAttribute("src",msg);
+		reloadImg('image');
+    	  },
+    	  error: function(err) {
+        	alert("ERROR: "+JSON.stringify(err));
+	    if (err.status == 200) {
+		    ParseResult(err);
+	   }else { alert('Error:' + err.responseText + '  Status: ' + err.status); }
+    	  }
 	});
 }
 function parse(textArea){

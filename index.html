@@ -61,8 +61,13 @@ parser.trace=function(x){console.log("TRACE:"+x);}
     </select>
     <button onClick="visualize(1);return false;">Visualize</button>
     <br/>
-    <textarea name="source" id="source" rows="40" cols="40"></textarea>
-    <textarea name="result" id="result" rows="40" cols="40"></textarea>
+    <!-- one could have EDITABLE content here...parsed using lexer-->
+    <!--<section id="editable" contenteditable="true">
+    a <text style="color:red">&gt;</text> b,c,d
+    f &lt; g
+    </section>-->
+    <textarea id="editable" rows="40" cols="40"></textarea>
+    <textarea id="result" rows="40" cols="40"></textarea>
     <img align="top" id="image" src="result.png"/>
     <p>Javascript generated(dot only)</p>
     <div id="svg" style="border-width: 2px; border-style: dotted; " align="top"></div>
@@ -136,6 +141,23 @@ function cancelVTimer(){
             window.clearTimeout(vtimer);
         }
 }
+function highlight(tc){
+var s=document.getElementById("editable");
+s.innerHTML=tc
+.replace("->","->>")
+.replace(".>",".>>")
+.replace("<-","<<-")
+.replace("<.","<<.")
+.replace("<","<<")
+.replace(">",">>")
+.replace("->>",'<text id="event">-&gt;</text>')
+.replace(".>>",'<text id="event">.&gt;</text>')
+.replace("<<-",'<text id="event">&lt;-</text>')
+.replace("<<.",'<text id="event">&lt;.</text>')
+.replace(">>",'<text id="event">&gt;</text>')
+.replace("<<",'<text id="event">&lt;</text>')
+;
+}
 function parse(textArea){
 	parsingStarted=true;
 	delete (parser.yy.GRAPHROOT);
@@ -143,6 +165,11 @@ function parse(textArea){
 	delete (parser.yy.OBJECTS);
 	parser.yy.OUTPUT=getGenerator();
 	parser.parse(textArea.value+"\n");
+	/*
+	var tc=textArea.textContent;
+	parser.parse(tc+"\n");
+	highlight(tc);
+	*/
         cancelVTimer();
         vtimer = window.setTimeout( function() {
             vtimer = null;
@@ -151,7 +178,7 @@ function parse(textArea){
 }
 function generatorChanged()
 {
-	parse(document.getElementById("source"));
+	parse(document.getElementById("editable"));
 }
 function exampleChanged()
 {
@@ -162,7 +189,7 @@ $.ajax({
   url: doc,
   cache:false
 }).done(function(data) {
-	document.getElementById("source").value=data;
+	document.getElementById("editable").value=data;
 	generatorChanged();
 });
 }
@@ -181,7 +208,8 @@ function delayedKeypressCallback(obj, callback, delay) {
     };
     obj = null;
 }
-delayedKeypressCallback( document.getElementById("source"), parse, 150 );
+
+delayedKeypressCallback( document.getElementById("editable"), parse, 150 );
 delayedKeypressCallback( document.getElementById("result"), visualize, 250 );
 </script>
 </html>

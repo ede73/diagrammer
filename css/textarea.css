@@ -12,19 +12,20 @@ textarea,#editable
         border: 1px solid #EEEEEE;
         box-shadow: 1px 1px 0 #DDDDDD;
   /*      display: block;*/
-        font-family: 'Marck Script',cursive;
-        font-size: 18px;
-        line-height: 40px;
+  /*      font-family: 'Marck Script',cursive;*/
+        font-family: 'Marck Script';
+        font-size: 14px;
+        line-height: 30px;
         margin: 2% auto;
-        padding: 11px 20px 0 70px;
-        resize: none;
-        width: 530px;
+        padding: 4px 20px 0 30px;
+        /*resize: none;*/
+        width: 300px;
         /*height: 689px;*/
 
         background-image: -moz-linear-gradient(top , transparent, transparent 49px,#E7EFF8 0px), -moz-radial-gradient(4% 50%, circle closest-corner, #f5f5f5, #f5f5f5 39%, transparent 0%), -moz-radial-gradient(3.9% 46% , circle closest-corner, #CCCCCC, #CCCCCC 43.5%, transparent 0%); 
         background-image: -webkit-linear-gradient(top , transparent, transparent 49px,#E7EFF8 0), -webkit-radial-gradient(4% 50%, circle closest-corner, #f5f5f5, #f5f5f5 39%, transparent 0%), -webkit-radial-gradient(3.9% 46%, circle closest-corner, #cccccc, #cccccc 43.5%, transparent 0%);
 
-        -webkit-background-size:  100% 40px;
-        background-size: 100% 40px;
+        -webkit-background-size:  100% 30px;
+        background-size: 100% 30px;
     }
 

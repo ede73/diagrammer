@@ -1,7 +1,17 @@
+- See plain JS http://bramp.github.io/js-sequence-diagrams/ Good Raphael SEQ diag. PLAIN JS
+- http://mdaines.github.io/viz.js/example.html FUCKING AWSOME!! DOTTY!! JS!!!
+- https://github.com/mdaines/viz.js/ emscripten variamt llvm
+- https://github.com/kripken/emscripten
+- http://bl.ocks.org/mbostock/950642
+- (Not JS - http://www.ryandesign.com/canviz/ support dot,neato,fdp,twopi,circo FUCK, it uses graphviz..it is not plain JS)
+- http://philogb.github.io/jit/demos.html
 - Make STACKED containers(ie. pop on exit)
--Check if something could be done for network graphs .. 
+-
+
+Check if something could be done for network graphs .. 
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
+
 - Make LIST (nodelist,grouplist what ever list) actual object, not array kludge
 	- one could then map setLabel to all contained objects in one call
 - Make group RECURSIVE...ie. real container. Now it is shallow

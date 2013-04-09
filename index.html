@@ -1,4 +1,5 @@
 <html>
+<link rel="stylesheet" type="text/css" href="css/textarea.css"/>
 <script type="text/javascript" src="parser.js"></script>
 <script type="text/javascript">
 parser.yy.OUTPUT="digraph";
@@ -56,14 +57,18 @@ parser.trace=function(x){console.log("TRACE:"+x);}
 <option value="state_dual_node.txt">state_dual_node.txt</option>
 <option value="state_sequence.txt">state_sequence.txt</option>
 <option value="state_sequence2.txt">state_sequence2.txt</option>
+<option value="state_ancestry.txt">state_ancestry.txt</option>
     </select>
     <button onClick="visualize(1);return false;">Visualize</button>
     <br/>
     <textarea name="source" id="source" rows="40" cols="40"></textarea>
     <textarea name="result" id="result" rows="40" cols="40"></textarea>
     <img align="top" id="image" src="result.png"/>
-	</form>
+    <p>Javascript generated(dot only)</p>
+    <div id="svg" style="border-width: 2px; border-style: dotted; " align="top"></div>
+  </form>
 </body>
+<script src="http://mdaines.github.io/viz.js/viz.js"></script>
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <script type="text/javascript">
 result= document.getElementById("result");
@@ -82,6 +87,11 @@ function reloadImg(id) {
 }
 function visualize(tt){
 	var statelang= document.getElementById("result").value;
+	if (getVisualizer()=="dot"){
+		document.getElementById('svg').innerHTML=Viz(statelang,'svg');
+	}else{
+		document.getElementById('svg').innerHTML="only for dotty";		
+	}
 	var visualizeUrl="visualize.php?visualizer="+getVisualizer();
 	$.ajax({
 	  type:"POST",
@@ -136,7 +146,7 @@ function parse(textArea){
         cancelVTimer();
         vtimer = window.setTimeout( function() {
             vtimer = null;
-            visualize();
+            visualize(1);
         }, vdelay );
 }
 function generatorChanged()

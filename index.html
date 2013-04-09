@@ -20,6 +20,9 @@ parser.yy.result=function(line){
    result.value=result.value+line+"\n";
 }
 parser.trace=function(x){console.log("TRACE:"+x);}
+  function openImage(imageUrl) { 
+    window.open(imageUrl); 
+  } 
 </script>
 <body>
 <form name="contact" action="">
@@ -59,7 +62,7 @@ parser.trace=function(x){console.log("TRACE:"+x);}
 <option value="state_sequence2.txt">state_sequence2.txt</option>
 <option value="state_ancestry.txt">state_ancestry.txt</option>
     </select>
-    <button onClick="visualize(1);return false;">Visualize</button>
+    <button onclick="visualize(1);return false;">Visualize</button>
     <br/>
     <!-- one could have EDITABLE content here...parsed using lexer-->
     <!--<section id="editable" contenteditable="true">
@@ -68,7 +71,7 @@ parser.trace=function(x){console.log("TRACE:"+x);}
     </section>-->
     <textarea id="editable" rows="40" cols="40"></textarea>
     <textarea id="result" rows="40" cols="40"></textarea>
-    <img align="top" id="image" src="result.png"/>
+      <img align="top" id="image" width=400 src="result.png" onclick="javascript:openImage('result.png');"/>
     <p>Javascript generated(dot only)</p>
     <div id="svg" style="border-width: 2px; border-style: dotted; " align="top"></div>
   </form>

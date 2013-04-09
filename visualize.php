@@ -1,4 +1,11 @@
 <?
+#<!-- HTTP 1.1 -->
+#<meta http-equiv="Cache-Control" content="no-store"/>
+#<!-- HTTP 1.0 -->
+#<meta http-equiv="Pragma" content="no-cache"/>
+#<!-- Prevents caching at the Proxy Server -->
+#<meta http-equiv="Expires" content="0"/>
+
 //print_r($_SERVER);
 $postText = trim(file_get_contents('php://input'));
 file_put_contents("/Users/ede/jison/state/post.txt",$postText);

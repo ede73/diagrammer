@@ -5,9 +5,10 @@
 parser.yy.OUTPUT="digraph";
 VERBOSE=false;
 parser.yy.parseError=function(str,hash){
-	console.log("Parsing error:");
-	console.log(str);
-	console.log(hash);
+	var pe="Parsing error:\n"+
+		str+"\n"+hash;
+	console.log("pe");
+	document.getElementById("error").innerText=pe;
 	cancelVTimer();
 	throw new Error(str);
 };
@@ -20,78 +21,31 @@ parser.yy.result=function(line){
    result.value=result.value+line+"\n";
 }
 parser.trace=function(x){console.log("TRACE:"+x);}
-  function openImage(imageUrl) { 
-    window.open(imageUrl); 
-  } 
-</script>
-<body>
-<form name="contact" action="">
-    <select id="generator" name="generator" onChange="generatorChanged()">
-      <option value="digraph:dot">Graphviz - dot</option>
-      <option value="digraph:circo">Graphviz - circo</option>
-      <option value="digraph:twopi">Graphviz - twopi</option>
-      <option value="digraph:neato">Graphviz - neato</option>
-      <option value="digraph:fdp">Graphviz - fdp</option>
-      <option value="digraph:sfdp">Graphviz - sfdp</option>
-      <option value="actdiag">Activity Diagram</option>
-      <option value="blockdiag">Block diagram</option>
-      <option value="nwdiag">Network diagram</option>
-      <option value="seqdiag">Sequence diagram</option>
-      <option value="mscgen">MSCGEN</option>
-    </select>
-    <select id="example" onChange="exampleChanged()">
-<option value="state.txt">state.txt</option>
-<option value="state10.txt">state10.txt</option>
-<option value="state11.txt">state11.txt</option>
-<option value="state12.txt">state12.txt</option>
-<option value="state13.txt">state13.txt</option>
-<option value="state14.txt">state14.txt</option>
-<option value="state15.txt">state15.txt</option>
-<option value="state16.txt">state16.txt</option>
-<option value="state2.txt">state2.txt</option>
-<option value="state3.txt">state3.txt</option>
-<option value="state4.txt">state4.txt</option>
-<option value="state5.txt">state5.txt</option>
-<option value="state6.txt">state6.txt</option>
-<option value="state7.txt">state7.txt</option>
-<option value="state8.txt">state8.txt</option>
-<option value="state9.txt">state9.txt</option>
-<option value="state_cluster_edge.txt">state_cluster_edge.txt</option>
-<option value="state_dual_node.txt">state_dual_node.txt</option>
-<option value="state_sequence.txt">state_sequence.txt</option>
-<option value="state_sequence2.txt">state_sequence2.txt</option>
-<option value="state_ancestry.txt">state_ancestry.txt</option>
-    </select>
-    <button onclick="visualize(1);return false;">Visualize</button>
-    <br/>
-    <!-- one could have EDITABLE content here...parsed using lexer-->
-    <!--<section id="editable" contenteditable="true">
-    a <text style="color:red">&gt;</text> b,c,d
-    f &lt; g
-    </section>-->
-    <textarea id="editable" rows="40" cols="40"></textarea>
-    <textarea id="result" rows="40" cols="40"></textarea>
-      <img align="top" id="image" width=400 src="result.png" onclick="javascript:openImage('result.png');"/>
-    <p>Javascript generated(dot only)</p>
-    <div id="svg" style="border-width: 2px; border-style: dotted; " align="top"></div>
-  </form>
-</body>
-<script src="http://mdaines.github.io/viz.js/viz.js"></script>
-<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-<script type="text/javascript">
-result= document.getElementById("result");
-var vtimer = null;
-var vdelay=1000;
-function reloadImg(id) {
-   var obj = document.getElementById(id);
-   var src = obj.src;
-   var pos = src.indexOf('?');
-   if (pos >= 0) {
-      src = src.substr(0, pos);
-   }
-   var date = new Date();
-   obj.src = src + '?v=' + date.getTime();
-   return false;
+function openImage(imageUrl) { 
+  window.open(imageUrl+ '?x=' + new Date().getTime()); 
+}
+
+function getSavedGraph(){
+  var data={};
+  if (!localStorage.getItem("graphs")){
+    localStorage.setItem("graphs",JSON.stringify(data));
+    return data;
+  }
+  data=eval("("+localStorage.getItem("graphs")+")");
+  return data;
+}
+function save(){
+  var filename=document.getElementById("filename").value;
+  var editable=document.getElementById("editable").value;
+  var data=getSavedGraph();
+  data.filename=editable;
+  localStorage.setItem("graphs",JSON.stringify(data));
+}
+function load(){
+  var filename=document.getElementById("filename").value;
+  var data=getSavedGraph();
+  if (data.filename)
+  document.getElementById("editable").value=data.filename;
 }
 function visualize(tt){
 	var statelang= document.getElementById("result").value;
@@ -123,6 +77,83 @@ function visualize(tt){
 	   }else { alert('Error:' + err.responseText + '  Status: ' + err.status); }
     	  }
 	});
+}
+</script>
+<body>
+<form name="contact" action="">
+    <label for="generator">Generator</label>
+    <select id="generator" name="generator" onChange="generatorChanged()">
+      <option value="digraph:dot">Graphviz - dot</option>
+      <option value="digraph:circo">Graphviz - circo</option>
+      <option value="digraph:twopi">Graphviz - twopi</option>
+      <option value="digraph:neato">Graphviz - neato</option>
+      <option value="digraph:fdp">Graphviz - fdp</option>
+      <option value="digraph:sfdp">Graphviz - sfdp</option>
+      <option value="actdiag">Activity Diagram</option>
+      <option value="blockdiag">Block diagram</option>
+      <option value="nwdiag">Network diagram</option>
+      <option value="seqdiag">Sequence diagram</option>
+      <option value="mscgen">MSCGEN</option>
+    </select>
+	<label for="example">Examples:</label>
+    <select id="example" name="example" onChange="exampleChanged()">
+<option value="state.txt">state.txt</option>
+<option value="state10.txt">state10.txt</option>
+<option value="state11.txt">state11.txt</option>
+<option value="state12.txt">state12.txt</option>
+<option value="state13.txt">state13.txt</option>
+<option value="state14.txt">state14.txt</option>
+<option value="state15.txt">state15.txt</option>
+<option value="state16.txt">state16.txt</option>
+<option value="state2.txt">state2.txt</option>
+<option value="state3.txt">state3.txt</option>
+<option value="state4.txt">state4.txt</option>
+<option value="state5.txt">state5.txt</option>
+<option value="state6.txt">state6.txt</option>
+<option value="state7.txt">state7.txt</option>
+<option value="state8.txt">state8.txt</option>
+<option value="state9.txt">state9.txt</option>
+<option value="state_cluster_edge.txt">state_cluster_edge.txt</option>
+<option value="state_dual_node.txt">state_dual_node.txt</option>
+<option value="state_sequence.txt">state_sequence.txt</option>
+<option value="state_sequence2.txt">state_sequence2.txt</option>
+<option value="state_ancestry.txt">state_ancestry.txt</option>
+    </select>
+    <label for="filename">Filename</label>
+    <input type="text" id="filename" name="filename" value="output"/>
+    <button onclick="save();return false;">Save</button>
+    <button onclick="load();return false;">Load</button>
+    <button onclick="visualize(1);return false;">Visualize</button>
+    <br/>
+    <!-- one could have EDITABLE content here...parsed using lexer-->
+    <!--<section id="editable" contenteditable="true">
+    a <text style="color:red">&gt;</text> b,c,d
+    f &lt; g
+    </section>-->
+    <div id="error"></div>
+    <textarea id="editable" rows="40" cols="40"></textarea>
+    <textarea id="result" rows="40" cols="40"></textarea>
+      <img align="top" id="image" width=600 src="result.png" onclick="javascript:openImage('result.png');"/>
+    <p>Javascript generated(dot only)</p>
+    <div id="svg" style="border-width: 2px; border-style: dotted; " align="top"></div>
+  </form>
+</body>
+<script src="http://mdaines.github.io/viz.js/viz.js"></script>
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script type="text/javascript">
+result= document.getElementById("result");
+var vtimer = null;
+var vdelay=1000;
+function reloadImg(id) {
+   var obj = document.getElementById(id);
+   var src = obj.src;
+   var pos = src.indexOf('?');
+   if (pos >= 0) {
+      src = src.substr(0, pos);
+   }
+   var date = new Date();
+   obj.src = src + '?v=' + date.getTime();
+   return false;
 }
 //Get currently selected generator
 function getGenerator(){
@@ -162,6 +193,7 @@ s.innerHTML=tc
 ;
 }
 function parse(textArea){
+	document.getElementById("error").innerText="";
 	parsingStarted=true;
 	delete (parser.yy.GRAPHROOT);
 	delete (parser.yy.LINKS);

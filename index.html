@@ -34,18 +34,30 @@ function getSavedGraph(){
   data=eval("("+localStorage.getItem("graphs")+")");
   return data;
 }
+function getSavedFiles(){
+  var t="";
+  for(var k in getSavedGraph()){
+    console.log("Stored file:"+k);
+    t+='<option value="'+k+'">'+k+'</option>';
+  }
+	var e = document.getElementById("saved");
+e.innerHTML=t;
+
+}
 function save(){
   var filename=document.getElementById("filename").value;
   var editable=document.getElementById("editable").value;
   var data=getSavedGraph();
-  data.filename=editable;
-  localStorage.setItem("graphs",JSON.stringify(data));
+  data[filename]=editable;
+  var jd=JSON.stringify(data);
+  localStorage.setItem("graphs",jd);
+  //clipboardData.setData("text",jd);
 }
 function load(){
   var filename=document.getElementById("filename").value;
   var data=getSavedGraph();
-  if (data.filename)
-  document.getElementById("editable").value=data.filename;
+  if (data[filename])
+  document.getElementById("editable").value=data[filename];
 }
 function visualize(tt){
 	var statelang= document.getElementById("result").value;
@@ -123,8 +135,10 @@ function visualize(tt){
     <input type="text" id="filename" name="filename" value="output"/>
     <button onclick="save();return false;">Save</button>
     <button onclick="load();return false;">Load</button>
+    <select id="saved" name="saved" onChange="savedChanged()"></select>
     <button onclick="visualize(1);return false;">Visualize</button>
     <br/>
+
     <!-- one could have EDITABLE content here...parsed using lexer-->
     <!--<section id="editable" contenteditable="true">
     a <text style="color:red">&gt;</text> b,c,d
@@ -141,6 +155,7 @@ function visualize(tt){
 <script src="http://mdaines.github.io/viz.js/viz.js"></script>
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <script type="text/javascript">
+getSavedFiles();
 result= document.getElementById("result");
 var vtimer = null;
 var vdelay=1000;
@@ -214,6 +229,14 @@ function parse(textArea){
 function generatorChanged()
 {
 	parse(document.getElementById("editable"));
+}
+function savedChanged(){
+  //read the example...place to textArea(overwrite)
+  var e = document.getElementById("saved");
+  var doc=e.options[e.selectedIndex].value;
+  var data=getSavedGraph();
+  if (data[doc])
+    document.getElementById("editable").value=data[doc];
 }
 function exampleChanged()
 {

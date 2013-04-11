@@ -13,7 +13,7 @@ function actdiag(yy){
 	for(var i in r.OBJECTS){
 		var o=r.OBJECTS[i];
 		if (o instanceof Group){
-			yy.result('  lane "'+o.getLabel()+'"{');
+			yy.result('  lane "'+o.getName()+'"{');
 			for(var j in o.OBJECTS){
 				var z=o.OBJECTS[j];
 				var s=	getAttrFmt(z,'color',',color="{0}"')+

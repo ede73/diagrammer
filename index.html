@@ -190,6 +190,39 @@ function visualize(tt){
     f &lt; g
     </section>-->
     <div id="error"></div>
+    <style type="text/css">
+        .toolbar ul {
+            float: left;
+        }
+        .toolbar ul li
+        {
+    height: 30px;
+    background-color: rgba(0,0,255,.5);
+    color: white;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 8px;
+    font-family: Helvetica;
+    font-size: 12px;
+    line-height: 30px;
+    display: block;
+            /*border: solid 1px black;*/
+           /* display: table-cell;*/
+            list-style-type: none;
+/*            height: 10px;
+            margin: 10px;
+            vertical-align: middle;
+  */      }
+        </style>
+        <div class="toolbar">
+    <ul class="toolbar">
+    <li onclick="addLine(1);">Colored node with label</li>
+    <li onclick="addLine(2);">A Group</li>
+    <li onclick="addLine(3);">Connected node pair</li>
+    <li onclick="addLine(4);">Many connected nodes</li>
+    <li onclick="addLine(5);">Start node</li>
+    <li onclick="addLine(6);">Shape the reminder</li>
+    </ul></div>
     <textarea id="editable" rows="40" cols="40"></textarea>
     <textarea id="result" rows="40" cols="40"></textarea>
       <img align="top" id="image" width=600 src="result.png" onclick="javascript:openImage('result.png');"/>
@@ -204,6 +237,34 @@ getSavedFiles();
 result= document.getElementById("result");
 var vtimer = null;
 var vdelay=1000;
+function addLine(i){
+var d=document.getElementById("editable");
+switch(i){
+case 1:
+d.value=d.value+"node#ff0000;Label here\n";
+break;
+case 2:
+d.value=d.value+"group NAME;label\n//Nodes\ngroup end\n";
+break;
+case 3:
+d.value=d.value+"x#ff0000>#00ff00y#0000ff\n";
+break;
+case 4:
+d.value=d.value+"a,b,c>d,e,f\n";
+break;
+case 5:
+d.value="start NODENAME\n"+d.value;
+break;
+case 6:
+d.value=d.value+"//shapes: default, invis, record, dots, actor, cloud\n"+
+"//beginpoint,endpoint,condition,database,terminator,input,loopin,loopout\n"+
+"//square,ellipse,diamond,minidiamond,note,mail\n"+
+"shape box\n";
+break;
+}
+	parse(document.getElementById("editable"));
+return false;
+}
 function reloadImg(id) {
    var obj = document.getElementById(id);
    var src = obj.src;

@@ -47,7 +47,7 @@ function digraph(yy){
 			}
 			for(var j in o.OBJECTS){
 				var z=o.OBJECTS[j];
-				var s=	getAttrFmt(z,'color',',color="{0}"')+
+				var s=	getAttrFmt(z,'color',',fillcolor="{0}",style="filled"')+
 					getShape(shapes.digraph,z.shape,',shape="{0}"')+
 					getAttrFmt(z,'style',',style={0}')+
 					/*getAttrFmt(z,'shape',',shape="{0}"')+*/
@@ -80,7 +80,8 @@ function digraph(yy){
 	for(var i in yy.LINKS){
 		var l=yy.LINKS[i];
 		var t=getAttrFmt(l,'label',',label="{0}"')+
-		getAttrFmt(l,'color',',color="{0}"');
+		getAttrFmt(l,'color',',color="{0}"')+
+		getAttrFmt(l,'color',',fontcolor="{0}"');
 		var lt;
 		var lr=l.right;
 		var ll=l.left;

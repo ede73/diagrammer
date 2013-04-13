@@ -222,6 +222,7 @@ function visualize(tt){
     <li onclick="addLine(4);">Many connected nodes</li>
     <li onclick="addLine(5);">Start node</li>
     <li onclick="addLine(6);">Shape the reminder</li>
+    <li onclick="addLine(7);">Add equals</li>
     </ul></div>
     <textarea id="editable" rows="40" cols="40"></textarea>
     <textarea id="result" rows="40" cols="40"></textarea>
@@ -260,6 +261,9 @@ d.value=d.value+"//shapes: default, invis, record, dots, actor, cloud\n"+
 "//beginpoint,endpoint,condition,database,terminator,input,loopin,loopout\n"+
 "//square,ellipse,diamond,minidiamond,note,mail\n"+
 "shape box\n";
+break;
+case 7:
+d.value="equal node1,node2\n"+d.value;
 break;
 }
 	parse(document.getElementById("editable"));

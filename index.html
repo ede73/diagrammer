@@ -73,7 +73,7 @@ function exportGraphs(){
 	  alert("Exported");
 	},
     	  error: function(err) {
-        	alert("ERROR: "+JSON.stringify(err));
+            alert("ERROR: "+JSON.stringify(err));
 	    if (err.status == 200) {
 		    ParseResult(err);
 	   }else { alert('Error:' + err.responseText + '  Status: ' + err.status); }

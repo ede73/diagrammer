@@ -1,5 +1,8 @@
 <?
 //print_r($_SERVER);
 $postText = trim(file_get_contents('php://input'));
-file_put_contents("./localstorage.json",$postText);
+if (FALES===file_put_contents("./localstorage.json",$postText)){
+http_response_code(500);
+return;
+}
 ?>

@@ -104,7 +104,7 @@ function importGraphs(){
 function visualize(tt){
 	var statelang= document.getElementById("result").value;
 	if (getVisualizer()=="dot"){
-		document.getElementById('svg').innerHTML=Viz(statelang,'svg');
+  	        document.getElementById('svg').innerHTML=Viz(statelang,'svg');
 	}else{
 		document.getElementById('svg').innerHTML="only for dotty";		
 	}
@@ -231,7 +231,7 @@ function visualize(tt){
     <div id="svg" style="border-width: 2px; border-style: dotted; " align="top"></div>
   </form>
 </body>
-<script src="http://mdaines.github.io/viz.js/viz.js"></script>
+<script src="js/viz.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type="text/javascript">
 getSavedFiles();

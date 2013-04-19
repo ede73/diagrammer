@@ -345,8 +345,10 @@ function savedChanged(){
   var e = document.getElementById("saved");
   var doc=e.options[e.selectedIndex].value;
   var data=getSavedGraph();
-  if (data[doc])
+  if (data[doc]){
     document.getElementById("editable").value=data[doc];
+    parse(document.getElementById("editable"));
+  }
 }
 function exampleChanged()
 {

@@ -344,9 +344,11 @@ function savedChanged(){
   //read the example...place to textArea(overwrite)
   var e = document.getElementById("saved");
   var doc=e.options[e.selectedIndex].value;
+    var filename=document.getElementById("filename");
   var data=getSavedGraph();
   if (data[doc]){
     document.getElementById("editable").value=data[doc];
+    filename.value=doc;
     parse(document.getElementById("editable"));
   }
 }

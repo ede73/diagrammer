@@ -33,9 +33,11 @@ function getGraphRoot(yy){
 			yy.result=function(str){console.log(str);}
 		}
 		debug("  ...Initialize emptyroot "+yy);
+		yy.CURRENTCONTAINER=new Array();
 	        yy.LINKS=new Array();
         	yy.GRAPHROOT=new GraphRoot();
-		yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
+		//yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
+		enterContainer(yy,yy.GRAPHROOT);
 	}
         return yy.GRAPHROOT;
 }
@@ -54,13 +56,14 @@ function getCurrentContainer(yy){
 	return x;
 }
 //Direct accessor, though graphroot governs!
-function setCurrentContainer(yy,ctr){
+//Return the current container...(the NEW GROUP)
+/*function setCurrentContainer(yy,ctr){
 	if (!(ctr instanceof Group || ctr instanceof GraphRoot)){
 		throw new Error("Trying to set container other than Group/GraphRoot:"+typeof(ctr));
 	}
 	debug(" setCurrentContainer "+yy);
 	return getGraphRoot(yy).setCurrentContainer(ctr);
-}
+}*/
 //LHS=Node(z1)
 function getList(yy,LHS,RHS){
   if (LHS instanceof Node){
@@ -108,6 +111,19 @@ function getNode(yy,name){
 	var n=new Node(name,getGraphRoot(yy).getCurrentShape());
 	return pushObject(yy,n);
 }
+function getCurrentContainer(yy){
+	return yy.CURRENTCONTAINER[yy.CURRENTCONTAINER.length-1];
+}
+function enterContainer(yy,container){
+	yy.CURRENTCONTAINER.push(container);
+	//yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
+	return container;
+}
+//exit a container, next one popped is the new CURRENT
+function exitContainer(yy){
+	return yy.CURRENTCONTAINER.pop();
+}
+
 function getGroup(yy,ref){
 	if (ref instanceof Group) return ref;
 	debug(" NEW GROUP:"+yy+"/"+ref);
@@ -115,7 +131,7 @@ function getGroup(yy,ref){
 	var newGroup=new Group(yy.GROUPIDS++);
 	debug(" push group "+newGroup+" to "+yy);
 	pushObject(yy,newGroup);
-	setCurrentContainer(yy,newGroup);
+	//setCurrentContainer(yy,newGroup);
 	return newGroup;
 }
 //Get a link such that l links to r, return the added LINK or LINKS
@@ -233,8 +249,8 @@ function GraphRoot(){
         this.getVisualizer = function() { return getAttr(this,'visualizer');}
 	this.setCurrentShape=function(value){return setAttr(this,'shape',value);};
         this.getCurrentShape = function() { return getAttr(this,'shape');}
-	this.setCurrentContainer=function(value){return setAttr(this,'container',value);};
-        this.getCurrentContainer = function() { return getAttr(this,'container');}
+	//this.setCurrentContainer=function(value){return setAttr(this,'container',value);};
+        //this.getCurrentContainer = function() { return getAttr(this,'container');}
 	this.setDirection=function(value){return setAttr(this,'direction',value);};
         this.getDirection = function() { return getAttr(this,'direction');}
 	this.setStart=function(value){return setAttr(this,'start',value);};

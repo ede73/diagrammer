@@ -122,17 +122,29 @@ targetName
 	;
 groupTarget
 	: NAME getColorOrVariable LABEL
-		{{$$=getGroup(yy).setName($1).setColor($2).setLabel($3.substring(1));}}
+		{{$$=getGroup(yy).setName($1).setColor($2).setLabel($3.substring(1));
+		enterContainer(yy,$$);
+		}}
 	| getColorOrVariable LABEL
-		{{$$=getGroup(yy).setColor($1).setLabel($2.substring(1));}}
+		{{$$=getGroup(yy).setColor($1).setLabel($2.substring(1));
+		enterContainer(yy,$$);
+		}}
 	| LABEL
-		{{$$=getGroup(yy).setLabel($1.substring(1));}}
+		{{$$=getGroup(yy).setLabel($1.substring(1));
+		enterContainer(yy,$$);
+		}}
 	| NAME LABEL
-		{{$$=getGroup(yy).setName($1).setLabel($2.substring(1));}}
+		{{$$=getGroup(yy).setName($1).setLabel($2.substring(1));
+		enterContainer(yy,$$);
+		}}
 	| NAME getColorOrVariable
-		{{$$=getGroup(yy).setName($1).setColor($2);}}
+		{{$$=getGroup(yy).setName($1).setColor($2);
+		enterContainer(yy,$$);
+		}}
 	| NAME
-		{{$$=getGroup(yy).setName($1);}}
+		{{$$=getGroup(yy).setName($1);
+		enterContainer(yy,$$);
+		}}
 	;
 content
 	: VARIABLE
@@ -170,8 +182,7 @@ content
 		{}
 	| GROUP_END
 		{{
-			//TODO:containers should be stack!
-			$$=setCurrentContainer(yy,getGraphRoot(yy));
+			$$=exitContainer(yy);
 		}}
 	| START NAME
 		//{$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}

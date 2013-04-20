@@ -38,48 +38,43 @@ function digraph(yy) {
         }
     }(r.OBJECTS);
 
-    for (var i in r.OBJECTS) {
-        var o = r.OBJECTS[i];
-        if (o instanceof Group) {
-            debug(JSON.stringify(o));
-            yy.result('  subgraph cluster_' + o.getName() + ' {');
-            yy.result(getAttrFmt(o, 'label', '   label="{0}";'));
-            if (o.getColor() != undefined) {
-                yy.result("    style=filled;");
-                yy.result(getAttrFmt(o, 'color', '   color="{0}";\n'));
+    var processANode = function(o) {
+        var s = getAttrFmt(o, 'color', ',fillcolor="{0}",style="filled"') +
+            getAttrFmt(o, 'image', ',image="icons{0}"') +
+            getShape(shapes.digraph, o.shape, ',shape="{0}"') +
+            getAttrFmt(o, 'style', ',style={0}') +
+        /*getAttrFmt(o,'shape',',shape="{0}"')+*/
+        getAttrFmt(o, 'label', ',label="{0}"');
+        if (s.trim() != "")
+            s = "[" + s.trim().substring(1) + "]";
+        yy.result("  " + o.getName() + s + ';');
+    };
+
+
+    var traverseObjects = function traverseObjects(r) {
+        for (var i in r.OBJECTS) {
+            var o = r.OBJECTS[i];
+            if (o instanceof Group) {
+                //Group name,OBJECTS,get/setEqual,toString
+                var processAGroup = function(o) {
+                    debug(JSON.stringify(o));
+                    yy.result('  subgraph cluster_' + o.getName() + ' {');
+                    yy.result(getAttrFmt(o, 'label', '   label="{0}";'));
+                    if (o.getColor() != undefined) {
+                        yy.result("    style=filled;");
+                        yy.result(getAttrFmt(o, 'color', '   color="{0}";\n'));
+                    }
+                    traverseObjects(o);
+                    yy.result("  }//end of "+o.getName());
+                }(o);
+            } else if (o instanceof Node) {
+                processANode(o);
+            } else {
+                throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
-            for (var j in o.OBJECTS) {
-                var z = o.OBJECTS[j];
-                var s = getAttrFmt(z, 'color', ',fillcolor="{0}",style="filled"') +
-                    getShape(shapes.digraph, z.shape, ',shape="{0}"') +
-                    getAttrFmt(z, 'style', ',style={0}') +
-                /*getAttrFmt(z,'shape',',shape="{0}"')+*/
-                getAttrFmt(z, 'label', ',label="{0}"');
-                if (s.trim() != "")
-                    s = "[" + s.trim().substring(1) + "]";
-                yy.result("    " + z.getName() + s + ';');
-            }
-            yy.result("  }");
-        } else if (o instanceof Node) {
-            var s = getAttrFmt(o, 'color', ',fillcolor="{0}",style="filled"') +
-                getAttrFmt(o, 'image', ',image="icons{0}"') +
-                getShape(shapes.digraph, o.shape, ',shape="{0}"') +
-                getAttrFmt(o, 'style', ',style={0}') +
-            /*getAttrFmt(o,'shape',',shape="{0}"')+*/
-            getAttrFmt(o, 'label', ',label="{0}"');
-            if (s.trim() != "")
-                s = "[" + s.trim().substring(1) + "]";
-            yy.result("  " + o.getName() + s + ';');
-        } else {
-            var s = getAttrFmt(o, 'color', ',color="{0}"') +
-                getShape(shapes.digraph, o.shape, ',shape="{0}"') +
-            /*getAttrFmt(o,'shape',',shape="{0}"')+*/
-            getAttrFmt(o, 'label', ',label="{0}"');
-            if (s.trim() != "")
-                s = "[" + s.trim().substring(1) + "]";
-            yy.result("  " + o.getName() + s + ';');
         }
-    }
+    }(r);
+
     for (var i in yy.LINKS) {
         var l = yy.LINKS[i];
         var t = getAttrFmt(l, 'label', ',label="{0}"') +

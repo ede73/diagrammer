@@ -200,6 +200,10 @@ GraphRoot.prototype=new GraphObject();
 GraphRoot.prototype.constructor=GraphRoot;
 function GraphRoot(){
 	this.OBJECTS=new Array();
+	this.setGenerator=function(value){return setAttr(this,'generator',value);};
+        this.getGenerator = function() { return getAttr(this,'generator');}
+	this.setVisualizer=function(value){return setAttr(this,'visualizer',value);};
+        this.getVisualizer = function() { return getAttr(this,'visualizer');}
 	this.setCurrentShape=function(value){return setAttr(this,'shape',value);};
         this.getCurrentShape = function() { return getAttr(this,'shape');}
 	this.setCurrentContainer=function(value){return setAttr(this,'container',value);};

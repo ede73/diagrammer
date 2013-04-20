@@ -37,6 +37,9 @@ Could make out
 "group end"	return 'GROUP_END';
 "group"		return 'GROUP';
 "start"		return 'START';
+/* hint about visualizer*/
+"generator"	return 'GENERATOR';
+"visualizer"	return 'VISUALIZER';
 "<.>"|"<->"|"<>"|"<-"|"<."|"<"|"->"|".>"|">"|"-"|"."	return 'EVENT';
 {NAME}		return 'NAME';
 {IMAGE}		return 'IMAGE';

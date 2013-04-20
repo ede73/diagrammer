@@ -1,9 +1,12 @@
 function digraph(yy){
 //TODO: See splines control http://www.graphviz.org/doc/info/attrs.html#d:splines
 //TODO: Start note fdp/neato http://www.graphviz.org/doc/info/attrs.html#d:start
+	var r=getGraphRoot(yy);
+	if (r.getVisualizer()){
+		yy.result("/* render:"+r.getVisualizer()+"*/")
+	}
 	yy.result("digraph {");
 	yy.result("  compound=true;");
-	var r=getGraphRoot(yy);
 	if (r.getDirection()==="portrait"){
 		yy.result("  rankdir=LR;");
 	}else{

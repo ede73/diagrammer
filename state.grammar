@@ -6,15 +6,18 @@ S
 	: contents EOF
 		{
 			debug("contents EOF");
-			if ("actdiag" == yy.OUTPUT){
+			var generator=getGraphRoot(yy).getGenerator();
+			if (yy.OUTPUT)
+			  generator=yy.OUTPUT;
+			if ("actdiag" == generator){
 				actdiag(yy);
-			}else if ("blockdiag" == yy.OUTPUT){
+			}else if ("blockdiag" == generator){
 				blockdiag(yy);
-			}else if ("nwdiag" == yy.OUTPUT){
+			}else if ("nwdiag" == generator){
 				nwdiag(yy);
-			}else if ("seqdiag" == yy.OUTPUT){
+			}else if ("seqdiag" == generator){
 				seqdiag(yy);
-			}else if ("mscgen" == yy.OUTPUT){
+			}else if ("mscgen" == generator){
 				mscgen(yy);
 			}else{
 				//rankdir available ONLY IN dot
@@ -137,6 +140,10 @@ content
 		{{throw new Error("Expecting one of the shapes, got ("+$2+")");}}
 	| LANDSCAPE
 		{{$$=getGraphRoot(yy).setDirection("landscape");}}
+	| GENERATOR NAME
+		{{$$=getGraphRoot(yy).setGenerator($2);}}
+	| VISUALIZER NAME
+		{{$$=getGraphRoot(yy).setVisualizer($2);}}
 	| PORTRAIT
 		{{$$=getGraphRoot(yy).setDirection("portrait");}}
 	| COMMENT

@@ -20,9 +20,10 @@ Could make out
 -o odot
 -| tee
 */
+%options flex
 %%
-
 /*{COLORLABEL}	return 'COLORLABEL';*/
+"$("[^)]+")"	return 'VARIABLE';
 {LABEL}		return 'LABEL';
 {SHAPES}	return 'SHAPES';
 {STYLES}	return 'STYLES';

@@ -8,7 +8,7 @@ S
 			debug("contents EOF");
 			var generator=getGraphRoot(yy).getGenerator();
 			if (yy.OUTPUT)
-			  generator=yy.OUTPUT;
+			  generator=yy.OUTPUT
 			if ("actdiag" == generator){
 				actdiag(yy);
 			}else if ("blockdiag" == generator){
@@ -34,11 +34,25 @@ contents
 		{$$ =  $1 + $2;}
 	;
 
+getColorOrVariable
+	: VARIABLE {
+			$$=processVariable(yy,$1);
+	}
+	| COLOR	{$$=$1};
+	
 readNodeAttrs
-	: NAME COLOR{
-		debug("NAME COLOR"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
+	: NAME getColorOrVariable {
+		debug("NAME VARIABLE"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
 		$$=getNode(yy,$1).setColor($2);
 	}
+/*	: NAME VARIABLE{
+		debug("NAME VARIABLE"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
+		$$=getNode(yy,$1).setColor($2);
+	}
+	| NAME COLOR{
+		debug("NAME COLOR"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
+		$$=getNode(yy,$1).setColor($2);
+	}*/
 	| NAME IMAGE
 	{
 		debug("NAME IMAGE"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
@@ -68,12 +82,12 @@ readNodeOrGroup
 			$$=$1;
 		};
 targetName
-	: targetName EVENT COLOR readNodeOrGroup LABEL
+	: targetName EVENT getColorOrVariable readNodeOrGroup LABEL
 		{
 			debug("targetName EVENT COLOR readNode LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3+",S4="+$4);
 			$$=getLink(yy,$2,$1,$4,$5.substring(1),$3).right;
 		}
-	| targetName EVENT COLOR readNodeOrGroup
+	| targetName EVENT getColorOrVariable readNodeOrGroup
 		{
 			debug("targetName EVENT COLOR readNode"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3+",S4="+$4);
 			$$=getLink(yy,$2,$1,$4,undefined,$3).right;
@@ -107,21 +121,25 @@ targetName
 		}
 	;
 groupTarget
-	: NAME COLOR LABEL
+	: NAME getColorOrVariable LABEL
 		{{$$=getGroup(yy).setName($1).setColor($2).setLabel($3.substring(1));}}
-	| COLOR LABEL
+	| getColorOrVariable LABEL
 		{{$$=getGroup(yy).setColor($1).setLabel($2.substring(1));}}
 	| LABEL
 		{{$$=getGroup(yy).setLabel($1.substring(1));}}
 	| NAME LABEL
 		{{$$=getGroup(yy).setName($1).setLabel($2.substring(1));}}
-	| NAME COLOR
+	| NAME getColorOrVariable
 		{{$$=getGroup(yy).setName($1).setColor($2);}}
 	| NAME
 		{{$$=getGroup(yy).setName($1);}}
 	;
 content
-	: SHAPE SHAPES
+	: VARIABLE
+		{{
+			$$=processVariable(yy,$1)
+		}}
+	| SHAPE SHAPES
 		{{
 			if ($2=="default")
 				$$=getGraphRoot(yy).setCurrentShape(undefined);

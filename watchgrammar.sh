@@ -12,7 +12,7 @@ while [ 1 ]; do
   for c in `cat $new $old|sort|uniq -u|cut -d" " -f1`;do	
    rb=1
   done
-  [[ $rb -eq 1 ]] &&  ./makeLexerAndParser.sh
+  [[ $rb -eq 1 ]] &&  ./makeLexerAndParser.sh ; sleep 1
   cp $new $old
   rm -f $new
   sleep 1

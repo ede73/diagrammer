@@ -1,3 +1,30 @@
+function processVariable(yy,variable){
+	//ASSIGN VARIABLE
+	//$(NAME:CONTENT...)
+	// or
+	// refer variable
+	//$(NAME)
+	var vari=variable.slice(2,-1);
+	if (vari.indexOf(":")!==-1){
+		//Assignment
+		var tmp=vari.split(":");
+		debug("GOT assignment "+tmp[0]+"="+tmp[1]);
+		getVariables(yy)[tmp[0]]=tmp[1];
+		return tmp[1];
+	}else{
+		//referral
+		if (!getVariables(yy)[vari]){
+			throw new Error("Variable "+vari+" not defined");
+		}
+		return getVariables(yy)[vari];
+	}
+}
+function getVariables(yy){
+	if (!yy.VARIABLES){
+		yy.VARIABLES={}
+	}
+	return yy.VARIABLES;
+}
 function getGraphRoot(yy){
 	//debug(" getGraphRoot "+yy);
 	if (!yy.GRAPHROOT){

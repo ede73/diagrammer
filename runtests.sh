@@ -28,6 +28,7 @@ test state11.txt
 test state12.txt
 test state_cluster_edge.txt
 test state_dual_node.txt
+test state_innergroups.txt
 done
 
 x=nwdiag

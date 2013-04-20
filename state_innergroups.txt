@@ -1,0 +1,17 @@
+outside1
+group master
+  ma
+  group innermaster1
+    ima1
+  group end
+  group innermaster2
+   ima2
+  group end
+group end
+
+outside2
+
+group other
+ o
+group end
+

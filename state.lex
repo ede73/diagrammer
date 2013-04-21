@@ -28,6 +28,7 @@ Could make out
 {SHAPES}	return 'SHAPES';
 {STYLES}	return 'STYLES';
 \s+		 /* skip WS */
+"("|")" /*skip for now*/
 {COMMENT}	return 'COMMENT';
 {LISTSEP}	return 'LISTSEP';
 {COLOR}		return 'COLOR';

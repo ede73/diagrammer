@@ -1,0 +1,8 @@
+hominoidea>hominidae,hylobatidae
+	hylobatidae>hylobates
+hominidae>ponginae,homininae
+ponginae>pongo
+homininae>hominini,gorillini
+gorillini>gorilla
+hominini>homo,pan
+

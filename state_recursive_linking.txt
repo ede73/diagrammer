@@ -1,0 +1,12 @@
+//Should produce a trail of nodes from a-b
+//to that B has a common link to C and F
+//where as C and F have individual trails
+//from C-E and from F-H
+//Similar construct would be
+//A>B>C,F
+//C>D>E
+//F>G>H
+//But written in below would make it more compact
+//TODO: NOT YET IMPLEMENTED
+a>b>c(>d>e),f(>g>h)
+

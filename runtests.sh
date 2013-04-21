@@ -1,12 +1,17 @@
 test(){
- ./t.sh silent $1 $x
+ echo "Run test $1 using $x"
+ ./t.sh silent $1 $x >/dev/null
  png=${1%.*}_${x}.png
  if [ -f "$png" ]; then
+   if [ ! -f "ref/$x/$png" ]; then
+    cp $png ref/$x/$png    
+   fi
    diff $png ref/$x/$png
    [ $? -ne 0 ] && echo "ERROR: at $1, image $png ref/$x/$png differ" >&2 && open -Fn $png ref/$x/$png && exit 1
  else
    echo "ERROR: Could not produce output $1 as $png is non existent" >&2
    ls -l $png
+   exit 10
  fi
 }
 tests=${1:-dot actdiag blockdiag}
@@ -18,7 +23,7 @@ test state.txt
 test state2.txt
 test state3.txt
 test state4.txt
-test state5.txt
+[[ "$test" != "actdiag" ]] && [[ "$test" != "blockdiag" ]] && test state5.txt
 test state6.txt
 test state7.txt
 test state8.txt

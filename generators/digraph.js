@@ -1,26 +1,36 @@
 function digraph(yy) {
     //TODO: See splines control http://www.graphviz.org/doc/info/attrs.html#d:splines
     //TODO: Start note fdp/neato http://www.graphviz.org/doc/info/attrs.html#d:start
+    var depth=0;
+    function indent(msg){
+    	    if (msg.trim()=="")return "";
+    	    var prefix="";
+    	    for(var i=0;i<depth;i++){
+    	    	    prefix+="  ";
+    	    }
+    	    return prefix+msg;
+    }
     var r = getGraphRoot(yy);
     if (r.getVisualizer()) {
         yy.result("/* render:" + r.getVisualizer() + "*/")
     }
     yy.result("digraph {");
-    yy.result("  compound=true;");
+    depth++;
+    yy.result(indent("compound=true;"));
     if (r.getDirection() === "portrait") {
-        yy.result("  rankdir=LR;");
+        yy.result(indent("rankdir=LR;"));
     } else {
-        yy.result("  rankdir=TD;");
+        yy.result(indent("rankdir=TD;"));
     }
     var s = r.getStart();
     if (s != undefined && s != "") {
         //    {$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-        yy.result("  {rank = same;null} {rank = same; " + s + "} null [shape=plaintext, label=\"\"];\n" + s + "[shape=doublecircle];\nnull->" + s + ";\n");
+        yy.result(indent("//startnode setup\n  {rank = same;null} {rank = same; " + s + "}\n  null [shape=plaintext, label=\"\"];\n  " + s + "[shape=doublecircle];\n  null->" + s + ";\n"));
     }
     if (r.getEqual() != undefined && r.getEqual().length > 0) {
-        yy.result("  {rank=same;");
+        yy.result(indent("{rank=same;"));
         for (var x = 0; x < r.getEqual().length; x++) {
-            yy.result(r.getEqual()[x].getName() + ";");
+            yy.result(indent(r.getEqual()[x].getName() + ";"));
         }
         yy.result("}");
     }
@@ -47,7 +57,7 @@ function digraph(yy) {
         getAttrFmt(o, 'label', ',label="{0}"');
         if (s.trim() != "")
             s = "[" + s.trim().substring(1) + "]";
-        yy.result("  " + o.getName() + s + ';');
+        yy.result(indent( o.getName() + s + ';'));
     };
 
 
@@ -58,14 +68,18 @@ function digraph(yy) {
                 //Group name,OBJECTS,get/setEqual,toString
                 var processAGroup = function(o) {
                     debug(JSON.stringify(o));
-                    yy.result('  subgraph cluster_' + o.getName() + ' {');
-                    yy.result(getAttrFmt(o, 'label', '   label="{0}";'));
-                    if (o.getColor() != undefined) {
-                        yy.result("    style=filled;");
-                        yy.result(getAttrFmt(o, 'color', '   color="{0}";\n'));
+                    yy.result(indent('subgraph cluster_' + o.getName() + ' {'));
+                    depth++;
+                    if (o.getLabel())
+                      yy.result(indent(getAttrFmt(o, 'label', '   label="{0}";')));
+                    if (o.getColor()!==undefined) {
+                        yy.result(indent("style=filled;"));
+                        yy.result(indent(getAttrFmt(o, 'color', '   color="{0}";\n')));
                     }
+                    depth++;
                     traverseObjects(o);
-                    yy.result("  }//end of " + o.getName());
+                    depth--;
+                    yy.result(indent("}//end of " + o.getName()));
                 }(o);
             } else if (o instanceof Node) {
                 processANode(o);
@@ -75,6 +89,7 @@ function digraph(yy) {
         }
     }(r);
 
+    yy.result("//links start");
     for (var i in yy.LINKS) {
         var l = yy.LINKS[i];
         var t = getAttrFmt(l, 'label', ',label="{0}"') +
@@ -84,6 +99,7 @@ function digraph(yy) {
         var lr = l.right;
         var ll = l.left;
 
+        yy.result(indent("//"+lr));
         if (lr instanceof Group) {
             //just pick ONE Node from group and use lhead
             //TODO: Assuming it is Node (if Recursive groups implemented, it could be smthg else)
@@ -98,7 +114,8 @@ function digraph(yy) {
         //For GRAPH all edges are type --
         //but we could SET arrow type if we'd like
         if (t.trim() != "")
-            t = t.trim().substring(1);
+            t = t.trim();
+        if (t.substring(0,1)==",") t=t.substring(1);
         if (l.linkType.indexOf(".") !== -1) {
             t += ' style="dotted" ';
         } else if (l.linkType.indexOf("-") !== -1) {
@@ -122,7 +139,7 @@ function digraph(yy) {
         }
         if (t.trim() != "")
             t = "[" + t + "]";
-        yy.result(ll.getName() + lt + lr.getName() + t + ";");
+        yy.result(indent(ll.getName() + lt + lr.getName() + t + ";"));
     }
     yy.result("}");
 }

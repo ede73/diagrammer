@@ -1,5 +1,5 @@
 #!/bin/sh
-./makeLexerAndParser.sh
+./makeLexerAndParser.sh >/dev/null
 
 silent=0
 if [ "$1" = "silent" ]; then

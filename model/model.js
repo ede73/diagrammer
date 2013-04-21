@@ -118,6 +118,8 @@ function getNode(yy, name) {
 }
 
 function getCurrentContainer(yy) {
+	//no need for value, but runs init if missing
+	getGraphRoot(yy);
     return yy.CURRENTCONTAINER[yy.CURRENTCONTAINER.length - 1];
 }
 
@@ -129,6 +131,8 @@ function enterContainer(yy, container) {
 //exit a container, next one popped is the new CURRENT
 
 function exitContainer(yy) {
+    if (yy.CURRENTCONTAINER.length<=1)
+        throw new Error("INTERNAL ERROR:Trying to exist ROOT container");
     return yy.CURRENTCONTAINER.pop();
 }
 

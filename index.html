@@ -225,6 +225,7 @@ function visualize(tt){
     <li onclick="addLine(5);">Start node</li>
     <li onclick="addLine(6);">Shape the reminder</li>
     <li onclick="addLine(7);">Add equals</li>
+    <li onclick="addLine(8);">Variable color</li>
     </ul></div>
     <textarea id="editable" rows="40" cols="40"></textarea>
     <textarea id="result" rows="40" cols="40"></textarea>
@@ -247,13 +248,18 @@ case 1:
 d.value=d.value+"node#ff0000;Label here\n";
 break;
 case 2:
-d.value=d.value+"group NAME;label\n//Nodes\ngroup end\n";
+d.value=d.value+"group color #7722ee\ngroup NAME;Label the group\n//Nodes\n  group InnerGroup#00ff00;Inner group\n  xy\n  group end\ngroup end\n";
 break;
 case 3:
 d.value=d.value+"x#ff0000>#00ff00y#0000ff\n";
 break;
 case 4:
-d.value=d.value+"a,b,c>d,e,f\n";
+d.value=d.value+
+"a/barcode.png,b/basestation.png,c/battery.png>d/camera.png,e/cpu.png,f/documents.png\n"+
+"a1/harddisk.png,b1/keyboard.png,c1/laptop.png>d1/laser.png,e1/monitor.png,f1/mouse.png\n"+
+"a2/phone.png,b2/printer.png,c2/ram.png>d2/satellite.png,e2/scanner.png,f2/sim.png\n"+
+"u/usbmemory.png>w/wifi.png\n"+
+"a1/actor1.png>a2/actor2.png>a3/actor3.png";
 break;
 case 5:
 d.value="start NODENAME\n"+d.value;
@@ -267,6 +273,8 @@ break;
 case 7:
 d.value="equal node1,node2\n"+d.value;
 break;
+case 8:
+d.value="$(color1:#12ede0)\nclr$(color1)\nclr2$(color1)\n"+d.value;
 }
 	parse(document.getElementById("editable"));
 return false;

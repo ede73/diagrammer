@@ -65,7 +65,7 @@ function digraph(yy) {
                         yy.result(getAttrFmt(o, 'color', '   color="{0}";\n'));
                     }
                     traverseObjects(o);
-                    yy.result("  }//end of "+o.getName());
+                    yy.result("  }//end of " + o.getName());
                 }(o);
             } else if (o instanceof Node) {
                 processANode(o);

@@ -5,16 +5,18 @@
 - http://bl.ocks.org/mbostock/950642
 - (Not JS - http://www.ryandesign.com/canviz/ support dot,neato,fdp,twopi,circo FUCK, it uses graphviz..it is not plain JS)
 - http://philogb.github.io/jit/demos.html
-- Make STACKED containers(ie. pop on exit)
--
+- oMeta!
 
 Check if something could be done for network graphs .. 
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
 
+- Make DEFAULT COLOR for nodes...
+- Change the DEFAULT SHAPE (ie. shape default would become...shape box...OR (see below))
+- !!Make SHAPE be variable (so one can achieve DEFAULT SHAPE by that alone!)
+
 - Make LIST (nodelist,grouplist what ever list) actual object, not array kludge
 	- one could then map setLabel to all contained objects in one call
-- Make group RECURSIVE...ie. real container. Now it is shallow
 - Make EQUAL container property (not it ALWAYS belongs to graphroot, but network diag can have groups inside network..
 	well dotty can have subcluster inside subcluster)
 - Instead of exploding links in GRAMMAR(parser) it could save the link cluster as such and utilize the dotty
@@ -25,16 +27,17 @@ Check if something could be done for network graphs ..
                x -- y [w=5.0,len=3];
        }
 	The generator could then offload it (but that would make generator bit more complex)
-- Pass the actual visualizing engine information to generator as well (dotty can draw directional graphs and accept
-	> and <, but other visualizing engines accept undirected graphs only - graphviz only)
 -------
-(DONE)-Add ability to connect node to graph in dotty (nwdiag does it already) ltail,lhead dotty only
+(DONE) - Make STACKED containers(ie. pop on exit)
+(DONE) - - Pass the actual visualizing engine information to generator as well (dotty can draw directional graphs and accept
+	> and <, but other visualizing engines accept undirected graphs only - graphviz only), in getVisualizer(yy) and getGenerator(yy)
+(DONE)- Make group RECURSIVE...ie. real container. Now it is shallow
+(DONE)- Add ability to connect node to graph in dotty (nwdiag does it already) ltail,lhead dotty only
 (DONE)- RESET default shape (shape default) instead of explicitly adding shape=default that results shape=box to all nodes
 (DONE)- EQUAL (rank same) printed when no declaration, remove it
 (DONE)- replace shape=invis as style=invis
 
-(DONE)
-Implement branching
+(DONE)Implement branching
 
 a>b,c
 is same as 

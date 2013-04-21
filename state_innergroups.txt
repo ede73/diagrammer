@@ -1,14 +1,16 @@
+node color #ff0000
 outside1;Group to node
 outside3;Inner group to node
 group master
   ma
-  group innermaster1
+  group innermaster1#999999
     ima1
   group end 
-  group innermaster2 
+  group innermaster2 #ffaaaa
    ima2
   group end
 group end
+node color #ffff00
 
 outside2;Node to group
 outside4;Node to inner group
@@ -21,3 +23,4 @@ outside2>master
 master>outside1
 innermaster1>outside3
 outside4>innermaster2
+

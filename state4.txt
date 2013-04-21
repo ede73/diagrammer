@@ -1,5 +1,6 @@
 start LR_0
 landscape
+link color #555599 
 shape doublecircle
 
 LR_0 LR_3 LR_4 LR_8

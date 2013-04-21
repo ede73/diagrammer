@@ -11,7 +11,9 @@ Check if something could be done for network graphs ..
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
 
-- Make DEFAULT COLOR for nodes...
+- Combine setDefaultXXXX to setDefault(xxx,) for better versatility and lesser code...
+- OH, make defaults CONTAINER SPECIFIC!! If a default inside a group is visible only within that group! 
+   Meaning setDefault is current container specific setting.. (easy piecey!)
 - Change the DEFAULT SHAPE (ie. shape default would become...shape box...OR (see below))
 - !!Make SHAPE be variable (so one can achieve DEFAULT SHAPE by that alone!)
 
@@ -28,6 +30,9 @@ Check if something could be done for network graphs ..
        }
 	The generator could then offload it (but that would make generator bit more complex)
 -------
+(DONE)- Make DEFAULT COLOR for nodes...
+(DONE)- Make DEFAULT COLOR for groups...
+(DONE)- Make DEFAULT COLOR for links...
 (DONE) - Make STACKED containers(ie. pop on exit)
 (DONE) - - Pass the actual visualizing engine information to generator as well (dotty can draw directional graphs and accept
 	> and <, but other visualizing engines accept undirected graphs only - graphviz only), in getVisualizer(yy) and getGenerator(yy)

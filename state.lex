@@ -31,6 +31,9 @@ Could make out
 "("|")" /*skip for now*/
 {COMMENT}	return 'COMMENT';
 {LISTSEP}	return 'LISTSEP';
+"link color" return 'LINK_COLOR';
+"node color" return 'NODE_COLOR';
+"group color" return 'GROUP_COLOR';
 {COLOR}		return 'COLOR';
 ^("landscape"|"horizontal"|"lr") return 'LANDSCAPE';
 ^("portrait"|"vertical"|"td")	return 'PORTRAIT';

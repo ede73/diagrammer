@@ -114,6 +114,8 @@ function getNode(yy, name) {
     if (search != undefined) return search;
     debug(" Create new node");
     var n = new Node(name, getGraphRoot(yy).getCurrentShape());
+    var nc=getGraphRoot(yy).getDefaultNodeColor();
+    if (nc!==undefined) n.setColor(nc);
     return pushObject(yy, n);
 }
 
@@ -149,6 +151,8 @@ function getGroup(yy, ref) {
     var newGroup = new Group(yy.GROUPIDS++);
     debug(" push group " + newGroup + " to " + yy);
     pushObject(yy, newGroup);
+    var gc=getGraphRoot(yy).getDefaultGroupColor();
+    if (gc!==undefined) newGroup.setColor(gc);
     return newGroup;
 }
 //Get a link such that l links to r, return the added LINK or LINKS
@@ -186,6 +190,8 @@ function getLink(yy, linkType, l, r, label, color) {
         throw new Error("RHS not a Node nor a Group(" + r + ")");
     }
     var l = new Link(linkType, l, r);
+    var lc=getGraphRoot(yy).getDefaultLinkColor();
+    if (lc!==undefined) l.setColor(lc);
     if (label != undefined) l.setLabel(label);
     if (color != undefined) l.setColor(color);
     return addLink(yy, l);
@@ -307,40 +313,56 @@ function GraphRoot() {
     };
     this.getGenerator = function() {
         return getAttr(this, 'generator');
-    }
+    };
     this.setVisualizer = function(value) {
         return setAttr(this, 'visualizer', value);
     };
     this.getVisualizer = function() {
         return getAttr(this, 'visualizer');
-    }
+    };
     this.setCurrentShape = function(value) {
         return setAttr(this, 'shape', value);
     };
     this.getCurrentShape = function() {
         return getAttr(this, 'shape');
-    }
-    //this.setCurrentContainer=function(value){return setAttr(this,'container',value);};
-    //this.getCurrentContainer = function() { return getAttr(this,'container');}
+    };
     this.setDirection = function(value) {
         return setAttr(this, 'direction', value);
     };
     this.getDirection = function() {
         return getAttr(this, 'direction');
-    }
+    };
     this.setStart = function(value) {
         return setAttr(this, 'start', value);
     };
     this.getStart = function() {
         return getAttr(this, 'start');
-    }
+    };
     //Save EQUAL node ranking
     this.setEqual = function(value) {
         return setAttr(this, 'equal', value);
     };
     this.getEqual = function() {
         return getAttr(this, 'equal');
-    }
+    };
+    this.setDefaultNodeColor = function(value) {
+        return setAttr(this, 'nodecolor', value);
+    };
+    this.getDefaultNodeColor = function() {
+        return getAttr(this, 'nodecolor');
+    };
+    this.setDefaultGroupColor = function(value) {2
+        return setAttr(this, 'groupcolor', value);
+    };
+    this.getDefaultGroupColor = function() {
+        return getAttr(this, 'groupcolor');
+    };
+    this.setDefaultLinkColor = function(value) {2
+        return setAttr(this, 'linkcolor', value);
+    };
+    this.getDefaultLinkColor = function() {
+        return getAttr(this, 'linkcolor');
+    };
     this.toString = function() {
         return "GraphRoot";
     };

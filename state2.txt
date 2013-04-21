@@ -1,3 +1,4 @@
+node color #0000ff
 start s
 shape actor
 s#ff0000>#00ff00c#0000ff;#ff00ffconnect,s=red\nlink=green\n this node=blue

@@ -183,6 +183,15 @@ content
 		{{$$=getGraphRoot(yy).setDirection("portrait");}}
 	| COMMENT
 		{{$$="/*"+$1.substring(2)+"*/\n";}}
+	| NODE_COLOR getColorOrVariable{{
+		if ($2=="default") $2=undefined;
+		$$=getGraphRoot(yy).setDefaultNodeColor($2);}}
+	| LINK_COLOR getColorOrVariable{{
+		if ($2=="default") $2=undefined;
+		$$=getGraphRoot(yy).setDefaultLinkColor($2);}}
+	| GROUP_COLOR getColorOrVariable{{
+		if ($2=="default") $2=undefined;
+		$$=getGraphRoot(yy).setDefaultGroupColor($2);}}
 	| GROUP groupTarget
 		{}
 	| GROUP_END

@@ -24,7 +24,7 @@ function blockdiag(yy) {
             yy.result('  group "' + o.getLabel() + '"{');
             yy.result(getAttrFmt(o, 'color', '   color="{0}"'));
             yy.result(getAttrFmt(o, 'label', '   label="{0}"'));
-            if (s.trim() != "")
+            if (s!==undefined && s.trim() != "")
                 s = "[" + s.trim().substring(1) + "]";
             for (var j in o.OBJECTS) {
                 var z = o.OBJECTS[j];

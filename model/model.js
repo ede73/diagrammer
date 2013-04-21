@@ -114,11 +114,41 @@ function getNode(yy, name) {
     if (search != undefined) return search;
     debug(" Create new node");
     var n = new Node(name, getGraphRoot(yy).getCurrentShape());
-    var nc=getGraphRoot(yy).getDefaultNodeColor();
-    if (nc!==undefined) n.setColor(nc);
+    
+    getDefaultAttribute(yy,'nodecolor',function(color){
+    	n.setColor(color);
+    });
     return pushObject(yy, n);
 }
-
+/** 
+ * Get default attribute nodecolor,linkcolor,groupcolor
+ * and bubble upwards if otherwise 'unobtainable'
+ */
+function getDefaultAttribute(yy,attrname,x){
+  //no need for the value, but runs init if missing
+  getGraphRoot(yy);
+  debug("getDefaultAttribute "+attrname);
+  for(var i in yy.CURRENTCONTAINER){
+  	  var ctr=yy.CURRENTCONTAINER[i];
+  	  var a=ctr.getDefault(attrname);
+  	  debug("  traverse getDefaultAttribute "+attrname+" from "+ctr+" as "+a);
+  	  if (a!==undefined){
+  	  	  debug("getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
+  	  	  if (x!==undefined)
+  	  	    x(a);
+  	  	  return a;
+  	  }
+  }
+  var a=getGraphRoot(yy).getDefault(attrname);
+  if (a!==undefined){
+  debug("getDefaultAttribute got from graphroot");
+	  if (x!==undefined)
+		x(a);
+	  return a;
+  }
+  debug("getDefaultAttribute FAILED");
+  return undefined;
+}
 function getCurrentContainer(yy) {
 	//no need for value, but runs init if missing
 	getGraphRoot(yy);
@@ -151,8 +181,10 @@ function getGroup(yy, ref) {
     var newGroup = new Group(yy.GROUPIDS++);
     debug(" push group " + newGroup + " to " + yy);
     pushObject(yy, newGroup);
-    var gc=getGraphRoot(yy).getDefaultGroupColor();
-    if (gc!==undefined) newGroup.setColor(gc);
+    
+    getDefaultAttribute(yy,'groupcolor',function(color){
+    	newGroup.setColor(color);
+    });
     return newGroup;
 }
 //Get a link such that l links to r, return the added LINK or LINKS
@@ -190,8 +222,9 @@ function getLink(yy, linkType, l, r, label, color) {
         throw new Error("RHS not a Node nor a Group(" + r + ")");
     }
     var l = new Link(linkType, l, r);
-    var lc=getGraphRoot(yy).getDefaultLinkColor();
-    if (lc!==undefined) l.setColor(lc);
+    getDefaultAttribute(yy,'linkcolor',function(color){
+    	l.setColor(color);
+    });
     if (label != undefined) l.setLabel(label);
     if (color != undefined) l.setColor(color);
     return addLink(yy, l);
@@ -299,6 +332,18 @@ function Group(name) {
     this.getEqual = function() {
         return getAttr(this, 'equal');
     }
+    /**
+     * Set default nodecolor, groupcolor, linkcolor
+     * Always ask from the currentContainer first
+     */
+    this.setDefault = function(key,value) {
+    	debug("Set group "+key+ " to "+value);
+        return setAttr(this, key, value);
+    };
+    this.getDefault = function(key) {
+    	debug("Get group "+key);
+        return getAttr(this, key);
+    };
     this.toString = function() {
         return "Group(" + this.name + ")";
     };
@@ -345,23 +390,17 @@ function GraphRoot() {
     this.getEqual = function() {
         return getAttr(this, 'equal');
     };
-    this.setDefaultNodeColor = function(value) {
-        return setAttr(this, 'nodecolor', value);
+    /**
+     * Set default nodecolor, groupcolor, linkcolor
+     * Always ask from the currentContainer first
+     */
+    this.setDefault = function(key,value) {
+    	debug("Set ROOT "+key+ " to "+value);
+        return setAttr(this,  key,value);
     };
-    this.getDefaultNodeColor = function() {
-        return getAttr(this, 'nodecolor');
-    };
-    this.setDefaultGroupColor = function(value) {2
-        return setAttr(this, 'groupcolor', value);
-    };
-    this.getDefaultGroupColor = function() {
-        return getAttr(this, 'groupcolor');
-    };
-    this.setDefaultLinkColor = function(value) {2
-        return setAttr(this, 'linkcolor', value);
-    };
-    this.getDefaultLinkColor = function() {
-        return getAttr(this, 'linkcolor');
+    this.getDefault = function(key) {
+    	debug("Get ROOT "+key);
+        return getAttr(this, key);
     };
     this.toString = function() {
         return "GraphRoot";

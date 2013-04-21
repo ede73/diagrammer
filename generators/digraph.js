@@ -10,6 +10,18 @@ function digraph(yy) {
     	    }
     	    return prefix+msg;
     }
+	var processANode = function(o) {
+        var s = getAttrFmt(o, 'color', ',fillcolor="{0}",style="filled"') +
+            getAttrFmt(o, 'image', ',image="icons{0}"') +
+            getShape(shapes.digraph, o.shape, ',shape="{0}"') +
+            getAttrFmt(o, 'style', ',style={0}') +
+        /*getAttrFmt(o,'shape',',shape="{0}"')+*/
+        getAttrFmt(o, 'label', ',label="{0}"');
+        if (s.trim() != "")
+            s = "[" + s.trim().substring(1) + "]";
+        yy.result(indent( o.getName() + s + ';'));
+    };
+    
     var r = getGraphRoot(yy);
     if (r.getVisualizer()) {
         yy.result("/* render:" + r.getVisualizer() + "*/")
@@ -22,11 +34,15 @@ function digraph(yy) {
     } else {
         yy.result(indent("rankdir=TD;"));
     }
+    //This may FORWARD DECLARE a node...which creates problems with coloring
     var s = r.getStart();
     if (s != undefined && s != "") {
+    	var fwd=getNode(yy,s);
+    	processANode(fwd);
         //    {$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
         yy.result(indent("//startnode setup\n  {rank = same;null} {rank = same; " + s + "}\n  null [shape=plaintext, label=\"\"];\n  " + s + "[shape=doublecircle];\n  null->" + s + ";\n"));
     }
+    //This may FORWARD DECLARE a node...which creates problems with coloring
     if (r.getEqual() != undefined && r.getEqual().length > 0) {
         yy.result(indent("{rank=same;"));
         for (var x = 0; x < r.getEqual().length; x++) {
@@ -47,18 +63,6 @@ function digraph(yy) {
             }
         }
     }(r.OBJECTS);
-
-    var processANode = function(o) {
-        var s = getAttrFmt(o, 'color', ',fillcolor="{0}",style="filled"') +
-            getAttrFmt(o, 'image', ',image="icons{0}"') +
-            getShape(shapes.digraph, o.shape, ',shape="{0}"') +
-            getAttrFmt(o, 'style', ',style={0}') +
-        /*getAttrFmt(o,'shape',',shape="{0}"')+*/
-        getAttrFmt(o, 'label', ',label="{0}"');
-        if (s.trim() != "")
-            s = "[" + s.trim().substring(1) + "]";
-        yy.result(indent( o.getName() + s + ';'));
-    };
 
 
     var traverseObjects = function traverseObjects(r) {

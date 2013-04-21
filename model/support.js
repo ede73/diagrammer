@@ -16,7 +16,7 @@ String.prototype.format = function() {
 };
 /* return attribute like prefix="ATTRHERE" with padding at both sides or "" if 0 or undefined */
 function getAttr(cl, attr) {
-    if (cl[attr] == undefined || cl[attr] == 0) return "";
+    if (cl[attr] === undefined || cl[attr] == 0) return undefined;;
     return cl[attr];
 }
 

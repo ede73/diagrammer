@@ -185,13 +185,16 @@ content
 		{{$$="/*"+$1.substring(2)+"*/\n";}}
 	| NODE_COLOR getColorOrVariable{{
 		if ($2=="default") $2=undefined;
-		$$=getGraphRoot(yy).setDefaultNodeColor($2);}}
+		debug("Set NODE_COLOR to "+$2);
+		$$=getCurrentContainer(yy).setDefault('nodecolor',$2);}}
 	| LINK_COLOR getColorOrVariable{{
 		if ($2=="default") $2=undefined;
-		$$=getGraphRoot(yy).setDefaultLinkColor($2);}}
+		debug("Set LINK_COLOR to "+$2);
+		$$=getCurrentContainer(yy).setDefault('linkcolor',$2);}}
 	| GROUP_COLOR getColorOrVariable{{
 		if ($2=="default") $2=undefined;
-		$$=getGraphRoot(yy).setDefaultGroupColor($2);}}
+		debug("Set GROUP_COLOR to "+$2);
+		$$=getCurrentContainer(yy).setDefault('groupcolor',$2);}}
 	| GROUP groupTarget
 		{}
 	| GROUP_END

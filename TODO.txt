@@ -11,9 +11,6 @@ Check if something could be done for network graphs ..
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
 
-- Combine setDefaultXXXX to setDefault(xxx,) for better versatility and lesser code...
-- OH, make defaults CONTAINER SPECIFIC!! If a default inside a group is visible only within that group! 
-   Meaning setDefault is current container specific setting.. (easy piecey!)
 - Change the DEFAULT SHAPE (ie. shape default would become...shape box...OR (see below))
 - !!Make SHAPE be variable (so one can achieve DEFAULT SHAPE by that alone!)
 
@@ -30,6 +27,9 @@ Check if something could be done for network graphs ..
        }
 	The generator could then offload it (but that would make generator bit more complex)
 -------
+(DONE)- OH, make defaults CONTAINER SPECIFIC!! If a default inside a group is visible only within that group! 
+   Meaning setDefault is current container specific setting.. (easy piecey!)
+(DONE) - Combine setDefaultXXXX to setDefault(xxx,) for better versatility and lesser code...
 (DONE)- Make DEFAULT COLOR for nodes...
 (DONE)- Make DEFAULT COLOR for groups...
 (DONE)- Make DEFAULT COLOR for links...

@@ -1,16 +1,17 @@
+group color #bbbbbb
 shape minidiamond
 xstart
 shape minisquare
 end
 
 shape ellipse
-group;process #1
+group#ff0000;process #1
  a0>a1
  a1>a2
  a2>a3
 group end
 
-group;process #2
+group#00ff00;process #2
  b0>b1
  b1>b2
  b2>b3

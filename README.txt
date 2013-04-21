@@ -114,3 +114,60 @@ end note
 --> "Main loop"
 -->(*)
 }
+
+
+
+
+
+
+================== FLOW CHART ======================
+input a,b,c
+
+if;is a>b
+ if;is a>c
+  output;print a
+ else
+  output;print c
+ fi
+else
+ if;is b>c
+  persist;save b
+ else
+  output;print b
+ fi
+fi
+
+end
+
+
+How about this?
+- Commands: input, output, save, load, end, event, decision, chance
+- decision & chance make a new context (and a named node)
+- chance ties to a NAMED decision
+- all commands bind to current context
+- group? Automatically POPS to start context at the end
+- need for break?
+
+input;a,b,c
+
+group a
+decision a;is a>b
+  chance a;yes
+    decision b;is a>c
+      chance b;yes
+        output;print a
+      chance b;no
+	event dd;print c
+  chance a;no
+    decision c;is b>c
+      chance c;yes
+        save;save b
+      chance c;no
+        load;load xxx
+
+group end
+
+group 2
+  d;xxx yyy
+  
+group end

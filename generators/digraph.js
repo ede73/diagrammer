@@ -110,6 +110,13 @@ function digraph(yy) {
                 //But should add already at TOP
             }
         }
+        if (ll instanceof Group) {
+            t += " ltail=cluster_" + ll.getName();
+            ll = ll.OBJECTS[0];
+            if (ll == undefined) {
+            	//Same as above
+            }
+        }
         //TODO:Assuming producing DIGRAPH
         //For GRAPH all edges are type --
         //but we could SET arrow type if we'd like

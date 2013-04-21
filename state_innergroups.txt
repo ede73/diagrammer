@@ -1,4 +1,5 @@
-outside1
+outside1;Group to node
+outside3;Inner group to node
 group master
   ma
   group innermaster1
@@ -9,11 +10,14 @@ group master
   group end
 group end
 
-outside2
-
+outside2;Node to group
+outside4;Node to inner group
 group other
  o
 group end
 
 ma>ima1,ima2>o
 outside2>master     
+master>outside1
+innermaster1>outside3
+outside4>innermaster2

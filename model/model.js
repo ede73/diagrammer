@@ -136,18 +136,30 @@ function exitContainer(yy) {
     return yy.CURRENTCONTAINER.pop();
 }
 
+/**
+ * Create a NEW GROUP if one (ref) does not exist yet
+ * getGroup(yy) => create a new anonymous group
+ * getGroup(yy,GroupRef) => create a new group if GroupRef is not a Group
+ *    or return GroupRef if it is...1
+ */
 function getGroup(yy, ref) {
     if (ref instanceof Group) return ref;
-    debug(" NEW GROUP:" + yy + "/" + ref);
+    debug(" getGroup() NEW GROUP:" + yy + "/" + ref);
     if (yy.GROUPIDS == undefined) yy.GROUPIDS = 1;
     var newGroup = new Group(yy.GROUPIDS++);
     debug(" push group " + newGroup + " to " + yy);
     pushObject(yy, newGroup);
-    //setCurrentContainer(yy,newGroup);
     return newGroup;
 }
 //Get a link such that l links to r, return the added LINK or LINKS
 
+/**
+ * linkType >,<,.>,<.,->,<-,<>
+ * l = left side, Node(xxx) or Group(yyy), or Array(smthg)
+ * r = right side, Node(xxx) or Group(yyy), or Array(smthg)
+ * label = if defined, LABEL for the link
+ * color = if defined, COLOR for the link
+ */
 function getLink(yy, linkType, l, r, label, color) {
     if (l instanceof Array) {
         debug(" getLink called with LHS array");
@@ -167,11 +179,11 @@ function getLink(yy, linkType, l, r, label, color) {
         }
         return lastLink;
     }
-    if (!(l instanceof Node)) {
-        throw new Error("LHS not a Node(" + l + ")");
+    if (!(l instanceof Node) && !(l instanceof Group)) {
+        throw new Error("LHS not a Node nor a Group(" + l + ")");
     }
     if (!(r instanceof Node) && !(r instanceof Group)) {
-        throw new Error("RHS not a Node or Group(" + r + ")");
+        throw new Error("RHS not a Node nor a Group(" + r + ")");
     }
     var l = new Link(linkType, l, r);
     if (label != undefined) l.setLabel(label);

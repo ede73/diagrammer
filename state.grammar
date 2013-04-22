@@ -1,3 +1,5 @@
+/*https://github.com/zaach/jison/wiki/Deviations-From-Flex-Bison*/
+
 %start S
 
 %%
@@ -131,79 +133,79 @@ targetName
 	*/
 groupTarget
 	: NAME getColorOrVariable LABEL
-		{{$$=getGroup(yy).setName($1).setColor($2).setLabel($3.substring(1));
+		{$$=getGroup(yy).setName($1).setColor($2).setLabel($3.substring(1));
 		enterContainer(yy,$$);
-		}}
+		}
 	| getColorOrVariable LABEL
-		{{$$=getGroup(yy).setColor($1).setLabel($2.substring(1));
+		{$$=getGroup(yy).setColor($1).setLabel($2.substring(1));
 		enterContainer(yy,$$);
-		}}
+		}
 	| LABEL
-		{{$$=getGroup(yy).setLabel($1.substring(1));
+		{$$=getGroup(yy).setLabel($1.substring(1));
 		enterContainer(yy,$$);
-		}}
+		}
 	| NAME LABEL
-		{{$$=getGroup(yy).setName($1).setLabel($2.substring(1));
+		{$$=getGroup(yy).setName($1).setLabel($2.substring(1));
 		enterContainer(yy,$$);
-		}}
+		}
 	| NAME getColorOrVariable
-		{{$$=getGroup(yy).setName($1).setColor($2);
+		{$$=getGroup(yy).setName($1).setColor($2);
 		enterContainer(yy,$$);
-		}}
+		}
 	| NAME
-		{{$$=getGroup(yy).setName($1);
+		{$$=getGroup(yy).setName($1);
 		enterContainer(yy,$$);
-		}}
+		}
 	;
 content
 	: VARIABLE
-		{{
+		{
 			$$=processVariable(yy,$1)
-		}}
+		}
 	| SHAPE getShapeOrVariable
-		{{
+		{
 			debug("SHAPE getShapeOrVariablleee");
 			if ($2=="default") $2=undefined;
 			$$=getGraphRoot(yy).setCurrentShape($2);
-		}}
+		}
 	| EQUAL readNodeOrGroup
-		{{
+		{
 			if ($2 instanceof Node){
 				getCurrentContainer(yy).setEqual(new Array($2));
 			}else{
 				getCurrentContainer(yy).setEqual($2);
 			}
-		}}
+		}
 	| SHAPE NAME
-		{{throw new Error("Expecting one of the shapes, got ("+$2+")");}}
+		{throw new Error("Expecting one of the shapes, got ("+$2+")");}
 	| LANDSCAPE
-		{{$$=getGraphRoot(yy).setDirection("landscape");}}
+		{$$=getGraphRoot(yy).setDirection("landscape");}
 	| GENERATOR NAME
-		{{$$=getGraphRoot(yy).setGenerator($2);}}
+		{$$=getGraphRoot(yy).setGenerator($2);}
 	| VISUALIZER NAME
-		{{$$=getGraphRoot(yy).setVisualizer($2);}}
+		{$$=getGraphRoot(yy).setVisualizer($2);}
 	| PORTRAIT
-		{{$$=getGraphRoot(yy).setDirection("portrait");}}
+		{$$=getGraphRoot(yy).setDirection("portrait");}
 	| COMMENT
-		{{$$="/*"+$1.substring(2)+"*/\n";}}
-	| NODE_COLOR getColorOrVariable{{
+		{$$="/*"+$1.substring(2)+"*/\n";}
+	| NODE_COLOR getColorOrVariable{
 		if ($2=="default") $2=undefined;
 		debug("Set NODE_COLOR to "+$2);
-		$$=getCurrentContainer(yy).setDefault('nodecolor',$2);}}
-	| LINK_COLOR getColorOrVariable{{
+		$$=getCurrentContainer(yy).setDefault('nodecolor',$2);}
+	| LINK_COLOR getColorOrVariable{
 		if ($2=="default") $2=undefined;
 		debug("Set LINK_COLOR to "+$2);
-		$$=getCurrentContainer(yy).setDefault('linkcolor',$2);}}
-	| GROUP_COLOR getColorOrVariable{{
+		$$=getCurrentContainer(yy).setDefault('linkcolor',$2);}
+	| GROUP_COLOR getColorOrVariable{
 		if ($2=="default") $2=undefined;
 		debug("Set GROUP_COLOR to "+$2);
-		$$=getCurrentContainer(yy).setDefault('groupcolor',$2);}}
+		$$=getCurrentContainer(yy).setDefault('groupcolor',$2);}
 	| GROUP groupTarget
 		{}
 	| GROUP_END
-		{{
+		{
 			$$=exitContainer(yy);
-		}}
+		}
 	| START NAME
 		//{$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
 		{$$=getGraphRoot(yy).setStart($2);}

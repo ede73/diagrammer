@@ -1,7 +1,6 @@
 /*https://github.com/zaach/jison/wiki/Deviations-From-Flex-Bison*/
-
 %start S
-
+%ebnf
 %%
 
 S
@@ -30,40 +29,29 @@ S
 	;
 
 contents
-	: content
-		{$$ = $1;}
-	| contents content
-		{$$ =  $1 + $2;}
+	: content 			-> $content
+	| contents content 	-> $contents + $content
 	;
 
 getColorOrVariable
-	: VARIABLE {
-			$$=processVariable(yy,$1);
-	}
-	| COLOR	{$$=$1};
+	: VARIABLE 	-> processVariable(yy,$VARIABLE) /*one can use named $VARIABLE or positional $1 args, like former, but latter seem more ...readable*/
+	| COLOR		-> $COLOR
+	;
+	
 getShapeOrVariable
 	: VARIABLE {
-		debug("variablleeee"+$1);
 			$$=processVariable(yy,$1).trim();
 			if (["actor","beginpoint","box","circle","cloud","condition","database","default","diamond","dots","doublecircle","ellipse","endpoint","input","loopin","loopout","mail","minidiamond","minisquare","note","record","roundedbox","square","terminator","loop","loopend","loopstart","rect","rectangle"].indexOf($$)==-1){
 				throw new Error("Must use declared shape");
 			}
 	}
-	| SHAPES	{debug("SHAPES..."+$1);$$=$1};
+	| SHAPES -> $SHAPES
+	;
 readNodeAttrs
-	: NAME getColorOrVariable {
-		debug("NAME VARIABLE"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
-		$$=getNode(yy,$1).setColor($2);
-	}
-	| NAME IMAGE
-	{
-		debug("NAME IMAGE"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
-		$$=getNode(yy,$1).setImage($2);
-	}
-	| NAME {
-		debug("NAME"+" SS="+$$+",S0="+$0+",S1="+$1);
-		$$=getNode(yy,$1);
-	};
+	: NAME getColorOrVariable -> getNode(yy,$NAME).setColor($getColorOrVariable)
+	| NAME IMAGE 	-> getNode(yy,$NAME).setImage($IMAGE)
+	| NAME 			-> getNode(yy,$NAME)
+	;
 
 /*
 NOT BEST...return Node or Group, but some commands allow only Node and some just Group...
@@ -73,27 +61,12 @@ TODO: Fix it
 This means getNode MUST be able to return a Group as well! If name matches!!
 */
 readNodeOrGroup
-	: readNodeOrGroup LISTSEP readNodeAttrs
-		{
-			debug("\readNodeOrGroup LISTSEP readNodeAttrs"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3);
-			$$=getList(yy,$1,$3);
-		}
-	|readNodeAttrs
-		{
-			debug("readNodeAttrs"+" SS="+$$+",S0="+$0+",S1="+$1);
-			$$=$1;
-		};
+	: readNodeOrGroup LISTSEP readNodeAttrs -> getList(yy,$readNodeOrGroup,$readNodeAttrs)
+	| readNodeAttrs -> $readNodeAttrs
+	;
 targetName
-	: targetName EVENT getColorOrVariable readNodeOrGroup LABEL
-		{
-			debug("targetName EVENT getColorOrVariable readNodeOrGroup LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3+",S4="+$4);
-			$$=getLink(yy,$2,$1,$4,$5.substring(1),$3).right;
-		}
-	| targetName EVENT getColorOrVariable readNodeOrGroup
-		{
-			debug("targetName EVENT getColorOrVariable readNodeOrGroup"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3+",S4="+$4);
-			$$=getLink(yy,$2,$1,$4,undefined,$3).right;
-		}
+	: targetName EVENT getColorOrVariable readNodeOrGroup LABEL -> getLink(yy,$2,$1,$4,$5.substring(1),$3).right
+	| targetName EVENT getColorOrVariable readNodeOrGroup -> getLink(yy,$2,$1,$4,undefined,$3).right
 	| targetName EVENT readNodeOrGroup LABEL
 		{
 			debug("targetName EVENT readNodeOrGroup LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3);
@@ -117,13 +90,8 @@ targetName
 				$$=getLink(yy,$2,$1,getNode(yy,$3)).right;
 			}
 		}
-	| readNodeOrGroup LABEL
-		{
-			debug("readNodeOrGroup LABEL"+" SS="+$$+",S0="+$0+",S1="+$1);
-			$$.setLabel($2.substring(1));
-		}
-	| readNodeOrGroup
-		{
+	| readNodeOrGroup LABEL -> $$.setLabel($2.substring(1))
+	| readNodeOrGroup {
 			debug("readNodeOrGroup"+" SS="+$$+",S0="+$0+",S1="+$1);
 		}
 	;
@@ -132,39 +100,18 @@ targetName
 	GROUP [NAME] [COLOR] [LABEL]
 	*/
 groupTarget
-	: NAME getColorOrVariable LABEL
-		{$$=getGroup(yy).setName($1).setColor($2).setLabel($3.substring(1));
-		enterContainer(yy,$$);
-		}
-	| getColorOrVariable LABEL
-		{$$=getGroup(yy).setColor($1).setLabel($2.substring(1));
-		enterContainer(yy,$$);
-		}
-	| LABEL
-		{$$=getGroup(yy).setLabel($1.substring(1));
-		enterContainer(yy,$$);
-		}
-	| NAME LABEL
-		{$$=getGroup(yy).setName($1).setLabel($2.substring(1));
-		enterContainer(yy,$$);
-		}
-	| NAME getColorOrVariable
-		{$$=getGroup(yy).setName($1).setColor($2);
-		enterContainer(yy,$$);
-		}
-	| NAME
-		{$$=getGroup(yy).setName($1);
-		enterContainer(yy,$$);
-		}
+	: NAME getColorOrVariable LABEL -> enterContainer(yy,getGroup(yy).setName($1).setColor($2).setLabel($3.substring(1)))
+	| getColorOrVariable LABEL	-> enterContainer(yy,getGroup(yy).setColor($1).setLabel($2.substring(1)))
+	| LABEL 					-> enterContainer(yy,getGroup(yy).setLabel($1.substring(1)))
+	| NAME LABEL				-> enterContainer(yy,getGroup(yy).setName($1).setLabel($2.substring(1)))
+	| NAME getColorOrVariable	-> enterContainer(yy,getGroup(yy).setName($1).setColor($2))
+	| NAME						-> enterContainer(yy,getGroup(yy).setName($1))
 	;
 content
-	: VARIABLE
-		{
-			$$=processVariable(yy,$1)
-		}
+	: VARIABLE -> processVariable(yy,$1)
 	| SHAPE getShapeOrVariable
 		{
-			debug("SHAPE getShapeOrVariablleee");
+			debug("SHAPE getShapeOrVariablleee ");
 			if ($2=="default") $2=undefined;
 			$$=getGraphRoot(yy).setCurrentShape($2);
 		}
@@ -176,18 +123,12 @@ content
 				getCurrentContainer(yy).setEqual($2);
 			}
 		}
-	| SHAPE NAME
-		{throw new Error("Expecting one of the shapes, got ("+$2+")");}
-	| LANDSCAPE
-		{$$=getGraphRoot(yy).setDirection("landscape");}
-	| GENERATOR NAME
-		{$$=getGraphRoot(yy).setGenerator($2);}
-	| VISUALIZER NAME
-		{$$=getGraphRoot(yy).setVisualizer($2);}
-	| PORTRAIT
-		{$$=getGraphRoot(yy).setDirection("portrait");}
-	| COMMENT
-		{$$="/*"+$1.substring(2)+"*/\n";}
+	| SHAPE NAME {throw new Error("Expecting one of the shapes, got ("+$2+")");}
+	| LANDSCAPE 	-> getGraphRoot(yy).setDirection("landscape")
+	| GENERATOR NAME -> getGraphRoot(yy).setGenerator($NAME)
+	| VISUALIZER NAME -> getGraphRoot(yy).setVisualizer($NAME)
+	| PORTRAIT 	-> getGraphRoot(yy).setDirection("portrait")
+	| COMMENT 	-> "/*"+$COMMENT.substring(2)+"*/\n"
 	| NODE_COLOR getColorOrVariable{
 		if ($2=="default") $2=undefined;
 		debug("Set NODE_COLOR to "+$2);
@@ -200,17 +141,10 @@ content
 		if ($2=="default") $2=undefined;
 		debug("Set GROUP_COLOR to "+$2);
 		$$=getCurrentContainer(yy).setDefault('groupcolor',$2);}
-	| GROUP groupTarget
-		{}
-	| GROUP_END
-		{
-			$$=exitContainer(yy);
-		}
-	| START NAME
-		//{$$="  {rank = same;null}\n  {rank = same; "+$2+"}\n  null [shape=plaintext, label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-		{$$=getGraphRoot(yy).setStart($2);}
-	| targetName
-		{
+	| GROUP groupTarget {}
+	| GROUP_END 	-> exitContainer(yy)
+	| START NAME 	-> getGraphRoot(yy).setStart($NAME)
+	| targetName {
 		//debug("targetName"+" SS="+$$+",S0="+$0+",S1="+$1);
 		//$$=getNode(yy,$1);
 		//$2($$);

@@ -11,9 +11,6 @@ Check if something could be done for network graphs ..
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
 
-- Change the DEFAULT SHAPE (ie. shape default would become...shape box...OR (see below))
-- !!Make SHAPE be variable (so one can achieve DEFAULT SHAPE by that alone!)
-
 - Make LIST (nodelist,grouplist what ever list) actual object, not array kludge
 	- one could then map setLabel to all contained objects in one call
 - Make EQUAL container property (not it ALWAYS belongs to graphroot, but network diag can have groups inside network..
@@ -27,6 +24,8 @@ Check if something could be done for network graphs ..
        }
 	The generator could then offload it (but that would make generator bit more complex)
 -------
+(Not gonna do:shape is implicit already and variable as well)- Change the DEFAULT SHAPE (ie. shape default would become...shape box...OR (see below))
+(DONE) - !!Make SHAPE be variable (so one can achieve DEFAULT SHAPE by that alone!)
 (DONE)- OH, make defaults CONTAINER SPECIFIC!! If a default inside a group is visible only within that group! 
    Meaning setDefault is current container specific setting.. (easy piecey!)
 (DONE) - Combine setDefaultXXXX to setDefault(xxx,) for better versatility and lesser code...

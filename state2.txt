@@ -1,7 +1,7 @@
 node color #0000ff
 group color #33ff33
 start s
-shape actor
+shape $(shape:actor)
 s#ff0000>#00ff00c#0000ff;#ff00ffconnect,s=red\nlink=green\n this node=blue
 shape box
 //a comment is a good thing

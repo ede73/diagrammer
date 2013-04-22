@@ -35,6 +35,7 @@ test state_cluster_edge.txt
 test state_dual_node.txt
 test state_innergroups.txt
 test state_recursive_linking.txt
+test state_images.txt
 done
 
 x=nwdiag

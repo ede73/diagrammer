@@ -39,20 +39,20 @@ getColorOrVariable
 			$$=processVariable(yy,$1);
 	}
 	| COLOR	{$$=$1};
-	
+getShapeOrVariable
+	: VARIABLE {
+		debug("variablleeee"+$1);
+			$$=processVariable(yy,$1).trim();
+			if (["actor","beginpoint","box","circle","cloud","condition","database","default","diamond","dots","doublecircle","ellipse","endpoint","input","loopin","loopout","mail","minidiamond","minisquare","note","record","roundedbox","square","terminator","loop","loopend","loopstart","rect","rectangle"].indexOf($$)==-1){
+				throw new Error("Must use declared shape");
+			}
+	}
+	| SHAPES	{debug("SHAPES..."+$1);$$=$1};
 readNodeAttrs
 	: NAME getColorOrVariable {
 		debug("NAME VARIABLE"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
 		$$=getNode(yy,$1).setColor($2);
 	}
-/*	: NAME VARIABLE{
-		debug("NAME VARIABLE"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
-		$$=getNode(yy,$1).setColor($2);
-	}
-	| NAME COLOR{
-		debug("NAME COLOR"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
-		$$=getNode(yy,$1).setColor($2);
-	}*/
 	| NAME IMAGE
 	{
 		debug("NAME IMAGE"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2);
@@ -125,6 +125,10 @@ targetName
 			debug("readNodeOrGroup"+" SS="+$$+",S0="+$0+",S1="+$1);
 		}
 	;
+	/*
+	A GROUP declaration
+	GROUP [NAME] [COLOR] [LABEL]
+	*/
 groupTarget
 	: NAME getColorOrVariable LABEL
 		{{$$=getGroup(yy).setName($1).setColor($2).setLabel($3.substring(1));
@@ -156,12 +160,11 @@ content
 		{{
 			$$=processVariable(yy,$1)
 		}}
-	| SHAPE SHAPES
+	| SHAPE getShapeOrVariable
 		{{
-			if ($2=="default")
-				$$=getGraphRoot(yy).setCurrentShape(undefined);
-			else
-				$$=getGraphRoot(yy).setCurrentShape($2);
+			debug("SHAPE getShapeOrVariablleee");
+			if ($2=="default") $2=undefined;
+			$$=getGraphRoot(yy).setCurrentShape($2);
 		}}
 	| EQUAL readNodeOrGroup
 		{{
@@ -206,7 +209,7 @@ content
 		{$$=getGraphRoot(yy).setStart($2);}
 	| targetName
 		{
-		debug("targetName"+" SS="+$$+",S0="+$0+",S1="+$1);
+		//debug("targetName"+" SS="+$$+",S0="+$0+",S1="+$1);
 		//$$=getNode(yy,$1);
 		//$2($$);
 		}

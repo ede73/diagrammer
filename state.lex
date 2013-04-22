@@ -1,5 +1,16 @@
 %lex
-/* https://github.com/zaach/jison/wiki/Deviations-From-Flex-Bison */
+/* https://github.com/zaach/jison/wiki/Deviations-From-Flex-Bison 
+Remember:
+non-grouping brackets (?:PATTERN),
+positive lookahead (?=PATTERN) and
+negative lookahead (?!PATTERN).
+Jison adds negative lookahead using /!
+"foo" vs ("foo")
+*/
+%{
+/*could have a codeblock here*/
+%}
+
 D	[0-9]
 C	[A-Za-z_:]
 COLOR	"#"[A-Fa-f0-9]{6}

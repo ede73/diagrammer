@@ -19,7 +19,6 @@ NAME	[A-Za-z][A-Za-z_:0-9]*
 LABEL	";"[^\n]+(\n)
 LISTSEP ","
 IMAGE	"/"[A-Za-z0-9]+".png"
-/*COLORLABEL	";#"[A-Fa-f0-9]{6}[^\n]+(\n)*/
 SHAPES "actor"|"beginpoint"|"box"|"circle"|"cloud"|"condition"|"database"|"default"|"diamond"|"dots"|"doublecircle"|"ellipse"|"endpoint"|"input"|"loopin"|"loopout"|"mail"|"minidiamond"|"minisquare"|"note"|"record"|"roundedbox"|"square"|"terminator"|"loop"|"loopend"|"loopstart"|"rect"|"rectangle"
 STYLES "dotted"|"dashed"|"solid"
 /*

@@ -127,7 +127,7 @@ function getNode(yy, name) {
 function getDefaultAttribute(yy,attrname,x){
   //no need for the value, but runs init if missing
   getGraphRoot(yy);
-  debug("getDefaultAttribute "+attrname);
+  //debug("getDefaultAttribute "+attrname);
   for(var i in yy.CURRENTCONTAINER){
   	  var ctr=yy.CURRENTCONTAINER[i];
   	  var a=ctr.getDefault(attrname);
@@ -146,7 +146,7 @@ function getDefaultAttribute(yy,attrname,x){
 		x(a);
 	  return a;
   }
-  debug("getDefaultAttribute FAILED");
+  //debug("getDefaultAttribute FAILED");
   return undefined;
 }
 function getCurrentContainer(yy) {
@@ -277,9 +277,23 @@ function GraphObject(label) {
     this.getColor = function() {
         return getAttr(this, 'color');
     }
+    this.setTextColor = function(value) {
+        return setAttr(this, 'textcolor', value);
+    };
+    this.getTextColor = function() {
+    	return getAttr(this, 'textcolor');
+    }
     this.label = label;
     this.setLabel = function(value) {
-        return setAttr(this, 'label', value.trim());
+    	value=value.trim();
+    	debug("TEST value("+value+") for color");
+    	var m=value.match(/^(#[A-Fa-f0-9]{6,6})(.*)$/);
+    	debug(m);
+    	if (m!==null && m.length==3){
+    		this.setTextColor(m[1]);
+    		value=m[2].trim();
+    	}
+        return setAttr(this, 'label', value);
     };
     this.getLabel = function() {
         return getAttr(this, 'label');

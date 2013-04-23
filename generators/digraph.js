@@ -13,6 +13,7 @@ function digraph(yy) {
 	var processANode = function(o) {
         var s = getAttrFmt(o, 'color', ',fillcolor="{0}",style="filled"') +
             getAttrFmt(o, 'image', ',image="icons{0}"') +
+            getAttrFmt(o, 'textcolor', ',fontcolor="{0}"')+
             getShape(shapes.digraph, o.shape, ',shape="{0}"') +
             getAttrFmt(o, 'style', ',style={0}') +
         /*getAttrFmt(o,'shape',',shape="{0}"')+*/
@@ -98,12 +99,12 @@ function digraph(yy) {
         var l = yy.LINKS[i];
         var t = getAttrFmt(l, 'label', ',label="{0}"') +
             getAttrFmt(l, 'color', ',color="{0}"') +
-            getAttrFmt(l, 'color', ',fontcolor="{0}"');
+            getAttrFmt(l, ['textcolor','color'] ,'fontcolor="{0}"');
         var lt;
         var lr = l.right;
         var ll = l.left;
 
-        yy.result(indent("//"+lr));
+        //yy.result(indent("//"+lr));
         if (lr instanceof Group) {
             //just pick ONE Node from group and use lhead
             //TODO: Assuming it is Node (if Recursive groups implemented, it could be smthg else)

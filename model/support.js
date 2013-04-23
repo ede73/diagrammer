@@ -21,6 +21,17 @@ function getAttr(cl, attr) {
 }
 
 function getAttrFmt(cl, attr, fmt) {
+	if (attr instanceof Array){
+		for(var i in attr){
+			debug("Get FMT attr "+attr[i]+" from "+cl);
+			var r=getAttrFmt(cl,attr[i],fmt);
+			if (r!=="") {
+				debug("Return "+r);
+				return r;
+			}
+		}
+		return "";
+	}
     if (cl[attr] == undefined || cl[attr] == 0) return "";
     return ' ' + fmt.format(cl[attr]) + ' ';
 }

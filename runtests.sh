@@ -38,6 +38,7 @@ test state_innergroups.txt
 test state_recursive_linking.txt
 test state_images.txt
 test fulltest.txt
+test state_tcp.txt
 done
 
 x=nwdiag

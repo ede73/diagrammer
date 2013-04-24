@@ -35,6 +35,7 @@ Could make out
 %options flex
 %%
 /*{COLORLABEL}	return 'COLORLABEL';*/
+'"'[^"]+'"'	return 'INLINE_STRING';
 "$("[^)]+")"	return 'VARIABLE';
 {LABEL}		return 'LABEL';
 {SHAPES}	return 'SHAPES';

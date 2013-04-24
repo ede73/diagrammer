@@ -20,3 +20,5 @@ dashed a1$(red:#ff0000);#00ff00Red dashed a1 with green link
 dotted green$(red) .>$(green:#00ff00) rounded b1$(green:#0000ff);#ff0000dotted red node named green\nAnd green dotted link to rounded b1 node, that is blue\nRed label
 
 q,w,e>r,t,y>z>x>dotted c,rounded v>dashed n
+
+dashed l>"dashed l links to k" dotted k$(red:#ff0000)>"red k to 'j'"j>h>g>f;last link text

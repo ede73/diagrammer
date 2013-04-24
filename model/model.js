@@ -301,7 +301,7 @@ function GraphObject(label) {
     }
     this.label = label;
     this.setLabel = function(value) {
-    	value=value.trim();
+    	value=value.trim().replace(/"/gi,"");
     	debug("TEST value("+value+") for color");
     	var m=value.match(/^(#[A-Fa-f0-9]{6,6})(.*)$/);
     	debug(m);

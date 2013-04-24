@@ -4,13 +4,10 @@ node color #7473b3
 $(green:#00ff00)
 dashed idle$(red:#ff0000);idle\nevent
 xstart>idle
-idle>$(green)start_forward;on sound
-start_forward>$(green)dotted moving_forward
-moving_forward > stop_motor;on touch
-moving_forward>start_backward;on sound
-start_backward>rounded moving_backward
-moving_backward>$(green)start_forward;on sound
-moving_backward>stop_motor;on touch
+idle>$(green)"on sound"start_forward>$(green)dotted moving_forward > "on touch"stop_motor
+
+moving_forward>"on sound"start_backward>rounded moving_backward>$(green)"on sound"start_forward
+moving_backward>"on touch"stop_motor
 stop_motor>idle
 
 equal start_forward,moving_backward

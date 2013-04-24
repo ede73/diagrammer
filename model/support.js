@@ -23,7 +23,7 @@ function getAttr(cl, attr) {
 function getAttrFmt(cl, attr, fmt) {
 	if (attr instanceof Array){
 		for(var i in attr){
-			debug("Get FMT attr "+attr[i]+" from "+cl);
+			//debug("Get FMT attr "+attr[i]+" from "+cl);
 			var r=getAttrFmt(cl,attr[i],fmt);
 			if (r!=="") {
 				debug("Return "+r);

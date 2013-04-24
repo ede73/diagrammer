@@ -64,7 +64,9 @@ TODO: Fix it
 This means getNode MUST be able to return a Group as well! If name matches!!
 */
 readNodeOrGroup
+    /* readNodeOrGroup cumulates an array of nodes, RHS is latest node */
 	: readNodeOrGroup LISTSEP readNodeAttrs -> getList(yy,$readNodeOrGroup,$readNodeAttrs)
+	| readNodeOrGroup LISTSEP INLINE_STRING readNodeAttrs -> getList(yy,$readNodeOrGroup,$readNodeAttrs,$INLINE_STRING)
 	| readNodeAttrs -> $readNodeAttrs
 	;
 targetName

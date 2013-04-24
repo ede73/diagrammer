@@ -28,18 +28,18 @@ syn_sent.>syn_received;SYN/SYN+ACK\n(simultaneous open)
 listen.>syn_sent;SEND/SYN
 listen.>closed;CLOSE/-
 syn_received.>listen;RST/-
-syn_received.>fin_wait1;CLOSE/FIN
-fin_wait1.>closing;FIN/ACK
+syn_received.>"CLOSE/FIN"fin_wait1
+	.>"FIN/ACK"closing
 fin_wait1.>time_wait;FIN+ACK/ACK
 closing.>time_wait
 
 // client / receiver path
-closed>$(red)syn_sent;CONNECT/SYN(1/3 of 3w/hs)
-syn_sent>$(red)established;SYN+ACK/ACK(3/3 of 3w/hs)
-established>$(red)fin_wait1;CLOSE/FIN
-fin_wait1>$(red)fin_wait2;ACK/-
-fin_wait2>$(red)time_wait;FIN/ACK
-time_wait>$(red)closed_end;Timeout
+closed>$(red)"CONNECT/SYN(1/3 of 3w/hs)"syn_sent
+	>$(red)"SYN+ACK/ACK(3/3 of 3w/hs)"established
+	>$(red)"CLOSE/FIN"fin_wait1
+	>$(red)"ACK/-"fin_wait2
+	>$(red)"FIN/ACK"time_wait
+	>$(red)closed_end;Timeout
 
 // server / sender path
 closed>$(blue)"LISTEN/-"listen

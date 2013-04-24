@@ -70,17 +70,21 @@ function getCurrentContainer(yy) {
 	return getGraphRoot(yy).setCurrentContainer(ctr);
 }*/
 //LHS=Node(z1)
-function getList(yy, LHS, RHS) {
+/**
+* create an array, push LHS,RHS nodes there and return the arrray
+* As long as processing the list nodes added to array..
+*/
+function getList(yy, LHS, RHS,rhsLinkLabel) {
     if (LHS instanceof Node) {
         debug(" getList(" + LHS + "," + RHS + ")");
         var x = new Array();
         x.push(LHS);
-        x.push(getNode(yy, RHS));
+        x.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
         return x;
     }
     debug(" getList([" + LHS + "]," + RHS);
     //LHS not a node..
-    LHS.push(getNode(yy, RHS));
+    LHS.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
     return LHS;
 }
 /**
@@ -144,9 +148,9 @@ function getDefaultAttribute(yy,attrname,x){
   for(var i in yy.CURRENTCONTAINER){
   	  var ctr=yy.CURRENTCONTAINER[i];
   	  var a=ctr.getDefault(attrname);
-  	  debug("  traverse getDefaultAttribute "+attrname+" from "+ctr+" as "+a);
+  	  //debug("  traverse getDefaultAttribute "+attrname+" from "+ctr+" as "+a);
   	  if (a!==undefined){
-  	  	  debug("getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
+  	  	  //debug("getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
   	  	  if (x!==undefined)
   	  	    x(a);
   	  	  return a;
@@ -242,6 +246,7 @@ function getLink(yy, linkType, l, r, label, color) {
     	l.setTextColor(color);
     });
     if (label != undefined) l.setLabel(label);
+    if (r instanceof Node && r.getLinkLabel()!=undefined) l.setLabel(r.getLinkLabel())
     if (color != undefined) l.setColor(color);
     return addLink(yy, l);
 }
@@ -302,9 +307,9 @@ function GraphObject(label) {
     this.label = label;
     this.setLabel = function(value) {
     	value=value.trim().replace(/"/gi,"");
-    	debug("TEST value("+value+") for color");
+    	debug("  TEST value("+value+") for color");
     	var m=value.match(/^(#[A-Fa-f0-9]{6,6})(.*)$/);
-    	debug(m);
+    	//debug(m);
     	if (m!==null && m.length==3){
     		this.setTextColor(m[1]);
     		value=m[2].trim();
@@ -332,6 +337,13 @@ function Node(name, shape) {
     };
     this.getShape = function() {
         return getAttr(this, 'shape');
+    }
+    //temporary for RHS list array!!
+    this.setLinkLabel = function(value) {
+        return setAttr(this, 'linklabel', value);
+    };
+    this.getLinkLabel = function() {
+        return getAttr(this, 'linklabel');
     }
     this.setStyle = function(value) {
         return setAttr(this, 'style', value);
@@ -429,7 +441,7 @@ function GraphRoot() {
         return setAttr(this,  key,value);
     };
     this.getDefault = function(key) {
-    	debug("Get ROOT "+key);
+    	//debug("Get ROOT "+key);
         return getAttr(this, key);
     };
     this.toString = function() {

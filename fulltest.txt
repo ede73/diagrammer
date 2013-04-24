@@ -1,0 +1,22 @@
+// predeclare nodes
+solid a;dotted
+solid b;dashed
+solid c;solid
+solid d;bold
+solid e;rounded
+solid f;diagonals
+solid g;invis
+
+// redeclare 
+dotted a
+dashed b
+solid c
+bold d
+rounded e
+diagonals f
+invis g
+
+dashed a1$(red:#ff0000);#00ff00Red dashed a1 with green link
+dotted green$(red) .>$(green:#00ff00) rounded b1$(green:#0000ff);#ff0000dotted red node named green\nAnd green dotted link to rounded b1 node, that is blue\nRed label
+
+q,w,e>r,t,y>z>x>dotted c,rounded v>dashed n

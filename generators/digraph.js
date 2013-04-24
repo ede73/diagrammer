@@ -11,13 +11,17 @@ function digraph(yy) {
     	    return prefix+msg;
     }
 	var processANode = function(o) {
-        var s = getAttrFmt(o, 'color', ',fillcolor="{0}",style="filled"') +
+		var fillColor=getAttrFmt(o, 'color', ',fillcolor="{0}"');
+		var filledStyle=getAttrFmt(o,'color','filled').trim();
+		var styleStyle=getAttrFmt(o, 'style', '{0}').trim();
+		if (styleStyle!="" && filledStyle!="") filledStyle=filledStyle+",";
+		var fillAndStyle=getAttrFmt(o,['color','style'],
+				fillColor+',style="'+filledStyle+styleStyle+'"');
+        var s = fillAndStyle+
             getAttrFmt(o, 'image', ',image="icons{0}"') +
             getAttrFmt(o, 'textcolor', ',fontcolor="{0}"')+
             getShape(shapes.digraph, o.shape, ',shape="{0}"') +
-            getAttrFmt(o, 'style', ',style={0}') +
-        /*getAttrFmt(o,'shape',',shape="{0}"')+*/
-        getAttrFmt(o, 'label', ',label="{0}"');
+            getAttrFmt(o, 'label', ',label="{0}"');
         if (s.trim() != "")
             s = "[" + s.trim().substring(1) + "]";
         yy.result(indent( o.getName() + s + ';'));

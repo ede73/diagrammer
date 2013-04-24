@@ -5,20 +5,17 @@ shape square end
 shape ellipse
 
 group;process222
-
- a0>a1>a2>a3
+ a0.>a1->a2<>a3
 group end
 
 group;process 2
-
- b0>#ff0000b1>b2>#00ff00b3;b2 b3 link
-
+ b0>#ff0000b1>b2>#00ff00b3;#ff0000b2 b3 link
 group end
 
 xstart>a0>b0
 a1>b3;a1 b2 link comment
 
-b2>a3>a0
+dashed b2> solid a3> rounded a0
 a3>end
-b3>end
+invis b3>end
 

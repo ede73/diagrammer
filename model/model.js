@@ -87,10 +87,18 @@ function getList(yy, LHS, RHS) {
 See readNodeOrGroup in grammar
 
 Must be able to return Group as wlel..if NAME matches...
+
+STYLE will always be updated on last occurance (ie. 
+dashed a1
+
+dotted a1>b1 
+
+node a1 will be dotted instead of being dashed
 */
-function getNode(yy, name) {
+function getNode(yy, name,style) {
     debug(" getNode " + name);
     if (name instanceof Node) {
+        if (style) name.setStyle(style);
         return name;
     }
     if (name instanceof Array) {
@@ -102,6 +110,7 @@ function getNode(yy, name) {
         for (var i in container.OBJECTS) {
             var o = container.OBJECTS[i];
             if (o instanceof Node && o.getName() == name) {
+                if (style) o.setStyle(style);
                 return o;
             }
             if (o instanceof Group) {
@@ -114,9 +123,13 @@ function getNode(yy, name) {
     if (search != undefined) return search;
     debug(" Create new node");
     var n = new Node(name, getGraphRoot(yy).getCurrentShape());
+    if (style) n.setStyle(style);
     
     getDefaultAttribute(yy,'nodecolor',function(color){
     	n.setColor(color);
+    });
+    getDefaultAttribute(yy,'nodetextcolor',function(color){
+    	n.setTextColor(color);
     });
     return pushObject(yy, n);
 }
@@ -224,6 +237,9 @@ function getLink(yy, linkType, l, r, label, color) {
     var l = new Link(linkType, l, r);
     getDefaultAttribute(yy,'linkcolor',function(color){
     	l.setColor(color);
+    });
+    getDefaultAttribute(yy,'linktextcolor',function(color){
+    	l.setTextColor(color);
     });
     if (label != undefined) l.setLabel(label);
     if (color != undefined) l.setColor(color);

@@ -11,6 +11,21 @@ Check if something could be done for network graphs ..
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
 
+- Investigate following (graphviz) features for others as well:
+	bgcolor="#00ff00" for whole graph background
+	packmode? did not get to work
+	pagedir="BL", "BR", "TL", "TR", "RB", "RT", "LB", "LT"
+	colorList red:blue(depends on style/gradientangle) red;0.3:blue;0.7
+- Add node STYLES:  solid,dashed,dotted,bold,rounded,diagonals,filled,striped,wedged
+   solid x > dashed masa;link here
+   solid x#ff0000>$(link)rounded targetnode;#fffffflink label
+   Also could target GROUPs as well!!
+   Perhaps the EVENTs could have same styles (instead of compressed form >, .> and ->)
+   nah...they have solid,dashed,dotted,bold. 
+   And could add invis
+   x[style="invis"]
+   Wedged style required colorList support...
+   
 - Make LIST (nodelist,grouplist what ever list) actual object, not array kludge
 	- one could then map setLabel to all contained objects in one call
 - Make EQUAL container property (not it ALWAYS belongs to graphroot, but network diag can have groups inside network..

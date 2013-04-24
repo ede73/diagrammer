@@ -48,9 +48,12 @@ getShapeOrVariable
 	| SHAPES -> $SHAPES
 	;
 readNodeAttrs
-	: NAME getColorOrVariable -> getNode(yy,$NAME).setColor($getColorOrVariable)
-	| NAME IMAGE 	-> getNode(yy,$NAME).setImage($IMAGE)
-	| NAME 			-> getNode(yy,$NAME)
+	: STYLES NAME getColorOrVariable -> getNode(yy,$NAME,$STYLES).setColor($getColorOrVariable)
+	| STYLES NAME IMAGE 			-> getNode(yy,$NAME,$STYLES).setImage($IMAGE)
+	| STYLES NAME 				-> getNode(yy,$NAME,$STYLES)
+	| NAME getColorOrVariable 	-> getNode(yy,$NAME).setColor($getColorOrVariable)
+	| NAME IMAGE 				-> getNode(yy,$NAME).setImage($IMAGE)
+	| NAME 						-> getNode(yy,$NAME)
 	;
 
 /*
@@ -131,15 +134,18 @@ content
 	| COMMENT 	-> "/*"+$COMMENT.substring(2)+"*/\n"
 	| NODE_COLOR getColorOrVariable{
 		if ($2=="default") $2=undefined;
-		debug("Set NODE_COLOR to "+$2);
 		$$=getCurrentContainer(yy).setDefault('nodecolor',$2);}
+	| NODETEXT_COLOR getColorOrVariable{
+		if ($2=="default") $2=undefined;
+		$$=getCurrentContainer(yy).setDefault('nodetextcolor',$2);}
 	| LINK_COLOR getColorOrVariable{
 		if ($2=="default") $2=undefined;
-		debug("Set LINK_COLOR to "+$2);
 		$$=getCurrentContainer(yy).setDefault('linkcolor',$2);}
+	| LINKTEXT_COLOR getColorOrVariable{
+		if ($2=="default") $2=undefined;
+		$$=getCurrentContainer(yy).setDefault('linktextcolor',$2);}
 	| GROUP_COLOR getColorOrVariable{
 		if ($2=="default") $2=undefined;
-		debug("Set GROUP_COLOR to "+$2);
 		$$=getCurrentContainer(yy).setDefault('groupcolor',$2);}
 	| GROUP groupTarget {}
 	| GROUP_END 	-> exitContainer(yy)

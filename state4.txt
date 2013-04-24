@@ -1,6 +1,8 @@
 start LR_0
 landscape
+node textcolor#00aa00
 link color #555599 
+link text color #ff0000
 shape doublecircle
 
 LR_0 LR_3 LR_4 LR_8

@@ -2,13 +2,13 @@ start xstart
 node color #7473b3
 
 $(green:#00ff00)
-idle$(red:#ff0000);idle\nevent
+dashed idle$(red:#ff0000);idle\nevent
 xstart>idle
 idle>$(green)start_forward;on sound
-start_forward>$(green)moving_forward
+start_forward>$(green)dotted moving_forward
 moving_forward > stop_motor;on touch
 moving_forward>start_backward;on sound
-start_backward>moving_backward
+start_backward>rounded moving_backward
 moving_backward>$(green)start_forward;on sound
 moving_backward>stop_motor;on touch
 stop_motor>idle

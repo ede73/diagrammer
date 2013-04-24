@@ -20,7 +20,9 @@ LABEL	";"[^\n]+(\n)
 LISTSEP ","
 IMAGE	"/"[A-Za-z0-9]+".png"
 SHAPES "actor"|"beginpoint"|"box"|"circle"|"cloud"|"condition"|"database"|"default"|"diamond"|"dots"|"doublecircle"|"ellipse"|"endpoint"|"input"|"loopin"|"loopout"|"mail"|"minidiamond"|"minisquare"|"note"|"record"|"roundedbox"|"square"|"terminator"|"loop"|"loopend"|"loopstart"|"rect"|"rectangle"
-STYLES "dotted"|"dashed"|"solid"
+STYLES "dotted"|"dashed"|"solid"|"bold"|"rounded"|"diagonals"|"invis"
+/*wedged,striped..filled...*/
+
 /*
 Could make out
 -> normal
@@ -42,7 +44,9 @@ Could make out
 {COMMENT}	return 'COMMENT';
 {LISTSEP}	return 'LISTSEP';
 "link color" return 'LINK_COLOR';
+"link textcolor"|"link text color" return 'LINKTEXT_COLOR';
 "node color" return 'NODE_COLOR';
+"node textcolor"|"node text color" return 'NODETEXT_COLOR';
 "group color" return 'GROUP_COLOR';
 {COLOR}		return 'COLOR';
 ^("landscape"|"horizontal"|"lr") return 'LANDSCAPE';

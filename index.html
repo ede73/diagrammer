@@ -104,7 +104,10 @@ function importGraphs(){
 function visualize(tt){
 	var statelang= document.getElementById("result").value;
 	if (getVisualizer()=="dot"){
+		try{
   	        document.getElementById('svg').innerHTML=Viz(statelang,'svg');
+		}catch(err){
+		}
 	}else{
 		document.getElementById('svg').innerHTML="only for dotty";		
 	}

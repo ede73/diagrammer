@@ -42,10 +42,10 @@ fin_wait2>$(red)time_wait;FIN/ACK
 time_wait>$(red)closed_end;Timeout
 
 // server / sender path
-closed>$(blue)listen;LISTEN/-
-listen>$(blue)syn_received;SYN/SYN+ACK(2/3 of 3w/hs)
-syn_received>$(blue)established;ACK/-
-established>$(blue)close_wait;FIN/ACK
-close_wait>$(blue)last_ack;CLOSE/FIN
-last_ack>$(blue)closed_end
+closed>$(blue)"LISTEN/-"listen
+	>$(blue)"SYN/SYN+ACK(2/3 of 3w/hs)"syn_received
+	>$(blue)"ACK/-"established
+	>$(blue)"FIN/ACK"close_wait
+	>$(blue)"CLOSE/FIN"last_ack
+	>$(blue)closed_end
 

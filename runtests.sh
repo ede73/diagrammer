@@ -1,6 +1,7 @@
+./makeLexerAndParser.sh >/dev/null
 test(){
  echo "Run test $1 using $x"
- ./t.sh silent $1 $x >/dev/null
+ ./t.sh skipparsermake silent $1 $x >/dev/null
  png=${1%.*}_${x}.png
  if [ -f "$png" ]; then
    if [ ! -f "ref/$x/$png" ]; then

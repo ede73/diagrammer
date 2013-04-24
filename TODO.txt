@@ -11,6 +11,7 @@ Check if something could be done for network graphs ..
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
 
+- make landscape/portrait be container properties(blockdiag support, dotty not)
 - Investigate following (graphviz) features for others as well:
 	bgcolor="#00ff00" for whole graph background
 	packmode? did not get to work

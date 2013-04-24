@@ -36,7 +36,7 @@ beginScanning(){
     done
     cp $new $old
     rm -f $new
-    sleep 1
+    #sleep 1
   done
 }
 

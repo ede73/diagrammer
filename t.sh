@@ -1,5 +1,9 @@
 #!/bin/sh
-./makeLexerAndParser.sh >/dev/null
+if [ "${1:-skipparsermake}" == "skipparsermake" ]; then
+shift
+else
+  ./makeLexerAndParser.sh >/dev/null
+fi
 
 silent=0
 if [ "$1" = "silent" ]; then

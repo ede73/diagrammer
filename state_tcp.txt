@@ -1,0 +1,51 @@
+$(red:#ff0000)
+$(blue:#0000ff)
+$(yellow:#ffff00)
+ 
+shape box
+closed$(red);CLOSED
+closed_end$(red);closed\nBack to start
+listen$(yellow);LISTEN
+syn_received$(grey:#888888);SYN\nRECEIVED
+syn_sent$(grey);SYN\nSENT
+established#00ff00;ESTABLISHED\ndata xchange occurs
+
+group PassiveClose$(lightblue:#afeeee);Passive CLOSE
+  close_wait$(yellow);CLOSE WAIT
+  last_ack$(yellow);LAST ACK
+group end
+
+group ActiveClose$(lightblue);Active CLOSE
+  fin_wait1$(yellow);FIN WAIT 1
+  closing$(yellow);CLOSING
+  fin_wait2$(yellow);FIN WAIT 2
+  time_wait$(yellow);TIME WAIT
+group end
+
+//unusual event
+syn_sent.>closed;CLOSE/-
+syn_sent.>syn_received;SYN/SYN+ACK\n(simultaneous open)
+listen.>syn_sent;SEND/SYN
+listen.>closed;CLOSE/-
+syn_received.>listen;RST/-
+syn_received.>fin_wait1;CLOSE/FIN
+fin_wait1.>closing;FIN/ACK
+fin_wait1.>time_wait;FIN+ACK/ACK
+closing.>time_wait
+
+// client / receiver path
+closed>$(red)syn_sent;CONNECT/SYN(1/3 of 3w/hs)
+syn_sent>$(red)established;SYN+ACK/ACK(3/3 of 3w/hs)
+established>$(red)fin_wait1;CLOSE/FIN
+fin_wait1>$(red)fin_wait2;ACK/-
+fin_wait2>$(red)time_wait;FIN/ACK
+time_wait>$(red)closed_end;Timeout
+
+// server / sender path
+closed>$(blue)listen;LISTEN/-
+listen>$(blue)syn_received;SYN/SYN+ACK(2/3 of 3w/hs)
+syn_received>$(blue)established;ACK/-
+established>$(blue)close_wait;FIN/ACK
+close_wait>$(blue)last_ack;CLOSE/FIN
+last_ack>$(blue)closed_end
+

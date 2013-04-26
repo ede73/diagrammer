@@ -26,12 +26,25 @@ function seqdiag(yy) {
     }
     for (var i in yy.LINKS) {
         var l = yy.LINKS[i];
-        var t = getAttrFmt(l, 'label', ',label="{0}"') +
-            getAttrFmt(l, 'color', ',color="{0}"');
+        var attrs=[];
         var lt;
         var lr = l.right;
         var ll = l.left;
 
+        var color=getAttr(l,'color');
+        if (color){
+        	attrs.push('color="'+color+'"');
+        }
+        var label=getAttr(l,'label');
+        if (label){
+        	if( label.indexOf("::")!==-1){
+        		label=label.split("::");
+        		attrs.push('note="'+label[1].trim()+'"');
+        		attrs.push('label="'+label[0].trim()+'"');
+        	}else{
+        		attrs.push('label="'+label.trim()+'"');
+        	}
+        }
         if (lr instanceof Group) {
             //just pick ONE Node from group and use lhead
             //TODO: Assuming it is Node (if Recursive groups implemented, it could be smthg else)
@@ -46,9 +59,6 @@ function seqdiag(yy) {
         //For GRAPH all edges are type --
         //but we could SET arrow type if we'd like
         var rightName = lr.getName();
-        if (t.trim() != "")
-            t = t.trim().substring(1);
-
         var dot = false;
         var dash = false;
         var broken=false;
@@ -57,7 +67,7 @@ function seqdiag(yy) {
         } else if (l.linkType.indexOf("-") !== -1) {
             dash = true;
         } else if (l.linkType.indexOf("/") !== -1) {
-            broken = true;
+        	attrs.push("failed");
         }
         if (l.linkType.indexOf("<") !== -1 &&
             l.linkType.indexOf(">") !== -1) {
@@ -99,10 +109,8 @@ function seqdiag(yy) {
         } else {
             yy.result("ERROR: SHOULD NOT HAPPEN");
         }
-        if (t.trim() != "")
-            t = "[" + t + (broken?",failed":"")+"]";
         //MUST HAVE whitespace at both sides of the "arrow"
-        yy.result(ll.getName() + " " + lt + " " + rightName + t + ";");
+        yy.result(ll.getName() + " " + lt + " " + rightName + "["+attrs.join(",") + "];");
     }
     yy.result("}");
 }

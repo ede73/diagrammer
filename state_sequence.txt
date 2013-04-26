@@ -4,19 +4,24 @@ a<>a;A initiated broadcast
 b<>b;B initiated broadcast
 a<>b;Auto return edge
 b<>c;Auto return edge
-a-a;jotain kay tassanain
-a.a;ja aikaa palaa
+a-$(b:#0000ff)a;jotain kay tassanain
+a.$(r:#ff0000)a;ja aikaa palaa
+a/>"lost signal"b
+a</b;lost signal
+a>"signal::and a big\nlined\note"b
+a>b;signal::and a big\nlined\note
 //end test
+
 a>b;ab()
 b>c;bc(TRUE)
 c>c;process(1)
 c>c;process(2)
 //...
-c>c;process(n)
+c>$(b)c;process(n)
 c>c;process(END)
 a<c;callback()
 //--- if more to run
-a>a;next()
+a>$(r)a;next()
 a>a;ac1()\nac2()
 b<c;cb(TRUE)
 b>b;stalled(...)

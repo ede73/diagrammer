@@ -32,8 +32,6 @@ function mscgen(yy) {
     var id=1;
     for (var i in yy.LINKS) {
         var l = yy.LINKS[i];
-        var t = getAttrFmt(l, 'label', ',label="{0}"') +
-            getAttrFmt(l, 'color', ',linecolor="{0}"');
         var lt;
         var lr = l.right;
         var ll = l.left;
@@ -52,8 +50,6 @@ function mscgen(yy) {
         //For GRAPH all edges are type --
         //but we could SET arrow type if we'd like
         var rightName = lr.getName();
-        if (t.trim() != "")
-            t = t.trim().substring(1);
 
         var dot = false;
         var dash = false;
@@ -66,6 +62,23 @@ function mscgen(yy) {
             broken = true;
         }
         var swap = false;
+        var attrs=[];
+        var label=getAttr(l,"label");
+        var color=getAttr(l,'color');
+        if (color){
+        	attrs.push('linecolor="'+color+'"');
+        }
+        var note="";
+        if (label){
+        	if( label.indexOf("::")!==-1){
+        		label=label.split("::");
+        		note=label[1].trim();
+        		attrs.push('label="'+label[0].trim()+'"');
+        	}else{
+        		attrs.push('label="'+label.trim()+'"');
+        	}
+        }
+        attrs.push('id="'+ id++ +'"');
         if (l.linkType.indexOf("<") !== -1 &&
             l.linkType.indexOf(">") !== -1) {
             //Broadcast type (<>)
@@ -102,26 +115,26 @@ function mscgen(yy) {
                 lt = "=>";
         } else if (dot) {
             //dotted
-            yy.result(getAttrFmt(l, 'label', '...[label="{0}"'+
-            	getAttrFmt(l,'color',',textcolor="{0}"')
-            	+',id="'+ id++ +'"];'));
+            if (color){
+            	attrs.push('textcolor="'+color+'"');
+            }
+	        yy.result("...["+attrs.join(",")+"];");
             continue;
         } else if (dash) {
             //dashed
-            yy.result(getAttrFmt(l, 'label', '---[label="{0}"'+
-            	getAttrFmt(l,'color',',textcolor="{0}"')
-            	+',id="'+ id++ +'"];'));
+            if (color){
+            	attrs.push('textcolor="'+color+'"');
+            }
+	        yy.result("---["+attrs.join(",")+"];");
             continue;
         } else {
             yy.result("ERROR: SHOULD NOT HAPPEN");
         }
-        if (t.trim() != "")
-            t = "[" + t + ",id=\""+ id++ +"\"]";
-        else
-        	//label needed, else ID wont show up..
-            t = '[label="",id="'+ id++ +'"]';
-            
-        yy.result(ll.getName() + lt + rightName + t + ";");
+        
+        yy.result(ll.getName() + lt + rightName + "["+attrs.join(",") + "];");
+        if (note!="")
+        	//yy.result(ll.getName() +' abox ' +lr.getName()+'[label="'+note+'"];');
+        	yy.result(lr.getName() +' abox ' +lr.getName()+'[label="'+note+'"];');
         //if (swap)
         //    yy.result(lr.getName() + lt + ll.getName() + t + ";");
     }

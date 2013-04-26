@@ -1,0 +1,6 @@
+a/barcode.png,b/basestation.png,c/battery.png>d/camera.png,e/cpu.png,f/documents.png
+a1/harddisk.png,b1/keyboard.png,c1/laptop.png>d1/laser.png,e1/monitor.png,f1/mouse.png
+a2/phone.png,b2/printer.png,c2/ram.png>d2/satellite.png,e2/scanner.png,f2/sim.png
+u/usbmemory.png>w/wifi.png
+a1/actor1.png>a2/actor2.png>a3/actor3.png
+

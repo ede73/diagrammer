@@ -15,8 +15,8 @@ test(){
    exit 10
  fi
 }
-tests=${1:-dot actdiag blockdiag}
 
+tests=${1:-dot actdiag blockdiag}
 for test in $tests; do
 echo TEst suite $test >&2
 x=$test
@@ -47,6 +47,10 @@ test state14.txt
 test state15.txt
 test state16.txt
 
-x=mscgen
-test state_sequence.txt
+tests=${1:-mscgen seqdiag}
+for test in $tests; do
+x=$test
+  test state_sequence.txt
+  test state_sequence2.txt
+done
 

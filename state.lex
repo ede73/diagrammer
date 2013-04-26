@@ -24,13 +24,19 @@ STYLES "dotted"|"dashed"|"solid"|"bold"|"rounded"|"diagonals"|"invis"
 /*wedged,striped..filled...*/
 
 /*
-Could make out
+Could make out?
 -> normal
 -< inv
 -. dot
 -.< invdot
 -o odot
 -| tee
+
+Currently supports only single arrow head and dotted or dashed.
+Two special cases for equence diagrams are ellipsis a.a., and event/broadcast a-a
+
+Why so? I want to keep the syntax as "common" as possible, so theoretically a sequence diagram can ge presented with graphviz or vice versa.
+Special arrow is /> and </ that denotes a broken signal...
 */
 %options flex
 %%
@@ -60,7 +66,7 @@ Could make out
 /* hint about visualizer*/
 "generator"	return 'GENERATOR';
 "visualizer"	return 'VISUALIZER';
-"<.>"|"<->"|"<>"|"<-"|"<."|"<"|"->"|".>"|">"|"-"|"."	return 'EVENT';
+"</"|"/>"|"<.>"|"<->"|"<>"|"<-"|"<."|"<"|"->"|".>"|">"|"-"|"."	return 'EVENT';
 {IMAGE}		return 'IMAGE';
 {NAME}		return 'NAME';
 {D}+		return 'NUMBER';

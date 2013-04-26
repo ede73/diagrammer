@@ -29,6 +29,7 @@ function mscgen(yy) {
         }
     }
     yy.result(";");
+    var id=1;
     for (var i in yy.LINKS) {
         var l = yy.LINKS[i];
         var t = getAttrFmt(l, 'label', ',label="{0}"') +
@@ -56,10 +57,13 @@ function mscgen(yy) {
 
         var dot = false;
         var dash = false;
+        var broken=false;
         if (l.linkType.indexOf(".") !== -1) {
             dot = true;
         } else if (l.linkType.indexOf("-") !== -1) {
             dash = true;
+        } else if (l.linkType.indexOf("/") !== -1) {
+            broken = true;
         }
         var swap = false;
         if (l.linkType.indexOf("<") !== -1 &&
@@ -71,7 +75,7 @@ function mscgen(yy) {
                 lt = "->";
                 rightName = "*";
             } else {
-                lt = "=>";
+                lt = "<=>";
                 swap = true;
             }
         } else if (l.linkType.indexOf("<") !== -1) {
@@ -82,6 +86,8 @@ function mscgen(yy) {
                 lt = ">>";
             else if (dash)
                 lt = "->";
+            else if (broken)
+                lt = "-x";
             else
                 lt = "=>";
             rightName = lr.getName();
@@ -90,24 +96,34 @@ function mscgen(yy) {
                 lt = ">>";
             else if (dash)
                 lt = "->";
+            else if (broken)
+                lt = "-x";
             else
                 lt = "=>";
         } else if (dot) {
             //dotted
-            yy.result(getAttrFmt(l, 'label', '...[label="{0}"];'));
+            yy.result(getAttrFmt(l, 'label', '...[label="{0}"'+
+            	getAttrFmt(l,'color',',textcolor="{0}"')
+            	+',id="'+ id++ +'"];'));
             continue;
         } else if (dash) {
             //dashed
-            yy.result(getAttrFmt(l, 'label', '---[label="{0}"];'));
+            yy.result(getAttrFmt(l, 'label', '---[label="{0}"'+
+            	getAttrFmt(l,'color',',textcolor="{0}"')
+            	+',id="'+ id++ +'"];'));
             continue;
         } else {
             yy.result("ERROR: SHOULD NOT HAPPEN");
         }
         if (t.trim() != "")
-            t = "[" + t + "]";
+            t = "[" + t + ",id=\""+ id++ +"\"]";
+        else
+        	//label needed, else ID wont show up..
+            t = '[label="",id="'+ id++ +'"]';
+            
         yy.result(ll.getName() + lt + rightName + t + ";");
-        if (swap)
-            yy.result(lr.getName() + lt + ll.getName() + t + ";");
+        //if (swap)
+        //    yy.result(lr.getName() + lt + ll.getName() + t + ";");
     }
     yy.result("}");
 }

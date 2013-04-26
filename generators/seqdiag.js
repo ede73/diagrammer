@@ -1,5 +1,6 @@
 function seqdiag(yy) {
     yy.result("seqdiag {");
+    yy.result("autonumber = True;");
     var r = getGraphRoot(yy);
     //print out all node declarations FIRST (if any)
     for (var i in r.OBJECTS) {
@@ -50,10 +51,13 @@ function seqdiag(yy) {
 
         var dot = false;
         var dash = false;
+        var broken=false;
         if (l.linkType.indexOf(".") !== -1) {
             dot = true;
         } else if (l.linkType.indexOf("-") !== -1) {
             dash = true;
+        } else if (l.linkType.indexOf("/") !== -1) {
+            broken = true;
         }
         if (l.linkType.indexOf("<") !== -1 &&
             l.linkType.indexOf(">") !== -1) {
@@ -96,7 +100,7 @@ function seqdiag(yy) {
             yy.result("ERROR: SHOULD NOT HAPPEN");
         }
         if (t.trim() != "")
-            t = "[" + t + "]";
+            t = "[" + t + (broken?",failed":"")+"]";
         //MUST HAVE whitespace at both sides of the "arrow"
         yy.result(ll.getName() + " " + lt + " " + rightName + t + ";");
     }

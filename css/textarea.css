@@ -21,7 +21,7 @@ textarea,#editable
         margin: 2% auto;
         padding: 4px 20px 0 30px;
         /*resize: none;*/
-        width: 300px;
+        width: 200px;
         /*height: 689px;*/
 
         background-image: -moz-linear-gradient(top , transparent, transparent 49px,#E7EFF8 0px), -moz-radial-gradient(4% 50%, circle closest-corner, #f5f5f5, #f5f5f5 39%, transparent 0%), -moz-radial-gradient(3.9% 46% , circle closest-corner, #CCCCCC, #CCCCCC 43.5%, transparent 0%); 

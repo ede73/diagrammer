@@ -1,0 +1,16 @@
+Alice$(alice:#ff0000)>"INVITE"P1$(proxy:#00ff00)>"100 Trying" Alice
+P1>"INVITE"P2$(proxy)>"100 Trying"P1
+P2>"INVITE"Bob$(bob:#0000ff)>"100 Trying"P2
+Bob>"180 Ringing"P2>"180 Ringing"P1>"180 Ringing"Alice
+  Alice-Alice ;      "Alice's client plays ringing" 
+  Alice.Alice; 
+  Alice-Alice   ;  "Bob answers" 
+Bob>"200 Ok"P2>"200 Ok"P1>"200 Ok"Alice
+Alice>"ACK"P1>"ACK"P2>"ACK"Bob
+  Alice-Alice ;      "two way media" 
+  Alice.Alice;
+  Alice-Alice     ;  "Bob hangs up" 
+Bob>"BYE"P2>"200 Ok"Bob 
+P2>"BYE"P1>"200 Ok"P2 
+P1>"BYE"Alice>"200 Ok"P1 
+

@@ -17,4 +17,7 @@ d.#ff00ffc
 special<>link
 special<.>link
 special<->link
+special/>link
 
+sd.sd
+sd-sd

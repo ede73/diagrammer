@@ -7,26 +7,16 @@
 - http://philogb.github.io/jit/demos.html
 - oMeta!
 
-Check if something could be done for network graphs .. 
+- Check if something could be done for network graphs .. 
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
-
-- make label color be part of grammar, not model hack (allows variable derived coloring then)
+- HTML rendering available in svg and cairo (and hyperlinks), see if graphviz could create svg's. DIFFing could be done in pngs still
 - make landscape/portrait be container properties(blockdiag support, dotty not)
 - Investigate following (graphviz) features for others as well:
 	bgcolor="#00ff00" for whole graph background
 	packmode? did not get to work
 	pagedir="BL", "BR", "TL", "TR", "RB", "RT", "LB", "LT"
 	colorList red:blue(depends on style/gradientangle) red;0.3:blue;0.7
-- Add node STYLES:  solid,dashed,dotted,bold,rounded,diagonals,filled,striped,wedged
-   solid x > dashed masa;link here
-   solid x#ff0000>$(link)rounded targetnode;#fffffflink label
-   Also could target GROUPs as well!!
-   Perhaps the EVENTs could have same styles (instead of compressed form >, .> and ->)
-   nah...they have solid,dashed,dotted,bold. 
-   And could add invis
-   x[style="invis"]
-   Wedged style required colorList support...
    
 - Make LIST (nodelist,grouplist what ever list) actual object, not array kludge
 	- one could then map setLabel to all contained objects in one call
@@ -40,7 +30,24 @@ Check if something could be done for network graphs ..
                x -- y [w=5.0,len=3];
        }
 	The generator could then offload it (but that would make generator bit more complex)
+- decorate=true for edge labels in graphviz might help readability
+- constraint=false for edges in graphviz might help the layout to be as user wants
+- compass (a:ne->b:nw) for edges in graphviz might help the layout to be as user wants (ie. direct the edge start/end to compass directions)
+
 -------
+(DONE)- groups as {} for simplicity
+(DONE)- broken links (for sequence / msc)
+(DONE)- external labels, label with :: the :: part becomes xlabel or note !
+(DONE)- Add node STYLES:  solid,dashed,dotted,bold,rounded,diagonals,filled,striped,wedged
+   solid x > dashed masa;link here
+   solid x#ff0000>$(link)rounded targetnode;#fffffflink label
+(NOT)   Also could target GROUPs as well!!
+(NOT)   Perhaps the EVENTs could have same styles (instead of compressed form >, .> and ->)
+   nah...they have solid,dashed,dotted,bold. 
+   And could add invis
+   x[style="invis"]
+(NOT)   Wedged style required colorList support...
+(DONE)- make label color be part of grammar, not model hack (allows variable derived coloring then)
 (Not gonna do:shape is implicit already and variable as well)- Change the DEFAULT SHAPE (ie. shape default would become...shape box...OR (see below))
 (DONE) - !!Make SHAPE be variable (so one can achieve DEFAULT SHAPE by that alone!)
 (DONE)- OH, make defaults CONTAINER SPECIFIC!! If a default inside a group is visible only within that group! 

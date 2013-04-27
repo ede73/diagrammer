@@ -147,6 +147,11 @@ function digraph(yy) {
         } else if (l.linkType.indexOf("-") !== -1) {
             attrs.push('style="dashed"');
         }
+        if (l.linkType.indexOf("/") !== -1) {
+        	//TODO: Somehow denote better this "quite does not reach"
+        	//even though such an edge type MAKES NO SENSE in a graph
+            attrs.push('arrowhead="tee"');
+        }
         if (l.linkType.indexOf("<") !== -1 &&
             l.linkType.indexOf(">") !== -1) {
             lt = "->";

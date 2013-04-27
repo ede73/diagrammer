@@ -1,6 +1,8 @@
 function seqdiag(yy) {
     yy.result("seqdiag {");
     yy.result("autonumber = True;");
+    //quite fucked up life line activations and no control over..skip it,shrimpy!
+    yy.result(" activation = none;");
     var r = getGraphRoot(yy);
     //print out all node declarations FIRST (if any)
     for (var i in r.OBJECTS) {
@@ -18,7 +20,8 @@ function seqdiag(yy) {
             }
         } else if (o instanceof Node) {
             var s = getAttrFmt(o, 'style', ',style={0}') +
-                getAttrFmt(o, 'label', ',label="{0}"');
+                getAttrFmt(o, 'label', ',label="{0}"')+
+                getAttrFmt(o, 'color', ',color="{0}"');
             if (s.trim() != "")
                 s = "[" + s.trim().substring(1) + "]";
             yy.result(o.getName() + s + ";");

@@ -105,7 +105,16 @@ function digraph(yy) {
     for (var i in yy.LINKS) {
         var l = yy.LINKS[i];
         var attrs=[];
-        getAttrFmt(l, 'label', 'label="{0}"',attrs);
+        var label=getAttr(l, 'label');
+        if (label){
+        	if( label.indexOf("::")!==-1){
+        		label=label.split("::");
+        		attrs.push('label="'+label[0].trim()+'"');
+        		attrs.push('xlabel="'+label[1].trim()+'"');
+        	}else{
+        		attrs.push('label="'+label.trim()+'"');
+        	}
+        }
         getAttrFmt(l, 'color', 'color="{0}"',attrs);
         getAttrFmt(l, ['textcolor','color'] ,'fontcolor="{0}"',attrs);
         var lt;

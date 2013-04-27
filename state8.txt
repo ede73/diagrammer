@@ -1,6 +1,6 @@
-shape diamond xstart;start
+ShApe Diamond xstart;start
 
-shape square end
+SHAPE square end
 
 shape ellipse
 
@@ -15,7 +15,7 @@ shape ellipse
 xstart>a0>b0
 a1>b3;a1 b2 link comment
 
-dashed b2> solid a3> rounded a0
+DASHeD b2> solid a3> RoundED a0
 a3>end
-invis b3>end
+INVIS b3>end
 

@@ -1,9 +1,9 @@
-node color #0000ff
-group color #33ff33
-start s
-shape $(shape:actor)
+NODE COLOR #0000ff
+GROUP COLOR #33ff33
+START s
+SHAPE $(shape:actor)
 s#ff0000>#00ff00c#0000ff;#ff00ffconnect,s=red\nlink=green\n this node=blue
-shape box
+SHAPE box
 //a comment is a good thing
 {#777777;vpn connector
 	c>m;turn off mobile data

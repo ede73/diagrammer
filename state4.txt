@@ -1,13 +1,13 @@
-start LR_0
-landscape
-node textcolor#00aa00
-link color #555599 
-link text color #ff0000
-shape doublecircle
+START LR_0
+LANDSCAPE
+NODE TEXTCOLOR#00aa00
+LINK COLOR #555599 
+LINK TEXT COLOR #ff0000
+SHAPE DOUBLECIRCLE
 
 LR_0 LR_3 LR_4 LR_8
 
-shape circle
+SHAPE circle
 
 LR_0>LR_2;SS(B)
 LR_0>LR_1;SS(S)

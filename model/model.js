@@ -333,6 +333,7 @@ function Node(name, shape) {
     this.image;
     this.style;
     this.setShape = function(value) {
+	if(value)value=value.toLowerCase();
         return setAttr(this, 'shape', value);
     };
     this.getShape = function() {
@@ -346,6 +347,7 @@ function Node(name, shape) {
         return getAttr(this, 'linklabel');
     }
     this.setStyle = function(value) {
+	if(value)value=value.toLowerCase();
         return setAttr(this, 'style', value);
     };
     this.getStyle = function() {
@@ -396,18 +398,21 @@ GraphRoot.prototype.constructor = GraphRoot;
 function GraphRoot() {
     this.OBJECTS = new Array();
     this.setGenerator = function(value) {
+	if(value)value=value.toLowerCase();
         return setAttr(this, 'generator', value);
     };
     this.getGenerator = function() {
         return getAttr(this, 'generator');
     };
     this.setVisualizer = function(value) {
+	if(value)value=value.toLowerCase();
         return setAttr(this, 'visualizer', value);
     };
     this.getVisualizer = function() {
         return getAttr(this, 'visualizer');
     };
     this.setCurrentShape = function(value) {
+	if(value)value=value.toLowerCase();
         return setAttr(this, 'shape', value);
     };
     this.getCurrentShape = function() {
@@ -465,6 +470,7 @@ function Link(linkType, l, r) {
 
 function getShape(shapes, o, fmt) {
     if (o == undefined || o == 0) return "";
+    o=o.toLowerCase()
     if (o in shapes)
         return ' ' + fmt.format(shapes[o]) + ' ';
     else

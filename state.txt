@@ -1,5 +1,5 @@
-start xstart
-node color #7473b3
+START xstart
+NODE COLOR #7473b3
 
 $(green:#00ff00)
 dashed idle$(red:#ff0000);idle\nevent
@@ -10,5 +10,5 @@ moving_forward>"on sound"start_backward>rounded moving_backward>$(green)"on soun
 moving_backward>"on touch"stop_motor
 stop_motor>idle
 
-equal start_forward,moving_backward
-equal start_backward,moving_forward
+EQUAL start_forward,moving_backward
+EQUAL start_backward,moving_forward

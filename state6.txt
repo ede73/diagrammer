@@ -1,10 +1,10 @@
-group color #bbbbbb
-shape minidiamond
+GROUP COLOR #bbbbbb
+SHAPE miniDiamond
 xstart
-shape minisquare
+SHAPE minisquare
 end
 
-shape ellipse
+SHAPE ellipse
 {#ff0000;process #1
  a0>a1
  a1>a2

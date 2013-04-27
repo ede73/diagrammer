@@ -11,20 +11,23 @@ function digraph(yy) {
     	    return prefix+msg;
     }
 	var processANode = function(o) {
-		var fillColor=getAttrFmt(o, 'color', ',fillcolor="{0}"');
-		var filledStyle=getAttrFmt(o,'color','filled').trim();
-		var styleStyle=getAttrFmt(o, 'style', '{0}').trim();
-		if (styleStyle!="" && filledStyle!="") filledStyle=filledStyle+",";
-		var fillAndStyle=getAttrFmt(o,['color','style'],
-				fillColor+',style="'+filledStyle+styleStyle+'"');
-        var s = fillAndStyle+
-            getAttrFmt(o, 'image', ',image="icons{0}"') +
-            getAttrFmt(o, 'textcolor', ',fontcolor="{0}"')+
-            getShape(shapes.digraph, o.shape, ',shape="{0}"') +
-            getAttrFmt(o, 'label', ',label="{0}"');
-        if (s.trim() != "")
-            s = "[" + s.trim().substring(1) + "]";
-        yy.result(indent( o.getName() + s + ';'));
+		var nattrs=[];
+		var styles=[];
+		getAttrFmt(o, 'color', 'fillcolor="{0}"',nattrs);
+		getAttrFmt(o,'color','filled',styles);
+		getAttrFmt(o, 'style', '{0}',styles);
+		if (styles.length>0)
+			nattrs.push('style="'+styles.join(",")+'"');
+		getAttrFmt(o, 'image', 'image="icons{0}"',nattrs);
+		getAttrFmt(o, 'textcolor', 'fontcolor="{0}"',nattrs);
+		var r=getShape(shapes.digraph, o.shape, 'shape="{0}"');
+		if (r)
+			nattrs.push(r);
+		getAttrFmt(o, 'label', 'label="{0}"',nattrs);
+		var t="";
+		if (nattrs.length>0)
+			t="["+nattrs.join(",")+"]";
+        yy.result(indent( o.getName() + t + ';'));
     };
     
     var r = getGraphRoot(yy);
@@ -101,9 +104,10 @@ function digraph(yy) {
     yy.result("//links start");
     for (var i in yy.LINKS) {
         var l = yy.LINKS[i];
-        var t = getAttrFmt(l, 'label', ',label="{0}"') +
-            getAttrFmt(l, 'color', ',color="{0}"') +
-            getAttrFmt(l, ['textcolor','color'] ,'fontcolor="{0}"');
+        var attrs=[];
+        getAttrFmt(l, 'label', 'label="{0}"',attrs);
+        getAttrFmt(l, 'color', 'color="{0}"',attrs);
+        getAttrFmt(l, ['textcolor','color'] ,'fontcolor="{0}"',attrs);
         var lt;
         var lr = l.right;
         var ll = l.left;
@@ -112,7 +116,7 @@ function digraph(yy) {
         if (lr instanceof Group) {
             //just pick ONE Node from group and use lhead
             //TODO: Assuming it is Node (if Recursive groups implemented, it could be smthg else)
-            t += " lhead=cluster_" + lr.getName();
+            attrs.push(" lhead=cluster_" + lr.getName());
             lr = lr.OBJECTS[0];
             if (lr == undefined) {
                 //TODO:Bad thing, EMPTY group..add one invisible node there...
@@ -120,7 +124,7 @@ function digraph(yy) {
             }
         }
         if (ll instanceof Group) {
-            t += " ltail=cluster_" + ll.getName();
+            attrs.push(" ltail=cluster_" + ll.getName());
             ll = ll.OBJECTS[0];
             if (ll == undefined) {
             	//Same as above
@@ -129,18 +133,15 @@ function digraph(yy) {
         //TODO:Assuming producing DIGRAPH
         //For GRAPH all edges are type --
         //but we could SET arrow type if we'd like
-        if (t.trim() != "")
-            t = t.trim();
-        if (t.substring(0,1)==",") t=t.substring(1);
         if (l.linkType.indexOf(".") !== -1) {
-            t += ' style="dotted" ';
+            attrs.push('style="dotted"');
         } else if (l.linkType.indexOf("-") !== -1) {
-            t += ' style="dashed" ';
+            attrs.push('style="dashed"');
         }
         if (l.linkType.indexOf("<") !== -1 &&
             l.linkType.indexOf(">") !== -1) {
             lt = "->";
-            t += "dir=both";
+            attrs.push("dir=both");
         } else if (l.linkType.indexOf("<") !== -1) {
             var tmp = ll;
             ll = lr;
@@ -151,10 +152,11 @@ function digraph(yy) {
         } else {
             //is dotted or dashed no direction
             lt = "->";
-            t += "dir=none";
+            attrs.push("dir=none");
         }
-        if (t.trim() != "")
-            t = "[" + t + "]";
+        var t="";
+        if (attrs.length>0)
+            t = "[" + attrs.join(",") + "]";
         yy.result(indent(ll.getName() + lt + lr.getName() + t + ";"));
     }
     yy.result("}");

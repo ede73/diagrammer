@@ -39,6 +39,7 @@ test state_recursive_linking.txt
 test state_images.txt
 test fulltest.txt
 test state_tcp.txt
+test state_y_edge.txt
 done
 
 x=nwdiag

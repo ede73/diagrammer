@@ -7,6 +7,7 @@
 - http://philogb.github.io/jit/demos.html
 - oMeta!
 
+
 - ambiguity in group definitions {xxx could be group named xxx, or a group that has a node xxx. Fix so that group declarations in one line! Always!
 - Check if something could be done for network graphs .. 
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
@@ -36,6 +37,7 @@
 - compass (a:ne->b:nw) for edges in graphviz might help the layout to be as user wants (ie. direct the edge start/end to compass directions)
 
 -------
+(DONE)- make a dot or singularity  xxx[shape=circle,label="",width=0.01,height=0.01] so a>xxx>b,c becomes nice combo arrow until split to b,c
 (DONE)- groups as {} for simplicity
 (DONE)- broken links (for sequence / msc)
 (DONE)- external labels, label with :: the :: part becomes xlabel or note !

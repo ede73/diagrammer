@@ -20,7 +20,7 @@ LABEL	";"[^\n]+(\n)
 LISTSEP ","
 IMAGE	"/"[A-Za-z0-9]+".png"
 SHAPES "actor"|"beginpoint"|"box"|"circle"|"cloud"|"condition"|"database"|"default"|"diamond"|"dots"|"doublecircle"|"ellipse"|"endpoint"|"input"|"loopin"|"loopout"|"mail"|"minidiamond"|"minisquare"|"note"|"record"|"roundedbox"|"square"|"terminator"|"loop"|"loopend"|"loopstart"|"rect"|"rectangle"
-STYLES "dotted"|"dashed"|"solid"|"bold"|"rounded"|"diagonals"|"invis"
+STYLES "dotted"|"dashed"|"solid"|"bold"|"rounded"|"diagonals"|"invis"|"singularity"
 /*wedged,striped..filled...*/
 
 /*

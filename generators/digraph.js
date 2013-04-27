@@ -19,13 +19,23 @@ function digraph(yy) {
 		//if (getAttr(o,'free')===true){
 		//	nattrs.push("constraint=false");
 		//}
-		if (styles.length>0)
-			nattrs.push('style="'+styles.join(",")+'"');
+		if (styles.length>0){
+			if (styles.join("").indexOf('singularity')!==-1){
+				//invis node is not singularity!, circle with minimal width/height IS!
+				nattrs.push('shape="circle"');
+				nattrs.push('label=""');
+				nattrs.push("width=0.01");
+				nattrs.push("weight=0.01");
+			}else{
+				nattrs.push('style="'+styles.join(",")+'"');
+			}
+		}
 		getAttrFmt(o, 'image', 'image="icons{0}"',nattrs);
 		getAttrFmt(o, 'textcolor', 'fontcolor="{0}"',nattrs);
 		var r=getShape(shapes.digraph, o.shape, 'shape="{0}"');
-		if (r)
+		if (r){
 			nattrs.push(r);
+		}
 		getAttrFmt(o, 'label', 'label="{0}"',nattrs);
 		var t="";
 		if (nattrs.length>0)

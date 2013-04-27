@@ -16,6 +16,9 @@ function digraph(yy) {
 		getAttrFmt(o, 'color', 'fillcolor="{0}"',nattrs);
 		getAttrFmt(o,'color','filled',styles);
 		getAttrFmt(o, 'style', '{0}',styles);
+		if (getAttr(o,'free')===true){
+			nattrs.push("constraint=false");
+		}
 		if (styles.length>0)
 			nattrs.push('style="'+styles.join(",")+'"');
 		getAttrFmt(o, 'image', 'image="icons{0}"',nattrs);

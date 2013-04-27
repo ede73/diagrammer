@@ -1,8 +1,7 @@
 NODE COLOR #0000ff
 GROUP COLOR #33ff33
 START s
-SHAPE $(shape:actor)
-s#ff0000>#00ff00c#0000ff;#ff00ffconnect,s=red\nlink=green\n this node=blue
+actor s#ff0000>#00ff00 actor c#0000ff;#ff00ffconnect,s=red\nlink=green\n this node=blue
 SHAPE box
 //a comment is a good thing
 {#777777;vpn connector

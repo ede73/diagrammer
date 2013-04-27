@@ -20,6 +20,8 @@ S
 				seqdiag(yy);
 			}else if ("mscgen" == generator){
 				mscgen(yy);
+			}else if ("plantuml_sequence" == generator){
+				plantuml_sequence(yy);
 			}else{
 				//rankdir available ONLY IN dot
 				digraph(yy);

@@ -63,6 +63,11 @@ switch($_REQUEST["visualizer"]){
   case "neato":
     $r=exec(getExe("neato")." -Tpng -o result.png post.txt");
   break;
+  case "plantuml_sequence":
+    //cat josha.txt| java -jar ext/plantuml.jar -pipe> result.png
+    copy("./post.txt","./result.txt");
+    $r=exec(getExe("java")." -jar ext/plantuml.jar result.txt");
+  break;
   default:
     $r=exec(getExe("dot")." -Tpng -o result.png post.txt");
   break;

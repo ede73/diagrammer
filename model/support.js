@@ -20,11 +20,11 @@ function getAttr(cl, attr) {
     return cl[attr];
 }
 
-function getAttrFmt(cl, attr, fmt) {
+function getAttrFmt(cl, attr, fmt,resultarray) {
 	if (attr instanceof Array){
 		for(var i in attr){
 			//debug("Get FMT attr "+attr[i]+" from "+cl);
-			var r=getAttrFmt(cl,attr[i],fmt);
+			var r=getAttrFmt(cl,attr[i],fmt,resultarray);
 			if (r!=="") {
 				debug("Return "+r);
 				return r;
@@ -33,5 +33,8 @@ function getAttrFmt(cl, attr, fmt) {
 		return "";
 	}
     if (cl[attr] == undefined || cl[attr] == 0) return "";
-    return ' ' + fmt.format(cl[attr]) + ' ';
+    var r=fmt.format(cl[attr]);
+    if (resultarray)
+      resultarray.push(r);
+    return " "+r+" ";
 }

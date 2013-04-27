@@ -60,8 +60,8 @@ Special arrow is /> and </ that denotes a broken signal...
 ^("portrait"|"vertical"|"td")	return 'PORTRAIT';
 "equal"		return 'EQUAL';
 "shape"		return 'SHAPE';
-"group end"	return 'GROUP_END';
-"group"		return 'GROUP';
+"group end"|"}"	return 'GROUP_END';
+"group"|"{"		return 'GROUP';
 "start"		return 'START';
 /* hint about visualizer*/
 "generator"	return 'GENERATOR';

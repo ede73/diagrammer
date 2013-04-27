@@ -178,6 +178,7 @@ function visualize(tt){
 <option value="state_innergroups.txt">state_innergroups.txt</option>
 <option value="state_recursive_linking.txt">state_recursive_linking.txt</option>
 <option value="fulltest.txt">fulltest.txt</option>
+<option value="state_tcp.txt">state_tcp.txt</option>
 <option value="state_sip_sequence.txt">state_sip_sequence.txt</option>
     </select>
     <label for="filename">Filename</label>
@@ -384,7 +385,7 @@ $.ajax({
 function delayedKeypressCallback(obj, callback, delay) {
     var timer = null;
     var tt=obj;
-    obj.onkeypress = function() {
+    obj.onkeyup= function() {//onchange does not work on chrome/mac(elsewhere?)
         if (timer) {
             window.clearTimeout(timer);
         }

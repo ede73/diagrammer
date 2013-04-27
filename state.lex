@@ -38,7 +38,7 @@ Two special cases for equence diagrams are ellipsis a.a., and event/broadcast a-
 Why so? I want to keep the syntax as "common" as possible, so theoretically a sequence diagram can ge presented with graphviz or vice versa.
 Special arrow is /> and </ that denotes a broken signal...
 */
-%options flex
+%options flex case-insensitive
 %%
 /*{COLORLABEL}	return 'COLORLABEL';*/
 '"'[^"]+'"'	return 'INLINE_STRING';

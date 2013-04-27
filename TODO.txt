@@ -8,6 +8,8 @@
 - oMeta!
 
 
+- for all links add CURRENT CONTAINER in which context the link was added, plantuml_sequence requires links to be IN CONTEXT of the group
+  where as the graphviz is not so picky...node definition is what counts (plantuml does not seem to care about node definitions in sequence mode)
 - For plantuml 
   alt succesfull case
   else some kind of failure

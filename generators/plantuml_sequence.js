@@ -42,6 +42,7 @@ function plantuml_sequence(yy) {
         yy.result("/* render:" + r.getVisualizer() + "*/")
     }
     yy.result("@startuml");
+    yy.result("autonumber");
     /*if (r.getDirection() === "portrait") {
         yy.result(indent("rankdir=LR;"));
     } else {
@@ -82,6 +83,7 @@ function plantuml_sequence(yy) {
         for (var i in r.OBJECTS) {
             var o = r.OBJECTS[i];
             if (o instanceof Group) {
+            //TODO:
                 //Group name,OBJECTS,get/setEqual,toString
                 var processAGroup = function(o) {
                     debug(JSON.stringify(o));
@@ -114,13 +116,10 @@ function plantuml_sequence(yy) {
         if (label){
         	if( label.indexOf("::")!==-1){
         		label=label.split("::");
-        		attrs.push('label="'+label[0].trim()+'"');
         		note=label[1].trim();
-        	}else{
-        		attrs.push('label="'+label.trim()+'"');
         	}
         }
-        var color=getAttrFmt(l, 'color', '[{0}]');
+        var color=getAttrFmt(l, 'color', '[{0}]').trim();
         //getAttrFmt(l, ['textcolor','color'] ,'fontcolor="{0}"',attrs);
         var lt;
         var lr = l.right;
@@ -130,7 +129,8 @@ function plantuml_sequence(yy) {
         if (lr instanceof Group) {
             //just pick ONE Node from group and use lhead
             //TODO: Assuming it is Node (if Recursive groups implemented, it could be smthg else)
-            attrs.push(" lhead=cluster_" + lr.getName());
+            //attrs.push(" lhead=cluster_" + lr.getName());
+            //TODO:
             lr = lr.OBJECTS[0];
             if (lr == undefined) {
                 //TODO:Bad thing, EMPTY group..add one invisible node there...
@@ -138,7 +138,8 @@ function plantuml_sequence(yy) {
             }
         }
         if (ll instanceof Group) {
-            attrs.push(" ltail=cluster_" + ll.getName());
+            //attrs.push(" ltail=cluster_" + ll.getName());
+            //TODO:
             ll = ll.OBJECTS[0];
             if (ll == undefined) {
             	//Same as above
@@ -147,39 +148,58 @@ function plantuml_sequence(yy) {
         //TODO:Assuming producing DIGRAPH
         //For GRAPH all edges are type --
         //but we could SET arrow type if we'd like
-        if (l.linkType.indexOf(".") !== -1) {
-            attrs.push('style="dotted"');
-        } else if (l.linkType.indexOf("-") !== -1) {
-            attrs.push('style="dashed"');
-        }
         if (l.linkType.indexOf("/") !== -1) {
         	//TODO: Somehow denote better this "quite does not reach"
         	//even though such an edge type MAKES NO SENSE in a graph
-            attrs.push('arrowhead="tee"');
+            //attrs.push('arrowhead="tee"');
+            //TODO:
         }
+        var dot = false;
+        var dash = false;
+        var broken=false;
+        if (l.linkType.indexOf(".") !== -1) {
+            dot = true;
+        } else if (l.linkType.indexOf("-") !== -1) {
+            dash = true;
+        } else if (l.linkType.indexOf("/") !== -1) {
+        	//attrs.push("failed");
+            //TODO:
+        }
+        var swap=false;
         if (l.linkType.indexOf("<") !== -1 &&
             l.linkType.indexOf(">") !== -1) {
-            lt = "-"+color+">";
-            attrs.push("dir=both");
+            lt = (dot?"-":"")+"-"+color+">";
+            swap=true;
         } else if (l.linkType.indexOf("<") !== -1) {
             var tmp = ll;
             ll = lr;
             lr = tmp;
-            lt = "-"+color+">";
+            lt = (dot?"-":"")+"-"+color+">";
         } else if (l.linkType.indexOf(">") !== -1) {
-            lt = "-"+color+">";
+            lt = (dot?"-":"")+"-"+color+">";
+        } else if (dot) {
+            //dotted
+            yy.result(getAttrFmt(l, 'label', '...{0}...'));
+            continue;
+        } else if (dash) {
+            //dashed
+            yy.result(getAttrFmt(l, 'label', '=={0}=='));
+            continue;
         } else {
             //is dotted or dashed no direction
             lt = "-"+color+">";
-            attrs.push("dir=none");
+            //attrs.push("dir=none");
         }
         var t="";
         //if (attrs.length>0)
         //    t = "[" + attrs.join(",") + "]";
-        yy.result(indent(ll.getName() + lt + lr.getName() + t));
+        if (label) label=":"+label;else label="";
+        yy.result(indent(ll.getName() + lt + lr.getName() + t+label));
+        if (swap)
+        yy.result(indent(lr.getName() + lt + ll.getName() + t+label));
         if (note!=""){
         	yy.result(indent("note over "+lr.getName()));
-        	yy.result(note);
+        	yy.result(note.replace(/\\n/g,"\n"));
         	yy.result(indent("end note"));
         }
     }

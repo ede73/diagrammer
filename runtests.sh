@@ -48,7 +48,7 @@ test state14.txt
 test state15.txt
 test state16.txt
 
-tests=${1:-mscgen seqdiag}
+tests=${1:-mscgen seqdiag plantuml_sequence}
 for test in $tests; do
 x=$test
   test state_sequence.txt

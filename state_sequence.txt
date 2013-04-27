@@ -1,4 +1,4 @@
-generator seqdiag
+generator plantuml_sequence
 //unconventional
 a<>a;A initiated broadcast
 b<>b;B initiated broadcast
@@ -8,8 +8,8 @@ a-$(b:#0000ff)a;jotain kay tassanain
 a.$(r:#ff0000)a;ja aikaa palaa
 a/>"lost signal"b
 a</b;lost signal
-a>"signal::and a big\nlined\note"b
-a>b;signal::and a big\nlined\note
+a>"signal::and a big\nlined\nnote"b
+a>b;signal::and a big\nlined\nnote
 //end test
 
 a>b;ab()

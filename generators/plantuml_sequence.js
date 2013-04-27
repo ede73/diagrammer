@@ -78,11 +78,15 @@ function plantuml_sequence(yy) {
         }
     }(r.OBJECTS);
 */
+    //print only NON PRINTED container links. If first non printed link is NOT for this continer, break out immediately
+    //this is to emulate ORDERED nodes of plantuml (node=edge,node,link.group...all in order for this fucker)
     var printLinks=function printLinks(container){
     for (var i in yy.LINKS) {
         var l = yy.LINKS[i];
+        if (l.printed) continue;
         //if container given, print ONLY THOSE links that match this container!
-        if (container && l.container!==container) continue;
+        if (l.container!==container) break;
+        l.printed=true;
         var attrs=[];
         var note="";
         var label=getAttr(l, 'label');
@@ -177,11 +181,19 @@ function plantuml_sequence(yy) {
         }
     }
     };
+    
     var traverseObjects = function traverseObjects(r) {
+    	//Dump this groups participants first...
+        for (var i in r.OBJECTS) {
+            var o = r.OBJECTS[i];
+            if (o instanceof Node)
+                processANode(o);
+        }
+        printLinks(r);
         for (var i in r.OBJECTS) {
             var o = r.OBJECTS[i];
             if (o instanceof Group) {
-            //TODO:
+                //TODO:
                 //Group name,OBJECTS,get/setEqual,toString
                 var processAGroup = function(o) {
                     debug(JSON.stringify(o));
@@ -205,9 +217,7 @@ function plantuml_sequence(yy) {
                     depth--;
                     //yy.result(indent("}//end of " + o.getName()));
                 }(o);
-            } else if (o instanceof Node) {
-                processANode(o);
-            } else {
+            } else if (!o instanceof Node){
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
         }

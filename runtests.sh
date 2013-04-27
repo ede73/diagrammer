@@ -40,6 +40,7 @@ test state_images.txt
 test fulltest.txt
 test state_tcp.txt
 test state_y_edge.txt
+test state_conditionals.txt
 done
 
 x=nwdiag
@@ -53,5 +54,6 @@ for test in $tests; do
 x=$test
   test state_sequence.txt
   test state_sequence2.txt
+  test state_conditionals.txt
 done
 

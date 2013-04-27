@@ -1,16 +1,24 @@
+q;tamakin
+w;on
+
 q>w
-a
 
 if something would happend then
+a;Jotain
+b;muuta
   a>b
 elseif something probably would not happen then
+c;erikoista
  b>c
 elseif or if i see a flying bird then
 then<elseif
  c>z
+then;mita
+elseif;lie
+z;turhaa
 else
  q>m
+m;homppaa
 endif
 
 outside>end
-

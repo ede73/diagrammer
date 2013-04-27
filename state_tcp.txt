@@ -10,17 +10,17 @@ syn_received$(grey:#888888);SYN\nRECEIVED
 syn_sent$(grey);SYN\nSENT
 established#00ff00;ESTABLISHED\ndata xchange occurs
 
-group PassiveClose$(lightblue:#afeeee);Passive CLOSE
+{ PassiveClose$(lightblue:#afeeee);Passive CLOSE
   close_wait$(yellow);CLOSE WAIT
   last_ack$(yellow);LAST ACK
-group end
+}
 
-group ActiveClose$(lightblue);Active CLOSE
+{ ActiveClose$(lightblue);Active CLOSE
   fin_wait1$(yellow);FIN WAIT 1
   closing$(yellow);CLOSING
   fin_wait2$(yellow);FIN WAIT 2
   time_wait$(yellow);TIME WAIT
-group end
+}
 
 //unusual event
 syn_sent.>closed;CLOSE/-

@@ -1,22 +1,22 @@
 node color #ff0000
 outside1;Group to node
 outside3;Inner group to node
-group master
+{ master
   ma
   group innermaster1#999999
     ima1
-  group end 
+  } 
   group innermaster2 #ffaaaa
    ima2
-  group end
-group end
+  }
+}
 node color #ffff00
 
 outside2;Node to group
 outside4;Node to inner group
-group other
+{ other
  o
-group end
+}
 
 ma>ima1,ima2>o
 outside2>master     

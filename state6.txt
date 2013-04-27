@@ -5,17 +5,17 @@ shape minisquare
 end
 
 shape ellipse
-group#ff0000;process #1
+{#ff0000;process #1
  a0>a1
  a1>a2
  a2>a3
-group end
+}
 
-group#00ff00;process #2
+{#00ff00;process #2
  b0>b1
  b1>b2
  b2>b3
-group end
+}
 
 xstart>a0
 xstart>b0

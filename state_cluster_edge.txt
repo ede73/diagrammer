@@ -1,12 +1,12 @@
-group joku#ff0000;label tassa
+{ joku#ff0000;label tassa
  joku1
  joku2
-group end
+}
 
-group toinen#00ff00;label tassa
+{ toinen#00ff00;label tassa
  toinen1
  toinen2
-group end
+}
 
 joku1>toinen1;node to node
 joku2>toinen;node to group

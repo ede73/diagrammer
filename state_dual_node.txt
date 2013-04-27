@@ -1,5 +1,5 @@
 shape actor
 s
-group dummy
+{ dummy
  a>s
-group end
+}

@@ -4,13 +4,13 @@ shape square end
 
 shape ellipse
 
-group;process222
+{;process222
  a0.>a1->a2<>a3
-group end
+}
 
-group;process 2
+{;process 2
  b0>#ff0000b1>b2>#00ff00b3;#ff0000b2 b3 link
-group end
+}
 
 xstart>a0>b0
 a1>b3;a1 b2 link comment

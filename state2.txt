@@ -5,18 +5,18 @@ shape $(shape:actor)
 s#ff0000>#00ff00c#0000ff;#ff00ffconnect,s=red\nlink=green\n this node=blue
 shape box
 //a comment is a good thing
-group#777777;vpn connector
+{#777777;vpn connector
 	c>m;turn off mobile data
 	m>vb;create blackhole VPN
 	vb>mo;turn on mobile data
 	mo>b;do bootstrap
 	b>v;connect vpn
-group end
+}
 
-group;Phone state listener
+{;Phone state listener
 	e>s;wifi connected
 	e>s;wifi disconnected
 	e>s;mobile connected
 	e>s;mobile disconnected
-group end
+}
 

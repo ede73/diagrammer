@@ -1,17 +1,17 @@
 group color #33FF33
 node color #ffff00
-group Sample_front;192.168.10.0/24
+{ Sample_front;192.168.10.0/24
 	web01
 	web02
 	equal web01,web02
-group end
-group Sample_back;192.168.20.0/24
+}
+{ Sample_back;192.168.20.0/24
 	web01;.1
 	web02;.2
 	db01;.101
 	db02;.102
 	equal db01,db02
-group end
+}
 
 web01-Sample_front;.1
 web02-Sample_front;.2

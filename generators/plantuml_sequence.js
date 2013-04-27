@@ -78,38 +78,11 @@ function plantuml_sequence(yy) {
         }
     }(r.OBJECTS);
 */
-
-    var traverseObjects = function traverseObjects(r) {
-        for (var i in r.OBJECTS) {
-            var o = r.OBJECTS[i];
-            if (o instanceof Group) {
-            //TODO:
-                //Group name,OBJECTS,get/setEqual,toString
-                var processAGroup = function(o) {
-                    debug(JSON.stringify(o));
-                    yy.result(indent('subgraph cluster_' + o.getName() + ' {'));
-                    depth++;
-                    if (o.getLabel())
-                      yy.result(indent(getAttrFmt(o, 'label', '   label="{0}";')));
-                    if (o.getColor()!==undefined) {
-                        yy.result(indent("style=filled;"));
-                        yy.result(indent(getAttrFmt(o, 'color', '   color="{0}";\n')));
-                    }
-                    depth++;
-                    traverseObjects(o);
-                    depth--;
-                    yy.result(indent("}//end of " + o.getName()));
-                }(o);
-            } else if (o instanceof Node) {
-                processANode(o);
-            } else {
-                throw new Error("Not a node nor a group, NOT SUPPORTED");
-            }
-        }
-    }(r);
-
+    var printLinks=function printLinks(container){
     for (var i in yy.LINKS) {
         var l = yy.LINKS[i];
+        //if container given, print ONLY THOSE links that match this container!
+        if (container && l.container!==container) continue;
         var attrs=[];
         var note="";
         var label=getAttr(l, 'label');
@@ -203,5 +176,43 @@ function plantuml_sequence(yy) {
         	yy.result(indent("end note"));
         }
     }
+    };
+    var traverseObjects = function traverseObjects(r) {
+        for (var i in r.OBJECTS) {
+            var o = r.OBJECTS[i];
+            if (o instanceof Group) {
+            //TODO:
+                //Group name,OBJECTS,get/setEqual,toString
+                var processAGroup = function(o) {
+                    debug(JSON.stringify(o));
+                    var cond=getAttr(o,'conditional');
+                    if (cond){
+                    	if (cond=="if")cond="alt";
+                    	else if (cond=="elseif")cond="else";
+                    	else if (cond=="else")cond="else";
+                    	else if (cond=="endif")cond="end";
+                    }else{
+                    	cond="ref";
+                    }
+                    yy.result(indent(cond+' ' + o.getLabel()));
+                    if (o.getColor()!==undefined) {
+                        yy.result(indent("style=filled;"));
+                        yy.result(indent(getAttrFmt(o, 'color', '   color="{0}";\n')));
+                    }
+                    depth++;
+                    traverseObjects(o);
+                    printLinks(o);
+                    depth--;
+                    //yy.result(indent("}//end of " + o.getName()));
+                }(o);
+            } else if (o instanceof Node) {
+                processANode(o);
+            } else {
+                throw new Error("Not a node nor a group, NOT SUPPORTED");
+            }
+        }
+    }(r);
+    printLinks(r);
+
     yy.result("@enduml");
 }

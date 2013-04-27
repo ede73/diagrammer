@@ -257,6 +257,7 @@ function addLink(yy, l) {
         debug(" PUSH LINK ARRAY:" + l);
     } else {
         debug(" PUSH LINK:" + l);
+        setAttr(l,'container',getCurrentContainer(yy));
     }
     yy.LINKS.push(l);
     return l;

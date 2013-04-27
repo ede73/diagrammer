@@ -1,0 +1,16 @@
+q>w
+a
+
+if something would happend then
+  a>b
+elseif something probably would not happen then
+ b>c
+elseif or if i see a flying bird then
+then<elseif
+ c>z
+else
+ q>m
+endif
+
+outside>end
+

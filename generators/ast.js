@@ -39,6 +39,10 @@ function ast(yy) {
 
     for (var i in yy.LINKS) {
         var l = yy.LINKS[i];
-	yy.result(indent(JSON.stringify(l)));
+			var n = JSON.parse(JSON.stringify(l));
+			n.container.OBJECTS=undefined;
+			n.container.label=undefined;
+			n.container.conditional=undefined;
+	yy.result(indent(JSON.stringify(n)));
     }
 }

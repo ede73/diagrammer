@@ -104,6 +104,7 @@ function digraph(yy) {
                     depth++;
                     traverseObjects(o);
                     depth--;
+                    depth--;
                     yy.result(indent("}//end of " + o.getName()));
                 }(o);
             } else if (o instanceof Node) {

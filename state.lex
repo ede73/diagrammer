@@ -22,6 +22,10 @@ IMAGE	"/"[A-Za-z0-9]+".png"
 SHAPES "actor"|"beginpoint"|"box"|"circle"|"cloud"|"condition"|"database"|"default"|"diamond"|"dots"|"doublecircle"|"ellipse"|"endpoint"|"input"|"loopin"|"loopout"|"mail"|"minidiamond"|"minisquare"|"note"|"record"|"roundedbox"|"square"|"terminator"|"loop"|"loopend"|"loopstart"|"rect"|"rectangle"
 STYLES "dotted"|"dashed"|"solid"|"bold"|"rounded"|"diagonals"|"invis"|"singularity"
 /*wedged,striped..filled...*/
+IF	"if"\s+.*"then"(?=\n)
+ELSEIF	"else"\s*"if"\s+.*"then"(?=\n)
+ELSE	"else"(?=\n)
+ENDIF	"end"\s*"if"(?=\n)
 
 /*
 Could make out?
@@ -43,6 +47,11 @@ Special arrow is /> and </ that denotes a broken signal...
 /*{COLORLABEL}	return 'COLORLABEL';*/
 '"'[^"]+'"'	return 'INLINE_STRING';
 "$("[^)]+")"	return 'VARIABLE';
+{IF}		return 'IF';
+{IF_CLAUSE}	return 'IF_CLAUSE';
+{ELSEIF}	return 'ELSEIF';
+{ELSE}		return 'ELSE';
+{ENDIF}		return 'ENDIF';
 {LABEL}		return 'LABEL';
 {SHAPES}	return 'SHAPES';
 {STYLES}	return 'STYLES';

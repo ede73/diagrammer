@@ -10,7 +10,9 @@ S
 			var generator=getGraphRoot(yy).getGenerator();
 			if (yy.OUTPUT)
 			  generator=yy.OUTPUT
-			if ("actdiag" == generator){
+			if ("ast" == generator){
+				ast(yy);
+			}else if ("actdiag" == generator){
 				actdiag(yy);
 			}else if ("blockdiag" == generator){
 				blockdiag(yy);
@@ -158,6 +160,22 @@ content
 	| GROUP_COLOR getColorOrVariable{
 		if ($2=="default") $2=undefined;
 		$$=getCurrentContainer(yy).setDefault('groupcolor',$2);}
+	| IF 	 {
+		$$=setAttr(enterContainer(yy,getGroup(yy).setLabel($IF)),'conditional','if')
+		}
+	| ELSEIF {
+		exitContainer(yy);
+		$$=setAttr(enterContainer(yy,getGroup(yy).setLabel($ELSEIF)),'conditional','elseif')
+		}
+	| ELSE 	 {
+		exitContainer(yy);
+		$$=setAttr(enterContainer(yy,getGroup(yy).setLabel($ELSE)),'conditional','else')
+		}
+	| ENDIF	 { 
+		exitContainer(yy);
+		setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif');
+		$$=exitContainer(yy)
+	}
 	| GROUP groupTarget {}
 	| GROUP_END 	-> exitContainer(yy)
 	| START NAME 	-> getGraphRoot(yy).setStart($NAME)

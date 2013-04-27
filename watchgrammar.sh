@@ -2,7 +2,7 @@ old=.$$.old
 new=.$$.new
 FILE="state.lex state.grammar \
 model/support.js model/model.js \
-generators/seqdiag.js generators/mscgen.js generators/blockdiag.js generators/actdiag.js generators/digraph.js generators/nwdiag.js generators/plantuml_sequence.js"
+generators/seqdiag.js generators/mscgen.js generators/blockdiag.js generators/actdiag.js generators/digraph.js generators/nwdiag.js generators/plantuml_sequence.js generators/ast.js"
 
 touch $FILE
 stat -f"%N %m%b%z%v" $FILE>$old

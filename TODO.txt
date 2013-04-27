@@ -8,6 +8,22 @@
 - oMeta!
 
 
+- For plantuml 
+  alt succesfull case
+  else some kind of failure
+    group 
+      ...
+      loop 1000 times
+      end
+    end
+  else another type of failure
+  end
+
+  For simplicity could make if then else and loop constructs that WOULD works automatically in graphviz...
+  if x>y then
+  else if x==y then
+  end if
+
 - ambiguity in group definitions {xxx could be group named xxx, or a group that has a node xxx. Fix so that group declarations in one line! Always!
 - Check if something could be done for network graphs .. 
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
@@ -35,6 +51,7 @@
 - decorate=true for edge labels in graphviz might help readability
 - constraint=false for edges in graphviz might help the layout to be as user wants
 - compass (a:ne->b:nw) for edges in graphviz might help the layout to be as user wants (ie. direct the edge start/end to compass directions)
+  plant uml also supports these, but just for simple ones up,down,left,right(n,s,e,w)
 
 -------
 (DONE)- make a dot or singularity  xxx[shape=circle,label="",width=0.01,height=0.01] so a>xxx>b,c becomes nice combo arrow until split to b,c

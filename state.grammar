@@ -48,11 +48,15 @@ getShapeOrVariable
 	| SHAPES -> $SHAPES
 	;
 readNodeAttrs
-	: STYLES NAME getColorOrVariable -> getNode(yy,$NAME,$STYLES).setColor($getColorOrVariable)
+	: STYLES SHAPES getColorOrVariable -> getNode(yy,$NAME,$STYLES).setColor($getColorOrVariable).setShape($SHAPES)
+	| STYLES NAME getColorOrVariable -> getNode(yy,$NAME,$STYLES).setColor($getColorOrVariable)
 	| STYLES NAME IMAGE 			-> getNode(yy,$NAME,$STYLES).setImage($IMAGE)
+	| STYLES SHAPES NAME 				-> getNode(yy,$NAME,$STYLES).setShape($SHAPES)
 	| STYLES NAME 				-> getNode(yy,$NAME,$STYLES)
+	| SHAPES NAME getColorOrVariable 	-> getNode(yy,$NAME).setColor($getColorOrVariable).setShape($SHAPES)
 	| NAME getColorOrVariable 	-> getNode(yy,$NAME).setColor($getColorOrVariable)
 	| NAME IMAGE 				-> getNode(yy,$NAME).setImage($IMAGE)
+	| SHAPES NAME 						-> getNode(yy,$NAME).setShape($SHAPES)
 	| NAME 						-> getNode(yy,$NAME)
 	;
 

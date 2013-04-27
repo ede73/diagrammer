@@ -24,34 +24,6 @@
   else if x==y then
   end if
 
-- WHILE links have a container specification now, it is not yet enuf for plantuml.. It needs the LINKS and GROUPS (and participants) appear IN ORDER
- sequentially, from top of the file...so as this approach works for graphviz and msc/seqdiag..with node/group ordering, plantuml needs to know order like
-  1 link
-  2 link
-  3 group
-  4 a link in group
-  5 a link in group
-  6 group end
-  6.1 a link outside groups...
-  7 another group
-  8 a link in another group
-  9 group end
- 10 link outside all
- 11 link outside all groups...
- This can be done YES, but it will require stacking all attributes in order. now OBJECTS store groups/nodes and theres a separate array for LINKS (which do appear in order as well)
- a) Actually One could..traverse AST to see if it has groups..If not, print nodes and links
- b) If having groups, print LINKS until first containment.. then process groups and links in that group and so forth 
- c) when last group is processed, traverse link list until no container(root container) links are left, print those
-eh..like above link has following containers
-1: root
-2: root
-4: group
-5: group
-6.1 root
-8: another group
-10: root
-11: root
-
 - ambiguity in group definitions {xxx could be group named xxx, or a group that has a node xxx. Fix so that group declarations in one line! Always!
 - Check if something could be done for network graphs .. 
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
@@ -82,6 +54,35 @@ eh..like above link has following containers
   plant uml also supports these, but just for simple ones up,down,left,right(n,s,e,w)
 
 -------
+(DONE + way of last suggestion) - WHILE links have a container specification now, it is not yet enuf for plantuml.. It needs the LINKS and GROUPS (and participants) appear IN ORDER
+ sequentially, from top of the file...so as this approach works for graphviz and msc/seqdiag..with node/group ordering, plantuml needs to know order like
+  1 link
+  2 link
+  3 group
+  4 a link in group
+  5 a link in group
+  6 group end
+  6.1 a link outside groups...
+  7 another group
+  8 a link in another group
+  9 group end
+ 10 link outside all
+ 11 link outside all groups...
+ This can be done YES, but it will require stacking all attributes in order. now OBJECTS store groups/nodes and theres a separate array for LINKS (which do appear in order as well)
+ a) Actually One could..traverse AST to see if it has groups..If not, print nodes and links
+ b) If having groups, print LINKS until first containment.. then process groups and links in that group and so forth 
+ c) when last group is processed, traverse link list until no container(root container) links are left, print those
+eh..like above link has following containers
+1: root
+2: root
+4: group
+5: group
+6.1 root
+8: another group
+10: root
+11: root
+
+
 (DONE) -- for all links add CURRENT CONTAINER in which context the link was added, plantuml_sequence requires links to be IN CONTEXT of the group
   where as the graphviz is not so picky...node definition is what counts (plantuml does not seem to care about node definitions in sequence mode)
 (DONE)- make a dot or singularity  xxx[shape=circle,label="",width=0.01,height=0.01] so a>xxx>b,c becomes nice combo arrow until split to b,c

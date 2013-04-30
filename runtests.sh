@@ -1,8 +1,12 @@
-./makeLexerAndParser.sh >/dev/null
+#./makeLexerAndParser.sh >/dev/null
 error=0
 test(){
  echo "Run test $1 using $x"
  ./t.sh skipparsermake silent $1 $x >/dev/null
+ [[ $? -ne 0 ]] && {
+   error=1
+   exit 9
+ }
  png=${1%.*}_${x}.png
  if [ -f "$png" ]; then
    if [ ! -f "ref/$x/$png" ]; then

@@ -36,13 +36,13 @@ contents
 	| contents content 	-> $contents + $content
 	;
 /* Read a color #xxxxxx or a variable $(xxx) or $(xxx:yyy) that MUST produce #xxxxxx*/
-getColorOrVariable
+colorOrVariable
 	: VARIABLE 	-> processVariable(yy,$VARIABLE) /*one can use named $VARIABLE or positional $1 args, like former, but latter seem more ...readable*/
 	| COLOR		-> $COLOR
 	;
 
 /* Read a shape  or a variable $(xxx) or $(xxx:yyy) that MUST produce a shape */
-getShapeOrVariable
+shapeOrVariable
 	: VARIABLE {
 			$$=processVariable(yy,$1).trim();
 			if (["actor","beginpoint","box","circle","cloud","condition","database","default","diamond","dots","doublecircle","ellipse","endpoint","input","loopin","loopout","mail","minidiamond","minisquare","note","record","roundedbox","square","terminator","loop","loopend","loopstart","rect","rectangle"].indexOf($$)==-1){
@@ -52,18 +52,17 @@ getShapeOrVariable
 	| SHAPES -> $SHAPES
 	;
 
-/* read nodes attributes */
+/* read nodes attributes basically like:
+[STYLES] [SHAPES] NAME [IMAGE|COLOR]
+*/
 readNodeAttrs
-	: STYLES SHAPES getColorOrVariable -> getNode(yy,$NAME,$STYLES).setColor($getColorOrVariable).setShape($SHAPES)
-	| STYLES NAME getColorOrVariable   -> getNode(yy,$NAME,$STYLES).setColor($getColorOrVariable)
-	| STYLES NAME IMAGE 			   -> getNode(yy,$NAME,$STYLES).setImage($IMAGE)
-	| STYLES SHAPES NAME 			   -> getNode(yy,$NAME,$STYLES).setShape($SHAPES)
-	| STYLES NAME 					   -> getNode(yy,$NAME,$STYLES)
-	| SHAPES NAME getColorOrVariable   -> getNode(yy,$NAME).setColor($getColorOrVariable).setShape($SHAPES)
-	| NAME getColorOrVariable 		   -> getNode(yy,$NAME).setColor($getColorOrVariable)
-	| NAME IMAGE 					   -> getNode(yy,$NAME).setImage($IMAGE)
-	| SHAPES NAME 					   -> getNode(yy,$NAME).setShape($SHAPES)
-	| NAME 							   -> getNode(yy,$NAME)
+	: STYLES SHAPES colorOrVariable -> getNode(yy,$NAME,$STYLES).setColor($colorOrVariable).setShape($SHAPES)
+	| STYLES NAME colorOrVariable?	-> getNode(yy,$NAME,$STYLES).setColor($3)
+	| STYLES NAME IMAGE 			-> getNode(yy,$NAME,$STYLES).setImage($IMAGE)
+	| STYLES SHAPES NAME 			-> getNode(yy,$NAME,$STYLES).setShape($SHAPES)
+	| SHAPES NAME colorOrVariable?	-> getNode(yy,$NAME).setColor($3).setShape($SHAPES)
+	| NAME colorOrVariable?		 	-> getNode(yy,$NAME).setColor($2)
+	| NAME IMAGE 					-> getNode(yy,$NAME).setImage($IMAGE)
 	;
 
 /*
@@ -72,84 +71,94 @@ But it gets thing done..for now!
 TODO: Fix it
 
 This means getNode MUST be able to return a Group as well! If name matches!!
+
+left recursive
+  X=[STYLES] [SHAPES] NAME [IMAGE|COLOR]
+  X ([ LISTSEP X]*)
+See Cris Dodds good explanation of right recursion 
+http://stackoverflow.com/questions/12715961/grammar-spec-resolving-shift-reduce-conflicts
 */
-readNodeOrGroup
-    /* readNodeOrGroup cumulates an array of nodes, RHS is latest node */
-	: readNodeOrGroup LISTSEP readNodeAttrs -> getList(yy,$readNodeOrGroup,$readNodeAttrs)
-	| readNodeOrGroup LISTSEP INLINE_STRING readNodeAttrs -> getList(yy,$readNodeOrGroup,$readNodeAttrs,$INLINE_STRING)
+nodeOrGroup
+    /* nodeOrGroup cumulates an array of nodes, RHS is latest node */
+	: nodeOrGroup LISTSEP readNodeAttrs 			  -> getList(yy,$nodeOrGroup,$readNodeAttrs)
+	| nodeOrGroup LISTSEP INLINE_STRING readNodeAttrs -> getList(yy,$nodeOrGroup,$readNodeAttrs,$INLINE_STRING)
 	| readNodeAttrs -> $readNodeAttrs
 	;
+/*
+(nodeOrGroup (LABEL|nodesAndEvents EVENT [colorOrVariable] [INLINE_STRING]))+
 
-targetName
-	: targetName EVENT getColorOrVariable INLINE_STRING readNodeOrGroup -> getLink(yy,$EVENT,$targetName,$readNodeOrGroup,$INLINE_STRING,$getColorOrVariable).right
-	| targetName EVENT getColorOrVariable readNodeOrGroup LABEL -> getLink(yy,$EVENT,$targetName,$readNodeOrGroup,$LABEL.substring(1),$getColorOrVariable).right
-	| targetName EVENT getColorOrVariable readNodeOrGroup -> getLink(yy,$2,$1,$4,undefined,$3).right
-	| targetName EVENT readNodeOrGroup LABEL
+*/
+nodesAndEvents
+	: nodesAndEvents EVENT colorOrVariable INLINE_STRING nodeOrGroup -> getLink(yy,$EVENT,$nodesAndEvents,$nodeOrGroup,$INLINE_STRING,$colorOrVariable).right
+	| nodesAndEvents EVENT colorOrVariable nodeOrGroup LABEL -> getLink(yy,$EVENT,$nodesAndEvents,$nodeOrGroup,$LABEL.substring(1),$colorOrVariable).right
+	| nodesAndEvents EVENT colorOrVariable nodeOrGroup -> getLink(yy,$2,$1,$4,undefined,$3).right
+	| nodesAndEvents EVENT nodeOrGroup LABEL
 		{
-			debug("targetName EVENT readNodeOrGroup LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3);
+			debug("nodesAndEvents EVENT nodeOrGroup LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3);
 			if ($3 instanceof Group){
 				$$=getLink(yy,$2,$1,getGroup(yy,$3),$4.substring(1)).right;
 			}else{
 				$$=getLink(yy,$2,$1,getNode(yy,$3),$4.substring(1)).right;
 			}
 		}
-	| targetName EVENT INLINE_STRING readNodeOrGroup
+	| nodesAndEvents EVENT INLINE_STRING nodeOrGroup
 		{
-			if ($readNodeOrGroup instanceof Group){
-				$$=getLink(yy,$EVENT,$targetName,getGroup(yy,$readNodeOrGroup),$INLINE_STRING).right;
+			if ($nodeOrGroup instanceof Group){
+				$$=getLink(yy,$EVENT,$nodesAndEvents,getGroup(yy,$nodeOrGroup),$INLINE_STRING).right;
 			}else{
-				$$=getLink(yy,$EVENT,$targetName,getNode(yy,$readNodeOrGroup),$INLINE_STRING).right;
+				$$=getLink(yy,$EVENT,$nodesAndEvents,getNode(yy,$nodeOrGroup),$INLINE_STRING).right;
 			}
 		}
-	| targetName EVENT readNodeOrGroup
+	| nodesAndEvents EVENT nodeOrGroup
 		{
-			if ($readNodeOrGroup instanceof Group){
-				$$=getLink(yy,$EVENT,$targetName,getGroup(yy,$readNodeOrGroup)).right;
+			if ($nodeOrGroup instanceof Group){
+				$$=getLink(yy,$EVENT,$nodesAndEvents,getGroup(yy,$nodeOrGroup)).right;
 			}else{
-				$$=getLink(yy,$EVENT,$targetName,getNode(yy,$readNodeOrGroup)).right;
+				$$=getLink(yy,$EVENT,$nodesAndEvents,getNode(yy,$nodeOrGroup)).right;
 			}
 		}
-	| readNodeOrGroup LABEL -> $$.setLabel($2.substring(1))
-	| readNodeOrGroup {
-			debug("readNodeOrGroup"+" SS="+$$+",S0="+$0+",S1="+$1);
+	| nodeOrGroup LABEL -> $$.setLabel($2.substring(1))
+	| nodeOrGroup {
+			debug("nodeOrGroup"+" SS="+$$+",S0="+$0+",S1="+$1);
 		}
 	;
 	/*
 	A GROUP declaration
 	GROUP [NAME] [COLOR] [LABEL]
+	
 	*/
 groupTarget
-	: NAME getColorOrVariable LABEL -> enterContainer(yy,getGroup(yy).setName($1).setColor($2).setLabel($3.substring(1)))
-	| getColorOrVariable LABEL	-> enterContainer(yy,getGroup(yy).setColor($1).setLabel($2.substring(1)))
-	| LABEL 					-> enterContainer(yy,getGroup(yy).setLabel($1.substring(1)))
-	| NAME LABEL				-> enterContainer(yy,getGroup(yy).setName($1).setLabel($2.substring(1)))
-	| NAME getColorOrVariable	-> enterContainer(yy,getGroup(yy).setName($1).setColor($2))
-	| NAME						-> enterContainer(yy,getGroup(yy).setName($1))
+	: NAME? colorOrVariable? LABEL? -> enterContainer(yy,getGroup(yy).setName($1).setColor($2).setLabel($3==undefined?undefined:$3.substring(1)))
 	;
 
 content
+	/* variable declaration(s) */
 	: VARIABLE -> processVariable(yy,$1)
-	| SHAPE getShapeOrVariable
+	/* set default shape*/
+	| SHAPE shapeOrVariable
 		{
 			debug("SHAPE getShapeOrVariablleee ");
 			if ($2=="default") $2=undefined;
 			$$=getGraphRoot(yy).setCurrentShape($2);
 		}
-	| EQUAL readNodeOrGroup
+	/* set equal nodes */
+	| EQUAL nodeOrGroup
 		{
 			getCurrentContainer(yy).setEqual($2 instanceof Node?new Array($2):$2);
 		}
 	| SHAPE NAME {throw new Error("Expecting one of the shapes, got ("+$2+")");}
+	/*other defaults*/
 	| LANDSCAPE 		-> getGraphRoot(yy).setDirection("landscape")
 	| GENERATOR NAME 	-> getGraphRoot(yy).setGenerator($NAME)
 	| VISUALIZER NAME 	-> getGraphRoot(yy).setVisualizer($NAME)
 	| PORTRAIT 			-> getGraphRoot(yy).setDirection("portrait")
 	| COMMENT 			-> "/*"+$COMMENT.substring(2)+"*/\n"
-	| NODE_COLOR getColorOrVariable		-> getCurrentContainer(yy).setDefault('nodecolor',$2=="default"?undefined:$2)
-	| NODETEXT_COLOR getColorOrVariable	-> getCurrentContainer(yy).setDefault('nodetextcolor',$2=="default"?undefined:$2)
-	| LINK_COLOR getColorOrVariable		-> getCurrentContainer(yy).setDefault('linkcolor',$2=="default"?undefined:$2)
-	| LINKTEXT_COLOR getColorOrVariable	-> getCurrentContainer(yy).setDefault('linktextcolor',$2=="default"?undefined:$2)
-	| GROUP_COLOR getColorOrVariable	-> getCurrentContainer(yy).setDefault('groupcolor',$2=="default"?undefined:$2)
+	| NODE_COLOR colorOrVariable		-> getCurrentContainer(yy).setDefault('nodecolor',$2=="default"?undefined:$2)
+	| NODETEXT_COLOR colorOrVariable	-> getCurrentContainer(yy).setDefault('nodetextcolor',$2=="default"?undefined:$2)
+	| LINK_COLOR colorOrVariable		-> getCurrentContainer(yy).setDefault('linkcolor',$2=="default"?undefined:$2)
+	| LINKTEXT_COLOR colorOrVariable	-> getCurrentContainer(yy).setDefault('linktextcolor',$2=="default"?undefined:$2)
+	| GROUP_COLOR colorOrVariable	-> getCurrentContainer(yy).setDefault('groupcolor',$2=="default"?undefined:$2)
+	/* conditionals*/
 	| IF 	 ->	setAttr(enterContainer(yy,getGroup(yy).setLabel($IF)),'conditional','if')
 	| ELSEIF {
 		exitContainer(yy);
@@ -164,13 +173,11 @@ content
 		setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif');
 		$$=exitContainer(yy)
 	} 
+	/* actual nodes*/
 	| GROUP groupTarget {}
 	| GROUP_END 	-> exitContainer(yy)
 	| START NAME 	-> getGraphRoot(yy).setStart($NAME)
-	| targetName {
-		//debug("targetName"+" SS="+$$+",S0="+$0+",S1="+$1);
-		//$$=getNode(yy,$1);
-		//$2($$);
-		}
+	| nodesAndEvents {
+	}
 	;
 %% 

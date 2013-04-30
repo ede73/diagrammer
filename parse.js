@@ -12,6 +12,8 @@ if (myArgs[0]==="verbose") {
 //The moduleName you specify can also include a namespace, 
 //var parserSource = parser.generate({moduleName: "myCalculator.parser"});
 var raw = fs.readFileSync(path.normalize("./"+myArgs[0]), 'utf8');
+var errors=0
+
 if (myArgs[1]==="lex"){
 	var lexer=require("./state.js");
 	//LEX
@@ -36,7 +38,12 @@ if (myArgs[1]==="lex"){
 		console.log("Parsing error:");
 		console.log(str);
 		console.log(hash);
+		errors=1
 		throw new Error(str);
 	};
 	parser.parse(raw);
+        if (errors==1){
+		console.log("Errors....");
+		process.exit(9)
+	}
 }

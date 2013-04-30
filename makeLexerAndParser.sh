@@ -15,5 +15,7 @@ cat generators/*.js >>state.all
 echo make parser
 jison state.all -o parser.js 
 
-[[ "$?" -ne 0 ]] && exit 10
-
+[[ "$?" -ne 0 ]] && {
+ echo Generation error
+ exit 10
+}

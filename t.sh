@@ -50,7 +50,10 @@ case "$generator" in
     node parse.js "$input" digraph |dot -Tpng -o $png  && [[ $silent = 0 ]] && open "$png" 
   ;;
 esac
-
+[[ $? -ne 0 ]] && {
+  echo Fatal parsing error
+  exit 10
+}
 #circo -Tpng a.gv >c.png
 ##[[ -s c.png ]] && [[ $silent = 0 ]] && open c.png
 

@@ -1,141 +1,22 @@
 <html>
 <link rel="stylesheet" type="text/css" href="css/textarea.css"/>
 <script type="text/javascript" src="parser.js"></script>
-<script type="text/javascript">
-parser.yy.OUTPUT="digraph";
-VERBOSE=false;
-parser.yy.parseError=function(str,hash){
-	var pe="Parsing error:\n"+
-		str+"\n"+hash;
-	console.log("pe");
-	document.getElementById("error").innerText=pe;
-	cancelVTimer();
-	throw new Error(str);
-};
-//called line by line...
-parser.yy.result=function(line){
-   if (parsingStarted){
-	parsingStarted=false;
-	result.value="";
-   }
-   result.value=result.value+line+"\n";
-}
-parser.trace=function(x){console.log("TRACE:"+x);}
-function openImage(imageUrl) { 
-  window.open(imageUrl+ '?x=' + new Date().getTime()); 
-}
+<script type="text/javascript" src="index.js"></script>
+<!--<script type="text/javascript" src="js/mscgen.js"></script>-->
 
-function getSavedGraph(){
-  var data={};
-  if (!localStorage.getItem("graphs")){
-    localStorage.setItem("graphs",JSON.stringify(data));
-    return data;
-  }
-  var graph=localStorage.getItem("graphs");
-  console.log("Have graph"+graph);
-  data=eval("("+graph+")");
-  return data;
-}
-function getSavedFiles(){
-  var t="";
-  for(var k in getSavedGraph()){
-    console.log("Stored file:"+k);
-    t+='<option value="'+k+'">'+k+'</option>';
-  }
-  var e = document.getElementById("saved");
-  e.innerHTML=t;
-}
-function save(){
-  var filename=document.getElementById("filename").value;
-  var editable=document.getElementById("editable").value;
-  var data=getSavedGraph();
-  data[filename]=editable;
-  var jd=JSON.stringify(data);
-  localStorage.setItem("graphs",jd);
-  //clipboardData.setData("text",jd);
-}
-function load(){
-  var filename=document.getElementById("filename").value;
-  var data=getSavedGraph();
-  if (data[filename])
-  document.getElementById("editable").value=data[filename];
-}
-function exportGraphs(){
-	$.ajax({
-	  type:"POST",
-	  async:true,
-	  cache:false,
-	  url: "saveExport.php",
-	  data:JSON.stringify(getSavedGraph()),
-          contentType: "application/json; charset=utf-8",
-          //dataType: "json",
-	  success: function(msg) {
-	  alert("Exported");
-	},
-    	  error: function(err) {
-            alert("ERROR: "+JSON.stringify(err));
-	    if (err.status == 200) {
-		    ParseResult(err);
-	   }else { alert('Error:' + err.responseText + '  Status: ' + err.status); }
-    	  }
-	});
+<!-- canviz support start-->
+        <link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz.css" />
+        <!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz-ie6.css" /><![endif]-->
+        <!--[if IE]><script type="text/javascript" src="js/canviz-0.1/excanvas/excanvas.js"></script><![endif]-->
+        <!--<script type="text/javascript" src="js/canviz-0.1/prototype/prototype.js"></script>-->
+   <!--     <script src="//ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js"></script>
+        <script type="text/javascript" src="js/canviz-0.1/path/path.js"></script>
+        <script type="text/javascript" src="js/canviz-0.1/canviz.js"></script>
+        <script type="text/javascript" src="js/canviz-0.1/x11colors.js"></script>
+        <script type="text/javascript" src="js/canviz-0.1/graphs/graphlist.js"></script>
+        <script type="text/javascript" src="js/canviz-0.1/graphs/layoutlist.js"></script>
+--><!-- canviz support end-->
 
-}
-function importGraphs(){
-	$.ajax({
-	  type:"GET",
-	  async:true,
-	  cache:false,
-	  url: "localstorage.json",
-          contentType: "application/json; charset=utf-8",
-          dataType: "json",
-	  success: function(msg) {
-	  	//alert(JSON.stringify(msg));
-	  	localStorage.setItem("graphs",JSON.stringify(msg));
-    	  },
-    	  error: function(err) {
-        	alert("ERROR: "+JSON.stringify(err));
-	    if (err.status == 200) {
-		    ParseResult(err);
-	   }else { alert('Error:' + err.responseText + '  Status: ' + err.status); }
-    	  }
-	});
-}
-function visualize(tt){
-	var statelang= document.getElementById("result").value;
-	if (getVisualizer()=="dot"){
-		try{
-  	        document.getElementById('svg').innerHTML=Viz(statelang,'svg');
-		}catch(err){
-		}
-	}else{
-		document.getElementById('svg').innerHTML="only for dotty";		
-	}
-	var visualizeUrl="visualize.php?visualizer="+getVisualizer();
-	$.ajax({
-	  type:"POST",
-	  async:true,
-	  cache:false,
-	  url: visualizeUrl,
-	  data:statelang,
-	  //data: {body:statelang},
-          //contentType: "application/json; charset=utf-8",
-          //dataType: "json",
-	  success: function(msg) {
-	    //UseReturnedData(msg.d);
-		//alert(msg);
-		document.getElementById("image").setAttribute("src",msg);
-		reloadImg('image');
-    	  },
-    	  error: function(err) {
-        	alert("ERROR: "+JSON.stringify(err));
-	    if (err.status == 200) {
-		    ParseResult(err);
-	   }else { alert('Error:' + err.responseText + '  Status: ' + err.status); }
-    	  }
-	});
-}
-</script>
 <body>
 <form name="contact" action="">
     <label for="generator">Generator</label>
@@ -241,167 +122,21 @@ function visualize(tt){
     <textarea id="result" rows="40" cols="10"></textarea>
     <p>Javascript generated(dot only)</p>
     <div id="svg" style="border-width: 2px; border-style: dotted; " align="top"></div>
+    <p>CanViZ</p>
+    <div id="graph_container"></div>
+    <div id="debug_output"></div>
   </form>
 </body>
 <script src="js/viz.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="index2.js"></script>
 <script type="text/javascript">
-getSavedFiles();
-result= document.getElementById("result");
-var vtimer = null;
-var vdelay=1000;
-function addLine(i){
-var d=document.getElementById("editable");
-switch(i){
-case 1:
-d.value=d.value+"node#ff0000;Label here\n";
-break;
-case 2:
-d.value=d.value+"group color #7722ee\ngroup NAME;Label the group\n//Nodes\n  group InnerGroup#00ff00;Inner group\n  xy\n  group end\ngroup end\n";
-break;
-case 3:
-d.value=d.value+"x#ff0000>#00ff00y#0000ff\n";
-break;
-case 4:
-d.value=d.value+
-"a/barcode.png,b/basestation.png,c/battery.png>d/camera.png,e/cpu.png,f/documents.png\n"+
-"a1/harddisk.png,b1/keyboard.png,c1/laptop.png>d1/laser.png,e1/monitor.png,f1/mouse.png\n"+
-"a2/phone.png,b2/printer.png,c2/ram.png>d2/satellite.png,e2/scanner.png,f2/sim.png\n"+
-"u/usbmemory.png>w/wifi.png\n"+
-"a1/actor1.png>a2/actor2.png>a3/actor3.png";
-break;
-case 5:
-d.value="start NODENAME\n"+d.value;
-break;
-case 6:
-d.value=d.value+"//shapes: default, invis, record, dots, actor, cloud\n"+
-"//beginpoint,endpoint,condition,database,terminator,input,loopin,loopout\n"+
-"//square,ellipse,diamond,minidiamond,note,mail\n"+
-"shape box\n";
-break;
-case 7:
-d.value="equal node1,node2\n"+d.value;
-break;
-case 8:
-d.value="$(color1:#12ede0)\nclr$(color1)\nclr2$(color1)\n"+d.value;
-}
-	parse(document.getElementById("editable"));
-return false;
-}
-function reloadImg(id) {
-   var obj = document.getElementById(id);
-   var src = obj.src;
-   var pos = src.indexOf('?');
-   if (pos >= 0) {
-      src = src.substr(0, pos);
-   }
-   var date = new Date();
-   obj.src = src + '?v=' + date.getTime();
-   return false;
-}
-//Get currently selected generator
-function getGenerator(){
-	var e = document.getElementById("generator");
-	var gen=e.options[e.selectedIndex].value;
-	if (gen.indexOf(":")>-1)
-		return gen.split(":")[0];
-	return gen;
-}
-function getVisualizer(){
-	var e = document.getElementById("generator");
-	var gen=e.options[e.selectedIndex].value;
-	if (gen.indexOf(":")>-1)
-		return gen.split(":")[1];
-	return gen;
-}
-function cancelVTimer(){
-        if (vtimer) {
-            window.clearTimeout(vtimer);
-        }
-}
-function highlight(tc){
-var s=document.getElementById("editable");
-s.innerHTML=tc
-.replace("->","->>")
-.replace(".>",".>>")
-.replace("<-","<<-")
-.replace("<.","<<.")
-.replace("<","<<")
-.replace(">",">>")
-.replace("->>",'<text id="event">-&gt;</text>')
-.replace(".>>",'<text id="event">.&gt;</text>')
-.replace("<<-",'<text id="event">&lt;-</text>')
-.replace("<<.",'<text id="event">&lt;.</text>')
-.replace(">>",'<text id="event">&gt;</text>')
-.replace("<<",'<text id="event">&lt;</text>')
-;
-}
-function parse(textArea){
-	document.getElementById("error").innerText="";
-	parsingStarted=true;
-	delete (parser.yy.GRAPHROOT);
-	delete (parser.yy.LINKS);
-	delete (parser.yy.OBJECTS);
-	parser.yy.OUTPUT=getGenerator();
-	parser.parse(textArea.value+"\n");
-	/*
-	var tc=textArea.textContent;
-	parser.parse(tc+"\n");
-	highlight(tc);
-	*/
-        cancelVTimer();
-        vtimer = window.setTimeout( function() {
-            vtimer = null;
-            visualize(1);
-        }, vdelay );
-}
-function generatorChanged()
-{
-	parse(document.getElementById("editable"));
-}
-function savedChanged(){
-  //read the example...place to textArea(overwrite)
-  var e = document.getElementById("saved");
-  var doc=e.options[e.selectedIndex].value;
-    var filename=document.getElementById("filename");
-  var data=getSavedGraph();
-  if (data[doc]){
-    document.getElementById("editable").value=data[doc];
-    filename.value=doc;
-    parse(document.getElementById("editable"));
-  }
-}
-function exampleChanged()
-{
-	//read the example...place to textArea(overwrite)
-	var e = document.getElementById("example");
-	var doc=e.options[e.selectedIndex].value;
-$.ajax({
-  url: doc,
-  cache:false
-}).done(function(data) {
-	document.getElementById("editable").value=data;
-	generatorChanged();
-});
-}
-
-function delayedKeypressCallback(obj, callback, delay) {
-    var timer = null;
-    var tt=obj;
-    obj.onkeyup= function() {//onchange does not work on chrome/mac(elsewhere?)
-        if (timer) {
-            window.clearTimeout(timer);
-        }
-        timer = window.setTimeout( function() {
-            timer = null;
-            callback(tt);
-        }, delay );
-    };
-    obj = null;
-}
-
-delayedKeypressCallback( document.getElementById("editable"), parse, 150 );
-delayedKeypressCallback( document.getElementById("result"), visualize, 250 );
+//_MscParse("a>b");
+//  $.noConflict();
+//  jQuery(document).ready(function($) {
+//    // Code that uses jQuery's $ can follow here.
+//  });
+//  // Code that uses other library's $ can follow here.
 </script>
 </html>
 

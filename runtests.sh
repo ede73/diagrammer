@@ -1,4 +1,5 @@
 ./makeLexerAndParser.sh >/dev/null
+error=0
 test(){
  echo "Run test $1 using $x"
  ./t.sh skipparsermake silent $1 $x >/dev/null
@@ -12,48 +13,58 @@ test(){
  else
    echo "ERROR: Could not produce output $1 as $png is non existent" >&2
    ls -l $png
+   error=1
    exit 10
  fi
 }
 
+i=0
+#parallelism for 8 cores
+runtest(){
+ (( i++ ))
+ #echo Running test $i
+ test $* &
+ if (( $i % 8 == 0 )) ; then wait;fi
+ [[ $error != 0 ]] && exit 10
+}
 tests=${1:-dot actdiag blockdiag}
 for test in $tests; do
 echo TEst suite $test >&2
 x=$test
-test state.txt
-test state2.txt
-test state3.txt
-test state4.txt
-[[ "$test" != "actdiag" ]] && [[ "$test" != "blockdiag" ]] && test state5.txt
-test state6.txt
-test state7.txt
-test state8.txt
-test state9.txt
-test state10.txt
-test state11.txt
-test state12.txt
-test state_cluster_edge.txt
-test state_dual_node.txt
-test state_innergroups.txt
-test state_recursive_linking.txt
-test state_images.txt
-test fulltest.txt
-test state_tcp.txt
-test state_y_edge.txt
-test state_conditionals.txt
+runtest state.txt
+runtest state2.txt
+runtest state3.txt
+runtest state4.txt
+[[ "$test" != "actdiag" ]] && [[ "$test" != "blockdiag" ]] && runtest state5.txt
+runtest state6.txt
+runtest state7.txt
+runtest state8.txt
+runtest state9.txt
+runtest state10.txt
+runtest state11.txt
+runtest state12.txt
+runtest state_cluster_edge.txt
+runtest state_dual_node.txt
+runtest state_innergroups.txt
+runtest state_recursive_linking.txt
+runtest state_images.txt
+runtest fulltest.txt
+runtest state_tcp.txt
+runtest state_y_edge.txt
+runtest state_conditionals.txt
 done
 
 x=nwdiag
-test state13.txt
-test state14.txt
-test state15.txt
-test state16.txt
+runtest state13.txt
+runtest state14.txt
+runtest state15.txt
+runtest state16.txt
 
 tests=${1:-mscgen seqdiag plantuml_sequence}
 for test in $tests; do
-x=$test
-  test state_sequence.txt
-  test state_sequence2.txt
-  test state_conditionals.txt
+  x=$test
+  runtest state_sequence.txt
+  runtest state_sequence2.txt
+  runtest state_conditionals.txt
 done
 

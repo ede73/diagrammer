@@ -6,7 +6,6 @@
 S
 	: contents EOF
 		{
-			debug("contents EOF");
 			var generator=getGraphRoot(yy).getGenerator();
 			if (yy.OUTPUT)
 			  generator=yy.OUTPUT
@@ -36,12 +35,13 @@ contents
 	: content 			-> $content
 	| contents content 	-> $contents + $content
 	;
-
+/* Read a color #xxxxxx or a variable $(xxx) or $(xxx:yyy) that MUST produce #xxxxxx*/
 getColorOrVariable
 	: VARIABLE 	-> processVariable(yy,$VARIABLE) /*one can use named $VARIABLE or positional $1 args, like former, but latter seem more ...readable*/
 	| COLOR		-> $COLOR
 	;
-	
+
+/* Read a shape  or a variable $(xxx) or $(xxx:yyy) that MUST produce a shape */
 getShapeOrVariable
 	: VARIABLE {
 			$$=processVariable(yy,$1).trim();
@@ -51,17 +51,19 @@ getShapeOrVariable
 	}
 	| SHAPES -> $SHAPES
 	;
+
+/* read nodes attributes */
 readNodeAttrs
 	: STYLES SHAPES getColorOrVariable -> getNode(yy,$NAME,$STYLES).setColor($getColorOrVariable).setShape($SHAPES)
-	| STYLES NAME getColorOrVariable -> getNode(yy,$NAME,$STYLES).setColor($getColorOrVariable)
-	| STYLES NAME IMAGE 			-> getNode(yy,$NAME,$STYLES).setImage($IMAGE)
-	| STYLES SHAPES NAME 				-> getNode(yy,$NAME,$STYLES).setShape($SHAPES)
-	| STYLES NAME 				-> getNode(yy,$NAME,$STYLES)
-	| SHAPES NAME getColorOrVariable 	-> getNode(yy,$NAME).setColor($getColorOrVariable).setShape($SHAPES)
-	| NAME getColorOrVariable 	-> getNode(yy,$NAME).setColor($getColorOrVariable)
-	| NAME IMAGE 				-> getNode(yy,$NAME).setImage($IMAGE)
-	| SHAPES NAME 						-> getNode(yy,$NAME).setShape($SHAPES)
-	| NAME 						-> getNode(yy,$NAME)
+	| STYLES NAME getColorOrVariable   -> getNode(yy,$NAME,$STYLES).setColor($getColorOrVariable)
+	| STYLES NAME IMAGE 			   -> getNode(yy,$NAME,$STYLES).setImage($IMAGE)
+	| STYLES SHAPES NAME 			   -> getNode(yy,$NAME,$STYLES).setShape($SHAPES)
+	| STYLES NAME 					   -> getNode(yy,$NAME,$STYLES)
+	| SHAPES NAME getColorOrVariable   -> getNode(yy,$NAME).setColor($getColorOrVariable).setShape($SHAPES)
+	| NAME getColorOrVariable 		   -> getNode(yy,$NAME).setColor($getColorOrVariable)
+	| NAME IMAGE 					   -> getNode(yy,$NAME).setImage($IMAGE)
+	| SHAPES NAME 					   -> getNode(yy,$NAME).setShape($SHAPES)
+	| NAME 							   -> getNode(yy,$NAME)
 	;
 
 /*
@@ -77,6 +79,7 @@ readNodeOrGroup
 	| readNodeOrGroup LISTSEP INLINE_STRING readNodeAttrs -> getList(yy,$readNodeOrGroup,$readNodeAttrs,$INLINE_STRING)
 	| readNodeAttrs -> $readNodeAttrs
 	;
+
 targetName
 	: targetName EVENT getColorOrVariable INLINE_STRING readNodeOrGroup -> getLink(yy,$EVENT,$targetName,$readNodeOrGroup,$INLINE_STRING,$getColorOrVariable).right
 	| targetName EVENT getColorOrVariable readNodeOrGroup LABEL -> getLink(yy,$EVENT,$targetName,$readNodeOrGroup,$LABEL.substring(1),$getColorOrVariable).right
@@ -123,6 +126,7 @@ groupTarget
 	| NAME getColorOrVariable	-> enterContainer(yy,getGroup(yy).setName($1).setColor($2))
 	| NAME						-> enterContainer(yy,getGroup(yy).setName($1))
 	;
+
 content
 	: VARIABLE -> processVariable(yy,$1)
 	| SHAPE getShapeOrVariable
@@ -133,36 +137,20 @@ content
 		}
 	| EQUAL readNodeOrGroup
 		{
-			if ($2 instanceof Node){
-				getCurrentContainer(yy).setEqual(new Array($2));
-			}else{
-				getCurrentContainer(yy).setEqual($2);
-			}
+			getCurrentContainer(yy).setEqual($2 instanceof Node?new Array($2):$2);
 		}
 	| SHAPE NAME {throw new Error("Expecting one of the shapes, got ("+$2+")");}
-	| LANDSCAPE 	-> getGraphRoot(yy).setDirection("landscape")
-	| GENERATOR NAME -> getGraphRoot(yy).setGenerator($NAME)
-	| VISUALIZER NAME -> getGraphRoot(yy).setVisualizer($NAME)
-	| PORTRAIT 	-> getGraphRoot(yy).setDirection("portrait")
-	| COMMENT 	-> "/*"+$COMMENT.substring(2)+"*/\n"
-	| NODE_COLOR getColorOrVariable{
-		if ($2=="default") $2=undefined;
-		$$=getCurrentContainer(yy).setDefault('nodecolor',$2);}
-	| NODETEXT_COLOR getColorOrVariable{
-		if ($2=="default") $2=undefined;
-		$$=getCurrentContainer(yy).setDefault('nodetextcolor',$2);}
-	| LINK_COLOR getColorOrVariable{
-		if ($2=="default") $2=undefined;
-		$$=getCurrentContainer(yy).setDefault('linkcolor',$2);}
-	| LINKTEXT_COLOR getColorOrVariable{
-		if ($2=="default") $2=undefined;
-		$$=getCurrentContainer(yy).setDefault('linktextcolor',$2);}
-	| GROUP_COLOR getColorOrVariable{
-		if ($2=="default") $2=undefined;
-		$$=getCurrentContainer(yy).setDefault('groupcolor',$2);}
-	| IF 	 {
-		$$=setAttr(enterContainer(yy,getGroup(yy).setLabel($IF)),'conditional','if')
-		}
+	| LANDSCAPE 		-> getGraphRoot(yy).setDirection("landscape")
+	| GENERATOR NAME 	-> getGraphRoot(yy).setGenerator($NAME)
+	| VISUALIZER NAME 	-> getGraphRoot(yy).setVisualizer($NAME)
+	| PORTRAIT 			-> getGraphRoot(yy).setDirection("portrait")
+	| COMMENT 			-> "/*"+$COMMENT.substring(2)+"*/\n"
+	| NODE_COLOR getColorOrVariable		-> getCurrentContainer(yy).setDefault('nodecolor',$2=="default"?undefined:$2)
+	| NODETEXT_COLOR getColorOrVariable	-> getCurrentContainer(yy).setDefault('nodetextcolor',$2=="default"?undefined:$2)
+	| LINK_COLOR getColorOrVariable		-> getCurrentContainer(yy).setDefault('linkcolor',$2=="default"?undefined:$2)
+	| LINKTEXT_COLOR getColorOrVariable	-> getCurrentContainer(yy).setDefault('linktextcolor',$2=="default"?undefined:$2)
+	| GROUP_COLOR getColorOrVariable	-> getCurrentContainer(yy).setDefault('groupcolor',$2=="default"?undefined:$2)
+	| IF 	 ->	setAttr(enterContainer(yy,getGroup(yy).setLabel($IF)),'conditional','if')
 	| ELSEIF {
 		exitContainer(yy);
 		$$=setAttr(enterContainer(yy,getGroup(yy).setLabel($ELSEIF)),'conditional','elseif')
@@ -175,7 +163,7 @@ content
 		exitContainer(yy);
 		setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif');
 		$$=exitContainer(yy)
-	}
+	} 
 	| GROUP groupTarget {}
 	| GROUP_END 	-> exitContainer(yy)
 	| START NAME 	-> getGraphRoot(yy).setStart($NAME)
@@ -185,5 +173,4 @@ content
 		//$2($$);
 		}
 	;
-
 %% 

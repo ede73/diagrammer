@@ -1,4 +1,6 @@
-parser.yy.OUTPUT="digraph";
+console.log("Reset generator and visualizer");
+parser.yy.OUTPUT=undefined;
+parser.yy.VISUALIZER=undefined;
 VERBOSE=false;
 parser.yy.parseError=function(str,hash){
 	var pe="Parsing error:\n"+
@@ -11,6 +13,7 @@ parser.yy.parseError=function(str,hash){
 //called line by line...
 parser.yy.result=function(line){
    if (parsingStarted){
+	console.log("Parsing results coming in for "+parser.yy.OUTPUT+" / " + parser.yy.VISUALIZER);
 	parsingStarted=false;
 	result.value="";
    }
@@ -28,7 +31,7 @@ function getSavedGraph(){
     return data;
   }
   var graph=localStorage.getItem("graphs");
-  console.log("Have graph"+graph);
+  //console.log("Have graph"+graph);
   data=eval("("+graph+")");
   return data;
 }
@@ -98,24 +101,10 @@ function importGraphs(){
     	  }
 	});
 }
-function visualize(tt){
+function visualize(visualizer){
 	var statelang= document.getElementById("result").value;
-	if (getVisualizer()=="dot"){
-		try{
-  	        document.getElementById('svg').innerHTML=Viz(statelang,'svg');
-		}catch(err){
-			console.log(err);
-		}
-//		try{
-//			var canviz = new Canviz('graph_container');
-//			canviz.load("http://192.168.11.215/~ede/state/post.txt");
-//		}catch(err){
-//			console.log(err);
-//		}
-	}else{
-		document.getElementById('svg').innerHTML="only for dotty";		
-	}
-	var visualizeUrl="visualize.php?visualizer="+getVisualizer();
+	if (!visualizer) visualizer=getVisualizer();
+	var visualizeUrl="visualize.php?visualizer="+visualizer;
 	$.ajax({
 	  type:"POST",
 	  async:true,
@@ -138,5 +127,20 @@ function visualize(tt){
 	   }else { alert('Error:' + err.responseText + '  Status: ' + err.status); }
     	  }
 	});
+	if (visualizer=="dot"){
+		try{
+  	        document.getElementById('svg').innerHTML=Viz(statelang,'svg');
+		}catch(err){
+			console.log(err);
+		}
+//		try{
+//			var canviz = new Canviz('graph_container');
+//			canviz.load("http://192.168.11.215/~ede/state/post.txt");
+//		}catch(err){
+//			console.log(err);
+//		}
+	}else{
+		document.getElementById('svg').innerHTML="only for dotty";		
+	}
 }
 

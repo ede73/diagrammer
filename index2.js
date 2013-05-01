@@ -38,7 +38,7 @@ break;
 case 8:
 d.value="$(color1:#12ede0)\nclr$(color1)\nclr2$(color1)\n"+d.value;
 }
-	parse(document.getElementById("editable"));
+	parse(document.getElementById("editable"),getGenerator());
 return false;
 }
 function reloadImg(id) {
@@ -63,8 +63,11 @@ function getGenerator(){
 function getVisualizer(){
 	var e = document.getElementById("generator");
 	var gen=e.options[e.selectedIndex].value;
-	if (gen.indexOf(":")>-1)
+	if (gen.indexOf(":")>-1){
+		console.log("Return visualizer "+gen.split(":")[1]);
 		return gen.split(":")[1];
+	}
+	console.log("Return visualizer "+gen);
 	return gen;
 }
 function cancelVTimer(){
@@ -89,13 +92,15 @@ s.innerHTML=tc
 .replace("<<",'<text id="event">&lt;</text>')
 ;
 }
-function parse(textArea){
+function parse(textArea,generator,visualizer){
 	document.getElementById("error").innerText="";
 	parsingStarted=true;
 	delete (parser.yy.GRAPHROOT);
 	delete (parser.yy.LINKS);
 	delete (parser.yy.OBJECTS);
-	parser.yy.OUTPUT=getGenerator();
+	parser.yy.OUTPUT=generator;
+	parser.yy.VISUALIZER=visualizer;
+	console.log("Parse, set generator to "+parser.yy.OUTPUT+" visualizer to "+parser.yy.VISUALIZER);
 	parser.parse(textArea.value+"\n");
 	/*
 	var tc=textArea.textContent;
@@ -105,12 +110,13 @@ function parse(textArea){
         cancelVTimer();
         vtimer = window.setTimeout( function() {
             vtimer = null;
-            visualize(1);
+		console.log("Visualize now using "+parser.yy.VISUALIZER);
+            visualize(parser.yy.VISUALIZER);
         }, vdelay );
 }
 function generatorChanged()
 {
-	parse(document.getElementById("editable"));
+	parse(document.getElementById("editable"),getGenerator(),getVisualizer());
 }
 function savedChanged(){
   //read the example...place to textArea(overwrite)
@@ -134,7 +140,7 @@ $.ajax({
   cache:false
 }).done(function(data) {
 	document.getElementById("editable").value=data;
-	generatorChanged();
+        parse(document.getElementById("editable"));
 });
 }
 

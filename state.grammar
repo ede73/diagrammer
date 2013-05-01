@@ -6,9 +6,36 @@
 S
 	: contents EOF
 		{
+			/* 	- caller can ALWAYS specify the generator
+				- caller can ALWAYS specify the visualizer
+				- only graphviz has multiple visualizer (currently it 
+				  only draws digraphs, but those can be visualized with dot, neato.circo etc)
+				- generator/visualizer(since different grammars)
+					- mscgen=mscgen
+					- seqdiag=seqdiag
+					- blockdiag=blockdiag
+					- nwdiag=nwdiag
+					- ast=ast
+					- plantuml_sequence=plantuml_sequence
+
+					PlantUML MIGHT BE plantuml/[sequence|activty etc.]
+				- If visualizer given, RECORD it, do not use...
+				- Caller can then (willingly) check for LANGUAGE given visualizer(or generator) and
+				  override those or obey to those. Those would be suggested tools to use...
+			*/
 			var generator=getGraphRoot(yy).getGenerator();
 			if (yy.OUTPUT)
-			  generator=yy.OUTPUT
+			  generator=yy.OUTPUT;
+			if (!yy.OUTPUT)
+			  yy.OUTPUT=generator;
+			if (!yy.VISUALIZER)
+			  yy.VISUALIZER=getGraphRoot(yy).getVisualizer();
+			if (!yy.VISUALIZER){
+			  if( generator=="digraph")
+			    yy.VISUALIZER="dot";
+		  	  else
+			    yy.VISUALIZER=generator;
+			}
 			if ("ast" == generator){
 				ast(yy);
 			}else if ("actdiag" == generator){

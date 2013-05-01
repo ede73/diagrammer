@@ -288,18 +288,21 @@ function containsObject(container, o) {
 
 function GraphObject(label) {
     this.setName = function(value) {
+	if (value===undefined)return this;
         return setAttr(this, 'name', value);
     };
     this.getName = function() {
         return getAttr(this, 'name');
     }
     this.setColor = function(value) {
+	if (value===undefined)return this;
         return setAttr(this, 'color', value);
     };
     this.getColor = function() {
         return getAttr(this, 'color');
     }
     this.setTextColor = function(value) {
+	if (value===undefined)return this;
         return setAttr(this, 'textcolor', value);
     };
     this.getTextColor = function() {

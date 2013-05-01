@@ -119,43 +119,14 @@ STYLES always bind to right
 */
 nodesAndEvents
 	: nodesAndEvents EVENT colorOrVariable INLINE_STRING nodeGroupListOrAttrs -> getLink(yy,$EVENT,$nodesAndEvents,$nodeGroupListOrAttrs,$INLINE_STRING,$colorOrVariable).right
-	| nodesAndEvents EVENT colorOrVariable nodeGroupListOrAttrs LABEL? 	-> getLink(yy,$EVENT,$nodesAndEvents,$nodeGroupListOrAttrs,$5==undefined?undefined:$5.substring(1),$colorOrVariable).right
-	| nodesAndEvents EVENT nodeGroupListOrAttrs LABEL
-		{
-			debug("nodesAndEvents EVENT nodeGroupListOrAttrs LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3);
-			if ($3 instanceof Group){
-				$$=getLink(yy,$2,$1,getGroup(yy,$3),$4.substring(1)).right;
-			}else{
-				$$=getLink(yy,$2,$1,getNode(yy,$3),$4.substring(1)).right;
-			}
-		}
-	| nodesAndEvents EVENT INLINE_STRING nodeGroupListOrAttrs
-		{
-			if ($nodeGroupListOrAttrs instanceof Group){
-				$$=getLink(yy,$EVENT,$nodesAndEvents,getGroup(yy,$nodeGroupListOrAttrs),$INLINE_STRING).right;
-			}else{
-				$$=getLink(yy,$EVENT,$nodesAndEvents,getNode(yy,$nodeGroupListOrAttrs),$INLINE_STRING).right;
-			}
-		}
-	| nodesAndEvents EVENT nodeGroupListOrAttrs
-		{
-			if ($nodeGroupListOrAttrs instanceof Group){
-				$$=getLink(yy,$EVENT,$nodesAndEvents,getGroup(yy,$nodeGroupListOrAttrs)).right;
-			}else{
-				$$=getLink(yy,$EVENT,$nodesAndEvents,getNode(yy,$nodeGroupListOrAttrs)).right;
-			}
-		}
+	| nodesAndEvents EVENT colorOrVariable nodeGroupListOrAttrs LABEL? 		  -> getLink(yy,$EVENT,$nodesAndEvents,$nodeGroupListOrAttrs,$5==undefined?undefined:$5.substring(1),$colorOrVariable).right
+	| nodesAndEvents EVENT nodeGroupListOrAttrs LABEL						  -> getLink(yy,$EVENT,$nodesAndEvents,$nodeGroupListOrAttrs,$LABEL.substring(1)).right
+	| nodesAndEvents EVENT INLINE_STRING nodeGroupListOrAttrs				  -> getLink(yy,$EVENT,$nodesAndEvents,$nodeGroupListOrAttrs,$INLINE_STRING).right
+	| nodesAndEvents EVENT nodeGroupListOrAttrs								  -> getLink(yy,$EVENT,$nodesAndEvents,$nodeGroupListOrAttrs).right
 	| nodeGroupListOrAttrs LABEL -> $$.setLabel($2.substring(1))
 	| nodeGroupListOrAttrs {
 			debug("nodeGroupListOrAttrs"+" SS="+$$+",S0="+$0+",S1="+$1);
 		}
-	;
-	/*
-	A GROUP declaration
-	GROUP [NAME] [COLOR] [LABEL]
-	*/
-groupTarget
-	: NAME? colorOrVariable? LABEL? -> enterContainer(yy,getGroup(yy).setName($1).setColor($2).setLabel($3==undefined?undefined:$3.substring(1)))
 	;
 
 content
@@ -180,10 +151,10 @@ content
 	| VISUALIZER NAME 	-> getGraphRoot(yy).setVisualizer($NAME)
 	| PORTRAIT 			-> getGraphRoot(yy).setDirection("portrait")
 	| COMMENT 			-> "/*"+$COMMENT.substring(2)+"*/\n"
-	| NODE_COLOR colorOrVariable		-> getCurrentContainer(yy).setDefault('nodecolor',$2=="default"?undefined:$2)
-	| NODETEXT_COLOR colorOrVariable	-> getCurrentContainer(yy).setDefault('nodetextcolor',$2=="default"?undefined:$2)
-	| LINK_COLOR colorOrVariable		-> getCurrentContainer(yy).setDefault('linkcolor',$2=="default"?undefined:$2)
-	| LINKTEXT_COLOR colorOrVariable	-> getCurrentContainer(yy).setDefault('linktextcolor',$2=="default"?undefined:$2)
+	| NODE_COLOR colorOrVariable	-> getCurrentContainer(yy).setDefault('nodecolor',$2=="default"?undefined:$2)
+	| NODETEXT_COLOR colorOrVariable-> getCurrentContainer(yy).setDefault('nodetextcolor',$2=="default"?undefined:$2)
+	| LINK_COLOR colorOrVariable	-> getCurrentContainer(yy).setDefault('linkcolor',$2=="default"?undefined:$2)
+	| LINKTEXT_COLOR colorOrVariable-> getCurrentContainer(yy).setDefault('linktextcolor',$2=="default"?undefined:$2)
 	| GROUP_COLOR colorOrVariable	-> getCurrentContainer(yy).setDefault('groupcolor',$2=="default"?undefined:$2)
 	/* conditionals*/
 	| IF 	 ->	setAttr(enterContainer(yy,getGroup(yy).setLabel($IF)),'conditional','if')
@@ -201,7 +172,8 @@ content
 		$$=exitContainer(yy)
 	} 
 	/* actual nodes*/
-	| GROUP groupTarget {}
+	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */
+	| GROUP NAME? colorOrVariable? LABEL? -> enterContainer(yy,getGroup(yy).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
 	| GROUP_END 	-> exitContainer(yy)
 	| START NAME 	-> getGraphRoot(yy).setStart($NAME)
 	| nodesAndEvents {

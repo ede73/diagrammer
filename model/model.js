@@ -90,7 +90,7 @@ function getList(yy, LHS, RHS,rhsLinkLabel) {
 /**
 See readNodeOrGroup in grammar
 
-Must be able to return Group as wlel..if NAME matches...
+Must be able to return Group as well..if NAME matches...
 
 STYLE will always be updated on last occurance (ie. 
 dashed a1

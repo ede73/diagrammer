@@ -84,10 +84,9 @@ shapeOrVariable
 Those few first ones are used with EVENTS
 */
 readNodeAttrs
-	: STYLES SHAPES NAME colorOrVariable -> getNode(yy,$NAME,$STYLES).setColor($colorOrVariable).setShape($SHAPES)
+	: STYLES SHAPES NAME colorOrVariable? -> getNode(yy,$NAME,$STYLES).setColor($4).setShape($SHAPES)
 	| STYLES NAME colorOrVariable?	-> getNode(yy,$NAME,$STYLES).setColor($3)
 	| STYLES NAME IMAGE 			-> getNode(yy,$NAME,$STYLES).setImage($IMAGE)
-	| STYLES SHAPES NAME 			-> getNode(yy,$NAME,$STYLES).setShape($SHAPES)
 	| SHAPES NAME colorOrVariable?	-> getNode(yy,$NAME).setColor($3).setShape($SHAPES)
 	| NAME colorOrVariable?		 	-> getNode(yy,$NAME).setColor($2)
 	| NAME IMAGE 					-> getNode(yy,$NAME).setImage($IMAGE)

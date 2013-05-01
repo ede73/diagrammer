@@ -4,7 +4,9 @@
 %%
 
 S
-	: contents EOF
+	: graphContent 			-> $graphContent
+	| S graphContent  		-> $S + $graphContent
+	| S EOF
 		{
 			/* 	- caller can ALWAYS specify the generator
 				- caller can ALWAYS specify the visualizer
@@ -58,14 +60,10 @@ S
 		}
 	;
 
-contents
-	: content 			-> $content
-	| contents content 	-> $contents + $content
-	;
 /* Read a color #xxxxxx or a variable $(xxx) or $(xxx:yyy) that MUST produce #xxxxxx*/
 colorOrVariable
-	: VARIABLE 	-> processVariable(yy,$VARIABLE) /*one can use named $VARIABLE or positional $1 args, like former, but latter seem more ...readable*/
-	| COLOR		-> $COLOR
+	: COLOR		-> $COLOR
+	| VARIABLE 	-> processVariable(yy,$VARIABLE) /*one can use named $VARIABLE or positional $1 args, like former, but latter seem more ...readable*/
 	;
 
 /* Read a shape  or a variable $(xxx) or $(xxx:yyy) that MUST produce a shape */
@@ -131,7 +129,7 @@ nodesAndEvents
 		}
 	;
 
-content
+graphContent
 	/* variable declaration(s) */
 	: VARIABLE -> processVariable(yy,$1)
 	/* set default shape*/

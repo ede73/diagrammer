@@ -1,4 +1,5 @@
 #./makeLexerAndParser.sh >/dev/null
+
 rm -f .error
 error=0
 checkError(){

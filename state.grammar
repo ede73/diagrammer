@@ -104,6 +104,8 @@ left recursive
   X ([ LISTSEP X]*)
 See Cris Dodds good explanation of right recursion 
 http://stackoverflow.com/questions/12715961/grammar-spec-resolving-shift-reduce-conflicts
+And even better thorough explanation from IBM
+http://publib.boulder.ibm.com/infocenter/zvm/v5r4/index.jsp?topic=/com.ibm.zvm.v54.dmsp4/hcsp4b10120.htm
 nodeGroupListOrAttrs cumulates an array of nodes, RHS is latest node
 */
 nodeGroupListOrAttrs
@@ -151,11 +153,11 @@ content
 	| VISUALIZER NAME 	-> getGraphRoot(yy).setVisualizer($NAME)
 	| PORTRAIT 			-> getGraphRoot(yy).setDirection("portrait")
 	| COMMENT 			-> "/*"+$COMMENT.substring(2)+"*/\n"
-	| NODE_COLOR colorOrVariable	-> getCurrentContainer(yy).setDefault('nodecolor',$2=="default"?undefined:$2)
-	| NODETEXT_COLOR colorOrVariable-> getCurrentContainer(yy).setDefault('nodetextcolor',$2=="default"?undefined:$2)
-	| LINK_COLOR colorOrVariable	-> getCurrentContainer(yy).setDefault('linkcolor',$2=="default"?undefined:$2)
-	| LINKTEXT_COLOR colorOrVariable-> getCurrentContainer(yy).setDefault('linktextcolor',$2=="default"?undefined:$2)
-	| GROUP_COLOR colorOrVariable	-> getCurrentContainer(yy).setDefault('groupcolor',$2=="default"?undefined:$2)
+	| NODE_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('nodecolor'    ,$2=="default"?undefined:$2)
+	| NODETEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('nodetextcolor',$2=="default"?undefined:$2)
+	| LINK_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('linkcolor'    ,$2=="default"?undefined:$2)
+	| LINKTEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('linktextcolor',$2=="default"?undefined:$2)
+	| GROUP_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('groupcolor'   ,$2=="default"?undefined:$2)
 	/* conditionals*/
 	| IF 	 ->	setAttr(enterContainer(yy,getGroup(yy).setLabel($IF)),'conditional','if')
 	| ELSEIF {

@@ -15,7 +15,12 @@ while [ 1 ]; do
   done
   [[ $rb -eq 1 ]] &&  {
 	./makeLexerAndParser.sh 
-	./runtests.sh
+	rc=$?
+	if [ $rc -gt 1 ] ; then
+		echo "LEXER CREATION ERROR:"$rc
+        else
+		./runtests.sh
+	fi
   }
   cp $new $old
   rm -f $new

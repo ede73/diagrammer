@@ -23,8 +23,35 @@ echo "test parser"
 
 png=${input%.*}_${generator}.png
 rm -f $png
+OUT=${input%.*}_${generator}.out
+rm -f $OUT
 
-node parse.js "$input" "$generator" >/dev/null
+case "$generator" in
+  nwdiag|actdiag|blockdiag|plantuml_sequence)
+    node parse.js "$input" $generator >$OUT
+  ;;
+  mscgen)
+    node parse.js "$input" $generator >$OUT
+  ;;
+  neato)
+    node parse.js "$input" digraph >$OUT
+  ;;
+  twopi)
+    node parse.js "$input" digraph >$OUT
+  ;;
+  circo)
+    node parse.js "$input" digraph >$OUT
+  ;;
+  fdp)
+    node parse.js "$input" digraph >$OUT
+  ;;
+  sfdp)
+    node parse.js "$input" digraph >$OUT
+  ;;
+  *)
+    node parse.js "$input" digraph >$OUT
+  ;;
+esac
 rc=$?
 [[ $? -ne 0 ]] && {
   echo Fatal parsing error $rc
@@ -32,29 +59,32 @@ rc=$?
 }
 
 case "$generator" in
+  plantuml_sequence)
+    java -jar ext/plantuml.jar $OUT >"$png"&& [[ $silent = 0 ]] && open "$png"
+  ;;
   nwdiag|actdiag|blockdiag)
-    node parse.js "$input" $generator |$generator -a -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -a -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" 
   ;;
   mscgen)
-    node parse.js "$input" $generator |$generator -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" 
   ;;
   neato)
-    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
   ;;
   twopi)
-    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
   ;;
   circo)
-    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
   ;;
   fdp)
-    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
   ;;
   sfdp)
-    node parse.js "$input" digraph |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
   ;;
   *)
-    node parse.js "$input" digraph |dot -Tpng -o $png  && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |dot -Tpng -o $png  && [[ $silent = 0 ]] && open "$png" 
   ;;
 esac
 #circo -Tpng a.gv >c.png

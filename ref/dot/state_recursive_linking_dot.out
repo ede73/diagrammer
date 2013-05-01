@@ -1,0 +1,20 @@
+digraph {
+  compound=true;
+  rankdir=TD;
+  a;
+  b;
+  c;
+  d;
+  e;
+  f;
+  g;
+  h;
+//links start
+  a->b;
+  b->c;
+  c->d;
+  d->e;
+  d->f;
+  f->g;
+  g->h;
+}

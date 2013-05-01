@@ -1,0 +1,30 @@
+digraph {
+  compound=true;
+  rankdir=TD;
+  a;
+  b;
+  c;
+//links start
+  a->a[label="A initiated broadcast",dir=both];
+  b->b[label="B initiated broadcast",dir=both];
+  a->b[label="Auto return edge",dir=both];
+  b->c[label="Auto return edge",dir=both];
+  a->a[label="jotain kay tassanain",color="#0000ff",fontcolor="#0000ff",style="dashed",dir=none];
+  a->a[label="ja aikaa palaa",color="#ff0000",fontcolor="#ff0000",style="dotted",dir=none];
+  a->b[label="lost signal",arrowhead="tee"];
+  b->a[label="lost signal",arrowhead="tee"];
+  a->b[label="signal",xlabel="and a big\nlined\nnote"];
+  a->b[label="signal",xlabel="and a big\nlined\nnote"];
+  a->b[label="ab()"];
+  b->c[label="bc(TRUE)"];
+  c->c[label="process(1)"];
+  c->c[label="process(2)"];
+  c->c[label="process(n)",color="#0000ff",fontcolor="#0000ff"];
+  c->c[label="process(END)"];
+  c->a[label="callback()"];
+  a->a[label="next()",color="#ff0000",fontcolor="#ff0000"];
+  a->a[label="ac1()\nac2()"];
+  c->b[label="cb(TRUE)"];
+  b->b[label="stalled(...)"];
+  b->a[label="ab()=FALSE"];
+}

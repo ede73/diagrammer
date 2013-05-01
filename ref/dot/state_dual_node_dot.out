@@ -1,0 +1,10 @@
+digraph {
+  compound=true;
+  rankdir=TD;
+  s[ shape="cds" ];
+  subgraph cluster_dummy {
+      a[ shape="cds" ];
+  }//end of dummy
+//links start
+  a->s;
+}

@@ -1,0 +1,50 @@
+digraph {
+  compound=true;
+  rankdir=TD;
+  closed[fillcolor="#ff0000",style="filled", shape="box" ,label="CLOSED"];
+  closed_end[fillcolor="#ff0000",style="filled", shape="box" ,label="closed\nBack to start"];
+  listen[fillcolor="#ffff00",style="filled", shape="box" ,label="LISTEN"];
+  syn_received[fillcolor="#888888",style="filled", shape="box" ,label="SYN\nRECEIVED"];
+  syn_sent[fillcolor="#888888",style="filled", shape="box" ,label="SYN\nSENT"];
+  established[fillcolor="#00ff00",style="filled", shape="box" ,label="ESTABLISHED\ndata xchange occurs"];
+  subgraph cluster_PassiveClose {
+        label="Passive CLOSE"; 
+    style=filled;
+        color="#afeeee";
+ 
+      close_wait[fillcolor="#ffff00",style="filled", shape="box" ,label="CLOSE WAIT"];
+      last_ack[fillcolor="#ffff00",style="filled", shape="box" ,label="LAST ACK"];
+  }//end of PassiveClose
+  subgraph cluster_ActiveClose {
+        label="Active CLOSE"; 
+    style=filled;
+        color="#afeeee";
+ 
+      fin_wait1[fillcolor="#ffff00",style="filled", shape="box" ,label="FIN WAIT 1"];
+      closing[fillcolor="#ffff00",style="filled", shape="box" ,label="CLOSING"];
+      fin_wait2[fillcolor="#ffff00",style="filled", shape="box" ,label="FIN WAIT 2"];
+      time_wait[fillcolor="#ffff00",style="filled", shape="box" ,label="TIME WAIT"];
+  }//end of ActiveClose
+//links start
+  syn_sent->closed[label="CLOSE/-",style="dotted"];
+  syn_sent->syn_received[label="SYN/SYN+ACK\n(simultaneous open)",style="dotted"];
+  listen->syn_sent[label="SEND/SYN",style="dotted"];
+  listen->closed[label="CLOSE/-",style="dotted"];
+  syn_received->listen[label="RST/-",style="dotted"];
+  syn_received->fin_wait1[label="CLOSE/FIN",style="dotted"];
+  fin_wait1->closing[label="FIN/ACK",style="dotted"];
+  fin_wait1->time_wait[label="FIN+ACK/ACK",style="dotted"];
+  closing->time_wait[style="dotted"];
+  closed->syn_sent[label="CONNECT/SYN(1/3 of 3w/hs)",color="#ff0000",fontcolor="#ff0000"];
+  syn_sent->established[label="SYN+ACK/ACK(3/3 of 3w/hs)",color="#ff0000",fontcolor="#ff0000"];
+  established->fin_wait1[label="CLOSE/FIN",color="#ff0000",fontcolor="#ff0000"];
+  fin_wait1->fin_wait2[label="ACK/-",color="#ff0000",fontcolor="#ff0000"];
+  fin_wait2->time_wait[label="FIN/ACK",color="#ff0000",fontcolor="#ff0000"];
+  time_wait->closed_end[label="Timeout",color="#ff0000",fontcolor="#ff0000"];
+  closed->listen[label="LISTEN/-",color="#0000ff",fontcolor="#0000ff"];
+  listen->syn_received[label="SYN/SYN+ACK(2/3 of 3w/hs)",color="#0000ff",fontcolor="#0000ff"];
+  syn_received->established[label="ACK/-",color="#0000ff",fontcolor="#0000ff"];
+  established->close_wait[label="FIN/ACK",color="#0000ff",fontcolor="#0000ff"];
+  close_wait->last_ack[label="CLOSE/FIN",color="#0000ff",fontcolor="#0000ff"];
+  last_ack->closed_end[color="#0000ff",fontcolor="#0000ff"];
+}

@@ -1,0 +1,35 @@
+blockdiag{
+ default_fontsize = 14
+  orientation=landscape
+  xstart[shape="diamond"  ,label="start"];
+  end[shape="square"];
+  group "process222"{
+
+    label="process222" 
+    a0[shape=ellipse];
+    a1[shape=ellipse];
+    a2[shape=ellipse];
+    a3[shape=ellipse];
+  }
+  group "process 2"{
+
+    label="process 2" 
+    b0[shape=ellipse];
+    b1[shape=ellipse];
+    b2[shape=ellipse];
+    b3[shape=ellipse];
+  }
+  a0 -> a1[style="dotted"];
+  a1 -> a2[style="dashed"];
+  a2 -> a3;
+  b0 -> b1[color="#ff0000"];
+  b1 -> b2;
+  b2 -> b3[label = "b2 b3 link" textcolor="#00ff00"   ,color="#00ff00"];
+  xstart -> a0;
+  a0 -> b0;
+  a1 -> b3[label = "a1 b2 link comment"];
+  b2 -> a3;
+  a3 -> a0;
+  a3 -> end;
+  b3 -> end;
+}

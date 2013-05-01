@@ -1,0 +1,30 @@
+msc {
+  a
+,  b
+,  c
+;
+a->*[label="A initiated broadcast",id="1"];
+b->*[label="B initiated broadcast",id="2"];
+a<=>b[label="Auto return edge",id="3"];
+b<=>c[label="Auto return edge",id="4"];
+---[linecolor="#0000ff",label="jotain kay tassanain",id="5",textcolor="#0000ff"];
+...[linecolor="#ff0000",label="ja aikaa palaa",id="6",textcolor="#ff0000"];
+a-xb[label="lost signal",id="7"];
+b-xa[label="lost signal",id="8"];
+a=>b[label="signal",id="9"];
+b abox b[label="and a big\nlined\nnote"];
+a=>b[label="signal",id="10"];
+b abox b[label="and a big\nlined\nnote"];
+a=>b[label="ab()",id="11"];
+b=>c[label="bc(TRUE)",id="12"];
+c=>c[label="process(1)",id="13"];
+c=>c[label="process(2)",id="14"];
+c=>c[linecolor="#0000ff",label="process(n)",id="15"];
+c=>c[label="process(END)",id="16"];
+c=>a[label="callback()",id="17"];
+a=>a[linecolor="#ff0000",label="next()",id="18"];
+a=>a[label="ac1()\nac2()",id="19"];
+c=>b[label="cb(TRUE)",id="20"];
+b=>b[label="stalled(...)",id="21"];
+b=>a[label="ab()=FALSE",id="22"];
+}

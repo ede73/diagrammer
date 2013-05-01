@@ -1,0 +1,8 @@
+actdiag{
+  default_fontsize = 14
+  s[shape=actor];
+  lane "dummy"{
+    a[shape=actor];
+  }
+  a -> s;
+}

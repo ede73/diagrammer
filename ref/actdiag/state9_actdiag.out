@@ -1,0 +1,20 @@
+actdiag{
+  default_fontsize = 14
+  z1[color="#ff0000"];
+  z2[color="#00ff00"];
+  z3;
+  z4[color="#0000ff"];
+  q1[color="#ff00ff"];
+  w1;
+  w2;
+  w3;
+  w4;
+  z1 -> q1[label = "Multiple LHS lists"];
+  z2 -> q1[label = "Multiple LHS lists"];
+  z3 -> q1[label = "Multiple LHS lists"];
+  z4 -> q1[label = "Multiple LHS lists"];
+  w1 -> q1[color="#00ffff"];
+  w2 -> q1[color="#00ffff"];
+  w3 -> q1[color="#00ffff"];
+  w4 -> q1[color="#00ffff"];
+}

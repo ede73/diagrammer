@@ -1,0 +1,26 @@
+actdiag{
+  default_fontsize = 14
+  a[background="icons/wifi.png"];
+  b;
+  c[background="icons/wifi.png"  ,label="a"];
+  d[label="b"];
+  special;
+  link;
+  sd;
+  a -> b[color="#ff0000"];
+  a -> b[style="dotted"  ,color="#00ff00"];
+  a -> b[style="dashed"  ,color="#0000ff"];
+  a -> b[style="dashed"  ,color="#00ffff"];
+  a -> b[style="dotted"  ,color="#ff00ff"];
+  d -> c[color="#ff0000"];
+  d -> c[style="dotted"  ,color="#00ff00"];
+  d -> c[style="dashed"  ,color="#0000ff"];
+  d -> c[style="dashed"  ,color="#00ffff"];
+  d -> c[style="dotted"  ,color="#ff00ff"];
+  special -> link;
+  special -> link[style="dotted"];
+  special -> link[style="dashed"];
+  special -> link;
+  sd -> sd[style="dotted"];
+  sd -> sd[style="dashed"];
+}

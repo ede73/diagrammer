@@ -1,0 +1,28 @@
+actdiag{
+  default_fontsize = 14
+  ablack;
+  b[label="label"];
+  cblue[color="#0000ff"];
+  dred[color="#ff0000"  ,label="red with label, c with blue, b has label, a without, e links to f"];
+  eblack;
+  fblack;
+  gblack;
+  hblack;
+  iblue[color="#0000ff"];
+  j;
+  klightblue[color="#00ffff"];
+  l;
+  myellow[color="#ffff00"];
+  n;
+  ogray[color="#777777"];
+  p;
+  qred[color="#ff0000"];
+  rblue[color="#0000ff"];
+  eblack -> fblack;
+  gblack -> hblack[label = "g links to h"];
+  iblue -> j;
+  klightblue -> l[label = "k links to l"];
+  myellow -> n[color="#ff00ff"];
+  ogray -> p[label = "o p link orange" textcolor="#ff7777"   ,color="#ff7777"];
+  qred -> rblue[label = "q r link green" textcolor="#00ff00"   ,color="#00ff00"];
+}

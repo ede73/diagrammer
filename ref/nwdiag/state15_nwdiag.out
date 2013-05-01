@@ -1,0 +1,17 @@
+nwdiag{
+ default_fontsize = 16
+
+  network dmz{
+    address="y"
+    web01;
+    web02;
+  web01;
+  web02;
+  }
+  network internal{
+    address="x"
+    db01;
+  web01;
+  web02;
+  }
+}

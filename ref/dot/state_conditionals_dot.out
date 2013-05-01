@@ -1,0 +1,38 @@
+digraph {
+  compound=true;
+  rankdir=TD;
+  q[label="tamakin"];
+  w[label="on"];
+  subgraph cluster_1 {
+        label="if something would happend then"; 
+      a[label="Jotain"];
+      b[label="muuta"];
+  }//end of 1
+  subgraph cluster_2 {
+        label="elseif something probably would not happen then"; 
+      c[label="erikoista"];
+  }//end of 2
+  subgraph cluster_3 {
+        label="elseif or if i see a flying bird then"; 
+      then[label="mita"];
+      elseif[label="lie"];
+      z[label="turhaa"];
+  }//end of 3
+  subgraph cluster_4 {
+        label="else"; 
+      m[label="homppaa"];
+  }//end of 4
+  subgraph cluster_5 {
+        label="endif"; 
+  }//end of 5
+  outside;
+  end;
+//links start
+  q->w;
+  a->b;
+  b->c;
+  elseif->then;
+  c->z;
+  q->m;
+  outside->end;
+}

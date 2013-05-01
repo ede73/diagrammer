@@ -1,0 +1,19 @@
+actdiag{
+  default_fontsize = 14
+  idle[color="#ff0000"  ,style="dashed"  ,label="idle\nevent"];
+  xstart[color="#7473b3"];
+  start_forward[color="#7473b3"];
+  moving_forward[color="#7473b3"  ,style="dotted"];
+  stop_motor[color="#7473b3"];
+  start_backward[color="#7473b3"];
+  moving_backward[color="#7473b3"];
+  xstart -> idle;
+  idle -> start_forward[label = "on sound" textcolor="#00ff00"   ,color="#00ff00"];
+  start_forward -> moving_forward[color="#00ff00"];
+  moving_forward -> stop_motor[label = "on touch"];
+  moving_forward -> start_backward[label = "on sound"];
+  start_backward -> moving_backward;
+  moving_backward -> start_forward[label = "on sound" textcolor="#00ff00"   ,color="#00ff00"];
+  moving_backward -> stop_motor[label = "on touch"];
+  stop_motor -> idle;
+}

@@ -1,0 +1,34 @@
+digraph {
+  compound=true;
+  rankdir=TD;
+  outside1[fillcolor="#ff0000",style="filled",label="Group to node"];
+  outside3[fillcolor="#ff0000",style="filled",label="Inner group to node"];
+  subgraph cluster_master {
+      ma[fillcolor="#ff0000",style="filled"];
+      subgraph cluster_innermaster1 {
+        style=filled;
+            color="#999999";
+ 
+          ima1[fillcolor="#ff0000",style="filled"];
+      }//end of innermaster1
+      subgraph cluster_innermaster2 {
+        style=filled;
+            color="#ffaaaa";
+ 
+          ima2[fillcolor="#ff0000",style="filled"];
+      }//end of innermaster2
+  }//end of master
+  outside2[fillcolor="#ffff00",style="filled",label="Node to group"];
+  outside4[fillcolor="#ffff00",style="filled",label="Node to inner group"];
+  subgraph cluster_other {
+      o[fillcolor="#ffff00",style="filled"];
+  }//end of other
+//links start
+  ma->ima1;
+  ma->ima2;
+  ima2->o;
+  outside2->ma[ lhead=cluster_master];
+  ma->outside1[ ltail=cluster_master];
+  ima1->outside3[ ltail=cluster_innermaster1];
+  outside4->ima2[ lhead=cluster_innermaster2];
+}

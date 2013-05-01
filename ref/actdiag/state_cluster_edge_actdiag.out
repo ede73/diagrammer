@@ -1,0 +1,13 @@
+actdiag{
+  default_fontsize = 14
+  lane "joku"{
+    joku1;
+    joku2;
+  }
+  lane "toinen"{
+    toinen1;
+    toinen2;
+  }
+  joku1 -> toinen1[label = "node to node"];
+  joku2 -> toinen[label = "node to group"];
+}

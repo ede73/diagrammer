@@ -1,0 +1,52 @@
+blockdiag{
+ default_fontsize = 14
+  orientation=landscape
+  a[style="dotted"  ,label="dotted"];
+  b[style="dashed"  ,label="dashed"];
+  c[style="dotted"  ,label="solid"];
+  d[label="bold"];
+  e[label="rounded"];
+  f[label="diagonals"];
+  g[label="invis"];
+  a1[color="#ff0000"  ,style="dashed"  ,label="Red dashed a1 with green link"];
+  green[color="#ff0000"  ,style="dotted"];
+  b1[color="#0000ff"];
+  q;
+  w;
+  r;
+  t;
+  y;
+  z;
+  x;
+  v;
+  n[style="dashed"];
+  l[style="dashed"];
+  k[color="#ff0000"  ,style="dotted"];
+  j;
+  h;
+  m1;
+  m2;
+  m3;
+  green -> b1[style="dotted"  ,label = "dotted red node named green\nAnd green dotted link to rounded b1 node, that is blue\nRed label" textcolor="#00ff00"   ,color="#00ff00"];
+  q -> r;
+  q -> t;
+  q -> y;
+  w -> r;
+  w -> t;
+  w -> y;
+  e -> r;
+  e -> t;
+  e -> y;
+  y -> z;
+  z -> x;
+  x -> c;
+  x -> v;
+  v -> n;
+  l -> k[label = "dashed l links to k"];
+  k -> j[label = "red k to 'j'"];
+  j -> h;
+  h -> g;
+  g -> f[label = "last link text"];
+  m1 -> m2[label = "m1 to m2"];
+  m1 -> m3[label = "m1 to m3"];
+}

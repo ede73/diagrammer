@@ -1,0 +1,32 @@
+blockdiag{
+ default_fontsize = 14
+  orientation=landscape
+  a;
+  b[color="#ff0000"];
+  c[label="b is red"];
+  d[color="#00ff00"  ,label="Green"];
+  e;
+  f;
+  g;
+  h;
+  i[color="#ffff00"];
+  j;
+  k;
+  l;
+  za;
+  zb[color="#ff0000"];
+  zc[label="zb red"];
+  zd[color="#00ff00"  ,label="this is greeen"];
+  ze;
+  zg;
+  zi[color="#ffff00"];
+  zk;
+  e -> f;
+  g -> h[color="#ff00ff"];
+  i -> j;
+  k -> l[label = "moro"];
+  ze -> f[color="#772222"];
+  zg -> h[color="#ff00ff"];
+  zi -> j[color="#aaaaaa"];
+  zk -> l[label = "moro" textcolor="#f0f0f0"   ,color="#f0f0f0"];
+}

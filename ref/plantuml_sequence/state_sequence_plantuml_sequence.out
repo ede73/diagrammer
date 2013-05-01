@@ -1,0 +1,42 @@
+@startuml
+autonumber
+participant  a
+participant  b
+participant  c
+a->a:A initiated broadcast
+a->a:A initiated broadcast
+b->b:B initiated broadcast
+b->b:B initiated broadcast
+a->b:Auto return edge
+b->a:Auto return edge
+b->c:Auto return edge
+c->b:Auto return edge
+ ==jotain kay tassanain== 
+ ...ja aikaa palaa... 
+a->b:lost signal
+b->a:lost signal
+a->b:signal,and a big\nlined\nnote
+note over b
+and a big
+lined
+note
+end note
+a->b:signal,and a big\nlined\nnote
+note over b
+and a big
+lined
+note
+end note
+a->b:ab()
+b->c:bc(TRUE)
+c->c:process(1)
+c->c:process(2)
+c-[#0000ff]>c:process(n)
+c->c:process(END)
+c->a:callback()
+a-[#ff0000]>a:next()
+a->a:ac1()\nac2()
+c->b:cb(TRUE)
+b->b:stalled(...)
+b->a:ab()=FALSE
+@enduml

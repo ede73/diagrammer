@@ -1,0 +1,14 @@
+digraph {
+  compound=true;
+  rankdir=TD;
+  b[label="browser"];
+  d[label="database"];
+  w[label="webserver"];
+//links start
+  b->w[label="GET /index.html"];
+  w->b[style="dotted"];
+  b->w[label="POST /blog/comment"];
+  w->d[label="INSERT comment",style="dotted"];
+  d->w[style="dotted"];
+  w->b;
+}

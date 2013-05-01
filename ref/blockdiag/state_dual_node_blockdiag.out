@@ -1,0 +1,11 @@
+blockdiag{
+ default_fontsize = 14
+  orientation=landscape
+  s[shape="actor"];
+  group "undefined"{
+
+
+    a[shape=actor];
+  }
+  a -> s;
+}

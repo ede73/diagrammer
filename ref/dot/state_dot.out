@@ -1,0 +1,32 @@
+digraph {
+  compound=true;
+  rankdir=TD;
+  xstart[fillcolor="#7473b3",style="filled"];
+  //startnode setup
+  {rank = same;null} {rank = same; xstart}
+  null [shape=plaintext, label=""];
+  xstart[shape=doublecircle];
+  null->xstart;
+
+  {rank=same;
+  start_backward;
+  moving_forward;
+}
+  idle[fillcolor="#ff0000",style="filled,dashed",label="idle\nevent"];
+  xstart[fillcolor="#7473b3",style="filled"];
+  start_forward[fillcolor="#7473b3",style="filled"];
+  moving_forward[fillcolor="#7473b3",style="filled,dotted"];
+  stop_motor[fillcolor="#7473b3",style="filled"];
+  start_backward[fillcolor="#7473b3",style="filled"];
+  moving_backward[fillcolor="#7473b3",style="filled,rounded"];
+//links start
+  xstart->idle;
+  idle->start_forward[label="on sound",color="#00ff00",fontcolor="#00ff00"];
+  start_forward->moving_forward[color="#00ff00",fontcolor="#00ff00"];
+  moving_forward->stop_motor[label="on touch"];
+  moving_forward->start_backward[label="on sound"];
+  start_backward->moving_backward;
+  moving_backward->start_forward[label="on sound",color="#00ff00",fontcolor="#00ff00"];
+  moving_backward->stop_motor[label="on touch"];
+  stop_motor->idle;
+}

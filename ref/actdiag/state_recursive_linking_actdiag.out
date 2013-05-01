@@ -1,0 +1,18 @@
+actdiag{
+  default_fontsize = 14
+  a;
+  b;
+  c;
+  d;
+  e;
+  f;
+  g;
+  h;
+  a -> b;
+  b -> c;
+  c -> d;
+  d -> e;
+  d -> f;
+  f -> g;
+  g -> h;
+}

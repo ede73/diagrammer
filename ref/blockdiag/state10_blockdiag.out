@@ -1,0 +1,46 @@
+blockdiag{
+ default_fontsize = 14
+  orientation=landscape
+  q1[color="#ffff00"];
+  z1[color="#0000ff"];
+  z2[color="#555555"];
+  z3;
+  z4;
+  q2[color="#00ffff"];
+  w1[color="#ff0000"];
+  w2[color="#00ff00"];
+  w3;
+  w4;
+  a;
+  b;
+  c;
+  d;
+  e;
+  f;
+  g;
+  h;
+  q1 -> z1[label = "Multiple RHS lists" textcolor="#3333ff"   ,color="#3333ff"];
+  q1 -> z2[label = "Multiple RHS lists" textcolor="#3333ff"   ,color="#3333ff"];
+  q1 -> z3[label = "Multiple RHS lists" textcolor="#3333ff"   ,color="#3333ff"];
+  q1 -> z4[label = "Multiple RHS lists" textcolor="#3333ff"   ,color="#3333ff"];
+  q2 -> w1[color="#999999"];
+  q2 -> w2[color="#999999"];
+  q2 -> w3[color="#999999"];
+  q2 -> w4[color="#999999"];
+  a -> e;
+  a -> f;
+  a -> g;
+  a -> h;
+  b -> e;
+  b -> f;
+  b -> g;
+  b -> h;
+  c -> e;
+  c -> f;
+  c -> g;
+  c -> h;
+  d -> e;
+  d -> f;
+  d -> g;
+  d -> h;
+}

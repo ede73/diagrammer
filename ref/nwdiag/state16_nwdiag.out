@@ -1,0 +1,12 @@
+nwdiag{
+ default_fontsize = 16
+
+    inet[shape="cloud"];
+  network empty{
+    address="x"
+    router;
+    web01;
+    web02;
+  }
+inet -- router;
+}

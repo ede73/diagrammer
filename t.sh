@@ -24,6 +24,13 @@ echo "test parser"
 png=${input%.*}_${generator}.png
 rm -f $png
 
+node parse.js "$input" "$generator" >/dev/null
+rc=$?
+[[ $? -ne 0 ]] && {
+  echo Fatal parsing error $rc
+  exit $rc
+}
+
 case "$generator" in
   nwdiag|actdiag|blockdiag)
     node parse.js "$input" $generator |$generator -a -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" 
@@ -50,10 +57,6 @@ case "$generator" in
     node parse.js "$input" digraph |dot -Tpng -o $png  && [[ $silent = 0 ]] && open "$png" 
   ;;
 esac
-[[ $? -ne 0 ]] && {
-  echo Fatal parsing error
-  exit 10
-}
 #circo -Tpng a.gv >c.png
 ##[[ -s c.png ]] && [[ $silent = 0 ]] && open c.png
 
@@ -64,3 +67,4 @@ esac
 ##[[ -s n.png ]] && [[ $silent = 0 ]] && open n.png
 
 
+exit 0

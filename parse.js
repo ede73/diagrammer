@@ -46,4 +46,5 @@ if (myArgs[1]==="lex"){
 		console.log("Errors....");
 		process.exit(9)
 	}
+	process.exit(0)
 }

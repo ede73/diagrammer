@@ -1,35 +1,44 @@
 #./makeLexerAndParser.sh >/dev/null
+rm -f .error
 error=0
+checkError(){
+  if [ -f .error ]; then
+    exit 10
+  fi
+}
+setError(){
+  touch .error
+  checkError
+}
 test(){
+ checkError
  echo "Run test $1 using $x"
  ./t.sh skipparsermake silent $1 $x >/dev/null
- [[ $? -ne 0 ]] && {
-   error=1
-   exit 9
- }
+ rc=$?
+ [[ $rc -ne 0 ]] && setError $rc
  png=${1%.*}_${x}.png
  if [ -f "$png" ]; then
    if [ ! -f "ref/$x/$png" ]; then
     cp $png ref/$x/$png    
    fi
    diff $png ref/$x/$png
-   [ $? -ne 0 ] && echo "ERROR: at $1, image $png ref/$x/$png differ" >&2 && open -Fn $png ref/$x/$png && exit 1
+   [ $? -ne 0 ] && echo "ERROR: at $1, image $png ref/$x/$png differ" >&2 && open -Fn $png ref/$x/$png && setError 11
  else
    echo "ERROR: Could not produce output $1 as $png is non existent" >&2
    ls -l $png
-   error=1
-   exit 10
+   setError 12
  fi
 }
 
 i=0
 #parallelism for 8 cores
 runtest(){
+ checkError
  (( i++ ))
- #echo Running test $i
+ echo Running test $i
  test $* &
  if (( $i % 8 == 0 )) ; then wait;fi
- [[ $error != 0 ]] && exit 10
+ checkError
 }
 tests=${1:-dot actdiag blockdiag}
 for test in $tests; do
@@ -71,4 +80,3 @@ for test in $tests; do
   runtest state_sequence2.txt
   runtest state_conditionals.txt
 done
-

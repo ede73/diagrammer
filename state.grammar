@@ -1,10 +1,6 @@
 /*https://github.com/zaach/jison/wiki/Deviations-From-Flex-Bison*/
 %start S
 %ebnf
-%right STYLES
-%left IMAGE
-%left COLOR
-
 %%
 
 S

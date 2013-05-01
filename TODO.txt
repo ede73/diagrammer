@@ -8,6 +8,7 @@
 - oMeta!
 
 
+-rectangle does not work in lexer..rect works..wtf?
 - For plantuml 
   alt succesfull case
   else some kind of failure

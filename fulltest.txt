@@ -25,7 +25,7 @@ dashed l>"dashed l links to k" dotted k$(red:#ff0000)>"red k to 'j'"j>h>g>f;last
 
 m1>"m1 to m2"m2,"m1 to m3"m3
 
-dashed rectangle a #ff0000 ;dashed red rectangle
+dashed rect a #ff0000 ;dashed red rectangle
 bold circle b #ff0000 ;bold red circle
 bold c;bold c
 diamond d;Diamond d

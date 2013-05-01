@@ -17,12 +17,17 @@ test(){
  rc=$?
  [[ $rc -ne 0 ]] && setError $rc
  png=${1%.*}_${x}.png
+ out=${1%.*}_${x}.out
  if [ -f "$png" ]; then
-   if [ ! -f "ref/$x/$png" ]; then
-    cp $png ref/$x/$png    
-   fi
+   [ ! -f "ref/$x/$png" ] && cp $png ref/$x/$png
+   [ ! -f "ref/$x/$out" ] && cp $out ref/$x/$out
    diff $png ref/$x/$png
-   [ $? -ne 0 ] && echo "ERROR: at $1, image $png ref/$x/$png differ" >&2 && open -Fn $png ref/$x/$png && setError 11
+   [ $? -ne 0 ] && {
+	echo "ERROR: at $1, image $png ref/$x/$png differ" >&2 
+        diff -u $out ref/$x/$out
+	open -Fn $png ref/$x/$png
+	setError 11
+    }
  else
    echo "ERROR: Could not produce output $1 as $png is non existent" >&2
    ls -l $png

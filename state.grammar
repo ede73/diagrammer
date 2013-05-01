@@ -90,8 +90,7 @@ nodeOrGroup
 */
 nodesAndEvents
 	: nodesAndEvents EVENT colorOrVariable INLINE_STRING nodeOrGroup -> getLink(yy,$EVENT,$nodesAndEvents,$nodeOrGroup,$INLINE_STRING,$colorOrVariable).right
-	| nodesAndEvents EVENT colorOrVariable nodeOrGroup LABEL -> getLink(yy,$EVENT,$nodesAndEvents,$nodeOrGroup,$LABEL.substring(1),$colorOrVariable).right
-	| nodesAndEvents EVENT colorOrVariable nodeOrGroup -> getLink(yy,$2,$1,$4,undefined,$3).right
+	| nodesAndEvents EVENT colorOrVariable nodeOrGroup LABEL? 	-> getLink(yy,$EVENT,$nodesAndEvents,$nodeOrGroup,$5==undefined?undefined:$5.substring(1),$colorOrVariable).right
 	| nodesAndEvents EVENT nodeOrGroup LABEL
 		{
 			debug("nodesAndEvents EVENT nodeOrGroup LABEL"+" SS="+$$+",S0="+$0+",S1="+$1+",S2="+$2+",S3="+$3);

@@ -1,0 +1,26 @@
+actdiag{
+  default_fontsize = 14
+  lane "1"{
+    notgroupA1;
+    notgroupB1;
+  }
+  lane "groupname2"{
+    notgroupA2;
+    notgroupB2;
+  }
+  lane "groupname3"{
+    notgroupA3;
+    notgroupB3;
+  }
+  lane "groupname4"{
+    notgroupA4;
+    notgroupB4;
+  }
+  lane "groupname5"{
+    notgroupA5;
+    notgroupB6;
+  }
+  lane "6"{
+    notgroupA6;
+  }
+}

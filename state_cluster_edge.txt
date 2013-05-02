@@ -1,4 +1,4 @@
-{ joku#ff0000;label tassa
+{joku#ff0000;label tassa
  joku1
  joku2
 }

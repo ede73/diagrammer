@@ -17,6 +17,8 @@ COLOR	"#"[A-Fa-f0-9]{6}
 COMMENT ^"//"[^\n]*
 NAME	[A-Za-z][A-Za-z_:0-9]*
 LABEL	";"[^\n]+(\n)
+/*IN GROUP should return last ENDL*/
+GLABEL	";"[^\n]+
 LISTSEP ","
 IMAGE	"/"[A-Za-z0-9]+".png"
 SHAPES "actor"|"beginpoint"|"box"|"circle"|"cloud"|"condition"|"database"|"default"|"diamond"|"dots"|"doublecircle"|"ellipse"|"endpoint"|"input"|"loopin"|"loopout"|"mail"|"minidiamond"|"minisquare"|"note"|"record"|"roundedbox"|"square"|"terminator"|"loop"|"loopend"|"loopstart"|"rect"|"rectangle"
@@ -42,19 +44,23 @@ Two special cases for equence diagrams are ellipsis a.a., and event/broadcast a-
 Why so? I want to keep the syntax as "common" as possible, so theoretically a sequence diagram can ge presented with graphviz or vice versa.
 Special arrow is /> and </ that denotes a broken signal...
 */
+%x GROUP
 %options flex case-insensitive
 %%
 /*{COLORLABEL}	return 'COLORLABEL';*/
 '"'[^"]+'"'	return 'INLINE_STRING';
-"$("[^)]+")"	return 'VARIABLE';
+<INITIAL,GROUP>"$("[^)]+")"	return 'VARIABLE';
 {IF}		return 'IF';
 {IF_CLAUSE}	return 'IF_CLAUSE';
 {ELSEIF}	return 'ELSEIF';
 {ELSE}		return 'ELSE';
 {ENDIF}		return 'ENDIF';
+<GROUP>{GLABEL}		return 'LABEL';
 {LABEL}		return 'LABEL';
 {SHAPES}	return 'SHAPES';
 {STYLES}	return 'STYLES';
+<GROUP>[\n]	this.begin('INITIAL');return 'GROUP_DECLARATION_END';
+<GROUP>[ \t]+	/*skip*/
 \s+		 /* skip WS */
 "("|")" /*skip for now*/
 {COMMENT}	return 'COMMENT';
@@ -64,13 +70,14 @@ Special arrow is /> and </ that denotes a broken signal...
 "node color" return 'NODE_COLOR';
 "node textcolor"|"node text color" return 'NODETEXT_COLOR';
 "group color" return 'GROUP_COLOR';
-{COLOR}		return 'COLOR';
+<INITIAL,GROUP>{COLOR}		return 'COLOR';
 ^("landscape"|"horizontal"|"lr") return 'LANDSCAPE';
 ^("portrait"|"vertical"|"td")	return 'PORTRAIT';
 "equal"		return 'EQUAL';
 "shape"		return 'SHAPE';
 "group end"|"}"	return 'GROUP_END';
-"group"|"{"		return 'GROUP';
+"group"|"{"		{ this.begin('GROUP');return 'GROUP';} 
+/*"group"|"{"		return 'GROUP';*/
 "start"		return 'START';
 /* hint about visualizer*/
 "generator"	return 'GENERATOR';
@@ -78,6 +85,7 @@ Special arrow is /> and </ that denotes a broken signal...
 "</"|"/>"|"<.>"|"<->"|"<>"|"<-"|"<."|"<"|"->"|".>"|">"|"-"|"."	return 'EVENT';
 {IMAGE}		return 'IMAGE';
 {NAME}		return 'NAME';
+<GROUP>{NAME}		return 'GROUPNAME';
 {D}+		return 'NUMBER';
 <<EOF>>		return 'EOF';
 

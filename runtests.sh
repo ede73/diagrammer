@@ -9,6 +9,7 @@ checkError(){
 }
 setError(){
   touch .error
+  echo "ERROR $1 in $2"
   checkError
 }
 test(){
@@ -16,7 +17,7 @@ test(){
  echo "Run test $1 using $x"
  ./t.sh skipparsermake silent $1 $x >/dev/null
  rc=$?
- [[ $rc -ne 0 ]] && setError $rc
+ [[ $rc -ne 0 ]] && setError $rc $1
  png=${1%.*}_${x}.png
  out=${1%.*}_${x}.out
  if [ -f "$png" ]; then
@@ -27,12 +28,12 @@ test(){
 	echo "ERROR: at $1, image $png ref/$x/$png differ" >&2 
         diff -u $out ref/$x/$out
 	open -Fn $png ref/$x/$png
-	setError 11
+	setError 11 $1
     }
  else
    echo "ERROR: Could not produce output $1 as $png is non existent" >&2
    ls -l $png
-   setError 12
+   setError 12 $1
  fi
 }
 
@@ -71,6 +72,7 @@ runtest fulltest.txt
 runtest state_tcp.txt
 runtest state_y_edge.txt
 runtest state_conditionals.txt
+runtest state_group.txt
 done
 
 x=nwdiag

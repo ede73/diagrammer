@@ -130,22 +130,18 @@ nodesAndEvents
 	;
 
 graphContent
-	/* variable declaration(s) */
 	: VARIABLE -> processVariable(yy,$1)
-	/* set default shape*/
 	| SHAPE shapeOrVariable
 		{
 			debug("SHAPE getShapeOrVariablleee ");
 			if ($2=="default") $2=undefined;
 			$$=getGraphRoot(yy).setCurrentShape($2);
 		}
-	/* set equal nodes */
 	| EQUAL nodeGroupListOrAttrs
 		{
 			getCurrentContainer(yy).setEqual($2 instanceof Node?new Array($2):$2);
 		}
 	| SHAPE NAME {throw new Error("Expecting one of the shapes, got ("+$2+")");}
-	/*other defaults*/
 	| LANDSCAPE 		-> getGraphRoot(yy).setDirection("landscape")
 	| GENERATOR NAME 	-> getGraphRoot(yy).setGenerator($NAME)
 	| VISUALIZER NAME 	-> getGraphRoot(yy).setVisualizer($NAME)
@@ -156,7 +152,6 @@ graphContent
 	| LINK_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('linkcolor'    ,$2=="default"?undefined:$2)
 	| LINKTEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('linktextcolor',$2=="default"?undefined:$2)
 	| GROUP_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('groupcolor'   ,$2=="default"?undefined:$2)
-	/* conditionals*/
 	| IF 	 ->	setAttr(enterContainer(yy,getGroup(yy).setLabel($IF)),'conditional','if')
 	| ELSEIF {
 		exitContainer(yy);
@@ -171,9 +166,8 @@ graphContent
 		setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif');
 		$$=exitContainer(yy)
 	} 
-	/* actual nodes*/
 	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */
-	| GROUP NAME? colorOrVariable? LABEL? -> enterContainer(yy,getGroup(yy).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
+	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END -> enterContainer(yy,getGroup(yy).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
 	| GROUP_END 	-> exitContainer(yy)
 	| START NAME 	-> getGraphRoot(yy).setStart($NAME)
 	| nodesAndEvents {

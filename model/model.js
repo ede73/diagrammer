@@ -26,7 +26,6 @@ function getVariables(yy) {
     }
     return yy.VARIABLES;
 }
-
 function getGraphRoot(yy) {
     // debug(" getGraphRoot "+yy);
     if (!yy.GRAPHROOT) {
@@ -39,6 +38,7 @@ function getGraphRoot(yy) {
         debug("  ...Initialize emptyroot " + yy);
         yy.CURRENTCONTAINER = new Array();
         yy.LINKS = new Array();
+        yy.CONTAINER_EXIT=1;
         yy.GRAPHROOT = new GraphRoot();
         // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
         enterContainer(yy, yy.GRAPHROOT);
@@ -178,10 +178,13 @@ function enterContainer(yy, container) {
 }
 // exit a container, next one popped is the new CURRENT
 
+/**
+ * Exit the current container, return the previous one
+ */
 function exitContainer(yy) {
     if (yy.CURRENTCONTAINER.length<=1)
         throw new Error("INTERNAL ERROR:Trying to exist ROOT container");
-    return yy.CURRENTCONTAINER.pop();
+    return setAttr(yy.CURRENTCONTAINER.pop(),'exitnode',yy.CONTAINER_EXIT++);
 }
 
 /**

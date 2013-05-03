@@ -8,6 +8,23 @@
 - oMeta!
 
 
+- Each group has UNIQUE name and UNIQUE exitnode attr. That is enuf to
+<> -YES- .(name)
+ |     ------
+ |     | a  |
+ |     | |  |
+ |     | b  |
+ |     ------
+ |--NO-- . (exitnode)
+         |
+         <> -YES- .(name)
+         |     ------
+         |     | c  |
+         |     | |  |
+         |     | d  |
+         |     ------
+         |--NO-- . (exitnode)
+
 -rectangle does not work in lexer..rect works..wtf?
 - For plantuml 
   alt succesfull case

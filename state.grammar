@@ -163,7 +163,7 @@ graphContent
 		}
 	| ENDIF	 { 
 		exitContainer(yy);
-		setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif');
+		setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif')
 		$$=exitContainer(yy)
 	} 
 	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */

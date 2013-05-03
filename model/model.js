@@ -1,18 +1,18 @@
 function processVariable(yy, variable) {
-    //ASSIGN VARIABLE
-    //$(NAME:CONTENT...)
+    // ASSIGN VARIABLE
+    // $(NAME:CONTENT...)
     // or
     // refer variable
-    //$(NAME)
+    // $(NAME)
     var vari = variable.slice(2, -1);
     if (vari.indexOf(":") !== -1) {
-        //Assignment
+        // Assignment
         var tmp = vari.split(":");
         debug("GOT assignment " + tmp[0] + "=" + tmp[1]);
         getVariables(yy)[tmp[0]] = tmp[1];
         return tmp[1];
     } else {
-        //referral
+        // referral
         if (!getVariables(yy)[vari]) {
             throw new Error("Variable " + vari + " not defined");
         }
@@ -28,7 +28,7 @@ function getVariables(yy) {
 }
 
 function getGraphRoot(yy) {
-    //debug(" getGraphRoot "+yy);
+    // debug(" getGraphRoot "+yy);
     if (!yy.GRAPHROOT) {
         debug(" no graphroot,init - in getGraphRoot");
         if (yy.result === undefined) {
@@ -40,15 +40,15 @@ function getGraphRoot(yy) {
         yy.CURRENTCONTAINER = new Array();
         yy.LINKS = new Array();
         yy.GRAPHROOT = new GraphRoot();
-        //yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
+        // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
         enterContainer(yy, yy.GRAPHROOT);
     }
     return yy.GRAPHROOT;
 }
-//Direct accessor, though graphroot governs!
+// Direct accessor, though graphroot governs!
 
 function getCurrentContainer(yy) {
-    //debug(" getCurrentContainer of "+yy);
+    // debug(" getCurrentContainer of "+yy);
     var x = getGraphRoot(yy).getCurrentContainer();
     if (x == undefined) debug(" ERROR: Container undefined");
     if (x.OBJECTS == undefined) {
@@ -60,20 +60,19 @@ function getCurrentContainer(yy) {
     }
     return x;
 }
-//Direct accessor, though graphroot governs!
-//Return the current container...(the NEW GROUP)
-/*function setCurrentContainer(yy,ctr){
-	if (!(ctr instanceof Group || ctr instanceof GraphRoot)){
-		throw new Error("Trying to set container other than Group/GraphRoot:"+typeof(ctr));
-	}
-	debug(" setCurrentContainer "+yy);
-	return getGraphRoot(yy).setCurrentContainer(ctr);
-}*/
-//LHS=Node(z1)
+// Direct accessor, though graphroot governs!
+// Return the current container...(the NEW GROUP)
+/*
+ * function setCurrentContainer(yy,ctr){ if (!(ctr instanceof Group || ctr
+ * instanceof GraphRoot)){ throw new Error("Trying to set container other than
+ * Group/GraphRoot:"+typeof(ctr)); } debug(" setCurrentContainer "+yy); return
+ * getGraphRoot(yy).setCurrentContainer(ctr); }
+ */
+// LHS=Node(z1)
 /**
-* create an array, push LHS,RHS nodes there and return the arrray
-* As long as processing the list nodes added to array..
-*/
+ * create an array, push LHS,RHS nodes there and return the arrray As long as
+ * processing the list nodes added to array..
+ */
 function getList(yy, LHS, RHS,rhsLinkLabel) {
     if (LHS instanceof Node) {
         debug(" getList(" + LHS + "," + RHS + ")");
@@ -83,22 +82,21 @@ function getList(yy, LHS, RHS,rhsLinkLabel) {
         return x;
     }
     debug(" getList([" + LHS + "]," + RHS);
-    //LHS not a node..
+    // LHS not a node..
     LHS.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
     return LHS;
 }
 /**
-See readNodeOrGroup in grammar
-
-Must be able to return Group as well..if NAME matches...
-
-STYLE will always be updated on last occurance (ie. 
-dashed a1
-
-dotted a1>b1 
-
-node a1 will be dotted instead of being dashed
-*/
+ * See readNodeOrGroup in grammar
+ * 
+ * Must be able to return Group as well..if NAME matches...
+ * 
+ * STYLE will always be updated on last occurance (ie. dashed a1
+ * 
+ * dotted a1>b1
+ * 
+ * node a1 will be dotted instead of being dashed
+ */
 function getNode(yy, name,style) {
     debug(" getNode " + name);
     if (name instanceof Node) {
@@ -137,20 +135,21 @@ function getNode(yy, name,style) {
     });
     return pushObject(yy, n);
 }
-/** 
- * Get default attribute nodecolor,linkcolor,groupcolor
- * and bubble upwards if otherwise 'unobtainable'
+/**
+ * Get default attribute nodecolor,linkcolor,groupcolor and bubble upwards if
+ * otherwise 'unobtainable'
  */
 function getDefaultAttribute(yy,attrname,x){
-  //no need for the value, but runs init if missing
+  // no need for the value, but runs init if missing
   getGraphRoot(yy);
-  //debug("getDefaultAttribute "+attrname);
+  // debug("getDefaultAttribute "+attrname);
   for(var i in yy.CURRENTCONTAINER){
   	  var ctr=yy.CURRENTCONTAINER[i];
   	  var a=ctr.getDefault(attrname);
-  	  //debug("  traverse getDefaultAttribute "+attrname+" from "+ctr+" as "+a);
+  	  // debug(" traverse getDefaultAttribute "+attrname+" from "+ctr+" as
+		// "+a);
   	  if (a!==undefined){
-  	  	  //debug("getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
+  	  	  // debug("getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
   	  	  if (x!==undefined)
   	  	    x(a);
   	  	  return a;
@@ -163,21 +162,21 @@ function getDefaultAttribute(yy,attrname,x){
 		x(a);
 	  return a;
   }
-  //debug("getDefaultAttribute FAILED");
+  // debug("getDefaultAttribute FAILED");
   return undefined;
 }
 function getCurrentContainer(yy) {
-	//no need for value, but runs init if missing
+	// no need for value, but runs init if missing
 	getGraphRoot(yy);
     return yy.CURRENTCONTAINER[yy.CURRENTCONTAINER.length - 1];
 }
 
 function enterContainer(yy, container) {
     yy.CURRENTCONTAINER.push(container);
-    //yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
+    // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
     return container;
 }
-//exit a container, next one popped is the new CURRENT
+// exit a container, next one popped is the new CURRENT
 
 function exitContainer(yy) {
     if (yy.CURRENTCONTAINER.length<=1)
@@ -186,10 +185,9 @@ function exitContainer(yy) {
 }
 
 /**
- * Create a NEW GROUP if one (ref) does not exist yet
- * getGroup(yy) => create a new anonymous group
- * getGroup(yy,GroupRef) => create a new group if GroupRef is not a Group
- *    or return GroupRef if it is...1
+ * Create a NEW GROUP if one (ref) does not exist yet getGroup(yy) => create a
+ * new anonymous group getGroup(yy,GroupRef) => create a new group if GroupRef
+ * is not a Group or return GroupRef if it is...1
  */
 function getGroup(yy, ref) {
     if (ref instanceof Group) return ref;
@@ -204,14 +202,12 @@ function getGroup(yy, ref) {
     });
     return newGroup;
 }
-//Get a link such that l links to r, return the added LINK or LINKS
+// Get a link such that l links to r, return the added LINK or LINKS
 
 /**
- * linkType >,<,.>,<.,->,<-,<>
- * l = left side, Node(xxx) or Group(yyy), or Array(smthg)
- * r = right side, Node(xxx) or Group(yyy), or Array(smthg)
- * label = if defined, LABEL for the link
- * color = if defined, COLOR for the link
+ * linkType >,<,.>,<.,->,<-,<> l = left side, Node(xxx) or Group(yyy), or
+ * Array(smthg) r = right side, Node(xxx) or Group(yyy), or Array(smthg) label =
+ * if defined, LABEL for the link color = if defined, COLOR for the link
  */
 function getLink(yy, linkType, l, r, label, color) {
     if (l instanceof Array) {
@@ -250,7 +246,7 @@ function getLink(yy, linkType, l, r, label, color) {
     if (color != undefined) l.setColor(color);
     return addLink(yy, l);
 }
-//Add link to the list of links, return the LINK
+// Add link to the list of links, return the LINK
 
 function addLink(yy, l) {
     if (l instanceof Array) {
@@ -268,8 +264,8 @@ function pushObject(yy, o) {
     getCurrentContainer(yy).OBJECTS.push(o);
     return o;
 }
-//test if container has the object
-//TODO: Recurse
+// test if container has the object
+// TODO: Recurse
 
 function containsObject(container, o) {
     for (var i in container.OBJECTS) {
@@ -314,7 +310,7 @@ function GraphObject(label) {
     	value=value.trim().replace(/"/gi,"");
     	debug("  TEST value("+value+") for color");
     	var m=value.match(/^(#[A-Fa-f0-9]{6,6})(.*)$/);
-    	//debug(m);
+    	// debug(m);
     	if (m!==null && m.length==3){
     		this.setTextColor(m[1]);
     		value=m[2].trim();
@@ -344,7 +340,7 @@ function Node(name, shape) {
     this.getShape = function() {
         return getAttr(this, 'shape');
     }
-    //temporary for RHS list array!!
+    // temporary for RHS list array!!
     this.setLinkLabel = function(value) {
         return setAttr(this, 'linklabel', value);
     };
@@ -374,7 +370,7 @@ Group.prototype.constructor = Group;
 function Group(name) {
     this.name = name;
     this.OBJECTS = new Array();
-    //Save EQUAL node ranking
+    // Save EQUAL node ranking
     this.setEqual = function(value) {
         return setAttr(this, 'equal', value);
     };
@@ -382,9 +378,9 @@ function Group(name) {
         return getAttr(this, 'equal');
     }
     /**
-     * Set default nodecolor, groupcolor, linkcolor
-     * Always ask from the currentContainer first
-     */
+	 * Set default nodecolor, groupcolor, linkcolor Always ask from the
+	 * currentContainer first
+	 */
     this.setDefault = function(key,value) {
     	debug("Set group "+key+ " to "+value);
         return setAttr(this, key, value);
@@ -435,7 +431,7 @@ function GraphRoot() {
     this.getStart = function() {
         return getAttr(this, 'start');
     };
-    //Save EQUAL node ranking
+    // Save EQUAL node ranking
     this.setEqual = function(value) {
         return setAttr(this, 'equal', value);
     };
@@ -443,15 +439,15 @@ function GraphRoot() {
         return getAttr(this, 'equal');
     };
     /**
-     * Set default nodecolor, groupcolor, linkcolor
-     * Always ask from the currentContainer first
-     */
+	 * Set default nodecolor, groupcolor, linkcolor Always ask from the
+	 * currentContainer first
+	 */
     this.setDefault = function(key,value) {
     	debug("Set ROOT "+key+ " to "+value);
         return setAttr(this,  key,value);
     };
     this.getDefault = function(key) {
-    	//debug("Get ROOT "+key);
+    	// debug("Get ROOT "+key);
         return getAttr(this, key);
     };
     this.toString = function() {
@@ -487,7 +483,7 @@ var shapes = {
     blockdiag: {
         default: "box",
         invis: "invis",
-        /*TODO?*/
+        /* TODO? */
         record: "box",
         doublecircle: "endpoint",
         box: "box",
@@ -519,7 +515,7 @@ var shapes = {
     actdiag: {
         default: "box",
         invis: "invis",
-        /*TODO?*/
+        /* TODO? */
         record: "box",
         doublecircle: "endpoint",
         box: "box",

@@ -15,24 +15,24 @@ setError(){
 test(){
  checkError
  echo "Run test $1 using $x"
- ./t.sh skipparsermake silent $1 $x >/dev/null
+ ./t.sh skipparsermake silent tests/$1 $x >/dev/null
  rc=$?
  [[ $rc -ne 0 ]] && setError $rc $1
  png=${1%.*}_${x}.png
  out=${1%.*}_${x}.out
- if [ -f "$png" ]; then
-   [ ! -f "ref/$x/$png" ] && cp $png ref/$x/$png
-   [ ! -f "ref/$x/$out" ] && cp $out ref/$x/$out
-   diff $png ref/$x/$png
+ if [ -f "tests/$png" ]; then
+   [ ! -f "ref/$x/$png" ] && cp tests/$png ref/$x/$png
+   [ ! -f "ref/$x/$out" ] && cp tests/$out ref/$x/$out
+   diff tests/$png ref/$x/$png
    [ $? -ne 0 ] && {
-	echo "ERROR: at $1, image $png ref/$x/$png differ" >&2 
-        diff -u $out ref/$x/$out
-	open -Fn $png ref/$x/$png
+	echo "ERROR: at $1, image tests/$png ref/$x/$png differ" >&2 
+        diff -u tests/$out ref/$x/$out
+	open -Fn tests/$png ref/$x/$png
 	setError 11 $1
     }
  else
    echo "ERROR: Could not produce output $1 as $png is non existent" >&2
-   ls -l $png
+   ls -l tests/$png
    setError 12 $1
  fi
 }

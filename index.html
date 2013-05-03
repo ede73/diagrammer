@@ -1,142 +1,173 @@
 <html>
-<link rel="stylesheet" type="text/css" href="css/textarea.css"/>
-<script type="text/javascript" src="parser.js"></script>
-<script type="text/javascript" src="index.js"></script>
-<!--<script type="text/javascript" src="js/mscgen.js"></script>-->
+	<link rel="stylesheet" type="text/css" href="css/textarea.css"/>
+	<script type="text/javascript" src="parser.js"></script>
+	<script type="text/javascript" src="index.js"></script>
+	<!--<script type="text/javascript" src="js/mscgen.js"></script>-->
 
-<!-- canviz support start-->
-        <link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz.css" />
-        <!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz-ie6.css" /><![endif]-->
-        <!--[if IE]><script type="text/javascript" src="js/canviz-0.1/excanvas/excanvas.js"></script><![endif]-->
-        <!--<script type="text/javascript" src="js/canviz-0.1/prototype/prototype.js"></script>-->
-   <!--     <script src="//ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js"></script>
-        <script type="text/javascript" src="js/canviz-0.1/path/path.js"></script>
-        <script type="text/javascript" src="js/canviz-0.1/canviz.js"></script>
-        <script type="text/javascript" src="js/canviz-0.1/x11colors.js"></script>
-        <script type="text/javascript" src="js/canviz-0.1/graphs/graphlist.js"></script>
-        <script type="text/javascript" src="js/canviz-0.1/graphs/layoutlist.js"></script>
---><!-- canviz support end-->
+	<!-- canviz support start-->
+	<link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz.css" />
+	<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz-ie6.css" /><![endif]-->
+	<!--[if IE]><script type="text/javascript" src="js/canviz-0.1/excanvas/excanvas.js"></script><![endif]-->
+	<!--<script type="text/javascript" src="js/canviz-0.1/prototype/prototype.js"></script>-->
+	<!--     <script src="//ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js"></script>
+	<script type="text/javascript" src="js/canviz-0.1/path/path.js"></script>
+	<script type="text/javascript" src="js/canviz-0.1/canviz.js"></script>
+	<script type="text/javascript" src="js/canviz-0.1/x11colors.js"></script>
+	<script type="text/javascript" src="js/canviz-0.1/graphs/graphlist.js"></script>
+	<script type="text/javascript" src="js/canviz-0.1/graphs/layoutlist.js"></script>
+	--><!-- canviz support end-->
 
-<body>
-<form name="contact" action="">
-    <label for="generator">Generator</label>
-    <select id="generator" name="generator" onChange="generatorChanged()">
-      <option value="digraph:dot">Graphviz - dot</option>
-      <option value="digraph:circo">Graphviz - circo</option>
-      <option value="digraph:twopi">Graphviz - twopi</option>
-      <option value="digraph:neato">Graphviz - neato</option>
-      <option value="digraph:fdp">Graphviz - fdp</option>
-      <option value="digraph:sfdp">Graphviz - sfdp</option>
-      <option value="actdiag">Activity Diagram</option>
-      <option value="blockdiag">Block diagram</option>
-      <option value="nwdiag">Network diagram</option>
-      <option value="seqdiag">Sequence diagram</option>
-      <option value="mscgen">MSCGEN</option>
-      <option value="plantuml_sequence">PlantUML - Sequence</option>
-    </select>
-	<label for="example">Examples:</label>
-    <select id="example" name="example" onChange="exampleChanged()">
-<option value="state.txt">state.txt</option>
-<option value="state10.txt">state10.txt</option>
-<option value="state11.txt">state11.txt</option>
-<option value="state12.txt">state12.txt</option>
-<option value="state13.txt">state13.txt</option>
-<option value="state14.txt">state14.txt</option>
-<option value="state15.txt">state15.txt</option>
-<option value="state16.txt">state16.txt</option>
-<option value="state2.txt">state2.txt</option>
-<option value="state3.txt">state3.txt</option>
-<option value="state4.txt">state4.txt</option>
-<option value="state5.txt">state5.txt</option>
-<option value="state6.txt">state6.txt</option>
-<option value="state7.txt">state7.txt</option>
-<option value="state8.txt">state8.txt</option>
-<option value="state9.txt">state9.txt</option>
-<option value="state_cluster_edge.txt">state_cluster_edge.txt</option>
-<option value="state_dual_node.txt">state_dual_node.txt</option>
-<option value="state_sequence.txt">state_sequence.txt</option>
-<option value="state_sequence2.txt">state_sequence2.txt</option>
-<option value="state_ancestry.txt">state_ancestry.txt</option>
-<option value="state_innergroups.txt">state_innergroups.txt</option>
-<option value="state_recursive_linking.txt">state_recursive_linking.txt</option>
-<option value="fulltest.txt">fulltest.txt</option>
-<option value="state_tcp.txt">state_tcp.txt</option>
-<option value="state_android.txt">state_android.txt</option>
-<option value="state_conditionals.txt">state_conditionals.txt</option>
-<option value="state_sip_sequence.txt">state_sip_sequence.txt</option>
-    </select>
-    <label for="filename">Filename</label>
-    <input type="text" id="filename" name="filename" value="output"/>
-    <button onclick="save();return false;">Save</button>
-    <button onclick="load();return false;">Load</button>
-    <button onclick="importGraphs();return false;">Import</button>
-    <button onclick="exportGraphs();return false;">Export</button>
-    <label for="saved">Saved graphs</label>
-    <select id="saved" name="saved" onChange="savedChanged()"></select>
-    <button onclick="visualize();return false;">Visualize</button>
-    <br/>
+	<body>
+		<form name="contact" action="">
+			<label for="generator">Generator</label>
+			<select id="generator" name="generator" onChange="generatorChanged()">
+				<option value="digraph:dot">Graphviz - dot</option>
+				<option value="digraph:circo">Graphviz - circo</option>
+				<option value="digraph:twopi">Graphviz - twopi</option>
+				<option value="digraph:neato">Graphviz - neato</option>
+				<option value="digraph:fdp">Graphviz - fdp</option>
+				<option value="digraph:sfdp">Graphviz - sfdp</option>
+				<option value="actdiag">Activity Diagram</option>
+				<option value="blockdiag">Block diagram</option>
+				<option value="nwdiag">Network diagram</option>
+				<option value="seqdiag">Sequence diagram</option>
+				<option value="mscgen">MSCGEN</option>
+				<option value="plantuml_sequence">PlantUML - Sequence</option>
+			</select>
+			<label for="example">Examples:</label>
+			<select id="example" name="example" onChange="exampleChanged()">
+				<option value="state.txt">state.txt</option>
+				<option value="state10.txt">state10.txt</option>
+				<option value="state11.txt">state11.txt</option>
+				<option value="state12.txt">state12.txt</option>
+				<option value="state13.txt">state13.txt</option>
+				<option value="state14.txt">state14.txt</option>
+				<option value="state15.txt">state15.txt</option>
+				<option value="state16.txt">state16.txt</option>
+				<option value="state2.txt">state2.txt</option>
+				<option value="state3.txt">state3.txt</option>
+				<option value="state4.txt">state4.txt</option>
+				<option value="state5.txt">state5.txt</option>
+				<option value="state6.txt">state6.txt</option>
+				<option value="state7.txt">state7.txt</option>
+				<option value="state8.txt">state8.txt</option>
+				<option value="state9.txt">state9.txt</option>
+				<option value="state_cluster_edge.txt">state_cluster_edge.txt</option>
+				<option value="state_dual_node.txt">state_dual_node.txt</option>
+				<option value="state_sequence.txt">state_sequence.txt</option>
+				<option value="state_sequence2.txt">state_sequence2.txt</option>
+				<option value="state_ancestry.txt">state_ancestry.txt</option>
+				<option value="state_innergroups.txt">state_innergroups.txt</option>
+				<option value="state_recursive_linking.txt">state_recursive_linking.txt</option>
+				<option value="fulltest.txt">fulltest.txt</option>
+				<option value="state_tcp.txt">state_tcp.txt</option>
+				<option value="state_android.txt">state_android.txt</option>
+				<option value="state_conditionals.txt">state_conditionals.txt</option>
+				<option value="state_sip_sequence.txt">state_sip_sequence.txt</option>
+			</select>
+			<label for="filename">Filename</label>
+			<input type="text" id="filename" name="filename" value="output"/>
+			<button onclick="save();return false;">
+				Save
+			</button>
+			<button onclick="load();return false;">
+				Load
+			</button>
+			<button onclick="importGraphs();return false;">
+				Import
+			</button>
+			<button onclick="exportGraphs();return false;">
+				Export
+			</button>
+			<label for="saved">Saved graphs</label>
+			<select id="saved" name="saved" onChange="savedChanged()"></select>
+			<button onclick="visualize();return false;">
+				Visualize
+			</button>
+			<br/>
 
-    <!-- one could have EDITABLE content here...parsed using lexer-->
-    <!--<section id="editable" contenteditable="true">
-    a <text style="color:red">&gt;</text> b,c,d
-    f &lt; g
-    </section>-->
-    <div id="error"></div>
-    <style type="text/css">
-        .toolbar ul {
-            float: left;
-        }
-        .toolbar ul li
-        {
-    height: 30px;
-    background-color: rgba(0,0,255,.5);
-    color: white;
-    padding: 5px;
-    margin: 5px;
-    border-radius: 8px;
-    font-family: Helvetica;
-    font-size: 12px;
-    line-height: 30px;
-    display: block;
-            /*border: solid 1px black;*/
-           /* display: table-cell;*/
-            list-style-type: none;
-/*            height: 10px;
-            margin: 10px;
-            vertical-align: middle;
-  */      }
-        </style>
-        <div class="toolbar">
-    <ul class="toolbar">
-    <li onclick="addLine(1);">Colored node with label</li>
-    <li onclick="addLine(2);">A Group</li>
-    <li onclick="addLine(3);">Connected node pair</li>
-    <li onclick="addLine(4);">Many connected nodes</li>
-    <li onclick="addLine(5);">Start node</li>
-    <li onclick="addLine(6);">Shape the reminder</li>
-    <li onclick="addLine(7);">Add equals</li>
-    <li onclick="addLine(8);">Variable color</li>
-    </ul></div>
-    <textarea id="editable" rows="40" cols="40"></textarea>
-      <img align="top" id="image" width=700 src="result.png" onclick="javascript:openImage('result.png');"/>
-    <textarea id="result" rows="40" cols="10"></textarea>
-    <p>Javascript generated(dot only)</p>
-    <div id="svg" style="border-width: 2px; border-style: dotted; " align="top"></div>
-    <p>CanViZ</p>
-    <div id="graph_container"></div>
-    <div id="debug_output"></div>
-  </form>
-</body>
-<script src="js/viz.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script type="text/javascript" src="index2.js"></script>
-<script type="text/javascript">
-//_MscParse("a>b");
-//  $.noConflict();
-//  jQuery(document).ready(function($) {
-//    // Code that uses jQuery's $ can follow here.
-//  });
-//  // Code that uses other library's $ can follow here.
-</script>
+			<!-- one could have EDITABLE content here...parsed using lexer-->
+			<!--<section id="editable" contenteditable="true">
+			a <text style="color:red">&gt;</text> b,c,d
+			f &lt; g
+			</section>-->
+			<div id="error"></div>
+			<style type="text/css">
+				.toolbar ul {
+					float: left;
+				}
+				.toolbar ul li {
+					height: 30px;
+					background-color: rgba(0,0,255,.5);
+					color: white;
+					padding: 5px;
+					margin: 5px;
+					border-radius: 8px;
+					font-family: Helvetica;
+					font-size: 12px;
+					line-height: 30px;
+					display: block;
+					/*border: solid 1px black;*/
+					/* display: table-cell;*/
+					list-style-type: none;
+					/*            height: 10px;
+					 margin: 10px;
+					 vertical-align: middle;
+					 */
+				}
+			</style>
+			<div class="toolbar">
+				<ul class="toolbar">
+					<li onclick="addLine(1);">
+						Colored node with label
+					</li>
+					<li onclick="addLine(2);">
+						A Group
+					</li>
+					<li onclick="addLine(3);">
+						Connected node pair
+					</li>
+					<li onclick="addLine(4);">
+						Many connected nodes
+					</li>
+					<li onclick="addLine(5);">
+						Start node
+					</li>
+					<li onclick="addLine(6);">
+						Shape the reminder
+					</li>
+					<li onclick="addLine(7);">
+						Add equals
+					</li>
+					<li onclick="addLine(8);">
+						Variable color
+					</li>
+				</ul>
+			</div>
+			<textarea id="editable" rows="40" cols="40"></textarea>
+			<img align="top" id="image" width=700 src="result.png" onclick="javascript:openImage('result.png');"/>
+			<textarea id="result" rows="40" cols="10"></textarea>
+			<p>
+				Javascript generated(dot only)
+			</p>
+			<div id="svg" style="border-width: 2px; border-style: dotted; " align="top"></div>
+			<p>
+				CanViZ
+			</p>
+			<div id="graph_container"></div>
+			<div id="debug_output"></div>
+		</form>
+	</body>
+	<script src="js/viz.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script type="text/javascript" src="index2.js"></script>
+	<script type="text/javascript">
+		//_MscParse("a>b");
+		//  $.noConflict();
+		//  jQuery(document).ready(function($) {
+		//    // Code that uses jQuery's $ can follow here.
+		//  });
+		//  // Code that uses other library's $ can follow here.
+	</script>
 </html>
 

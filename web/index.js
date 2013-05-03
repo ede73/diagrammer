@@ -64,7 +64,7 @@ function exportGraphs() {
 		type : "POST",
 		async : true,
 		cache : false,
-		url : "saveExport.php",
+		url : "web/saveExport.php",
 		data : JSON.stringify(getSavedGraph()),
 		contentType : "application/json; charset=utf-8",
 		// dataType: "json",
@@ -87,8 +87,8 @@ function importGraphs() {
 		type : "GET",
 		async : true,
 		cache : false,
-		// url: "localstorage.json",
-		url : "loadExport.php",
+		// url: "web/localstorage.json",
+		url : "web/loadExport.php",
 		contentType : "application/json; charset=utf-8",
 		dataType : "json",
 		success : function(msg) {
@@ -109,7 +109,7 @@ function visualize(visualizer) {
 	var statelang = document.getElementById("result").value;
 	if (!visualizer)
 		visualizer = getVisualizer();
-	var visualizeUrl = "visualize.php?visualizer=" + visualizer;
+	var visualizeUrl = "web/visualize.php?visualizer=" + visualizer;
 	$.ajax({
 		type : "POST",
 		async : true,

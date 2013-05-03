@@ -11,17 +11,23 @@ function ast(yy) {
 	}
 	var processANode = function(o) {
 	};
-
+    yy.result(indent("{result:"));
+    depth++;
+    
 	var r = getGraphRoot(yy);
+	if (r.getVisualizer())
 	yy.result(indent(JSON.stringify({
 		visualizer : r.getVisualizer()
 	})));
+	if (r.getDirection())
 	yy.result(indent(JSON.stringify({
 		direction : r.getDirection()
 	})));
+	if (r.getStart())
 	yy.result(indent(JSON.stringify({
 		start : r.getStart()
 	})));
+	if (r.getEqual())
 	yy.result(indent(JSON.stringify({
 		equal : r.getEqual()
 	})));
@@ -58,4 +64,6 @@ function ast(yy) {
 		n.container.conditional = undefined;
 		yy.result(indent(JSON.stringify(n)));
 	}
+	   --depth;
+	   yy.result(indent("}"));
 }

@@ -73,5 +73,5 @@ switch($_REQUEST["visualizer"]){
   break;
 }
 file_put_contents("./error.txt",$r);
-echo "result.png";
+echo "web/result.png";
 ?>

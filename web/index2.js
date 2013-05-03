@@ -133,7 +133,7 @@ function exampleChanged() {
 	var e = document.getElementById("example");
 	var doc = e.options[e.selectedIndex].value;
 	$.ajax({
-		url : doc,
+		url : "tests/"+doc,
 		cache : false
 	}).done(function(data) {
 		document.getElementById("editable").value = data;

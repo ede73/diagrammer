@@ -1,7 +1,7 @@
 <html>
 	<link rel="stylesheet" type="text/css" href="css/textarea.css"/>
 	<script type="text/javascript" src="parser.js"></script>
-	<script type="text/javascript" src="index.js"></script>
+	<script type="text/javascript" src="web/index.js"></script>
 	<!--<script type="text/javascript" src="js/mscgen.js"></script>-->
 
 	<!-- canviz support start-->
@@ -33,6 +33,7 @@
 				<option value="seqdiag">Sequence diagram</option>
 				<option value="mscgen">MSCGEN</option>
 				<option value="plantuml_sequence">PlantUML - Sequence</option>
+				<option value="ast">AST</option>
 			</select>
 			<label for="example">Examples:</label>
 			<select id="example" name="example" onChange="exampleChanged()">
@@ -145,7 +146,7 @@
 				</ul>
 			</div>
 			<textarea id="editable" rows="40" cols="40"></textarea>
-			<img align="top" id="image" width=700 src="result.png" onclick="javascript:openImage('result.png');"/>
+			<img align="top" id="image" width=700 src="web/result.png" onclick="javascript:openImage('web/result.png');"/>
 			<textarea id="result" rows="40" cols="10"></textarea>
 			<p>
 				Javascript generated(dot only)
@@ -160,7 +161,7 @@
 	</body>
 	<script src="js/viz.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-	<script type="text/javascript" src="index2.js"></script>
+	<script type="text/javascript" src="web/index2.js"></script>
 	<script type="text/javascript">
 		//_MscParse("a>b");
 		//  $.noConflict();

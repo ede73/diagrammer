@@ -1,6 +1,4 @@
 console.log("Reset generator and visualizer");
-parser.yy.OUTPUT=undefined;
-parser.yy.VISUALIZER=undefined;
 VERBOSE=false;
 parser.yy.parseError=function(str,hash){
 	var pe="Parsing error:\n"+

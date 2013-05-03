@@ -38,6 +38,7 @@ break;
 case 8:
 d.value="$(color1:#12ede0)\nclr$(color1)\nclr2$(color1)\n"+d.value;
 }
+	console.log("getSavedFilesChanged..parse");
 	parse(document.getElementById("editable"),getGenerator());
 return false;
 }
@@ -93,6 +94,7 @@ s.innerHTML=tc
 ;
 }
 function parse(textArea,generator,visualizer){
+        console.log("parse "+generator+","+visualizer);
 	document.getElementById("error").innerText="";
 	parsingStarted=true;
 	delete (parser.yy.GRAPHROOT);
@@ -116,6 +118,7 @@ function parse(textArea,generator,visualizer){
 }
 function generatorChanged()
 {
+	console.log("generatorChanged..parse");
 	parse(document.getElementById("editable"),getGenerator(),getVisualizer());
 }
 function savedChanged(){
@@ -127,6 +130,7 @@ function savedChanged(){
   if (data[doc]){
     document.getElementById("editable").value=data[doc];
     filename.value=doc;
+    console.log("savedChanged..parse");
     parse(document.getElementById("editable"));
   }
 }
@@ -140,6 +144,7 @@ $.ajax({
   cache:false
 }).done(function(data) {
 	document.getElementById("editable").value=data;
+      	console.log("exampleChanged..parse");
         parse(document.getElementById("editable"));
 });
 }
@@ -153,7 +158,7 @@ function delayedKeypressCallback(obj, callback, delay) {
         }
         timer = window.setTimeout( function() {
             timer = null;
-            callback(tt);
+            callback(tt,getGenerator(),getVisualizer());
         }, delay );
     };
     obj = null;

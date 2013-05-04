@@ -99,46 +99,47 @@ function getList(yy, LHS, RHS,rhsLinkLabel) {
  */
 function getNode(yy, name,style) {
     function cc(yy,name,style){
-    if (name instanceof Node) {
-        if (style) name.setStyle(style);
-        return name;
-    }
-    if (name instanceof Array) {
-        return name;
-    }
+    	if (name instanceof Node) {
+    		if (style) name.setStyle(style);
+    		return name;
+    	}
+    	if (name instanceof Array) {
+    		return name;
+    	}
 
-    var search = function s(container, name) {
-        if (container.getName() == name) return container;
-        for (var i in container.OBJECTS) {
-            var o = container.OBJECTS[i];
-            if (o instanceof Node && o.getName() == name) {
-                if (style) o.setStyle(style);
-                return o;
-            }
-            if (o instanceof Group) {
-                var found = s(o, name);
-                if (found != undefined) return found;
-            }
-        }
-        return undefined;
-    }(getGraphRoot(yy), name);
-    if (search != undefined) {
-    	return search;
-    }
-    debug(" Create new node");
-    var n = new Node(name, getGraphRoot(yy).getCurrentShape());
-    if (style) n.setStyle(style);
+	    var search = function s(container, name) {
+	        if (container.getName() == name) return container;
+	        for (var i in container.OBJECTS) {
+	            var o = container.OBJECTS[i];
+	            if (o instanceof Node && o.getName() == name) {
+	                if (style) o.setStyle(style);
+	                return o;
+	            }
+	            if (o instanceof Group) {
+	                var found = s(o, name);
+	                if (found != undefined) return found;
+	            }
+	        }
+	        return undefined;
+	    }(getGraphRoot(yy), name);
+	    if (search != undefined) {
+	    	return search;
+	    }
+	    debug(" Create new node");
+	    var n = new Node(name, getGraphRoot(yy).getCurrentShape());
+	    if (style) n.setStyle(style);
     
-    getDefaultAttribute(yy,'nodecolor',function(color){
-    	n.setColor(color);
-    });
-    getDefaultAttribute(yy,'nodetextcolor',function(color){
-    	n.setTextColor(color);
-    });
-    return pushObject(yy, n);
+	    getDefaultAttribute(yy,'nodecolor',function(color){
+	    	n.setColor(color);
+	    });
+	    getDefaultAttribute(yy,'nodetextcolor',function(color){
+	    	n.setTextColor(color);
+	    });
+	    return pushObject(yy, n);
     }
     var node=cc(yy,name,style);
     debug(" getNode gotNode " + node);
+    yy.lastSeenNode=node;
     if (yy.collectNextNode){
         debug("Collect next node");
       	setAttr(yy.collectNextNode,'exitlink',name);

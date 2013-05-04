@@ -10,7 +10,6 @@
 - make generic AST traversal function with closures/callbacks for all generartors to use (so some business logic is not needed to be implemented on each generator)
 - FIX if/elseif/else lexing/parsing (now a bit hackish) - need context(in lexer)
 - move collectNextNode from yy property (like entrylink when implemented) to GROUP property (allowing inner if/elseif/elses)...
-- entrylink attribute collection(to getNode) for IF group!
 -rectangle does not work in lexer..rect works..wtf?
 - For plantuml 
   alt succesfull case
@@ -56,7 +55,8 @@
   plant uml also supports these, but just for simple ones up,down,left,right(n,s,e,w)
 
 -------
-(DONE)- Each group has UNIQUE name and UNIQUE exitnode attr. That is enuf to and EXIT LINK as well
+(DONE) - entrylink attribute collection(to getNode) for IF group!
+(DONE) - Each group has UNIQUE name and UNIQUE exitnode attr. That is enuf to and EXIT LINK as well
   Exit link is FIRST NODE that is referred or created AFTER endif
   The diamonds are FABRICATED! Earlier had just GROUPs, but flowchartish wey may be better
 <> -YES- .(name)

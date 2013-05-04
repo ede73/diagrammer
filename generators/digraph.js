@@ -171,6 +171,10 @@ function digraph(yy) {
 							//TODO:else does not need diamond
 							yy.result(indent(sn + "[shape=diamond,label=\""
 									+ o.getLabel() + "\"];"));
+							if (cond=="if"){
+								//entrylink!
+								yy.result(indent(getAttr(o, 'entrylink').getName() + "->" + sn+";"));
+							}
 							// FIRST node of group and LAST node in group..
 							var fn = getFirstLink(o);
 							var ln = getLastLink(o);

@@ -152,7 +152,7 @@ graphContent
 	| LINK_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('linkcolor'    ,$2=="default"?undefined:$2)
 	| LINKTEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('linktextcolor',$2=="default"?undefined:$2)
 	| GROUP_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('groupcolor'   ,$2=="default"?undefined:$2)
-	| IF 	 ->	setAttr(enterContainer(yy,getGroup(yy).setLabel($IF)),'conditional','if')
+	| IF 	 ->	setAttr(setAttr(enterContainer(yy,getGroup(yy).setLabel($IF)),'conditional','if'),'entrylink',yy.lastSeenNode)
 	| ELSEIF {
 		exitContainer(yy);
 		$$=setAttr(enterContainer(yy,getGroup(yy).setLabel($ELSEIF)),'conditional','elseif')

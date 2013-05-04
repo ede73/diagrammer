@@ -7,24 +7,10 @@
 - http://philogb.github.io/jit/demos.html
 - oMeta!
 
-
-- Each group has UNIQUE name and UNIQUE exitnode attr. That is enuf to
-<> -YES- .(name)
- |     ------
- |     | a  |
- |     | |  |
- |     | b  |
- |     ------
- |--NO-- . (exitnode)
-         |
-         <> -YES- .(name)
-         |     ------
-         |     | c  |
-         |     | |  |
-         |     | d  |
-         |     ------
-         |--NO-- . (exitnode)
-
+- make generic AST traversal function with closures/callbacks for all generartors to use (so some business logic is not needed to be implemented on each generator)
+- FIX if/elseif/else lexing/parsing (now a bit hackish) - need context(in lexer)
+- move collectNextNode from yy property (like entrylink when implemented) to GROUP property (allowing inner if/elseif/elses)...
+- entrylink attribute collection(to getNode) for IF group!
 -rectangle does not work in lexer..rect works..wtf?
 - For plantuml 
   alt succesfull case
@@ -70,6 +56,51 @@
   plant uml also supports these, but just for simple ones up,down,left,right(n,s,e,w)
 
 -------
+(DONE)- Each group has UNIQUE name and UNIQUE exitnode attr. That is enuf to and EXIT LINK as well
+  Exit link is FIRST NODE that is referred or created AFTER endif
+  The diamonds are FABRICATED! Earlier had just GROUPs, but flowchartish wey may be better
+<> -YES- .(name)
+ |     ------
+ |     | a  |
+ |     | |  |
+ |     | b  |
+ |     ------
+ |--NO-- . (exitnode)
+         |
+         <> -YES- .(name)
+         |     ------
+         |     | c  |
+         |     | |  |
+         |     | d  |
+         |     ------
+         |--NO-- . (exitnode)
+  I thought about entrynode>if xxx then ... else ... endif >exitnode, but gave up on that
+  For GRAPHS that would work NICE! But for sequences...they are unrelated to each other and there the
+   if/else/elseif is just a grouping construct
+  With contract of saying the first preceding node and first seen node after endif gets 'linked' in graphs
+  For sequences those are not handled allows the if/Else/elseif construct to work on both graph types!
+  This got implemented as collectNextNode in state.grammar and then used in model/getNode
+  if/elseif/else/endif are all GROUPS now, each have special attributes
+	conditional	if/elseif/else/endif
+	exitnode	a UNIQUE exitnode within the graph.
+	exitlink	only with endif, first node seen after
+	entrylink	only with IF, first preceding node seen before "if"
+    {"node":{"name":"w","label":"on"}}
+    {"group":{"name":1,"label":"if something would happend then","conditional":"if","exitnode":1}}
+        {"node":{"name":"a1"}}
+        {"node":{"name":"b1"}}
+    {"group":{"name":2,"label":"elseif something probably would not happen then","conditional":"elseif","exitnode":2}}
+        {"node":{"name":"a2"}}
+        {"node":{"name":"b2"}}
+    {"group":{"name":3,"label":"elseif or if i see a flying bird then","conditional":"elseif","exitnode":3}}
+        {"node":{"name":"a3"}}
+        {"node":{"name":"b3"}}
+    {"group":{"name":4,"label":"else","conditional":"else","exitnode":4}}
+        {"node":{"name":"a4"}}
+        {"node":{"name":"b4"}}
+    {"group":{"name":5,"label":"endif","conditional":"endif","exitnode":5,"exitlink":"outside"}}
+    {"node":{"name":"outside"}}
+ 
 (DONE)- Make EQUAL container property (not it ALWAYS belongs to graphroot, but network diag can have groups inside network..
 	well dotty can have subcluster inside subcluster)
 (DONE + way of last suggestion) - WHILE links have a container specification now, it is not yet enuf for plantuml.. It needs the LINKS and GROUPS (and participants) appear IN ORDER

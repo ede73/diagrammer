@@ -31,7 +31,7 @@ test(){
 	setError 11 $1
     }
  else
-   echo "ERROR: Could not produce output $1 as $png is non existent" >&2
+   echo "ERROR: Could not produce output tests/$png" >&2
    ls -l tests/$png
    setError 12 $1
  fi

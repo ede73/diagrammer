@@ -9,6 +9,7 @@ Jison adds negative lookahead using /!
 */
 %{
 /*could have a codeblock here*/
+collectNextNode=undefined;
 %}
 
 D	[0-9]

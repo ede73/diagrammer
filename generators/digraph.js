@@ -96,10 +96,44 @@ function digraph(yy) {
 		}
 	}(r.OBJECTS);
 
+	function getFirstLink(grp) {
+		// yy.result("FIRST NODE"+JSON.stringify(grp));
+		for ( var i in yy.LINKS) {
+			var l = yy.LINKS[i];
+			for ( var j in grp.OBJECTS) {
+				var n = grp.OBJECTS[j];
+				if (n == l.left) {
+					// yy.result("ReturnF "+n);
+					return n;
+				}
+			}
+		}
+		return undefined;
+	}
+	function getLastLink(grp) {
+		var nod = undefined;
+		// yy.result("LAST NODE"+JSON.stringify(grp));
+		for ( var i in yy.LINKS) {
+			var l = yy.LINKS[i];
+			for ( var j in grp.OBJECTS) {
+				var n = grp.OBJECTS[j];
+				if (n == l.left)
+					nod = n;
+				if (n == l.right)
+					nod = n;
+			}
+		}
+		// yy.result("ReturnL "+nod);
+		return nod;
+	}
+	var lastexit = undefined;
+	var lastendif = undefined;
 	var traverseObjects = function traverseObjects(r) {
 		for ( var i in r.OBJECTS) {
 			var o = r.OBJECTS[i];
 			if (o instanceof Group) {
+				var cond = getAttr(o, 'conditional');
+			//	if (cond=="endif")continue;
 				// Group name,OBJECTS,get/setEqual,toString
 				var processAGroup = function(o) {
 					debug(JSON.stringify(o));
@@ -117,7 +151,46 @@ function digraph(yy) {
 					traverseObjects(o);
 					depth--;
 					depth--;
-					yy.result(indent("}//end of " + o.getName()));
+					yy.result(indent("}//end of " + o.getName()+" "+cond));
+					if (cond) {
+						yy.result(indent("//COND " + o.getName()+" "+cond));
+						if (cond == "endif") {
+							//never reached
+							var exitlink=getAttr(o,'exitlink');
+							if (exitlink){
+								yy.result(indent(lastexit + "->" + exitlink+"[color=red];"));
+								yy.result(indent(lastendif + "->" + exitlink+";"));								
+							}
+						} else {
+							var sn = "entry" + getAttr(o, 'exitnode');
+							if (!lastendif){
+								lastendif = "endif" + getAttr(o, 'exitnode');
+								yy.result(indent(lastendif
+										+ "[shape=circle,label=\"\",width=0.01,height=0.01];"));
+							}
+							//TODO:else does not need diamond
+							yy.result(indent(sn + "[shape=diamond,label=\""
+									+ o.getLabel() + "\"];"));
+							// FIRST node of group and LAST node in group..
+							var fn = getFirstLink(o);
+							var ln = getLastLink(o);
+							// decision node
+							var en = "exit" + getAttr(o, 'exitnode');
+							
+							if (lastexit) {
+								yy.result(indent(lastexit + "->" + sn
+										+ "[label=\"NO\",color=red];"));
+								lastexit = undefined;
+							}
+							// YES LINK to first node of the group
+							yy.result(indent(sn + "->" + fn.getName()
+									+ "[label=\"YES\",color=green,lhead=cluster_"
+									+ o.getName() + "];"));
+							yy.result(indent(ln.getName() + "->" + lastendif
+									+ "[label=\"\"];"));
+							lastexit = sn;
+						}
+					}
 				}(o);
 			} else if (o instanceof Node) {
 				processANode(o);

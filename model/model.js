@@ -98,7 +98,7 @@ function getList(yy, LHS, RHS,rhsLinkLabel) {
  * node a1 will be dotted instead of being dashed
  */
 function getNode(yy, name,style) {
-    debug(" getNode " + name);
+    function cc(yy,name,style){
     if (name instanceof Node) {
         if (style) name.setStyle(style);
         return name;
@@ -122,7 +122,9 @@ function getNode(yy, name,style) {
         }
         return undefined;
     }(getGraphRoot(yy), name);
-    if (search != undefined) return search;
+    if (search != undefined) {
+    	return search;
+    }
     debug(" Create new node");
     var n = new Node(name, getGraphRoot(yy).getCurrentShape());
     if (style) n.setStyle(style);
@@ -134,6 +136,15 @@ function getNode(yy, name,style) {
     	n.setTextColor(color);
     });
     return pushObject(yy, n);
+    }
+    var node=cc(yy,name,style);
+    debug(" getNode gotNode " + node);
+    if (yy.collectNextNode){
+        debug("Collect next node");
+      	setAttr(yy.collectNextNode,'exitlink',name);
+       	yy.collectNextNode=undefined
+    }
+    return node;
 }
 /**
  * Get default attribute nodecolor,linkcolor,groupcolor and bubble upwards if

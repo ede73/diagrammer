@@ -163,9 +163,11 @@ graphContent
 		}
 	| ENDIF	 { 
 		exitContainer(yy);
-		setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif')
+		//TODO: is ENDIF container necessary?YES, it could be invisible node! Could link to that instead of endif kludge in digraph
+		yy.collectNextNode=setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif')
+		debug("XXXXXXXXXXXXXXXXXXXXX collectNextNode"+yy.collectNextNode);
 		$$=exitContainer(yy)
-	} 
+	}
 	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */
 	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END -> enterContainer(yy,getGroup(yy).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
 	| GROUP_END 	-> exitContainer(yy)

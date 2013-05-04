@@ -2,23 +2,17 @@ q;tamakin
 w;on
 
 q>w
-
+//should link
 if something would happend then
-a;Jotain
-b;muuta
-  a>b
+  a1>b1
 elseif something probably would not happen then
-c;erikoista
- b>c
+ a2>b2
 elseif or if i see a flying bird then
-then<elseif
- c>z
-then;mita
-elseif;lie
-z;turhaa
+ a3>b3
 else
- q>m
-m;homppaa
+  a4>b4
 endif
 
+//should link
 outside>end
+

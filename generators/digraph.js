@@ -169,7 +169,7 @@ function digraph(yy) {
 										+ "[shape=circle,label=\"\",width=0.01,height=0.01];"));
 							}
 							//TODO:else does not need diamond
-							yy.result(indent(sn + "[shape=diamond,label=\""
+							yy.result(indent(sn + "[shape=diamond,fixedsize=true,width=1,height=1,label=\""
 									+ o.getLabel() + "\"];"));
 							if (cond=="if"){
 								//entrylink!

@@ -7,7 +7,10 @@
 - http://philogb.github.io/jit/demos.html
 - oMeta!
 
+-http://stackoverflow.com/questions/3428448/reducing-graph-size-in-graphviz
+- make eclipse plugin out of this all?? http://wiki.eclipse.org/Graphviz_DOT_as_a_DSL_for_Zest
 - make generic AST traversal function with closures/callbacks for all generartors to use (so some business logic is not needed to be implemented on each generator)
+- make landscape/portrait be container properties(blockdiag support, dotty should as well subgraph cluster_1{rankdir=LR})
 - FIX if/elseif/else lexing/parsing (now a bit hackish) - need context(in lexer)
 - move collectNextNode from yy property (like entrylink when implemented) to GROUP property (allowing inner if/elseif/elses)...
 -rectangle does not work in lexer..rect works..wtf?
@@ -32,7 +35,6 @@
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
 - HTML rendering available in svg and cairo (and hyperlinks), see if graphviz could create svg's. DIFFing could be done in pngs still
-- make landscape/portrait be container properties(blockdiag support, dotty not)
 - Investigate following (graphviz) features for others as well:
 	bgcolor="#00ff00" for whole graph background
 	packmode? did not get to work

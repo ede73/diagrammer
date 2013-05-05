@@ -1,24 +1,26 @@
 //Prerequisite is obviously node parsing PASSED
 //Simple event
-aLINE>b
+aLINE>bLINE
+anl>bnl;This is label for EVENT, NOT node bnl
 //Simple event
-aDOT.>b
+aDOT.>bDOT
 //Simple event
-aDASHED->b
-aDUAL<>b
-aDUALDOTTED<.>b
-aDUALDASHED<->b
-AREVERSE<b
-AREVERSEDOTTED<.b
-AREVERSEDASHED<-b
-aDotted.b
-aDashed-b
-alr</b
-arr>/b
+aDASHED->bDASHED
+aDUAL<>bDUAL
+aDUALDOTTED<.>bDUALDOTTED
+aDUALDASHED<->bDUALDASHED
+AREVERSE<bREVERSE
+AREVERSEDOTTED<.bReverseDotted
+AREVERSEDASHED<-bReverseDashed
+aDotted.bDOTTED
+aDashed-bdasHed
+alr</bLR
+arr/>bRR
 //Event with color attached
-a1>#ff0000b
+a1>#ff0000b1
 //Event with label attached
-a2>"event label"b
+a2>"event label"b2
 //Event with label AND color attached
-a3>#ff0000"event label"b
-
+a3>#ff0000"event label"b3
+a4>b4,c4
+c5,d5>a5

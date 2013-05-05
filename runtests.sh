@@ -43,10 +43,11 @@ i=0
 runtest(){
  checkError
  (( i++ ))
- echo Running test $i
+ echo  Running test $i
  test $* &
  if (( $i % $PARALLEL == 0 )) ; then wait;fi
  checkError
+ echo test $i ok
 }
 tests=${1:-dot actdiag blockdiag}
 for test in $tests; do
@@ -74,6 +75,8 @@ runtest state_tcp.txt
 runtest state_y_edge.txt
 runtest state_conditionals.txt
 runtest state_group.txt
+runtest nodes.txt
+runtest events.txt
 done
 
 x=nwdiag
@@ -88,4 +91,5 @@ for test in $tests; do
   runtest state_sequence.txt
   runtest state_sequence2.txt
   runtest state_conditionals.txt
+  runtest events.txt
 done

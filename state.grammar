@@ -77,17 +77,14 @@ shapeOrVariable
 	| SHAPES -> $SHAPES
 	;
 
-/* read nodes attributes basically like:
-[STYLES] [SHAPES] NAME [IMAGE|COLOR]
-Those few first ones are used with EVENTS
-*/
+/* read nodes attributes basically like: [STYLES] [SHAPES] NAME [IMAGE|COLOR]*/
 readNodeAttrs
-	: STYLES SHAPES NAME colorOrVariable? -> getNode(yy,$NAME,$STYLES).setColor($4).setShape($SHAPES)
-	| STYLES NAME colorOrVariable?	-> getNode(yy,$NAME,$STYLES).setColor($3)
-	| STYLES NAME IMAGE 			-> getNode(yy,$NAME,$STYLES).setImage($IMAGE)
-	| SHAPES NAME colorOrVariable?	-> getNode(yy,$NAME).setColor($3).setShape($SHAPES)
-	| NAME colorOrVariable?		 	-> getNode(yy,$NAME).setColor($2)
-	| NAME IMAGE 					-> getNode(yy,$NAME).setImage($IMAGE)
+	: STYLES SHAPES NAME colorOrVariable?	-> getNode(yy,$NAME,$STYLES).setColor($4).setShape($SHAPES)
+	| STYLES NAME colorOrVariable?	 		-> getNode(yy,$NAME,$STYLES).setColor($3)
+	| STYLES NAME IMAGE  					-> getNode(yy,$NAME,$STYLES).setImage($IMAGE)
+	| SHAPES NAME colorOrVariable? 			-> getNode(yy,$NAME).setColor($3).setShape($SHAPES)
+	| NAME colorOrVariable? 		 		-> getNode(yy,$NAME).setColor($2)
+	| NAME IMAGE	  						-> getNode(yy,$NAME).setImage($IMAGE)
 	;
 
 /*
@@ -110,23 +107,13 @@ nodeGroupListOrAttrs
 	: nodeGroupListOrAttrs LISTSEP INLINE_STRING? readNodeAttrs -> getList(yy,$nodeGroupListOrAttrs,$readNodeAttrs,$3)
 	| readNodeAttrs -> $readNodeAttrs
 	;
-/*
-(nodeGroupListOrAttrs (LABEL|nodesAndEvents EVENT [colorOrVariable] [INLINE_STRING]))+
-a>b
-a#ff0000>#00ff00b#0000ff
-color binds to left, always? Hmm..yes..and color variable as well, but sometimes variable binds to right(shape of node)
-STYLES always bind to right
-*/
-nodesAndEvents
-	: nodesAndEvents EVENT colorOrVariable INLINE_STRING nodeGroupListOrAttrs -> getLink(yy,$EVENT,$nodesAndEvents,$nodeGroupListOrAttrs,$INLINE_STRING,$colorOrVariable).right
-	| nodesAndEvents EVENT colorOrVariable nodeGroupListOrAttrs LABEL? 		  -> getLink(yy,$EVENT,$nodesAndEvents,$nodeGroupListOrAttrs,$5==undefined?undefined:$5.substring(1),$colorOrVariable).right
-	| nodesAndEvents EVENT nodeGroupListOrAttrs LABEL						  -> getLink(yy,$EVENT,$nodesAndEvents,$nodeGroupListOrAttrs,$LABEL.substring(1)).right
-	| nodesAndEvents EVENT INLINE_STRING nodeGroupListOrAttrs				  -> getLink(yy,$EVENT,$nodesAndEvents,$nodeGroupListOrAttrs,$INLINE_STRING).right
-	| nodesAndEvents EVENT nodeGroupListOrAttrs								  -> getLink(yy,$EVENT,$nodesAndEvents,$nodeGroupListOrAttrs).right
-	| nodeGroupListOrAttrs LABEL -> $$.setLabel($2.substring(1))
-	| nodeGroupListOrAttrs {
-			debug("nodeGroupListOrAttrs"+" SS="+$$+",S0="+$0+",S1="+$1);
-		}
+readEvents
+	: readEvents EVENT nodeGroupListOrAttrs LABEL?							-> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$4?$4.substring(1):$4).right
+	| readEvents EVENT colorOrVariable INLINE_STRING nodeGroupListOrAttrs 	-> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$INLINE_STRING,$colorOrVariable).right
+	| readEvents EVENT colorOrVariable nodeGroupListOrAttrs LABEL?			-> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$5?$5.substring(1):$5,$colorOrVariable).right
+	| readEvents EVENT INLINE_STRING nodeGroupListOrAttrs					-> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$INLINE_STRING,undefined).right
+	| readEvents LABEL														-> $$.setLabel($LABEL.substring(1))
+	| nodeGroupListOrAttrs
 	;
 
 graphContent
@@ -172,7 +159,7 @@ graphContent
 	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END -> enterContainer(yy,getGroup(yy).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
 	| GROUP_END 	-> exitContainer(yy)
 	| START NAME 	-> getGraphRoot(yy).setStart($NAME)
-	| nodesAndEvents {
+	| readEvents {
 	}
 	;
 %% 

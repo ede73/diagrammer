@@ -1,7 +1,7 @@
 plainnode
 labelplainnode;WithLabel
-ImageNode/masa.png
-labelImageNode/masa.png;WithLabel
+ImageNode/cpu.png
+labelImageNode/laptop.png;WithLabel
 NodeAndRedColor#ff0000
 LabelNodeAndRedColor#ff0000;WithLabel
 VNodeAndRedColor$(var:#ff0000)
@@ -12,8 +12,8 @@ circle CircularBlueNode#0000ff
 circle labelCircularBlueNode#0000ff;Label
 circle VCircularBlueNode$(var2:#0000ff)
 circle LabelVCircularBlueNode$(var2:#0000ff);Label
-bold BoldImage/bold.png
-bold LabelBoldImage/bold.png;Label
+bold BoldImage/actor1.png
+bold LabelBoldImage/actor2.png;Label
 bold PlainBoldNode
 bold LabelPlainBoldNode;Label
 dashed DashedGreenNode#00ff00

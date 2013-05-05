@@ -77,6 +77,7 @@ runtest state_conditionals.txt
 runtest state_group.txt
 runtest nodes.txt
 runtest events.txt
+runtest compass.txt
 done
 
 x=nwdiag

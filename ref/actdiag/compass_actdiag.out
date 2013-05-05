@@ -1,0 +1,29 @@
+actdiag{
+  default_fontsize = 14
+  a[color="#ff0000"];
+  b;
+  c;
+  d;
+  e;
+  f;
+  g;
+  h;
+  i;
+  q[color="#0000ff"];
+  a -> b[style="dotted"  ,color="#0000ff"];
+  a -> c[style="dotted"  ,color="#0000ff"];
+  a -> d[style="dotted"  ,color="#0000ff"];
+  a -> e[style="dotted"  ,color="#0000ff"];
+  a -> f[style="dotted"  ,color="#0000ff"];
+  a -> g[style="dotted"  ,color="#0000ff"];
+  a -> h[style="dotted"  ,color="#0000ff"];
+  a -> i[style="dotted"  ,color="#0000ff"];
+  q -> b[color="#ff0000"];
+  q -> c[color="#ff0000"];
+  q -> d[color="#ff0000"];
+  q -> e[color="#ff0000"];
+  q -> f[color="#ff0000"];
+  q -> g[color="#ff0000"];
+  q -> h[color="#ff0000"];
+  q -> i[color="#ff0000"];
+}

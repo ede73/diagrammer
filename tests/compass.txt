@@ -1,0 +1,15 @@
+$(r:#ff0000)
+
+link color #0000ff
+a#ff0000:se.>b:s,c:se,d:w,e:ne,f:s,g:nw,h:e,i:sw
+
+link color $(r)
+q#0000ff:ne>b:n
+q:e>c:ne
+q:se>d:e
+q:s>e:se
+q:sw>f:s
+q:w>g:sw
+q:nw>h:w
+q:n>i:nw
+

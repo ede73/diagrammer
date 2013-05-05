@@ -98,13 +98,15 @@ Special arrow is /> and </ that denotes a broken signal...
 			if (c==":"){
 				var c1=this.input();
 				var c2=this.input();
-				if (c1+c1=="ne" || c1+c2=="nw" || c1+c2=="se" || c1+c2=="sw"
-					|| (c1.match(/[ensw]/) && c2.match(/\s/))){
+				if (c1.match(/[ns]/i) && c2.match(/[ew]/i)
+					|| (c1.match(/[ensw]/i) && (c2.match(/\s/) || !c2.match(/A-Za-z0-9_/)))){
+					//console.log("compass "+c+c1+c2);
 					this.unput(c2);
 					this.unput(c1);
 					this.unput(c);
 					return 'NAME';
 				}
+				//console.log("somethign else");
 				//read as long as A-Z0-9_
 				while(true){
 					var cz=this.input();

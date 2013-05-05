@@ -69,8 +69,10 @@ colorOrVariable
 /* Read a shape  or a variable $(xxx) or $(xxx:yyy) that MUST produce a shape */
 shapeOrVariable
 	: VARIABLE {
-			$$=processVariable(yy,$1).trim();
-			if (["actor","beginpoint","box","circle","cloud","condition","database","default","diamond","dots","doublecircle","ellipse","endpoint","input","loopin","loopout","mail","minidiamond","minisquare","note","record","roundedbox","square","terminator","loop","loopend","loopstart","rect","rectangle"].indexOf($$)==-1){
+			$$=processVariable(yy,$1).trim().toLowerCase();
+			if (["actor","beginpoint","box","circle","cloud","condition","database","default","diamond","dots","doublecircle",
+				 "ellipse","endpoint","input","loopin","loopout","mail","minidiamond","minisquare","note","record","roundedbox",
+				 "square","terminator","loop","loopend","loopstart","rect","rectangle"].indexOf($$)==-1){
 				throw new Error("Must use declared shape");
 			}
 	}
@@ -79,12 +81,7 @@ shapeOrVariable
 
 /* read nodes attributes basically like: [STYLES] [SHAPES] NAME [IMAGE|COLOR]*/
 readNodeAttrs
-	: STYLES SHAPES NAME colorOrVariable?	-> getNode(yy,$NAME,$STYLES).setColor($4).setShape($SHAPES)
-	| STYLES NAME colorOrVariable?	 		-> getNode(yy,$NAME,$STYLES).setColor($3)
-	| STYLES NAME IMAGE  					-> getNode(yy,$NAME,$STYLES).setImage($IMAGE)
-	| SHAPES NAME colorOrVariable? 			-> getNode(yy,$NAME).setColor($3).setShape($SHAPES)
-	| NAME colorOrVariable? 		 		-> getNode(yy,$NAME).setColor($2)
-	| NAME IMAGE	  						-> getNode(yy,$NAME).setImage($IMAGE)
+	: STYLES? SHAPES? NAME colorOrVariable?	IMAGE? -> getNode(yy,$NAME,$1).setColor($4);if ($$ instanceof Node) $$.setShape($2).setImage($5)
 	;
 
 /*

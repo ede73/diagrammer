@@ -349,6 +349,7 @@ function Node(name, shape) {
     this.image;
     this.style;
     this.setShape = function(value) {
+	if (value===undefined)return this;
 	if(value)value=value.toLowerCase();
         return setAttr(this, 'shape', value);
     };
@@ -363,6 +364,7 @@ function Node(name, shape) {
         return getAttr(this, 'linklabel');
     }
     this.setStyle = function(value) {
+	if (value===undefined)return this;
 	if(value)value=value.toLowerCase();
         return setAttr(this, 'style', value);
     };
@@ -370,6 +372,7 @@ function Node(name, shape) {
         return getAttr(this, 'style');
     }
     this.setImage = function(value) {
+	if (value===undefined)return this;
         return setAttr(this, 'image', value);
     };
     this.getImage = function() {

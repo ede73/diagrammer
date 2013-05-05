@@ -16,7 +16,8 @@ D	[0-9]
 C	[A-Za-z_:]
 COLOR	"#"[A-Fa-f0-9]{6}
 COMMENT ^"//"[^\n]*
-NAME	[A-Za-z][A-Za-z_:0-9]*
+COMPASS ":"("nw"|"ne"|"n"|"sw"|"se"|"s"|"e"|"w")
+NAME	[A-Za-z][A-Za-z_0-9]*
 LABEL	";"[^\n]+(\n)
 /*IN GROUP should return last ENDL*/
 GLABEL	";"[^\n]+
@@ -85,7 +86,39 @@ Special arrow is /> and </ that denotes a broken signal...
 "visualizer"	return 'VISUALIZER';
 "</"|"/>"|"<.>"|"<->"|"<>"|"<-"|"<."|"<"|"->"|".>"|">"|"-"|"."	return 'EVENT';
 {IMAGE}		return 'IMAGE';
-{NAME}		return 'NAME';
+{COMPASS}	return 'COMPASS';
+{NAME}		{
+			//FUCKSAKE! unput is broken, fixed MONTH ago, not seen in npm..fuck fuck
+			// https://github.com/zaach/jison/pull/135
+			//I CANNOT see it in npm install, and it is NOT seen in jison master branch, but jison-lex..does not show it EITHER
+			//but PR merged 3 months ago!WTF..Manually fixed to
+//  nano /usr/local/share//npm/lib/node_modules/jison/node_modules/jison-lex/regexp-lexer.js
+//  nano /usr/local/share//npm/lib/node_modules/jison-lex/regexp-lexer.js
+			var c=this.input();
+			if (c==":"){
+				var c1=this.input();
+				var c2=this.input();
+				if (c1+c1=="ne" || c1+c2=="nw" || c1+c2=="se" || c1+c2=="sw"
+					|| (c1.match(/[ensw]/) && c2.match(/\s/))){
+					this.unput(c2);
+					this.unput(c1);
+					this.unput(c);
+					return 'NAME';
+				}
+				//read as long as A-Z0-9_
+				while(true){
+					var cz=this.input();
+					if (!cz.match(/[A-Za-z_0-9]/i)) {
+						if (!cz.match(/\n/)) this.unput(cz);
+						break;
+					}
+				}
+				return 'NAME';
+			}else{
+				this.unput(c);
+				return 'NAME';
+			}
+		}
 <GROUP>{NAME}		return 'GROUPNAME';
 {D}+		return 'NUMBER';
 <<EOF>>		return 'EOF';

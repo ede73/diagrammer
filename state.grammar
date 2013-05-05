@@ -81,7 +81,7 @@ shapeOrVariable
 
 /* read nodes attributes basically like: [STYLES] [SHAPES] NAME [IMAGE|COLOR]*/
 readNodeAttrs
-	: STYLES? SHAPES? NAME colorOrVariable?	IMAGE? -> getNode(yy,$NAME,$1).setColor($4);if ($$ instanceof Node) $$.setShape($2).setImage($5)
+	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> getNode(yy,$NAME,$1).setColor($5);if ($$ instanceof Node) setAttr($$.setShape($2).setImage($6),'compass',$4)
 	;
 
 /*

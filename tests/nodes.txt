@@ -1,0 +1,15 @@
+plainnode
+ImageNode/masa.png
+NodeAndRedColor#ff0000
+VNodeAndRedColor$(var:#ff0000)
+circle CircularNode
+circle CircularBlueNode#0000ff
+circle VCircularBlueNode$(var2:#0000ff)
+bold BoldImage/bold.png
+bold PlainBoldNode
+dashed DashedGreenNode#00ff00
+dashed VDashedGreenNode$(var3:#00ff00)
+dotted box DottedBoxNode
+dotted box DottedRedBoxNode#ff0000
+dotted box VDottedRedBoxNode$(var4:#ff0000)
+

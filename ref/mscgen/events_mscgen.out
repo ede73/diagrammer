@@ -1,0 +1,64 @@
+msc {
+  aLINE
+,  bLINE
+,  anl
+,  bnl
+,  aDOT
+,  bDOT
+,  aDASHED
+,  bDASHED
+,  aDUAL
+,  bDUAL
+,  aDUALDOTTED
+,  bDUALDOTTED
+,  aDUALDASHED
+,  bDUALDASHED
+,  AREVERSE
+,  bREVERSE
+,  AREVERSEDOTTED
+,  bReverseDotted
+,  AREVERSEDASHED
+,  bReverseDashed
+,  aDotted
+,  bDOTTED
+,  aDashed
+,  bdasHed
+,  alr
+,  bLR
+,  arr
+,  bRR
+,  a1
+,  b1
+,  a2
+,  b2
+,  a3
+,  b3
+,  a4
+,  b4
+,  c4
+,  c5
+,  d5
+,  a5
+;
+aLINE=>bLINE[id="1"];
+anl=>bnl[label="This is label for EVENT, NOT node bnl",id="2"];
+aDOT>>bDOT[id="3"];
+aDASHED->bDASHED[id="4"];
+aDUAL<=>bDUAL[id="5"];
+aDUALDOTTED<=>bDUALDOTTED[id="6"];
+aDUALDASHED<=>bDUALDASHED[id="7"];
+bREVERSE=>AREVERSE[id="8"];
+bReverseDotted>>AREVERSEDOTTED[id="9"];
+bReverseDashed->AREVERSEDASHED[id="10"];
+...[id="11"];
+---[id="12"];
+bLR-xalr[id="13"];
+arr-xbRR[id="14"];
+a1=>b1[linecolor="#ff0000",id="15"];
+a2=>b2[label="event label",id="16"];
+a3=>b3[linecolor="#ff0000",label="event label",id="17"];
+a4=>b4[id="18"];
+a4=>c4[id="19"];
+c5=>a5[id="20"];
+d5=>a5[id="21"];
+}

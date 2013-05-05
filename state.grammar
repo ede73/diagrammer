@@ -104,11 +104,9 @@ nodeGroupListOrAttrs
 	: nodeGroupListOrAttrs LISTSEP INLINE_STRING? readNodeAttrs -> getList(yy,$nodeGroupListOrAttrs,$readNodeAttrs,$3)
 	| readNodeAttrs -> $readNodeAttrs
 	;
+	/* TOOD: Could concatenate $4,$6 or if $4 defined AND $6, $6 could be appended as ::, unless already(note)*/
 readEvents
-	: readEvents EVENT nodeGroupListOrAttrs LABEL?							-> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$4?$4.substring(1):$4).right
-	| readEvents EVENT colorOrVariable INLINE_STRING nodeGroupListOrAttrs 	-> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$INLINE_STRING,$colorOrVariable).right
-	| readEvents EVENT colorOrVariable nodeGroupListOrAttrs LABEL?			-> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$5?$5.substring(1):$5,$colorOrVariable).right
-	| readEvents EVENT INLINE_STRING nodeGroupListOrAttrs					-> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$INLINE_STRING,undefined).right
+	: readEvents EVENT colorOrVariable? INLINE_STRING? nodeGroupListOrAttrs LABEL? -> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$4?$4:($6?$6.substring(1):$6),$3).right
 	| readEvents LABEL														-> $$.setLabel($LABEL.substring(1))
 	| nodeGroupListOrAttrs
 	;

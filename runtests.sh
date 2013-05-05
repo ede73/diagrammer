@@ -1,4 +1,6 @@
 #./makeLexerAndParser.sh >/dev/null
+#parallelism for 8 cores
+PARALLEL=${2:-8}
 
 rm -f .error
 error=0
@@ -38,13 +40,12 @@ test(){
 }
 
 i=0
-#parallelism for 8 cores
 runtest(){
  checkError
  (( i++ ))
  echo Running test $i
  test $* &
- if (( $i % 8 == 0 )) ; then wait;fi
+ if (( $i % $PARALLEL == 0 )) ; then wait;fi
  checkError
 }
 tests=${1:-dot actdiag blockdiag}

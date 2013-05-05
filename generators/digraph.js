@@ -53,6 +53,10 @@ function digraph(yy) {
 	}
 	yy.result("digraph {");
 	depth++;
+	//yy.result(indent("edge[weight=1]"))
+	//yy.result(indent("ranksep=0.75"))
+	//yy.result(indent("nodesep=0.75"))
+
 	yy.result(indent("compound=true;"));
 	if (r.getDirection() === "portrait") {
 		yy.result(indent("rankdir=LR;"));

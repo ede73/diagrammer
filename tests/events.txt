@@ -1,0 +1,24 @@
+//Prerequisite is obviously node parsing PASSED
+//Simple event
+aLINE>b
+//Simple event
+aDOT.>b
+//Simple event
+aDASHED->b
+aDUAL<>b
+aDUALDOTTED<.>b
+aDUALDASHED<->b
+AREVERSE<b
+AREVERSEDOTTED<.b
+AREVERSEDASHED<-b
+aDotted.b
+aDashed-b
+alr</b
+arr>/b
+//Event with color attached
+a1>#ff0000b
+//Event with label attached
+a2>"event label"b
+//Event with label AND color attached
+a3>#ff0000"event label"b
+

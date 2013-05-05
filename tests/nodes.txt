@@ -1,15 +1,29 @@
 plainnode
+labelplainnode;WithLabel
 ImageNode/masa.png
+labelImageNode/masa.png;WithLabel
 NodeAndRedColor#ff0000
+LabelNodeAndRedColor#ff0000;WithLabel
 VNodeAndRedColor$(var:#ff0000)
+LabelVNodeAndRedColor$(var:#ff0000);Label
 circle CircularNode
+circle LabelCircularNode;Label
 circle CircularBlueNode#0000ff
+circle labelCircularBlueNode#0000ff;Label
 circle VCircularBlueNode$(var2:#0000ff)
+circle LabelVCircularBlueNode$(var2:#0000ff);Label
 bold BoldImage/bold.png
+bold LabelBoldImage/bold.png;Label
 bold PlainBoldNode
+bold LabelPlainBoldNode;Label
 dashed DashedGreenNode#00ff00
+dashed LabelDashedGreenNode#00ff00;Label
 dashed VDashedGreenNode$(var3:#00ff00)
+dashed LabelVDashedGreenNode$(var3:#00ff00);Label
 dotted box DottedBoxNode
+dotted box LabelDottedBoxNode;Label
 dotted box DottedRedBoxNode#ff0000
+dotted box LabelDottedRedBoxNode#ff0000;Label
 dotted box VDottedRedBoxNode$(var4:#ff0000)
+dotted box LabelVDottedRedBoxNode$(var4:#ff0000);Label
 

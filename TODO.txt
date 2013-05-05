@@ -53,10 +53,10 @@
 	The generator could then offload it (but that would make generator bit more complex)
 - decorate=true for edge labels in graphviz might help readability
 - constraint=false for edges in graphviz might help the layout to be as user wants
-- compass (a:ne->b:nw) for edges in graphviz might help the layout to be as user wants (ie. direct the edge start/end to compass directions)
-  plant uml also supports these, but just for simple ones up,down,left,right(n,s,e,w)
-
+- compass 4 plantuml
 -------
+(DONE)- compass (a:ne->b:nw) for edges in graphviz might help the layout to be as user wants (ie. direct the edge start/end to compass directions)
+  plant uml also supports these, but just for simple ones up,down,left,right(n,s,e,w)
 (DONE) - entrylink attribute collection(to getNode) for IF group!
 (DONE) - Each group has UNIQUE name and UNIQUE exitnode attr. That is enuf to and EXIT LINK as well
   Exit link is FIRST NODE that is referred or created AFTER endif

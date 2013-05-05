@@ -274,7 +274,7 @@ function digraph(yy) {
 		var t = "";
 		if (attrs.length > 0)
 			t = "[" + attrs.join(",") + "]";
-		yy.result(indent(ll.getName() + lt + lr.getName() + t + ";"));
+		yy.result(indent(ll.getName() +getAttrFmt(l,'lcompass','{0}').trim() + lt + lr.getName() + getAttrFmt(l,'rcompass','{0}').trim() +t + ";"));
 	}
 	yy.result("}");
 }

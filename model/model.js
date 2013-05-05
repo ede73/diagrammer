@@ -224,13 +224,13 @@ function getGroup(yy, ref) {
  * Array(smthg) r = right side, Node(xxx) or Group(yyy), or Array(smthg) label =
  * if defined, LABEL for the link color = if defined, COLOR for the link
  */
-function getLink(yy, linkType, l, r, label, color) {
+function getLink(yy, linkType, l, r, label, color,lcompass,rcompass) {
     if (l instanceof Array) {
         debug(" getLink called with LHS array");
         var lastLink;
         for (var i = 0; i < l.length; i++) {
             debug(" Get link " + l[i]);
-            lastLink = getLink(yy, linkType, l[i], r, label, color);
+            lastLink = getLink(yy, linkType, l[i], r, label, color,lcompass,rcompass);
         }
         return lastLink;
     }
@@ -239,7 +239,7 @@ function getLink(yy, linkType, l, r, label, color) {
         var lastLink;
         for (var i = 0; i < r.length; i++) {
             debug(" Get link " + r[i]);
-            lastLink = getLink(yy, linkType, l, r[i], label, color);
+            lastLink = getLink(yy, linkType, l, r[i], label, color,lcompass,rcompass);
         }
         return lastLink;
     }
@@ -249,17 +249,21 @@ function getLink(yy, linkType, l, r, label, color) {
     if (!(r instanceof Node) && !(r instanceof Group)) {
         throw new Error("RHS not a Node nor a Group(" + r + ")");
     }
-    var l = new Link(linkType, l, r);
+    var lnk = new Link(linkType, l, r);
+	if(lcompass) setAttr(lnk,'lcompass',lcompass);
+	else if (getAttr(l,'compass')) setAttr(lnk,'lcompass',getAttr(l,'compass'));
+	if(rcompass) setAttr(lnk,'rcompass',rcompass);
+	else if (getAttr(r,'compass')) setAttr(lnk,'rcompass',getAttr(r,'compass'));
     getDefaultAttribute(yy,'linkcolor',function(color){
-    	l.setColor(color);
+    	lnk.setColor(color);
     });
     getDefaultAttribute(yy,'linktextcolor',function(color){
-    	l.setTextColor(color);
+    	lnk.setTextColor(color);
     });
-    if (label != undefined) l.setLabel(label);
-    if (r instanceof Node && r.getLinkLabel()!=undefined) l.setLabel(r.getLinkLabel())
-    if (color != undefined) l.setColor(color);
-    return addLink(yy, l);
+    if (label != undefined) lnk.setLabel(label);
+    if (r instanceof Node && r.getLinkLabel()!=undefined) lnk.setLabel(r.getLinkLabel())
+    if (color != undefined) lnk.setColor(color);
+    return addLink(yy, lnk);
 }
 // Add link to the list of links, return the LINK
 

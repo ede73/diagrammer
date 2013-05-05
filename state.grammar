@@ -106,7 +106,8 @@ nodeGroupListOrAttrs
 	;
 	/* TOOD: Could concatenate $4,$6 or if $4 defined AND $6, $6 could be appended as ::, unless already(note)*/
 readEvents
-	: readEvents EVENT colorOrVariable? INLINE_STRING? nodeGroupListOrAttrs LABEL? -> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$4?$4:($6?$6.substring(1):$6),$3).right
+        /*   1         2       3       4        5               6              7                   8*/
+	: readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? nodeGroupListOrAttrs LABEL? -> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$6?$6:($8?$8.substring(1):$8),$5,$2,$4).right
 	| readEvents LABEL														-> $$.setLabel($LABEL.substring(1))
 	| nodeGroupListOrAttrs
 	;

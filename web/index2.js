@@ -5,6 +5,9 @@ var vtimer = null;
 var vdelay = 1000;
 function addLine(i) {
 	var d = document.getElementById("editable");
+	if (typeof i=="string"){
+		d.value=d.value+i+"\n";
+	}else
 	switch (i) {
 	case 1:
 		d.value = d.value + "node#ff0000;Label here\n";

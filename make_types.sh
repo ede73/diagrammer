@@ -1,3 +1,5 @@
+ls types|sed -e 's/.png//g' -e 's/^x//g'|awk '{print "<li tooltip=\""$1"\" onclick=\"addLine(\""$1" nodeName\");\"><img height=\"30\" src=\"types/x"$1".png\"/></li>";}'
+exit 0
 #while read line    
 #do
 #echo $line
@@ -15,8 +17,7 @@
 while read line    
 do
 node=${line%[*}
-echo $line
-echo $node
+echo types/$node.png
 cat <<EOF |dot -Tpng -o types/$node.png
 digraph {
   compound=true;
@@ -24,4 +25,6 @@ digraph {
   $line
 }
 EOF
-done <types.txt
+done <types2.txt
+
+

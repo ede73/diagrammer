@@ -42,6 +42,19 @@ function addLine(i) {
 		break;
 	case 8:
 		d.value = "$(color1:#12ede0)\nclr$(color1)\nclr2$(color1)\n" + d.value;
+		break;
+	case 9:
+		d.value = "if something would happend then\n"
++"  a1>b1\n"
++"elseif something probably would not happen then\n"
++" a2>b2\n"
++"elseif or if i see a flying bird then\n"
++" a3>b3\n"
++"else\n"
++"  a4>b4\n"
++"endif\n"
+ + d.value;
+		break;
 	}
 	console.log("getSavedFilesChanged..parse");
 	parse(document.getElementById("editable"), getGenerator());

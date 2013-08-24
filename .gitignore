@@ -1,3 +1,9 @@
+web/post.txt
+web/result.txt
+web/result.png
+web/error.txt
+web/icons
+state.all
 tests/*.png
 tests/*.out
 

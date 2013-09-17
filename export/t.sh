@@ -1,4 +1,6 @@
 #!/bin/sh
+MYPATH=$(dirname $0)
+EXTPATH=$(pwd)
 #EXPORTREMOVE
 #EXPORTREMOVE
 #EXPORTREMOVE
@@ -28,28 +30,28 @@ rm -f $OUT
 
 case "$generator" in
   nwdiag|actdiag|blockdiag|plantuml_sequence)
-    node parse.js "$input" $generator >$OUT
+    node $MYPATH/parse.js "$input" $generator >$OUT
   ;;
   mscgen)
-    node parse.js "$input" $generator >$OUT
+    node $MYPATH/parse.js "$input" $generator >$OUT
   ;;
   neato)
-    node parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js "$input" digraph >$OUT
   ;;
   twopi)
-    node parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js "$input" digraph >$OUT
   ;;
   circo)
-    node parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js "$input" digraph >$OUT
   ;;
   fdp)
-    node parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js "$input" digraph >$OUT
   ;;
   sfdp)
-    node parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js "$input" digraph >$OUT
   ;;
   *)
-    node parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js "$input" digraph >$OUT
   ;;
 esac
 rc=$?
@@ -97,5 +99,9 @@ esac
 ##[[ -s n.png ]] && [[ $silent = 0 ]] && open n.png
 
 rm $OUT
+#Compress
+if [ -x pngquant ]; then
+  pngquant --ext .png --force --speed 1 --quality 0-10 $png
+fi
 echo $png
 exit 0

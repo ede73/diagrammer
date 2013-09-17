@@ -109,5 +109,10 @@ esac
 ##[[ -s n.png ]] && [[ $silent = 0 ]] && open n.png
 
 rm $OUT
+#Compress
+which  pngquant
+if [ $? -eq 0 ]; then
+  pngquant --ext .png --force --speed 1 --quality 0-10 $png
+fi
 echo $png
 exit 0

@@ -1,8 +1,13 @@
 #!/bin/sh
+#EXPORTREMOVE
 if [ "${1:-skipparsermake}" == "skipparsermake" ]; then
+#EXPORTREMOVE
 shift
+#EXPORTREMOVE
 else
+#EXPORTREMOVE
   ./makeLexerAndParser.sh >/dev/null
+#EXPORTREMOVE
 fi
 
 silent=0
@@ -14,11 +19,16 @@ fi
 input=${1:-state2.txt}
 generator=${2:-dot}
 
+#EXPORTREMOVE
 echo "testing lexing"
+#EXPORTREMOVE
 node testStateLexer.js $input
 
+#EXPORTREMOVE
 echo "test parser"
+#EXPORTREMOVE
 #node parser.js $input $func | tee a.gv
+#EXPORTREMOVE
 # |sed '/digraph/,$!d'
 
 png=${input%.*}_${generator}.png
@@ -96,5 +106,6 @@ esac
 #neato -Tpng a.gv >n.png
 ##[[ -s n.png ]] && [[ $silent = 0 ]] && open n.png
 
+rm $OUT
 
 exit 0

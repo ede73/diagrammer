@@ -110,7 +110,7 @@ esac
 
 rm $OUT
 #Compress
-which  pngquant
+which  pngquant >/dev/null
 if [ $? -eq 0 ]; then
   pngquant --ext .png --force --speed 1 --quality 0-10 $png
 fi

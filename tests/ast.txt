@@ -1,0 +1,57 @@
+vertical
+$(gen:#ccffcc)
+$(par:#ccccff)
+
+{ GraphObject;GraphObject
+  name$(par)
+  color$(par)
+  textColor$(par)
+  label$(par);#ff0000label\nspecial syntax with :: for links\n(label::xlabel)
+}
+
+{ GraphRoot;GraphRoot:GraphObject
+  database OBJECTS1;OBJECTS
+  xGenerator$(gen);generator
+  xVisualizer$(gen);visualizer
+  direction$(gen)
+  xStart$(gen);start
+  xEqual$(gen);equal
+  currentShape
+  default2;default\nnodecolor\ngroupcolor\nlinkcolor
+}
+{ xGroup;Group:GraphObject
+  name
+  equal2;equal
+  database OBJECTS2;OBJECTS
+}
+
+{ Node;Node:GraphObject
+  xShape;shape
+  image
+  style
+  color
+}
+
+{ Link;Link:GraphObject
+  linkType
+  left
+  right
+}
+
+link color #0000ff
+GraphObject/.>GraphRoot;extends
+GraphObject/.>Node;extends
+GraphObject/.>xGroup;extends
+GraphObject/.>Link;extends::extends
+
+link color #00ff00
+left<->"links"Node
+left<->"links"xGroup
+right<->"links"xGroup
+right<->"links"Node
+
+link color #ff0000
+OBJECTS1>"contains"Node
+OBJECTS1>"contains"xGroup
+OBJECTS2>"contains"Node
+OBJECTS2>"contains"xGroup

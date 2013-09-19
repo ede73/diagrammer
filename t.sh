@@ -1,4 +1,5 @@
 #!/bin/sh
+#TODO:ALLOW SVG!
 MYPATH=$(dirname $0)
 EXTPATH=$(pwd)
 #EXPORTREMOVE

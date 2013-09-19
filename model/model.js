@@ -323,15 +323,28 @@ function GraphObject(label) {
     this.getTextColor = function() {
     	return getAttr(this, 'textcolor');
     }
+    this.setUrl = function(value) {
+	if (value===undefined)return this;
+        return setAttr(this, 'url', value);
+    };
+    this.getUrl = function() {
+    	return getAttr(this, 'url');
+    }
     this.label = label;
     this.setLabel = function(value) {
     	if (!value)return this;
     	value=value.trim().replace(/"/gi,"");
     	debug("  TEST value("+value+") for color");
+    	//Take out COLOR if preset
     	var m=value.match(/^(#[A-Fa-f0-9]{6,6})(.*)$/);
     	// debug(m);
     	if (m!==null && m.length==3){
     		this.setTextColor(m[1]);
+    		value=m[2].trim();
+    	}
+    	var m=value.match(/\[([^\]]+)\](.*)$/);
+    	if (m!==null && m.length>=3){
+    		this.setUrl(m[1]);
     		value=m[2].trim();
     	}
         return setAttr(this, 'label', value);
@@ -497,8 +510,7 @@ function getShape(shapes, o, fmt) {
     if (o in shapes)
         return ' ' + fmt.format(shapes[o]) + ' ';
     else
-        return ' ' + fmt.format(shapes.
-        default) + ' ';
+        return ' ' + fmt.format(shapes.default) + ' ';
 }
 
 var shapes = {

@@ -22,6 +22,10 @@ function digraph(yy) {
 		// if (getAttr(o,'free')===true){
 		// nattrs.push("constraint=false");
 		// }
+		var url = getAttr(o, 'url');
+		if (url){
+			nattrs.push('URL="' + url.trim() + '"');
+		}
 		if (styles.length > 0) {
 			if (styles.join("").indexOf('singularity') !== -1) {
 				// invis node is not singularity!, circle with minimal
@@ -221,6 +225,10 @@ function digraph(yy) {
 			} else {
 				attrs.push('label="' + label.trim() + '"');
 			}
+		}
+		var url = getAttr(l, 'url');
+		if (url){
+			attrs.push('URL="' + url.trim() + '"');
 		}
 		getAttrFmt(l, 'color', 'color="{0}"', attrs);
 		getAttrFmt(l, [ 'textcolor', 'color' ], 'fontcolor="{0}"', attrs);

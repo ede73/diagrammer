@@ -109,15 +109,15 @@ esac
 ##[[ -s n.png ]] && [[ $silent = 0 ]] && open n.png
 
 #When running tests, these are important
-test=1
-if [ $test -eq 1 ]; then
-  rm $OUT
-  #Compress
-  which  pngquant >/dev/null
-  if [ $? -eq 0 ]; then
-    pngquant --ext .png --force --speed 1 --quality 0-10 $png
-  fi
-  echo $png
-fi
+testm=1
+#if [ "$testm" = "1" ]; then
+#  rm $OUT
+#  #Compress
+#  which  pngquant >/dev/null
+#  if [ $? -eq 0 ]; then
+#    pngquant --ext .png --force --speed 1 --quality 0-10 $png
+#  fi
+#  echo $png
+#fi
 
 exit 0

@@ -66,10 +66,14 @@ function mscgen(yy) {
 		var attrs = [];
 		var label = getAttr(l, "label");
 		var color = getAttr(l, 'color');
+		var url = getAttr(l, "url");
+		var note = "";
+		if (url) {
+			attrs.push('URL="'+url+'"');
+		}
 		if (color) {
 			attrs.push('linecolor="' + color + '"');
 		}
-		var note = "";
 		if (label) {
 			if (label.indexOf("::") !== -1) {
 				label = label.split("::");

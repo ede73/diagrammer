@@ -1,3 +1,4 @@
+Icons from http://openiconlibrary.sourceforge.net/
 PlantUML
 
 GOES LIKE THIS(as You see, still A LOT of boiler plate code...)..see below after ====

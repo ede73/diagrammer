@@ -39,10 +39,10 @@ $(par:#ccccff)
 }
 
 link color #0000ff
-GraphObject/.>GraphRoot;extends
-GraphObject/.>Node;extends
-GraphObject/.>xGroup;extends
-GraphObject/.>Link;extends::extends
+GraphObject.>GraphRoot;extends
+GraphObject.>Node;extends
+GraphObject.>xGroup;extends
+GraphObject.>Link;extends::extends
 
 link color #00ff00
 left<->"links"Node

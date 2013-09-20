@@ -1,4 +1,4 @@
-#!/bin/sh
+#TODO:ALLOW SVG
 MYPATH=$(dirname $0)
 EXTPATH=$(pwd)
 #EXPORTREMOVE
@@ -13,6 +13,18 @@ if [ "$1" = "silent" ]; then
  silent=1
 fi
 
+tests=0
+if [ "$1" = "tests" ]; then
+ shift
+ tests=1
+fi
+
+FORMAT=png
+if [ "$1" == "svg" ]; then
+ shift
+ FORMAT=svg
+fi
+
 input=${1:-state2.txt}
 generator=${2:-dot}
 
@@ -23,8 +35,8 @@ generator=${2:-dot}
 #EXPORTREMOVE
 #EXPORTREMOVE
 
-png=${input%.*}_${generator}.png
-rm -f $png
+IMAGEFILE=${input%.*}_${generator}.${FORMAT}
+rm -f $IMAGEFILE
 OUT=${input%.*}_${generator}.out
 rm -f $OUT
 
@@ -62,47 +74,54 @@ rc=$?
 
 case "$generator" in
   plantuml_sequence)
-    java -jar ext/plantuml.jar $OUT >"$png"&& [[ $silent = 0 ]] && open "$png"
+    java -jar ext/plantuml.jar $OUT >"$IMAGEFILE"&& [[ $silent = 0 ]] && open "$IMAGEFILE"
   ;;
   nwdiag|actdiag|blockdiag)
-    cat $OUT |$generator -a -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -a -T${FORMAT} -o $IMAGEFILE - && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
   mscgen)
-    cat $OUT |$generator -Tpng -o $png - && [[ $silent = 0 ]] && open "$png" 
+	echo 1
+    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE - && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
   neato)
-    cat $OUT |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
   twopi)
-    cat $OUT |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
   circo)
-    cat $OUT |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
   fdp)
-    cat $OUT |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
   sfdp)
-    cat $OUT |$generator -Tpng -o $png && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
   *)
-    cat $OUT |dot -Tpng -o $png  && [[ $silent = 0 ]] && open "$png" 
+    cat $OUT |dot -T${FORMAT} -o $IMAGEFILE  && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
 esac
-#circo -Tpng a.gv >c.png
-##[[ -s c.png ]] && [[ $silent = 0 ]] && open c.png
+#circo -T${FORMAT} a.gv >c.${FORMAT}
+##[[ -s c.${FORMAT} ]] && [[ $silent = 0 ]] && open c.${FORMAT}
 
-#twopi -Tpng a.gv >t.png
-##[[ -s t.png ]] && [[ $silent = 0 ]] && open t.png
+#twopi -T${FORMAT} a.gv >t.${FORMAT}
+##[[ -s t.${FORMAT} ]] && [[ $silent = 0 ]] && open t.${FORMAT}
 
-#neato -Tpng a.gv >n.png
-##[[ -s n.png ]] && [[ $silent = 0 ]] && open n.png
+#neato -T${FORMAT} a.gv >n.${FORMAT}
+##[[ -s n.${FORMAT} ]] && [[ $silent = 0 ]] && open n.${FORMAT}
 
-rm $OUT
-#Compress
-which  pngquant
-if [ $? -eq 0 ]; then
-  pngquant --ext .png --force --speed 1 --quality 0-10 $png
-fi
-echo $png
+#When running tests, these are important
+[[ $tests -eq 0 ]] && {
+  rm $OUT;
+  [[ $FORMAT -eq "png" ]] && {
+    #Compress
+    which  pngquant >/dev/null
+    if [ $? -eq 0 ]; then
+      pngquant --ext .png --force --speed 1 --quality 0-10 $png
+    fi
+  }
+  echo $IMAGEFILE
+}
+
 exit 0

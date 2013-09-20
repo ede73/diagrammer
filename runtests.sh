@@ -17,7 +17,7 @@ setError(){
 test(){
  checkError
  echo "Run test $1 using $x"
- ./t.sh skipparsermake silent tests/$1 $x >/dev/null
+ ./t.sh tests skipparsermake silent tests/$1 $x >/dev/null
  rc=$?
  [[ $rc -ne 0 ]] && setError $rc $1
  png=${1%.*}_${x}.png

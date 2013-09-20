@@ -4,9 +4,9 @@ EXTPATH=$(pwd)
 #EXPORTREMOVE
 if [ "${1:-skipparsermake}" == "skipparsermake" ]; then
 #EXPORTREMOVE
-shift
+  shift
 #EXPORTREMOVE
-else
+  else
 #EXPORTREMOVE
   ./makeLexerAndParser.sh >/dev/null
 #EXPORTREMOVE

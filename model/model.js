@@ -26,6 +26,7 @@ function getVariables(yy) {
     }
     return yy.VARIABLES;
 }
+
 function getGraphRoot(yy) {
     // debug(" getGraphRoot "+yy);
     if (!yy.GRAPHROOT) {
@@ -38,7 +39,7 @@ function getGraphRoot(yy) {
         debug("  ...Initialize emptyroot " + yy);
         yy.CURRENTCONTAINER = new Array();
         yy.LINKS = new Array();
-        yy.CONTAINER_EXIT=1;
+        yy.CONTAINER_EXIT = 1;
         yy.GRAPHROOT = new GraphRoot();
         // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
         enterContainer(yy, yy.GRAPHROOT);
@@ -73,7 +74,7 @@ function getCurrentContainer(yy) {
  * create an array, push LHS,RHS nodes there and return the arrray As long as
  * processing the list nodes added to array..
  */
-function getList(yy, LHS, RHS,rhsLinkLabel) {
+function getList(yy, LHS, RHS, rhsLinkLabel) {
     if (LHS instanceof Node) {
         debug(" getList(" + LHS + "," + RHS + ")");
         var x = new Array();
@@ -97,53 +98,53 @@ function getList(yy, LHS, RHS,rhsLinkLabel) {
  * 
  * node a1 will be dotted instead of being dashed
  */
-function getNode(yy, name,style) {
-    function cc(yy,name,style){
-    	if (name instanceof Node) {
-    		if (style) name.setStyle(style);
-    		return name;
-    	}
-    	if (name instanceof Array) {
-    		return name;
-    	}
+function getNode(yy, name, style) {
+    function cc(yy, name, style) {
+        if (name instanceof Node) {
+            if (style) name.setStyle(style);
+            return name;
+        }
+        if (name instanceof Array) {
+            return name;
+        }
 
-	    var search = function s(container, name) {
-	        if (container.getName() == name) return container;
-	        for (var i in container.OBJECTS) {
-	            var o = container.OBJECTS[i];
-	            if (o instanceof Node && o.getName() == name) {
-	                if (style) o.setStyle(style);
-	                return o;
-	            }
-	            if (o instanceof Group) {
-	                var found = s(o, name);
-	                if (found != undefined) return found;
-	            }
-	        }
-	        return undefined;
-	    }(getGraphRoot(yy), name);
-	    if (search != undefined) {
-	    	return search;
-	    }
-	    debug(" Create new node");
-	    var n = new Node(name, getGraphRoot(yy).getCurrentShape());
-	    if (style) n.setStyle(style);
-    
-	    getDefaultAttribute(yy,'nodecolor',function(color){
-	    	n.setColor(color);
-	    });
-	    getDefaultAttribute(yy,'nodetextcolor',function(color){
-	    	n.setTextColor(color);
-	    });
-	    return pushObject(yy, n);
+        var search = function s(container, name) {
+            if (container.getName() == name) return container;
+            for (var i in container.OBJECTS) {
+                var o = container.OBJECTS[i];
+                if (o instanceof Node && o.getName() == name) {
+                    if (style) o.setStyle(style);
+                    return o;
+                }
+                if (o instanceof Group) {
+                    var found = s(o, name);
+                    if (found != undefined) return found;
+                }
+            }
+            return undefined;
+        }(getGraphRoot(yy), name);
+        if (search != undefined) {
+            return search;
+        }
+        debug(" Create new node");
+        var n = new Node(name, getGraphRoot(yy).getCurrentShape());
+        if (style) n.setStyle(style);
+
+        getDefaultAttribute(yy, 'nodecolor', function(color) {
+            n.setColor(color);
+        });
+        getDefaultAttribute(yy, 'nodetextcolor', function(color) {
+            n.setTextColor(color);
+        });
+        return pushObject(yy, n);
     }
-    var node=cc(yy,name,style);
+    var node = cc(yy, name, style);
     debug(" getNode gotNode " + node);
-    yy.lastSeenNode=node;
-    if (yy.collectNextNode){
+    yy.lastSeenNode = node;
+    if (yy.collectNextNode) {
         debug("Collect next node");
-      	setAttr(yy.collectNextNode,'exitlink',name);
-       	yy.collectNextNode=undefined
+        setAttr(yy.collectNextNode, 'exitlink', name);
+        yy.collectNextNode = undefined
     }
     return node;
 }
@@ -151,35 +152,36 @@ function getNode(yy, name,style) {
  * Get default attribute nodecolor,linkcolor,groupcolor and bubble upwards if
  * otherwise 'unobtainable'
  */
-function getDefaultAttribute(yy,attrname,x){
-  // no need for the value, but runs init if missing
-  getGraphRoot(yy);
-  // debug("getDefaultAttribute "+attrname);
-  for(var i in yy.CURRENTCONTAINER){
-  	  var ctr=yy.CURRENTCONTAINER[i];
-  	  var a=ctr.getDefault(attrname);
-  	  // debug(" traverse getDefaultAttribute "+attrname+" from "+ctr+" as
-		// "+a);
-  	  if (a!==undefined){
-  	  	  // debug("getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
-  	  	  if (x!==undefined)
-  	  	    x(a);
-  	  	  return a;
-  	  }
-  }
-  var a=getGraphRoot(yy).getDefault(attrname);
-  if (a!==undefined){
-  debug("getDefaultAttribute got from graphroot");
-	  if (x!==undefined)
-		x(a);
-	  return a;
-  }
-  // debug("getDefaultAttribute FAILED");
-  return undefined;
+function getDefaultAttribute(yy, attrname, x) {
+    // no need for the value, but runs init if missing
+    getGraphRoot(yy);
+    // debug("getDefaultAttribute "+attrname);
+    for (var i in yy.CURRENTCONTAINER) {
+        var ctr = yy.CURRENTCONTAINER[i];
+        var a = ctr.getDefault(attrname);
+        // debug(" traverse getDefaultAttribute "+attrname+" from "+ctr+" as
+        // "+a);
+        if (a !== undefined) {
+            // debug("getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
+            if (x !== undefined)
+                x(a);
+            return a;
+        }
+    }
+    var a = getGraphRoot(yy).getDefault(attrname);
+    if (a !== undefined) {
+        debug("getDefaultAttribute got from graphroot");
+        if (x !== undefined)
+            x(a);
+        return a;
+    }
+    // debug("getDefaultAttribute FAILED");
+    return undefined;
 }
+
 function getCurrentContainer(yy) {
-	// no need for value, but runs init if missing
-	getGraphRoot(yy);
+    // no need for value, but runs init if missing
+    getGraphRoot(yy);
     return yy.CURRENTCONTAINER[yy.CURRENTCONTAINER.length - 1];
 }
 
@@ -194,9 +196,9 @@ function enterContainer(yy, container) {
  * Exit the current container, return the previous one
  */
 function exitContainer(yy) {
-    if (yy.CURRENTCONTAINER.length<=1)
+    if (yy.CURRENTCONTAINER.length <= 1)
         throw new Error("INTERNAL ERROR:Trying to exist ROOT container");
-    return setAttr(yy.CURRENTCONTAINER.pop(),'exitnode',yy.CONTAINER_EXIT++);
+    return setAttr(yy.CURRENTCONTAINER.pop(), 'exitnode', yy.CONTAINER_EXIT++);
 }
 
 /**
@@ -211,9 +213,9 @@ function getGroup(yy, ref) {
     var newGroup = new Group(yy.GROUPIDS++);
     debug(" push group " + newGroup + " to " + yy);
     pushObject(yy, newGroup);
-    
-    getDefaultAttribute(yy,'groupcolor',function(color){
-    	newGroup.setColor(color);
+
+    getDefaultAttribute(yy, 'groupcolor', function(color) {
+        newGroup.setColor(color);
     });
     return newGroup;
 }
@@ -224,13 +226,13 @@ function getGroup(yy, ref) {
  * Array(smthg) r = right side, Node(xxx) or Group(yyy), or Array(smthg) label =
  * if defined, LABEL for the link color = if defined, COLOR for the link
  */
-function getLink(yy, linkType, l, r, label, color,lcompass,rcompass) {
+function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
     if (l instanceof Array) {
         debug(" getLink called with LHS array");
         var lastLink;
         for (var i = 0; i < l.length; i++) {
             debug(" Get link " + l[i]);
-            lastLink = getLink(yy, linkType, l[i], r, label, color,lcompass,rcompass);
+            lastLink = getLink(yy, linkType, l[i], r, label, color, lcompass, rcompass);
         }
         return lastLink;
     }
@@ -239,7 +241,7 @@ function getLink(yy, linkType, l, r, label, color,lcompass,rcompass) {
         var lastLink;
         for (var i = 0; i < r.length; i++) {
             debug(" Get link " + r[i]);
-            lastLink = getLink(yy, linkType, l, r[i], label, color,lcompass,rcompass);
+            lastLink = getLink(yy, linkType, l, r[i], label, color, lcompass, rcompass);
         }
         return lastLink;
     }
@@ -250,18 +252,18 @@ function getLink(yy, linkType, l, r, label, color,lcompass,rcompass) {
         throw new Error("RHS not a Node nor a Group(" + r + ")");
     }
     var lnk = new Link(linkType, l, r);
-	if(lcompass) setAttr(lnk,'lcompass',lcompass);
-	else if (getAttr(l,'compass')) setAttr(lnk,'lcompass',getAttr(l,'compass'));
-	if(rcompass) setAttr(lnk,'rcompass',rcompass);
-	else if (getAttr(r,'compass')) setAttr(lnk,'rcompass',getAttr(r,'compass'));
-    getDefaultAttribute(yy,'linkcolor',function(color){
-    	lnk.setColor(color);
+    if (lcompass) setAttr(lnk, 'lcompass', lcompass);
+    else if (getAttr(l, 'compass')) setAttr(lnk, 'lcompass', getAttr(l, 'compass'));
+    if (rcompass) setAttr(lnk, 'rcompass', rcompass);
+    else if (getAttr(r, 'compass')) setAttr(lnk, 'rcompass', getAttr(r, 'compass'));
+    getDefaultAttribute(yy, 'linkcolor', function(color) {
+        lnk.setColor(color);
     });
-    getDefaultAttribute(yy,'linktextcolor',function(color){
-    	lnk.setTextColor(color);
+    getDefaultAttribute(yy, 'linktextcolor', function(color) {
+        lnk.setTextColor(color);
     });
     if (label != undefined) lnk.setLabel(label);
-    if (r instanceof Node && r.getLinkLabel()!=undefined) lnk.setLabel(r.getLinkLabel())
+    if (r instanceof Node && r.getLinkLabel() != undefined) lnk.setLabel(r.getLinkLabel())
     if (color != undefined) lnk.setColor(color);
     return addLink(yy, lnk);
 }
@@ -272,7 +274,7 @@ function addLink(yy, l) {
         debug(" PUSH LINK ARRAY:" + l);
     } else {
         debug(" PUSH LINK:" + l);
-        setAttr(l,'container',getCurrentContainer(yy));
+        setAttr(l, 'container', getCurrentContainer(yy));
     }
     yy.LINKS.push(l);
     return l;
@@ -303,50 +305,50 @@ function containsObject(container, o) {
 
 function GraphObject(label) {
     this.setName = function(value) {
-	if (value===undefined)return this;
+        if (value === undefined) return this;
         return setAttr(this, 'name', value);
     };
     this.getName = function() {
         return getAttr(this, 'name');
     }
     this.setColor = function(value) {
-	if (value===undefined)return this;
+        if (value === undefined) return this;
         return setAttr(this, 'color', value);
     };
     this.getColor = function() {
         return getAttr(this, 'color');
     }
     this.setTextColor = function(value) {
-	if (value===undefined)return this;
+        if (value === undefined) return this;
         return setAttr(this, 'textcolor', value);
     };
     this.getTextColor = function() {
-    	return getAttr(this, 'textcolor');
+        return getAttr(this, 'textcolor');
     }
     this.setUrl = function(value) {
-	if (value===undefined)return this;
+        if (value === undefined) return this;
         return setAttr(this, 'url', value);
     };
     this.getUrl = function() {
-    	return getAttr(this, 'url');
+        return getAttr(this, 'url');
     }
     this.label = label;
     this.setLabel = function(value) {
-    	if (!value)return this;
-    	value=value.trim().replace(/"/gi,"");
-    	debug("  TEST value("+value+") for color");
-    	//Take out COLOR if preset
-    	var m=value.match(/^(#[A-Fa-f0-9]{6,6})(.*)$/);
-    	// debug(m);
-    	if (m!==null && m.length==3){
-    		this.setTextColor(m[1]);
-    		value=m[2].trim();
-    	}
-    	var m=value.match(/\[([^\]]+)\](.*)$/);
-    	if (m!==null && m.length>=3){
-    		this.setUrl(m[1]);
-    		value=m[2].trim();
-    	}
+        if (!value) return this;
+        value = value.trim().replace(/"/gi, "");
+        debug("  TEST value(" + value + ") for color");
+        //Take out COLOR if preset
+        var m = value.match(/^(#[A-Fa-f0-9]{6,6})(.*)$/);
+        // debug(m);
+        if (m !== null && m.length == 3) {
+            this.setTextColor(m[1]);
+            value = m[2].trim();
+        }
+        var m = value.match(/\[([^\]]+)\](.*)$/);
+        if (m !== null && m.length >= 3) {
+            this.setUrl(m[1]);
+            value = m[2].trim();
+        }
         return setAttr(this, 'label', value);
     };
     this.getLabel = function() {
@@ -366,8 +368,8 @@ function Node(name, shape) {
     this.image;
     this.style;
     this.setShape = function(value) {
-	if (value===undefined)return this;
-	if(value)value=value.toLowerCase();
+        if (value === undefined) return this;
+        if (value) value = value.toLowerCase();
         return setAttr(this, 'shape', value);
     };
     this.getShape = function() {
@@ -381,15 +383,15 @@ function Node(name, shape) {
         return getAttr(this, 'linklabel');
     }
     this.setStyle = function(value) {
-	if (value===undefined)return this;
-	if(value)value=value.toLowerCase();
+        if (value === undefined) return this;
+        if (value) value = value.toLowerCase();
         return setAttr(this, 'style', value);
     };
     this.getStyle = function() {
         return getAttr(this, 'style');
     }
     this.setImage = function(value) {
-	if (value===undefined)return this;
+        if (value === undefined) return this;
         return setAttr(this, 'image', value);
     };
     this.getImage = function() {
@@ -413,15 +415,15 @@ function Group(name) {
         return getAttr(this, 'equal');
     }
     /**
-	 * Set default nodecolor, groupcolor, linkcolor Always ask from the
-	 * currentContainer first
-	 */
-    this.setDefault = function(key,value) {
-    	debug("Set group "+key+ " to "+value);
+     * Set default nodecolor, groupcolor, linkcolor Always ask from the
+     * currentContainer first
+     */
+    this.setDefault = function(key, value) {
+        debug("Set group " + key + " to " + value);
         return setAttr(this, key, value);
     };
     this.getDefault = function(key) {
-    	debug("Get group "+key);
+        debug("Get group " + key);
         return getAttr(this, key);
     };
     this.toString = function() {
@@ -434,21 +436,21 @@ GraphRoot.prototype.constructor = GraphRoot;
 function GraphRoot() {
     this.OBJECTS = new Array();
     this.setGenerator = function(value) {
-	if(value)value=value.toLowerCase();
+        if (value) value = value.toLowerCase();
         return setAttr(this, 'generator', value);
     };
     this.getGenerator = function() {
         return getAttr(this, 'generator');
     };
     this.setVisualizer = function(value) {
-	if(value)value=value.toLowerCase();
+        if (value) value = value.toLowerCase();
         return setAttr(this, 'visualizer', value);
     };
     this.getVisualizer = function() {
         return getAttr(this, 'visualizer');
     };
     this.setCurrentShape = function(value) {
-	if(value)value=value.toLowerCase();
+        if (value) value = value.toLowerCase();
         return setAttr(this, 'shape', value);
     };
     this.getCurrentShape = function() {
@@ -474,15 +476,15 @@ function GraphRoot() {
         return getAttr(this, 'equal');
     };
     /**
-	 * Set default nodecolor, groupcolor, linkcolor Always ask from the
-	 * currentContainer first
-	 */
-    this.setDefault = function(key,value) {
-    	debug("Set ROOT "+key+ " to "+value);
-        return setAttr(this,  key,value);
+     * Set default nodecolor, groupcolor, linkcolor Always ask from the
+     * currentContainer first
+     */
+    this.setDefault = function(key, value) {
+        debug("Set ROOT " + key + " to " + value);
+        return setAttr(this, key, value);
     };
     this.getDefault = function(key) {
-    	// debug("Get ROOT "+key);
+        // debug("Get ROOT "+key);
         return getAttr(this, key);
     };
     this.toString = function() {
@@ -506,11 +508,12 @@ function Link(linkType, l, r) {
 
 function getShape(shapes, o, fmt) {
     if (o == undefined || o == 0) return "";
-    o=o.toLowerCase()
+    o = o.toLowerCase()
     if (o in shapes)
         return ' ' + fmt.format(shapes[o]) + ' ';
     else
-        return ' ' + fmt.format(shapes.default) + ' ';
+        return ' ' + fmt.format(shapes.
+        default) + ' ';
 }
 
 var shapes = {

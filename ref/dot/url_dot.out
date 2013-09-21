@@ -1,0 +1,8 @@
+digraph {
+  compound=true;
+  rankdir=TD;
+  node1[URL="http://www.google.com/",fontcolor="#ff0000"];
+  node2[URL="http://www.mtv3.fi/",fontcolor="#ccffcc"];
+//links start
+  node1->node2[URL="http://www.nelonen.fi/",style="dashed",dir=none];
+}

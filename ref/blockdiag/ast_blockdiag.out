@@ -1,0 +1,56 @@
+blockdiag{
+ default_fontsize = 14
+  orientation=portrait
+  group "GraphObject"{
+
+    label="GraphObject" 
+    name[color="#ccccff"];
+    color[color="#ccccff"];
+    textColor[color="#ccccff"];
+    label[color="#ccccff"  ,label="label\nspecial syntax with :: for links\n(label::xlabel)"];
+  }
+  group "GraphRoot:GraphObject"{
+
+    label="GraphRoot:GraphObject" 
+    OBJECTS1[shape=flowchart.database  ,label="OBJECTS"];
+    xGenerator[color="#ccffcc"  ,label="generator"];
+    xVisualizer[color="#ccffcc"  ,label="visualizer"];
+    direction[color="#ccffcc"];
+    xStart[color="#ccffcc"  ,label="start"];
+    xEqual[color="#ccffcc"  ,label="equal"];
+    currentShape;
+    default2[label="default\nnodecolor\ngroupcolor\nlinkcolor"];
+  }
+  group "Group:GraphObject"{
+
+    label="Group:GraphObject" 
+    equal2[label="equal"];
+    OBJECTS2[shape=flowchart.database  ,label="OBJECTS"];
+  }
+  group "Node:GraphObject"{
+
+    label="Node:GraphObject" 
+    xShape[label="shape"];
+    image;
+    style;
+  }
+  group "Link:GraphObject"{
+
+    label="Link:GraphObject" 
+    linkType;
+    left;
+    right;
+  }
+  GraphObject -> GraphRoot[style="dotted"  ,label = "extends" textcolor="#0000ff"   ,color="#0000ff"];
+  GraphObject -> Node[style="dotted"  ,label = "extends" textcolor="#0000ff"   ,color="#0000ff"];
+  GraphObject -> xGroup[style="dotted"  ,label = "extends" textcolor="#0000ff"   ,color="#0000ff"];
+  GraphObject -> Link[style="dotted"  ,label = "extends::extends" textcolor="#0000ff"   ,color="#0000ff"];
+  left -> Node[style="dashed"  ,label = "links" textcolor="#00ff00"   ,color="#00ff00"];
+  left -> xGroup[style="dashed"  ,label = "links" textcolor="#00ff00"   ,color="#00ff00"];
+  right -> xGroup[style="dashed"  ,label = "links" textcolor="#00ff00"   ,color="#00ff00"];
+  right -> Node[style="dashed"  ,label = "links" textcolor="#00ff00"   ,color="#00ff00"];
+  OBJECTS1 -> Node[label = "contains" textcolor="#ff0000"   ,color="#ff0000"];
+  OBJECTS1 -> xGroup[label = "contains" textcolor="#ff0000"   ,color="#ff0000"];
+  OBJECTS2 -> Node[label = "contains" textcolor="#ff0000"   ,color="#ff0000"];
+  OBJECTS2 -> xGroup[label = "contains" textcolor="#ff0000"   ,color="#ff0000"];
+}

@@ -1,0 +1,6 @@
+actdiag{
+  default_fontsize = 14
+  node1;
+  node2;
+  node1 -> node2[style="dashed"];
+}

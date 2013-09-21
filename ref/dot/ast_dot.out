@@ -1,0 +1,52 @@
+digraph {
+  compound=true;
+  rankdir=LR;
+  subgraph cluster_GraphObject {
+        label="GraphObject"; 
+      name[fillcolor="#ccccff",style="filled"];
+      color[fillcolor="#ccccff",style="filled"];
+      textColor[fillcolor="#ccccff",style="filled"];
+      label[fillcolor="#ccccff",style="filled",fontcolor="#ff0000",label="label\nspecial syntax with :: for links\n(label::xlabel)"];
+  }//end of GraphObject undefined
+  subgraph cluster_GraphRoot {
+        label="GraphRoot:GraphObject"; 
+      OBJECTS1[ shape="Mcircle" ,label="OBJECTS"];
+      xGenerator[fillcolor="#ccffcc",style="filled",label="generator"];
+      xVisualizer[fillcolor="#ccffcc",style="filled",label="visualizer"];
+      direction[fillcolor="#ccffcc",style="filled"];
+      xStart[fillcolor="#ccffcc",style="filled",label="start"];
+      xEqual[fillcolor="#ccffcc",style="filled",label="equal"];
+      currentShape;
+      default2[label="default\nnodecolor\ngroupcolor\nlinkcolor"];
+  }//end of GraphRoot undefined
+  subgraph cluster_xGroup {
+        label="Group:GraphObject"; 
+      equal2[label="equal"];
+      OBJECTS2[ shape="Mcircle" ,label="OBJECTS"];
+  }//end of xGroup undefined
+  subgraph cluster_Node {
+        label="Node:GraphObject"; 
+      xShape[label="shape"];
+      image;
+      style;
+  }//end of Node undefined
+  subgraph cluster_Link {
+        label="Link:GraphObject"; 
+      linkType;
+      left;
+      right;
+  }//end of Link undefined
+//links start
+  name->OBJECTS1[label="extends",color="#0000ff",fontcolor="#0000ff", lhead=cluster_GraphRoot, ltail=cluster_GraphObject,style="dotted"];
+  name->xShape[label="extends",color="#0000ff",fontcolor="#0000ff", lhead=cluster_Node, ltail=cluster_GraphObject,style="dotted"];
+  name->equal2[label="extends",color="#0000ff",fontcolor="#0000ff", lhead=cluster_xGroup, ltail=cluster_GraphObject,style="dotted"];
+  name->linkType[label="extends",xlabel="extends",color="#0000ff",fontcolor="#0000ff", lhead=cluster_Link, ltail=cluster_GraphObject,style="dotted"];
+  left->xShape[label="links",color="#00ff00",fontcolor="#00ff00", lhead=cluster_Node,style="dashed",dir=both];
+  left->equal2[label="links",color="#00ff00",fontcolor="#00ff00", lhead=cluster_xGroup,style="dashed",dir=both];
+  right->equal2[label="links",color="#00ff00",fontcolor="#00ff00", lhead=cluster_xGroup,style="dashed",dir=both];
+  right->xShape[label="links",color="#00ff00",fontcolor="#00ff00", lhead=cluster_Node,style="dashed",dir=both];
+  OBJECTS1->xShape[label="contains",color="#ff0000",fontcolor="#ff0000", lhead=cluster_Node];
+  OBJECTS1->equal2[label="contains",color="#ff0000",fontcolor="#ff0000", lhead=cluster_xGroup];
+  OBJECTS2->xShape[label="contains",color="#ff0000",fontcolor="#ff0000", lhead=cluster_Node];
+  OBJECTS2->equal2[label="contains",color="#ff0000",fontcolor="#ff0000", lhead=cluster_xGroup];
+}

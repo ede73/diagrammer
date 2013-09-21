@@ -53,6 +53,8 @@ tests=${1:-dot actdiag blockdiag}
 for test in $tests; do
 echo TEst suite $test >&2
 x=$test
+runtest ast.txt
+runtest url.txt
 runtest state.txt
 runtest state2.txt
 runtest state3.txt

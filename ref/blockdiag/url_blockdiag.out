@@ -1,0 +1,7 @@
+blockdiag{
+ default_fontsize = 14
+  orientation=landscape
+  node1;
+  node2;
+  node1 -> node2[style="dashed"];
+}

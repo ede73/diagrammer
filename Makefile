@@ -19,7 +19,7 @@ all: state.js state.all parser.js
 
 .PHONY: export
 export: state.js parse.js parser.js
-	@sed '/EXPORTREMOVE/{n;d;}' t.sh |grep -v '#EXPORTREMOVE' > export/t.sh
+	@sed '/EXPORTREMOVE/{n;d;}' t.sh |grep -v -E '(^#|^[[:space:]]*$$)' > export/t.sh
 	@cp COPYRIGHT.txt export
 	${foreach f,$^,$(shell uglifyjs $f -o export/$f -c -m)}
-	@echo 'Add alias depict="~/state/t.sh silent " to your profile/bashrc etc.' >export/README.txt
+	@echo 'Add alias depict="~/state/t.sh silent " to your profile/bashrc etc.\nYou need (depending) visualizers graphviz,mscgen,plantuml.jar,nwdiag,blockdiag,actdiag.\nplantuml requires java\nblockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html\nPlantuml from http://plantuml.sourceforge.net/\n' >export/README.txt

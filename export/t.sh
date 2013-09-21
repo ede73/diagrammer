@@ -1,11 +1,6 @@
 #TODO:ALLOW SVG
 MYPATH=$(dirname $0)
 EXTPATH=$(pwd)
-#EXPORTREMOVE
-#EXPORTREMOVE
-#EXPORTREMOVE
-#EXPORTREMOVE
-#EXPORTREMOVE
 
 silent=0
 if [ "$1" = "silent" ]; then
@@ -28,12 +23,7 @@ fi
 input=${1:-state2.txt}
 generator=${2:-dot}
 
-#EXPORTREMOVE
-#EXPORTREMOVE
 
-#EXPORTREMOVE
-#EXPORTREMOVE
-#EXPORTREMOVE
 
 IMAGEFILE=${input%.*}_${generator}.${FORMAT}
 rm -f $IMAGEFILE

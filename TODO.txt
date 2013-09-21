@@ -10,7 +10,7 @@
 - oMeta!
 
 -http://stackoverflow.com/questions/3428448/reducing-graph-size-in-graphviz
-- make eclipse plugin out of this all?? http://wiki.eclipse.org/Graphviz_DOT_as_a_DSL_for_Zest
+- make eclipse plugin out of this all?? http://wiki.eclipse.org/Graphviz_DOT_as_a_DSL_for_Zest(tried editor already)
 - make generic AST traversal function with closures/callbacks for all generartors to use (so some business logic is not needed to be implemented on each generator)
 - make landscape/portrait be container properties(blockdiag support, dotty should as well subgraph cluster_1{rankdir=LR})
 - FIX if/elseif/else lexing/parsing (now a bit hackish) - need context(in lexer)

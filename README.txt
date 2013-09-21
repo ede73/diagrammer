@@ -1,3 +1,4 @@
+http://www.gnu.org/software/make/manual/html_node/Foreach-Function.html#Foreach-Function
 Icons from http://openiconlibrary.sourceforge.net/
 PlantUML
 

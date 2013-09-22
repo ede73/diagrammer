@@ -10,6 +10,7 @@ function ast(yy) {
         }
         return prefix + msg;
     }
+
     var processANode = function(o) {};
     yy.result(indent("{result:"));
     depth++;

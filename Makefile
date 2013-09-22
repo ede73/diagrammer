@@ -26,4 +26,4 @@ export: state.js parse.js parser.js
 
 .PHONY: test
 test: all
-	time ./runtests.sh
+	./runtests.sh

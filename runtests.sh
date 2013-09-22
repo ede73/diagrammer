@@ -7,6 +7,7 @@ rm -f .error
 error=0
 checkError(){
   if [ -f .error ]; then
+    echo ERROR
     exit 10
   fi
 }
@@ -97,3 +98,4 @@ for test in $tests; do
   runtest state_conditionals.txt
   runtest events.txt
 done
+exit 0

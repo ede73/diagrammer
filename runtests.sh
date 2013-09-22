@@ -1,6 +1,7 @@
 #./makeLexerAndParser.sh >/dev/null
 #parallelism for 8 cores
 PARALLEL=${2:-8}
+verbose=0
 
 rm -f .error
 error=0
@@ -16,7 +17,7 @@ setError(){
 }
 test(){
  checkError
- echo "Run test $1 using $x"
+ [[ $verbose -ne 0 ]] && echo "Run test $1 using $x"
  ./t.sh skipparsermake silent tests tests/$1 $x >/dev/null
  rc=$?
  [[ $rc -ne 0 ]] && setError $rc $1
@@ -43,15 +44,15 @@ i=0
 runtest(){
  checkError
  (( i++ ))
- echo  Running test $i
+ [[ $verbose -ne 0 ]] && echo  Running test $i
  test $* &
  if (( $i % $PARALLEL == 0 )) ; then wait;fi
  checkError
- echo test $i ok
+ [[ $verbose -ne 0 ]] && echo test $i ok
 }
 tests=${1:-dot actdiag blockdiag}
 for test in $tests; do
-echo TEst suite $test >&2
+echo Test suite $test >&2
 x=$test
 runtest ast.txt
 runtest url.txt

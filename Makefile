@@ -23,3 +23,7 @@ export: state.js parse.js parser.js
 	@cp COPYRIGHT.txt export
 	${foreach f,$^,$(shell uglifyjs $f -o export/$f -c -m)}
 	@echo 'Add alias depict="~/state/t.sh silent " to your profile/bashrc etc.\nYou need (depending) visualizers graphviz,mscgen,plantuml.jar,nwdiag,blockdiag,actdiag.\nplantuml requires java\nblockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html\nPlantuml from http://plantuml.sourceforge.net/\n' >export/README.txt
+
+.PHONY: test
+test: all
+	time ./runtests.sh

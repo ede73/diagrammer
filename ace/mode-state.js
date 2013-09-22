@@ -146,19 +146,13 @@ var StateHighlightRules = function() {
                 token : "constant.numeric",
                 regex : /[+\-]?\d+(?:(?:\.\d*)?(?:[eE][+\-]?\d+)?)?\b/
             }, {
-                token : "keyword.operator",
-                regex : /\+|=|\->/
-            }, {
-                token : "punctuation.operator",
-                regex : /,|;/
-            }, {
                 token : "paren.lparen",
                 regex : /[\[{]/
             }, {
                 token : "paren.rparen",
                 regex : /[\]}]/
             }, {
-                token : "edge",
+                token : "keyword.operator",
                 regex : /<\/|\/>|<\.>|<->|<>|<-|<\.|<|->|\.>|>|-|\./
             }, {
                 token : "variable",
@@ -171,11 +165,13 @@ var StateHighlightRules = function() {
                     else if (attributes.hasOwnProperty(value.toLowerCase())) {
                         return "variable";
                     }
-                    else if (edges.hasOwnProperty(value.toLowerCase())) {
-                        return "edge";
-                    }
+//                    else if (edges.hasOwnProperty(value.toLowerCase())) {
+//                        return "edge";
+//                    }
                     else {
-                        return "node";
+                        return "constant";
+//                        return "punctuation.operator";
+//                        return "node";
                     }
                 },
                 regex: "\\-?[a-zA-Z_][a-zA-Z0-9_\\-]*"

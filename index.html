@@ -36,9 +36,13 @@
 			<option value="mscgen">MSCGEN</option>
 			<option value="plantuml_sequence">PlantUML - Sequence</option>
 			<option value="ast">AST</option>
-		</select> <label for="example">Examples:</label> <select id="example"
+		</select> 
+		<!-- handling examples -->
+		<label for="example">Examples:</label> <select id="example"
 			name="example" onChange="exampleChanged()">
 			<!--ls tests/*txt|awk -F/ '{print "<option value=\""$2"\">"$2"</option>"}'-->
+			<option value="ast.txt">ast.txt</option>
+			<option value="url.txt">url.txt</option>
 			<option value="compass.txt">compass.txt</option>
 			<option value="events.txt">events.txt</option>
 			<option value="fulltest.txt">fulltest.txt</option>
@@ -79,6 +83,7 @@
 		<button onclick="load();return false;">Load</button>
 		<button onclick="importGraphs();return false;">Import</button>
 		<button onclick="exportGraphs();return false;">Export</button>
+		<!-- saved combobox and handlers -->
 		<label for="saved">Saved graphs</label> <select id="saved"
 			name="saved" onChange="savedChanged()"></select>
 		<button onclick="visualize();return false;">Visualize</button>
@@ -102,7 +107,8 @@
 	padding: 10px;
 	margin: 10px;
 	border-radius: 8px;
-	font-family: Helvetica;
+	//font-family: Helvetica;
+	font-family: 'Droid Sans Mono';
 	font-size: 12px;
 	display: table-cell;
 	list-style-type: none;
@@ -120,7 +126,8 @@
 	padding: 5px;
 	margin: 5px;
 	border-radius: 8px;
-	font-family: Helvetica;
+	//font-family: Helvetica;
+	font-family: 'Droid Sans Mono';
 	font-size: 12px;
 	line-height: 30px;
 	display: block;
@@ -289,7 +296,9 @@
 					src="icons/timer.png" /></li>
 			</ul>
 		</div>
-		<textarea id="editable" rows="27" cols="40"></textarea>
+	<!--	<textarea id="editable" rows="27" cols="40"></textarea>-->
+	<!-- TODO: insert does not work here..-->
+		<pre id="editable" style="margin:0;left:0;height:600px;"></pre>
 		<img align="top" id="image" width=700 src="web/result.png"
 			onclick="javascript:openImage('web/result.png');" />
 		<textarea id="result" rows="40" cols="10"></textarea>
@@ -304,6 +313,12 @@
 <script src="js/viz.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type="text/javascript" src="web/index2.js"></script>
+<script src="ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = ace.edit("editable");
+    editor.setTheme("ace/theme/kr");
+    editor.getSession().setMode("ace/mode/state");
+</script>
 <script type="text/javascript">
 	//_MscParse("a>b");
 	//  $.noConflict();

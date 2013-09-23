@@ -15,7 +15,8 @@ textarea,#editable
         box-shadow: 1px 1px 0 #DDDDDD;
   /*     display: block;*/
   /*      font-family: 'Marck Script',cursive;*/
-        font-family: 'Marck Script';
+        //font-family: 'Marck Script';
+        font-family: monospace;
         font-size: 14px;
         line-height: 30px;
         margin: 2% auto;

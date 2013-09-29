@@ -48,7 +48,7 @@ function getSavedFiles() {
 
 function save() {
     var filename = document.getElementById("filename").value;
-    var editable = document.getElementById("editable").value;
+    var editable = getText();
     var data = getSavedGraph();
     data[filename] = editable;
     var jd = JSON.stringify(data);
@@ -60,7 +60,7 @@ function load() {
     var filename = document.getElementById("filename").value;
     var data = getSavedGraph();
     if (data[filename])
-        document.getElementById("editable").value = data[filename];
+        setText(data[filename]);
 }
 
 function exportGraphs() {

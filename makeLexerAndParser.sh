@@ -8,8 +8,7 @@ EOF
 cat state.lex > state.all
 echo /lex  >>state.all 
 cat state.grammar >>state.all
-cat model/support.js >>state.all
-cat model/model.js >>state.all
+cat model/*.js >>state.all
 cat generators/*.js >>state.all
 
 echo make parser

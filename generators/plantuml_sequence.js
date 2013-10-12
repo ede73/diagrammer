@@ -10,7 +10,8 @@ function plantuml_sequence(yy) {
         }
         return prefix + msg;
     }
-    var processANode = function(o) {
+
+    var processANode = function (o) {
         var nattrs = [];
         var styles = [];
         // getAttrFmt(o, 'color', 'fillcolor="{0}"',nattrs);
@@ -202,7 +203,7 @@ function plantuml_sequence(yy) {
             if (o instanceof Group) {
                 // TODO:
                 // Group name,OBJECTS,get/setEqual,toString
-                var processAGroup = function(o) {
+                var processAGroup = function (o) {
                     debug(JSON.stringify(o));
                     var cond = getAttr(o, 'conditional');
                     if (cond) {

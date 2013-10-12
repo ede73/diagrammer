@@ -11,7 +11,8 @@ function ast(yy) {
         return prefix + msg;
     }
 
-    var processANode = function(o) {};
+    var processANode = function (o) {
+    };
     yy.result(indent("{result:"));
     depth++;
 
@@ -37,7 +38,7 @@ function ast(yy) {
         for (var i in r.OBJECTS) {
             var o = r.OBJECTS[i];
             if (o instanceof Group) {
-                var processAGroup = function(o) {
+                var processAGroup = function (o) {
                     var n = JSON.parse(JSON.stringify(o));
                     n.OBJECTS = undefined;
                     yy.result(indent(JSON.stringify({

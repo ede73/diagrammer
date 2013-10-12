@@ -5,56 +5,56 @@ var vtimer = null;
 var vdelay = 1000;
 
 //Set to 0 to fall back to textarea(enable textarea in index.html)
-var acemode=1;
+var acemode = 1;
 
 //get all
-function getText(){
-  if (acemode){
-    return editor.getSession().getValue();
-  }else{
-    return document.getElementById("editable").value;
-  }
+function getText() {
+    if (acemode) {
+        return editor.getSession().getValue();
+    } else {
+        return document.getElementById("editable").value;
+    }
 }
 
 //replace all
-function setText(data){
-  if (acemode){
-    editor.destroy();
-    editor.insert(data);
-  }else{
-    document.getElementById("editable").value = data;
-  }
+function setText(data) {
+    if (acemode) {
+        editor.destroy();
+        editor.insert(data);
+    } else {
+        document.getElementById("editable").value = data;
+    }
 }
 //Add text to top of document
 //try to maintain cursor position(TODO:fucked up)
-function addTop(data){
-  if (acemode){
-    //using ace
-    var cursor=editor.getCursorPosition();
-    editor.navigateFileStart();
-    editor.insert(data);
-    //should roughly
-    editor.getSession().getSelection().selectionLead.setPosition(cursor.column,cursor.row-data.split("\n").length+1);
-  }else{
-    var comp = document.getElementById("editable");
-    //using textarea
-    comp.value=data+comp.value;
-  }
+function addTop(data) {
+    if (acemode) {
+        //using ace
+        var cursor = editor.getCursorPosition();
+        editor.navigateFileStart();
+        editor.insert(data);
+        //should roughly
+        editor.getSession().getSelection().selectionLead.setPosition(cursor.column, cursor.row - data.split("\n").length + 1);
+    } else {
+        var comp = document.getElementById("editable");
+        //using textarea
+        comp.value = data + comp.value;
+    }
 }
 //add text to current cursor position(on a new line how ever)
-function appendLine(comp,data){
-  if (acemode){
-    //using ace insert text into wherever the cursor is pointing.
-    editor.navigateLineEnd();
-    //TODO: If this is empty line, no need for linefeed
-    var cursor=editor.getCursorPosition();
-    if (cursor.column>1)
-      editor.insert("\n");
-    editor.insert(data.trim());
-  }else{
-    //using textarea
-    comp.value=comp.value+data;
-  }
+function appendLine(comp, data) {
+    if (acemode) {
+        //using ace insert text into wherever the cursor is pointing.
+        editor.navigateLineEnd();
+        //TODO: If this is empty line, no need for linefeed
+        var cursor = editor.getCursorPosition();
+        if (cursor.column > 1)
+            editor.insert("\n");
+        editor.insert(data.trim());
+    } else {
+        //using textarea
+        comp.value = comp.value + data;
+    }
 }
 function addLine(i) {
     if (typeof i == "string") {
@@ -88,15 +88,15 @@ function addLine(i) {
             case 9:
                 appendLine("if something would happend then\n" + "  a1>b1\n" + "elseif something probably would not happen then\n" + " a2>b2\n" + "elseif or if i see a flying bird then\n" + " a3>b3\n" + "else\n" + "  a4>b4\n" + "endif\n");
                 break;
-    }
+        }
     console.log("getSavedFilesChanged..parse");
-    parse(getText()+"\n", getGenerator());
+    parse(getText() + "\n", getGenerator());
     return false;
 }
 
 var win;
-function openPicWindow(){
-  win=window.open('web/result.png','extpic');
+function openPicWindow() {
+    win = window.open('web/result.png', 'extpic');
 }
 
 function reloadImg(id) {
@@ -109,7 +109,7 @@ function reloadImg(id) {
     var date = new Date();
     obj.src = src + '?v=' + date.getTime();
     if (win)
-	win.location.reload();
+        win.location.reload();
     return false;
 }
 
@@ -140,21 +140,21 @@ function cancelVTimer() {
 }
 
 /*
-function highlight(tc) {
-    var s = document.getElementById("editable");
-    s.innerHTML = tc.replace("->", "->>").replace(".>", ".>>").replace("<-",
-        "<<-").replace("<.", "<<.").replace("<", "<<").replace(">", ">>")
-        .replace("->>", '<text id="event">-&gt;</text>').replace(".>>",
-        '<text id="event">.&gt;</text>').replace("<<-",
-        '<text id="event">&lt;-</text>').replace("<<.",
-        '<text id="event">&lt;.</text>').replace(">>",
-        '<text id="event">&gt;</text>').replace("<<",
-        '<text id="event">&lt;</text>');
-}
-*/
+ function highlight(tc) {
+ var s = document.getElementById("editable");
+ s.innerHTML = tc.replace("->", "->>").replace(".>", ".>>").replace("<-",
+ "<<-").replace("<.", "<<.").replace("<", "<<").replace(">", ">>")
+ .replace("->>", '<text id="event">-&gt;</text>').replace(".>>",
+ '<text id="event">.&gt;</text>').replace("<<-",
+ '<text id="event">&lt;-</text>').replace("<<.",
+ '<text id="event">&lt;.</text>').replace(">>",
+ '<text id="event">&gt;</text>').replace("<<",
+ '<text id="event">&lt;</text>');
+ }
+ */
 
 function parse(generator, visualizer) {
-    var data=getText()+"\n";
+    var data = getText() + "\n";
     console.log("parse " + generator + "," + visualizer);
     document.getElementById("error").innerText = "";
     parsingStarted = true;
@@ -169,7 +169,7 @@ function parse(generator, visualizer) {
      * var tc=textArea.textContent; parser.parse(tc+"\n"); highlight(tc);
      */
     cancelVTimer();
-    vtimer = window.setTimeout(function() {
+    vtimer = window.setTimeout(function () {
         vtimer = null;
         console.log("Visualize now using " + parser.yy.VISUALIZER);
         visualize(parser.yy.VISUALIZER);
@@ -202,21 +202,21 @@ function exampleChanged() {
     $.ajax({
         url: "tests/" + doc,
         cache: false
-    }).done(function(data) {
-	setText(data);
-        console.log("exampleChanged..parse");
-        parse();
-    });
+    }).done(function (data) {
+            setText(data);
+            console.log("exampleChanged..parse");
+            parse();
+        });
 }
 
 function textAreaOnChange(callback, delay) {
     var timer = null;
-    document.getElementById("editable").onkeyup = function() { // onchange does not work on
+    document.getElementById("editable").onkeyup = function () { // onchange does not work on
         // chrome/mac(elsewhere?)
         if (timer) {
             window.clearTimeout(timer);
         }
-        timer = window.setTimeout(function() {
+        timer = window.setTimeout(function () {
             timer = null;
             callback(getGenerator(), getVisualizer());
         }, delay);
@@ -225,31 +225,31 @@ function textAreaOnChange(callback, delay) {
 }
 function visualizeOnChange(callback, delay) {
     var timer = null;
-    var tt=document.getElementById("result");
-    tt.onkeyup = function() { // onchange does not work on
+    var tt = document.getElementById("result");
+    tt.onkeyup = function () { // onchange does not work on
         // chrome/mac(elsewhere?)
         if (timer) {
             window.clearTimeout(timer);
         }
-        timer = window.setTimeout(function() {
+        timer = window.setTimeout(function () {
             timer = null;
-            callback(tt,getGenerator(), getVisualizer());
+            callback(tt, getGenerator(), getVisualizer());
         }, delay);
     };
     obj = null;
 }
-textAreaOnChange( parse, 150);
-visualizeOnChange( visualize, 250);
-if (acemode){
-  var timer2 = null;
-  editor.getSession().on('change', function(){
-    // chrome/mac(elsewhere?)
-    if (timer2) {
-        window.clearTimeout(timer2);
-    }
-    timer = window.setTimeout(function() {
-        timer2 = null;
-        parse(getGenerator(), getVisualizer());
-    }, delay);
-  });
+textAreaOnChange(parse, 150);
+visualizeOnChange(visualize, 250);
+if (acemode) {
+    var timer2 = null;
+    editor.getSession().on('change', function () {
+        // chrome/mac(elsewhere?)
+        if (timer2) {
+            window.clearTimeout(timer2);
+        }
+        timer = window.setTimeout(function () {
+            timer2 = null;
+            parse(getGenerator(), getVisualizer());
+        }, delay);
+    });
 }

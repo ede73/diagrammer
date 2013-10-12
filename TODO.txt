@@ -1,5 +1,5 @@
 - LABEL can already have color definition as well, but NOT $(color) variable. Colro extracted directly in model setLabel
-- GROUP>group1,group2,group3 not functional, (like NODE>node1,node2,node3 does work)
+- GROUP>group1,group2,group3 not functional, (NODE>node1,node2,node3 does work)
 - See plain JS http://bramp.github.io/js-sequence-diagrams/ Good Raphael SEQ diag. PLAIN JS
 - http://mdaines.github.io/viz.js/example.html FUCKING AWSOME!! DOTTY!! JS!!!
 - https://github.com/mdaines/viz.js/ emscripten variant llvm
@@ -9,13 +9,14 @@
 - http://philogb.github.io/jit/demos.html
 - oMeta!
 
--http://stackoverflow.com/questions/3428448/reducing-graph-size-in-graphviz
+- http://stackoverflow.com/questions/3428448/reducing-graph-size-in-graphviz
 - make eclipse plugin out of this all?? http://wiki.eclipse.org/Graphviz_DOT_as_a_DSL_for_Zest(tried editor already)
-- make generic AST traversal function with closures/callbacks for all generartors to use (so some business logic is not needed to be implemented on each generator)
+- make generic AST traversal function with closures/callbacks for all generartors to use (so some business logic is not 
+  needed to be implemented on each generator)
 - make landscape/portrait be container properties(blockdiag support, dotty should as well subgraph cluster_1{rankdir=LR})
 - FIX if/elseif/else lexing/parsing (now a bit hackish) - need context(in lexer)
 - move collectNextNode from yy property (like entrylink when implemented) to GROUP property (allowing inner if/elseif/elses)...
--rectangle does not work in lexer..rect works..wtf?
+- rectangle does not work in lexer..rect works..wtf?
 - For plantuml 
   alt succesfull case
   else some kind of failure
@@ -32,11 +33,13 @@
   else if x==y then
   end if
 
-- ambiguity in group definitions {xxx could be group named xxx, or a group that has a node xxx. Fix so that group declarations in one line! Always!
+- ambiguity in group definitions {xxx could be group named xxx, or a group that has a node xxx. 
+  Fix so that group declarations in one line! Always!
 - Check if something could be done for network graphs .. 
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
-- HTML rendering available in svg and cairo (and hyperlinks), see if graphviz could create svg's. DIFFing could be done in pngs still
+- HTML rendering available in svg and cairo (and hyperlinks), see if graphviz could create svg's. DIFFing could be done in pngs
+  still
 - Investigate following (graphviz) features for others as well:
 	bgcolor="#00ff00" for whole graph background
 	packmode? did not get to work

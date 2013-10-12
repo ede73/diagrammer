@@ -14,7 +14,8 @@ function digraph(yy) {
         }
         return prefix + msg;
     }
-    var processANode = function(o) {
+
+    var processANode = function (o) {
         var nattrs = [];
         var styles = [];
         getAttrFmt(o, 'color', 'fillcolor="{0}"', nattrs);
@@ -87,7 +88,7 @@ function digraph(yy) {
         }
         yy.result("}");
     }
-    var fixgroup = function(c) {
+    var fixgroup = function (c) {
         for (var i in c.OBJECTS) {
             var o = c.OBJECTS[i];
             if (o instanceof Group) {
@@ -133,6 +134,7 @@ function digraph(yy) {
         // yy.result("ReturnL "+nod);
         return nod;
     }
+
     var lastexit = undefined;
     var lastendif = undefined;
     var traverseObjects = function traverseObjects(r) {
@@ -142,7 +144,7 @@ function digraph(yy) {
                 var cond = getAttr(o, 'conditional');
                 //	if (cond=="endif")continue;
                 // Group name,OBJECTS,get/setEqual,toString
-                var processAGroup = function(o) {
+                var processAGroup = function (o) {
                     debug(JSON.stringify(o));
                     yy.result(indent('subgraph cluster_' + o.getName() + ' {'));
                     depth++;

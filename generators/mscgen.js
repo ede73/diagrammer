@@ -79,7 +79,7 @@ function mscgen(yy) {
                 attrs.push('label="' + label.trim() + '"');
             }
         }
-        attrs.push('id="' + id+++'"');
+        attrs.push('id="' + id++ + '"');
         if (l.linkType.indexOf("<") !== -1 && l.linkType.indexOf(">") !== -1) {
             // Broadcast type (<>)
             // hmh..since seqdiag uses a<>a as broadcast and

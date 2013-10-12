@@ -1,6 +1,6 @@
 console.log("Reset generator and visualizer");
 VERBOSE = false;
-parser.yy.parseError = function(str, hash) {
+parser.yy.parseError = function (str, hash) {
     var pe = "Parsing error:\n" + str + "\n" + hash;
     console.log("pe");
     document.getElementById("error").innerText = pe;
@@ -8,7 +8,7 @@ parser.yy.parseError = function(str, hash) {
     throw new Error(str);
 };
 // called line by line...
-parser.yy.result = function(line) {
+parser.yy.result = function (line) {
     if (parsingStarted) {
         console.log("Parsing results coming in for " + parser.yy.OUTPUT + " / " + parser.yy.VISUALIZER);
         parsingStarted = false;
@@ -16,7 +16,7 @@ parser.yy.result = function(line) {
     }
     result.value = result.value + line + "\n";
 }
-parser.trace = function(x) {
+parser.trace = function (x) {
     console.log("TRACE:" + x);
 }
 
@@ -72,10 +72,10 @@ function exportGraphs() {
         data: JSON.stringify(getSavedGraph()),
         contentType: "application/json; charset=utf-8",
         // dataType: "json",
-        success: function(msg) {
+        success: function (msg) {
             alert("Exported");
         },
-        error: function(err) {
+        error: function (err) {
             alert("ERROR: " + JSON.stringify(err));
             if (err.status == 200) {
                 ParseResult(err);
@@ -96,11 +96,11 @@ function importGraphs() {
         url: "web/loadExport.php",
         contentType: "application/json; charset=utf-8",
         dataType: "json",
-        success: function(msg) {
+        success: function (msg) {
             // alert(JSON.stringify(msg));
             localStorage.setItem("graphs", JSON.stringify(msg));
         },
-        error: function(err) {
+        error: function (err) {
             alert("ERROR: " + JSON.stringify(err));
             if (err.status == 200) {
                 ParseResult(err);
@@ -125,13 +125,13 @@ function visualize(visualizer) {
         // data: {body:statelang},
         // contentType: "application/json; charset=utf-8",
         // dataType: "json",
-        success: function(msg) {
+        success: function (msg) {
             // UseReturnedData(msg.d);
             // alert(msg);
             document.getElementById("image").setAttribute("src", msg);
             reloadImg('image');
         },
-        error: function(err) {
+        error: function (err) {
             alert("ERROR: " + JSON.stringify(err));
             if (err.status == 200) {
                 ParseResult(err);

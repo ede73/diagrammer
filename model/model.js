@@ -1,3 +1,13 @@
+/**
+ *
+ * Called from grammar to inject a new (COLOR) variable
+ * Only colors supported currently, though there's really no limitation
+ * 
+ * If this is assignment, rewrite the variable, else assign new
+ * Always return the current value
+ *
+ * @param variable ${XXX:yyy} assignment or ${XXX} query
+ */
 function processVariable(yy, variable) {
     // ASSIGN VARIABLE
     // $(NAME:CONTENT...)
@@ -20,6 +30,9 @@ function processVariable(yy, variable) {
     }
 }
 
+/**
+ * Return all the variables from the collection (hard coded to yy)
+ */
 function getVariables(yy) {
     if (!yy.VARIABLES) {
         yy.VARIABLES = {}
@@ -27,6 +40,9 @@ function getVariables(yy) {
     return yy.VARIABLES;
 }
 
+/**
+ * Get current singleton graphroot or create  new one
+ */
 function getGraphRoot(yy) {
     // debug(" getGraphRoot "+yy);
     if (!yy.GRAPHROOT) {
@@ -46,10 +62,20 @@ function getGraphRoot(yy) {
     }
     return yy.GRAPHROOT;
 }
-// Direct accessor, though graphroot governs!
 
-function getCurrentContainer(yy) {
-    // debug(" getCurrentContainer of "+yy);
+/**
+ * Return current container. If none specified, it is GRAPHROOT
+ *
+ * Current container can be (in therory):
+ * array -> link list
+ * group -> well, a group
+ * node ->
+ * link -> 
+ *
+ * Direct accessor, though graphroot governs!
+ * TODO: DUAL DECLARATION - this function never used
+ */
+function getCurrentContainer_ERROR(yy) {
     var x = getGraphRoot(yy).getCurrentContainer();
     if (x == undefined) debug(" ERROR: Container undefined");
     if (x.OBJECTS == undefined) {
@@ -61,9 +87,7 @@ function getCurrentContainer(yy) {
     }
     return x;
 }
-// Direct accessor, though graphroot governs!
-// Return the current container...(the NEW GROUP)
-/*
+/**
  * function setCurrentContainer(yy,ctr){ if (!(ctr instanceof Group || ctr
  * instanceof GraphRoot)){ throw new Error("Trying to set container other than
  * Group/GraphRoot:"+typeof(ctr)); } debug(" setCurrentContainer "+yy); return
@@ -71,8 +95,12 @@ function getCurrentContainer(yy) {
  */
 // LHS=Node(z1)
 /**
- * create an array, push LHS,RHS nodes there and return the arrray As long as
+ * Create an array, push LHS,RHS nodes there and return the array as long as
  * processing the list nodes added to array..
+ *
+ * @param LHS left hand side of the list
+ * @param RHS right hand side of the list
+ * @param rhsLinkLabel optional RHS label
  */
 function getList(yy, LHS, RHS, rhsLinkLabel) {
     if (LHS instanceof Node) {
@@ -90,13 +118,17 @@ function getList(yy, LHS, RHS, rhsLinkLabel) {
 /**
  * See readNodeOrGroup in grammar
  * 
- * Must be able to return Group as well..if NAME matches...
+ * Return matching Node,Array,Group
  * 
+ * If no match, create a new node
+ *
  * STYLE will always be updated on last occurance (ie. dashed a1
- * 
- * dotted a1>b1
+ * dotted a1>b1 - only for nodes!
  * 
  * node a1 will be dotted instead of being dashed
+ *
+ * @param name Reference, Node/Array/Group
+ * @param style OPTIONAL if style given, update (only if name refers to node)
  */
 function getNode(yy, name, style) {
     function cc(yy, name, style) {
@@ -179,21 +211,28 @@ function getDefaultAttribute(yy, attrname, x) {
     return undefined;
 }
 
+/**
+ * TODO: DUAL DECLARATION
+ */
 function getCurrentContainer(yy) {
     // no need for value, but runs init if missing
     getGraphRoot(yy);
     return yy.CURRENTCONTAINER[yy.CURRENTCONTAINER.length - 1];
 }
 
+/**
+ * Enter into a new container, set it as current container
+ */
 function enterContainer(yy, container) {
     yy.CURRENTCONTAINER.push(container);
     // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
     return container;
 }
-// exit a container, next one popped is the new CURRENT
 
 /**
- * Exit the current container, return the previous one
+ * Exit the current container
+ * Return the previous one
+ * Previous one also set as current container
  */
 function exitContainer(yy) {
     if (yy.CURRENTCONTAINER.length <= 1)
@@ -267,8 +306,10 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
     if (color != undefined) lnk.setColor(color);
     return addLink(yy, lnk);
 }
-// Add link to the list of links, return the LINK
 
+/**
+ * Add link to the list of links, return the LINK
+ */
 function addLink(yy, l) {
     if (l instanceof Array) {
         debug(" PUSH LINK ARRAY:" + l);
@@ -280,14 +321,19 @@ function addLink(yy, l) {
     return l;
 }
 
+/**
+ * Push given object into a current container
+ */
 function pushObject(yy, o) {
     debug("  pushObject " + o + "to " + getCurrentContainer(yy));
     getCurrentContainer(yy).OBJECTS.push(o);
     return o;
 }
-// test if container has the object
-// TODO: Recurse
 
+
+/**
+ * test if container has the object
+ */
 function containsObject(container, o) {
     for (var i in container.OBJECTS) {
         var c = container.OBJECTS[i];

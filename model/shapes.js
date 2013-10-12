@@ -4,8 +4,7 @@ function getShape(shapes, o, fmt) {
     if (o in shapes)
         return ' ' + fmt.format(shapes[o]) + ' ';
     else
-        return ' ' + fmt.format(shapes.
-            default) + ' ';
+        return ' ' + fmt.format(shapes['default']) + ' ';
 }
 
 var shapes = {

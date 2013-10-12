@@ -1,5 +1,10 @@
 #./makeLexerAndParser.sh >/dev/null
 #parallelism for 8 cores
+which node>/dev/null
+if [ $? -ne 0 ]; then
+ PATH=$PATH:/usr/local/bin
+fi
+
 PARALLEL=${2:-8}
 verbose=0
 

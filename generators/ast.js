@@ -36,6 +36,7 @@ function ast(yy) {
 
     var traverseObjects = function traverseObjects(r) {
         for (var i in r.OBJECTS) {
+            if (!r.OBJECTS.hasOwnProperty(i))continue;
             var o = r.OBJECTS[i];
             if (o instanceof Group) {
                 var processAGroup = function (o) {
@@ -59,6 +60,7 @@ function ast(yy) {
     }(r);
 
     for (var i in yy.LINKS) {
+        if (!yy.LINKS.hasOwnProperty(i))continue;
         var l = yy.LINKS[i];
         var n = JSON.parse(JSON.stringify(l));
         n.container.OBJECTS = undefined;

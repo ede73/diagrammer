@@ -17,21 +17,24 @@ function blockdiag(yy) {
         // DEFAULT
         yy.result("  orientation=landscape");
     }
-    var s = r.getStart();
-    for (var i in r.OBJECTS) {
+    var i;
+    var tmp = r.getStart();
+    for (i in r.OBJECTS) {
+        if (!r.OBJECTS.hasOwnProperty(i))continue;
         var o = r.OBJECTS[i];
         if (o instanceof Group) {
             yy.result('  group "' + o.getLabel() + '"{');
             yy.result(getAttrFmt(o, 'color', '   color="{0}"'));
             yy.result(getAttrFmt(o, 'label', '   label="{0}"'));
-            if (s !== undefined && s.trim() != "")
-                s = "[" + s.trim().substring(1) + "]";
+            if (tmp !== undefined && tmp.trim() != "")
+                tmp = "[" + tmp.trim().substring(1) + "]";
             for (var j in o.OBJECTS) {
+                if (!o.OBJECTS.hasOwnProperty(j))continue;
                 var z = o.OBJECTS[j];
-                var s = getAttrFmt(z, 'color', ',color="{0}"') + getShape(shapes.blockdiag, z.shape, ',shape={0}') + getAttrFmt(z, 'label', ',label="{0}"');
-                if (s.trim() != "")
-                    s = "[" + s.trim().substring(1) + "]";
-                yy.result("    " + z.getName() + s + ';');
+                tmp = getAttrFmt(z, 'color', ',color="{0}"') + getShape(shapes.blockdiag, z.shape, ',shape={0}') + getAttrFmt(z, 'label', ',label="{0}"');
+                if (tmp.trim() != "")
+                    tmp = "[" + tmp.trim().substring(1) + "]";
+                yy.result("    " + z.getName() + tmp + ';');
             }
             yy.result("  }");
         } else {
@@ -49,7 +52,8 @@ function blockdiag(yy) {
             yy.result("  " + o.getName() + s + ';');
         }
     }
-    for (var i in yy.LINKS) {
+    for (i in yy.LINKS) {
+        if (!yy.LINKS.hasOwnProperty(i))continue;
         var l = yy.LINKS[i];
         var t = "";
         if (l.linkType.indexOf(".") !== -1) {

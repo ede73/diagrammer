@@ -90,6 +90,7 @@ function digraph(yy) {
     }
     var fixgroup = function (c) {
         for (var i in c.OBJECTS) {
+            if (!c.OBJECTS.hasOwnProperty(i))continue;
             var o = c.OBJECTS[i];
             if (o instanceof Group) {
                 if (o.OBJECTS.length == 0) {
@@ -106,8 +107,10 @@ function digraph(yy) {
     function getFirstLink(grp) {
         // yy.result("FIRST NODE"+JSON.stringify(grp));
         for (var i in yy.LINKS) {
+            if (!yy.LINKS.hasOwnProperty(i))continue;
             var l = yy.LINKS[i];
             for (var j in grp.OBJECTS) {
+                if (!grp.OBJECTS.hasOwnProperty(j))continue;
                 var n = grp.OBJECTS[j];
                 if (n == l.left) {
                     // yy.result("ReturnF "+n);
@@ -122,8 +125,10 @@ function digraph(yy) {
         var nod = undefined;
         // yy.result("LAST NODE"+JSON.stringify(grp));
         for (var i in yy.LINKS) {
+            if (!yy.LINKS.hasOwnProperty(i))continue;
             var l = yy.LINKS[i];
             for (var j in grp.OBJECTS) {
+                if (!grp.OBJECTS.hasOwnProperty(j))continue;
                 var n = grp.OBJECTS[j];
                 if (n == l.left)
                     nod = n;
@@ -139,6 +144,7 @@ function digraph(yy) {
     var lastendif = undefined;
     var traverseObjects = function traverseObjects(r) {
         for (var i in r.OBJECTS) {
+            if (!r.OBJECTS.hasOwnProperty(i))continue;
             var o = r.OBJECTS[i];
             if (o instanceof Group) {
                 var cond = getAttr(o, 'conditional');
@@ -186,11 +192,11 @@ function digraph(yy) {
                             var fn = getFirstLink(o);
                             var ln = getLastLink(o);
                             // decision node
-                            var en = "exit" + getAttr(o, 'exitnode');
+                            //var en = "exit" + getAttr(o, 'exitnode');
 
                             if (lastexit) {
                                 yy.result(indent(lastexit + "->" + sn + "[label=\"NO\",color=red];"));
-                                lastexit = undefined;
+                                //lastexit = undefined;
                             }
                             // YES LINK to first node of the group
                             yy.result(indent(sn + "->" + fn.getName() + "[label=\"YES\",color=green,lhead=cluster_" + o.getName() + "];"));
@@ -209,6 +215,7 @@ function digraph(yy) {
 
     yy.result("//links start");
     for (var i in yy.LINKS) {
+        if (!yy.LINKS.hasOwnProperty(i))continue;
         var l = yy.LINKS[i];
         var attrs = [];
         var label = getAttr(l, 'label');

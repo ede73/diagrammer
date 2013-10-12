@@ -1,11 +1,13 @@
+//noinspection JSUnusedGlobalSymbols,JSUnusedGlobalSymbols
 /**
  *
  * Called from grammar to inject a new (COLOR) variable
  * Only colors supported currently, though there's really no limitation
- * 
+ *
  * If this is assignment, rewrite the variable, else assign new
  * Always return the current value
  *
+ * @param yy Lexer yy
  * @param variable ${XXX:yyy} assignment or ${XXX} query
  */
 function processVariable(yy, variable) {
@@ -48,13 +50,13 @@ function getGraphRoot(yy) {
     if (!yy.GRAPHROOT) {
         debug(" no graphroot,init - in getGraphRoot");
         if (yy.result === undefined) {
-            yy.result = function(str) {
+            yy.result = function (str) {
                 console.log(str);
             }
         }
         debug("  ...Initialize emptyroot " + yy);
-        yy.CURRENTCONTAINER = new Array();
-        yy.LINKS = new Array();
+        yy.CURRENTCONTAINER = [];
+        yy.LINKS = [];
         yy.CONTAINER_EXIT = 1;
         yy.GRAPHROOT = new GraphRoot();
         // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
@@ -70,23 +72,24 @@ function getGraphRoot(yy) {
  * array -> link list
  * group -> well, a group
  * node ->
- * link -> 
+ * link ->
  *
  * Direct accessor, though graphroot governs!
  * TODO: DUAL DECLARATION - this function never used
  */
-function getCurrentContainer_ERROR(yy) {
-    var x = getGraphRoot(yy).getCurrentContainer();
-    if (x == undefined) debug(" ERROR: Container undefined");
-    if (x.OBJECTS == undefined) {
-        if (x instanceof Array) debug(" Container is Array");
-        if (x instanceof Group) debug(" Container is Group");
-        if (x instanceof Node) debug(" Container is Node");
-        if (x instanceof Link) debug(" Container is Link");
-        debug(" ERROR: Containers " + typeof(x) + "object store undefined");
-    }
-    return x;
-}
+//function getCurrentContainer_ERROR(yy) {
+//    var x = getGraphRoot(yy).getCurrentContainer();
+//    if (x == undefined) debug(" ERROR: Container undefined");
+//    if (x.OBJECTS == undefined) {
+//        if (x instanceof Array) debug(" Container is Array");
+//        if (x instanceof Group) debug(" Container is Group");
+//        if (x instanceof Node) debug(" Container is Node");
+//        if (x instanceof Link) debug(" Container is Link");
+//        debug(" ERROR: Containers " + typeof(x) + "object store undefined");
+//    }
+//    return x;
+//}
+
 /**
  * function setCurrentContainer(yy,ctr){ if (!(ctr instanceof Group || ctr
  * instanceof GraphRoot)){ throw new Error("Trying to set container other than
@@ -98,6 +101,7 @@ function getCurrentContainer_ERROR(yy) {
  * Create an array, push LHS,RHS nodes there and return the array as long as
  * processing the list nodes added to array..
  *
+ * @param yy Lexer yy
  * @param LHS left hand side of the list
  * @param RHS right hand side of the list
  * @param rhsLinkLabel optional RHS label
@@ -105,7 +109,7 @@ function getCurrentContainer_ERROR(yy) {
 function getList(yy, LHS, RHS, rhsLinkLabel) {
     if (LHS instanceof Node) {
         debug(" getList(" + LHS + "," + RHS + ")");
-        var x = new Array();
+        var x = [];
         x.push(LHS);
         x.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
         return x;
@@ -117,18 +121,19 @@ function getList(yy, LHS, RHS, rhsLinkLabel) {
 }
 /**
  * See readNodeOrGroup in grammar
- * 
+ *
  * Return matching Node,Array,Group
- * 
+ *
  * If no match, create a new node
  *
  * STYLE will always be updated on last occurance (ie. dashed a1
  * dotted a1>b1 - only for nodes!
- * 
+ *
  * node a1 will be dotted instead of being dashed
  *
+ * @param yy Lexer yy
  * @param name Reference, Node/Array/Group
- * @param style OPTIONAL if style given, update (only if name refers to node)
+ * @param [style] OPTIONAL if style given, update (only if name refers to node)
  */
 function getNode(yy, name, style) {
     function cc(yy, name, style) {
@@ -143,6 +148,7 @@ function getNode(yy, name, style) {
         var search = function s(container, name) {
             if (container.getName() == name) return container;
             for (var i in container.OBJECTS) {
+                if (!container.OBJECTS.hasOwnProperty(i))continue;
                 var o = container.OBJECTS[i];
                 if (o instanceof Node && o.getName() == name) {
                     if (style) o.setStyle(style);
@@ -162,14 +168,15 @@ function getNode(yy, name, style) {
         var n = new Node(name, getGraphRoot(yy).getCurrentShape());
         if (style) n.setStyle(style);
 
-        getDefaultAttribute(yy, 'nodecolor', function(color) {
+        getDefaultAttribute(yy, 'nodecolor', function (color) {
             n.setColor(color);
         });
-        getDefaultAttribute(yy, 'nodetextcolor', function(color) {
+        getDefaultAttribute(yy, 'nodetextcolor', function (color) {
             n.setTextColor(color);
         });
         return pushObject(yy, n);
     }
+
     var node = cc(yy, name, style);
     debug(" getNode gotNode " + node);
     yy.lastSeenNode = node;
@@ -183,14 +190,20 @@ function getNode(yy, name, style) {
 /**
  * Get default attribute nodecolor,linkcolor,groupcolor and bubble upwards if
  * otherwise 'unobtainable'
+ *
+ * @param yy lexer
+ * @param attrname Name of the default attribute. If not found, returns undefined
+ * @param [x] Pass the attribute to the this function as only argument - if attribute WAS actually defined!
  */
 function getDefaultAttribute(yy, attrname, x) {
     // no need for the value, but runs init if missing
     getGraphRoot(yy);
     // debug("getDefaultAttribute "+attrname);
+    var a;
     for (var i in yy.CURRENTCONTAINER) {
+        if (!yy.CURRENTCONTAINER.hasOwnProperty(i))continue;
         var ctr = yy.CURRENTCONTAINER[i];
-        var a = ctr.getDefault(attrname);
+        a = ctr.getDefault(attrname);
         // debug(" traverse getDefaultAttribute "+attrname+" from "+ctr+" as
         // "+a);
         if (a !== undefined) {
@@ -200,7 +213,7 @@ function getDefaultAttribute(yy, attrname, x) {
             return a;
         }
     }
-    var a = getGraphRoot(yy).getDefault(attrname);
+    a = getGraphRoot(yy).getDefault(attrname);
     if (a !== undefined) {
         debug("getDefaultAttribute got from graphroot");
         if (x !== undefined)
@@ -213,6 +226,9 @@ function getDefaultAttribute(yy, attrname, x) {
 
 /**
  * TODO: DUAL DECLARATION
+ *
+ * Get current container
+ * @para, yy Lexer
  */
 function getCurrentContainer(yy) {
     // no need for value, but runs init if missing
@@ -222,6 +238,8 @@ function getCurrentContainer(yy) {
 
 /**
  * Enter into a new container, set it as current container
+ * @param yy lexer
+ * @param container Set this container as current container
  */
 function enterContainer(yy, container) {
     yy.CURRENTCONTAINER.push(container);
@@ -229,10 +247,12 @@ function enterContainer(yy, container) {
     return container;
 }
 
+//noinspection JSUnusedGlobalSymbols
 /**
  * Exit the current container
  * Return the previous one
  * Previous one also set as current container
+ * @param yy lexer
  */
 function exitContainer(yy) {
     if (yy.CURRENTCONTAINER.length <= 1)
@@ -240,36 +260,50 @@ function exitContainer(yy) {
     return setAttr(yy.CURRENTCONTAINER.pop(), 'exitnode', yy.CONTAINER_EXIT++);
 }
 
+//noinspection JSUnusedGlobalSymbols
 /**
  * Create a NEW GROUP if one (ref) does not exist yet getGroup(yy) => create a
  * new anonymous group getGroup(yy,GroupRef) => create a new group if GroupRef
  * is not a Group or return GroupRef if it is...1
+ * @param yy lexer
+ * @param ref Type of reference, if group, return it
+ * @return ref if ref instance of group, else the newly created group
  */
 function getGroup(yy, ref) {
     if (ref instanceof Group) return ref;
     debug(" getGroup() NEW GROUP:" + yy + "/" + ref);
-    if (yy.GROUPIDS == undefined) yy.GROUPIDS = 1;
+    if (yy.GROUPIDS === undefined) yy.GROUPIDS = 1;
     var newGroup = new Group(yy.GROUPIDS++);
     debug(" push group " + newGroup + " to " + yy);
     pushObject(yy, newGroup);
 
-    getDefaultAttribute(yy, 'groupcolor', function(color) {
+    getDefaultAttribute(yy, 'groupcolor', function (color) {
         newGroup.setColor(color);
     });
     return newGroup;
 }
 // Get a link such that l links to r, return the added LINK or LINKS
 
+//noinspection JSUnusedGlobalSymbols
 /**
  * linkType >,<,.>,<.,->,<-,<> l = left side, Node(xxx) or Group(yyy), or
  * Array(smthg) r = right side, Node(xxx) or Group(yyy), or Array(smthg) label =
  * if defined, LABEL for the link color = if defined, COLOR for the link
+ * @param yy lexer
+ * @param linkType Type of the link(grammar)
+ * @param l Left hand side (must be Array,Node,Group)
+ * @param r Right hand side (must be Array,Node,Group)
+ * @param [label] Optional label for the link
+ * @param [color] Optional color for the link
+ * @param [lcompass] Left hand side compass value
+ * @param [rcompass] Reft hand side compass value
  */
 function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
+    var lastLink;
+    var i;
     if (l instanceof Array) {
         debug(" getLink called with LHS array");
-        var lastLink;
-        for (var i = 0; i < l.length; i++) {
+        for (i = 0; i < l.length; i++) {
             debug(" Get link " + l[i]);
             lastLink = getLink(yy, linkType, l[i], r, label, color, lcompass, rcompass);
         }
@@ -277,8 +311,7 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
     }
     if (r instanceof Array) {
         debug(" getLink called with RHS array");
-        var lastLink;
-        for (var i = 0; i < r.length; i++) {
+        for (i = 0; i < r.length; i++) {
             debug(" Get link " + r[i]);
             lastLink = getLink(yy, linkType, l, r[i], label, color, lcompass, rcompass);
         }
@@ -295,20 +328,22 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
     else if (getAttr(l, 'compass')) setAttr(lnk, 'lcompass', getAttr(l, 'compass'));
     if (rcompass) setAttr(lnk, 'rcompass', rcompass);
     else if (getAttr(r, 'compass')) setAttr(lnk, 'rcompass', getAttr(r, 'compass'));
-    getDefaultAttribute(yy, 'linkcolor', function(color) {
+    getDefaultAttribute(yy, 'linkcolor', function (color) {
         lnk.setColor(color);
     });
-    getDefaultAttribute(yy, 'linktextcolor', function(color) {
+    getDefaultAttribute(yy, 'linktextcolor', function (color) {
         lnk.setTextColor(color);
     });
     if (label != undefined) lnk.setLabel(label);
-    if (r instanceof Node && r.getLinkLabel() != undefined) lnk.setLabel(r.getLinkLabel())
+    if (r instanceof Node && r.getLinkLabel() != undefined) lnk.setLabel(r.getLinkLabel());
     if (color != undefined) lnk.setColor(color);
     return addLink(yy, lnk);
 }
 
 /**
  * Add link to the list of links, return the LINK
+ * @param yy lexer
+ * @param l Link (Array or Link)
  */
 function addLink(yy, l) {
     if (l instanceof Array) {
@@ -331,11 +366,13 @@ function pushObject(yy, o) {
 }
 
 
+//noinspection JSUnusedGlobalSymbols
 /**
  * test if container has the object
  */
 function containsObject(container, o) {
     for (var i in container.OBJECTS) {
+        if (!container.OBJECTS.hasOwnProperty(i))continue;
         var c = container.OBJECTS[i];
         if (c == o) {
             return true;
@@ -349,37 +386,44 @@ function containsObject(container, o) {
     return false;
 }
 
+/**
+ * Create a new generic graph object
+ * @param [label] Optional label
+ * @constructor
+ */
 function GraphObject(label) {
-    this.setName = function(value) {
+    this.setName = function (value) {
         if (value === undefined) return this;
         return setAttr(this, 'name', value);
     };
-    this.getName = function() {
+    this.getName = function () {
         return getAttr(this, 'name');
-    }
-    this.setColor = function(value) {
+    };
+    this.setColor = function (value) {
         if (value === undefined) return this;
         return setAttr(this, 'color', value);
     };
-    this.getColor = function() {
+    this.getColor = function () {
         return getAttr(this, 'color');
-    }
-    this.setTextColor = function(value) {
+    };
+    this.setTextColor = function (value) {
         if (value === undefined) return this;
         return setAttr(this, 'textcolor', value);
     };
-    this.getTextColor = function() {
+    //noinspection JSUnusedGlobalSymbols
+    this.getTextColor = function () {
         return getAttr(this, 'textcolor');
-    }
-    this.setUrl = function(value) {
+    };
+    this.setUrl = function (value) {
         if (value === undefined) return this;
         return setAttr(this, 'url', value);
     };
-    this.getUrl = function() {
+    //noinspection JSUnusedGlobalSymbols
+    this.getUrl = function () {
         return getAttr(this, 'url');
-    }
+    };
     this.label = label;
-    this.setLabel = function(value) {
+    this.setLabel = function (value) {
         if (!value) return this;
         value = value.trim().replace(/"/gi, "");
         debug("  TEST value(" + value + ") for color");
@@ -390,17 +434,17 @@ function GraphObject(label) {
             this.setTextColor(m[1]);
             value = m[2].trim();
         }
-        var m = value.match(/\[([^\]]+)\](.*)$/);
+        m = value.match(/\[([^\]]+)\](.*)$/);
         if (m !== null && m.length >= 3) {
             this.setUrl(m[1]);
             value = m[2].trim();
         }
         return setAttr(this, 'label', value);
     };
-    this.getLabel = function() {
+    this.getLabel = function () {
         return getAttr(this, 'label');
-    }
-    this.toString = function() {
+    };
+    this.toString = function () {
         return "GraphObject";
     };
 }
@@ -408,143 +452,170 @@ function GraphObject(label) {
 Node.prototype = new GraphObject();
 Node.prototype.constructor = Node;
 
+/**
+ * Construct a new node
+ *
+ * @param name Name of the node
+ * @param [shape] Optional shape for the node, if not give, will default to what ever default is being used at the moment
+ * @constructor
+ */
 function Node(name, shape) {
     this.name = name;
     this.shape = shape;
-    this.image;
-    this.style;
-    this.setShape = function(value) {
+    this.image=undefined;
+    this.style=undefined;
+    this.setShape = function (value) {
         if (value === undefined) return this;
         if (value) value = value.toLowerCase();
         return setAttr(this, 'shape', value);
     };
-    this.getShape = function() {
+    //noinspection JSUnusedGlobalSymbols
+    this.getShape = function () {
         return getAttr(this, 'shape');
-    }
+    };
     // temporary for RHS list array!!
-    this.setLinkLabel = function(value) {
+    this.setLinkLabel = function (value) {
         return setAttr(this, 'linklabel', value);
     };
-    this.getLinkLabel = function() {
+    this.getLinkLabel = function () {
         return getAttr(this, 'linklabel');
-    }
-    this.setStyle = function(value) {
+    };
+    this.setStyle = function (value) {
         if (value === undefined) return this;
         if (value) value = value.toLowerCase();
         return setAttr(this, 'style', value);
     };
-    this.getStyle = function() {
+    //noinspection JSUnusedGlobalSymbols
+    this.getStyle = function () {
         return getAttr(this, 'style');
-    }
-    this.setImage = function(value) {
+    };
+    this.setImage = function (value) {
         if (value === undefined) return this;
         return setAttr(this, 'image', value);
     };
-    this.getImage = function() {
+    //noinspection JSUnusedGlobalSymbols
+    this.getImage = function () {
         return getAttr(this, 'image');
-    }
-    this.toString = function() {
+    };
+    this.toString = function () {
         return "Node(" + this.getName() + getAttrFmt(this, 'color', ',color={0}') + getAttrFmt(this, 'label', ',label={0}') + ")";
     };
 }
 Group.prototype = new GraphObject();
 Group.prototype.constructor = Group;
 
+/**
+ * Create a new container group
+ * @param name Name of the container
+ * @constructor
+ */
 function Group(name) {
     this.name = name;
-    this.OBJECTS = new Array();
+    this.OBJECTS = [];
     // Save EQUAL node ranking
-    this.setEqual = function(value) {
+    this.setEqual = function (value) {
         return setAttr(this, 'equal', value);
     };
-    this.getEqual = function() {
+    this.getEqual = function () {
         return getAttr(this, 'equal');
-    }
+    };
     /**
      * Set default nodecolor, groupcolor, linkcolor Always ask from the
      * currentContainer first
      */
-    this.setDefault = function(key, value) {
+    this.setDefault = function (key, value) {
         debug("Set group " + key + " to " + value);
         return setAttr(this, key, value);
     };
-    this.getDefault = function(key) {
+    this.getDefault = function (key) {
         debug("Get group " + key);
         return getAttr(this, key);
     };
-    this.toString = function() {
+    this.toString = function () {
         return "Group(" + this.name + ")";
     };
 }
 GraphRoot.prototype = new GraphObject();
 GraphRoot.prototype.constructor = GraphRoot;
 
+/**
+ * Create a new graph root
+ * @constructor
+ */
 function GraphRoot() {
-    this.OBJECTS = new Array();
-    this.setGenerator = function(value) {
+    this.OBJECTS = [];
+    this.setGenerator = function (value) {
         if (value) value = value.toLowerCase();
         return setAttr(this, 'generator', value);
     };
-    this.getGenerator = function() {
+    this.getGenerator = function () {
         return getAttr(this, 'generator');
     };
-    this.setVisualizer = function(value) {
+    this.setVisualizer = function (value) {
         if (value) value = value.toLowerCase();
         return setAttr(this, 'visualizer', value);
     };
-    this.getVisualizer = function() {
+    this.getVisualizer = function () {
         return getAttr(this, 'visualizer');
     };
-    this.setCurrentShape = function(value) {
+    this.setCurrentShape = function (value) {
         if (value) value = value.toLowerCase();
         return setAttr(this, 'shape', value);
     };
-    this.getCurrentShape = function() {
+    this.getCurrentShape = function () {
         return getAttr(this, 'shape');
     };
-    this.setDirection = function(value) {
+    this.setDirection = function (value) {
         return setAttr(this, 'direction', value);
     };
-    this.getDirection = function() {
+    this.getDirection = function () {
         return getAttr(this, 'direction');
     };
-    this.setStart = function(value) {
+    this.setStart = function (value) {
         return setAttr(this, 'start', value);
     };
-    this.getStart = function() {
+    this.getStart = function () {
         return getAttr(this, 'start');
     };
     // Save EQUAL node ranking
-    this.setEqual = function(value) {
+    this.setEqual = function (value) {
         return setAttr(this, 'equal', value);
     };
-    this.getEqual = function() {
+    this.getEqual = function () {
         return getAttr(this, 'equal');
     };
     /**
      * Set default nodecolor, groupcolor, linkcolor Always ask from the
      * currentContainer first
      */
-    this.setDefault = function(key, value) {
+    this.setDefault = function (key, value) {
         debug("Set ROOT " + key + " to " + value);
         return setAttr(this, key, value);
     };
-    this.getDefault = function(key) {
+    this.getDefault = function (key) {
         // debug("Get ROOT "+key);
         return getAttr(this, key);
     };
-    this.toString = function() {
+    this.toString = function () {
         return "GraphRoot";
     };
 }
 Link.prototype = new GraphObject();
 Link.prototype.constructor = Link;
 
+/**
+ * Create a new link between objects (nodes,groups,lists)
+ *
+ * @param linkType Type of the link(grammar!)
+ * @param l Left hand side of the link
+ * @param r Right hand side of the link
+ * @constructor
+ */
 function Link(linkType, l, r) {
     this.linkType = linkType.trim();
     this.left = l;
     this.right = r;
-    this.toString = function() {
+    this.toString = function () {
         return "Link(" + this.linkType + "== L" +
             this.left.toString() + ", R" +
             this.right.toString() + ",label=" +
@@ -554,12 +625,12 @@ function Link(linkType, l, r) {
 
 function getShape(shapes, o, fmt) {
     if (o == undefined || o == 0) return "";
-    o = o.toLowerCase()
+    o = o.toLowerCase();
     if (o in shapes)
         return ' ' + fmt.format(shapes[o]) + ' ';
     else
         return ' ' + fmt.format(shapes.
-        default) + ' ';
+            default) + ' ';
 }
 
 var shapes = {

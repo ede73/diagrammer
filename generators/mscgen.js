@@ -2,33 +2,37 @@ function mscgen(yy) {
     yy.result("msc {");
     var r = getGraphRoot(yy);
     var comma = false;
-
+    var i;
+    var tmp;
     // print out all node declarations FIRST (if any)
-    for (var i in r.OBJECTS) {
+    for (i in r.OBJECTS) {
+        if (!r.OBJECTS.hasOwnProperty(i))continue;
         var o = r.OBJECTS[i];
         if (o instanceof Group) {
             yy.result(' /*' + o.getName() + getAttrFmt(o, 'label', ' {0}*/'));
             for (var j in o.OBJECTS) {
+                if (!o.OBJECTS.hasOwnProperty(j))continue;
                 var z = o.OBJECTS[j];
-                var s = getAttrFmt(z, 'color', ',color="{0}"') + getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
-                if (s.trim() != "")
-                    s = "[" + s.trim().substring(1) + "]";
-                yy.result((comma ? "," : "") + "    " + z.getName() + s);
+                tmp = getAttrFmt(z, 'color', ',color="{0}"') + getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
+                if (tmp.trim() != "")
+                    tmp = "[" + tmp.trim().substring(1) + "]";
+                yy.result((comma ? "," : "") + "    " + z.getName() + tmp);
                 comma = true;
             }
         } else if (o instanceof Node) {
-            var s = getAttrFmt(o, 'color', ',textbgcolor="{0}"') + getAttrFmt(o, 'style', ',style={0}') + getAttrFmt(o, 'label', ',label="{0}"');
-            if (s.trim() != "")
-                s = "[" + s.trim().substring(1) + "]";
-            yy.result((comma ? "," : "") + "  " + o.getName() + s);
+            tmp = getAttrFmt(o, 'color', ',textbgcolor="{0}"') + getAttrFmt(o, 'style', ',style={0}') + getAttrFmt(o, 'label', ',label="{0}"');
+            if (tmp.trim() != "")
+                tmp = "[" + tmp.trim().substring(1) + "]";
+            yy.result((comma ? "," : "") + "  " + o.getName() + tmp);
             comma = true;
         }
     }
     yy.result(";");
     var id = 1;
-    for (var i in yy.LINKS) {
+    for (i in yy.LINKS) {
+        if (!yy.LINKS.hasOwnProperty(i))continue;
         var l = yy.LINKS[i];
-        var lt;
+        var lt="";
         var lr = l.right;
         var ll = l.left;
 
@@ -36,7 +40,7 @@ function mscgen(yy) {
             // just pick ONE Node from group and use lhead
             // TODO: Assuming it is Node (if Recursive groups implemented, it
             // could be smthg else)
-            t += " lhead=cluster_" + lr.getName();
+            lt += " lhead=cluster_" + lr.getName();
             lr = lr.OBJECTS[0];
             if (lr == undefined) {
                 // TODO:Bad thing, EMPTY group..add one invisible node there...
@@ -92,9 +96,9 @@ function mscgen(yy) {
                 swap = true;
             }
         } else if (l.linkType.indexOf("<") !== -1) {
-            var tmp = ll;
+            var tmpl = ll;
             ll = lr;
-            lr = tmp;
+            lr = tmpl;
             if (dot)
                 lt = ">>";
             else if (dash)

@@ -83,6 +83,7 @@ function plantuml_sequence(yy) {
     // (node=edge,node,link.group...all in order for this fucker)
     var printLinks = function printLinks(container) {
         for (var i in yy.LINKS) {
+            if (!yy.LINKS.hasOwnProperty(i))continue;
             var l = yy.LINKS[i];
             if (l.printed)
                 continue;
@@ -91,7 +92,7 @@ function plantuml_sequence(yy) {
             if (l.container !== container)
                 break;
             l.printed = true;
-            var attrs = [];
+            //var attrs = [];
             var note = "";
             var label = getAttr(l, 'label');
             if (label) {
@@ -139,7 +140,7 @@ function plantuml_sequence(yy) {
             }
             var dot = false;
             var dash = false;
-            var broken = false;
+            //var broken = false;
             if (l.linkType.indexOf(".") !== -1) {
                 dot = true;
             } else if (l.linkType.indexOf("-") !== -1) {
@@ -192,14 +193,18 @@ function plantuml_sequence(yy) {
 
     var traverseObjects = function traverseObjects(r) {
         // Dump this groups participants first...
-        for (var i in r.OBJECTS) {
-            var o = r.OBJECTS[i];
+        var i;
+        var o;
+        for (i in r.OBJECTS) {
+            if(!r.OBJECTS.hasOwnProperty(i))continue;
+            o = r.OBJECTS[i];
             if (o instanceof Node)
                 processANode(o);
         }
         printLinks(r);
-        for (var i in r.OBJECTS) {
-            var o = r.OBJECTS[i];
+        for (i in r.OBJECTS) {
+            if(!r.OBJECTS.hasOwnProperty(i))continue;
+            o = r.OBJECTS[i];
             if (o instanceof Group) {
                 // TODO:
                 // Group name,OBJECTS,get/setEqual,toString

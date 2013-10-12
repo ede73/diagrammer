@@ -8,17 +8,20 @@ function actdiag(yy) {
      * (r.getDirection()==="portrait"){ yy.result(" orientation=portrait");
      * }else{ //DEFAULT yy.result(" orientation=landscape"); }
      */
-    var s = r.getStart();
-    for (var i in r.OBJECTS) {
+    //var s = r.getStart();
+    var i;
+    for (i in r.OBJECTS) {
+        if (!r.OBJECTS.hasOwnProperty(i))continue;
         var o = r.OBJECTS[i];
         if (o instanceof Group) {
             yy.result('  lane "' + o.getName() + '"{');
             for (var j in o.OBJECTS) {
+                if (!o.OBJECTS.hasOwnProperty(j))continue;
                 var z = o.OBJECTS[j];
-                var s = getAttrFmt(z, 'color', ',color="{0}"') + getShape(shapes.actdiag, z.shape, ',shape={0}') + getAttrFmt(z, 'label', ',label="{0}"');
-                if (s.trim() != "")
-                    s = "[" + s.trim().substring(1) + "]";
-                yy.result("    " + z.getName() + s + ';');
+                var s1 = getAttrFmt(z, 'color', ',color="{0}"') + getShape(shapes.actdiag, z.shape, ',shape={0}') + getAttrFmt(z, 'label', ',label="{0}"');
+                if (s1.trim() != "")
+                    s1 = "[" + s1.trim().substring(1) + "]";
+                yy.result("    " + z.getName() + s1 + ';');
             }
             yy.result("  }");
         } else {
@@ -31,13 +34,14 @@ function actdiag(yy) {
             }
 
             // ICON does not work, using background
-            var s = getAttrFmt(o, 'color', ',color="{0}"') + getAttrFmt(o, 'image', ',background="icons{0}"') + style + getShape(shapes.actdiag, o.shape, ',shape={0}') + getAttrFmt(o, 'label', ',label="{0}"');
-            if (s.trim() != "")
-                s = "[" + s.trim().substring(1) + "]";
-            yy.result("  " + o.getName() + s + ';');
+            var s2 = getAttrFmt(o, 'color', ',color="{0}"') + getAttrFmt(o, 'image', ',background="icons{0}"') + style + getShape(shapes.actdiag, o.shape, ',shape={0}') + getAttrFmt(o, 'label', ',label="{0}"');
+            if (s2.trim() != "")
+                s2 = "[" + s2.trim().substring(1) + "]";
+            yy.result("  " + o.getName() + s2 + ';');
         }
     }
-    for (var i in yy.LINKS) {
+    for (i in yy.LINKS) {
+        if (!yy.LINKS.hasOwnProperty(i))continue;
         var l = yy.LINKS[i];
         var t = "";
         if (l.linkType.indexOf(".") !== -1) {

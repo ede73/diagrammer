@@ -5,14 +5,14 @@
 state.js: state.lex
 	@jison-lex $<
 	@echo "exports.state=state;" >> $@
-	@mv $@ a;uglifyjs a -c -m -o $@;rm a
+	@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
 state.all: state.lex lexmarker.txt state.grammar model/support.js model/model.js generators/*.js
 	@cat $^ >$@
 
 parser.js: state.all
 	@jison $< -o $@
-	@mv $@ a;uglifyjs a -c -m -o $@;rm a
+	@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
 all: state.js state.all parser.js
 	@echo done

@@ -80,7 +80,7 @@ runtest state_innergroups.txt
 runtest state_recursive_linking.txt
 runtest state_images.txt
 runtest fulltest.txt
-runtest state_tcp.txt
+[[ "$test" != "blockdiag" ]] && runtest state_tcp.txt
 runtest state_y_edge.txt
 runtest state_conditionals.txt
 runtest state_group.txt

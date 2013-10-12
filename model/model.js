@@ -161,7 +161,7 @@ function getNode(yy, name, style) {
             }
             return undefined;
         }(getGraphRoot(yy), name);
-        if (search != undefined) {
+        if (search !== undefined) {
             return search;
         }
         debug(" Create new node");
@@ -183,7 +183,7 @@ function getNode(yy, name, style) {
     if (yy.collectNextNode) {
         debug("Collect next node");
         setAttr(yy.collectNextNode, 'exitlink', name);
-        yy.collectNextNode = undefined
+        yy.collectNextNode = undefined;
     }
     return node;
 }

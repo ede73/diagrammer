@@ -30,7 +30,7 @@ String.prototype.format = function () {
     return formatted;
 };
 /**
- * return attribute like prefix="ATTRHERE" with padding at both sides or "" if 0
+ * Return attribute like prefix="ATTRHERE" with padding at both sides or "" if 0
  * or undefined
  * @param cl Object to scan
  * @param attr Name of the attribute index to return
@@ -42,6 +42,7 @@ function getAttr(cl, attr) {
 }
 
 /**
+ * Return formatted attribute value
  *
  * @param cl Object to scan thru
  * @param attr Name of the attribute to return

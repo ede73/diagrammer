@@ -2,20 +2,24 @@
 #Automatic variables: http://www.chemie.fu-berlin.de/chemnet/use/info/make/make_10.html#SEC94
 #Loosely based on makeLexerAndParser.js
 
+all: state.js state.all parser.js Makefile
+	@echo Make ALL
+	@echo done
+
 state.js: state.lex
+	@echo Make state.js from LEX
 	@jison-lex $<
 	@echo "exports.state=state;" >> $@
-	@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
+	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
-state.all: state.lex lexmarker.txt state.grammar model/support.js model/model.js generators/*.js
+state.all: state.lex lexmarker.txt state.grammar model/support.js model/model.js model/graphobject.js model/node.js model/group.js model/graphroot.js model/link.js model/shapes.js generators/*.js
+	@echo Compile state.all
 	@cat $^ >$@
 
 parser.js: state.all
+	@echo make parser
 	@jison $< -o $@
-	@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
-
-all: state.js state.all parser.js
-	@echo done
+	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
 .PHONY: export
 export: state.js parse.js parser.js
@@ -27,3 +31,6 @@ export: state.js parse.js parser.js
 .PHONY: test
 test: all
 	./runtests.sh
+
+clean:
+	rm state.js state.all parser.js

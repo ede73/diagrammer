@@ -148,7 +148,7 @@ getNode = (yy, name, style) ->
           found = s(o, name)
           return found  unless found is `undefined`
       `undefined`
-    (getGraphRoot(yy), name)
+    search getGraphRoot(yy), name
     return search  if search isnt `undefined`
     debug " Create new node"
     n = new Node(name, getGraphRoot(yy).getCurrentShape())

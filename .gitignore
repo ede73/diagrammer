@@ -6,4 +6,8 @@ web/icons
 state.all
 tests/*.png
 tests/*.out
-
+.idea
+state.iml
+.error
+.buildpath
+grunt.js

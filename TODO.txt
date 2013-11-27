@@ -1,5 +1,5 @@
-- LABEL can already have color definition as well, but NOT $(color) variable. Colro extracted directly in model setLabel
-- GROUP>group1,group2,group3 not functional, (NODE>node1,node2,node3 does work)
+- GROUP>"a"group1,"b"group2,"c"group3  use all same label a
+- LABEL can already have color definition as well, but NOT $(color) variable. Colro extracted directly in model setLabel grammar parsing not possible currently (;.* all label. no parsing)
 - See plain JS http://bramp.github.io/js-sequence-diagrams/ Good Raphael SEQ diag. PLAIN JS
 - http://mdaines.github.io/viz.js/example.html FUCKING AWSOME!! DOTTY!! JS!!!
 - https://github.com/mdaines/viz.js/ emscripten variant llvm
@@ -60,6 +60,7 @@
 - constraint=false for edges in graphviz might help the layout to be as user wants
 - compass 4 plantuml
 -------
+(DONE)- GROUP>group1,group2,group3 not functional, (NODE>node1,node2,node3 does work)
 (DONE)- Have LINK be defined to node (lazily) like with xxx[http://xx.yy.xx] creates node xxx with HLINK or updates xxx with HLINK
 (DONE)- compass (a:ne->b:nw) for edges in graphviz might help the layout to be as user wants (ie. direct the edge start/end to compass directions)
   plant uml also supports these, but just for simple ones up,down,left,right(n,s,e,w)

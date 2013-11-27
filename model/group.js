@@ -16,6 +16,13 @@ function Group(name) {
     this.getEqual = function () {
         return getAttr(this, 'equal');
     };
+    // temporary for RHS list array!!
+    this.setLinkLabel = function (value) {
+        return setAttr(this, 'linklabel', value);
+    };
+    this.getLinkLabel = function () {
+        return getAttr(this, 'linklabel');
+    };
     /**
      * Set default nodecolor, groupcolor, linkcolor Always ask from the
      * currentContainer first

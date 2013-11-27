@@ -111,7 +111,16 @@ function getList(yy, LHS, RHS, rhsLinkLabel) {
         debug(" getList(" + LHS + "," + RHS + ")");
         var x = [];
         x.push(LHS);
+	//TODO assuming RHS is Node
         x.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
+        return x;
+    }
+    if (LHS instanceof Group) {
+        debug(" getList(" + LHS + "," + RHS + ")");
+        var x = [];
+        x.push(LHS);
+	//TODO assuming RHS is Group
+        x.push(getGroup(yy, RHS).setLinkLabel(rhsLinkLabel));
         return x;
     }
     debug(" getList([" + LHS + "]," + RHS);

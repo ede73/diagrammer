@@ -42,7 +42,7 @@ function addTop(data) {
     }
 }
 //add text to current cursor position(on a new line how ever)
-function appendLine(comp, data) {
+function appendLine(data,comp) {
     if (acemode) {
         //using ace insert text into wherever the cursor is pointing.
         editor.navigateLineEnd();

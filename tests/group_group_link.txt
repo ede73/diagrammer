@@ -1,0 +1,7 @@
+{z;Group1
+x} 
+{a;Group2
+b}
+{c;Group3
+d}
+z>"edge1"a,"edge2"c;ignore

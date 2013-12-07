@@ -19,7 +19,9 @@ function getText() {
 //replace all
 function setText(data) {
     if (acemode) {
-        editor.destroy();
+	//EDE:editor.destroy does not work reliably
+        //editor.destroy();
+	editor.selectAll();
         editor.insert(data);
     } else {
         document.getElementById("editable").value = data;

@@ -300,15 +300,18 @@
 					src="icons/timer.png" /></li>
 			</ul>
 		</div>
-	<!--	<textarea id="editable" rows="27" cols="40"></textarea>-->
-	<!-- TODO: insert does not work here..-->
+
+		<!-- result.png -->
+		<img align="top" id="image" width="30%" src="web/result.png" onclick="javascript:openImage('web/result.png');" style="float:right;"/>
+
 		<pre id="editable" style="margin:0;left:0;height:600px;"></pre>
-		<img align="top" id="image" width=700 src="web/result.png"
-			onclick="javascript:openImage('web/result.png');" />
+
+		<!-- resulting data of grammar parser/ast generator -->
 		<textarea id="result" rows="40" cols="10"></textarea>
+
 		<p>Javascript generated(dot only)</p>
-		<div id="svg" style="border-width: 2px; border-style: dotted;"
-			align="top"></div>
+		<div id="svg" style="border-width: 2px; border-style: dotted;"	align="top"></div>
+
 		<p>CanViZ</p>
 		<div id="graph_container"></div>
 		<div id="debug_output"></div>

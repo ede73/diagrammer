@@ -33,4 +33,4 @@ test: all
 	./runtests.sh
 
 clean:
-	rm state.js state.all parser.js
+	rm -f state.js state.all parser.js

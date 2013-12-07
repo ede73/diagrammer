@@ -173,7 +173,7 @@ function getNode(yy, name, style) {
         if (search !== undefined) {
             return search;
         }
-        debug(" Create new node");
+        debug(" Create new node name="+name);
         var n = new Node(name, getGraphRoot(yy).getCurrentShape());
         if (style) n.setStyle(style);
 
@@ -265,8 +265,19 @@ function enterContainer(yy, container) {
  */
 function exitContainer(yy) {
     if (yy.CURRENTCONTAINER.length <= 1)
-        throw new Error("INTERNAL ERROR:Trying to exist ROOT container");
+        throw new Error("INTERNAL ERROR:Trying to exit ROOT container");
     return setAttr(yy.CURRENTCONTAINER.pop(), 'exitnode', yy.CONTAINER_EXIT++);
+}
+/**
+ * Enter to a new parented sub section
+ * like in a>(b>c,d,e)>h
+ * TODO: USE REAL TYPE (subsection)
+ */
+function enterSubSection(yy) {
+    return enterContainer(yy,getGroup(yy).setLabel("temporary"));
+}
+function exitSubSection(yy) {
+    return exitContainer(yy);
 }
 
 //noinspection JSUnusedGlobalSymbols
@@ -312,7 +323,7 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
     var lastLink;
     var i;
     if (l instanceof Array) {
-        debug(" getLink called with LHS array");
+        debug(" getLink called with LHS array("+l+") len="+l.length);
         for (i = 0; i < l.length; i++) {
             debug(" Get link " + l[i]);
             lastLink = getLink(yy, linkType, l[i], r, label, color, lcompass, rcompass);
@@ -320,7 +331,7 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
         return lastLink;
     }
     if (r instanceof Array) {
-        debug(" getLink called with RHS array");
+        debug(" getLink called with RHS array("+r+") len="+r.length);
         for (i = 0; i < r.length; i++) {
             debug(" Get link " + r[i]);
             lastLink = getLink(yy, linkType, l, r[i], label, color, lcompass, rcompass);
@@ -328,10 +339,10 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
         return lastLink;
     }
     if (!(l instanceof Node) && !(l instanceof Group)) {
-        throw new Error("LHS not a Node nor a Group(LHS=" + l + ")");
+        throw new Error("LHS not a Node nor a Group(LHS=" + l + ") RHS=(" + r + ")");
     }
     if (!(r instanceof Node) && !(r instanceof Group)) {
-        throw new Error("RHS not a Node nor a Group(RHS=" + r + ")");
+        throw new Error("RHS not a Node nor a Group(LHS=" + l + ") RHS=(" + r + ")");
     }
     var lnk = new Link(linkType, l, r);
     if (lcompass) setAttr(lnk, 'lcompass', lcompass);

@@ -33,6 +33,9 @@ if (myArgs[1] === "lex") {
     parser.parser.trace = function(x) {
         console.log("TRACE:" + x);
     }
+    parser.parser.debug = function(x) {
+        console.log("DEBUG:" + x);
+    }
     parser.parser.yy.result = function(result) {
         console.log(result);
     }

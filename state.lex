@@ -26,6 +26,8 @@ IMAGE	"/"[A-Za-z0-9]+".png"
 SHAPES "actor"|"beginpoint"|"box"|"circle"|"cloud"|"condition"|"database"|"default"|"diamond"|"dots"|"doublecircle"|"ellipse"|"endpoint"|"input"|"loopin"|"loopout"|"mail"|"minidiamond"|"minisquare"|"note"|"record"|"roundedbox"|"square"|"terminator"|"loop"|"loopend"|"loopstart"|"rect"|"rectangle"
 STYLES "dotted"|"dashed"|"solid"|"bold"|"rounded"|"diagonals"|"invis"|"singularity"
 /*wedged,striped..filled...*/
+OPAREN "("
+CPAREN ")"
 IF	"if"\s+.*"then"(?=\n)
 ELSEIF	"else"\s*"if"\s+.*"then"(?=\n)
 ELSE	"else"(?=\n)
@@ -61,6 +63,8 @@ Special arrow is /> and </ that denotes a broken signal...
 {LABEL}		return 'LABEL';
 {SHAPES}	return 'SHAPES';
 {STYLES}	return 'STYLES';
+{OPAREN}	return 'OPAREN';
+{CPAREN}	return 'CPAREN';
 <GROUP>[\n]	this.begin('INITIAL');return 'GROUP_DECLARATION_END';
 <GROUP>[ \t]+	/*skip*/
 \s+		 /* skip WS */

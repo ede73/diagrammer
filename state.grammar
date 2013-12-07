@@ -79,8 +79,9 @@ shapeOrVariable
 	| SHAPES -> $SHAPES
 	;
 
-/* read nodes attributes basically like: [STYLES] [SHAPES] NAME [IMAGE|COLOR]*/
+/* read node's attributes basically like: [STYLES] [SHAPES] NAME [IMAGE|COLOR]*/
 readNodeAttrs
+    /*  1      2       3       4        5            6          7*/
 	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> getNode(yy,$NAME,$1).setColor($5);if ($$ instanceof Node) setAttr($$.setShape($2).setImage($6),'compass',$4)
 	;
 
@@ -101,8 +102,10 @@ http://publib.boulder.ibm.com/infocenter/zvm/v5r4/index.jsp?topic=/com.ibm.zvm.v
 nodeGroupListOrAttrs cumulates an array of nodes, RHS is latest node
 */
 nodeGroupListOrAttrs
-	: nodeGroupListOrAttrs LISTSEP INLINE_STRING? readNodeAttrs -> getList(yy,$nodeGroupListOrAttrs,$readNodeAttrs,$3)
+	: OPAREN -> enterSubSection(yy)
+	| nodeGroupListOrAttrs LISTSEP INLINE_STRING? readNodeAttrs -> getList(yy,$nodeGroupListOrAttrs,$readNodeAttrs,$3)
 	| readNodeAttrs -> $readNodeAttrs
+	| CPAREN -> exitSubSection(yy)
 	;
 	/* TOOD: Could concatenate $4,$6 or if $4 defined AND $6, $6 could be appended as ::, unless already(note)*/
 readEvents

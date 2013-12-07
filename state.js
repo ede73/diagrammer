@@ -357,55 +357,59 @@ case 9:return 'SHAPES';
 break;
 case 10:return 'STYLES';
 break;
-case 11:this.begin('INITIAL');return 'GROUP_DECLARATION_END';
+case 11:return 'OPAREN';
 break;
-case 12:/*skip*/
+case 12:return 'CPAREN';
 break;
-case 13:/* skip WS */
+case 13:this.begin('INITIAL');return 'GROUP_DECLARATION_END';
 break;
-case 14:/*skip for now*/
+case 14:/*skip*/
 break;
-case 15:return 'COMMENT';
+case 15:/* skip WS */
 break;
-case 16:return 'LISTSEP';
+case 16:/*skip for now*/
 break;
-case 17:return 'LINK_COLOR';
+case 17:return 'COMMENT';
 break;
-case 18:return 'LINKTEXT_COLOR';
+case 18:return 'LISTSEP';
 break;
-case 19:return 'NODE_COLOR';
+case 19:return 'LINK_COLOR';
 break;
-case 20:return 'NODETEXT_COLOR';
+case 20:return 'LINKTEXT_COLOR';
 break;
-case 21:return 'GROUP_COLOR';
+case 21:return 'NODE_COLOR';
 break;
-case 22:return 'COLOR';
+case 22:return 'NODETEXT_COLOR';
 break;
-case 23:return 'LANDSCAPE';
+case 23:return 'GROUP_COLOR';
 break;
-case 24:return 'PORTRAIT';
+case 24:return 'COLOR';
 break;
-case 25:return 'EQUAL';
+case 25:return 'LANDSCAPE';
 break;
-case 26:return 'SHAPE';
+case 26:return 'PORTRAIT';
 break;
-case 27:return 'GROUP_END';
+case 27:return 'EQUAL';
 break;
-case 28: this.begin('GROUP');return 'GROUP';
+case 28:return 'SHAPE';
 break;
-case 29:return 'START';
+case 29:return 'GROUP_END';
 break;
-case 30:return 'GENERATOR';
+case 30: this.begin('GROUP');return 'GROUP';
 break;
-case 31:return 'VISUALIZER';
+case 31:return 'START';
 break;
-case 32:return 'EVENT';
+case 32:return 'GENERATOR';
 break;
-case 33:return 'IMAGE';
+case 33:return 'VISUALIZER';
 break;
-case 34:return 'COMPASS';
+case 34:return 'EVENT';
 break;
-case 35:
+case 35:return 'IMAGE';
+break;
+case 36:return 'COMPASS';
+break;
+case 37:
 			//FUCKSAKE! unput is broken, fixed MONTH ago, not seen in npm..fuck fuck
 			// https://github.com/zaach/jison/pull/135
 			//I CANNOT see it in npm install, and it is NOT seen in jison master branch, but jison-lex..does not show it EITHER
@@ -440,18 +444,18 @@ case 35:
 			}
 		
 break;
-case 36:return 'GROUPNAME';
+case 38:return 'GROUPNAME';
 break;
-case 37:return 'NUMBER';
+case 39:return 'NUMBER';
 break;
-case 38:return 'EOF';
+case 40:return 'EOF';
 break;
-case 39:console.log(yy_.yytext);
+case 41:console.log(yy_.yytext);
 break;
 }
 },
-rules: [/^(?:"[^"]+")/i,/^(?:\$\([^)]+\))/i,/^(?:(if\s+.*then(?=\n)))/i,/^(?:{IF_CLAUSE})/i,/^(?:(else\s*if\s+.*then(?=\n)))/i,/^(?:(else(?=\n)))/i,/^(?:(end\s*if(?=\n)))/i,/^(?:(;[^\n]+))/i,/^(?:(;[^\n]+(\n)))/i,/^(?:(actor|beginpoint|box|circle|cloud|condition|database|default|diamond|dots|doublecircle|ellipse|endpoint|input|loopin|loopout|mail|minidiamond|minisquare|note|record|roundedbox|square|terminator|loop|loopend|loopstart|rect|rectangle\b))/i,/^(?:(dotted|dashed|solid|bold|rounded|diagonals|invis|singularity\b))/i,/^(?:[\n])/i,/^(?:[ \t]+)/i,/^(?:\s+)/i,/^(?:\(|\))/i,/^(?:(^\/\/[^\n]*))/i,/^(?:(,))/i,/^(?:link color)/i,/^(?:link textcolor|link text color)/i,/^(?:node color)/i,/^(?:node textcolor|node text color)/i,/^(?:group color)/i,/^(?:(#[A-Fa-f0-9]{6}))/i,/^(?:^(landscape|horizontal|lr))/i,/^(?:^(portrait|vertical|td))/i,/^(?:equal)/i,/^(?:shape)/i,/^(?:group end|\})/i,/^(?:group|\{)/i,/^(?:start)/i,/^(?:generator)/i,/^(?:visualizer)/i,/^(?:<\/|\/>|<\.>|<->|<>|<-|<\.|<|->|\.>|>|-|\.)/i,/^(?:(\/[A-Za-z0-9]+\.png\b))/i,/^(?:(:(nw|ne|n|sw|se|s|e|w)))/i,/^(?:([A-Za-z][A-Za-z_0-9]*))/i,/^(?:([A-Za-z][A-Za-z_0-9]*))/i,/^(?:([0-9])+)/i,/^(?:$)/i,/^(?:.)/i],
-conditions: {"GROUP":{"rules":[1,7,11,12,22,36],"inclusive":false},"INITIAL":{"rules":[0,1,2,3,4,5,6,8,9,10,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,37,38,39],"inclusive":true}}
+rules: [/^(?:"[^"]+")/i,/^(?:\$\([^)]+\))/i,/^(?:(if\s+.*then(?=\n)))/i,/^(?:{IF_CLAUSE})/i,/^(?:(else\s*if\s+.*then(?=\n)))/i,/^(?:(else(?=\n)))/i,/^(?:(end\s*if(?=\n)))/i,/^(?:(;[^\n]+))/i,/^(?:(;[^\n]+(\n)))/i,/^(?:(actor|beginpoint|box|circle|cloud|condition|database|default|diamond|dots|doublecircle|ellipse|endpoint|input|loopin|loopout|mail|minidiamond|minisquare|note|record|roundedbox|square|terminator|loop|loopend|loopstart|rect|rectangle\b))/i,/^(?:(dotted|dashed|solid|bold|rounded|diagonals|invis|singularity\b))/i,/^(?:(\())/i,/^(?:(\)))/i,/^(?:[\n])/i,/^(?:[ \t]+)/i,/^(?:\s+)/i,/^(?:\(|\))/i,/^(?:(^\/\/[^\n]*))/i,/^(?:(,))/i,/^(?:link color)/i,/^(?:link textcolor|link text color)/i,/^(?:node color)/i,/^(?:node textcolor|node text color)/i,/^(?:group color)/i,/^(?:(#[A-Fa-f0-9]{6}))/i,/^(?:^(landscape|horizontal|lr))/i,/^(?:^(portrait|vertical|td))/i,/^(?:equal)/i,/^(?:shape)/i,/^(?:group end|\})/i,/^(?:group|\{)/i,/^(?:start)/i,/^(?:generator)/i,/^(?:visualizer)/i,/^(?:<\/|\/>|<\.>|<->|<>|<-|<\.|<|->|\.>|>|-|\.)/i,/^(?:(\/[A-Za-z0-9]+\.png\b))/i,/^(?:(:(nw|ne|n|sw|se|s|e|w)))/i,/^(?:([A-Za-z][A-Za-z_0-9]*))/i,/^(?:([A-Za-z][A-Za-z_0-9]*))/i,/^(?:([0-9])+)/i,/^(?:$)/i,/^(?:.)/i],
+conditions: {"GROUP":{"rules":[1,7,13,14,24,38],"inclusive":false},"INITIAL":{"rules":[0,1,2,3,4,5,6,8,9,10,11,12,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,39,40,41],"inclusive":true}}
 };
 return lexer;
 })();exports.state=state;

@@ -24,6 +24,13 @@ if [ "$1" = "tests" ]; then
  tests=1
 fi
 
+verbose=""
+if [ "$1" = "verbose" ]; then
+ shift
+ verbose=" verbose "
+fi
+
+
 FORMAT=png
 if [ "$1" == "svg" ]; then
  shift
@@ -50,30 +57,36 @@ rm -f $IMAGEFILE
 OUT=${input%.*}_${generator}.out
 rm -f $OUT
 
+extras=$verbose
+
 case "$generator" in
   nwdiag|actdiag|blockdiag|plantuml_sequence)
-    node $MYPATH/parse.js "$input" $generator >$OUT
+    node $MYPATH/parse.js $extras "$input" $generator >$OUT
   ;;
   mscgen)
-    node $MYPATH/parse.js "$input" $generator >$OUT
+    node $MYPATH/parse.js $extras "$input" $generator >$OUT
   ;;
   neato)
-    node $MYPATH/parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js $extras "$input" digraph >$OUT
   ;;
   twopi)
-    node $MYPATH/parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js $extras "$input" digraph >$OUT
   ;;
   circo)
-    node $MYPATH/parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js $extras "$input" digraph >$OUT
   ;;
   fdp)
-    node $MYPATH/parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js $extras "$input" digraph >$OUT
   ;;
   sfdp)
-    node $MYPATH/parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js $extras "$input" digraph >$OUT
+  ;;
+  ast)
+    node $MYPATH/parse.js $extras "$input" ast
+    exit 0
   ;;
   *)
-    node $MYPATH/parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js $extras "$input" digraph >$OUT
   ;;
 esac
 rc=$?

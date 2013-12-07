@@ -19,7 +19,6 @@
 <!-- canviz support end-->
 
 <body>
-	<input type="button" value="Open Window" onclick="openPicWindow();">
 	<form name="contact" action="">
 		<label for="generator">Generator</label> <select id="generator"
 			name="generator" onChange="generatorChanged()">
@@ -98,14 +97,16 @@
 		<style type="text/css">
 .htoolbar ul {
 	float: top;
+	padding: 0px;
+	margin: 2px;
 }
 
 .htoolbar ul li {
 	width: 30px;
 	background-color: rgba(0, 127, 255, .5);
 	color: white;
-	padding: 10px;
-	margin: 10px;
+	padding: 8px;
+	margin: 8px;
 	border-radius: 8px;
 	//font-family: Helvetica;
 	font-family: 'Droid Sans Mono';
@@ -117,6 +118,8 @@
 
 .toolbar ul {
 	float: left;
+	padding: 0px;
+	margin: 2px;
 }
 
 .toolbar ul li {
@@ -225,6 +228,7 @@
 					height="45" src="arrows/broken_l.png" /></li>
 				<li tooltip="broker_r" onclick="addLine('a/>b');"><img
 					height="45" src="arrows/broker_r.png" /></li>
+				<li>	<input type="button" value="Open Window" onclick="openPicWindow();"></li>
 			</ul>
 		</div>
 		<div class="toolbar">

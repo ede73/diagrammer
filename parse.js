@@ -1,3 +1,7 @@
+//Usage: (typically called from t.sh/depict)
+//Usage: node parse.js [verbose] inputFile [lex] digraph|nwdiag|actdiag|blockdiag|plantuml_sequence >output
+//Usage: node parse.js verbose tests/state_group.txt ast
+
 var fs = require('fs');
 var path = require('path');
 var myArgs = process.argv.slice(2);
@@ -36,7 +40,7 @@ if (myArgs[1] === "lex") {
     //this.parseError(errStr, 
     //{text: this.lexer.match, token: this.terminals_[symbol] || symbol, line: this.lexer.yylineno, loc: yyloc, expected: expected});
     parser.parser.yy.parseError = function(str, hash) {
-        console.log("Parsing error:");
+        console.log("Parsing error found:");
         console.log(str);
         console.log(hash);
         errors = 1

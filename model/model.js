@@ -306,6 +306,7 @@ function getGroup(yy, ref) {
  * @param [color] Optional color for the link
  * @param [lcompass] Left hand side compass value
  * @param [rcompass] Reft hand side compass value
+ * @return the link that got added
  */
 function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
     var lastLink;
@@ -327,10 +328,10 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
         return lastLink;
     }
     if (!(l instanceof Node) && !(l instanceof Group)) {
-        throw new Error("LHS not a Node nor a Group(" + l + ")");
+        throw new Error("LHS not a Node nor a Group(LHS=" + l + ")");
     }
     if (!(r instanceof Node) && !(r instanceof Group)) {
-        throw new Error("RHS not a Node nor a Group(" + r + ")");
+        throw new Error("RHS not a Node nor a Group(RHS=" + r + ")");
     }
     var lnk = new Link(linkType, l, r);
     if (lcompass) setAttr(lnk, 'lcompass', lcompass);

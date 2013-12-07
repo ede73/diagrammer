@@ -13,7 +13,7 @@ if [ "${1:-skipparsermake}" == "skipparsermake" ]; then
 fi
 
 if [ $# -eq 0 ];then
-  echo "USAGE: [skipparsermake] [silent] [tests] [verbose] [svg] [INPUT] [GENERATOR|dot]"
+  echo "USAGE: [skipparsermake] [silent] [tests] [verbose] [text] [svg] [INPUT] [GENERATOR|dot]"
   exit 0
 fi
 
@@ -35,6 +35,12 @@ if [ "$1" = "verbose" ]; then
  verbose=" verbose "
 fi
 
+text=0
+if [ "$1" = "text" ]; then
+ shift
+ text=1
+fi
+
 
 FORMAT=png
 if [ "$1" == "svg" ]; then
@@ -51,8 +57,6 @@ echo "testing lexing"
 node testStateLexer.js $input
 
 #EXPORTREMOVE
-echo "test parser"
-#EXPORTREMOVE
 #node parser.js $input $func | tee a.gv
 #EXPORTREMOVE
 # |sed '/digraph/,$!d'
@@ -63,13 +67,17 @@ OUT=${input%.*}_${generator}.out
 rm -f $OUT
 
 extras=$verbose
+#EXPORTREMOVE
+echo "test parser "$extras" "$OUT
 
 case "$generator" in
   nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
     node $MYPATH/parse.js $extras "$input" $generator >$OUT
+    [[ $text -ne 0 ]] && cat $OUT
   ;;
   neato|twopi|circo|fdp|sfdp)
-    node $MYPATH/parse.js $extras "$input" digraph >$OUT
+   node $MYPATH/parse.js $extras "$input" digraph >$OUT
+   [[ $text -ne 0 ]] && cat $OUT
   ;;
   ast|dendrogram)
     node $MYPATH/parse.js $extras "$input" $generator
@@ -77,6 +85,7 @@ case "$generator" in
   ;;
   *)
     node $MYPATH/parse.js $extras "$input" digraph >$OUT
+    [[ $text -ne 0 ]] && cat $OUT
   ;;
 esac
 rc=$?
@@ -84,6 +93,9 @@ rc=$?
   echo Fatal parsing error $rc
   exit $rc
 }
+[[ $text -ne 0 ]] && exit 0
+
+echo "Generate sequence"
 
 case "$generator" in
   plantuml_sequence)

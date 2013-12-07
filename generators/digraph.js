@@ -153,6 +153,9 @@ function digraph(yy) {
                 var processAGroup = function (o) {
                     debug(JSON.stringify(o));
                     yy.result(indent('subgraph cluster_' + o.getName() + ' {'));
+                    if (o.isSubGraph){
+                        yy.result('graph[style=invis];');
+                    }
                     depth++;
                     if (o.getLabel())
                         yy.result(indent(getAttrFmt(o, 'label',
@@ -239,11 +242,12 @@ function digraph(yy) {
         var ll = l.left;
 
         // yy.result(indent("//"+lr));
-        if (lr instanceof Group) {
+        if (lr instanceof Group ) {
             // just pick ONE Node from group and use lhead
             // TODO: Assuming it is Node (if Recursive groups implemented, it
             // could be smthg else)
-            attrs.push(" lhead=cluster_" + lr.getName());
+            if (!lr.isSubGraph)
+                attrs.push(" lhead=cluster_" + lr.getName());
             lr = lr.OBJECTS[0];
             if (lr == undefined) {
                 // TODO:Bad thing, EMPTY group..add one invisible node there...
@@ -251,7 +255,8 @@ function digraph(yy) {
             }
         }
         if (ll instanceof Group) {
-            attrs.push(" ltail=cluster_" + ll.getName());
+            if (!ll.isSubGraph)
+                attrs.push(" ltail=cluster_" + ll.getName());
             ll = ll.OBJECTS[0];
             if (ll == undefined) {
                 // Same as above

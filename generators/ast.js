@@ -49,6 +49,17 @@ function ast(yy) {
                     traverseObjects(o);
                     depth--;
                 }(o);
+            } else if (o instanceof SubGraph) {
+                var processASubGraph = function (o) {
+                    var n = JSON.parse(JSON.stringify(o));
+                    n.OBJECTS = undefined;
+                    yy.result(indent(JSON.stringify({
+                        subgraph: n
+                    })));
+                    depth++;
+                    traverseObjects(o);
+                    depth--;
+                }(o);
             } else if (o instanceof Node) {
                 yy.result(indent(JSON.stringify({
                     node: o

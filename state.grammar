@@ -52,6 +52,9 @@ S
 				mscgen(yy);
 			}else if ("plantuml_sequence" == generator){
 				plantuml_sequence(yy);
+			//could be tree/dendrogram rather!
+			}else if ("dendrogram" == generator){
+				dendrogram(yy);
 			}else{
 				//rankdir available ONLY IN dot
 				digraph(yy);
@@ -102,10 +105,10 @@ http://publib.boulder.ibm.com/infocenter/zvm/v5r4/index.jsp?topic=/com.ibm.zvm.v
 nodeGroupListOrAttrs cumulates an array of nodes, RHS is latest node
 */
 nodeGroupListOrAttrs
-	: OPAREN -> enterSubSection(yy)
+	: OPAREN -> enterSubGraph(yy)
 	| nodeGroupListOrAttrs LISTSEP INLINE_STRING? readNodeAttrs -> getList(yy,$nodeGroupListOrAttrs,$readNodeAttrs,$3)
 	| readNodeAttrs -> $readNodeAttrs
-	| CPAREN -> exitSubSection(yy)
+	| CPAREN -> exitSubGraph(yy)
 	;
 	/* TOOD: Could concatenate $4,$6 or if $4 defined AND $6, $6 could be appended as ::, unless already(note)*/
 readEvents

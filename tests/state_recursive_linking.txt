@@ -9,7 +9,8 @@
 //But written in below would make it more compact
 //TODO: NOT YET IMPLEMENTED
 //a>b>c(>d>e),f(>g>h)
-a>b>(c,d>e,f>g,h)>(s>k)
+//a>b>(c,d>e,f>g,h)>(s>k)
+a>b>c>(d>e)>f>(g>h)
 
 // a
 // |

@@ -108,22 +108,22 @@ function getGraphRoot(yy) {
  */
 function getList(yy, LHS, RHS, rhsLinkLabel) {
     if (LHS instanceof Node) {
-        debug(" getList(" + LHS + "," + RHS + ")");
+        debug(" getList(node:" + LHS + ",rhs:" + RHS + ")");
         var x = [];
         x.push(LHS);
-	//TODO assuming RHS is Node
+	    //TODO assuming RHS is Node
         x.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
         return x;
     }
     if (LHS instanceof Group) {
-        debug(" getList(" + LHS + "," + RHS + ")");
+        debug(" getList(group:" + LHS + ",rhs:" + RHS + ")");
         var x = [];
         x.push(LHS);
 	//TODO assuming RHS is Group
         x.push(getGroup(yy, RHS).setLinkLabel(rhsLinkLabel));
         return x;
     }
-    debug(" getList([" + LHS + "]," + RHS);
+    debug(" getList(lhs:[" + LHS + "],rhs:" + RHS);
     // LHS not a node..
     LHS.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
     return LHS;
@@ -187,7 +187,7 @@ function getNode(yy, name, style) {
     }
 
     var node = cc(yy, name, style);
-    debug(" getNode gotNode " + node);
+    debug(" in getNode gotNode " + node);
     yy.lastSeenNode = node;
     if (yy.collectNextNode) {
         debug("Collect next node");
@@ -269,14 +269,16 @@ function exitContainer(yy) {
     return setAttr(yy.CURRENTCONTAINER.pop(), 'exitnode', yy.CONTAINER_EXIT++);
 }
 /**
- * Enter to a new parented sub section
+ * Enter to a new parented sub graph
  * like in a>(b>c,d,e)>h
- * TODO: USE REAL TYPE (subsection)
+ *
+ * Edit grammar so it links a>b and c,d,e to h
+ * Ie exit node(s) and enrance node(s) linked properly
  */
-function enterSubSection(yy) {
-    return enterContainer(yy,getGroup(yy).setLabel("temporary"));
+function enterSubGraph(yy) {
+    return enterContainer(yy,getSubGraph(yy));
 }
-function exitSubSection(yy) {
+function exitSubGraph(yy) {
     return exitContainer(yy);
 }
 
@@ -302,6 +304,15 @@ function getGroup(yy, ref) {
     });
     return newGroup;
 }
+function getSubGraph(yy, ref) {
+    if (ref instanceof SubGraph) return ref;
+    debug(" getSubGraph() NEW SubGraph:" + yy + "/" + ref);
+    if (yy.SUBGRAPHS === undefined) yy.SUBGRAPHS = 1;
+    var newSubGraph = new SubGraph(yy.SUBGRAPHS++);
+    debug(" push SubGraph " + newSubGraph + " to " + yy);
+    pushObject(yy, newSubGraph);
+    return newSubGraph;
+}
 // Get a link such that l links to r, return the added LINK or LINKS
 
 //noinspection JSUnusedGlobalSymbols
@@ -322,10 +333,16 @@ function getGroup(yy, ref) {
 function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
     var lastLink;
     var i;
+    if (r instanceof SubGraph && r.getEntrance()==undefined){
+        r.setEntrance(l);
+    }
+    if (l instanceof SubGraph && l.getExit()==undefined){
+        l.setExit(r);
+    }
     if (l instanceof Array) {
         debug(" getLink called with LHS array("+l+") len="+l.length);
         for (i = 0; i < l.length; i++) {
-            debug(" Get link " + l[i]);
+            debug("  Get link " + l[i]);
             lastLink = getLink(yy, linkType, l[i], r, label, color, lcompass, rcompass);
         }
         return lastLink;
@@ -338,12 +355,13 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
         }
         return lastLink;
     }
-    if (!(l instanceof Node) && !(l instanceof Group)) {
-        throw new Error("LHS not a Node nor a Group(LHS=" + l + ") RHS=(" + r + ")");
+    if (!(l instanceof Node) && !(l instanceof Group)& !(l instanceof SubGraph)) {
+        throw new Error("LHS not a Node,Group nor a SubGraph(LHS=" + l + ") RHS=(" + r + ")");
     }
-    if (!(r instanceof Node) && !(r instanceof Group)) {
-        throw new Error("RHS not a Node nor a Group(LHS=" + l + ") RHS=(" + r + ")");
+    if (!(r instanceof Node) && !(r instanceof Group)&& !(r instanceof SubGraph)) {
+        throw new Error("RHS not a Node,Group nor a SubGraph(LHS=" + l + ") RHS=(" + r + ")");
     }
+    debug(" getLink type("+linkType+") l("+l+") r("+r+")");
     var lnk = new Link(linkType, l, r);
     if (lcompass) setAttr(lnk, 'lcompass', lcompass);
     else if (getAttr(l, 'compass')) setAttr(lnk, 'lcompass', getAttr(l, 'compass'));

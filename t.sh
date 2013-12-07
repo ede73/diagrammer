@@ -12,6 +12,11 @@ if [ "${1:-skipparsermake}" == "skipparsermake" ]; then
 #EXPORTREMOVE
 fi
 
+if [ $# -eq 0 ];then
+  echo "USAGE: [skipparsermake] [silent] [tests] [verbose] [svg] [INPUT] [GENERATOR|dot]"
+  exit 0
+fi
+
 silent=0
 if [ "$1" = "silent" ]; then
  shift
@@ -60,29 +65,14 @@ rm -f $OUT
 extras=$verbose
 
 case "$generator" in
-  nwdiag|actdiag|blockdiag|plantuml_sequence)
+  nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
     node $MYPATH/parse.js $extras "$input" $generator >$OUT
   ;;
-  mscgen)
-    node $MYPATH/parse.js $extras "$input" $generator >$OUT
-  ;;
-  neato)
+  neato|twopi|circo|fdp|sfdp)
     node $MYPATH/parse.js $extras "$input" digraph >$OUT
   ;;
-  twopi)
-    node $MYPATH/parse.js $extras "$input" digraph >$OUT
-  ;;
-  circo)
-    node $MYPATH/parse.js $extras "$input" digraph >$OUT
-  ;;
-  fdp)
-    node $MYPATH/parse.js $extras "$input" digraph >$OUT
-  ;;
-  sfdp)
-    node $MYPATH/parse.js $extras "$input" digraph >$OUT
-  ;;
-  ast)
-    node $MYPATH/parse.js $extras "$input" ast
+  ast|dendrogram)
+    node $MYPATH/parse.js $extras "$input" $generator
     exit 0
   ;;
   *)
@@ -103,36 +93,15 @@ case "$generator" in
     cat $OUT |$generator -a -T${FORMAT} -o $IMAGEFILE - && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
   mscgen)
-	echo 1
     cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE - && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
-  neato)
-    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
-  ;;
-  twopi)
-    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
-  ;;
-  circo)
-    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
-  ;;
-  fdp)
-    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
-  ;;
-  sfdp)
+  neato|twopi|circo|fdp|sfdp)
     cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
   *)
     cat $OUT |dot -T${FORMAT} -o $IMAGEFILE  && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
 esac
-#circo -T${FORMAT} a.gv >c.${FORMAT}
-##[[ -s c.${FORMAT} ]] && [[ $silent = 0 ]] && open c.${FORMAT}
-
-#twopi -T${FORMAT} a.gv >t.${FORMAT}
-##[[ -s t.${FORMAT} ]] && [[ $silent = 0 ]] && open t.${FORMAT}
-
-#neato -T${FORMAT} a.gv >n.${FORMAT}
-##[[ -s n.${FORMAT} ]] && [[ $silent = 0 ]] && open n.${FORMAT}
 
 #When running tests, these are important
 [[ $tests -eq 0 ]] && {

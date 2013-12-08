@@ -48,19 +48,20 @@ function getVariables(yy) {
 function getGraphRoot(yy) {
     // debug(" getGraphRoot "+yy);
     if (!yy.GRAPHROOT) {
-        debug(" no graphroot,init - in getGraphRoot");
+        debug("no graphroot,init - in getGraphRoot",true);
         if (yy.result === undefined) {
             yy.result = function (str) {
                 console.log(str);
             }
         }
-        debug("  ...Initialize emptyroot " + yy);
+        debug("...Initialize emptyroot " + yy);
         yy.CURRENTCONTAINER = [];
         yy.LINKS = [];
         yy.CONTAINER_EXIT = 1;
         yy.GRAPHROOT = new GraphRoot();
         // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
         enterContainer(yy, yy.GRAPHROOT);
+        debug(false);
     }
     return yy.GRAPHROOT;
 }
@@ -108,24 +109,27 @@ function getGraphRoot(yy) {
  */
 function getList(yy, LHS, RHS, rhsLinkLabel) {
     if (LHS instanceof Node) {
-        debug(" getList(node:" + LHS + ",rhs:" + RHS + ")");
+        debug("getList(node:" + LHS + ",rhs:" + RHS + ")",true);
         var x = [];
         x.push(LHS);
 	    //TODO assuming RHS is Node
         x.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
+        debug("return node:"+x,false);
         return x;
     }
     if (LHS instanceof Group) {
-        debug(" getList(group:" + LHS + ",rhs:" + RHS + ")");
+        debug("getList(group:" + LHS + ",rhs:" + RHS + ")",true);
         var x = [];
         x.push(LHS);
-	//TODO assuming RHS is Group
+	   //TODO assuming RHS is Group
         x.push(getGroup(yy, RHS).setLinkLabel(rhsLinkLabel));
+        debug("return group:"+x,false);
         return x;
     }
-    debug(" getList(lhs:[" + LHS + "],rhs:" + RHS);
+    debug("getList(lhs:[" + LHS + "],rhs:" + RHS,true);
     // LHS not a node..
     LHS.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
+    debug("return ["+LHS+"]",false);
     return LHS;
 }
 /**
@@ -145,6 +149,7 @@ function getList(yy, LHS, RHS, rhsLinkLabel) {
  * @param [style] OPTIONAL if style given, update (only if name refers to node)
  */
 function getNode(yy, name, style) {
+    debug("getNode ("+name+","+style+")",true);
     function cc(yy, name, style) {
         if (name instanceof Node) {
             if (style) name.setStyle(style);
@@ -173,7 +178,7 @@ function getNode(yy, name, style) {
         if (search !== undefined) {
             return search;
         }
-        debug(" Create new node name="+name);
+        debug("Create new node name="+name,true);
         var n = new Node(name, getGraphRoot(yy).getCurrentShape());
         if (style) n.setStyle(style);
 
@@ -183,17 +188,19 @@ function getNode(yy, name, style) {
         getDefaultAttribute(yy, 'nodetextcolor', function (color) {
             n.setTextColor(color);
         });
+        debug(false);
         return pushObject(yy, n);
     }
 
     var node = cc(yy, name, style);
-    debug(" in getNode gotNode " + node);
+    debug("  in getNode gotNode " + node);
     yy.lastSeenNode = node;
     if (yy.collectNextNode) {
         debug("Collect next node");
         setAttr(yy.collectNextNode, 'exitlink', name);
         yy.collectNextNode = undefined;
     }
+    debug(false);
     return node;
 }
 /**
@@ -293,24 +300,26 @@ function exitSubGraph(yy) {
  */
 function getGroup(yy, ref) {
     if (ref instanceof Group) return ref;
-    debug(" getGroup() NEW GROUP:" + yy + "/" + ref);
+    debug("getGroup() NEW GROUP:" + yy + "/" + ref,true);
     if (yy.GROUPIDS === undefined) yy.GROUPIDS = 1;
     var newGroup = new Group(yy.GROUPIDS++);
-    debug(" push group " + newGroup + " to " + yy);
+    debug("push group " + newGroup + " to " + yy);
     pushObject(yy, newGroup);
 
     getDefaultAttribute(yy, 'groupcolor', function (color) {
         newGroup.setColor(color);
     });
+    debug(false);
     return newGroup;
 }
 function getSubGraph(yy, ref) {
     if (ref instanceof SubGraph) return ref;
-    debug(" getSubGraph() NEW SubGraph:" + yy + "/" + ref);
+    debug("getSubGraph() NEW SubGraph:" + yy + "/" + ref,true);
     if (yy.SUBGRAPHS === undefined) yy.SUBGRAPHS = 1;
     var newSubGraph = new SubGraph(yy.SUBGRAPHS++);
-    debug(" push SubGraph " + newSubGraph + " to " + yy);
+    debug("push SubGraph " + newSubGraph + " to " + yy);
     pushObject(yy, newSubGraph);
+    debug(false);
     return newSubGraph;
 }
 // Get a link such that l links to r, return the added LINK or LINKS
@@ -333,6 +342,7 @@ function getSubGraph(yy, ref) {
 function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
     var lastLink;
     var i;
+    debug(true);
     if (r instanceof SubGraph && r.getEntrance()==undefined){
         r.setEntrance(l);
     }
@@ -340,19 +350,21 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
         l.setExit(r);
     }
     if (l instanceof Array) {
-        debug(" getLink called with LHS array("+l+") len="+l.length);
+        debug("getLink called with LHS array("+l+") len="+l.length);
         for (i = 0; i < l.length; i++) {
-            debug("  Get link " + l[i]);
+            debug("Get link " + l[i]);
             lastLink = getLink(yy, linkType, l[i], r, label, color, lcompass, rcompass);
         }
+        debug(false);
         return lastLink;
     }
     if (r instanceof Array) {
-        debug(" getLink called with RHS array("+r+") len="+r.length);
+        debug("getLink called with RHS array("+r+") len="+r.length);
         for (i = 0; i < r.length; i++) {
-            debug(" Get link " + r[i]);
+            debug("Get link " + r[i]);
             lastLink = getLink(yy, linkType, l, r[i], label, color, lcompass, rcompass);
         }
+        debug(false);
         return lastLink;
     }
     if (!(l instanceof Node) && !(l instanceof Group)& !(l instanceof SubGraph)) {
@@ -376,6 +388,7 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
     if (label != undefined) lnk.setLabel(label);
     if (r instanceof Node && r.getLinkLabel() != undefined) lnk.setLabel(r.getLinkLabel());
     if (color != undefined) lnk.setColor(color);
+    debug(false);
     return addLink(yy, lnk);
 }
 
@@ -386,12 +399,13 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
  */
 function addLink(yy, l) {
     if (l instanceof Array) {
-        debug(" PUSH LINK ARRAY:" + l);
+        debug("PUSH LINK ARRAY:" + l,true);
     } else {
-        debug(" PUSH LINK:" + l);
+        debug("PUSH LINK:" + l,true);
         setAttr(l, 'container', getCurrentContainer(yy));
     }
     yy.LINKS.push(l);
+    debug(false);
     return l;
 }
 
@@ -399,8 +413,9 @@ function addLink(yy, l) {
  * Push given object into a current container
  */
 function pushObject(yy, o) {
-    debug("  pushObject " + o + "to " + getCurrentContainer(yy));
+    debug("pushObject " + o + "to " + getCurrentContainer(yy),true);
     getCurrentContainer(yy).OBJECTS.push(o);
+    debug(false);
     return o;
 }
 

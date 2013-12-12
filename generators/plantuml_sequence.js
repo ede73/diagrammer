@@ -11,7 +11,7 @@ function plantuml_sequence(yy) {
         return prefix + msg;
     }
 
-    var processANode = function (o) {
+    var processANode = function (o,sbgraph) {
         var nattrs = [];
         var styles = [];
         // getAttrFmt(o, 'color', 'fillcolor="{0}"',nattrs);
@@ -55,33 +55,13 @@ function plantuml_sequence(yy) {
     var s = r.getStart();
     if (s != undefined && s != "") {
         var fwd = getNode(yy, s);
-        processANode(fwd);
-        // {$$=" {rank = same;null}\n {rank = same; "+$2+"}\n null
-        // [shape=plaintext,
-        // label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-        // yy.result(indent("//startnode setup\n {rank = same;null} {rank =
-        // same; " + s + "}\n null [shape=plaintext, label=\"\"];\n " + s +
-        // "[shape=doublecircle];\n null->" + s + ";\n"));
+        processANode(fwd,false);
     }
-    // This may FORWARD DECLARE a node...which creates problems with coloring
-    /*
-     * if (r.getEqual() != undefined && r.getEqual().length > 0) {
-     * yy.result(indent("{rank=same;")); for (var x = 0; x <
-     * r.getEqual().length; x++) { yy.result(indent(r.getEqual()[x].getName() +
-     * ";")); } yy.result("}"); }
-     */
-    /*
-     * var fixgroup = function(c) { for (var i in c.OBJECTS) { var o =
-     * c.OBJECTS[i]; if (o instanceof Group) { if (o.OBJECTS.length == 0) {
-     * o.OBJECTS.push(new Node("invis_" + o.getName()).setStyle("invis")); }
-     * else { //A group...non empty...parse inside fixgroup(o); } } }
-     * }(r.OBJECTS);
-     */
     // print only NON PRINTED container links. If first non printed link is NOT
     // for this continer, break out immediately
     // this is to emulate ORDERED nodes of plantuml
     // (node=edge,node,link.group...all in order for this fucker)
-    var printLinks = function printLinks(container) {
+    var printLinks = function printLinks(container,sbgraph) {
         for (var i in yy.LINKS) {
             if (!yy.LINKS.hasOwnProperty(i))continue;
             var l = yy.LINKS[i];
@@ -184,6 +164,20 @@ function plantuml_sequence(yy) {
             yy.result(indent(ll.getName() + lt + lr.getName() + t + label));
             if (swap)
                 yy.result(indent(lr.getName() + lt + ll.getName() + t + label));
+            if (sbgraph){
+                if (!lr.active){
+                    yy.result(indent("activate "+ lr.getName()));
+                    lr.active=true;
+                }else{
+                    ll.active=false;
+                   yy.result(indent("deactivate "+ ll.getName()));
+                }
+            }else{
+                if (ll.active){
+                    ll.active=false;
+                   yy.result(indent("deactivate "+ ll.getName()));                    
+                }
+            }
             if (note != "") {
                 yy.result(indent("note over " + lr.getName()));
                 yy.result(note.replace(/\\n/g, "\n"));
@@ -192,7 +186,7 @@ function plantuml_sequence(yy) {
         }
     };
 
-    var traverseObjects = function traverseObjects(r) {
+    var traverseObjects = function traverseObjects(r,sbgraph) {
         // Dump this groups participants first...
         var i;
         var o;
@@ -200,9 +194,9 @@ function plantuml_sequence(yy) {
             if(!r.OBJECTS.hasOwnProperty(i))continue;
             o = r.OBJECTS[i];
             if (o instanceof Node)
-                processANode(o);
+                processANode(o,sbgraph);
         }
-        printLinks(r);
+        printLinks(r,sbgraph);
         for (i in r.OBJECTS) {
             if(!r.OBJECTS.hasOwnProperty(i))continue;
             o = r.OBJECTS[i];
@@ -212,6 +206,7 @@ function plantuml_sequence(yy) {
                 var processAGroup = function (o) {
                     debug(JSON.stringify(o));
                     var cond = getAttr(o, 'conditional');
+                    var sbg = getAttr(o, 'isSubGraph');
                     if (cond) {
                         if (cond == "if")
                             cond = "alt";
@@ -221,17 +216,17 @@ function plantuml_sequence(yy) {
                             cond = "else";
                         else if (cond == "endif")
                             cond = "end";
+                        yy.result(indent(cond + ' ' + o.getLabel()));
                     } else {
-                        cond = "ref";
+                        cond="";//cond = "ref";
                     }
-                    yy.result(indent(cond + ' ' + o.getLabel()));
                     if (o.getColor() !== undefined) {
                         yy.result(indent("style=filled;"));
                         yy.result(indent(getAttrFmt(o, 'color',
                             '   color="{0}";\n')));
                     }
                     depth++;
-                    traverseObjects(o);
+                    traverseObjects(o,sbg);
                     printLinks(o);
                     depth--;
                     // yy.result(indent("}//end of " + o.getName()));
@@ -240,7 +235,7 @@ function plantuml_sequence(yy) {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
         }
-    }(r);
+    }(r,false);
     printLinks(r);
 
     yy.result("@enduml");

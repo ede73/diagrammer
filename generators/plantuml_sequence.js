@@ -99,6 +99,7 @@ function plantuml_sequence(yy) {
                 if (label.indexOf("::") !== -1) {
                     label = label.split("::");
                     note = label[1].trim();
+		    label=label[2].trim();
                 }
             }
             var color = getAttrFmt(l, 'color', '[{0}]').trim();

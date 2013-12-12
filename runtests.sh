@@ -109,5 +109,6 @@ done
 
 x=plantuml_sequence
 runtest plantuml_context.txt
+runtest plantuml_context2.txt
 
 exit 0

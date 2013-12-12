@@ -58,7 +58,7 @@ runtest(){
 }
 
 #EDE:New act dag is fucked..instead of Lane1 it prints out random number as lane title, groups work though
-tests=${1:-dot actdiag } #blockdiag}
+tests=${1:-dot } #actdiag } #blockdiag}
 for test in $tests; do
 echo Test suite $test >&2
 x=$test
@@ -106,4 +106,8 @@ for test in $tests; do
   runtest state_conditionals.txt
   runtest events.txt
 done
+
+x=plantuml_sequence
+runtest plantuml_context.txt
+
 exit 0

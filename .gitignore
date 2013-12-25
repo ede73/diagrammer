@@ -1,3 +1,8 @@
+[a-z].txt
+l*.txt
+*.png
+*.dot
+*.out
 web/post.txt
 web/result.txt
 web/result.png

@@ -1,7 +1,8 @@
 #Build the fucker!
 #Automatic variables: http://www.chemie.fu-berlin.de/chemnet/use/info/make/make_10.html#SEC94
 #Loosely based on makeLexerAndParser.js
-
+#Also you get MATCHES=a/b/c.file:c/b/d.file
+#And DIRNAMES=a/:c/
 all: state.js state.all parser.js Makefile
 	@echo Make ALL
 	@echo done
@@ -31,6 +32,16 @@ export: state.js parse.js parser.js
 .PHONY: test
 test: all
 	#./runtests.sh
+	#Shortcut without need to define every occurance of test files
+ifneq (,$(findstring jni/,$(DIRNAMES)))
+	#make -C jni/tests
+endif
+ifneq (,$(findstring src/,$(DIRNAMES)))
+	#Run client tests(roboelectric)
+	#../../gradlew robolectric
+	#tests/runtest.sh
+endif
+	@echo matches are "$(MATCHES)" dirnames are "$(DIRNAMES)"
 
 clean:
 	rm -f state.js state.all parser.js

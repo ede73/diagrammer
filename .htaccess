@@ -1,0 +1,20 @@
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresDefault "access plus 1 hour"
+ExpiresByType text/html "access plus 1 week"
+ExpiresByType text/css "access plus 1 week"
+ExpiresByType image/*   "access plus 1 week"
+ExpiresByType image/png   "access plus 1 week"
+ExpiresByType application/javascript "access plus 1 month"  
+ExpiresByType text/x-javascript "access plus 1 month"  
+ExpiresByType application/x-javascript "access plus 1 month"
+</IfModule>
+
+<IfModule mod_mime.c>
+AddDefaultCharset utf-8
+#Below shit does not work..but should
+AddCharset UTF-8 .js
+AddCharset UTF-8 .html
+AddCharset UTF-8 .php
+AddCharset UTF-8 .phtml
+</IfModule>

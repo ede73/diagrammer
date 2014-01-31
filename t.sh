@@ -99,7 +99,7 @@ echo "Generate sequence"
 
 case "$generator" in
   plantuml_sequence)
-    java -jar ext/plantuml.jar $OUT >"$IMAGEFILE"&& [[ $silent = 0 ]] && open "$IMAGEFILE"
+    java -Xmx2048m -jar ext/plantuml.jar $OUT >"$IMAGEFILE"&& [[ $silent = 0 ]] && open "$IMAGEFILE"
   ;;
   nwdiag|actdiag|blockdiag)
     cat $OUT |$generator -a -T${FORMAT} -o $IMAGEFILE - && [[ $silent = 0 ]] && open "$IMAGEFILE" 

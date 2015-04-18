@@ -71,7 +71,7 @@ extras=$verbose
 echo "test parser "$extras" "$OUT
 
 case "$generator" in
-  nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
+  dexgraph|nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
     node $MYPATH/parse.js $extras "$input" $generator >$OUT
     [[ $text -ne 0 ]] && cat $OUT
   ;;
@@ -95,7 +95,7 @@ rc=$?
 }
 [[ $text -ne 0 ]] && exit 0
 
-echo "Generate sequence"
+echo "Generate sequence $generator"
 
 case "$generator" in
   plantuml_sequence)

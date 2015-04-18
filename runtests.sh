@@ -63,6 +63,7 @@ for test in $tests; do
 echo Test suite $test >&2
 x=$test
 runtest ast.txt
+[[ "$test" != "actdiag" ]] && runtest state_nodelinktests.txt
 [[ "$test" != "actdiag" ]] && runtest url.txt
 [[ "$test" != "actdiag" ]] && runtest state.txt
 [[ "$test" != "actdiag" ]] && runtest state2.txt

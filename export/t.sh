@@ -1,5 +1,9 @@
 MYPATH=$(dirname $0)
 EXTPATH=$(pwd)
+if [ $# -eq 0 ];then
+  echo "USAGE: [skipparsermake] [silent] [tests] [verbose] [text] [svg] [INPUT] [GENERATOR|dot]"
+  exit 0
+fi
 silent=0
 if [ "$1" = "silent" ]; then
  shift
@@ -9,6 +13,16 @@ tests=0
 if [ "$1" = "tests" ]; then
  shift
  tests=1
+fi
+verbose=""
+if [ "$1" = "verbose" ]; then
+ shift
+ verbose=" verbose "
+fi
+text=0
+if [ "$1" = "text" ]; then
+ shift
+ text=1
 fi
 FORMAT=png
 if [ "$1" == "svg" ]; then
@@ -21,30 +35,23 @@ IMAGEFILE=${input%.*}_${generator}.${FORMAT}
 rm -f $IMAGEFILE
 OUT=${input%.*}_${generator}.out
 rm -f $OUT
+extras=$verbose
 case "$generator" in
-  nwdiag|actdiag|blockdiag|plantuml_sequence)
-    node $MYPATH/parse.js "$input" $generator >$OUT
+  dexgraph|nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
+    node $MYPATH/parse.js $extras "$input" $generator >$OUT
+    [[ $text -ne 0 ]] && cat $OUT
   ;;
-  mscgen)
-    node $MYPATH/parse.js "$input" $generator >$OUT
+  neato|twopi|circo|fdp|sfdp)
+   node $MYPATH/parse.js $extras "$input" digraph >$OUT
+   [[ $text -ne 0 ]] && cat $OUT
   ;;
-  neato)
-    node $MYPATH/parse.js "$input" digraph >$OUT
-  ;;
-  twopi)
-    node $MYPATH/parse.js "$input" digraph >$OUT
-  ;;
-  circo)
-    node $MYPATH/parse.js "$input" digraph >$OUT
-  ;;
-  fdp)
-    node $MYPATH/parse.js "$input" digraph >$OUT
-  ;;
-  sfdp)
-    node $MYPATH/parse.js "$input" digraph >$OUT
+  ast|dendrogram)
+    node $MYPATH/parse.js $extras "$input" $generator
+    exit 0
   ;;
   *)
-    node $MYPATH/parse.js "$input" digraph >$OUT
+    node $MYPATH/parse.js $extras "$input" digraph >$OUT
+    [[ $text -ne 0 ]] && cat $OUT
   ;;
 esac
 rc=$?
@@ -52,30 +59,19 @@ rc=$?
   echo Fatal parsing error $rc
   exit $rc
 }
+[[ $text -ne 0 ]] && exit 0
+echo "Generate sequence $generator"
 case "$generator" in
   plantuml_sequence)
-    java -jar ext/plantuml.jar $OUT >"$IMAGEFILE"&& [[ $silent = 0 ]] && open "$IMAGEFILE"
+    java -Xmx2048m -jar ext/plantuml.jar $OUT >"$IMAGEFILE"&& [[ $silent = 0 ]] && open "$IMAGEFILE"
   ;;
   nwdiag|actdiag|blockdiag)
     cat $OUT |$generator -a -T${FORMAT} -o $IMAGEFILE - && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
   mscgen)
-	echo 1
     cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE - && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
-  neato)
-    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
-  ;;
-  twopi)
-    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
-  ;;
-  circo)
-    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
-  ;;
-  fdp)
-    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
-  ;;
-  sfdp)
+  neato|twopi|circo|fdp|sfdp)
     cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
   ;;
   *)
@@ -88,7 +84,7 @@ esac
     #Compress
     which  pngquant >/dev/null
     if [ $? -eq 0 ]; then
-      pngquant --ext .png --force --speed 1 --quality 0-10 $png
+      pngquant --ext .png --force --speed 1 --quality 0-10 $IMAGEFILE
     fi
   }
   echo $IMAGEFILE

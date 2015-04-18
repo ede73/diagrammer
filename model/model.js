@@ -109,19 +109,19 @@ function getGraphRoot(yy) {
  */
 function getList(yy, LHS, RHS, rhsLinkLabel) {
     if (LHS instanceof Node) {
-        debug("getList(node:" + LHS + ",rhs:" + RHS + ")",true);
+        debug("getList(node:" + LHS + ",rhs:[" + RHS + "])",true);
         var x = [];
         x.push(LHS);
-	    //TODO assuming RHS is Node
+	//TODO assuming RHS is Node
         x.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
         debug("return node:"+x,false);
         return x;
     }
     if (LHS instanceof Group) {
-        debug("getList(group:" + LHS + ",rhs:" + RHS + ")",true);
+        debug("getList(group:[" + LHS + "],rhs:" + RHS + ")",true);
         var x = [];
         x.push(LHS);
-	   //TODO assuming RHS is Group
+	//TODO assuming RHS is Group
         x.push(getGroup(yy, RHS).setLinkLabel(rhsLinkLabel));
         debug("return group:"+x,false);
         return x;
@@ -149,7 +149,7 @@ function getList(yy, LHS, RHS, rhsLinkLabel) {
  * @param [style] OPTIONAL if style given, update (only if name refers to node)
  */
 function getNode(yy, name, style) {
-    debug("getNode ("+name+","+style+")",true);
+    debug("getNode (name:"+name+",style:"+style+")",true);
     function cc(yy, name, style) {
         if (name instanceof Node) {
             if (style) name.setStyle(style);
@@ -329,17 +329,21 @@ function getSubGraph(yy, ref) {
  * linkType >,<,.>,<.,->,<-,<> l = left side, Node(xxx) or Group(yyy), or
  * Array(smthg) r = right side, Node(xxx) or Group(yyy), or Array(smthg) label =
  * if defined, LABEL for the link color = if defined, COLOR for the link
+ *
+ * if there is a list a>b,c,x,d;X then X is gonna e link label for EVERYONE
+ * but for a>"1"b,"2"c link label is gonna be individual! 
  * @param yy lexer
  * @param linkType Type of the link(grammar)
  * @param l Left hand side (must be Array,Node,Group)
  * @param r Right hand side (must be Array,Node,Group)
- * @param [label] Optional label for the link
- * @param [color] Optional color for the link
+ * @param [inlineLinkLabel] Optional label for the link
+ * @param [commonLinkLabel] Optional label for the link
+ * @param [linkColor] Optional color for the link
  * @param [lcompass] Left hand side compass value
  * @param [rcompass] Reft hand side compass value
  * @return the link that got added
  */
-function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
+function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass) {
     var lastLink;
     var i;
     debug(true);
@@ -350,23 +354,24 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
         l.setExit(r);
     }
     if (l instanceof Array) {
-        debug("getLink called with LHS array("+l+") len="+l.length);
+        debug("getLink called with LHS array, type:"+linkType+" l:["+l+"] r:"+r+" inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
         for (i = 0; i < l.length; i++) {
-            debug("Get link " + l[i]);
-            lastLink = getLink(yy, linkType, l[i], r, label, color, lcompass, rcompass);
+            debug("    1Get link " + l[i]);
+            lastLink = getLink(yy, linkType, l[i], r, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
         }
         debug(false);
         return lastLink;
     }
     if (r instanceof Array) {
-        debug("getLink called with RHS array("+r+") len="+r.length);
+        debug("getLink called with RHS array, type:"+linkType+" l:"+l+" r:["+r+"] inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
         for (i = 0; i < r.length; i++) {
-            debug("Get link " + r[i]);
-            lastLink = getLink(yy, linkType, l, r[i], label, color, lcompass, rcompass);
+            debug("    2Get link " + r[i]);
+            lastLink = getLink(yy, linkType, l, r[i], inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
         }
         debug(false);
         return lastLink;
     }
+     debug("getLink called type:"+linkType+" l:"+l+" r:"+r+" inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
     if (!(l instanceof Node) && !(l instanceof Group)& !(l instanceof SubGraph)) {
         throw new Error("LHS not a Node,Group nor a SubGraph(LHS=" + l + ") RHS=(" + r + ")");
     }
@@ -375,19 +380,24 @@ function getLink(yy, linkType, l, r, label, color, lcompass, rcompass) {
     }
     debug(" getLink type("+linkType+") l("+l+") r("+r+")");
     var lnk = new Link(linkType, l, r);
+
     if (lcompass) setAttr(lnk, 'lcompass', lcompass);
     else if (getAttr(l, 'compass')) setAttr(lnk, 'lcompass', getAttr(l, 'compass'));
+
     if (rcompass) setAttr(lnk, 'rcompass', rcompass);
     else if (getAttr(r, 'compass')) setAttr(lnk, 'rcompass', getAttr(r, 'compass'));
-    getDefaultAttribute(yy, 'linkcolor', function (color) {
-        lnk.setColor(color);
+
+    getDefaultAttribute(yy, 'linkcolor', function (linkColor) {
+        lnk.setColor(linkColor);
     });
-    getDefaultAttribute(yy, 'linktextcolor', function (color) {
-        lnk.setTextColor(color);
+    getDefaultAttribute(yy, 'linktextcolor', function (linkColor) {
+        lnk.setTextColor(linkColor);
     });
-    if (label != undefined) lnk.setLabel(label);
-    if (r instanceof Node && r.getLinkLabel() != undefined) lnk.setLabel(r.getLinkLabel());
-    if (color != undefined) lnk.setColor(color);
+    if (commonLinkLabel != undefined) {lnk.setLabel(commonLinkLabel);debug("set commonLinkLabel "+commonLinkLabel);}
+    if (inlineLinkLabel != undefined) {lnk.setLabel(inlineLinkLabel);debug("set inlineLinkLabel "+inlineLinkLabel);}
+    else if (r instanceof Node && commonLinkLabel != undefined ) {lnk.setLabel(commonLinkLabel);debug('set commonLinkLabel '+commonLinkLabel);}
+    if (r instanceof Node) { tmp=r.getLinkLabel(); if (tmp != undefined ) {lnk.setLabel(tmp);debug('reset link label to '+tmp);}}
+    if (linkColor != undefined) lnk.setColor(linkColor);
     debug(false);
     return addLink(yy, lnk);
 }

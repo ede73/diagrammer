@@ -14,8 +14,8 @@ function Link(linkType, l, r) {
     this.left = l;
     this.right = r;
     this.toString = function () {
-        return "Link(" + this.linkType + "== L" +
-            this.left.toString() + ", R" +
+        return "Link(type:" + this.linkType + " as L:" +
+            this.left.toString() + ", R:" +
             this.right.toString() + ",label=" +
             this.getLabel() + ")";
     };

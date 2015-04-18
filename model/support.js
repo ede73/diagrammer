@@ -5,8 +5,7 @@ debugIndent=0;
 function debug(msg,indentOrDedent) {
     if (VERBOSE == true && msg!==false && msg!==true){
         var d="";
-        for(var i=0;i<debugIndent;i++) d+="   ";
-        //console.log(debugIndent+d+msg);
+        for(var i=0;i<debugIndent;i++) d+="    ";
         console.log(d+msg);
     }
     if (indentOrDedent===true || msg===true){
@@ -14,7 +13,6 @@ function debug(msg,indentOrDedent) {
     }else if (indentOrDedent===false || msg===false){
       debugIndent--;
     }
-    //console.log("Indent now "+debugIndent);
 }
 /**
  * Set attribute of an object

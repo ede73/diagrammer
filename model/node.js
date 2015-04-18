@@ -27,7 +27,9 @@ function Node(name, shape) {
         return setAttr(this, 'linklabel', value);
     };
     this.getLinkLabel = function () {
-        return getAttr(this, 'linklabel');
+        $tmp = getAttr(this, 'linklabel');
+        setAttr(this, 'linklabel', undefined);
+        return $tmp;
     };
     this.setStyle = function (value) {
         if (value === undefined) return this;
@@ -47,6 +49,6 @@ function Node(name, shape) {
         return getAttr(this, 'image');
     };
     this.toString = function () {
-        return "Node(" + this.getName() + getAttrFmt(this, 'color', ',color={0}') + getAttrFmt(this, 'label', ',label={0}') + ")";
+        return "Node(name:" + this.getName() +" color:" + getAttrFmt(this, 'color', ',color={0}') + " fmt:" + getAttrFmt(this, 'label', ',label={0}') + ")";
     };
 }

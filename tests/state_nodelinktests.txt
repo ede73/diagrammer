@@ -1,0 +1,7 @@
+a>"A2B"b,"A2C"c
+r>"R2C"c
+
+q>w,e,r;Q2WER
+
+m1>"M1toM2"m2,"M1toM3"m3
+

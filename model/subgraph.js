@@ -27,24 +27,24 @@ function SubGraph(name) {
         return setAttr(this, key, value);
     };
     this.setEntrance = function (entrance) {
-        debug("Set entrance to " + entrance);
+        debug("subgrah:Set entrance to " + entrance);
         return setAttr(this, 'entrance', entrance);
     }; 
     this.getEntrance = function () {
         return getAttr(this, 'entrance');
     }; 
     this.setExit = function (exit) {
-        debug("Set exit to " + exit);
+        debug("subgraph:Set exit to " + exit);
         return setAttr(this, 'exit', exit);
     };
     this.getExit = function () {
         return getAttr(this, 'exit');
     }; 
     this.getDefault = function (key) {
-        //debug("Get SubGraph " + key);
+        //debug("subgrah:Get SubGraph " + key);
         return getAttr(this, key);
     };
     this.toString = function () {
-        return "SubGraph(" + this.name + ")";
+        return "SubGraph(name:" + this.name + ",linklabel:"+this.linklabel+",entrance:"+this.entrance+")";
     };
 }

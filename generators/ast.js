@@ -15,7 +15,12 @@ function ast(yy) {
     };
     yy.result(indent("{result:"));
     depth++;
-
+    var skipEntrances = function (key,value) {
+        if (key === 'entrance' || key === 'exit') {
+            return null;
+        }
+        return value;
+    };    
     var r = getGraphRoot(yy);
     if (r.getVisualizer())
         yy.result(indent(JSON.stringify({
@@ -40,7 +45,7 @@ function ast(yy) {
             var o = r.OBJECTS[i];
             if (o instanceof Group) {
                 var processAGroup = function (o) {
-                    var n = JSON.parse(JSON.stringify(o));
+                    var n = JSON.parse(JSON.stringify(o, skipEntrances));
                     n.OBJECTS = undefined;
                     yy.result(indent(JSON.stringify({
                         group: n
@@ -51,7 +56,7 @@ function ast(yy) {
                 }(o);
             } else if (o instanceof SubGraph) {
                 var processASubGraph = function (o) {
-                    var n = JSON.parse(JSON.stringify(o));
+                    var n = JSON.parse(JSON.stringify(o, skipEntrances));//2
                     n.OBJECTS = undefined;
                     yy.result(indent(JSON.stringify({
                         subgraph: n
@@ -73,7 +78,8 @@ function ast(yy) {
     for (var i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i))continue;
         var l = yy.LINKS[i];
-        var n = JSON.parse(JSON.stringify(l));
+        var n = JSON.parse(JSON.stringify(l, skipEntrances));
+
         n.container.OBJECTS = undefined;
         n.container.label = undefined;
         n.container.conditional = undefined;

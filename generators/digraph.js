@@ -5,6 +5,13 @@ function digraph(yy) {
     // http://www.graphviz.org/doc/info/attrs.html#d:start
     var depth = 0;
 
+    var skipEntrances = function (key,value) {
+        if (key === 'entrance' || key === 'exit') {
+            return null;
+        }
+        return value;
+    };
+
     function indent(msg) {
         if (msg.trim() == "")
             return "";
@@ -151,7 +158,7 @@ function digraph(yy) {
                 //	if (cond=="endif")continue;
                 // Group name,OBJECTS,get/setEqual,toString
                 var processAGroup = function (o) {
-                    debug(JSON.stringify(o));
+                    debug(JSON.stringify(o,skipEntrances));
                     yy.result(indent('subgraph cluster_' + o.getName() + ' {'));
                     if (o.isSubGraph){
                         yy.result('graph[style=invis];');

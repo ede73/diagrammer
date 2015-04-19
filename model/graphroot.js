@@ -52,11 +52,11 @@ function GraphRoot() {
      * currentContainer first
      */
     this.setDefault = function (key, value) {
-        debug("Set ROOT " + key + " to " + value);
+        debug("graphroot:Set ROOT " + key + " to " + value);
         return setAttr(this, key, value);
     };
     this.getDefault = function (key) {
-        // debug("Get ROOT "+key);
+        // debug("graphroot:Get ROOT "+key);
         return getAttr(this, key);
     };
     this.toString = function () {

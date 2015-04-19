@@ -28,14 +28,14 @@ function Group(name) {
      * currentContainer first
      */
     this.setDefault = function (key, value) {
-        debug("Set group " + key + " to " + value);
+        debug("group:Set group " + key + " to " + value);
         return setAttr(this, key, value);
     };
     this.getDefault = function (key) {
-        debug("Get group " + key);
+        debug("group:Get group " + key);
         return getAttr(this, key);
     };
     this.toString = function () {
-        return "Group(" + this.name + ")";
+        return "group:Group(" + this.name + ")";
     };
 }

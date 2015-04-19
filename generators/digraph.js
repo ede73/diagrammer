@@ -111,7 +111,7 @@ function digraph(yy) {
         }
     }(r.OBJECTS);
 
-    function getFirstLink(grp) {
+    function getFirstLinkOfTheGroup(grp) {
         // yy.result("FIRST NODE"+JSON.stringify(grp));
         for (var i in yy.LINKS) {
             if (!yy.LINKS.hasOwnProperty(i))continue;
@@ -128,7 +128,7 @@ function digraph(yy) {
         return undefined;
     }
 
-    function getLastLink(grp) {
+    function getLastLinkInGroup(grp) {
         var nod = undefined;
         // yy.result("LAST NODE"+JSON.stringify(grp));
         for (var i in yy.LINKS) {
@@ -199,8 +199,8 @@ function digraph(yy) {
                                 yy.result(indent(getAttr(o, 'entrylink').getName() + "->" + sn + ";"));
                             }
                             // FIRST node of group and LAST node in group..
-                            var fn = getFirstLink(o);
-                            var ln = getLastLink(o);
+                            var fn = getFirstLinkOfTheGroup(o);
+                            var ln = getLastLinkInGroup(o);
                             // decision node
                             //var en = "exit" + getAttr(o, 'exitnode');
 

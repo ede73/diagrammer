@@ -20,7 +20,7 @@ function processVariable(yy, variable) {
     if (vari.indexOf(":") !== -1) {
         // Assignment
         var tmp = vari.split(":");
-        debug("model:GOT assignment " + tmp[0] + "=" + tmp[1]);
+        debug("GOT assignment " + tmp[0] + "=" + tmp[1]);
         getVariables(yy)[tmp[0]] = tmp[1];
         return tmp[1];
     } else {
@@ -46,15 +46,15 @@ function getVariables(yy) {
  * Get current singleton graphroot or create  new one
  */
 function getGraphRoot(yy) {
-    // debug("model: getGraphRoot "+yy);
+    // debug(" getGraphRoot "+yy);
     if (!yy.GRAPHROOT) {
-        //debug("model:no graphroot,init - in getGraphRoot",true);
+        //debug("no graphroot,init - in getGraphRoot",true);
         if (yy.result === undefined) {
             yy.result = function (str) {
                 console.log(str);
             }
         }
-        //debug("model:...Initialize emptyroot " + yy);
+        //debug("...Initialize emptyroot " + yy);
         yy.CURRENTCONTAINER = [];
         yy.LINKS = [];
         yy.CONTAINER_EXIT = 1;
@@ -80,13 +80,13 @@ function getGraphRoot(yy) {
  */
 //function getCurrentContainer_ERROR(yy) {
 //    var x = getGraphRoot(yy).getCurrentContainer();
-//    if (x == undefined) debug("model: ERROR: Container undefined");
+//    if (x == undefined) debug(" ERROR: Container undefined");
 //    if (x.OBJECTS == undefined) {
-//        if (x instanceof Array) debug("model: Container is Array");
-//        if (x instanceof Group) debug("model: Container is Group");
-//        if (x instanceof Node) debug("model: Container is Node");
-//        if (x instanceof Link) debug("model: Container is Link");
-//        debug("model: ERROR: Containers " + typeof(x) + "object store undefined");
+//        if (x instanceof Array) debug(" Container is Array");
+//        if (x instanceof Group) debug(" Container is Group");
+//        if (x instanceof Node) debug(" Container is Node");
+//        if (x instanceof Link) debug(" Container is Link");
+//        debug(" ERROR: Containers " + typeof(x) + "object store undefined");
 //    }
 //    return x;
 //}
@@ -94,7 +94,7 @@ function getGraphRoot(yy) {
 /**
  * function setCurrentContainer(yy,ctr){ if (!(ctr instanceof Group || ctr
  * instanceof GraphRoot)){ throw new Error("Trying to set container other than
- * Group/GraphRoot:"+typeof(ctr)); } debug("model: setCurrentContainer "+yy); return
+ * Group/GraphRoot:"+typeof(ctr)); } debug(" setCurrentContainer "+yy); return
  * getGraphRoot(yy).setCurrentContainer(ctr); }
  */
 // LHS=Node(z1)
@@ -109,27 +109,27 @@ function getGraphRoot(yy) {
  */
 function getList(yy, LHS, RHS, rhsLinkLabel) {
     if (LHS instanceof Node) {
-        debug("model:getList(node:" + LHS + ",rhs:[" + RHS + "])",true);
+        debug("getList(node:" + LHS + ",rhs:[" + RHS + "])",true);
         var x = [];
         x.push(LHS);
 	//TODO assuming RHS is Node
         x.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
-        debug("model:return node:"+x,false);
+        debug("return node:"+x,false);
         return x;
     }
     if (LHS instanceof Group) {
-        debug("model:getList(group:[" + LHS + "],rhs:" + RHS + ")",true);
+        debug("getList(group:[" + LHS + "],rhs:" + RHS + ")",true);
         var x = [];
         x.push(LHS);
 	//TODO assuming RHS is Group
         x.push(getGroup(yy, RHS).setLinkLabel(rhsLinkLabel));
-        debug("model:return group:"+x,false);
+        debug("return group:"+x,false);
         return x;
     }
-    debug("model:getList(lhs:[" + LHS + "],rhs:" + RHS,true);
+    debug("getList(lhs:[" + LHS + "],rhs:" + RHS,true);
     // LHS not a node..
     LHS.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
-    debug("model:return ["+LHS+"]",false);
+    debug("return ["+LHS+"]",false);
     return LHS;
 }
 /**
@@ -149,7 +149,7 @@ function getList(yy, LHS, RHS, rhsLinkLabel) {
  * @param [style] OPTIONAL if style given, update (only if name refers to node)
  */
 function getNode(yy, name, style) {
-    debug("model:getNode (name:"+name+",style:"+style+")",true);
+    debug("getNode (name:"+name+",style:"+style+")",true);
     function cc(yy, name, style) {
         if (name instanceof Node) {
             if (style) name.setStyle(style);
@@ -178,7 +178,7 @@ function getNode(yy, name, style) {
         if (search !== undefined) {
             return search;
         }
-        debug("model:Create new node name="+name,true);
+        debug("Create new node name="+name,true);
         var n = new Node(name, getGraphRoot(yy).getCurrentShape());
         if (style) n.setStyle(style);
 
@@ -193,10 +193,10 @@ function getNode(yy, name, style) {
     }
 
     var node = cc(yy, name, style);
-    debug("model:  in getNode gotNode " + node);
+    debug("  in getNode gotNode " + node);
     yy.lastSeenNode = node;
     if (yy.collectNextNode) {
-        debug("model:Collect next node");
+        debug("Collect next node");
         setAttr(yy.collectNextNode, 'exitlink', name);
         yy.collectNextNode = undefined;
     }
@@ -214,16 +214,16 @@ function getNode(yy, name, style) {
 function getDefaultAttribute(yy, attrname, x) {
     // no need for the value, but runs init if missing
     getGraphRoot(yy);
-    // debug("model:getDefaultAttribute "+attrname);
+    // debug("getDefaultAttribute "+attrname);
     var a;
     for (var i in yy.CURRENTCONTAINER) {
         if (!yy.CURRENTCONTAINER.hasOwnProperty(i))continue;
         var ctr = yy.CURRENTCONTAINER[i];
         a = ctr.getDefault(attrname);
-        // debug("model: traverse getDefaultAttribute "+attrname+" from "+ctr+" as
+        // debug(" traverse getDefaultAttribute "+attrname+" from "+ctr+" as
         // "+a);
         if (a !== undefined) {
-            // debug("model:getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
+            // debug("getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
             if (x !== undefined)
                 x(a);
             return a;
@@ -231,12 +231,12 @@ function getDefaultAttribute(yy, attrname, x) {
     }
     a = getGraphRoot(yy).getDefault(attrname);
     if (a !== undefined) {
-        debug("model:getDefaultAttribute got from graphroot");
+        debug("getDefaultAttribute got from graphroot");
         if (x !== undefined)
             x(a);
         return a;
     }
-    // debug("model:getDefaultAttribute FAILED");
+    // debug("getDefaultAttribute FAILED");
     return undefined;
 }
 
@@ -300,10 +300,10 @@ function exitSubGraph(yy) {
  */
 function getGroup(yy, ref) {
     if (ref instanceof Group) return ref;
-    debug("model:getGroup() NEW GROUP:" + yy + "/" + ref,true);
+    debug("getGroup() NEW GROUP:" + yy + "/" + ref,true);
     if (yy.GROUPIDS === undefined) yy.GROUPIDS = 1;
     var newGroup = new Group(yy.GROUPIDS++);
-    debug("model:push group " + newGroup + " to " + yy);
+    debug("push group " + newGroup + " to " + yy);
     pushObject(yy, newGroup);
 
     getDefaultAttribute(yy, 'groupcolor', function (color) {
@@ -314,10 +314,10 @@ function getGroup(yy, ref) {
 }
 function getSubGraph(yy, ref) {
     if (ref instanceof SubGraph) return ref;
-    debug("model:getSubGraph() NEW SubGraph:" + yy + "/" + ref,true);
+    debug("getSubGraph() NEW SubGraph:" + yy + "/" + ref,true);
     if (yy.SUBGRAPHS === undefined) yy.SUBGRAPHS = 1;
     var newSubGraph = new SubGraph(yy.SUBGRAPHS++);
-    debug("model:push SubGraph " + newSubGraph + " to " + yy);
+    debug("push SubGraph " + newSubGraph + " to " + yy);
     pushObject(yy, newSubGraph);
     debug(false);
     return newSubGraph;
@@ -347,38 +347,38 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
     var lastLink;
     var i;
     debug(true);
-    if (r instanceof SubGraph && r.getEntrance()==undefined){
+    if (r instanceof SubGraph && r.getEntrance()==undefined) {
         r.setEntrance(l);
     }
-    if (l instanceof SubGraph && l.getExit()==undefined){
+    if (l instanceof SubGraph && l.getExit()==undefined) {
         l.setExit(r);
     }
     if (l instanceof Array) {
-        debug("model:getLink called with LHS array, type:"+linkType+" l:["+l+"] r:"+r+" inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
+        debug("getLink called with LHS array, type:"+linkType+" l:["+l+"] r:"+r+" inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
         for (i = 0; i < l.length; i++) {
-            debug("model:    1Get link " + l[i]);
+            debug("    1Get link " + l[i]);
             lastLink = getLink(yy, linkType, l[i], r, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
         }
         debug(false);
         return lastLink;
     }
     if (r instanceof Array) {
-        debug("model:getLink called with RHS array, type:"+linkType+" l:"+l+" r:["+r+"] inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
+        debug("getLink called with RHS array, type:"+linkType+" l:"+l+" r:["+r+"] inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
         for (i = 0; i < r.length; i++) {
-            debug("model:    2Get link " + r[i]);
+            debug("    2Get link " + r[i]);
             lastLink = getLink(yy, linkType, l, r[i], inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
         }
         debug(false);
         return lastLink;
     }
-     debug("model:getLink called type:"+linkType+" l:"+l+" r:"+r+" inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
+     debug("getLink called type:"+linkType+" l:"+l+" r:"+r+" inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
     if (!(l instanceof Node) && !(l instanceof Group)& !(l instanceof SubGraph)) {
         throw new Error("LHS not a Node,Group nor a SubGraph(LHS=" + l + ") RHS=(" + r + ")");
     }
     if (!(r instanceof Node) && !(r instanceof Group)&& !(r instanceof SubGraph)) {
         throw new Error("RHS not a Node,Group nor a SubGraph(LHS=" + l + ") RHS=(" + r + ")");
     }
-    debug("model: getLink type("+linkType+") l("+l+") r("+r+")");
+    debug(" getLink type("+linkType+") l("+l+") r("+r+")");
     var lnk = new Link(linkType, l, r);
 
     if (lcompass) setAttr(lnk, 'lcompass', lcompass);
@@ -393,8 +393,8 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
     getDefaultAttribute(yy, 'linktextcolor', function (linkColor) {
         lnk.setTextColor(linkColor);
     });
-    if (commonLinkLabel != undefined) {lnk.setLabel(commonLinkLabel);debug("model:set commonLinkLabel "+commonLinkLabel);}
-    if (inlineLinkLabel != undefined) {lnk.setLabel(inlineLinkLabel);debug("model:set inlineLinkLabel "+inlineLinkLabel);}
+    if (commonLinkLabel != undefined) {lnk.setLabel(commonLinkLabel);debug("set commonLinkLabel "+commonLinkLabel);}
+    if (inlineLinkLabel != undefined) {lnk.setLabel(inlineLinkLabel);debug("set inlineLinkLabel "+inlineLinkLabel);}
     else if (r instanceof Node && commonLinkLabel != undefined ) {lnk.setLabel(commonLinkLabel);debug('set commonLinkLabel '+commonLinkLabel);}
     if (r instanceof Node) { tmp=r.getLinkLabel(); if (tmp != undefined ) {lnk.setLabel(tmp);debug('reset link label to '+tmp);}}
     if (linkColor != undefined) lnk.setColor(linkColor);
@@ -409,9 +409,9 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
  */
 function addLink(yy, l) {
     if (l instanceof Array) {
-        debug("model:PUSH LINK ARRAY:" + l,true);
+        debug("PUSH LINK ARRAY:" + l,true);
     } else {
-        debug("model:PUSH LINK:" + l,true);
+        debug("PUSH LINK:" + l,true);
         setAttr(l, 'container', getCurrentContainer(yy));
     }
     yy.LINKS.push(l);
@@ -423,7 +423,7 @@ function addLink(yy, l) {
  * Push given object into a current container
  */
 function pushObject(yy, o) {
-    debug("model:pushObject " + o + "to " + getCurrentContainer(yy),true);
+    debug("pushObject " + o + "to " + getCurrentContainer(yy),true);
     getCurrentContainer(yy).OBJECTS.push(o);
     debug(false);
     return o;

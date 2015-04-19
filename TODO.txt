@@ -1,3 +1,40 @@
+{result:
+    {"node":{"name":"b"}}
+    {"group":{"name":1,"isSubGraph":true,"entrance":null,"exitnode":1,"exit":null}}
+    {
+        {"node":{"name":"c"}}
+        {"node":{"name":"d"}}
+        {"node":{"name":"e"}}
+        {"node":{"name":"f"}}
+        {"node":{"name":"g"}}
+        {"node":{"name":"h"}}
+    }
+    {"node":{"name":"z"}}
+    {"link":{"linkType":">","left":"b","right":1,"container":1}}
+    {"link":{"linkType":">","left":"c","right":"d","container":1}}
+    {"link":{"linkType":">","left":"d","right":"e","container":1}}
+    {"link":{"linkType":">","left":"d","right":"f","container":1}}
+    {"link":{"linkType":">","left":"f","right":"g","container":1}}
+    {"link":{"linkType":">","left":"g","right":"h","container":1}}
+    {"link":{"linkType":">","left":1,"right":"z","label":"eandh"}}
+}
+
+b>(c>d>e,f>g>h)>"eandh"z
+when linking to subgraph, link all entrance nodes b>c,f and all exit nodes e,h>z (if exit exists)
+ie link all entrance to container to all nodes that have no links coming into
+ie. link all exit nodes to container exit node that have no links coming from
+instead of
+    {"link":{"linkType":">","left":"b","right":1,"container":1}}
+should have
+    {"link":{"linkType":">","left":"b","right":"c"}}
+    {"link":{"linkType":">","left":"b","right":"f"}}
+and
+    {"link":{"linkType":">","left":1,"right":"z","label":"eandh"}}
+shoulg have
+    {"link":{"linkType":">","left":e,"right":"z","label":"eandh"}}
+    {"link":{"linkType":">","left":h,"right":"z","label":"eandh"}}
+
+
 - LABEL can already have color definition as well, but NOT $(color) variable. Colro extracted directly in model setLabel grammar parsing not possible currently (;.* all label. no parsing)
 - See plain JS http://bramp.github.io/js-sequence-diagrams/ Good Raphael SEQ diag. PLAIN JS
 - http://mdaines.github.io/viz.js/example.html FUCKING AWSOME!! DOTTY!! JS!!!

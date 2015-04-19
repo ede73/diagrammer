@@ -17,7 +17,7 @@ function ast(yy) {
     depth++;
     var skipEntrances = function (key,value) {
         if (key === 'entrance' || key === 'exit') {
-            return null;
+            return value;
         }
         return value;
     };    
@@ -51,18 +51,22 @@ function ast(yy) {
                         group: n
                     })));
                     depth++;
+                    yy.result('    {');
                     traverseObjects(o);
                     depth--;
+                    yy.result('    }');
                 }(o);
             } else if (o instanceof SubGraph) {
                 var processASubGraph = function (o) {
-                    var n = JSON.parse(JSON.stringify(o, skipEntrances));//2
+                    var n = JSON.parse(JSON.stringify(o, skipEntrances));
                     n.OBJECTS = undefined;
                     yy.result(indent(JSON.stringify({
                         subgraph: n
                     })));
                     depth++;
+                    yy.result('    {');
                     traverseObjects(o);
+                    yy.result('    }');
                     depth--;
                 }(o);
             } else if (o instanceof Node) {
@@ -79,11 +83,16 @@ function ast(yy) {
         if (!yy.LINKS.hasOwnProperty(i))continue;
         var l = yy.LINKS[i];
         var n = JSON.parse(JSON.stringify(l, skipEntrances));
-
+        n.left = n.left.name;
+        n.right = n.right.name;
         n.container.OBJECTS = undefined;
         n.container.label = undefined;
+        n.container.isSubGraph = undefined;
+        n.container.entrance = n.container.entrance?n.container.entrance.name:undefined;
+        n.container.exitnode = n.container.exitnode?n.container.exitnode.name:undefined;
         n.container.conditional = undefined;
-        yy.result(indent(JSON.stringify(n)));
+        n.container = n.container.name;
+        yy.result(indent(JSON.stringify({link:n})));
     }
     --depth;
     yy.result(indent("}"));

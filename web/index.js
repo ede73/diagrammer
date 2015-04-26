@@ -163,8 +163,8 @@ function visualize(visualizer) {
 function dendroit(sks) {
 console.log(sks);
 var radius = 250;
-//var root=JSON.parse(sks);
-var root = {
+var root=JSON.parse(sks);
+var xroot = {
   "name": "root",
   "children": [
     {

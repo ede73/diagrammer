@@ -67,38 +67,6 @@ function getGraphRoot(yy) {
 }
 
 /**
- * Return current container. If none specified, it is GRAPHROOT
- *
- * Current container can be (in therory):
- * array -> link list
- * group -> well, a group
- * node ->
- * link ->
- *
- * Direct accessor, though graphroot governs!
- * TODO: DUAL DECLARATION - this function never used
- */
-//function getCurrentContainer_ERROR(yy) {
-//    var x = getGraphRoot(yy).getCurrentContainer();
-//    if (x == undefined) debug(" ERROR: Container undefined");
-//    if (x.OBJECTS == undefined) {
-//        if (x instanceof Array) debug(" Container is Array");
-//        if (x instanceof Group) debug(" Container is Group");
-//        if (x instanceof Node) debug(" Container is Node");
-//        if (x instanceof Link) debug(" Container is Link");
-//        debug(" ERROR: Containers " + typeof(x) + "object store undefined");
-//    }
-//    return x;
-//}
-
-/**
- * function setCurrentContainer(yy,ctr){ if (!(ctr instanceof Group || ctr
- * instanceof GraphRoot)){ throw new Error("Trying to set container other than
- * Group/GraphRoot:"+typeof(ctr)); } debug(" setCurrentContainer "+yy); return
- * getGraphRoot(yy).setCurrentContainer(ctr); }
- */
-// LHS=Node(z1)
-/**
  * Create an array, push LHS,RHS nodes there and return the array as long as
  * processing the list nodes added to array..
  *
@@ -132,6 +100,7 @@ function getList(yy, LHS, RHS, rhsLinkLabel) {
     debug("return ["+LHS+"]",false);
     return LHS;
 }
+
 /**
  * See readNodeOrGroup in grammar
  *
@@ -445,9 +414,6 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
     }
     l.nolinks=undefined;
     r.nolinks=undefined;
-    //if (l instanceof SubGraph && l.getExit()==undefined) {
-    //    l.setExit(r);
-    //}
 
     if (current_container  instanceof SubGraph && 
 	current_container.getEntrance()==undefined && 
@@ -455,18 +421,6 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
 	!(r instanceof SubGraph)) {
 	current_container.setEntrance(l);
     }
-
-    //if (getCurrentContainer(yy) instanceof SubGraph && r instanceof Node) {
-    // //    var ent = getCurrentContainer(yy).getEntrance();
-    //    //debug('might set exit to ' +r);
-    //    if (ent==undefined || (ent!==undefined && ent.name !== r.name)) {
-    //      //debug('set exit node'+r+' since current exit is '+ent);
-    //      getCurrentContainer(yy).setExit(r);
-    //    }
-    //}
-    //if (getCurrentContainer(yy) instanceof SubGraph){
-    //   debug("SUBGRAPH Should do special linking");
-    //}
 
     if (l instanceof Array) {
         debug("getLink LHS array, type:"+linkType+" l:["+l+"] r:"+r+" inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
@@ -595,3 +549,4 @@ function containsObject(container, o) {
     }
     return false;
 }
+

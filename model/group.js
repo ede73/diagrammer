@@ -9,6 +9,7 @@ Group.prototype.constructor = Group;
 function Group(name) {
     this.name = name;
     this.OBJECTS = [];
+    this.ROOTNODES = [];
     // Save EQUAL node ranking
     this.setEqual = function (value) {
         return setAttr(this, 'equal', value);

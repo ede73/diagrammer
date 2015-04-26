@@ -6,7 +6,7 @@ if [ $? -ne 0 ]; then
 fi
 
 PARALLEL=${2:-8}
-verbose=0
+verbose=1
 
 rm -f .error
 error=0

@@ -7,6 +7,7 @@ GraphRoot.prototype.constructor = GraphRoot;
  */
 function GraphRoot() {
     this.OBJECTS = [];
+    this.ROOTNODES = [];
     this.setGenerator = function (value) {
         if (value) value = value.toLowerCase();
         return setAttr(this, 'generator', value);

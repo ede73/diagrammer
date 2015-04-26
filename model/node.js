@@ -50,10 +50,10 @@ function Node(name, shape) {
     };
     this.toString = function () {
 	var fmt = "";
-	var tmp = getAttrFmt(this, 'color');
+	var tmp = getAttrFmt(this, 'color','');
 	if (tmp !== undefined && tmp!='')
 	    fmt += ",color: " + tmp;
-	tmp = getAttrFmt(this, 'label');
+	tmp = getAttrFmt(this, 'label','');
 	if (tmp !== undefined && tmp!='')
 	    fmt += ",label: " + tmp;
         return "Node(name:" + this.getName() +fmt+ ")";

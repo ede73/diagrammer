@@ -38,30 +38,34 @@ function plantuml_sequence(yy) {
         var t = "";
         if (nattrs.length > 0)
             t = "[" + nattrs.join(",") + "]";
-        yy.result(indent("participant " + getAttrFmt(o, 'label', '"{0}" as') + " " + o.getName() + t));
+        //yy.result(indent("participant " + getAttrFmt(o, 'label', '"{0}" as') + " " + o.getName() + t));
+        output(yy, indent("participant {0} {1} {2}".format(
+			    getAttrFmt(o, 'label', '"{0}" as'),
+			    o.getName(),
+			    t)));
     };
 
     var r = getGraphRoot(yy);
     if (r.getVisualizer()) {
-        yy.result("/* render:" + r.getVisualizer() + "*/")
+        outputFmt(yy, "/* render: {0} */",[r.getVisualizer()])
     }
-    yy.result("@startuml");
-    yy.result("autonumber");
+    output(yy, "@startuml");
+    output(yy, "autonumber");
     /*
-     * if (r.getDirection() === "portrait") { yy.result(indent("rankdir=LR;")); }
-     * else { yy.result(indent("rankdir=TD;")); }
+     * if (r.getDirection() === "portrait") { output(yy, indent("rankdir=LR;")); }
+     * else { output(yy, indent("rankdir=TD;")); }
      */
     // This may FORWARD DECLARE a node...which creates problems with coloring
     var s = r.getStart();
     if (s != undefined && s != "") {
         var fwd = getNode(yy, s);
-        processANode(fwd,false);
+        processANode(fwd, false);
     }
     // print only NON PRINTED container links. If first non printed link is NOT
-    // for this continer, break out immediately
+    // for this container, break out immediately
     // this is to emulate ORDERED nodes of plantuml
     // (node=edge,node,link.group...all in order for this fucker)
-    var printLinks = function printLinks(container,sbgraph) {
+    var printLinks = function printLinks(container, sbgraph) {
         for (var i in yy.LINKS) {
             if (!yy.LINKS.hasOwnProperty(i))continue;
             var l = yy.LINKS[i];
@@ -88,7 +92,7 @@ function plantuml_sequence(yy) {
             var lr = l.right;
             var ll = l.left;
 
-            // yy.result(indent("//"+lr));
+            // output(yy, indent("//"+lr));
             if (lr instanceof Group) {
                 // just pick ONE Node from group and use lhead
                 // TODO: Assuming it is Node (if Recursive groups implemented,
@@ -143,11 +147,11 @@ function plantuml_sequence(yy) {
                 lt = (dot ? "-" : "") + "-" + color + ">";
             } else if (dot) {
                 // dotted
-                yy.result(getAttrFmt(l, 'label', '...{0}...'));
+                output(yy, getAttrFmt(l, 'label', '...{0}...'));
                 continue;
             } else if (dash) {
                 // dashed
-                yy.result(getAttrFmt(l, 'label', '=={0}=='));
+                output(yy, getAttrFmt(l, 'label', '=={0}=='));
                 continue;
             } else {
                 // is dotted or dashed no direction
@@ -161,32 +165,32 @@ function plantuml_sequence(yy) {
                 label = ":" + label;
             else
                 label = "";
-            yy.result(indent(ll.getName() + lt + lr.getName() + t + label));
+            output(yy, indent(ll.getName() + lt + lr.getName() + t + label));
             if (swap)
-                yy.result(indent(lr.getName() + lt + ll.getName() + t + label));
+                output(yy, indent(lr.getName() + lt + ll.getName() + t + label));
             if (sbgraph){
                 if (!lr.active){
-                    yy.result(indent("activate "+ lr.getName()));
+                    output(yy, indent("activate "+ lr.getName()));
                     lr.active=true;
                 }else{
                     ll.active=false;
-                   yy.result(indent("deactivate "+ ll.getName()));
+                   output(yy, indent("deactivate "+ ll.getName()));
                 }
             }else{
                 if (ll.active){
                     ll.active=false;
-                   yy.result(indent("deactivate "+ ll.getName()));                    
+                   output(yy, indent("deactivate "+ ll.getName()));                    
                 }
             }
             if (note != "") {
-                yy.result(indent("note over " + lr.getName()));
-                yy.result(note.replace(/\\n/g, "\n"));
-                yy.result(indent("end note"));
+                output(yy, indent("note over " + lr.getName()));
+                output(yy, note.replace(/\\n/g, "\n"));
+                output(yy, indent("end note"));
             }
         }
     };
 
-    var traverseObjects = function traverseObjects(r,sbgraph) {
+    var traverseObjects = function traverseObjects(r, isSubGraph) {
         // Dump this groups participants first...
         var i;
         var o;
@@ -194,9 +198,9 @@ function plantuml_sequence(yy) {
             if(!r.OBJECTS.hasOwnProperty(i))continue;
             o = r.OBJECTS[i];
             if (o instanceof Node)
-                processANode(o,sbgraph);
+                processANode(o, isSubGraph);
         }
-        printLinks(r,sbgraph);
+        printLinks(r, isSubGraph);
         for (i in r.OBJECTS) {
             if(!r.OBJECTS.hasOwnProperty(i))continue;
             o = r.OBJECTS[i];
@@ -204,9 +208,9 @@ function plantuml_sequence(yy) {
                 // TODO:
                 // Group name,OBJECTS,get/setEqual,toString
                 var processAGroup = function (o) {
-                    debug(JSON.stringify(o));
+                    debug('processAGroup:'+JSON.stringify(o));
                     var cond = getAttr(o, 'conditional');
-                    var sbg = getAttr(o, 'isSubGraph');
+                    var nodeIsSubGraph = getAttr(o, 'isSubGraph');
                     if (cond) {
                         if (cond == "if")
                             cond = "alt";
@@ -216,20 +220,20 @@ function plantuml_sequence(yy) {
                             cond = "else";
                         else if (cond == "endif")
                             cond = "end";
-                        yy.result(indent(cond + ' ' + o.getLabel()));
+                        output(yy, indent(cond + ' ' + o.getLabel()));
                     } else {
                         cond="";//cond = "ref";
                     }
                     if (o.getColor() !== undefined) {
-                        yy.result(indent("style=filled;"));
-                        yy.result(indent(getAttrFmt(o, 'color',
+                        output(yy, indent("style=filled;"));
+                        output(yy, indent(getAttrFmt(o, 'color',
                             '   color="{0}";\n')));
                     }
                     depth++;
-                    traverseObjects(o,sbg);
+                    traverseObjects(o, nodeIsSubGraph);
                     printLinks(o);
                     depth--;
-                    // yy.result(indent("}//end of " + o.getName()));
+                    // output(yy, indent("}//end of " + o.getName()));
                 }(o);
             } else if (!o instanceof Node) {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
@@ -238,5 +242,5 @@ function plantuml_sequence(yy) {
     }(r,false);
     printLinks(r);
 
-    yy.result("@enduml");
+    output(yy, "@enduml");
 }

@@ -10,6 +10,7 @@ SubGraph.prototype.constructor = SubGraph;
 function SubGraph(name) {
     this.name = name;
     this.OBJECTS = [];
+    this.ROOTNODES = [];
     this.isSubGraph=true;
     // temporary for RHS list array!!
     this.setLinkLabel = function (value) {
@@ -48,7 +49,9 @@ function SubGraph(name) {
 	var fmt = "";
 	if (this.linklabel !== undefined && this.linklabel!='') fmt+=",linklabel:"+this.linklabel;
 	if (this.entrance !== undefined) fmt+=",entrance:"+this.entrance;
+
 	if (this.exit !== undefined) fmt+=",exit:"+this.exit;
+	if (this.ROOTNODES !== undefined) fmt+=",rootnodes:"+this.ROOTNODES;
         return "SubGraph(name:" + this.name + fmt+")";
     };
 }

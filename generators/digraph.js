@@ -22,6 +22,17 @@ function digraph(yy) {
         return prefix + msg;
     }
 
+function hasOutwardLink(yy,node) {
+    for (var i in yy.LINKS) {
+        if (!yy.LINKS.hasOwnProperty(i))continue;
+        var r = yy.LINKS[i];
+        if (r.left.name === node.name){
+          return true;
+        }
+    }
+    return false;
+}
+
     var processANode = function (o) {
         var nattrs = [];
         var styles = [];
@@ -112,7 +123,7 @@ function digraph(yy) {
     }(r.OBJECTS);
 
     function getFirstLinkOfTheGroup(grp) {
-        // yy.result("FIRST NODE"+JSON.stringify(grp));
+        //yy.result("FIRST NODE"+JSON.stringify(grp));
         for (var i in yy.LINKS) {
             if (!yy.LINKS.hasOwnProperty(i))continue;
             var l = yy.LINKS[i];
@@ -248,14 +259,16 @@ function digraph(yy) {
         var lr = l.right;
         var ll = l.left;
 
-        // yy.result(indent("//"+lr));
+        //yy.result(indent("// link from "+ll+" to "+lr));
         if (lr instanceof Group ) {
+            //debug('huuhuu');
             // just pick ONE Node from group and use lhead
             // TODO: Assuming it is Node (if Recursive groups implemented, it
             // could be smthg else)
             if (!lr.isSubGraph)
                 attrs.push(" lhead=cluster_" + lr.getName());
             lr = lr.OBJECTS[0];
+            //debug('lr is '+lr);
             if (lr == undefined) {
                 // TODO:Bad thing, EMPTY group..add one invisible node there...
                 // But should add already at TOP
@@ -264,7 +277,25 @@ function digraph(yy) {
         if (ll instanceof Group) {
             if (!ll.isSubGraph)
                 attrs.push(" ltail=cluster_" + ll.getName());
-            ll = ll.OBJECTS[0];
+            if (ll instanceof SubGraph && ll.getExit()!==undefined){
+              //get containers all nodes that have no outward links...(TODO:should be in model actually!)
+              //perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
+              var exits=[];
+              for(var i in ll.OBJECTS){
+               if (!ll.OBJECTS.hasOwnProperty(i))continue;
+                var go = ll.OBJECTS[i];
+                if (!hasOutwardLink(yy,go)){
+                //debug('test node '+go);
+                  exits.push(go);
+                }
+              }
+              ll=exits;
+              //debug('got '+exits);
+            } else {
+              ll = ll.OBJECTS[0];
+            }
+            //debug('ll is.. '+ll);
+            //debug('lr is '+lr);
             if (ll == undefined) {
                 // Same as above
             }
@@ -300,7 +331,15 @@ function digraph(yy) {
         var t = "";
         if (attrs.length > 0)
             t = "[" + attrs.join(",") + "]";
-        yy.result(indent(ll.getName() + getAttrFmt(l, 'lcompass', '{0}').trim() + lt + lr.getName() + getAttrFmt(l, 'rcompass', '{0}').trim() + t + ";"));
+        //debug('print ll '+ll);
+        //debug('print lr '+lr);
+        if (ll instanceof Array) {
+          ll.forEach(function(element, index, array){
+            yy.result(indent(element.getName() + getAttrFmt(l, 'lcompass', '{0}').trim() + lt + lr.getName() + getAttrFmt(l, 'rcompass', '{0}').trim() + t + ";"));
+          });
+        } else {
+          yy.result(indent(ll.getName() + getAttrFmt(l, 'lcompass', '{0}').trim() + lt + lr.getName() + getAttrFmt(l, 'rcompass', '{0}').trim() + t + ";"));
+        }
     }
     yy.result("}");
 }

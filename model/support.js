@@ -88,8 +88,20 @@ function getAttrFmt(cl, attr, fmt, resultarray) {
     return " " + tmp + " ";
 }
 
-function output(yy, txt) {
-  yy.result(txt);
+var indentLevel=0;
+function output(yy, txt, indentOrDedent) {
+    var prefix="";
+    if (indentOrDedent===true || yy===true || txt===true){
+	indentLevel++;
+    }else if (indentOrDedent===false || yy===false || txt===false){
+	indentLevel--;
+    }
+    if (txt!== true && txt!==false && yy !== true && yy!==false){
+	for (var i = 0; i < indentLevel; i++) {
+            prefix += "    ";
+	}
+	yy.result(prefix + txt);
+    }
 }
 
 function outputFmt(yy, txt, a) {

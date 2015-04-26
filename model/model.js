@@ -550,3 +550,16 @@ function containsObject(container, o) {
     return false;
 }
 
+function traverseLinks(yy, callback) {
+    for (var i in yy.LINKS) {
+	if (!yy.LINKS.hasOwnProperty(i)) continue;
+	callback(yy.LINKS[i]);
+    }
+}
+
+function traverseObjects(container, callback) {
+    for (var i in container.OBJECTS) {
+	if (!container.OBJECTS.hasOwnProperty(i)) continue;
+	callback(container.OBJECTS[i]);
+    }
+}

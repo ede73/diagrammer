@@ -162,7 +162,7 @@ function visualize(visualizer) {
 
 function dendroit(parseResult) {
 console.log(parseResult);
-var radius = 250;
+var radius = 450;
 var root=JSON.parse(parseResult);
 
 var margin = 120;

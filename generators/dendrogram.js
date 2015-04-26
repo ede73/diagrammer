@@ -6,7 +6,7 @@ function dendrogram(yy) {
 	}
 	var cl = findNode(tree,l);
 	if (cl===undefined){
-	    throw new Error('Left node not found from tree');
+	    throw new Error('Left node ('+l.name+') not found from tree');
 	}
 	if (undefined === findNode(tree,r)){
 	    //debug('Add '+r.name+' as child of '+cl.data.name);

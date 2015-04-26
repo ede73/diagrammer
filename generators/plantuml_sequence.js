@@ -1,16 +1,4 @@
 function plantuml_sequence(yy) {
-    var depth = 0;
-
-    function indent(msg) {
-        if (msg.trim() == "")
-            return "";
-        var prefix = "";
-        for (var i = 0; i < depth; i++) {
-            prefix += "  ";
-        }
-        return prefix + msg;
-    }
-
     var processANode = function (o,sbgraph) {
         var nattrs = [];
         var styles = [];
@@ -39,10 +27,10 @@ function plantuml_sequence(yy) {
         if (nattrs.length > 0)
             t = "[" + nattrs.join(",") + "]";
         //yy.result(indent("participant " + getAttrFmt(o, 'label', '"{0}" as') + " " + o.getName() + t));
-        output(yy, indent("participant {0} {1} {2}".format(
+        output(yy, "participant {0} {1} {2}".format(
 			    getAttrFmt(o, 'label', '"{0}" as'),
 			    o.getName(),
-			    t)));
+			    t));
     };
 
     var r = getGraphRoot(yy);
@@ -50,7 +38,7 @@ function plantuml_sequence(yy) {
         outputFmt(yy, "/* render: {0} */",[r.getVisualizer()])
     }
     output(yy, "@startuml");
-    output(yy, "autonumber");
+    output(yy, "autonumber",true);
     /*
      * if (r.getDirection() === "portrait") { output(yy, indent("rankdir=LR;")); }
      * else { output(yy, indent("rankdir=TD;")); }
@@ -165,27 +153,29 @@ function plantuml_sequence(yy) {
                 label = ":" + label;
             else
                 label = "";
-            output(yy, indent(ll.getName() + lt + lr.getName() + t + label));
+            output(yy, ll.getName() + lt + lr.getName() + t + label);
             if (swap)
-                output(yy, indent(lr.getName() + lt + ll.getName() + t + label));
+                output(yy, lr.getName() + lt + ll.getName() + t + label);
             if (sbgraph){
                 if (!lr.active){
-                    output(yy, indent("activate "+ lr.getName()));
+                    output(yy, "activate "+ lr.getName(),true);
                     lr.active=true;
                 }else{
                     ll.active=false;
-                   output(yy, indent("deactivate "+ ll.getName()));
+		    output(false);
+                    output(yy, "deactivate "+ ll.getName());
                 }
             }else{
                 if (ll.active){
                     ll.active=false;
-                   output(yy, indent("deactivate "+ ll.getName()));                    
+		    output(false);
+                    output(yy, "deactivate "+ ll.getName());   
                 }
             }
             if (note != "") {
-                output(yy, indent("note over " + lr.getName()));
-                output(yy, note.replace(/\\n/g, "\n"));
-                output(yy, indent("end note"));
+                output(yy, "note over " + lr.getName());
+                outputFmt(yy, note.replace(/\\n/g, "\n"));
+                output(yy, "end note");
             }
         }
     };
@@ -220,19 +210,17 @@ function plantuml_sequence(yy) {
                             cond = "else";
                         else if (cond == "endif")
                             cond = "end";
-                        output(yy, indent(cond + ' ' + o.getLabel()));
+                        output(yy, cond + ' ' + o.getLabel());
                     } else {
                         cond="";//cond = "ref";
                     }
                     if (o.getColor() !== undefined) {
-                        output(yy, indent("style=filled;"));
-                        output(yy, indent(getAttrFmt(o, 'color',
-                            '   color="{0}";\n')));
+                        output(yy, "style=filled;");
+                        output(yy, getAttrFmt(o, 'color',
+                            '   color="{0}";\n'));
                     }
-                    depth++;
                     traverseObjects(o, nodeIsSubGraph);
                     printLinks(o);
-                    depth--;
                     // output(yy, indent("}//end of " + o.getName()));
                 }(o);
             } else if (!o instanceof Node) {
@@ -241,6 +229,6 @@ function plantuml_sequence(yy) {
         }
     }(r,false);
     printLinks(r);
-
+    output(false);
     output(yy, "@enduml");
 }

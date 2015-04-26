@@ -105,5 +105,8 @@ function output(yy, txt, indentOrDedent) {
 }
 
 function outputFmt(yy, txt, a) {
-  yy.result(txt.formatArray(a));
+    if (a === undefined)
+	yy.result(txt);
+    else
+	yy.result(txt.formatArray(a));
 }

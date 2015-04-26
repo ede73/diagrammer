@@ -2,7 +2,7 @@ debugIndent=0;
 /**
  * Simple debugger, uses console.log
  */
-function debug(msg,indentOrDedent) {
+function debug(msg, indentOrDedent) {
     if (VERBOSE == true && msg!==false && msg!==true){
         var d="";
         for(var i=0;i<debugIndent;i++) d+="    ";
@@ -35,6 +35,13 @@ String.prototype.format = function () {
     var formatted = this;
     for (var arg in arguments) {
         formatted = formatted.replace("{" + arg + "}", arguments[arg]);
+    }
+    return formatted;
+};
+String.prototype.formatArray = function (arra) {
+    var formatted = this;
+      for (var i=0;i<arra.length;i++) {
+        formatted = formatted.replace("{" + i + "}", arra[i]);
     }
     return formatted;
 };
@@ -79,4 +86,12 @@ function getAttrFmt(cl, attr, fmt, resultarray) {
     if (resultarray)
         resultarray.push(tmp);
     return " " + tmp + " ";
+}
+
+function output(yy, txt) {
+  yy.result(txt);
+}
+
+function outputFmt(yy, txt, a) {
+  yy.result(txt.formatArray(a));
 }

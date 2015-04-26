@@ -14,9 +14,22 @@ function Link(linkType, l, r) {
     this.left = l;
     this.right = r;
     this.toString = function () {
+	var fmt=""; 
+	var tmp = getAttrFmt(this, 'lcompass');
+	if (tmp !== undefined && tmp != '')
+	    fmt += ",lcompass: " + tmp;
+	tmp = getAttrFmt(this, 'rcompass');
+	if (tmp !== undefined && tmp != '')
+	    fmt += ",rcompass: " + tmp;
+	tmp = getAttrFmt(this, 'linkcolor');
+	if (tmp !== undefined && tmp != '')
+	    fmt += ",color: " + tmp;
+	tmp = getAttrFmt(this, 'linktextcolor');
+	if (tmp !== undefined && tmp != '')
+	    fmt += ",textcolor: " + tmp;
         return "Link(type:" + this.linkType + " as L:" +
             this.left.toString() + ", R:" +
             this.right.toString() + ",label=" +
-            this.getLabel() + ")";
+            this.getLabel() + fmt + ")";
     };
 }

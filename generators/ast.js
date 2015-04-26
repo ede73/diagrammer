@@ -13,7 +13,7 @@ function ast(yy) {
 
     var processANode = function (o) {
     };
-    yy.result(indent("{result:"));
+    output(yy, indent("{"));
     depth++;
     var skipEntrances = function (key,value) {
         if (key === 'entrance' || key === 'exit') {
@@ -23,19 +23,19 @@ function ast(yy) {
     };    
     var r = getGraphRoot(yy);
     if (r.getVisualizer())
-        yy.result(indent(JSON.stringify({
+        output(yy, indent(JSON.stringify({
             visualizer: r.getVisualizer()
         })));
     if (r.getDirection())
-        yy.result(indent(JSON.stringify({
+        output(yy, indent(JSON.stringify({
             direction: r.getDirection()
         })));
     if (r.getStart())
-        yy.result(indent(JSON.stringify({
+        output(yy, indent(JSON.stringify({
             start: r.getStart()
         })));
     if (r.getEqual())
-        yy.result(indent(JSON.stringify({
+        output(yy, indent(JSON.stringify({
             equal: r.getEqual()
         })));
 
@@ -47,32 +47,32 @@ function ast(yy) {
                 var processAGroup = function (o) {
                     var n = JSON.parse(JSON.stringify(o, skipEntrances));
                     n.OBJECTS = undefined;
-                    yy.result(indent(JSON.stringify({
+                    output(yy, indent(JSON.stringify({
                         group: n
-                    })));
+                    }))+",");
                     depth++;
-                    yy.result('    {');
+                    output(yy, '    {');
                     traverseObjects(o);
                     depth--;
-                    yy.result('    }');
+                    output(yy, '    },');
                 }(o);
             } else if (o instanceof SubGraph) {
                 var processASubGraph = function (o) {
                     var n = JSON.parse(JSON.stringify(o, skipEntrances));
                     n.OBJECTS = undefined;
-                    yy.result(indent(JSON.stringify({
+                    output(yy, indent(JSON.stringify({
                         subgraph: n
-                    })));
+                    }))+",");
                     depth++;
-                    yy.result('    {');
+                    output(yy, '    {');
                     traverseObjects(o);
-                    yy.result('    }');
+                    output(yy, '    },');
                     depth--;
                 }(o);
             } else if (o instanceof Node) {
-                yy.result(indent(JSON.stringify({
+                output(yy, indent(JSON.stringify({
                     node: o
-                })));
+                }))+",");
             } else {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
@@ -92,8 +92,8 @@ function ast(yy) {
         n.container.exitnode = n.container.exitnode?n.container.exitnode.name:undefined;
         n.container.conditional = undefined;
         n.container = n.container.name;
-        yy.result(indent(JSON.stringify({link:n})));
+        output(yy, indent(JSON.stringify({link:n}))+",");
     }
     --depth;
-    yy.result(indent("}"));
+    output(yy, indent("}"));
 }

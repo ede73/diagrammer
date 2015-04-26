@@ -52,7 +52,7 @@ function GraphRoot() {
      * currentContainer first
      */
     this.setDefault = function (key, value) {
-        debug("graphroot:Set ROOT " + key + " to " + value);
+        //debug("graphroot:Set ROOT " + key + " to " + value);
         return setAttr(this, key, value);
     };
     this.getDefault = function (key) {

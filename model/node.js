@@ -49,6 +49,13 @@ function Node(name, shape) {
         return getAttr(this, 'image');
     };
     this.toString = function () {
-        return "Node(name:" + this.getName() +" color:" + getAttrFmt(this, 'color', ',color={0}') + " fmt:" + getAttrFmt(this, 'label', ',label={0}') + ")";
+	var fmt = "";
+	var tmp = getAttrFmt(this, 'color');
+	if (tmp !== undefined && tmp!='')
+	    fmt += ",color: " + tmp;
+	tmp = getAttrFmt(this, 'label');
+	if (tmp !== undefined && tmp!='')
+	    fmt += ",label: " + tmp;
+        return "Node(name:" + this.getName() +fmt+ ")";
     };
 }

@@ -27,7 +27,7 @@ function SubGraph(name) {
         return setAttr(this, key, value);
     };
     this.setEntrance = function (entrance) {
-        debug("subgrah:Set entrance to " + entrance);
+        debug("subgraph:Set entrance to " + entrance);
         return setAttr(this, 'entrance', entrance);
     }; 
     this.getEntrance = function () {
@@ -45,6 +45,10 @@ function SubGraph(name) {
         return getAttr(this, key);
     };
     this.toString = function () {
-        return "SubGraph(name:" + this.name + ",linklabel:"+this.linklabel+",entrance:"+this.entrance+")";
+	var fmt = "";
+	if (this.linklabel !== undefined && this.linklabel!='') fmt+=",linklabel:"+this.linklabel;
+	if (this.entrance !== undefined) fmt+=",entrance:"+this.entrance;
+	if (this.exit !== undefined) fmt+=",exit:"+this.exit;
+        return "SubGraph(name:" + this.name + fmt+")";
     };
 }

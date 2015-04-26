@@ -160,46 +160,10 @@ function visualize(visualizer) {
     }
 }
 
-function dendroit(sks) {
-console.log(sks);
+function dendroit(parseResult) {
+console.log(parseResult);
 var radius = 250;
-var root=JSON.parse(sks);
-var xroot = {
-  "name": "root",
-  "children": [
-    {
-       "name": "parent A",
-       "children": [
-			{"name": "child A1"},
-			{"name": "child A2"},
-			{"name": "child A3"},
-			{"name": "child A4"},
-			{"name": "child A5"},
-			{"name": "child A6"}
-       ]
-    },{
-       "name": "parent B",
-       "children": [
-			{"name": "child B1"},
-			{"name": "child B2"},
-			{"name": "child B3"},
-			{"name": "child B4"},
-			{"name": "child B5"},
-			{"name": "child B6"},
-			{"name": "child B7"},
-			{"name": "child B8"}
-       ]
-    },{
-        "name": "parent C",
-        "children": [
-			{"name": "child C1"},
-			{"name": "child C2"},
-			{"name": "child C3"},
-			{"name": "child C4"}
-		]
-	}
-	]
-}
+var root=JSON.parse(parseResult);
 
 var margin = 120;
 var angle = 360;
@@ -208,8 +172,9 @@ var cluster = d3.layout.cluster()
  
 var diagonal = d3.svg.diagonal.radial() 
  .projection (function(d) { return [d.y, d.x / 180* Math.PI];}); 
-
-var svg = d3.select("body").append("svg") 
+d3.select("#the_SVG_ID").remove();
+var svg = d3.select("#dendrogram").append("svg") 
+ .attr('id','the_SVG_ID')
  .attr("width",2*radius) 
  .attr("height",2*radius) 
  .append("g") 

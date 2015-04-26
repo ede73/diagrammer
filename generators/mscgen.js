@@ -1,37 +1,32 @@
 function mscgen(yy) {
-    yy.result("msc {");
+    output(yy,"msc {",true);
     var r = getGraphRoot(yy);
     var comma = false;
     var i;
     var tmp;
     // print out all node declarations FIRST (if any)
-    for (i in r.OBJECTS) {
-        if (!r.OBJECTS.hasOwnProperty(i))continue;
-        var o = r.OBJECTS[i];
+    traverseObjects(r, function(o){
         if (o instanceof Group) {
-            yy.result(' /*' + o.getName() + getAttrFmt(o, 'label', ' {0}*/'));
-            for (var j in o.OBJECTS) {
-                if (!o.OBJECTS.hasOwnProperty(j))continue;
-                var z = o.OBJECTS[j];
+            output(yy,' /*' + o.getName() + getAttrFmt(o, 'label', ' {0}')+'*/');
+	    traverseObjects(o,function(z){
                 tmp = getAttrFmt(z, 'color', ',color="{0}"') + getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
-                yy.result((comma ? "," : "") + "    " + z.getName() + tmp);
+                output(yy,(comma ? "," : "") + "    " + z.getName() + tmp);
                 comma = true;
-            }
+            });
         } else if (o instanceof Node) {
             tmp = getAttrFmt(o, 'color', ',textbgcolor="{0}"') + getAttrFmt(o, 'style', ',style={0}') + getAttrFmt(o, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
-            yy.result((comma ? "," : "") + "  " + o.getName() + tmp);
+            output(yy,(comma ? "," : "") + "  " + o.getName() + tmp);
             comma = true;
         }
-    }
-    yy.result(";");
+    });
+    
+    output(yy,";");
     var id = 1;
-    for (i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i))continue;
-        var l = yy.LINKS[i];
+    traverseLinks(yy, function(l){
         var lt="";
         var lr = l.right;
         var ll = l.left;
@@ -122,26 +117,27 @@ function mscgen(yy) {
             if (color) {
                 attrs.push('textcolor="' + color + '"');
             }
-            yy.result("...[" + attrs.join(",") + "];");
-            continue;
+            output(yy,"...[" + attrs.join(",") + "];");
+            return;
         } else if (dash) {
             // dashed
             if (color) {
                 attrs.push('textcolor="' + color + '"');
             }
-            yy.result("---[" + attrs.join(",") + "];");
-            continue;
+            output(yy,"---[" + attrs.join(",") + "];");
+            return;
         } else {
-            yy.result("ERROR: SHOULD NOT HAPPEN");
+            output(yy,"ERROR: SHOULD NOT HAPPEN");
         }
 
-        yy.result(ll.getName() + lt + rightName + "[" + attrs.join(",") + "];");
+        output(yy,ll.getName() + lt + rightName + "[" + attrs.join(",") + "];");
         if (note != "")
-        // yy.result(ll.getName() +' abox '
+        // output(yy,ll.getName() +' abox '
         // +lr.getName()+'[label="'+note+'"];');
-            yy.result(lr.getName() + ' abox ' + lr.getName() + '[label="' + note + '"];');
+            output(yy,lr.getName() + ' abox ' + lr.getName() + '[label="' + note + '"];');
         // if (swap)
-        // yy.result(lr.getName() + lt + ll.getName() + t + ";");
-    }
-    yy.result("}");
+        // output(yy,lr.getName() + lt + ll.getName() + t + ";");
+    });
+    output(false);
+    output(yy,"}");
 }

@@ -25,9 +25,10 @@ function dendrogram(yy) {
     });
 
     //output(yy,'{',true);
-    traverseTree(tree,function (t, isLeaf, level) {
+    traverseTree(tree,function (t, isLeaf, level, index, siblingAmount) {
+	var isLast = (index)==siblingAmount-1;
 	if (isLeaf){
-	    output(yy,'{"name": "'+t.data.name+'", "size": 1},');
+	    output(yy,'{"name": "'+t.data.name+'", "size": 1},//'+isLast);
 	    //debug("Node at "+level+"="+t);
 	}else{
 	    output(yy,'{',true);

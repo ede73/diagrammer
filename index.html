@@ -15,7 +15,8 @@
 	<script type="text/javascript" src="js/canviz-0.1/x11colors.js"></script>
 	<script type="text/javascript" src="js/canviz-0.1/graphs/graphlist.js"></script>
 	<script type="text/javascript" src="js/canviz-0.1/graphs/layoutlist.js"></script>
-	-->
+-->
+<script type="text/javascript" src="js/d3.min.js"></script>
 <!-- canviz support end-->
 
 <body>
@@ -44,6 +45,7 @@
 			name="example" onChange="exampleChanged()">
 			<!--ls tests/*txt|awk -F/ '{print "<option value=\""$2"\">"$2"</option>"}'-->
 			<option value="ast.txt">ast.txt</option>
+			<option value="dendrogram.txt">dendrogram.txt</option>
 			<option value="url.txt">url.txt</option>
 			<option value="compass.txt">compass.txt</option>
 			<option value="events.txt">events.txt</option>

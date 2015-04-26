@@ -16,6 +16,7 @@ parser.yy.result = function (line) {
     }
     result.value = result.value + line + "\n";
 }
+
 parser.trace = function (x) {
     console.log("TRACE:" + x);
 }
@@ -152,7 +153,90 @@ function visualize(visualizer) {
         // }catch(err){
         // console.log(err);
         // }
+    } else if (visualizer == "dendrogram") {
+	dendroit(result.value);
     } else {
         document.getElementById('svg').innerHTML = "only for dotty";
     }
+}
+
+function dendroit(sks) {
+console.log(sks);
+var radius = 250;
+//var root=JSON.parse(sks);
+var root = {
+  "name": "root",
+  "children": [
+    {
+       "name": "parent A",
+       "children": [
+			{"name": "child A1"},
+			{"name": "child A2"},
+			{"name": "child A3"},
+			{"name": "child A4"},
+			{"name": "child A5"},
+			{"name": "child A6"}
+       ]
+    },{
+       "name": "parent B",
+       "children": [
+			{"name": "child B1"},
+			{"name": "child B2"},
+			{"name": "child B3"},
+			{"name": "child B4"},
+			{"name": "child B5"},
+			{"name": "child B6"},
+			{"name": "child B7"},
+			{"name": "child B8"}
+       ]
+    },{
+        "name": "parent C",
+        "children": [
+			{"name": "child C1"},
+			{"name": "child C2"},
+			{"name": "child C3"},
+			{"name": "child C4"}
+		]
+	}
+	]
+}
+
+var margin = 120;
+var angle = 360;
+var cluster = d3.layout.cluster() 
+ .size([angle, radius-margin]); 
+ 
+var diagonal = d3.svg.diagonal.radial() 
+ .projection (function(d) { return [d.y, d.x / 180* Math.PI];}); 
+
+var svg = d3.select("body").append("svg") 
+ .attr("width",2*radius) 
+ .attr("height",2*radius) 
+ .append("g") 
+ .attr("transform","translate("+radius + "," + radius + ")");
+ 
+//d3.json("dendrogram02.json", function(error, root){ 
+ var nodes = cluster.nodes(root); 
+ var links = cluster.links(nodes); 
+ var link = svg.selectAll(".link") 
+ .data(links) 
+ .enter().append("path") 
+ .attr("class","link") 
+ .attr("d", diagonal); 
+ 
+ var node = svg.selectAll(".node") 
+ .data(nodes) 
+ .enter().append("g") 
+ .attr("class","node")
+ .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; }); 
+ 
+ node.append("circle") 
+ .attr("r", 4.5); 
+ 
+ node.append("text")
+ .attr("dy", ".31em")
+ .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+ .attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
+ .text(function(d) { return d.name; }); 
+//});
 }

@@ -43,7 +43,7 @@ function traverseTree(root, callback, enter, exit, level, index, siblingAmount) 
     //debug('process node '+root.data.name + ' childmount'+siblingAmount);
     if (level===undefined) level=0;
     if (level===0) {
-	callback(root, root.CHILDREN.length===0, level);
+	callback(root, root.CHILDREN.length===0, level,0,1);
     }
     if (root.CHILDREN.length>0) {
 	enter(root);
@@ -51,7 +51,7 @@ function traverseTree(root, callback, enter, exit, level, index, siblingAmount) 
     for(var i in root.CHILDREN){
 	if (!root.CHILDREN.hasOwnProperty(i)) continue;
 	var tn = root.CHILDREN[i];
-	callback(tn, tn.CHILDREN.length===0, level+1);
+	callback(tn, tn.CHILDREN.length===0, level+1, i, tn.CHILDREN.length);
 	if (tn.CHILDREN.length>0){
 	    traverseTree(tn, callback, enter, exit, level+1, i, tn.CHILDREN.length);
 	}

@@ -1,29 +1,30 @@
 //node parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 
 function actdiag(yy) {
-    yy.result("actdiag{\n  default_fontsize = 14");
+    output(yy,"actdiag{\n  default_fontsize = 14");
     var r = getGraphRoot(yy);
     /*
      * does not really work..but portrait mode if
-     * (r.getDirection()==="portrait"){ yy.result(" orientation=portrait");
-     * }else{ //DEFAULT yy.result(" orientation=landscape"); }
+     * (r.getDirection()==="portrait"){ output(yy," orientation=portrait");
+     * }else{ //DEFAULT output(yy," orientation=landscape"); }
      */
     //var s = r.getStart();
     var i;
-    for (i in r.OBJECTS) {
-        if (!r.OBJECTS.hasOwnProperty(i))continue;
-        var o = r.OBJECTS[i];
+    var parseObjects = function (o) {
+	output(true);
         if (o instanceof Group) {
-            yy.result('  lane "' + o.getName() + '"{');
-            for (var j in o.OBJECTS) {
-                if (!o.OBJECTS.hasOwnProperty(j))continue;
-                var z = o.OBJECTS[j];
-                var s1 = getAttrFmt(z, 'color', ',color="{0}"') + getShape(shapes.actdiag, z.shape, ',shape={0}') + getAttrFmt(z, 'label', ',label="{0}"');
-                if (s1.trim() != "")
+            output(yy,'lane "' + o.getName() + '"{',true);
+	    traverseObjects(o, function(z){
+                var s1 = getAttrFmt(z, 'color', ',color="{0}"') + 
+		    getShape(shapes.actdiag, z.shape, ',shape={0}') + 
+		    getAttrFmt(z, 'label', ',label="{0}"');
+                if (s1.trim() != "") {
                     s1 = "[" + s1.trim().substring(1) + "]";
-                yy.result("    " + z.getName() + s1 + ';');
-            }
-            yy.result("  }");
+		}
+                output(yy, z.getName() + s1 + ';');
+            });
+	    output(false);
+            output(yy,"}");
         } else {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
@@ -34,15 +35,20 @@ function actdiag(yy) {
             }
 
             // ICON does not work, using background
-            var s2 = getAttrFmt(o, 'color', ',color="{0}"') + getAttrFmt(o, 'image', ',background="icons{0}"') + style + getShape(shapes.actdiag, o.shape, ',shape={0}') + getAttrFmt(o, 'label', ',label="{0}"');
+            var s2 = getAttrFmt(o, 'color', ',color="{0}"') +
+		getAttrFmt(o, 'image', ',background="icons{0}"') +
+		style +
+		getShape(shapes.actdiag, o.shape, ',shape={0}') +
+		getAttrFmt(o, 'label', ',label="{0}"');
             if (s2.trim() != "")
                 s2 = "[" + s2.trim().substring(1) + "]";
-            yy.result("  " + o.getName() + s2 + ';');
+            output(yy,o.getName() + s2 + ';');
         }
-    }
-    for (i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i))continue;
-        var l = yy.LINKS[i];
+	output(false);
+    };
+    traverseObjects(r, parseObjects);
+
+    traverseLinks(yy, function(l) {
         var t = "";
         if (l.linkType.indexOf(".") !== -1) {
             t += ',style="dotted" ';
@@ -57,7 +63,7 @@ function actdiag(yy) {
             t = t.substring(1).trim();
         if (t != "")
             t = "[" + t + "]";
-        yy.result("  " + l.left.getName() + " -> " + l.right.getName() + t + ";");
-    }
-    yy.result("}");
+        output(yy,"  " + l.left.getName() + " -> " + l.right.getName() + t + ";");
+    });
+    output(yy,"}");
 }

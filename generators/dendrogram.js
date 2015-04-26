@@ -25,31 +25,25 @@ function dendrogram(yy) {
     });
 
     //output(yy,'{',true);
-    traverseTree(tree,function (t, isLeaf, level, index, siblingAmount) {
-	var isLast = (index)==siblingAmount-1;
-	//debug('index '+index+' amo '+(siblingAmount-1));
+    traverseTree(tree,function (t, isLeaf, hasSibling) {
 	if (isLeaf){
 	    comma='';
-	    if (isLast!==true)
+	    if (hasSibling)
 		comma=',';
 	    output(yy,'{"name": "'+t.data.name+'", "size": 1}'+comma);
-	    //debug("Node at "+level+"="+t);
 	}else{
 	    output(yy,'{',true);
 	    output(yy,'"name": "'+t.data.name+'",');
-	    //debug("Node at "+level+"="+t);
 	}
     },function(t){
 	output(yy,'"children": [',true);
-    },function(t, index, siblingAmount){
-	var isLast = (index)==siblingAmount-1;
-	//debug('index '+index+' amo '+(siblingAmount-1));
+    },function(t, hasNextSibling){
 	output(false);
 	output(yy,']',false);
-	if (isLast || index===undefined){
-	    output(yy,'}');
-	}else{
+	if (hasNextSibling){
 	    output(yy,'},');
+	}else{
+	    output(yy,'}');
 	}
     });
     output(false);

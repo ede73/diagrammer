@@ -39,11 +39,12 @@ function findNode(tree, findData) {
     return undefined;
 }
 
-function traverseTree(root, callback, enter, exit, level, index, siblingAmount) {
+function traverseTree(root, callback, enter, exit, level, hasSibling,parent) {
     //debug('process node '+root.data.name + ' childmount'+siblingAmount);
     if (level===undefined) level=0;
+    if (hasSibling===undefined) hasSibling=false;
     if (level===0) {
-	callback(root, root.CHILDREN.length===0, level,2,1);
+	callback(root, root.CHILDREN.length===0,false);
     }
     if (root.CHILDREN.length>0) {
 	enter(root);
@@ -51,12 +52,20 @@ function traverseTree(root, callback, enter, exit, level, index, siblingAmount) 
     for(var i in root.CHILDREN){
 	if (!root.CHILDREN.hasOwnProperty(i)) continue;
 	var tn = root.CHILDREN[i];
-	callback(tn, tn.CHILDREN.length===0, level+1, i, siblingAmount);
+	var isLeaf = tn.CHILDREN.length===0;
+	var hasNodeSiblings = (parseInt(i)+1)!==root.CHILDREN.length;
+	debug('node '+tn.data.name+' is leaf?'+isLeaf+" hasSiblings"+hasNodeSiblings+" i="+(parseInt(i)+1)+"/");
+	callback(tn, isLeaf, hasNodeSiblings);
 	if (tn.CHILDREN.length>0){
-	    traverseTree(tn, callback, enter, exit, level+1, i, tn.CHILDREN.length);
+	    traverseTree(tn, 
+			 callback, enter, exit,
+			 level+1,
+			 hasNodeSiblings,
+			 root);
 	}
     }
     if (root.CHILDREN.length>0) {
-	exit(root, index, siblingAmount);
+	debug(root.data.name+="has sibling");
+	exit(root, hasSibling);
     }
 }

@@ -563,3 +563,5 @@ function traverseObjects(container, callback) {
 	callback(container.OBJECTS[i]);
     }
 }
+
+

@@ -1,55 +1,51 @@
 function dendrogram(yy) {
-    var processANode = function (o) {
-    };
-    output(yy,"{",true);
+    var tree;
+    function addNode(l, r) {
+	if (tree === undefined) {
+	    tree = new TreeNode(l);
+	}
+	var cl = findNode(tree,l);
+	if (cl===undefined){
+	    throw new Error('Left node not found from tree');
+	}
+	if (undefined === findNode(tree,r)){
+	    //debug('Add '+r.name+' as child of '+cl.data.name);
+	    cl.CHILDREN.push(new TreeNode(r));
+	}
+    }
 
-    var r = getGraphRoot(yy);
-    if (r.getVisualizer())
-        output(yy,JSON.stringify({
-            visualizer: r.getVisualizer()
-        }));
-    if (r.getDirection())
-        output(yy,JSON.stringify({
-            direction: r.getDirection()
-        }));
-    if (r.getStart())
-        output(yy,JSON.stringify({
-            start: r.getStart()
-        }));
-    if (r.getEqual())
-        output(yy,JSON.stringify({
-            equal: r.getEqual()
-        }));
-
-    var parseObject = function (o) {
-        if (o instanceof Group) {
-            var processAGroup = function (o) {
-                var n = JSON.parse(JSON.stringify(o));
-                n.OBJECTS = undefined;
-                output(yy,JSON.stringify({
-                    group: n
-                }));
-		output(true);
-                traverseObjects(o, parseObject);
-		output(false);
-            }(o);
-        } else if (o instanceof Node) {
-            output(yy,JSON.stringify({
-                node: o
-            }));
-        } else {
-            throw new Error("Not a node nor a group, NOT SUPPORTED");
-        }
-    };
-    traverseObjects(r,parseObject);
-
+    //debug(JSON.stringify(yy.LINKS));
+    /**
+     * For a dendrogram we're not interested in nodes
+     * just edges(for now!)
+     */
     traverseLinks(yy, function(l) {
-        var n = JSON.parse(JSON.stringify(l));
-        n.container.OBJECTS = undefined;
-        n.container.label = undefined;
-        n.container.conditional = undefined;
-        output(yy,JSON.stringify(n));
+	//debug('link node '+l.left.name+' to '+l.right.name);
+	addNode(l.left, l.right);
     });
 
-    output(yy,"}");
+    //output(yy,'{',true);
+    traverseTree(tree,function (t, isLeaf, level) {
+	if (isLeaf){
+	    output(yy,'{"name": "'+t.data.name+'", "size": 1},');
+	    //debug("Node at "+level+"="+t);
+	}else{
+	    output(yy,'{',true);
+	    output(yy,'"name": "'+t.data.name+'",');
+	    //debug("Node at "+level+"="+t);
+	}
+    },function(t){
+	output(yy,'"children": [',true);
+    },function(t, index, siblingAmount){
+	var isLast = (index)==siblingAmount-1;
+	//debug('index '+index+' amo '+(siblingAmount-1));
+	output(false);
+	output(yy,']',false);
+	if (isLast || index===undefined){
+	    output(yy,'}');
+	}else{
+	    output(yy,'},');
+	}
+    });
+    output(false);
 }

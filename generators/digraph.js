@@ -3,7 +3,6 @@ function digraph(yy) {
     // http://www.graphviz.org/doc/info/attrs.html#d:splines
     // TODO: Start note fdp/neato
     // http://www.graphviz.org/doc/info/attrs.html#d:start
-    var depth = 0;
 
     var skipEntrances = function (key,value) {
         if (key === 'entrance' || key === 'exit') {
@@ -12,27 +11,17 @@ function digraph(yy) {
         return value;
     };
 
-    function indent(msg) {
-        if (msg.trim() == "")
-            return "";
-        var prefix = "";
-        for (var i = 0; i < depth; i++) {
-            prefix += "  ";
-        }
-        return prefix + msg;
+    function hasOutwardLink(yy,node) {
+	for (var i in yy.LINKS) {
+            if (!yy.LINKS.hasOwnProperty(i))continue;
+            var r = yy.LINKS[i];
+            if (r.left.name === node.name){
+		return true;
+            }
+	}
+	return false;
     }
-
-function hasOutwardLink(yy,node) {
-    for (var i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i))continue;
-        var r = yy.LINKS[i];
-        if (r.left.name === node.name){
-          return true;
-        }
-    }
-    return false;
-}
-
+    
     var processANode = function (o) {
         var nattrs = [];
         var styles = [];
@@ -68,24 +57,23 @@ function hasOutwardLink(yy,node) {
         var t = "";
         if (nattrs.length > 0)
             t = "[" + nattrs.join(",") + "]";
-        yy.result(indent(o.getName() + t + ';'));
+        output(yy,o.getName() + t + ';');
     };
 
     var r = getGraphRoot(yy);
     if (r.getVisualizer()) {
-        yy.result("/* render:" + r.getVisualizer() + "*/")
+        output(yy,"/* render:" + r.getVisualizer() + "*/")
     }
-    yy.result("digraph {");
-    depth++;
-    //yy.result(indent("edge[weight=1]"))
-    //yy.result(indent("ranksep=0.75"))
-    //yy.result(indent("nodesep=0.75"))
+    output(yy,"digraph {",true);
+    //output(yy,"edge[weight=1]")
+    //output(yy,"ranksep=0.75")
+    //output(yy,"nodesep=0.75")
 
-    yy.result(indent("compound=true;"));
+    output(yy,"compound=true;");
     if (r.getDirection() === "portrait") {
-        yy.result(indent("rankdir=LR;"));
+        output(yy,"rankdir=LR;");
     } else {
-        yy.result(indent("rankdir=TD;"));
+        output(yy,"rankdir=TD;");
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
     var s = r.getStart();
@@ -95,16 +83,15 @@ function hasOutwardLink(yy,node) {
         // {$$=" {rank = same;null}\n {rank = same; "+$2+"}\n null
         // [shape=plaintext,
         // label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-        yy
-            .result(indent("//startnode setup\n  {rank = same;null} {rank = same; " + s + "}\n  null [shape=plaintext, label=\"\"];\n  " + s + "[shape=doublecircle];\n  null->" + s + ";\n"));
+        output(yy, "//startnode setup\n  {rank = same;null} {rank = same; " + s + "}\n  null [shape=plaintext, label=\"\"];\n  " + s + "[shape=doublecircle];\n  null->" + s + ";\n");
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
     if (r.getEqual() != undefined && r.getEqual().length > 0) {
-        yy.result(indent("{rank=same;"));
+        output(yy,"{rank=same;",true);
         for (var x = 0; x < r.getEqual().length; x++) {
-            yy.result(indent(r.getEqual()[x].getName() + ";"));
+            output(yy,r.getEqual()[x].getName() + ";");
         }
-        yy.result("}");
+        output(yy,"}",false);
     }
     var fixgroup = function (c) {
         for (var i in c.OBJECTS) {
@@ -123,7 +110,7 @@ function hasOutwardLink(yy,node) {
     }(r.OBJECTS);
 
     function getFirstLinkOfTheGroup(grp) {
-        //yy.result("FIRST NODE"+JSON.stringify(grp));
+        //output(yy,"FIRST NODE"+JSON.stringify(grp));
         for (var i in yy.LINKS) {
             if (!yy.LINKS.hasOwnProperty(i))continue;
             var l = yy.LINKS[i];
@@ -131,7 +118,7 @@ function hasOutwardLink(yy,node) {
                 if (!grp.OBJECTS.hasOwnProperty(j))continue;
                 var n = grp.OBJECTS[j];
                 if (n == l.left) {
-                    // yy.result("ReturnF "+n);
+                    // output(yy,"ReturnF "+n);
                     return n;
                 }
             }
@@ -141,7 +128,7 @@ function hasOutwardLink(yy,node) {
 
     function getLastLinkInGroup(grp) {
         var nod = undefined;
-        // yy.result("LAST NODE"+JSON.stringify(grp));
+        // output(yy,"LAST NODE"+JSON.stringify(grp));
         for (var i in yy.LINKS) {
             if (!yy.LINKS.hasOwnProperty(i))continue;
             var l = yy.LINKS[i];
@@ -154,7 +141,7 @@ function hasOutwardLink(yy,node) {
                     nod = n;
             }
         }
-        // yy.result("ReturnL "+nod);
+        // output(yy,"ReturnL "+nod);
         return nod;
     }
 
@@ -170,44 +157,41 @@ function hasOutwardLink(yy,node) {
                 // Group name,OBJECTS,get/setEqual,toString
                 var processAGroup = function (o) {
                     debug(JSON.stringify(o,skipEntrances));
-                    yy.result(indent('subgraph cluster_' + o.getName() + ' {'));
+                    output(yy,'subgraph cluster_' + o.getName() + ' {',true);
                     if (o.isSubGraph){
-                        yy.result('graph[style=invis];');
+                        output(yy,'graph[style=invis];');
                     }
-                    depth++;
                     if (o.getLabel())
-                        yy.result(indent(getAttrFmt(o, 'label',
-                            '   label="{0}";')));
+                        output(yy,getAttrFmt(o, 'label',
+                            '   label="{0}";'));
                     if (o.getColor() !== undefined) {
-                        yy.result(indent("style=filled;"));
-                        yy.result(indent(getAttrFmt(o, 'color',
-                            '   color="{0}";\n')));
+                        output(yy,"style=filled;");
+                        output(yy,getAttrFmt(o, 'color',
+                            '   color="{0}";\n'));
                     }
-                    depth++;
                     traverseObjects(o);
-                    depth--;
-                    depth--;
-                    yy.result(indent("}//end of " + o.getName() + " " + cond));
+		    output(false);
+                    output(yy,"}//end of " + o.getName() + " " + cond);
                     if (cond) {
-                        yy.result(indent("//COND " + o.getName() + " " + cond));
+                        output(yy,"//COND " + o.getName() + " " + cond);
                         if (cond == "endif") {
                             //never reached
                             var exitlink = getAttr(o, 'exitlink');
                             if (exitlink) {
-                                yy.result(indent(lastexit + "->" + exitlink + "[color=red];"));
-                                yy.result(indent(lastendif + "->" + exitlink + ";"));
+                                output(yy,lastexit + "->" + exitlink + "[color=red];");
+                                output(yy,lastendif + "->" + exitlink + ";");
                             }
                         } else {
                             var sn = "entry" + getAttr(o, 'exitnode');
                             if (!lastendif) {
                                 lastendif = "endif" + getAttr(o, 'exitnode');
-                                yy.result(indent(lastendif + "[shape=circle,label=\"\",width=0.01,height=0.01];"));
+                                output(yy,lastendif + "[shape=circle,label=\"\",width=0.01,height=0.01];");
                             }
                             //TODO:else does not need diamond
-                            yy.result(indent(sn + "[shape=diamond,fixedsize=true,width=1,height=1,label=\"" + o.getLabel() + "\"];"));
+                            output(yy,sn + "[shape=diamond,fixedsize=true,width=1,height=1,label=\"" + o.getLabel() + "\"];");
                             if (cond == "if") {
                                 //entrylink!
-                                yy.result(indent(getAttr(o, 'entrylink').getName() + "->" + sn + ";"));
+                                output(yy,getAttr(o, 'entrylink').getName() + "->" + sn + ";");
                             }
                             // FIRST node of group and LAST node in group..
                             var fn = getFirstLinkOfTheGroup(o);
@@ -216,12 +200,12 @@ function hasOutwardLink(yy,node) {
                             //var en = "exit" + getAttr(o, 'exitnode');
 
                             if (lastexit) {
-                                yy.result(indent(lastexit + "->" + sn + "[label=\"NO\",color=red];"));
+                                output(yy,lastexit + "->" + sn + "[label=\"NO\",color=red];");
                                 //lastexit = undefined;
                             }
                             // YES LINK to first node of the group
-                            yy.result(indent(sn + "->" + fn.getName() + "[label=\"YES\",color=green,lhead=cluster_" + o.getName() + "];"));
-                            yy.result(indent(ln.getName() + "->" + lastendif + "[label=\"\"];"));
+                            output(yy,sn + "->" + fn.getName() + "[label=\"YES\",color=green,lhead=cluster_" + o.getName() + "];");
+                            output(yy,ln.getName() + "->" + lastendif + "[label=\"\"];");
                             lastexit = sn;
                         }
                     }
@@ -234,7 +218,7 @@ function hasOutwardLink(yy,node) {
         }
     }(r);
 
-    yy.result("//links start");
+    output(yy,"//links start");
     for (var i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i))continue;
         var l = yy.LINKS[i];
@@ -259,7 +243,7 @@ function hasOutwardLink(yy,node) {
         var lr = l.right;
         var ll = l.left;
 
-        //yy.result(indent("// link from "+ll+" to "+lr));
+        //output(yy,"// link from "+ll+" to "+lr);
         if (lr instanceof Group ) {
             //debug('huuhuu');
             // just pick ONE Node from group and use lhead
@@ -335,11 +319,12 @@ function hasOutwardLink(yy,node) {
         //debug('print lr '+lr);
         if (ll instanceof Array) {
           ll.forEach(function(element, index, array){
-            yy.result(indent(element.getName() + getAttrFmt(l, 'lcompass', '{0}').trim() + lt + lr.getName() + getAttrFmt(l, 'rcompass', '{0}').trim() + t + ";"));
+            output(yy,element.getName() + getAttrFmt(l, 'lcompass', '{0}').trim() + lt + lr.getName() + getAttrFmt(l, 'rcompass', '{0}').trim() + t + ";");
           });
         } else {
-          yy.result(indent(ll.getName() + getAttrFmt(l, 'lcompass', '{0}').trim() + lt + lr.getName() + getAttrFmt(l, 'rcompass', '{0}').trim() + t + ";"));
+          output(yy,ll.getName() + getAttrFmt(l, 'lcompass', '{0}').trim() + lt + lr.getName() + getAttrFmt(l, 'rcompass', '{0}').trim() + t + ";");
         }
     }
-    yy.result("}");
+    output(false);
+    output(yy, "}");
 }

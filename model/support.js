@@ -91,16 +91,16 @@ function getAttrFmt(cl, attr, fmt, resultarray) {
 var indentLevel=0;
 function output(yy, txt, indentOrDedent) {
     var prefix="";
-    if (indentOrDedent===true || yy===true || txt===true){
-	indentLevel++;
-    }else if (indentOrDedent===false || yy===false || txt===false){
-	indentLevel--;
-    }
     if (txt!== true && txt!==false && yy !== true && yy!==false){
 	for (var i = 0; i < indentLevel; i++) {
             prefix += "    ";
 	}
 	yy.result(prefix + txt);
+    }
+    if (indentOrDedent===true || yy===true || txt===true){
+	indentLevel++;
+    }else if (indentOrDedent===false || yy===false || txt===false){
+	indentLevel--;
     }
 }
 

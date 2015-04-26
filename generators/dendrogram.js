@@ -4,12 +4,13 @@ function dendrogram(yy) {
 	if (tree === undefined) {
 	    tree = new TreeNode(l);
 	}
+	if (!(l instanceof Node)) return;
 	var cl = findNode(tree,l);
 	if (cl===undefined){
 	    throw new Error('Left node ('+l.name+') not found from tree');
 	}
-	if (undefined === findNode(tree,r)){
-	    //debug('Add '+r.name+' as child of '+cl.data.name);
+	if (undefined === findNode(tree,r) && (r instanceof Node)){
+	    debug('Add '+r.name+' as child of '+cl.data.name+" co "+r.container);
 	    cl.CHILDREN.push(new TreeNode(r));
 	}
     }

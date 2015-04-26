@@ -57,6 +57,8 @@ S
 			//could be tree/dendrogram rather!
 			}else if ("dendrogram" == generator){
 				dendrogram(yy);
+			}else if ("sankey" == generator){
+				sankey(yy);
 			}else{
 				//rankdir available ONLY IN dot
 				digraph(yy);

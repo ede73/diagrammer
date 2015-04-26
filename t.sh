@@ -79,7 +79,7 @@ case "$generator" in
    node $MYPATH/parse.js $extras "$input" digraph >$OUT
    [[ $text -ne 0 ]] && cat $OUT
   ;;
-  ast|dendrogram)
+  ast|dendrogram|sankey)
     node $MYPATH/parse.js $extras "$input" $generator
     exit 0
   ;;

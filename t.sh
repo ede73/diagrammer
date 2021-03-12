@@ -12,6 +12,9 @@ if [ "${1:-skipparsermake}" == "skipparsermake" ]; then
 #EXPORTREMOVE
 fi
 
+PLANTUML=ext/plantuml.jar
+#PLANTUML=/usr//local/Cellar/plantuml/1.2017.12/libexec/plantuml.jar
+
 if [ $# -eq 0 ];then
   echo "USAGE: [skipparsermake] [silent] [tests] [verbose] [text] [svg] [INPUT] [GENERATOR|dot]"
   exit 0
@@ -54,7 +57,7 @@ generator=${2:-dot}
 #EXPORTREMOVE
 echo "testing lexing"
 #EXPORTREMOVE
-node testStateLexer.js $input
+node --max-old-space-size=4096 testStateLexer.js $input
 
 #EXPORTREMOVE
 #node parser.js $input $func | tee a.gv
@@ -72,19 +75,19 @@ echo "test parser "$extras" "$OUT
 
 case "$generator" in
   dexgraph|nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
-    node $MYPATH/parse.js $extras "$input" $generator >$OUT
+    node --max-old-space-size=4096  $MYPATH/parse.js $extras "$input" $generator >$OUT
     [[ $text -ne 0 ]] && cat $OUT
   ;;
   neato|twopi|circo|fdp|sfdp)
-   node $MYPATH/parse.js $extras "$input" digraph >$OUT
+   node --max-old-space-size=4096  $MYPATH/parse.js $extras "$input" digraph >$OUT
    [[ $text -ne 0 ]] && cat $OUT
   ;;
   ast|dendrogram|sankey)
-    node $MYPATH/parse.js $extras "$input" $generator
+    node --max-old-space-size=4096 $MYPATH/parse.js $extras "$input" $generator
     exit 0
   ;;
   *)
-    node $MYPATH/parse.js $extras "$input" digraph >$OUT
+    node --max-old-space-size=4096 $MYPATH/parse.js $extras "$input" digraph >$OUT
     [[ $text -ne 0 ]] && cat $OUT
   ;;
 esac
@@ -99,7 +102,7 @@ echo "Generate sequence $generator"
 
 case "$generator" in
   plantuml_sequence)
-    java -Xmx2048m -jar ext/plantuml.jar $OUT >"$IMAGEFILE"&& [[ $silent = 0 ]] && open "$IMAGEFILE"
+    java -Xmx2048m -jar $PLANTUML_JAR $OUT >"$IMAGEFILE"&& [[ $silent = 0 ]] && open "$IMAGEFILE"
   ;;
   nwdiag|actdiag|blockdiag)
     cat $OUT |$generator -a -T${FORMAT} -o $IMAGEFILE - && [[ $silent = 0 ]] && open "$IMAGEFILE" 
@@ -117,7 +120,7 @@ esac
 
 #When running tests, these are important
 [[ $tests -eq 0 ]] && {
-  rm $OUT;
+  # rm $OUT;
   [[ $FORMAT -eq "png" ]] && {
     #Compress
     which  pngquant >/dev/null

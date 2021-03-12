@@ -1,0 +1,11 @@
+#https://medium.com/@JohnFoderaro/how-to-set-up-apache-in-macos-sierra-10-12-bca5a5dfffba
+sudo nano /etc/apache2/users/ede.conf /etc/apache2/httpd.conf /etc/apache2/extra/httpd-userdir.conf /etc/apache2/extra/httpd-vhosts.conf /etc/hosts && sudo apachectl restart
+
+chmod 755 /Users/ede/Sites/diagrammer/.htaccess 
+chmod 755 /Users/ede/Sites/diagrammer
+chmod 755 /Users/ede/Sites/diagrammer/web/
+chmod 777 /Users/ede/Sites/diagrammer/web/post.txt 
+chmod 777 /Users/ede/Sites/diagrammer/web/error.txt 
+chmod 777 /Users/ede/Sites/diagrammer/web/result.png
+
+brew install mscgen graphviz

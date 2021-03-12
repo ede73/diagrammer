@@ -1,0 +1,85 @@
+//MIND MAP PART
+$(events:#ffc0ff) $(pd:#ffc0c0) $(state:#ccffcc)
+$(vpn:#c0ffff) $(def:#c0c0c0) $(error:#ff0000) $(async:#9990ff) node color $(def)
+ $(single:#0000ff) $(thread:#aaccaa)
+$(sb8:#ff0000) $(snative:#ff00ff)
+
+//MINDMAP PART in DappleModeMindMap
+//ACTUAL STATE DESCRIPTION
+start begin
+begin>breakAllThreads
+//Async ask vpn permissions
+//As long as we're here, mobile data is ON
+VpnGranted
+group LaunchVpn#ccffcc;Prepare vpn
+  breakAllThreads.>Wait.>"granted"VpnGranted
+  group vpnprep#ccccff;Async
+    diamond startVpn;VpnService.prepare()
+    breakAllThreads.>startVpn>"show intent"showIntent>$(error)"Cancelled\nRevoked"startVpn
+    startVpn>VpnGranted
+  group end
+group end
+
+group FetchBootstrap;Fetch bootstrap from dc
+    cloud bs $(async);Make bootstrap request
+    bs.>$(error)bs;Retry until success
+group end
+
+group ConnectB8;Connect to b8\n(*Actually this is b8 reader thread)
+    blackhole>bs>Connect2B8>AuthNegotiate>ReconfigureVpn.>StartThreads
+group end
+
+//See Asynch error processing
+//group MainMode;Main processing\nEach group = one thread
+    group StackLoop$(thread);Run the user space TCP stack&timers
+        runUserSpaceStackLoop
+        shape input
+        runUserSpaceStackLoop.>InFree,InNonFree,
+                                        PrtctSocket,SendTcp,
+                                        SendUdp,SendWinUpd
+        shape default
+        cloud UdpOut$(async).>invis udp1
+        cloud TcpOut$(async).>invis tcp1
+    group end
+
+    group TunnelComms$(thread);Read from native stack (tunnel)
+        invis n1 .>
+        cloud readFromNativeSide$(snative).>"Continous feed"RoutingLogic/>$(single)"PIPE\nsingle thread access\nfree"StackLoop
+        RoutingLogic/>$(single)"nonfree"StackLoop
+    group end
+
+    group BackendComms$(thread);Read from B8\n(*)
+        invis b1 .> cloud readFromBackend$(sb8)>ParseB8 >
+              "Some\nadministrative\nmessages"AdminWork>"loop"readFromBackend
+        ParseB8 />$(single) StackLoop;PIPE\nsingle thread access
+    group end
+//group end
+
+group ConnectionBrokenGroup;Examine why connection broke
+    //Some connection errors MUST make bootstrap request, some quick reconnect
+    connectionBroken>SimChanged>bs
+    connectionBroken>IpChanged>bs
+    connectionBroken>IoError>Connect2B8
+group end
+
+//loose ends
+ReconfigureVpn>readFromBackend
+VpnGranted>blackhole
+//AdminWork>"break all threads"bs
+
+InFree,InNonFree.>cloud Write2Native$(snative).>invis i1
+
+SendUdp,SendTcp,SendWinUpd.>SendVCodes.>cloud Write2B8$(sb8).>invis i2
+
+//Timed events
+node color $(def)
+note Every24Hours.>$(async)bs;No retry?
+
+//Asynch error processing
+node color $(error)
+link color $(error)
+StackLoop.>"Exception caught"Errors
+VpnRevoked.>"User revoked vpn"Errors.>begin
+BackendComms.>"B8 connection broken"connectionBroken
+TunnelComms.>"Any error"Errors
+

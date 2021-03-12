@@ -1,0 +1,28 @@
+generator digraph
+visualizer fdp
+$(DM:#ff0000)
+$(DM_ACCT:#ffFF00)
+$(DM_PROD:#55FFF0)
+$(VPN:#00ff00)
+$(BACK:#5555ff)
+$(EVENT:#ff00ff)
+shape box
+//EventRecorder path
+node color $(EVENT)
+Android-EventRecorder-Queue,Uploader
+//BackendApiServicePart
+node color $(BACK)
+Android-BackendApiService-BackendBootstrapHelper,BootstrapListener
+//VpnService
+node color $(VPN)
+Android-VpnService-DropProcessor,AppDetection,VpnThread-VpnProtocol
+//DomainModel immediates
+node color $(DM)
+Android-DomainModel-DepencencyDb,DapplePurchaser,DappleRecommender,Accounting,Product
+//Domain model accounting
+node color $(DM_ACCT)
+Accounting-DataUsePreferenceStore,DataUseReporter,AccountedUid-RoutingGroup
+//Domain model product
+node color $(DM_PROD)
+Product-Branding,DetectedOperator,PromoDapple,ActiveDapple,Dapple-DappleApp,PurchaseOptions
+

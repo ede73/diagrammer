@@ -1,0 +1,61 @@
+start i
+
+LR
+
+shape rectangle
+m;Mobile data off
+d;Disconnect
+a;ask to connect
+bc;Begin connect
+bd;Begin disconnect
+i;idle
+e;End
+
+shape diamond
+d1;
+d2;
+d3;
+d4;
+d5;
+d6;
+
+m>#00ff00i
+i>#ff0000d1;os.mobile_connected
+
+//D1
+d1>#00ff00i;else
+d1>a;[service.autoconnect_on_mobile]
+d1>m;[service.turn_off_mobiledata==true]
+
+//D2
+i>#ff0000d2;service.start
+d2>#00ff00i;else
+d2>a;[service.autoconnect_on_service==true]
+i>#ff0000a;ui.connect
+
+//D3
+i>#ff0000d3;os.bootup
+d3>#00ff00i;else
+d3>a;[service.autoconnect_on_boot==true]
+
+//D4
+a>d4
+d4>#00ff00i;[service.connecting==true||service.connected==true]
+d4>bc;else
+
+//D5
+i>#ff0000d5;os.wifi_connected
+d5>#00ff00i;else
+d5>d;[service.disconnect_in_wifi==true]
+i>#ff0000d;ui.disconnect
+
+//D6
+d>d6
+d6>bd;else
+d6>#00ff00i;[service.disconnecting||(!service.connected && !service.connecting)]
+
+i>#ff0000e;service.quit
+
+bd>#00ff00i
+bc>#00ff00i
+

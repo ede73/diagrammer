@@ -1,0 +1,21 @@
+//MIND MAP PART
+$(events:#ffc0ff) $(pd:#ffc0c0) $(state:#ccffcc)
+$(vpn:#c0ffff) $(def:#c0c0c0) $(error:#ff0000)
+$(async:#0000ff)
+node color $(def)
+Events$(events);Possible events\nSystem is interested
+
+circle Events-note Wifi-On,Off
+
+node color $(pd)
+shape input
+Events-PhoneData-Connected,Connecting,Disconnecting,Suspended
+
+node color $(state)
+shape box
+Events-"Any point?"StateTransitions-TurnOn,TurnOff
+
+node color $(vpn)
+Events-"Must be granted"vpn-Revoke,Granted,Asking
+
+

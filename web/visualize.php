@@ -7,19 +7,22 @@
 #<meta http-equiv="Expires" content="0"/>
 
 function getExe($name){
-$PATH="/usr/bin/";
-if (!file_exists($PATH.$name)){
-  $PATH="/usr/local/bin/";
-  if (!file_exists($PATH.$name)){
-   http_response_code(501);
-   return "./".$name;
+  $x = array("/usr/bin/","/usr/local/bin/","/opt/homebrew/bin/");
+  foreach($x as $path) {
+    $file = $path.$name;
+    error_log("test $file");
+    if (file_exists($file)){
+       return $file;
+    }
   }
+  error_log("File $file does not exist...");
+  http_response_code(501);
+  return "./".$name;
 }
-return $PATH.$name;
-}
-//print_r($_SERVER);
+
 $postText = trim(file_get_contents('php://input'));
 if (FALSE===file_put_contents("./post.txt",$postText)){
+  error_log("Failed storing input to ./post.txt");
   http_response_code(500);
   return;
 }
@@ -28,7 +31,7 @@ if (FALSE===file_put_contents("./post.txt",$postText)){
 
 //header("Content-Type: image/png");
 //passthru("cat state_dot.png");
-
+#brew install mscgen
 switch($_REQUEST["visualizer"]){
   case "mscgen":
    $r=exec(getExe("mscgen")." -Tpng -o result.png post.txt");
@@ -46,7 +49,7 @@ switch($_REQUEST["visualizer"]){
     $r=exec(getExe("seqdiag")." -Tpng -a -o result.png post.txt");
   break;
   case "dot":
-    $r=exec(getExe("dot")." -Tpng -o result.png post.txt");
+    $r=exec(getExe("dot")." -Tpng:gd -o result.png post.txt");
   break;
   case "twopi":
     $r=exec(getExe("twopi")." -Tpng -o result.png post.txt");

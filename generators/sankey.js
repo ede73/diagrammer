@@ -1,4 +1,4 @@
-function dendrogram(yy) {
+function sankey(yy) {
     var tree;
     function addNode(l, r) {
 	if (tree === undefined) {

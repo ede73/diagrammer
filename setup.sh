@@ -4,7 +4,8 @@ debian_install() {
 }
 
 debian_package_search() {
-  apt-cache show $*
+  apt-cache show $* >/dev/null
+  return $?
 }
 
 install() {
@@ -17,7 +18,7 @@ install() {
 }
 
 apache_enable_mod() {
-  [ -x /usr/sbin/a2enmod ] && {
+  [[ -x /usr/sbin/a2enmod ]] && {
     sudo /usr/sbin/a2enmod $*
     return 0
   }
@@ -43,16 +44,20 @@ make_home_dir() {
 get_php_apache_module() {
   debian_package_search libapache2-mod-php7.4 && {
     echo libapache2-mod-php7.4
+    return 0
   }
   debian_package_search libapache2-mod-php7.3 && {
     echo libapache2-mod-php7.3
+    return 0
   }
+  echo "No install candidates for apache2-php modules"
+  exit 10
 }
 
 # Note MAC brew install graphviz --with-pango
 PHP_MODULE=$(get_php_apache_module)
 
-install jison apache2 "$PHP_MODULE" graphviz mscgen plantuml nwdiag blockdiag actdiag
+install jison apache2 "$PHP_MODULE" graphviz mscgen plantuml python3-nwdiag python3-blockdiag python3-actdiag
 apache_enable_mod userdir
 apache_enable_mod php7
 make_home_dir

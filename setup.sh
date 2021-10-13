@@ -81,5 +81,8 @@ apache_enable_mod php7.3
 apache_enable_mod php7.4
 make_home_dir
 
+cd web
+tar fxj ../ext/canviz-0.1.tar.bz2
+
 apache_restart
 echo "You need to ENABLE PHP in userdirs manually"

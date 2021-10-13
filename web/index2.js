@@ -244,14 +244,17 @@ textAreaOnChange(parse, 150);
 visualizeOnChange(visualize, 250);
 if (acemode) {
     var timer2 = null;
-    editor.getSession().on('change', function () {
+    // some init race condition, editor null on page load
+    if (typeof editor != 'undefined') {
+      editor.getSession().on('change', function () {
         // chrome/mac(elsewhere?)
-        if (timer2) {
-            window.clearTimeout(timer2);
-        }
-        timer = window.setTimeout(function () {
-            timer2 = null;
-            parse(getGenerator(), getVisualizer());
-        }, delay);
-    });
+          if (timer2) {
+              window.clearTimeout(timer2);
+          }
+          timer = window.setTimeout(function () {
+              timer2 = null;
+              parse(getGenerator(), getVisualizer());
+          }, delay);
+      });
+    }
 }

@@ -1,6 +1,6 @@
 debian_install() {
   sudo apt-get update
-  sudo apt-get install $*
+  sudo apt-get -y install $*
 }
 
 install() {
@@ -32,10 +32,11 @@ apache_restart() {
 
 make_home_dir() {
   # in linux
-  mkdir ~/public_html
+  mkdir -p ~/public_html
 }
 
-install jison apache2 libapache2-mod-php7.3
+# Note MAC brew install graphviz --with-pango
+install jison apache2 libapache2-mod-php7.3 graphviz mscgen plantuml
 apache_enable_mod userdir
 apache_enable_mod php7
 make_home_dir

@@ -1,4 +1,4 @@
-<?
+<?php
 #<!-- HTTP 1.1 -->
 #<meta http-equiv="Cache-Control" content="no-store"/>
 #<!-- HTTP 1.0 -->

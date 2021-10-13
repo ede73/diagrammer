@@ -1,5 +1,4 @@
-<?
-
+<?php
 $file="./localstorage_".$_SERVER['REMOTE_ADDR'].".json";
 if (!file_exists($file)){
   $file="./localstorage.json";

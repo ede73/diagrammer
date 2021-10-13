@@ -1,4 +1,4 @@
-<?
+<?php
 //print_r($_SERVER);
 
 function sanitize() {

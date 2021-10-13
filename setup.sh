@@ -17,8 +17,8 @@ install() {
 }
 
 apache_enable_mod() {
-  which a2enmod && {
-    sudo a2enmod $*
+  [ -x /usr/sbin/a2enmod ] && {
+    sudo /usr/sbin/a2enmod $*
     return 0
   }
   echo "Unknown architecture - no a2enmod command"
@@ -52,9 +52,8 @@ get_php_apache_module() {
 # Note MAC brew install graphviz --with-pango
 PHP_MODULE=$(get_php_apache_module)
 
-install jison apache2 "$PHP_MODULE" graphviz mscgen plantuml
+install jison apache2 "$PHP_MODULE" graphviz mscgen plantuml nwdiag blockdiag actdiag
 apache_enable_mod userdir
 apache_enable_mod php7
 make_home_dir
 apache_restart
-

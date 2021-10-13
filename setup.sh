@@ -57,8 +57,17 @@ get_php_apache_module() {
 # Note MAC brew install graphviz --with-pango
 PHP_MODULE=$(get_php_apache_module)
 
+# uh oh, rasp zero is armv6 and openjdk-11 doesn't provide armv6 compaible build (openjdk11 is default)
+uname -m | grep armv6 && {
+  install openjdk-8-jdk
+  # this may not be enuf, might need to set as default, as jdk11 installs anyway(as it seems)
+  # but it solved the Vm (armv6 not supported) issue on ca-certificates-java
+}
 install jison apache2 "$PHP_MODULE" graphviz mscgen plantuml python3-nwdiag python3-blockdiag python3-actdiag
 apache_enable_mod userdir
-apache_enable_mod php7
+# either succeeds
+apache_enable_mod php7.3
+apache_enable_mod php7.4
 make_home_dir
 apache_restart
+echo "You need to ENABLE PHP in userdirs manually"

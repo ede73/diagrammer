@@ -1,3 +1,9 @@
+prepare_file() {
+  touch $1
+  sudo chown :$WWWUSER $1
+  sudo chmod 775 $1
+}
+
 debian_install() {
   sudo apt-get update
   sudo apt-get -y install $*
@@ -69,5 +75,11 @@ apache_enable_mod userdir
 apache_enable_mod php7.3
 apache_enable_mod php7.4
 make_home_dir
+
+WWWUSER=www-data
+prepare_file web/post.txt
+prepare_file web/result.png
+prepare_file web/error.txt
+
 apache_restart
 echo "You need to ENABLE PHP in userdirs manually"

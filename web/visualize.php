@@ -37,13 +37,13 @@ switch($_REQUEST["visualizer"]){
    $r=exec(getExe("mscgen")." -Tpng -o result.png post.txt");
   break;
   case "actdiag":
-    $r=exec(getExe("actdiag")." -Tpng -a -o result.png post.txt");
+    $r=exec(getExe("actdiag3")." -Tpng -a -o result.png post.txt");
   break;
   case "blockdiag":
-    $r=exec(getExe("blockdiag")." -Tpng -a -o result.png post.txt");
+    $r=exec(getExe("blockdiag3")." -Tpng -a -o result.png post.txt");
   break;
   case "nwdiag":
-    $r=exec(getExe("nwdiag")." -Tpng -a -o result.png post.txt");
+    $r=exec(getExe("nwdiag3")." -Tpng -a -o result.png post.txt");
   break;
   case "seqdiag":
     $r=exec(getExe("seqdiag")." -Tpng -a -o result.png post.txt");

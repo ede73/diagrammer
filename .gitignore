@@ -17,3 +17,4 @@ state.iml
 .buildpath
 grunt.js
 js/canviz-0.1
+node_modules

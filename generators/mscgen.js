@@ -2,10 +2,9 @@ function mscgen(yy) {
     output(yy, "msc {", true);
     var r = getGraphRoot(yy);
     var comma = false;
-    var i;
-    var tmp;
     // print out all node declarations FIRST (if any)
     traverseObjects(r, function (o) {
+        var tmp;
         if (o instanceof Group) {
             output(yy, ' /*' + o.getName() + getAttrFmt(o, 'label', ' {0}') + '*/');
             traverseObjects(o, function (z) {

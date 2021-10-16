@@ -17,7 +17,6 @@ function blockdiag(yy) {
         // DEFAULT
         output(yy, "  orientation=landscape");
     }
-    var i;
     var tmp = r.getStart();
     var parseObjects = function (o) {
         output(true);

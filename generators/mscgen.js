@@ -1,33 +1,33 @@
 function mscgen(yy) {
-    output(yy,"msc {",true);
+    output(yy, "msc {", true);
     var r = getGraphRoot(yy);
     var comma = false;
     var i;
     var tmp;
     // print out all node declarations FIRST (if any)
-    traverseObjects(r, function(o){
+    traverseObjects(r, function (o) {
         if (o instanceof Group) {
-            output(yy,' /*' + o.getName() + getAttrFmt(o, 'label', ' {0}')+'*/');
-	    traverseObjects(o,function(z){
+            output(yy, ' /*' + o.getName() + getAttrFmt(o, 'label', ' {0}') + '*/');
+            traverseObjects(o, function (z) {
                 tmp = getAttrFmt(z, 'color', ',color="{0}"') + getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
-                output(yy,(comma ? "," : "") + "    " + z.getName() + tmp);
+                output(yy, (comma ? "," : "") + "    " + z.getName() + tmp);
                 comma = true;
             });
         } else if (o instanceof Node) {
             tmp = getAttrFmt(o, 'color', ',textbgcolor="{0}"') + getAttrFmt(o, 'style', ',style={0}') + getAttrFmt(o, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
-            output(yy,(comma ? "," : "") + "  " + o.getName() + tmp);
+            output(yy, (comma ? "," : "") + "  " + o.getName() + tmp);
             comma = true;
         }
     });
-    
-    output(yy,";");
+
+    output(yy, ";");
     var id = 1;
-    traverseLinks(yy, function(l){
-        var lt="";
+    traverseLinks(yy, function (l) {
+        var lt = "";
         var lr = l.right;
         var ll = l.left;
 
@@ -117,27 +117,27 @@ function mscgen(yy) {
             if (color) {
                 attrs.push('textcolor="' + color + '"');
             }
-            output(yy,"...[" + attrs.join(",") + "];");
+            output(yy, "...[" + attrs.join(",") + "];");
             return;
         } else if (dash) {
             // dashed
             if (color) {
                 attrs.push('textcolor="' + color + '"');
             }
-            output(yy,"---[" + attrs.join(",") + "];");
+            output(yy, "---[" + attrs.join(",") + "];");
             return;
         } else {
-            output(yy,"ERROR: SHOULD NOT HAPPEN");
+            output(yy, "ERROR: SHOULD NOT HAPPEN");
         }
 
-        output(yy,ll.getName() + lt + rightName + "[" + attrs.join(",") + "];");
+        output(yy, ll.getName() + lt + rightName + "[" + attrs.join(",") + "];");
         if (note != "")
-        // output(yy,ll.getName() +' abox '
-        // +lr.getName()+'[label="'+note+'"];');
-            output(yy,lr.getName() + ' abox ' + lr.getName() + '[label="' + note + '"];');
+            // output(yy,ll.getName() +' abox '
+            // +lr.getName()+'[label="'+note+'"];');
+            output(yy, lr.getName() + ' abox ' + lr.getName() + '[label="' + note + '"];');
         // if (swap)
         // output(yy,lr.getName() + lt + ll.getName() + t + ";");
     });
     output(false);
-    output(yy,"}");
+    output(yy, "}");
 }

@@ -7,7 +7,7 @@ function nwdiag(yy) {
     var i;
     var tmp;
     for (i in r.OBJECTS) {
-        if (!r.OBJECTS.hasOwnProperty(i))continue;
+        if (!r.OBJECTS.hasOwnProperty(i)) continue;
         var o = r.OBJECTS[i];
         if (o instanceof Group) {
             // split the label to two, NAME and address
@@ -15,7 +15,7 @@ function nwdiag(yy) {
             if (o.getLabel() != "")
                 yy.result('    address="' + o.getLabel() + '"');
             for (var j in o.OBJECTS) {
-                if (!o.OBJECTS.hasOwnProperty(j))continue;
+                if (!o.OBJECTS.hasOwnProperty(j)) continue;
                 var z = o.OBJECTS[j];
                 tmp = getAttrFmt(z, 'color', ',color="{0}"') + getShape(shapes.actdiag, z.shape, ',shape="{0}"') + getAttrFmt(z, 'label', ',address="{0}"');
                 if (tmp.trim() != "")
@@ -24,7 +24,7 @@ function nwdiag(yy) {
             }
             // find if there are ANY links that have this GROUP as participant!
             for (var il in yy.LINKS) {
-                if (!yy.LINKS.hasOwnProperty(il))continue;
+                if (!yy.LINKS.hasOwnProperty(il)) continue;
                 var l = yy.LINKS[il];
                 tmp = getAttrFmt(l, 'label', '[address="{0}"]');
                 if (l.left == o) {
@@ -44,7 +44,7 @@ function nwdiag(yy) {
         }
     }
     for (i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i))continue;
+        if (!yy.LINKS.hasOwnProperty(i)) continue;
         var l1 = yy.LINKS[i];
         if (l1.left instanceof Group || l1.right instanceof Group)
             continue;

@@ -1,17 +1,17 @@
-debugIndent=0;
+debugIndent = 0;
 /**
  * Simple debugger, uses console.log
  */
 function debug(msg, indentOrDedent) {
-    if (VERBOSE == true && msg!==false && msg!==true){
-        var d="";
-        for(var i=0;i<debugIndent;i++) d+="    ";
-        console.log(d+msg);
+    if (VERBOSE == true && msg !== false && msg !== true) {
+        var d = "";
+        for (var i = 0; i < debugIndent; i++) d += "    ";
+        console.log(d + msg);
     }
-    if (indentOrDedent===true || msg===true){
-      debugIndent++;
-    }else if (indentOrDedent===false || msg===false){
-      debugIndent--;
+    if (indentOrDedent === true || msg === true) {
+        debugIndent++;
+    } else if (indentOrDedent === false || msg === false) {
+        debugIndent--;
     }
 }
 /**
@@ -40,7 +40,7 @@ String.prototype.format = function () {
 };
 String.prototype.formatArray = function (arra) {
     var formatted = this;
-      for (var i=0;i<arra.length;i++) {
+    for (var i = 0; i < arra.length; i++) {
         formatted = formatted.replace("{" + i + "}", arra[i]);
     }
     return formatted;
@@ -70,7 +70,7 @@ function getAttrFmt(cl, attr, fmt, resultarray) {
     var tmp;
     if (attr instanceof Array) {
         for (var i in attr) {
-            if (!attr.hasOwnProperty(i))continue;
+            if (!attr.hasOwnProperty(i)) continue;
             // debug("Get FMT attr "+attr[i]+" from "+cl);
             tmp = getAttrFmt(cl, attr[i], fmt, resultarray);
             if (tmp !== "") {
@@ -88,25 +88,25 @@ function getAttrFmt(cl, attr, fmt, resultarray) {
     return " " + tmp + " ";
 }
 
-var indentLevel=0;
+var indentLevel = 0;
 function output(yy, txt, indentOrDedent) {
-    var prefix="";
-    if (txt!== true && txt!==false && yy !== true && yy!==false){
-	for (var i = 0; i < indentLevel; i++) {
+    var prefix = "";
+    if (txt !== true && txt !== false && yy !== true && yy !== false) {
+        for (var i = 0; i < indentLevel; i++) {
             prefix += "    ";
-	}
-	yy.result(prefix + txt);
+        }
+        yy.result(prefix + txt);
     }
-    if (indentOrDedent===true || yy===true || txt===true){
-	indentLevel++;
-    }else if (indentOrDedent===false || yy===false || txt===false){
-	indentLevel--;
+    if (indentOrDedent === true || yy === true || txt === true) {
+        indentLevel++;
+    } else if (indentOrDedent === false || yy === false || txt === false) {
+        indentLevel--;
     }
 }
 
 function outputFmt(yy, txt, a) {
     if (a === undefined)
-	yy.result(txt);
+        yy.result(txt);
     else
-	yy.result(txt.formatArray(a));
+        yy.result(txt.formatArray(a));
 }

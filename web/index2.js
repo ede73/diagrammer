@@ -27,6 +27,7 @@ function setText(data) {
         document.getElementById("editable").value = data;
     }
 }
+
 //Add text to top of document
 //try to maintain cursor position(TODO:fucked up)
 function addTop(data) {
@@ -43,6 +44,7 @@ function addTop(data) {
         comp.value = data + comp.value;
     }
 }
+
 //add text to current cursor position(on a new line how ever)
 function appendLine(data, comp) {
     if (acemode) {
@@ -58,6 +60,7 @@ function appendLine(data, comp) {
         comp.value = comp.value + data;
     }
 }
+
 function addLine(i) {
     if (typeof i == "string") {
         appendLine(i + "\n");
@@ -225,6 +228,7 @@ function textAreaOnChange(callback, delay) {
     };
     obj = null;
 }
+
 function visualizeOnChange(callback, delay) {
     var timer = null;
     var tt = document.getElementById("result");
@@ -240,8 +244,10 @@ function visualizeOnChange(callback, delay) {
     };
     obj = null;
 }
+
 textAreaOnChange(parse, 150);
 visualizeOnChange(visualize, 250);
+
 if (acemode) {
     var timer2 = null;
     // some init race condition, editor null on page load

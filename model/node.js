@@ -11,8 +11,8 @@ Node.prototype.constructor = Node;
 function Node(name, shape) {
     this.name = name;
     this.shape = shape;
-    this.image=undefined;
-    this.style=undefined;
+    this.image = undefined;
+    this.style = undefined;
     this.setShape = function (value) {
         if (value === undefined) return this;
         if (value) value = value.toLowerCase();
@@ -49,13 +49,13 @@ function Node(name, shape) {
         return getAttr(this, 'image');
     };
     this.toString = function () {
-	var fmt = "";
-	var tmp = getAttrFmt(this, 'color','');
-	if (tmp !== undefined && tmp!='')
-	    fmt += ",color: " + tmp;
-	tmp = getAttrFmt(this, 'label','');
-	if (tmp !== undefined && tmp!='')
-	    fmt += ",label: " + tmp;
-        return "Node(name:" + this.getName() +fmt+ ")";
+        var fmt = "";
+        var tmp = getAttrFmt(this, 'color', '');
+        if (tmp !== undefined && tmp != '')
+            fmt += ",color: " + tmp;
+        tmp = getAttrFmt(this, 'label', '');
+        if (tmp !== undefined && tmp != '')
+            fmt += ",label: " + tmp;
+        return "Node(name:" + this.getName() + fmt + ")";
     };
 }

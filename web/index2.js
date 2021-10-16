@@ -19,9 +19,9 @@ function getText() {
 //replace all
 function setText(data) {
     if (acemode) {
-	//EDE:editor.destroy does not work reliably
+        //EDE:editor.destroy does not work reliably
         //editor.destroy();
-	editor.selectAll();
+        editor.selectAll();
         editor.insert(data);
     } else {
         document.getElementById("editable").value = data;
@@ -44,7 +44,7 @@ function addTop(data) {
     }
 }
 //add text to current cursor position(on a new line how ever)
-function appendLine(data,comp) {
+function appendLine(data, comp) {
     if (acemode) {
         //using ace insert text into wherever the cursor is pointing.
         editor.navigateLineEnd();
@@ -160,9 +160,9 @@ function parse(generator, visualizer) {
     console.log("parse " + generator + "," + visualizer);
     document.getElementById("error").innerText = "";
     parsingStarted = true;
-    delete(parser.yy.GRAPHROOT);
-    delete(parser.yy.LINKS);
-    delete(parser.yy.OBJECTS);
+    delete (parser.yy.GRAPHROOT);
+    delete (parser.yy.LINKS);
+    delete (parser.yy.OBJECTS);
     parser.yy.OUTPUT = generator;
     parser.yy.VISUALIZER = visualizer;
     console.log("Parse, set generator to " + parser.yy.OUTPUT + " visualizer to " + parser.yy.VISUALIZER);
@@ -205,10 +205,10 @@ function exampleChanged() {
         url: "tests/" + doc,
         cache: false
     }).done(function (data) {
-            setText(data);
-            console.log("exampleChanged..parse");
-            parse();
-        });
+        setText(data);
+        console.log("exampleChanged..parse");
+        parse();
+    });
 }
 
 function textAreaOnChange(callback, delay) {
@@ -246,15 +246,15 @@ if (acemode) {
     var timer2 = null;
     // some init race condition, editor null on page load
     if (typeof editor != 'undefined') {
-      editor.getSession().on('change', function () {
-        // chrome/mac(elsewhere?)
-          if (timer2) {
-              window.clearTimeout(timer2);
-          }
-          timer = window.setTimeout(function () {
-              timer2 = null;
-              parse(getGenerator(), getVisualizer());
-          }, delay);
-      });
+        editor.getSession().on('change', function () {
+            // chrome/mac(elsewhere?)
+            if (timer2) {
+                window.clearTimeout(timer2);
+            }
+            timer = window.setTimeout(function () {
+                timer2 = null;
+                parse(getGenerator(), getVisualizer());
+            }, delay);
+        });
     }
 }

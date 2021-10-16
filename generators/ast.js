@@ -3,7 +3,7 @@ function ast(yy) {
     };
 
     output(yy, "{");
-    var skipEntrances = function (key,value) {
+    var skipEntrances = function (key, value) {
         if (key === 'entrance' || key === 'exit') {
             return value;
         }
@@ -35,7 +35,7 @@ function ast(yy) {
                 n.OBJECTS = undefined;
                 output(yy, JSON.stringify({
                     group: n
-                })+",");
+                }) + ",");
                 output(yy, '{');
                 traverseObjects(o, objectHandler);
                 output(yy, '},');
@@ -46,7 +46,7 @@ function ast(yy) {
                 n.OBJECTS = undefined;
                 output(yy, JSON.stringify({
                     subgraph: n
-                })+",");
+                }) + ",");
                 output(yy, '{');
                 traverseObjects(o, objectHandler);
                 output(yy, '},');
@@ -54,13 +54,13 @@ function ast(yy) {
         } else if (o instanceof Node) {
             output(yy, JSON.stringify({
                 node: o
-            })+",");
+            }) + ",");
         } else {
             throw new Error("Not a node nor a group, NOT SUPPORTED");
         }
-	output(false);
+        output(false);
     };
-    traverseObjects(r,objectHandler);
+    traverseObjects(r, objectHandler);
 
     output(true);
     traverseLinks(yy, function (l) {
@@ -70,12 +70,12 @@ function ast(yy) {
         n.container.OBJECTS = undefined;
         n.container.label = undefined;
         n.container.isSubGraph = undefined;
-        n.container.entrance = n.container.entrance?n.container.entrance.name:undefined;
-        n.container.exitnode = n.container.exitnode?n.container.exitnode.name:undefined;
+        n.container.entrance = n.container.entrance ? n.container.entrance.name : undefined;
+        n.container.exitnode = n.container.exitnode ? n.container.exitnode.name : undefined;
         n.container.conditional = undefined;
         n.container = n.container.name;
-        output(yy, JSON.stringify({link:n})+",");
+        output(yy, JSON.stringify({ link: n }) + ",");
     });
     output(false);
-    output(yy, "}",false);
+    output(yy, "}", false);
 }

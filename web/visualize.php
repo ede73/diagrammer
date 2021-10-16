@@ -77,4 +77,3 @@ switch($_REQUEST["visualizer"]){
 }
 file_put_contents("./error.txt",$r);
 echo "web/result.png";
-?>

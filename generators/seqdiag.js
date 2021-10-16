@@ -7,13 +7,13 @@ function seqdiag(yy) {
     var r = getGraphRoot(yy);
     var i;
     // print out all node declarations FIRST (if any)
-    for ( i in r.OBJECTS) {
-        if (!r.OBJECTS.hasOwnProperty(i))continue;
+    for (i in r.OBJECTS) {
+        if (!r.OBJECTS.hasOwnProperty(i)) continue;
         var o = r.OBJECTS[i];
         if (o instanceof Group) {
             yy.result(' /*' + o.getName() + getAttrFmt(o, 'label', ' {0}*/'));
             for (var j in o.OBJECTS) {
-                if (!o.OBJECTS.hasOwnProperty(j))continue;
+                if (!o.OBJECTS.hasOwnProperty(j)) continue;
                 var z = o.OBJECTS[j];
                 // no color support either..
                 var s = getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
@@ -29,10 +29,10 @@ function seqdiag(yy) {
         }
     }
     for (i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i))continue;
+        if (!yy.LINKS.hasOwnProperty(i)) continue;
         var l = yy.LINKS[i];
         var attrs = [];
-        var lt="";
+        var lt = "";
         var lr = l.right;
         var ll = l.left;
 

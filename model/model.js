@@ -77,27 +77,27 @@ function getGraphRoot(yy) {
  */
 function getList(yy, LHS, RHS, rhsLinkLabel) {
     if (LHS instanceof Node) {
-        debug("getList(node:" + LHS + ",rhs:[" + RHS + "])",true);
+        debug("getList(node:" + LHS + ",rhs:[" + RHS + "])", true);
         var x = [];
         x.push(LHS);
-	//TODO assuming RHS is Node
+        //TODO assuming RHS is Node
         x.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
-        debug("return node:"+x,false);
+        debug("return node:" + x, false);
         return x;
     }
     if (LHS instanceof Group) {
-        debug("getList(group:[" + LHS + "],rhs:" + RHS + ")",true);
+        debug("getList(group:[" + LHS + "],rhs:" + RHS + ")", true);
         var x = [];
         x.push(LHS);
-	//TODO assuming RHS is Group
+        //TODO assuming RHS is Group
         x.push(getGroup(yy, RHS).setLinkLabel(rhsLinkLabel));
-        debug("return group:"+x,false);
+        debug("return group:" + x, false);
         return x;
     }
-    debug("getList(lhs:[" + LHS + "],rhs:" + RHS,true);
+    debug("getList(lhs:[" + LHS + "],rhs:" + RHS, true);
     // LHS not a node..
     LHS.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
-    debug("return ["+LHS+"]",false);
+    debug("return [" + LHS + "]", false);
     return LHS;
 }
 
@@ -118,7 +118,7 @@ function getList(yy, LHS, RHS, rhsLinkLabel) {
  * @param [style] OPTIONAL if style given, update (only if name refers to node)
  */
 function getNode(yy, name, style) {
-    debug("getNode (name:"+name+",style:"+style+")",true);
+    debug("getNode (name:" + name + ",style:" + style + ")", true);
     function cc(yy, name, style) {
         if (name instanceof Node) {
             if (style) name.setStyle(style);
@@ -131,7 +131,7 @@ function getNode(yy, name, style) {
         var search = function s(container, name) {
             if (container.getName() == name) return container;
             for (var i in container.OBJECTS) {
-                if (!container.OBJECTS.hasOwnProperty(i))continue;
+                if (!container.OBJECTS.hasOwnProperty(i)) continue;
                 var o = container.OBJECTS[i];
                 if (o instanceof Node && o.getName() == name) {
                     if (style) o.setStyle(style);
@@ -147,10 +147,10 @@ function getNode(yy, name, style) {
         if (search !== undefined) {
             return search;
         }
-        debug("Create new node name="+name,true);
+        debug("Create new node name=" + name, true);
         var n = new Node(name, getGraphRoot(yy).getCurrentShape());
         if (style) n.setStyle(style);
-	n.nolinks=true;
+        n.nolinks = true;
 
         getDefaultAttribute(yy, 'nodecolor', function (color) {
             n.setColor(color);
@@ -188,7 +188,7 @@ function getDefaultAttribute(yy, attrname, x) {
     // debug("getDefaultAttribute "+attrname);
     var a;
     for (var i in yy.CURRENTCONTAINER) {
-        if (!yy.CURRENTCONTAINER.hasOwnProperty(i))continue;
+        if (!yy.CURRENTCONTAINER.hasOwnProperty(i)) continue;
         var ctr = yy.CURRENTCONTAINER[i];
         a = ctr.getDefault(attrname);
         // debug(" traverse getDefaultAttribute "+attrname+" from "+ctr+" as
@@ -258,11 +258,11 @@ function enterSubGraph(yy) {
     return enterContainer(yy, getSubGraph(yy));
 }
 
-function hasOutwardLink(yy,node) {
+function hasOutwardLink(yy, node) {
     for (var i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i))continue;
+        if (!yy.LINKS.hasOwnProperty(i)) continue;
         var r = yy.LINKS[i];
-        if (r.left.name === node.name){
+        if (r.left.name === node.name) {
             return true;
         }
     }
@@ -274,13 +274,13 @@ function hasOutwardLink(yy,node) {
  */
 function hasInwardLink(yy, node, nodesContainer) {
     for (var i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i))continue;
+        if (!yy.LINKS.hasOwnProperty(i)) continue;
         var r = yy.LINKS[i];
-	if (nodesContainer !== undefined &&
-	    r.container.name === nodesContainer.name) {
-	    continue;
-	}
-	if (r.right.name === node.name) {
+        if (nodesContainer !== undefined &&
+            r.container.name === nodesContainer.name) {
+            continue;
+        }
+        if (r.right.name === node.name) {
             return true;
         }
     }
@@ -290,50 +290,50 @@ function hasInwardLink(yy, node, nodesContainer) {
 function exitSubGraph(yy) {
     //Now should edit the ENTRANCE LINK to point to a>b, a>d, a>e
     var currentSubGraph = getCurrentContainer(yy);
-    debug('Exit subgraph '+currentSubGraph);
+    debug('Exit subgraph ' + currentSubGraph);
     var l = null;
     var i = 0;
 
     //fix entrance
     for (i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i))continue;
+        if (!yy.LINKS.hasOwnProperty(i)) continue;
         l = yy.LINKS[i];
         if (l.right.name == currentSubGraph.name && l.left.name == currentSubGraph.entrance.name) {
             //remove this link!
-            yy.LINKS.splice(i,1);
+            yy.LINKS.splice(i, 1);
             //and then relink it to containers nodes that have no LEFT links
             break;
         }
-        l=null;
+        l = null;
     }
 
-    if (l!==null){
-	//and then relink it to containers nodes that have no LEFT links
-	//traverse
-	for(var o in currentSubGraph.ROOTNODES) {
-            if (!currentSubGraph.ROOTNODES.hasOwnProperty(o))continue;
+    if (l !== null) {
+        //and then relink it to containers nodes that have no LEFT links
+        //traverse
+        for (var o in currentSubGraph.ROOTNODES) {
+            if (!currentSubGraph.ROOTNODES.hasOwnProperty(o)) continue;
             var g = currentSubGraph.ROOTNODES[o];
-	    currentSubGraph.entrance.nolinks=undefined;
-	    g.nolinks=undefined;
-	    var newLink = getLink(yy, l.linkType, currentSubGraph.entrance, g, l.label,
-				  undefined, undefined, undefined, undefined, true);
-	    setAttr(newLink, 'container', currentSubGraph);
-	    yy.LINKS.splice(i++,0, newLink);
-	}
+            currentSubGraph.entrance.nolinks = undefined;
+            g.nolinks = undefined;
+            var newLink = getLink(yy, l.linkType, currentSubGraph.entrance, g, l.label,
+                undefined, undefined, undefined, undefined, true);
+            setAttr(newLink, 'container', currentSubGraph);
+            yy.LINKS.splice(i++, 0, newLink);
+        }
     }
 
     //fix exits
     //{"link":{"linkType":">","left":1,"right":"z","label":"from e and h"}}
     var exits = [];
-    for(var o in currentSubGraph.OBJECTS) {
-        if (!currentSubGraph.OBJECTS.hasOwnProperty(o))continue;
+    for (var o in currentSubGraph.OBJECTS) {
+        if (!currentSubGraph.OBJECTS.hasOwnProperty(o)) continue;
         var g = currentSubGraph.OBJECTS[o];
-        if (!hasOutwardLink(yy,g)) {
+        if (!hasOutwardLink(yy, g)) {
             exits.push(g);
         }
     }
 
-    debug('exits '+exits);
+    debug('exits ' + exits);
     currentSubGraph.setExit(g);
     return exitContainer(yy);
 }
@@ -349,7 +349,7 @@ function exitSubGraph(yy) {
  */
 function getGroup(yy, ref) {
     if (ref instanceof Group) return ref;
-    debug("getGroup() NEW GROUP:" + yy + "/" + ref,true);
+    debug("getGroup() NEW GROUP:" + yy + "/" + ref, true);
     if (yy.GROUPIDS === undefined) yy.GROUPIDS = 1;
     var newGroup = new Group(yy.GROUPIDS++);
     debug("push group " + newGroup + " to " + yy);
@@ -402,28 +402,28 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
     var current_container = getCurrentContainer(yy);
 
     debug(true);
-    if (r instanceof SubGraph && r.getEntrance()==undefined) {
+    if (r instanceof SubGraph && r.getEntrance() == undefined) {
         r.setEntrance(l);
     }
-    if (r.nolinks === true && current_container!==undefined) {
-	debug('REMOVE '+r+' from root nodes of the container '+current_container);
-	var idx=current_container.ROOTNODES.indexOf(r);
-	if (idx>=0) {
-	    current_container.ROOTNODES.splice(idx,1);
+    if (r.nolinks === true && current_container !== undefined) {
+        debug('REMOVE ' + r + ' from root nodes of the container ' + current_container);
+        var idx = current_container.ROOTNODES.indexOf(r);
+        if (idx >= 0) {
+            current_container.ROOTNODES.splice(idx, 1);
         }
     }
-    l.nolinks=undefined;
-    r.nolinks=undefined;
+    l.nolinks = undefined;
+    r.nolinks = undefined;
 
-    if (current_container  instanceof SubGraph && 
-	current_container.getEntrance()==undefined && 
-	l instanceof Node && 
-	!(r instanceof SubGraph)) {
-	current_container.setEntrance(l);
+    if (current_container instanceof SubGraph &&
+        current_container.getEntrance() == undefined &&
+        l instanceof Node &&
+        !(r instanceof SubGraph)) {
+        current_container.setEntrance(l);
     }
 
     if (l instanceof Array) {
-        debug("getLink LHS array, type:"+linkType+" l:["+l+"] r:"+r+" inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
+        debug("getLink LHS array, type:" + linkType + " l:[" + l + "] r:" + r + " inlineLinkLabel:" + inlineLinkLabel + " commonLinkLabel: " + commonLinkLabel + " linkColor:" + linkColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
         for (i = 0; i < l.length; i++) {
             debug("    1Get link " + l[i]);
             lastLink = getLink(yy, linkType, l[i], r, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
@@ -432,7 +432,7 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
         return lastLink;
     }
     if (r instanceof Array) {
-        debug("getLink RHS array, type:"+linkType+" l:"+l+" r:["+r+"] inlineLinkLabel:"+inlineLinkLabel+" commonLinkLabel: "+commonLinkLabel+" linkColor:"+linkColor+" lcompass:"+lcompass+" rcompass:"+rcompass);
+        debug("getLink RHS array, type:" + linkType + " l:" + l + " r:[" + r + "] inlineLinkLabel:" + inlineLinkLabel + " commonLinkLabel: " + commonLinkLabel + " linkColor:" + linkColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
         for (i = 0; i < r.length; i++) {
             debug("    2Get link " + r[i]);
             lastLink = getLink(yy, linkType, l, r[i], inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
@@ -442,20 +442,20 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
     }
     var fmt = "";
     if (inlineLinkLabel !== undefined)
-      fmt += "inlineLinkLabel: "+inlineLinkLabel;
+        fmt += "inlineLinkLabel: " + inlineLinkLabel;
     if (commonLinkLabel !== undefined)
-      fmt += "commonLinkLabel: "+commonLinkLabel;
+        fmt += "commonLinkLabel: " + commonLinkLabel;
     if (linkColor !== undefined)
-      fmt += "linkColor: "+linkColor;
+        fmt += "linkColor: " + linkColor;
     if (lcompass !== undefined)
-      fmt += "lcompass: "+lcompass;
+        fmt += "lcompass: " + lcompass;
     if (rcompass !== undefined)
-      fmt += "rcompass: "+rcompass;
-    debug("getLink type:"+linkType+" l:"+l+" r:"+r+fmt);
-    if (!(l instanceof Node) && !(l instanceof Group)& !(l instanceof SubGraph)) {
+        fmt += "rcompass: " + rcompass;
+    debug("getLink type:" + linkType + " l:" + l + " r:" + r + fmt);
+    if (!(l instanceof Node) && !(l instanceof Group) & !(l instanceof SubGraph)) {
         throw new Error("LHS not a Node,Group nor a SubGraph(LHS=" + l + ") RHS=(" + r + ")");
     }
-    if (!(r instanceof Node) && !(r instanceof Group)&& !(r instanceof SubGraph)) {
+    if (!(r instanceof Node) && !(r instanceof Group) && !(r instanceof SubGraph)) {
         throw new Error("RHS not a Node,Group nor a SubGraph(LHS=" + l + ") RHS=(" + r + ")");
     }
     var lnk = new Link(linkType, l, r);
@@ -473,28 +473,28 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
         lnk.setTextColor(linkColor);
     });
     if (commonLinkLabel != undefined) {
-	lnk.setLabel(commonLinkLabel);
-	debug("  set commonLinkLabel "+commonLinkLabel);
+        lnk.setLabel(commonLinkLabel);
+        debug("  set commonLinkLabel " + commonLinkLabel);
     }
     if (inlineLinkLabel != undefined) {
-	lnk.setLabel(inlineLinkLabel);
-	debug("  set inlineLinkLabel "+inlineLinkLabel);
+        lnk.setLabel(inlineLinkLabel);
+        debug("  set inlineLinkLabel " + inlineLinkLabel);
     }
-    else if (r instanceof Node && commonLinkLabel != undefined ) {
-	lnk.setLabel(commonLinkLabel);
-	debug('  set commonLinkLabel '+commonLinkLabel);
+    else if (r instanceof Node && commonLinkLabel != undefined) {
+        lnk.setLabel(commonLinkLabel);
+        debug('  set commonLinkLabel ' + commonLinkLabel);
     }
     if (r instanceof Node) {
-	tmp=r.getLinkLabel();
-	if (tmp != undefined ) {
-	    lnk.setLabel(tmp);
-	    debug('  reset link label to '+tmp);
-	}
+        tmp = r.getLinkLabel();
+        if (tmp != undefined) {
+            lnk.setLabel(tmp);
+            debug('  reset link label to ' + tmp);
+        }
     }
     if (linkColor != undefined) lnk.setColor(linkColor);
 
     if (!dontadd) {
-	addLink(yy, lnk);
+        addLink(yy, lnk);
     }
     debug(false);
     return lnk;
@@ -507,9 +507,9 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
  */
 function addLink(yy, l) {
     if (l instanceof Array) {
-        debug("PUSH LINK ARRAY:" + l,true);
+        debug("PUSH LINK ARRAY:" + l, true);
     } else {
-        debug("PUSH LINK:" + l,true);
+        debug("PUSH LINK:" + l, true);
         setAttr(l, 'container', getCurrentContainer(yy));
     }
     yy.LINKS.push(l);
@@ -522,7 +522,7 @@ function addLink(yy, l) {
  */
 function pushObject(yy, o) {
     var cnt = getCurrentContainer(yy)
-    debug("pushObject " + o + "to " + cnt,true);
+    debug("pushObject " + o + "to " + cnt, true);
     cnt.OBJECTS.push(o);
     cnt.ROOTNODES.push(o);
     debug(false);
@@ -536,7 +536,7 @@ function pushObject(yy, o) {
  */
 function containsObject(container, o) {
     for (var i in container.OBJECTS) {
-        if (!container.OBJECTS.hasOwnProperty(i))continue;
+        if (!container.OBJECTS.hasOwnProperty(i)) continue;
         var c = container.OBJECTS[i];
         if (c == o) {
             return true;
@@ -552,15 +552,15 @@ function containsObject(container, o) {
 
 function traverseLinks(yy, callback) {
     for (var i in yy.LINKS) {
-	if (!yy.LINKS.hasOwnProperty(i)) continue;
-	callback(yy.LINKS[i]);
+        if (!yy.LINKS.hasOwnProperty(i)) continue;
+        callback(yy.LINKS[i]);
     }
 }
 
 function traverseObjects(container, callback) {
     for (var i in container.OBJECTS) {
-	if (!container.OBJECTS.hasOwnProperty(i)) continue;
-	callback(container.OBJECTS[i]);
+        if (!container.OBJECTS.hasOwnProperty(i)) continue;
+        callback(container.OBJECTS[i]);
     }
 }
 

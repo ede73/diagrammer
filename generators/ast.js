@@ -27,8 +27,8 @@ function ast(yy) {
             equal: r.getEqual()
         }));
 
-    var objectHandler = function(o) {
-	output(true);
+    var objectHandler = function (o) {
+        output(true);
         if (o instanceof Group) {
             var processAGroup = function (o) {
                 var n = JSON.parse(JSON.stringify(o, skipEntrances));

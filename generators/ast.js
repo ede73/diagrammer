@@ -8,7 +8,7 @@ function ast(yy) {
             return value;
         }
         return value;
-    };    
+    };
     var r = getGraphRoot(yy);
     if (r.getVisualizer())
         output(yy, JSON.stringify({
@@ -29,7 +29,7 @@ function ast(yy) {
 
     var objectHandler = function(o) {
 	output(true);
-        if (o instanceof Group) { 
+        if (o instanceof Group) {
             var processAGroup = function (o) {
                 var n = JSON.parse(JSON.stringify(o, skipEntrances));
                 n.OBJECTS = undefined;

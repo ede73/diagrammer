@@ -154,11 +154,11 @@ function visualize(visualizer) {
         // console.log(err);
         // }
     } else if (visualizer == "radialdendrogram") {
-	radialdendroit(result.value);
+        radialdendroit(result.value);
     } else if (visualizer == "circlepacked") {
-	circlepacked(result.value);
+        circlepacked(result.value);
     } else if (visualizer == "reingoldtilford") {
-	reingoldit(result.value);
+        reingoldit(result.value);
     } else {
         document.getElementById('svg').innerHTML = "only for dotty";
     }

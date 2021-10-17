@@ -5,9 +5,14 @@ prepare_file() {
 }
 
 WWWUSER=www-data
-for file in post.txt result.png result.txt error.txt; do
+for file in web web/post.txt web/result.png web/result.txt web/error.txt; do
+  prepare_file $file
+done
+
+for file in $(ls web/*.json); do
   prepare_file web/$file
 done
+
 
 debian_install() {
   sudo apt-get update

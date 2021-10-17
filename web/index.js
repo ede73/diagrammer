@@ -1,5 +1,6 @@
 console.log("Reset generator and visualizer");
 VERBOSE = false;
+
 parser.yy.parseError = function (str, hash) {
     var pe = "Parsing error:\n" + str + "\n" + hash;
     console.log("pe");
@@ -155,14 +156,13 @@ function visualize(visualizer) {
         // console.log(err);
         // }
     } else if (visualizer == "radialdendrogram") {
-        console.log("radialdendroit");
-        radialdendroit(result.value);
+        radialdendroit(JSON.parse(result.value));
     } else if (visualizer == "circlepacked") {
-        console.log("circlepacked");
-        circlepacked(result.value);
+        circlepacked(JSON.parse(result.value));
     } else if (visualizer == "reingoldtilford") {
-        console.log("reingoldit");
-        reingoldit(result.value);
+        reingoldit(JSON.parse(result.value));
+    } else if (visualizer == "parsetree") {
+        parsetree(""/*JSON.parse(result.value)*/);
     } else {
         console.log("UNKNOWN vISUALIZER " + visualizer);
         document.getElementById('svg').innerHTML = "only for dotty";
@@ -178,7 +178,7 @@ function make_svg(width, height) {
         .append("g");
 }
 
-function reingoldit(parseResult) {
+function reingoldit(jsonData) {
 
     const width = 400,
         height = 400;
@@ -191,7 +191,7 @@ function reingoldit(parseResult) {
             return (a.parent == b.parent ? 1 : 2) / a.depth;
         });
 
-    const data = d3.hierarchy(JSON.parse(parseResult));
+    const data = d3.hierarchy(jsonData);
     const root = tree(data);
 
     const svg = make_svg(width, height)
@@ -229,8 +229,7 @@ function reingoldit(parseResult) {
 }
 
 // https://medium.com/analytics-vidhya/creating-a-radial-tree-using-d3-js-for-javascript-be943e23b74e
-function radialdendroit(parseResult) {
-    const input = JSON.parse(parseResult);
+function radialdendroit(jsonData) {
     const radius = 450;
 
     const margin = 120;
@@ -272,7 +271,7 @@ function radialdendroit(parseResult) {
 }
 
 // https://observablehq.com/@d3/circle-packing
-function circlepacked(parseResult) {
+function circlepacked(jsonData) {
     const width = 400, height = 400;
     //pack = data => d3.pack()
     //    .size([width, height])
@@ -284,3 +283,123 @@ function circlepacked(parseResult) {
     //const root = pack(JSON.parse(parseResult));
     //       d3.select(self.frameElement).style("height", height + "px");
 }
+
+function parsetree(jsonData) {
+    var $ = go.GraphObject.make;  // for conciseness in defining templates
+    myDiagram =
+        $(go.Diagram, "D3JSIMAGES",
+            {
+                allowCopy: false,
+                allowDelete: false,
+                allowMove: false,
+                initialAutoScale: go.Diagram.Uniform,
+                layout:
+                    $(FlatTreeLayout,  // custom Layout, defined below
+                        {
+                            angle: 90,
+                            compaction: go.TreeLayout.CompactionNone
+                        }),
+                "undoManager.isEnabled": true
+            });
+
+    myDiagram.nodeTemplate =
+        $(go.Node, "Vertical",
+            { selectionObjectName: "BODY" },
+            $(go.Panel, "Auto", { name: "BODY" },
+                $(go.Shape, "RoundedRectangle",
+                    new go.Binding("fill"),
+                    new go.Binding("stroke")),
+                $(go.TextBlock,
+                    { font: "bold 12pt Arial, sans-serif", margin: new go.Margin(4, 2, 2, 2) },
+                    new go.Binding("text"))
+            ),
+            $(go.Panel,  // this is underneath the "BODY"
+                { height: 17 },  // always this height, even if the TreeExpanderButton is not visible
+                $("TreeExpanderButton")
+            )
+        );
+
+    myDiagram.linkTemplate =
+        $(go.Link,
+            $(go.Shape, { strokeWidth: 1.5 }));
+
+    // set up the nodeDataArray, describing each part of the sentence
+    var nodeDataArray = [
+        { key: 1, text: "Sentence", fill: "#f68c06", stroke: "#4d90fe" },
+        { key: 2, text: "NP", fill: "#f68c06", stroke: "#4d90fe", parent: 1 },
+        { key: 3, text: "DT", fill: "#ccc", stroke: "#4d90fe", parent: 2 },
+        { key: 4, text: "A", fill: "#f8f8f8", stroke: "#4d90fe", parent: 3 },
+        { key: 5, text: "JJ", fill: "#ccc", stroke: "#4d90fe", parent: 2 },
+        { key: 6, text: "rare", fill: "#f8f8f8", stroke: "#4d90fe", parent: 5 },
+        { key: 7, text: "JJ", fill: "#ccc", stroke: "#4d90fe", parent: 2 },
+        { key: 8, text: "black", fill: "#f8f8f8", stroke: "#4d90fe", parent: 7 },
+        { key: 9, text: "NN", fill: "#ccc", stroke: "#4d90fe", parent: 2 },
+        { key: 10, text: "squirrel", fill: "#f8f8f8", stroke: "#4d90fe", parent: 9 },
+        { key: 11, text: "VP", fill: "#f68c06", stroke: "#4d90fe", parent: 1 },
+        { key: 12, text: "VBZ", fill: "#ccc", stroke: "#4d90fe", parent: 11 },
+        { key: 13, text: "has", fill: "#f8f8f8", stroke: "#4d90fe", parent: 12 },
+        { key: 14, text: "VP", fill: "#f68c06", stroke: "#4d90fe", parent: 11 },
+        { key: 15, text: "VBN", fill: "#ccc", stroke: "#4d90fe", parent: 14 },
+        { key: 16, text: "become", fill: "#f8f8f8", stroke: "#4d90fe", parent: 15 },
+        { key: 17, text: "NP", fill: "#f68c06", stroke: "#4d90fe", parent: 14 },
+        { key: 18, text: "NP", fill: "#f68c06", stroke: "#4d90fe", parent: 17 },
+        { key: 19, text: "DT", fill: "#ccc", stroke: "#4d90fe", parent: 18 },
+        { key: 20, text: "a", fill: "#f8f8f8", stroke: "#4d90fe", parent: 19 },
+        { key: 21, text: "JJ", fill: "#ccc", stroke: "#4d90fe", parent: 18 },
+        { key: 22, text: "regular", fill: "#f8f8f8", stroke: "#4d90fe", parent: 21 },
+        { key: 23, text: "NN", fill: "#ccc", stroke: "#4d90fe", parent: 18 },
+        { key: 24, text: "visitor", fill: "#f8f8f8", stroke: "#4d90fe", parent: 23 },
+        { key: 25, text: "PP", fill: "#f68c06", stroke: "#4d90fe", parent: 17 },
+        { key: 26, text: "TO", fill: "#ccc", stroke: "#4d90fe", parent: 25 },
+        { key: 27, text: "to", fill: "#f8f8f8", stroke: "#4d90fe", parent: 26 },
+        { key: 28, text: "NP", fill: "#f68c06", stroke: "#4d90fe", parent: 25 },
+        { key: 29, text: "DT", fill: "#ccc", stroke: "#4d90fe", parent: 28 },
+        { key: 30, text: "a", fill: "#f8f8f8", stroke: "#4d90fe", parent: 29 },
+        { key: 31, text: "JJ", fill: "#ccc", stroke: "#4d90fe", parent: 28 },
+        { key: 32, text: "suburban", fill: "#f8f8f8", stroke: "#4d90fe", parent: 31 },
+        { key: 33, text: "NN", fill: "#ccc", stroke: "#4d90fe", parent: 28 },
+        { key: 34, text: "garden", fill: "#f8f8f8", stroke: "#4d90fe", parent: 33 },
+        { key: 35, text: ".", fill: "#ccc", stroke: "#4d90fe", parent: 1 },
+        { key: 36, text: ".", fill: "#f8f8f8", stroke: "#4d90fe", parent: 35 }
+    ]
+
+    // create the Model with data for the tree, and assign to the Diagram
+    myDiagram.model =
+        $(go.TreeModel,
+            { nodeDataArray: nodeDataArray });
+    x=0;y=0;printSize=300;
+    svg=myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
+
+    const svgimg=document.getElementById('D3JSIMAGES');
+   while (svgimg.firstChild) {
+    svgimg.removeChild(svgimg.firstChild);
+  }
+  svgimg.appendChild(svg);
+}
+
+// Customize the TreeLayout to position all of the leaf nodes at the same vertical Y position.
+function FlatTreeLayout() {
+    go.TreeLayout.call(this);  // call base constructor
+}
+go.Diagram.inherit(FlatTreeLayout, go.TreeLayout);
+
+// This assumes the TreeLayout.angle is 90 -- growing downward
+FlatTreeLayout.prototype.commitLayout = function () {
+    go.TreeLayout.prototype.commitLayout.call(this);  // call base method first
+    // find maximum Y position of all Nodes
+    var y = -Infinity;
+    this.network.vertexes.each(function (v) {
+        y = Math.max(y, v.node.position.y);
+    });
+    // move down all leaf nodes to that Y position, but keeping their X position
+    this.network.vertexes.each(function (v) {
+        if (v.destinationEdges.count === 0) {
+            // shift the node down to Y
+            v.node.position = new go.Point(v.node.position.x, y);
+            // extend the last segment vertically
+            v.node.toEndSegmentLength = Math.abs(v.centerY - y);
+        } else {  // restore to normal value
+            v.node.toEndSegmentLength = 10;
+        }
+    });
+};

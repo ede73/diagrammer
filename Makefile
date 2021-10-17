@@ -13,7 +13,7 @@ state.js: state.lex
 	@echo "exports.state=state;" >> $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
-state.all: state.lex lexmarker.txt state.grammar model/support.js model/model.js model/graphobject.js model/node.js model/group.js model/graphroot.js model/link.js model/shapes.js model/subgraph.js generators/*.js
+state.all: state.lex lexmarker.txt state.grammar model/support.js model/model.js model/graphobject.js model/node.js model/group.js model/graphroot.js model/link.js model/shapes.js model/subgraph.js model/tree.js generators/*.js
 	@echo Compile state.all
 	@cat $^ >$@
 

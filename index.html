@@ -150,7 +150,7 @@
 				padding: 8px;
 				margin: 8px;
 				border-radius: 8px;
-				//font-family: Helvetica;
+				/*font-family: Helvetica;*/
 				font-family: 'Droid Sans Mono';
 				font-size: 12px;
 				display: table-cell;
@@ -306,12 +306,29 @@
 			</ul>
 		</div>
 
-		<div id='dendrogram'></div>
-		<!-- result.png -->
-		<img align="top" id="image" width="30%" src="web/result.png" onclick="javascript:openImage('web/result.png');"
-			style="float:right;" />
-
-		<pre id="editable" style="margin:0;left:0;height:600px;"></pre>
+		<table>
+			<tr>
+				<td>
+					<pre id="editable" align="top" style="margin:0;left:0;height:600px;float:left"></pre>
+				</td>
+				<td>
+					<div style="float:right;">
+						<table>
+							<tr>
+								<td>
+									<div id='D3JSIMAGES' />
+								</td>
+								<td>
+									<!-- result.png -->
+									<img align="bottom" id="image" width="30%" src="web/result.png"
+										onclick="javascript:openImage('web/result.png');" />
+								</td>
+							</tr>
+						</table>
+					</div>
+				</td>
+			</tr>
+		</table>
 
 		<!-- resulting data of grammar parser/ast generator -->
 		<textarea id="result" rows="40" cols="10"></textarea>

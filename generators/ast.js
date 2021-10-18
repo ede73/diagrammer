@@ -52,7 +52,30 @@ yy={
     toString: ƒ ()
     [[Prototype]]: GraphObject
     LINKS: (4) [Link, Link, Link, Link]
-        0: Link {linkType: '>', left: Node, right: Node, container: GraphRoot, toString: ƒ}
+        0: Link
+            container: GraphRoot {OBJECTS: Array(5), ROOTNODES: Array(1), setGenerator: ƒ, getGenerator: ƒ, setVisualizer: ƒ, …}
+            left: Node
+                compass: undefined
+                getImage: ƒ ()
+                getLinkLabel: ƒ ()
+                getShape: ƒ ()
+                getStyle: ƒ ()
+                image: undefined
+                label: "node text"
+                name: "a"
+                nolinks: undefined
+                setImage: ƒ (value)
+                setLinkLabel: ƒ (value)
+                setShape: ƒ (value)
+                setStyle: ƒ (value)
+                shape: undefined
+                style: undefined
+                toString: ƒ ()
+                [[Prototype]]: GraphObject
+                linkType: ">"
+            right: Node {name: 'b', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+            toString: ƒ ()
+            [[Prototype]]: GraphObject
         1: Link {linkType: '>', left: Node, right: Node, container: GraphRoot, toString: ƒ}
         2: Link {linkType: '>', left: Node, right: Node, container: GraphRoot, toString: ƒ}
         3: Link {linkType: '>', left: Node, right: Node, label: 'link text', toString: ƒ, …}
@@ -81,7 +104,6 @@ to
 }
 */
 function ast(yy) {
-    console.log("jojojojj");
     console.log(yy)
     var processANode = function (o) {
     };

@@ -1,3 +1,22 @@
+/*
+a>b>c,d
+a>e;link text
+a;node text
+
+to
+@startuml
+autonumber
+participant  "node text" as  a 
+participant  b 
+participant  c 
+participant  d 
+participant  e 
+a->b
+b->c
+b->d
+a->e:link text
+@enduml
+*/
 function plantuml_sequence(yy) {
     var processANode = function (o, sbgraph) {
         var nattrs = [];

@@ -1,3 +1,23 @@
+/*
+a>b>c,d
+a>e;link text
+a;node text
+
+to
+{
+"name": "a",
+"children": [
+    {
+        "name": "b",
+        "children": [
+            {"name": "c", "size": 1},
+            {"name": "d", "size": 1}
+        ]
+    },
+    {"name": "e", "size": 1}
+]
+}
+*/
 function sankey(yy) {
 	var tree;
 	function addNode(l, r) {

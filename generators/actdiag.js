@@ -1,5 +1,23 @@
 //node parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
+/*
+a>b>c,d
+a>e;link text
+a;node text
 
+to
+actdiag{
+  default_fontsize = 14
+a[label="node text"];
+b;
+c;
+d;
+e;
+  a -> b;
+  b -> c;
+  b -> d;
+  a -> e[label = "link text"];
+}
+*/
 function actdiag(yy) {
     output(yy, "actdiag{\n  default_fontsize = 14");
     var r = getGraphRoot(yy);

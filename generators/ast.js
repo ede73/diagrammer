@@ -1,4 +1,88 @@
+/*
+a>b>c,d
+a>e;link text
+a;node text
+
+yy={
+    CONTAINER_EXIT: 1
+    CURRENTCONTAINER: [GraphRoot]
+    GRAPHROOT: GraphRoot {OBJECTS: Array(5), ROOTNODES: Array(1), setGenerator: ƒ, getGenerator: ƒ, setVisualizer: ƒ, …}
+        OBJECTS: Array(5)
+            0: Node
+                compass: undefined
+                getImage: ƒ ()
+                getLinkLabel: ƒ ()
+                getShape: ƒ ()
+                getStyle: ƒ ()
+                image: undefined
+                label: "node text"
+                name: "a"
+                nolinks: undefined
+                setImage: ƒ (value)
+                setLinkLabel: ƒ (value)
+                setShape: ƒ (value)
+                setStyle: ƒ (value)
+                shape: undefined
+                style: undefined
+                toString: ƒ ()
+                [[Prototype]]: GraphObject
+            1: Node {name: 'b', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+            2: Node {name: 'c', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+            3: Node {name: 'd', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+            4: Node {name: 'e', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+            length: 5
+    ROOTNODES: Array(1)
+        0: Node {name: 'a', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+        length: 1
+    [[Prototype]]: Array(0)
+    getCurrentShape: ƒ ()
+    getDefault: ƒ (key)
+    getDirection: ƒ ()
+    getEqual: ƒ ()
+    getGenerator: ƒ ()
+    getStart: ƒ ()
+    getVisualizer: ƒ ()
+    setCurrentShape: ƒ (value)
+    setDefault: ƒ (key, value)
+    setDirection: ƒ (value)
+    setEqual: ƒ (value)
+    setGenerator: ƒ (value)
+    setStart: ƒ (value)
+    setVisualizer: ƒ (value)
+    toString: ƒ ()
+    [[Prototype]]: GraphObject
+    LINKS: (4) [Link, Link, Link, Link]
+        0: Link {linkType: '>', left: Node, right: Node, container: GraphRoot, toString: ƒ}
+        1: Link {linkType: '>', left: Node, right: Node, container: GraphRoot, toString: ƒ}
+        2: Link {linkType: '>', left: Node, right: Node, container: GraphRoot, toString: ƒ}
+        3: Link {linkType: '>', left: Node, right: Node, label: 'link text', toString: ƒ, …}
+        length: 4
+    OUTPUT: "ast"
+    VISUALIZER: "ast"
+    lastSeenNode: Node {name: 'a', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+    lexer: {yy: {…}, _input: '', done: true, _backtrack: false, _more: false, …}
+    parseError: ƒ (str, hash)
+    parser: Parser {yy: {…}, trace: ƒ, parseError: ƒ}
+    result: ƒ (line)
+    [[Prototype]]: Object
+}
+
+to
+{
+    {"node":{"name":"a","label":"node text"}},
+    {"node":{"name":"b"}},
+    {"node":{"name":"c"}},
+    {"node":{"name":"d"}},
+    {"node":{"name":"e"}},
+    {"link":{"linkType":">","left":"a","right":"b"}},
+    {"link":{"linkType":">","left":"b","right":"c"}},
+    {"link":{"linkType":">","left":"b","right":"d"}},
+    {"link":{"linkType":">","left":"a","right":"e","label":"link text"}},
+}
+*/
 function ast(yy) {
+    console.log("jojojojj");
+    console.log(yy)
     var processANode = function (o) {
     };
 

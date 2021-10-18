@@ -1,3 +1,24 @@
+/*
+a>b>c,d
+a>e;link text
+a;node text
+
+to
+digraph {
+    compound=true;
+    rankdir=TD;
+    a[label="node text"];
+    b;
+    c;
+    d;
+    e;
+    //links start
+    a->b;
+    b->c;
+    b->d;
+    a->e[label="link text"];
+}
+*/
 function digraph(yy) {
     // TODO: See splines control
     // http://www.graphviz.org/doc/info/attrs.html#d:splines

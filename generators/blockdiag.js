@@ -7,7 +7,26 @@
 //flowchart.beginpoint,flowchart.endpoint
 //flowchart.condition,flowchart.database,flowchart.terminator,flowchart.input
 //flowchart.loopin,flowchart.loopout
+/*
+a>b>c,d
+a>e;link text
+a;node text
 
+to
+blockdiag{
+ default_fontsize = 14
+  orientation=landscape
+a[label="node text"];
+b;
+c;
+d;
+e;
+  a -> b;
+  b -> c;
+  b -> d;
+  a -> e[label = "link text"];
+}
+*/
 function blockdiag(yy) {
     output(yy, "blockdiag{\n default_fontsize = 14");
     var r = getGraphRoot(yy);

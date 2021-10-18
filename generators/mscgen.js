@@ -1,3 +1,22 @@
+/*
+a>b>c,d
+a>e;link text
+a;node text
+
+to
+msc {
+      a[label="node text"]
+    ,  b
+    ,  c
+    ,  d
+    ,  e
+    ;
+    a=>b[id="1"];
+    b=>c[id="2"];
+    b=>d[id="3"];
+    a=>e[label="link text",id="4"];
+}
+*/
 function mscgen(yy) {
     output(yy, "msc {", true);
     var r = getGraphRoot(yy);

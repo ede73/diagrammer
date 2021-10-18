@@ -1,3 +1,23 @@
+/*
+a>b>c,d
+a>e;link text
+a;node text
+
+to
+seqdiag {
+autonumber = True;
+ activation = none;
+a[label="node text"];
+b;
+c;
+d;
+e;
+a -> b[];
+b -> c[];
+b -> d[];
+a -> e[label="link text"];
+}
+*/
 function seqdiag(yy) {
     yy.result("seqdiag {");
     yy.result("autonumber = True;");

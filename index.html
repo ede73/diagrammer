@@ -22,6 +22,7 @@
 <!-- canviz support end-->
 
 <body>
+	<!-- top menu strip - horizontal -->
 	<form name="contact" action="">
 		<label for="generator">Generator</label> <select id="generator" name="generator" onChange="generatorChanged()">
 			<option value="digraph:dot">Graphviz - dot</option>
@@ -102,8 +103,9 @@
 			<option value="state_sip_sequence.txt">state_sip_sequence.txt</option>
 			<option value="state_tcp.txt">state_tcp.txt</option>
 			<option value="state_y_edge.txt">state_y_edge.txt</option>
-		</select> <label for="filename">Filename</label> <input type="text" id="filename" name="filename"
-			value="output" />
+		</select>
+		<label for="filename">Filename</label>
+		<input type="text" id="filename" name="filename" value="output" />
 		<button onclick="save();return false;">Save</button>
 		<button onclick="load();return false;">Load</button>
 		<button onclick="importGraphs();return false;">Import</button>
@@ -188,6 +190,8 @@
 					 */
 			}
 		</style>
+
+		<!-- first horizontal toolbar icon strip -->
 		<div class="htoolbar">
 			<ul class="htoolbar">
 				<li tooltip="actor" onclick="addLine('actor nodeName');"><img height="30" src="types/xactor.png" /></li>
@@ -219,6 +223,7 @@
 			</ul>
 		</div>
 
+		<!-- second horizontal toolbar icon strip -->
 		<div class="htoolbar">
 			<ul class="htoolbar">
 				<li tooltip="loopout" onclick="addLine('loopout nodeName');"><img height="30"
@@ -241,6 +246,7 @@
 			</ul>
 		</div>
 
+		<!-- third horizontal toolbar icon strip -->
 		<div class="htoolbar">
 			<ul class="htoolbar">
 				<li tooltip="normal_dir" onclick="addLine('a>b');"><img height="45" src="arrows/normal_dir.png" /></li>
@@ -261,6 +267,8 @@
 				<li> <input type="button" value="Open Window" onclick="openPicWindow();"></li>
 			</ul>
 		</div>
+
+		<!-- first leftmost vertical menu strip -->
 		<div class="toolbar">
 			<ul class="toolbar">
 				<li onclick="addLine(1);">Colored node with label</li>
@@ -274,6 +282,8 @@
 				<li onclick="addLine(9);">Conditional</li>
 			</ul>
 		</div>
+
+		<!-- second middle vertical menu strip -->
 		<div class="toolbar">
 			<ul class="toolbar">
 				<li onclick="addLine('NodeName/actor1.png');"><img height="30" src="icons/actor1.png" /></li>
@@ -290,6 +300,8 @@
 				<li onclick="addLine('NodeName/cpu.png');"><img height="30" src="icons/cpu.png" /></li>
 			</ul>
 		</div>
+
+		<!-- third rightmost vertical menu strip -->
 		<div class="toolbar">
 			<ul class="toolbar">
 				<li onclick="addLine('NodeName/keyboard.png');"><img height="30" src="icons/keyboard.png" /></li>
@@ -307,6 +319,7 @@
 			</ul>
 		</div>
 
+		<!-- ACE editor + resulting graphs (server/dynamic)-->
 		<table>
 			<tr>
 				<td>

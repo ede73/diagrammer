@@ -7,36 +7,54 @@
 //flowchart.beginpoint,flowchart.endpoint
 //flowchart.condition,flowchart.database,flowchart.terminator,flowchart.input
 //flowchart.loopin,flowchart.loopout
+/*
+a>b>c,d
+a>e;link text
+a;node text
 
+to
+blockdiag{
+ default_fontsize = 14
+  orientation=landscape
+a[label="node text"];
+b;
+c;
+d;
+e;
+  a -> b;
+  b -> c;
+  b -> d;
+  a -> e[label = "link text"];
+}
+*/
 function blockdiag(yy) {
-    output(yy,"blockdiag{\n default_fontsize = 14");
+    output(yy, "blockdiag{\n default_fontsize = 14");
     var r = getGraphRoot(yy);
     if (r.getDirection() === "portrait") {
-        output(yy,"  orientation=portrait");
+        output(yy, "  orientation=portrait");
     } else {
         // DEFAULT
-        output(yy,"  orientation=landscape");
+        output(yy, "  orientation=landscape");
     }
-    var i;
     var tmp = r.getStart();
-    var parseObjects = function(o){
-	output(true);
+    var parseObjects = function (o) {
+        output(true);
         if (o instanceof Group) {
-            output(yy,' group "' + o.getLabel() + '"{',true);
-            output(yy,getAttrFmt(o, 'color', '   color="{0}"'));
-            output(yy,getAttrFmt(o, 'label', '   label="{0}"'));
+            output(yy, ' group "' + o.getLabel() + '"{', true);
+            output(yy, getAttrFmt(o, 'color', '   color="{0}"'));
+            output(yy, getAttrFmt(o, 'label', '   label="{0}"'));
             if (tmp !== undefined && tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
-	    traverseObjects(o,function(z){
+            traverseObjects(o, function (z) {
                 tmp = getAttrFmt(z, 'color', ',color="{0}"') +
-		    getShape(shapes.blockdiag, z.shape, ',shape={0}') +
-		    getAttrFmt(z, 'label', ',label="{0}"');
+                    getShape(shapes.blockdiag, z.shape, ',shape={0}') +
+                    getAttrFmt(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
                 output(yy, z.getName() + tmp + ';');
             });
-	    output(false);
-            output(yy,"}");
+            output(false);
+            output(yy, "}");
         } else {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
@@ -47,20 +65,20 @@ function blockdiag(yy) {
             }
 
             var s = getAttrFmt(o, 'color', ',color="{0}"') +
-		getAttrFmt(o, 'image', ',background="icons{0}"') +
-		style +
-		getShape(shapes.blockdiag, o.shape, ',shape="{0}"') +
-		getAttrFmt(o, 'label', ',label="{0}"');
+                getAttrFmt(o, 'image', ',background="icons{0}"') +
+                style +
+                getShape(shapes.blockdiag, o.shape, ',shape="{0}"') +
+                getAttrFmt(o, 'label', ',label="{0}"');
             if (s.trim() != "")
                 s = "[" + s.trim().substring(1) + "]";
-            output(yy,o.getName() + s + ';');
+            output(yy, o.getName() + s + ';');
         }
-	output(false);
+        output(false);
     };
 
     traverseObjects(r, parseObjects);
 
-    traverseLinks(yy,function(l) {
+    traverseLinks(yy, function (l) {
         var t = "";
         if (l.linkType.indexOf(".") !== -1) {
             t += ',style="dotted" ';
@@ -75,7 +93,7 @@ function blockdiag(yy) {
             t = t.substring(1).trim();
         if (t != "")
             t = "[" + t + "]";
-        output(yy,"  " + l.left.getName() + " -> " + l.right.getName() + t + ";");
+        output(yy, "  " + l.left.getName() + " -> " + l.right.getName() + t + ";");
     });
-    output(yy,"}");
+    output(yy, "}");
 }

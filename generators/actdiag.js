@@ -1,7 +1,25 @@
 //node parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
+/*
+a>b>c,d
+a>e;link text
+a;node text
 
+to
+actdiag{
+  default_fontsize = 14
+a[label="node text"];
+b;
+c;
+d;
+e;
+  a -> b;
+  b -> c;
+  b -> d;
+  a -> e[label = "link text"];
+}
+*/
 function actdiag(yy) {
-    output(yy,"actdiag{\n  default_fontsize = 14");
+    output(yy, "actdiag{\n  default_fontsize = 14");
     var r = getGraphRoot(yy);
     /*
      * does not really work..but portrait mode if
@@ -11,20 +29,20 @@ function actdiag(yy) {
     //var s = r.getStart();
     var i;
     var parseObjects = function (o) {
-	output(true);
+        output(true);
         if (o instanceof Group) {
-            output(yy,'lane "' + o.getName() + '"{',true);
-	    traverseObjects(o, function(z){
-                var s1 = getAttrFmt(z, 'color', ',color="{0}"') + 
-		    getShape(shapes.actdiag, z.shape, ',shape={0}') + 
-		    getAttrFmt(z, 'label', ',label="{0}"');
+            output(yy, 'lane "' + o.getName() + '"{', true);
+            traverseObjects(o, function (z) {
+                var s1 = getAttrFmt(z, 'color', ',color="{0}"') +
+                    getShape(shapes.actdiag, z.shape, ',shape={0}') +
+                    getAttrFmt(z, 'label', ',label="{0}"');
                 if (s1.trim() != "") {
                     s1 = "[" + s1.trim().substring(1) + "]";
-		}
+                }
                 output(yy, z.getName() + s1 + ';');
             });
-	    output(false);
-            output(yy,"}");
+            output(false);
+            output(yy, "}");
         } else {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
@@ -36,19 +54,19 @@ function actdiag(yy) {
 
             // ICON does not work, using background
             var s2 = getAttrFmt(o, 'color', ',color="{0}"') +
-		getAttrFmt(o, 'image', ',background="icons{0}"') +
-		style +
-		getShape(shapes.actdiag, o.shape, ',shape={0}') +
-		getAttrFmt(o, 'label', ',label="{0}"');
+                getAttrFmt(o, 'image', ',background="icons{0}"') +
+                style +
+                getShape(shapes.actdiag, o.shape, ',shape={0}') +
+                getAttrFmt(o, 'label', ',label="{0}"');
             if (s2.trim() != "")
                 s2 = "[" + s2.trim().substring(1) + "]";
-            output(yy,o.getName() + s2 + ';');
+            output(yy, o.getName() + s2 + ';');
         }
-	output(false);
+        output(false);
     };
     traverseObjects(r, parseObjects);
 
-    traverseLinks(yy, function(l) {
+    traverseLinks(yy, function (l) {
         var t = "";
         if (l.linkType.indexOf(".") !== -1) {
             t += ',style="dotted" ';
@@ -63,7 +81,7 @@ function actdiag(yy) {
             t = t.substring(1).trim();
         if (t != "")
             t = "[" + t + "]";
-        output(yy,"  " + l.left.getName() + " -> " + l.right.getName() + t + ";");
+        output(yy, "  " + l.left.getName() + " -> " + l.right.getName() + t + ";");
     });
-    output(yy,"}");
+    output(yy, "}");
 }

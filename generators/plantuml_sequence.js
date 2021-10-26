@@ -1,5 +1,24 @@
+/*
+a>b>c,d
+a>e;link text
+a;node text
+
+to
+@startuml
+autonumber
+participant  "node text" as  a 
+participant  b 
+participant  c 
+participant  d 
+participant  e 
+a->b
+b->c
+b->d
+a->e:link text
+@enduml
+*/
 function plantuml_sequence(yy) {
-    var processANode = function (o,sbgraph) {
+    var processANode = function (o, sbgraph) {
         var nattrs = [];
         var styles = [];
         // getAttrFmt(o, 'color', 'fillcolor="{0}"',nattrs);
@@ -28,17 +47,17 @@ function plantuml_sequence(yy) {
             t = "[" + nattrs.join(",") + "]";
         //yy.result(indent("participant " + getAttrFmt(o, 'label', '"{0}" as') + " " + o.getName() + t));
         output(yy, "participant {0} {1} {2}".format(
-			    getAttrFmt(o, 'label', '"{0}" as'),
-			    o.getName(),
-			    t));
+            getAttrFmt(o, 'label', '"{0}" as'),
+            o.getName(),
+            t));
     };
 
     var r = getGraphRoot(yy);
     if (r.getVisualizer()) {
-        outputFmt(yy, "/* render: {0} */",[r.getVisualizer()])
+        outputFmt(yy, "/* render: {0} */", [r.getVisualizer()])
     }
     output(yy, "@startuml");
-    output(yy, "autonumber",true);
+    output(yy, "autonumber", true);
     /*
      * if (r.getDirection() === "portrait") { output(yy, indent("rankdir=LR;")); }
      * else { output(yy, indent("rankdir=TD;")); }
@@ -55,7 +74,7 @@ function plantuml_sequence(yy) {
     // (node=edge,node,link.group...all in order for this fucker)
     var printLinks = function printLinks(container, sbgraph) {
         for (var i in yy.LINKS) {
-            if (!yy.LINKS.hasOwnProperty(i))continue;
+            if (!yy.LINKS.hasOwnProperty(i)) continue;
             var l = yy.LINKS[i];
             if (l.printed)
                 continue;
@@ -71,7 +90,7 @@ function plantuml_sequence(yy) {
                 if (label.indexOf("::") !== -1) {
                     label = label.split("::");
                     note = label[1].trim();
-		    label=label[0].trim();
+                    label = label[0].trim();
                 }
             }
             var color = getAttrFmt(l, 'color', '[{0}]').trim();
@@ -156,20 +175,20 @@ function plantuml_sequence(yy) {
             output(yy, ll.getName() + lt + lr.getName() + t + label);
             if (swap)
                 output(yy, lr.getName() + lt + ll.getName() + t + label);
-            if (sbgraph){
-                if (!lr.active){
-                    output(yy, "activate "+ lr.getName(),true);
-                    lr.active=true;
-                }else{
-                    ll.active=false;
-		    output(false);
-                    output(yy, "deactivate "+ ll.getName());
+            if (sbgraph) {
+                if (!lr.active) {
+                    output(yy, "activate " + lr.getName(), true);
+                    lr.active = true;
+                } else {
+                    ll.active = false;
+                    output(false);
+                    output(yy, "deactivate " + ll.getName());
                 }
-            }else{
-                if (ll.active){
-                    ll.active=false;
-		    output(false);
-                    output(yy, "deactivate "+ ll.getName());   
+            } else {
+                if (ll.active) {
+                    ll.active = false;
+                    output(false);
+                    output(yy, "deactivate " + ll.getName());
                 }
             }
             if (note != "") {
@@ -185,20 +204,20 @@ function plantuml_sequence(yy) {
         var i;
         var o;
         for (i in r.OBJECTS) {
-            if(!r.OBJECTS.hasOwnProperty(i))continue;
+            if (!r.OBJECTS.hasOwnProperty(i)) continue;
             o = r.OBJECTS[i];
             if (o instanceof Node)
                 processANode(o, isSubGraph);
         }
         printLinks(r, isSubGraph);
         for (i in r.OBJECTS) {
-            if(!r.OBJECTS.hasOwnProperty(i))continue;
+            if (!r.OBJECTS.hasOwnProperty(i)) continue;
             o = r.OBJECTS[i];
             if (o instanceof Group) {
                 // TODO:
                 // Group name,OBJECTS,get/setEqual,toString
                 var processAGroup = function (o) {
-                    debug('processAGroup:'+JSON.stringify(o));
+                    debug('processAGroup:' + JSON.stringify(o));
                     var cond = getAttr(o, 'conditional');
                     var nodeIsSubGraph = getAttr(o, 'isSubGraph');
                     if (cond) {
@@ -212,7 +231,7 @@ function plantuml_sequence(yy) {
                             cond = "end";
                         output(yy, cond + ' ' + o.getLabel());
                     } else {
-                        cond="";//cond = "ref";
+                        cond = "";//cond = "ref";
                     }
                     if (o.getColor() !== undefined) {
                         output(yy, "style=filled;");
@@ -227,7 +246,7 @@ function plantuml_sequence(yy) {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
         }
-    }(r,false);
+    }(r, false);
     printLinks(r);
     output(false);
     output(yy, "@enduml");

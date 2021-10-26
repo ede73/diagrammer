@@ -1,19 +1,18 @@
 <?php
-//print_r($_SERVER);
 
-function sanitize() {
+function sanitize($ip)
+{
+    return str_replace(array(':', '.', '/'), array('_', '_', '_'), $ip);
 }
 
-function get_safe_ip() {
-  $ip = $_SERVER['REMOTE_ADDR'];
-  return str_replace($ip, array(':'), array('_'));
+function get_safe_ip()
+{
+    return sanitize($_SERVER['REMOTE_ADDR']);
 }
-
-$ip = get_safe_ip();
 
 $postText = trim(file_get_contents('php://input'));
 
-if (FALSE===file_put_contents("./localstorage_{$ip}.json", $postText)) {
-  http_response_code(500);
+$ip = get_safe_ip();
+if (false === file_put_contents("./localstorage_{$ip}.json", $postText)) {
+    http_response_code(500);
 }
-?>

@@ -1,13 +1,12 @@
 <?php
-$file="./localstorage_".$_SERVER['REMOTE_ADDR'].".json";
-if (!file_exists($file)){
-  $file="./localstorage.json";
+$file = "./localstorage_" . $_SERVER['REMOTE_ADDR'] . ".json";
+if (!file_exists($file)) {
+  $file = "./localstorage.json";
 }
 
-if (file_exists($file)){
-  error_log('Serve export:'.$file);
+if (file_exists($file)) {
+  error_log('Serve export:' . $file);
   echo file_get_contents($file);
 } else {
-  error_log('Export file '.$file." doesn't exist");
+  error_log('Export file ' . $file . " doesnt exist");
 }
-?>

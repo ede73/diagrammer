@@ -30,19 +30,19 @@ if (myArgs[1] === "lex") {
 } else {
     var parser = require("./parser.js");
     parser.parser.yy.OUTPUT = myArgs[1];
-    parser.parser.trace = function(x) {
+    parser.parser.trace = function (x) {
         console.log("TRACE:" + x);
     }
-    parser.parser.debug = function(x) {
+    parser.parser.debug = function (x) {
         console.log("DEBUG:" + x);
     }
-    parser.parser.yy.result = function(result) {
+    parser.parser.yy.result = function (result) {
         console.log(result);
     }
 
     //this.parseError(errStr, 
     //{text: this.lexer.match, token: this.terminals_[symbol] || symbol, line: this.lexer.yylineno, loc: yyloc, expected: expected});
-    parser.parser.yy.parseError = function(str, hash) {
+    parser.parser.yy.parseError = function (str, hash) {
         console.log("Parsing error found:");
         console.log(str);
         console.log(hash);

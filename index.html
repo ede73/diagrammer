@@ -1,9 +1,9 @@
-
 <html>
 <link rel="stylesheet" type="text/css" href="css/textarea.css" />
 <!-- canviz support start-->
 <link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz.css" />
 <script type="text/javascript" src="parser.js"></script>
+<script src="https://unpkg.com/gojs/release/go-debug.js"></script>
 <script type="text/javascript" src="web/index.js"></script>
 <!--<script type="text/javascript" src="js/mscgen.js"></script>-->
 
@@ -23,8 +23,7 @@
 
 <body>
 	<form name="contact" action="">
-		<label for="generator">Generator</label> <select id="generator"
-			name="generator" onChange="generatorChanged()">
+		<label for="generator">Generator</label> <select id="generator" name="generator" onChange="generatorChanged()">
 			<option value="digraph:dot">Graphviz - dot</option>
 			<option value="digraph:circo">Graphviz - circo</option>
 			<option value="digraph:twopi">Graphviz - twopi</option>
@@ -61,10 +60,9 @@
 			<option value="treelayout">TreeLayout(GoJS)</option>
 			<!--  https://gojs.net/latest/samples/sequencediagram.html -->
 			<option value="sequencediagram">SequenceDiagram(GoJS)</option>
-		</select> 
+		</select>
 		<!-- handling examples -->
-		<label for="example">Examples:</label> <select id="example"
-			name="example" onChange="exampleChanged()">
+		<label for="example">Examples:</label> <select id="example" name="example" onChange="exampleChanged()">
 			<!--ls tests/*txt|awk -F/ '{print "<option value=\""$2"\">"$2"</option>"}'-->
 			<option value="ast.txt">ast.txt</option>
 			<option value="dendrogram.txt">dendrogram.txt</option>
@@ -104,15 +102,14 @@
 			<option value="state_sip_sequence.txt">state_sip_sequence.txt</option>
 			<option value="state_tcp.txt">state_tcp.txt</option>
 			<option value="state_y_edge.txt">state_y_edge.txt</option>
-		</select> <label for="filename">Filename</label> <input type="text"
-			id="filename" name="filename" value="output" />
+		</select> <label for="filename">Filename</label> <input type="text" id="filename" name="filename"
+			value="output" />
 		<button onclick="save();return false;">Save</button>
 		<button onclick="load();return false;">Load</button>
 		<button onclick="importGraphs();return false;">Import</button>
 		<button onclick="exportGraphs();return false;">Export</button>
 		<!-- saved combobox and handlers -->
-		<label for="saved">Saved graphs</label> <select id="saved"
-			name="saved" onChange="savedChanged()"></select>
+		<label for="saved">Saved graphs</label> <select id="saved" name="saved" onChange="savedChanged()"></select>
 		<button onclick="visualize();return false;">Visualize</button>
 		<br />
 
@@ -123,158 +120,145 @@
 			</section>-->
 		<div id="error"></div>
 		<style type="text/css">
-/*dendrogram*/
-.node circle {     
-  fill: #fff;    
-  stroke: steelblue;    
-  stroke-width: 1.5px; 
-} 
-.node {    
-  font: 12px sans-serif; 
-} 
-.link {    
-  fill: none;    
-  stroke: #ccc;    
-  stroke-width: 1.5px; 
-}
+			/*dendrogram*/
+			.node circle {
+				fill: #fff;
+				stroke: steelblue;
+				stroke-width: 1.5px;
+			}
 
-/*rest*/
-.htoolbar ul {
-	float: top;
-	padding: 0px;
-	margin: 2px;
-}
+			.node {
+				font: 12px sans-serif;
+			}
 
-.htoolbar ul li {
-	width: 30px;
-	background-color: rgba(0, 127, 255, .5);
-	color: white;
-	padding: 8px;
-	margin: 8px;
-	border-radius: 8px;
-	//font-family: Helvetica;
-	font-family: 'Droid Sans Mono';
-	font-size: 12px;
-	display: table-cell;
+			.link {
+				fill: none;
+				stroke: #ccc;
+				stroke-width: 1.5px;
+			}
+
+			/*rest*/
+			.htoolbar ul {
+				float: top;
+				padding: 0px;
+				margin: 2px;
+			}
+
+			.htoolbar ul li {
+				width: 30px;
+				background-color: rgba(0, 127, 255, .5);
+				color: white;
+				padding: 8px;
+				margin: 8px;
+				border-radius: 8px;
+				/*font-family: Helvetica;*/
+				font-family: 'Droid Sans Mono';
+				font-size: 12px;
+				display: table-cell;
 
 
-	list-style-type: none;
-	vertical-align: middle;
-}
+				list-style-type: none;
+				vertical-align: middle;
+			}
 
-.toolbar ul {
-	float: left;
-	padding: 0px;
-	margin: 2px;
-}
+			.toolbar ul {
+				float: left;
+				padding: 0px;
+				margin: 2px;
+			}
 
-.toolbar ul li {
-	height: 30px;
-	background-color: rgba(0, 0, 255, .5);
-	color: white;
-	padding: 5px;
-	margin: 5px;
-	border-radius: 8px;
-	//font-family: Helvetica;
-	font-family: 'Droid Sans Mono';
-	font-size: 12px;
-	line-height: 30px;
-	display: block;
-	/*border: solid 1px black;*/
-	/* display: table-cell;*/
-	list-style-type: none;
-	/*            height: 10px;
+			.toolbar ul li {
+				height: 30px;
+				background-color: rgba(0, 0, 255, .5);
+				color: white;
+				padding: 5px;
+				margin: 5px;
+				border-radius: 8px;
+				//font-family: Helvetica;
+				font-family: 'Droid Sans Mono';
+				font-size: 12px;
+				line-height: 30px;
+				display: block;
+				/*border: solid 1px black;*/
+				/* display: table-cell;*/
+				list-style-type: none;
+				/*            height: 10px;
 					 margin: 10px;
 					 vertical-align: middle;
 					 */
-}
-</style>
+			}
+		</style>
 		<div class="htoolbar">
 			<ul class="htoolbar">
-				<li tooltip="actor" onclick="addLine('actor nodeName');"><img
-					height="30" src="types/xactor.png" /></li>
-				<li tooltip="beginpoint" onclick="addLine('beginpoint nodeName');"><img
-					height="30" src="types/xbeginpoint.png" /></li>
-				<li tooltip="box" onclick="addLine('box nodeName');"><img
-					height="30" src="types/xbox.png" /></li>
-				<li tooltip="circle" onclick="addLine('circle nodeName');"><img
-					height="30" src="types/xcircle.png" /></li>
-				<li tooltip="cloud" onclick="addLine('cloud nodeName');"><img
-					height="30" src="types/xcloud.png" /></li>
-				<li tooltip="condition" onclick="addLine('condition nodeName');"><img
-					height="30" src="types/xcondition.png" /></li>
-				<li tooltip="database" onclick="addLine('database nodeName');"><img
-					height="30" src="types/xdatabase.png" /></li>
-				<li tooltip="default" onclick="addLine('default nodeName');"><img
-					height="30" src="types/xdefault.png" /></li>
-				<li tooltip="diamond" onclick="addLine('diamond nodeName');"><img
-					height="30" src="types/xdiamond.png" /></li>
-				<li tooltip="dots" onclick="addLine('dots nodeName');"><img
-					height="30" src="types/xdots.png" /></li>
-				<li tooltip="doublecircle"
-					onclick="addLine('doublecircle nodeName');"><img height="30"
-					src="types/xdoublecircle.png" /></li>
-				<li tooltip="ellipse" onclick="addLine('ellipse nodeName');"><img
-					height="30" src="types/xellipse.png" /></li>
-				<li tooltip="endpoint" onclick="addLine('endpoint nodeName');"><img
-					height="30" src="types/xendpoint.png" /></li>
-				<li tooltip="input" onclick="addLine('input nodeName');"><img
-					height="30" src="types/xinput.png" /></li>
-				<li tooltip="loop" onclick="addLine('loop nodeName');"><img
-					height="30" src="types/xloop.png" /></li>
-				<li tooltip="loopin" onclick="addLine('loopin nodeName');"><img
-					height="30" src="types/xloopin.png" /></li>
+				<li tooltip="actor" onclick="addLine('actor nodeName');"><img height="30" src="types/xactor.png" /></li>
+				<li tooltip="beginpoint" onclick="addLine('beginpoint nodeName');"><img height="30"
+						src="types/xbeginpoint.png" /></li>
+				<li tooltip="box" onclick="addLine('box nodeName');"><img height="30" src="types/xbox.png" /></li>
+				<li tooltip="circle" onclick="addLine('circle nodeName');"><img height="30" src="types/xcircle.png" />
+				</li>
+				<li tooltip="cloud" onclick="addLine('cloud nodeName');"><img height="30" src="types/xcloud.png" /></li>
+				<li tooltip="condition" onclick="addLine('condition nodeName');"><img height="30"
+						src="types/xcondition.png" /></li>
+				<li tooltip="database" onclick="addLine('database nodeName');"><img height="30"
+						src="types/xdatabase.png" /></li>
+				<li tooltip="default" onclick="addLine('default nodeName');"><img height="30"
+						src="types/xdefault.png" /></li>
+				<li tooltip="diamond" onclick="addLine('diamond nodeName');"><img height="30"
+						src="types/xdiamond.png" /></li>
+				<li tooltip="dots" onclick="addLine('dots nodeName');"><img height="30" src="types/xdots.png" /></li>
+				<li tooltip="doublecircle" onclick="addLine('doublecircle nodeName');"><img height="30"
+						src="types/xdoublecircle.png" /></li>
+				<li tooltip="ellipse" onclick="addLine('ellipse nodeName');"><img height="30"
+						src="types/xellipse.png" /></li>
+				<li tooltip="endpoint" onclick="addLine('endpoint nodeName');"><img height="30"
+						src="types/xendpoint.png" /></li>
+				<li tooltip="input" onclick="addLine('input nodeName');"><img height="30" src="types/xinput.png" /></li>
+				<li tooltip="loop" onclick="addLine('loop nodeName');"><img height="30" src="types/xloop.png" /></li>
+				<li tooltip="loopin" onclick="addLine('loopin nodeName');"><img height="30" src="types/xloopin.png" />
+				</li>
 			</ul>
 		</div>
 
 		<div class="htoolbar">
 			<ul class="htoolbar">
-				<li tooltip="loopout" onclick="addLine('loopout nodeName');"><img
-					height="30" src="types/xloopout.png" /></li>
-				<li tooltip="mail" onclick="addLine('mail nodeName');"><img
-					height="30" src="types/xmail.png" /></li>
-				<li tooltip="minidiamond" onclick="addLine('minidiamond nodeName');"><img
-					height="30" src="types/xminidiamond.png" /></li>
-				<li tooltip="minisquare" onclick="addLine('minisquare nodeName');"><img
-					height="30" src="types/xminisquare.png" /></li>
-				<li tooltip="note" onclick="addLine('note nodeName');"><img
-					height="30" src="types/xnote.png" /></li>
-				<li tooltip="record" onclick="addLine('record nodeName');"><img
-					height="30" src="types/xrecord.png" /></li>
-				<li tooltip="rect" onclick="addLine('rect nodeName');"><img
-					height="30" src="types/xrect.png" /></li>
-				<li tooltip="roundedbox" onclick="addLine('roundedbox nodeName');"><img
-					height="30" src="types/xroundedbox.png" /></li>
-				<li tooltip="square" onclick="addLine('square nodeName');"><img
-					height="30" src="types/xsquare.png" /></li>
-				<li tooltip="terminator" onclick="addLine('terminator nodeName');"><img
-					height="30" src="types/xterminator.png" /></li>
+				<li tooltip="loopout" onclick="addLine('loopout nodeName');"><img height="30"
+						src="types/xloopout.png" /></li>
+				<li tooltip="mail" onclick="addLine('mail nodeName');"><img height="30" src="types/xmail.png" /></li>
+				<li tooltip="minidiamond" onclick="addLine('minidiamond nodeName');"><img height="30"
+						src="types/xminidiamond.png" /></li>
+				<li tooltip="minisquare" onclick="addLine('minisquare nodeName');"><img height="30"
+						src="types/xminisquare.png" /></li>
+				<li tooltip="note" onclick="addLine('note nodeName');"><img height="30" src="types/xnote.png" /></li>
+				<li tooltip="record" onclick="addLine('record nodeName');"><img height="30" src="types/xrecord.png" />
+				</li>
+				<li tooltip="rect" onclick="addLine('rect nodeName');"><img height="30" src="types/xrect.png" /></li>
+				<li tooltip="roundedbox" onclick="addLine('roundedbox nodeName');"><img height="30"
+						src="types/xroundedbox.png" /></li>
+				<li tooltip="square" onclick="addLine('square nodeName');"><img height="30" src="types/xsquare.png" />
+				</li>
+				<li tooltip="terminator" onclick="addLine('terminator nodeName');"><img height="30"
+						src="types/xterminator.png" /></li>
 			</ul>
 		</div>
 
 		<div class="htoolbar">
 			<ul class="htoolbar">
-				<li tooltip="normal_dir" onclick="addLine('a>b');"><img
-					height="45" src="arrows/normal_dir.png" /></li>
-				<li tooltip="dashed_dir" onclick="addLine('a->b');"><img
-					height="45" src="arrows/dashed_dir.png" /></li>
-				<li tooltip="dotted_dir" onclick="addLine('a.>b');"><img
-					height="45" src="arrows/dotted_dir.png" /></li>
-				<li tooltip="normal_both" onclick="addLine('a<>b');"><img
-					height="45" src="arrows/normal_both.png" /></li>
-				<li tooltip="dashed_both" onclick="addLine('a<->b');"><img
-					height="45" src="arrows/dashed_both.png" /></li>
-				<li tooltip="dotted_both" onclick="addLine('a<.>b');"><img
-					height="45" src="arrows/dotted_both.png" /></li>
-				<li tooltip="dashed_none" onclick="addLine('a-b');"><img
-					height="45" src="arrows/dashed_none.png" /></li>
-				<li tooltip="dotted_none" onclick="addLine('a.b');"><img
-					height="45" src="arrows/dotted_none.png" /></li>
-				<li tooltip="broken_l" onclick="addLine('a</b');"><img
-					height="45" src="arrows/broken_l.png" /></li>
-				<li tooltip="broker_r" onclick="addLine('a/>b');"><img
-					height="45" src="arrows/broker_r.png" /></li>
-				<li>	<input type="button" value="Open Window" onclick="openPicWindow();"></li>
+				<li tooltip="normal_dir" onclick="addLine('a>b');"><img height="45" src="arrows/normal_dir.png" /></li>
+				<li tooltip="dashed_dir" onclick="addLine('a->b');"><img height="45" src="arrows/dashed_dir.png" /></li>
+				<li tooltip="dotted_dir" onclick="addLine('a.>b');"><img height="45" src="arrows/dotted_dir.png" /></li>
+				<li tooltip="normal_both" onclick="addLine('a<>b');"><img height="45" src="arrows/normal_both.png" />
+				</li>
+				<li tooltip="dashed_both" onclick="addLine('a<->b');"><img height="45" src="arrows/dashed_both.png" />
+				</li>
+				<li tooltip="dotted_both" onclick="addLine('a<.>b');"><img height="45" src="arrows/dotted_both.png" />
+				</li>
+				<li tooltip="dashed_none" onclick="addLine('a-b');"><img height="45" src="arrows/dashed_none.png" />
+				</li>
+				<li tooltip="dotted_none" onclick="addLine('a.b');"><img height="45" src="arrows/dotted_none.png" />
+				</li>
+				<li tooltip="broken_l" onclick="addLine('a</b');"><img height="45" src="arrows/broken_l.png" /></li>
+				<li tooltip="broker_r" onclick="addLine('a/>b');"><img height="45" src="arrows/broker_r.png" /></li>
+				<li> <input type="button" value="Open Window" onclick="openPicWindow();"></li>
 			</ul>
 		</div>
 		<div class="toolbar">
@@ -292,72 +276,66 @@
 		</div>
 		<div class="toolbar">
 			<ul class="toolbar">
-				<li onclick="addLine('NodeName/actor1.png');"><img height="30"
-					src="icons/actor1.png" /></li>
-				<li onclick="addLine('NodeName/actor2.png');"><img height="30"
-					src="icons/actor2.png" /></li>
-				<li onclick="addLine('NodeName/actor3.png');"><img height="30"
-					src="icons/actor3.png" /></li>
-				<li onclick="addLine('NodeName/barcode.png');"><img height="30"
-					src="icons/barcode.png" /></li>
-				<li onclick="addLine('NodeName/camera.png');"><img height="30"
-					src="icons/camera.png" /></li>
-				<li onclick="addLine('NodeName/harddisk.png');"><img
-					height="30" src="icons/harddisk.png" /></li>
-				<li onclick="addLine('NodeName/laser.png');"><img height="30"
-					src="icons/laser.png" /></li>
-				<li onclick="addLine('NodeName/phone.png');"><img height="30"
-					src="icons/phone.png" /></li>
-				<li onclick="addLine('NodeName/satellite.png');"><img
-					height="30" src="icons/satellite.png" /></li>
-				<li onclick="addLine('NodeName/usbmemory.png');"><img
-					height="30" src="icons/usbmemory.png" /></li>
-				<li onclick="addLine('NodeName/basestation.png');"><img
-					height="30" src="icons/basestation.png" /></li>
-				<li onclick="addLine('NodeName/cpu.png');"><img height="30"
-					src="icons/cpu.png" /></li>
+				<li onclick="addLine('NodeName/actor1.png');"><img height="30" src="icons/actor1.png" /></li>
+				<li onclick="addLine('NodeName/actor2.png');"><img height="30" src="icons/actor2.png" /></li>
+				<li onclick="addLine('NodeName/actor3.png');"><img height="30" src="icons/actor3.png" /></li>
+				<li onclick="addLine('NodeName/barcode.png');"><img height="30" src="icons/barcode.png" /></li>
+				<li onclick="addLine('NodeName/camera.png');"><img height="30" src="icons/camera.png" /></li>
+				<li onclick="addLine('NodeName/harddisk.png');"><img height="30" src="icons/harddisk.png" /></li>
+				<li onclick="addLine('NodeName/laser.png');"><img height="30" src="icons/laser.png" /></li>
+				<li onclick="addLine('NodeName/phone.png');"><img height="30" src="icons/phone.png" /></li>
+				<li onclick="addLine('NodeName/satellite.png');"><img height="30" src="icons/satellite.png" /></li>
+				<li onclick="addLine('NodeName/usbmemory.png');"><img height="30" src="icons/usbmemory.png" /></li>
+				<li onclick="addLine('NodeName/basestation.png');"><img height="30" src="icons/basestation.png" /></li>
+				<li onclick="addLine('NodeName/cpu.png');"><img height="30" src="icons/cpu.png" /></li>
 			</ul>
 		</div>
 		<div class="toolbar">
 			<ul class="toolbar">
-				<li onclick="addLine('NodeName/keyboard.png');"><img
-					height="30" src="icons/keyboard.png" /></li>
-				<li onclick="addLine('NodeName/monitor.png');"><img height="30"
-					src="icons/monitor.png" /></li>
-				<li onclick="addLine('NodeName/printer.png');"><img height="30"
-					src="icons/printer.png" /></li>
-				<li onclick="addLine('NodeName/scanner.png');"><img height="30"
-					src="icons/scanner.png" /></li>
-				<li onclick="addLine('NodeName/wifi.png');"><img height="30"
-					src="icons/wifi.png" /></li>
-				<li onclick="addLine('NodeName/battery.png');"><img height="30"
-					src="icons/battery.png" /></li>
-				<li onclick="addLine('NodeName/documents.png');"><img
-					height="30" src="icons/documents.png" /></li>
-				<li onclick="addLine('NodeName/laptop.png');"><img height="30"
-					src="icons/laptop.png" /></li>
-				<li onclick="addLine('NodeName/mouse.png');"><img height="30"
-					src="icons/mouse.png" /></li>
-				<li onclick="addLine('NodeName/ram.png');"><img height="30"
-					src="icons/ram.png" /></li>
-				<li onclick="addLine('NodeName/sim.png');"><img height="30"
-					src="icons/sim.png" /></li>
-				<li onclick="addLine('NodeName/timer.png');"><img height="30"
-					src="icons/timer.png" /></li>
+				<li onclick="addLine('NodeName/keyboard.png');"><img height="30" src="icons/keyboard.png" /></li>
+				<li onclick="addLine('NodeName/monitor.png');"><img height="30" src="icons/monitor.png" /></li>
+				<li onclick="addLine('NodeName/printer.png');"><img height="30" src="icons/printer.png" /></li>
+				<li onclick="addLine('NodeName/scanner.png');"><img height="30" src="icons/scanner.png" /></li>
+				<li onclick="addLine('NodeName/wifi.png');"><img height="30" src="icons/wifi.png" /></li>
+				<li onclick="addLine('NodeName/battery.png');"><img height="30" src="icons/battery.png" /></li>
+				<li onclick="addLine('NodeName/documents.png');"><img height="30" src="icons/documents.png" /></li>
+				<li onclick="addLine('NodeName/laptop.png');"><img height="30" src="icons/laptop.png" /></li>
+				<li onclick="addLine('NodeName/mouse.png');"><img height="30" src="icons/mouse.png" /></li>
+				<li onclick="addLine('NodeName/ram.png');"><img height="30" src="icons/ram.png" /></li>
+				<li onclick="addLine('NodeName/sim.png');"><img height="30" src="icons/sim.png" /></li>
+				<li onclick="addLine('NodeName/timer.png');"><img height="30" src="icons/timer.png" /></li>
 			</ul>
 		</div>
 
-		<div id='dendrogram'></div>
-		<!-- result.png -->
-		<img align="top" id="image" width="30%" src="web/result.png" onclick="javascript:openImage('web/result.png');" style="float:right;"/>
-
-		<pre id="editable" style="margin:0;left:0;height:600px;"></pre>
+		<table>
+			<tr>
+				<td>
+					<pre id="editable" align="top" style="margin:0;left:0;height:600px;float:left"></pre>
+				</td>
+				<td>
+					<div style="float:right;">
+						<table>
+							<tr>
+								<td>
+									<div id='D3JSIMAGES' />
+								</td>
+								<td>
+									<!-- result.png -->
+									<img align="bottom" id="image" width="30%" src="web/result.png"
+										onclick="javascript:openImage('web/result.png');" />
+								</td>
+							</tr>
+						</table>
+					</div>
+				</td>
+			</tr>
+		</table>
 
 		<!-- resulting data of grammar parser/ast generator -->
 		<textarea id="result" rows="40" cols="10"></textarea>
 
 		<p>Javascript generated(dot only)</p>
-		<div id="svg" style="border-width: 2px; border-style: dotted;"	align="top"></div>
+		<div id="svg" style="border-width: 2px; border-style: dotted;" align="top"></div>
 
 		<p>CanViZ</p>
 		<div id="graph_container"></div>
@@ -369,9 +347,9 @@
 <script type="text/javascript" src="web/index2.js"></script>
 <script src="ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script>
-    var editor = ace.edit("editable");
-    editor.setTheme("ace/theme/kr");
-    editor.getSession().setMode("ace/mode/state");
+	var editor = ace.edit("editable");
+	editor.setTheme("ace/theme/kr");
+	editor.getSession().setMode("ace/mode/state");
 </script>
 <script type="text/javascript">
 	//_MscParse("a>b");
@@ -381,5 +359,5 @@
 	//  });
 	//  // Code that uses other library's $ can follow here.
 </script>
-</html>
 
+</html>

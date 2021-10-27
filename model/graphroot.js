@@ -19,6 +19,7 @@ function GraphRoot() {
         if (value) value = value.toLowerCase();
         return setAttr(this, 'visualizer', value);
     };
+    /* TODO: make meta.getVisualizer() */
     this.getVisualizer = function () {
         return getAttr(this, 'visualizer');
     };
@@ -32,12 +33,14 @@ function GraphRoot() {
     this.setDirection = function (value) {
         return setAttr(this, 'direction', value);
     };
+    /* TODO: make meta.getDirection() */
     this.getDirection = function () {
         return getAttr(this, 'direction');
     };
     this.setStart = function (value) {
         return setAttr(this, 'start', value);
     };
+    /* TODO: make meta.getStart() */
     this.getStart = function () {
         return getAttr(this, 'start');
     };
@@ -45,6 +48,7 @@ function GraphRoot() {
     this.setEqual = function (value) {
         return setAttr(this, 'equal', value);
     };
+    /* TODO: make meta.getEqual() */
     this.getEqual = function () {
         return getAttr(this, 'equal');
     };

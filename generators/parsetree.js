@@ -43,49 +43,42 @@ Only one root supported?
 */
 
 function parsetree(yy) {
-	var tree;
-	function addNode(l, r) {
-		if (tree === undefined) {
-			tree = new TreeNode(l);
-		}
-		if (!(l instanceof Node)) return;
-		const cl = findNode(tree, l);
-		if (cl === undefined) {
-			throw new Error('Left node (' + l.name + ') not found from tree');
-		}
-		if (undefined === findNode(tree, r) && (r instanceof Node)) {
-			debug('Add ' + r.name + ' as child of ' + cl.data.name + " co " + r.container);
-			cl.CHILDREN.push(new TreeNode(r));
-		}
+	var nodeList = [];
+	function addLinkedNode(left, right) {
+		if (!(left instanceof Node)) return;
+		if (!(right instanceof Node)) return;
+		const key=right.id;
+		const parent=left.id;
+		const text=(right.label == undefined) ? right.name : right.label;
+		nodeList.push({key: key, text: text, fill: "#f8f8f8", stroke: "#4d90fe", parent: parent});
 	}
 
-	console.log(JSON.stringify(yy.LINKS));
+	//console.log(JSON.stringify(yy.LINKS));
 
-	traverseLinks(yy, function (l) {
+	const root = getGraphRoot(yy).ROOTNODES;
+	if (root.length > 1) {
+		throw new Error('Only one root node supported');
+	}
+
+	(() => {
+		root[0].id = 1;
+		const text=(root[0].label == undefined) ? root[0].name : root[0].label;
+		nodeList.push({key: root[0].id, text: text, fill: "#f8f8f8", stroke: "#4d90fe"});
+		var keyId = 2;
+		getGraphRoot(yy).OBJECTS.forEach((node) => {
+			if (!getAttr(node, 'id')) {
+				node.id = keyId++;
+			}
+		});
+	})();
+
+	//console.log(JSON.stringify(getGraphRoot(yy).OBJECTS));
+
+	traverseLinks(yy, l => {
 		debug('link node '+l.left.name+' to '+l.right.name);
-		addNode(l.left, l.right);
+		addLinkedNode(l.left, l.right);
 	});
-
-	traverseTree(tree, function (t, isLeaf, hasSibling) {
-		if (isLeaf) {
-			comma = '';
-			if (hasSibling)
-				comma = ',';
-			output(yy, '{"name": "' + t.data.name + '", "size": 1}' + comma);
-		} else {
-			output(yy, '{', true);
-			output(yy, '"name": "' + t.data.name + '",');
-		}
-	}, function (t) {
-		output(yy, '"children": [', true);
-	}, function (t, hasNextSibling) {
-		output(false);
-		output(yy, ']', false);
-		if (hasNextSibling) {
-			output(yy, '},');
-		} else {
-			output(yy, '}');
-		}
-	});
+	//console.log(JSON.stringify(nodeList));
+	output(yy, JSON.stringify(nodeList));
 	output(false);
 }

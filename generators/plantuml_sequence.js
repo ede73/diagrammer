@@ -6,16 +6,18 @@ a;node text
 to
 @startuml
 autonumber
-participant  "node text" as  a 
-participant  b 
-participant  c 
-participant  d 
-participant  e 
+participant  "node text" as  a
+participant  b
+participant  c
+participant  d
+participant  e
 a->b
 b->c
 b->d
 a->e:link text
 @enduml
+
+node parse.js verbose parsetree.test plantuml_sequence
 */
 function plantuml_sequence(yy) {
     var processANode = function (o, sbgraph) {

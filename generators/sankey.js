@@ -17,6 +17,8 @@ to
     {"name": "e", "size": 1}
 ]
 }
+
+node parse.js verbose parsetree.test sankey
 */
 function sankey(yy) {
 	var tree;

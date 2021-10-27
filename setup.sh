@@ -157,7 +157,7 @@ uname -m | grep armv6 && {
   # but it solved the Vm (armv6 not supported) issue on ca-certificates-java
 }
 
-install $JISON $APACHE "$PHP_MODULE" graphviz mscgen plantuml $BLOCKCRAP
+install $JISON $APACHE "$PHP_MODULE" graphviz mscgen plantuml $BLOCKCRAP node
 
 apache_enable_mod userdir
 # either succeeds
@@ -170,3 +170,6 @@ tar fxj ../ext/canviz-0.1.tar.bz2
 
 apache_restart
 echo "You need to ENABLE PHP in userdirs manually"
+
+(cd web;ln -s ../icons icons)
+

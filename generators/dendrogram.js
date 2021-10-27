@@ -17,6 +17,8 @@ to
         {"name": "e", "size": 1}
     ]
 }
+
+node parse.js verbose parsetree.test dendrogram
 */
 function dendrogram(yy) {
 	var tree;

@@ -102,6 +102,8 @@ to
     {"link":{"linkType":">","left":"b","right":"d"}},
     {"link":{"linkType":">","left":"a","right":"e","label":"link text"}},
 }
+
+node parse.js verbose parsetree.test ast
 */
 function ast(yy) {
     console.log(yy)

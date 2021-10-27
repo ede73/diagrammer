@@ -31,16 +31,8 @@ export: state.js parse.js parser.js
 
 .PHONY: test
 test: all
-	#./runtests.sh
+	./runtests.sh
 	#Shortcut without need to define every occurance of test files
-ifneq (,$(findstring jni/,$(DIRNAMES)))
-	#make -C jni/tests
-endif
-ifneq (,$(findstring src/,$(DIRNAMES)))
-	#Run client tests(roboelectric)
-	#../../gradlew robolectric
-	#tests/runtest.sh
-endif
 	@echo matches are "$(MATCHES)" dirnames are "$(DIRNAMES)"
 
 clean:

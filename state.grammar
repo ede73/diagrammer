@@ -59,6 +59,8 @@ S
 				dendrogram(yy);
 			}else if ("sankey" == generator){
 				sankey(yy);
+			}else if ("parsetree" == generator){
+				parsetree(yy);
 			}else{
 				//rankdir available ONLY IN dot
 				digraph(yy);

@@ -26,6 +26,7 @@ e;
   b -> d;
   a -> e[label = "link text"];
 }
+node parse.js verbose parsetree.test blockdiag
 */
 function blockdiag(yy) {
     output(yy, "blockdiag{\n default_fontsize = 14");

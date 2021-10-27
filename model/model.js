@@ -1,4 +1,7 @@
-//noinspection JSUnusedGlobalSymbols,JSUnusedGlobalSymbols
+// =====================================
+// ONLY used in state.grammar
+// =====================================
+
 /**
  *
  * Called from grammar to inject a new (COLOR) variable
@@ -6,6 +9,8 @@
  *
  * If this is assignment, rewrite the variable, else assign new
  * Always return the current value
+ *
+ * Usage: state.grammar
  *
  * @param yy Lexer yy
  * @param variable ${XXX:yyy} assignment or ${XXX} query
@@ -21,54 +26,22 @@ function processVariable(yy, variable) {
         // Assignment
         var tmp = vari.split(":");
         debug("GOT assignment " + tmp[0] + "=" + tmp[1]);
-        getVariables(yy)[tmp[0]] = tmp[1];
+        _getVariables(yy)[tmp[0]] = tmp[1];
         return tmp[1];
     } else {
         // referral
-        if (!getVariables(yy)[vari]) {
+        if (!_getVariables(yy)[vari]) {
             throw new Error("Variable " + vari + " not defined");
         }
-        return getVariables(yy)[vari];
+        return _getVariables(yy)[vari];
     }
-}
-
-/**
- * Return all the variables from the collection (hard coded to yy)
- */
-function getVariables(yy) {
-    if (!yy.VARIABLES) {
-        yy.VARIABLES = {}
-    }
-    return yy.VARIABLES;
-}
-
-/**
- * Get current singleton graphroot or create  new one
- */
-function getGraphRoot(yy) {
-    // debug(" getGraphRoot "+yy);
-    if (!yy.GRAPHROOT) {
-        //debug("no graphroot,init - in getGraphRoot",true);
-        if (yy.result === undefined) {
-            yy.result = function (str) {
-                console.log(str);
-            }
-        }
-        debug("...Initialize emptyroot " + yy);
-        yy.CURRENTCONTAINER = [];
-        yy.LINKS = [];
-        yy.CONTAINER_EXIT = 1;
-        yy.GRAPHROOT = new GraphRoot();
-        // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
-        enterContainer(yy, yy.GRAPHROOT);
-        //debug(false);
-    }
-    return yy.GRAPHROOT;
 }
 
 /**
  * Create an array, push LHS,RHS nodes there and return the array as long as
  * processing the list nodes added to array..
+ *
+ * Usage: state.grammar
  *
  * @param yy Lexer yy
  * @param LHS left hand side of the list
@@ -113,6 +86,8 @@ function getList(yy, LHS, RHS, rhsLinkLabel) {
  *
  * node a1 will be dotted instead of being dashed
  *
+ * Usage: state.grammar
+ *
  * @param yy Lexer yy
  * @param name Reference, Node/Array/Group
  * @param [style] OPTIONAL if style given, update (only if name refers to node)
@@ -152,14 +127,14 @@ function getNode(yy, name, style) {
         if (style) n.setStyle(style);
         n.nolinks = true;
 
-        getDefaultAttribute(yy, 'nodecolor', function (color) {
+        _getDefaultAttribute(yy, 'nodecolor', function (color) {
             n.setColor(color);
         });
-        getDefaultAttribute(yy, 'nodetextcolor', function (color) {
+        _getDefaultAttribute(yy, 'nodetextcolor', function (color) {
             n.setTextColor(color);
         });
         debug(false);
-        return pushObject(yy, n);
+        return _pushObject(yy, n);
     }
 
     var node = cc(yy, name, style);
@@ -175,44 +150,9 @@ function getNode(yy, name, style) {
 }
 
 /**
- * Get default attribute nodecolor,linkcolor,groupcolor and bubble upwards if
- * otherwise 'unobtainable'
- *
- * @param yy lexer
- * @param attrname Name of the default attribute. If not found, returns undefined
- * @param [x] Pass the attribute to the this function as only argument - if attribute WAS actually defined!
- */
-function getDefaultAttribute(yy, attrname, x) {
-    // no need for the value, but runs init if missing
-    getGraphRoot(yy);
-    // debug("getDefaultAttribute "+attrname);
-    var a;
-    for (var i in yy.CURRENTCONTAINER) {
-        if (!yy.CURRENTCONTAINER.hasOwnProperty(i)) continue;
-        var ctr = yy.CURRENTCONTAINER[i];
-        a = ctr.getDefault(attrname);
-        // debug(" traverse getDefaultAttribute "+attrname+" from "+ctr+" as
-        // "+a);
-        if (a !== undefined) {
-            // debug("getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
-            if (x !== undefined)
-                x(a);
-            return a;
-        }
-    }
-    a = getGraphRoot(yy).getDefault(attrname);
-    if (a !== undefined) {
-        debug("getDefaultAttribute got from graphroot");
-        if (x !== undefined)
-            x(a);
-        return a;
-    }
-    // debug("getDefaultAttribute FAILED");
-    return undefined;
-}
-
-/**
  * TODO: DUAL DECLARATION
+ *
+ * Usage: state.grammar
  *
  * Get current container
  * @para, yy Lexer
@@ -225,6 +165,9 @@ function getCurrentContainer(yy) {
 
 /**
  * Enter into a new container, set it as current container
+ *
+ * Usage: state.grammar
+ *
  * @param yy lexer
  * @param container Set this container as current container
  */
@@ -239,6 +182,9 @@ function enterContainer(yy, container) {
  * Exit the current container
  * Return the previous one
  * Previous one also set as current container
+ *
+ * Usage: state.grammar
+ *
  * @param yy lexer
  */
 function exitContainer(yy) {
@@ -253,40 +199,16 @@ function exitContainer(yy) {
  *
  * Edit grammar so it links a>b and c,d,e to h
  * Ie exit node(s) and enrance node(s) linked properly
+ *
+ * Usage: state.grammar
  */
 function enterSubGraph(yy) {
-    return enterContainer(yy, getSubGraph(yy));
+    return enterContainer(yy, _getSubGraph(yy));
 }
 
-function hasOutwardLink(yy, node) {
-    for (var i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i)) continue;
-        var r = yy.LINKS[i];
-        if (r.left.name === node.name) {
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
- * return true if node has inward link OUTSIDE container it is in
+/*
+ * Usage: state.grammar
  */
-function hasInwardLink(yy, node, nodesContainer) {
-    for (var i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i)) continue;
-        var r = yy.LINKS[i];
-        if (nodesContainer !== undefined &&
-            r.container.name === nodesContainer.name) {
-            continue;
-        }
-        if (r.right.name === node.name) {
-            return true;
-        }
-    }
-    return false;
-}
-
 function exitSubGraph(yy) {
     //Now should edit the ENTRANCE LINK to point to a>b, a>d, a>e
     var currentSubGraph = getCurrentContainer(yy);
@@ -343,6 +265,9 @@ function exitSubGraph(yy) {
  * Create a NEW GROUP if one (ref) does not exist yet getGroup(yy) => create a
  * new anonymous group getGroup(yy,GroupRef) => create a new group if GroupRef
  * is not a Group or return GroupRef if it is...1
+ *
+ * Usage: state.grammar
+ *
  * @param yy lexer
  * @param ref Type of reference, if group, return it
  * @return ref if ref instance of group, else the newly created group
@@ -353,28 +278,15 @@ function getGroup(yy, ref) {
     if (yy.GROUPIDS === undefined) yy.GROUPIDS = 1;
     var newGroup = new Group(yy.GROUPIDS++);
     debug("push group " + newGroup + " to " + yy);
-    pushObject(yy, newGroup);
+    _pushObject(yy, newGroup);
 
-    getDefaultAttribute(yy, 'groupcolor', function (color) {
+    _getDefaultAttribute(yy, 'groupcolor', function (color) {
         newGroup.setColor(color);
     });
     debug(false);
     return newGroup;
 }
 
-/**
- * Create a new sub graph
- */
-function getSubGraph(yy, ref) {
-    if (ref instanceof SubGraph) return ref;
-    //debug("getSubGraph() NEW SubGraph:" + yy + "/" + ref,true);
-    if (yy.SUBGRAPHS === undefined) yy.SUBGRAPHS = 1;
-    var newSubGraph = new SubGraph(yy.SUBGRAPHS++);
-    //debug("push SubGraph " + newSubGraph + " to " + yy);
-    pushObject(yy, newSubGraph);
-    //debug(false);
-    return newSubGraph;
-}
 // Get a link such that l links to r, return the added LINK or LINKS
 
 //noinspection JSUnusedGlobalSymbols
@@ -384,7 +296,10 @@ function getSubGraph(yy, ref) {
  * if defined, LABEL for the link color = if defined, COLOR for the link
  *
  * if there is a list a>b,c,x,d;X then X is gonna e link label for EVERYONE
- * but for a>"1"b,"2"c link label is gonna be individual! 
+ * but for a>"1"b,"2"c link label is gonna be individual!
+ *
+ * Usage: state.grammar
+ *
  * @param yy lexer
  * @param linkType Type of the link(grammar)
  * @param l Left hand side (must be Array,Node,Group)
@@ -466,10 +381,10 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
     if (rcompass) setAttr(lnk, 'rcompass', rcompass);
     else if (getAttr(r, 'compass')) setAttr(lnk, 'rcompass', getAttr(r, 'compass'));
 
-    getDefaultAttribute(yy, 'linkcolor', function (linkColor) {
+    _getDefaultAttribute(yy, 'linkcolor', function (linkColor) {
         lnk.setColor(linkColor);
     });
-    getDefaultAttribute(yy, 'linktextcolor', function (linkColor) {
+    _getDefaultAttribute(yy, 'linktextcolor', function (linkColor) {
         lnk.setTextColor(linkColor);
     });
     if (commonLinkLabel != undefined) {
@@ -494,43 +409,75 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
     if (linkColor != undefined) lnk.setColor(linkColor);
 
     if (!dontadd) {
-        addLink(yy, lnk);
+        _addLink(yy, lnk);
     }
     debug(false);
     return lnk;
 }
 
+// =====================================
+// exposed to generators also
+// =====================================
+
 /**
- * Add link to the list of links, return the LINK
- * @param yy lexer
- * @param l Link (Array or Link)
+ * Get current singleton graphroot or create new one
+ * External utility support for generator
+ *
+ * Usage: state.grammar, generators
  */
-function addLink(yy, l) {
-    if (l instanceof Array) {
-        debug("PUSH LINK ARRAY:" + l, true);
-    } else {
-        debug("PUSH LINK:" + l, true);
-        setAttr(l, 'container', getCurrentContainer(yy));
+function getGraphRoot(yy) {
+    // debug(" getGraphRoot "+yy);
+    if (!yy.GRAPHROOT) {
+        //debug("no graphroot,init - in getGraphRoot",true);
+        if (yy.result === undefined) {
+            yy.result = function (str) {
+                console.log(str);
+            }
+        }
+        debug("...Initialize emptyroot " + yy);
+        yy.CURRENTCONTAINER = [];
+        yy.LINKS = [];
+        yy.CONTAINER_EXIT = 1;
+        yy.GRAPHROOT = new GraphRoot();
+        // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
+        enterContainer(yy, yy.GRAPHROOT);
+        //debug(false);
     }
-    yy.LINKS.push(l);
-    debug(false);
-    return l;
+    return yy.GRAPHROOT;
+}
+
+/*
+ * Usage: state.grammar, generators/digraph.js
+ */
+function hasOutwardLink(yy, node) {
+    for (var i in yy.LINKS) {
+        if (!yy.LINKS.hasOwnProperty(i)) continue;
+        var r = yy.LINKS[i];
+        if (r.left.name === node.name) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
- * Push given object into a current container
+ * return true if node has inward link OUTSIDE container it is in
  */
-function pushObject(yy, o) {
-    var cnt = getCurrentContainer(yy)
-    debug("pushObject " + o + "to " + cnt, true);
-    cnt.OBJECTS.push(o);
-    cnt.ROOTNODES.push(o);
-    debug(false);
-    return o;
+function hasInwardLink(yy, node, nodesContainer) {
+    for (var i in yy.LINKS) {
+        if (!yy.LINKS.hasOwnProperty(i)) continue;
+        var r = yy.LINKS[i];
+        if (nodesContainer !== undefined &&
+            r.container.name === nodesContainer.name) {
+            continue;
+        }
+        if (r.right.name === node.name) {
+            return true;
+        }
+    }
+    return false;
 }
 
-
-//noinspection JSUnusedGlobalSymbols
 /**
  * test if container has the object
  */
@@ -550,6 +497,9 @@ function containsObject(container, o) {
     return false;
 }
 
+/*
+ * Usage: generators
+ */
 function traverseLinks(yy, callback) {
     for (var i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
@@ -557,6 +507,9 @@ function traverseLinks(yy, callback) {
     }
 }
 
+/*
+ * Usage: generators
+ */
 function traverseObjects(container, callback) {
     for (var i in container.OBJECTS) {
         if (!container.OBJECTS.hasOwnProperty(i)) continue;
@@ -564,4 +517,96 @@ function traverseObjects(container, callback) {
     }
 }
 
+// =====================================
+// only model.js
+// =====================================
 
+/**
+ * Return all the variables from the collection (hard coded to yy)
+ */
+function _getVariables(yy) {
+    if (!yy.VARIABLES) {
+        yy.VARIABLES = {}
+    }
+    return yy.VARIABLES;
+}
+
+/**
+ * Get default attribute nodecolor,linkcolor,groupcolor and bubble upwards if
+ * otherwise 'unobtainable'
+ *
+ * @param yy lexer
+ * @param attrname Name of the default attribute. If not found, returns undefined
+ * @param [x] Pass the attribute to the this function as only argument - if attribute WAS actually defined!
+ */
+function _getDefaultAttribute(yy, attrname, x) {
+    // no need for the value, but runs init if missing
+    getGraphRoot(yy);
+    // debug("_getDefaultAttribute "+attrname);
+    var a;
+    for (var i in yy.CURRENTCONTAINER) {
+        if (!yy.CURRENTCONTAINER.hasOwnProperty(i)) continue;
+        var ctr = yy.CURRENTCONTAINER[i];
+        a = ctr.getDefault(attrname);
+        // debug(" traverse _getDefaultAttribute "+attrname+" from "+ctr+" as
+        // "+a);
+        if (a !== undefined) {
+            // debug("_getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
+            if (x !== undefined)
+                x(a);
+            return a;
+        }
+    }
+    a = getGraphRoot(yy).getDefault(attrname);
+    if (a !== undefined) {
+        debug("_getDefaultAttribute got from graphroot");
+        if (x !== undefined)
+            x(a);
+        return a;
+    }
+    // debug("_getDefaultAttribute FAILED");
+    return undefined;
+}
+
+/**
+ * Create a new sub graph
+ */
+function _getSubGraph(yy, ref) {
+    if (ref instanceof SubGraph) return ref;
+    //debug("_getSubGraph() NEW SubGraph:" + yy + "/" + ref,true);
+    if (yy.SUBGRAPHS === undefined) yy.SUBGRAPHS = 1;
+    var newSubGraph = new SubGraph(yy.SUBGRAPHS++);
+    //debug("push SubGraph " + newSubGraph + " to " + yy);
+    _pushObject(yy, newSubGraph);
+    //debug(false);
+    return newSubGraph;
+}
+
+/**
+ * Add link to the list of links, return the LINK
+ * @param yy lexer
+ * @param l Link (Array or Link)
+ */
+function _addLink(yy, l) {
+    if (l instanceof Array) {
+        debug("PUSH LINK ARRAY:" + l, true);
+    } else {
+        debug("PUSH LINK:" + l, true);
+        setAttr(l, 'container', getCurrentContainer(yy));
+    }
+    yy.LINKS.push(l);
+    debug(false);
+    return l;
+}
+
+/**
+ * Push given object into a current container
+ */
+function _pushObject(yy, o) {
+    var cnt = getCurrentContainer(yy)
+    debug("_pushObject " + o + "to " + cnt, true);
+    cnt.OBJECTS.push(o);
+    cnt.ROOTNODES.push(o);
+    debug(false);
+    return o;
+}

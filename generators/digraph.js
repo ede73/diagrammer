@@ -33,17 +33,6 @@ function digraph(yy) {
         return value;
     };
 
-    function hasOutwardLink(yy, node) {
-        for (var i in yy.LINKS) {
-            if (!yy.LINKS.hasOwnProperty(i)) continue;
-            var r = yy.LINKS[i];
-            if (r.left.name === node.name) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     var processANode = function (o) {
         var nattrs = [];
         var styles = [];

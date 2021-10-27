@@ -284,10 +284,26 @@ function circlepacked(jsonData) {
     //       d3.select(self.frameElement).style("height", height + "px");
 }
 
+function removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
+
 function parsetreevis(jsonData) {
     var $ = go.GraphObject.make;  // for conciseness in defining templates
+    // TODO: Find D3JSIMAGES as in <div id='D3JSIMAGES' />
+    // remove parsetree ID
+    // add parsetree ID
+
+    var element = document.getElementById("D3JSIMAGES");
+    removeAllChildNodes(element);
+    const newDiv = document.createElement("div");
+    newDiv.setAttribute("id", "PARSETREENODE");
+    element.appendChild(newDiv);
+
     myDiagram =
-        $(go.Diagram, "D3JSIMAGES",
+        $(go.Diagram, "PARSETREENODE",
             {
                 allowCopy: false,
                 allowDelete: false,

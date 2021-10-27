@@ -26,23 +26,23 @@ function digraph(yy) {
     // TODO: Start note fdp/neato
     // http://www.graphviz.org/doc/info/attrs.html#d:start
 
-    var skipEntrances = function (key, value) {
+    const skipEntrances = function (key, value) {
         if (key === 'entrance' || key === 'exit') {
             return null;
         }
         return value;
     };
 
-    var processANode = function (o) {
-        var nattrs = [];
-        var styles = [];
+    const processANode = function (o) {
+        const nattrs = [];
+        const styles = [];
         getAttrFmt(o, 'color', 'fillcolor="{0}"', nattrs);
         getAttrFmt(o, 'color', 'filled', styles);
         getAttrFmt(o, 'style', '{0}', styles);
         // if (getAttr(o,'free')===true){
         // nattrs.push("constraint=false");
         // }
-        var url = getAttr(o, 'url');
+        const url = getAttr(o, 'url');
         if (url) {
             nattrs.push('URL="' + url.trim() + '"');
         }
@@ -60,7 +60,7 @@ function digraph(yy) {
         }
         getAttrFmt(o, 'image', 'image="icons{0}"', nattrs);
         getAttrFmt(o, 'textcolor', 'fontcolor="{0}"', nattrs);
-        var r = getShape(shapes.digraph, o.shape, 'shape="{0}"');
+        const r = getShape(shapes.digraph, o.shape, 'shape="{0}"');
         if (r) {
             nattrs.push(r);
         }
@@ -71,7 +71,7 @@ function digraph(yy) {
         output(yy, o.getName() + t + ';');
     };
 
-    var r = getGraphRoot(yy);
+    const r = getGraphRoot(yy);
     if (r.getVisualizer()) {
         output(yy, "/* render:" + r.getVisualizer() + "*/")
     }
@@ -87,9 +87,9 @@ function digraph(yy) {
         output(yy, "rankdir=TD;");
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
-    var s = r.getStart();
+    const s = r.getStart();
     if (s != undefined && s != "") {
-        var fwd = getNode(yy, s);
+        const fwd = getNode(yy, s);
         processANode(fwd);
         // {$$=" {rank = same;null}\n {rank = same; "+$2+"}\n null
         // [shape=plaintext,
@@ -104,10 +104,10 @@ function digraph(yy) {
         }
         output(yy, "}", false);
     }
-    var fixgroup = function (c) {
+    const fixgroup = function (c) {
         for (var i in c.OBJECTS) {
             if (!c.OBJECTS.hasOwnProperty(i)) continue;
-            var o = c.OBJECTS[i];
+            const o = c.OBJECTS[i];
             if (o instanceof Group) {
                 if (o.OBJECTS.length == 0) {
                     o.OBJECTS.push(new Node("invis_" + o.getName())
@@ -124,10 +124,10 @@ function digraph(yy) {
         //output(yy,"FIRST NODE"+JSON.stringify(grp));
         for (var i in yy.LINKS) {
             if (!yy.LINKS.hasOwnProperty(i)) continue;
-            var l = yy.LINKS[i];
+            const l = yy.LINKS[i];
             for (var j in grp.OBJECTS) {
                 if (!grp.OBJECTS.hasOwnProperty(j)) continue;
-                var n = grp.OBJECTS[j];
+                const n = grp.OBJECTS[j];
                 if (n == l.left) {
                     // output(yy,"ReturnF "+n);
                     return n;
@@ -142,10 +142,10 @@ function digraph(yy) {
         // output(yy,"LAST NODE"+JSON.stringify(grp));
         for (var i in yy.LINKS) {
             if (!yy.LINKS.hasOwnProperty(i)) continue;
-            var l = yy.LINKS[i];
+            const l = yy.LINKS[i];
             for (var j in grp.OBJECTS) {
                 if (!grp.OBJECTS.hasOwnProperty(j)) continue;
-                var n = grp.OBJECTS[j];
+                const n = grp.OBJECTS[j];
                 if (n == l.left)
                     nod = n;
                 if (n == l.right)
@@ -158,15 +158,15 @@ function digraph(yy) {
 
     var lastexit = undefined;
     var lastendif = undefined;
-    var traverseObjects = function traverseObjects(r) {
+    const traverseObjects = function traverseObjects(r) {
         for (var i in r.OBJECTS) {
             if (!r.OBJECTS.hasOwnProperty(i)) continue;
-            var o = r.OBJECTS[i];
+            const o = r.OBJECTS[i];
             if (o instanceof Group) {
-                var cond = getAttr(o, 'conditional');
+                const cond = getAttr(o, 'conditional');
                 //	if (cond=="endif")continue;
                 // Group name,OBJECTS,get/setEqual,toString
-                var processAGroup = function (o) {
+                const processAGroup = function (o) {
                     debug(JSON.stringify(o, skipEntrances));
                     output(yy, 'subgraph cluster_' + o.getName() + ' {', true);
                     if (o.isSubGraph) {
@@ -187,13 +187,13 @@ function digraph(yy) {
                         output(yy, "//COND " + o.getName() + " " + cond);
                         if (cond == "endif") {
                             //never reached
-                            var exitlink = getAttr(o, 'exitlink');
+                            const exitlink = getAttr(o, 'exitlink');
                             if (exitlink) {
                                 output(yy, lastexit + "->" + exitlink + "[color=red];");
                                 output(yy, lastendif + "->" + exitlink + ";");
                             }
                         } else {
-                            var sn = "entry" + getAttr(o, 'exitnode');
+                            const sn = "entry" + getAttr(o, 'exitnode');
                             if (!lastendif) {
                                 lastendif = "endif" + getAttr(o, 'exitnode');
                                 output(yy, lastendif + "[shape=circle,label=\"\",width=0.01,height=0.01];");
@@ -205,8 +205,8 @@ function digraph(yy) {
                                 output(yy, getAttr(o, 'entrylink').getName() + "->" + sn + ";");
                             }
                             // FIRST node of group and LAST node in group..
-                            var fn = getFirstLinkOfTheGroup(o);
-                            var ln = getLastLinkInGroup(o);
+                            const fn = getFirstLinkOfTheGroup(o);
+                            const ln = getLastLinkInGroup(o);
                             // decision node
                             //var en = "exit" + getAttr(o, 'exitnode');
 
@@ -233,7 +233,7 @@ function digraph(yy) {
     for (var i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
         var l = yy.LINKS[i];
-        var attrs = [];
+        const attrs = [];
         var label = getAttr(l, 'label');
         if (label) {
             if (label.indexOf("::") !== -1) {
@@ -244,7 +244,7 @@ function digraph(yy) {
                 attrs.push('label="' + label.trim() + '"');
             }
         }
-        var url = getAttr(l, 'url');
+        const url = getAttr(l, 'url');
         if (url) {
             attrs.push('URL="' + url.trim() + '"');
         }
@@ -275,7 +275,7 @@ function digraph(yy) {
             if (ll instanceof SubGraph && ll.getExit() !== undefined) {
                 //get containers all nodes that have no outward links...(TODO:should be in model actually!)
                 //perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
-                var exits = [];
+                const exits = [];
                 for (var i in ll.OBJECTS) {
                     if (!ll.OBJECTS.hasOwnProperty(i)) continue;
                     var go = ll.OBJECTS[i];
@@ -312,7 +312,7 @@ function digraph(yy) {
             lt = "->";
             attrs.push("dir=both");
         } else if (l.linkType.indexOf("<") !== -1) {
-            var tmp = ll;
+            const tmp = ll;
             ll = lr;
             lr = tmp;
             lt = "->";

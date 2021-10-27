@@ -49,7 +49,7 @@ function parsetree(yy) {
 			tree = new TreeNode(l);
 		}
 		if (!(l instanceof Node)) return;
-		var cl = findNode(tree, l);
+		const cl = findNode(tree, l);
 		if (cl === undefined) {
 			throw new Error('Left node (' + l.name + ') not found from tree');
 		}

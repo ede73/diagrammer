@@ -107,11 +107,11 @@ node parse.js verbose parsetree.test ast
 */
 function ast(yy) {
     console.log(yy)
-    const processANode = function (o) {
+    const processANode = o => {
     };
 
     output(yy, "{");
-    const skipEntrances = function (key, value) {
+    const skipEntrances = (key, value) => {
         if (key === 'entrance' || key === 'exit') {
             return value;
         }
@@ -135,10 +135,10 @@ function ast(yy) {
             equal: r.getEqual()
         }));
 
-    const objectHandler = function (o) {
+    const objectHandler = o => {
         output(true);
         if (o instanceof Group) {
-            const processAGroup = function (o) {
+            const processAGroup = (o => {
                 const n = JSON.parse(JSON.stringify(o, skipEntrances));
                 n.OBJECTS = undefined;
                 output(yy, JSON.stringify({
@@ -147,9 +147,9 @@ function ast(yy) {
                 output(yy, '{');
                 traverseObjects(o, objectHandler);
                 output(yy, '},');
-            }(o);
+            })(o);
         } else if (o instanceof SubGraph) {
-            const processASubGraph = function (o) {
+            const processASubGraph = (o => {
                 const n = JSON.parse(JSON.stringify(o, skipEntrances));
                 n.OBJECTS = undefined;
                 output(yy, JSON.stringify({
@@ -158,7 +158,7 @@ function ast(yy) {
                 output(yy, '{');
                 traverseObjects(o, objectHandler);
                 output(yy, '},');
-            }(o);
+            })(o);
         } else if (o instanceof Node) {
             output(yy, JSON.stringify({
                 node: o
@@ -171,7 +171,7 @@ function ast(yy) {
     traverseObjects(r, objectHandler);
 
     output(true);
-    traverseLinks(yy, function (l) {
+    traverseLinks(yy, l => {
         const n = JSON.parse(JSON.stringify(l, skipEntrances));
         n.left = n.left.name;
         n.right = n.right.name;

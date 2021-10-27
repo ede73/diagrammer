@@ -26,14 +26,14 @@ function digraph(yy) {
     // TODO: Start note fdp/neato
     // http://www.graphviz.org/doc/info/attrs.html#d:start
 
-    const skipEntrances = function (key, value) {
+    const skipEntrances = (key, value) => {
         if (key === 'entrance' || key === 'exit') {
             return null;
         }
         return value;
     };
 
-    const processANode = function (o) {
+    const processANode = o => {
         const nattrs = [];
         const styles = [];
         getAttrFmt(o, 'color', 'fillcolor="{0}"', nattrs);
@@ -104,7 +104,7 @@ function digraph(yy) {
         }
         output(yy, "}", false);
     }
-    const fixgroup = function (c) {
+    const fixgroup = (c => {
         for (var i in c.OBJECTS) {
             if (!c.OBJECTS.hasOwnProperty(i)) continue;
             const o = c.OBJECTS[i];
@@ -118,7 +118,7 @@ function digraph(yy) {
                 }
             }
         }
-    }(r.OBJECTS);
+    })(r.OBJECTS);
 
     function getFirstLinkOfTheGroup(grp) {
         //output(yy,"FIRST NODE"+JSON.stringify(grp));
@@ -166,7 +166,7 @@ function digraph(yy) {
                 const cond = getAttr(o, 'conditional');
                 //	if (cond=="endif")continue;
                 // Group name,OBJECTS,get/setEqual,toString
-                const processAGroup = function (o) {
+                const processAGroup = (o => {
                     debug(JSON.stringify(o, skipEntrances));
                     output(yy, 'subgraph cluster_' + o.getName() + ' {', true);
                     if (o.isSubGraph) {
@@ -220,7 +220,7 @@ function digraph(yy) {
                             lastexit = sn;
                         }
                     }
-                }(o);
+                })(o);
             } else if (o instanceof Node) {
                 processANode(o);
             } else {
@@ -232,7 +232,7 @@ function digraph(yy) {
     output(yy, "//links start");
     for (var i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
-        var l = yy.LINKS[i];
+        const l = yy.LINKS[i];
         const attrs = [];
         var label = getAttr(l, 'label');
         if (label) {
@@ -329,7 +329,7 @@ function digraph(yy) {
         //debug('print ll '+ll);
         //debug('print lr '+lr);
         if (ll instanceof Array) {
-            ll.forEach(function (element, index, array) {
+            ll.forEach((element, index, array) => {
                 output(yy, element.getName() + getAttrFmt(l, 'lcompass', '{0}').trim() + lt + lr.getName() + getAttrFmt(l, 'rcompass', '{0}').trim() + t + ";");
             });
         } else {

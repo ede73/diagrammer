@@ -20,14 +20,14 @@ node parse.js verbose parsetree.test mscgen
 */
 function mscgen(yy) {
     output(yy, "msc {", true);
-    var r = getGraphRoot(yy);
+    const r = getGraphRoot(yy);
     var comma = false;
     // print out all node declarations FIRST (if any)
-    traverseObjects(r, function (o) {
+    traverseObjects(r, o => {
         var tmp;
         if (o instanceof Group) {
             output(yy, ' /*' + o.getName() + getAttrFmt(o, 'label', ' {0}') + '*/');
-            traverseObjects(o, function (z) {
+            traverseObjects(o, z => {
                 tmp = getAttrFmt(z, 'color', ',color="{0}"') + getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
@@ -45,7 +45,7 @@ function mscgen(yy) {
 
     output(yy, ";");
     var id = 1;
-    traverseLinks(yy, function (l) {
+    traverseLinks(yy, l => {
         var lt = "";
         var lr = l.right;
         var ll = l.left;
@@ -77,9 +77,9 @@ function mscgen(yy) {
             broken = true;
         }
         var swap = false;
-        var attrs = [];
+        const attrs = [];
         var label = getAttr(l, "label");
-        var color = getAttr(l, 'color');
+        const color = getAttr(l, 'color');
         var url = getAttr(l, "url");
         var note = "";
         if (url) {

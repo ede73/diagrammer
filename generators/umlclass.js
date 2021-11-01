@@ -123,7 +123,7 @@ function generateUmlClass(yy) {
 	traverseObjects(root, o => {
 		if (o instanceof Group) {
 			const key = id++;
-			groupNameIdMap.set(o.name, id);
+			groupNameIdMap.set(o.name, key);
 			groups.push({
 				key: key,
 				name: nameAndLabel(o),

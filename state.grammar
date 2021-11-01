@@ -63,6 +63,8 @@ S
 				parsetree(yy);
 			}else if ("layerbands" == generator){
 				generateLayerBands(yy);
+			}else if ("umlclass" == generator){
+				generateUmlClass(yy);
 			}else{
 				//rankdir available ONLY IN dot
 				digraph(yy);

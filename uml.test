@@ -1,7 +1,7 @@
 {Person;Person
 name;+String
 birth;+Date
-getCurrentAge;getCurrentAge(): int
+getCurrentAge;(): int
 }
 
 {Student;Student
@@ -33,4 +33,4 @@ withdraw;withdraw(amount: Currency)
 }
 
 Student,Professor>Person
-Course>Professor
+Course.Professor

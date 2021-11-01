@@ -82,7 +82,41 @@ function generateUmlClass(yy) {
 	const getMethods = nodes => {
 		// instead of array of names...{name:???,parameters:[{name:???,type:???}],visiblity:???}
 		//+public,-private,#protected
-		return [...nodes].filter(node => nameAndLabel(node).endsWith(")")).map(m => { return { name: nameAndLabel(m), type: "string", visibility: "public" } });
+		return [...nodes].filter(node => nameAndLabel(node).endsWith(")")).map(m => {
+			var ret = {
+			};
+			ret['name'] = m.name;
+			if (m.label) {
+				const regex = /^([+#-]|)([^:]+:|)([^=]+)(=.+|)/;
+				const all = m.label.match(regex);
+				switch (all[1]) {
+					case "+":
+						ret['visibility'] = 'public';
+						break;
+					case "-":
+						ret['visibility'] = 'private';
+						break;
+					case "#":
+						ret['visibility'] = 'protected';
+						break;
+				}
+				if (all[2]) {
+					// TODO:STUB
+					if (all[2] = "()"){
+						ret['name'] = m.name+all[2];
+					}else{
+						ret['name'] = all[2];
+					}
+				}
+				if (all[3]) {
+					ret['type'] = all[3];
+				}
+				if (all[4]) {
+					ret['default'] = all[4];
+				}
+				return ret;
+			}
+		});
 	};
 	var id = 1;
 	const groupNameIdMap = new Map();

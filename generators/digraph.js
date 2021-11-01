@@ -18,7 +18,7 @@ digraph {
     b->d;
     a->e[label="link text"];
 }
-node parse.js verbose parsetree.test digraph
+node parse.js verbose digraph.test digraph
 */
 function digraph(yy) {
     // TODO: See splines control

@@ -18,7 +18,7 @@ b -- c;
 b -- d;
 a -- e;
 }
-node parse.js verbose parsetree.test nwdiag
+node parse.js verbose nwdiag.test nwdiag
 */
 function nwdiag(yy) {
     yy.result("nwdiag{\n default_fontsize = 16\n");

@@ -18,7 +18,7 @@ to
 ]
 }
 
-node parse.js verbose parsetree.test sankey
+node parse.js verbose sankey.test sankey
 */
 function sankey(yy) {
 	var tree;

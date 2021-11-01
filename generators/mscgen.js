@@ -16,7 +16,7 @@ msc {
     b=>d[id="3"];
     a=>e[label="link text",id="4"];
 }
-node parse.js verbose parsetree.test mscgen
+node parse.js verbose mscgen.test mscgen
 */
 function mscgen(yy) {
     output(yy, "msc {", true);

@@ -156,13 +156,13 @@ function visualize(visualizer) {
         // console.log(err);
         // }
     } else if (visualizer == "radialdendrogram") {
-        radialdendroit(JSON.parse(result.value));
+        visualizeRadialDendrogram(JSON.parse(result.value));
     } else if (visualizer == "circlepacked") {
-        circlepacked(JSON.parse(result.value));
+        visualizeCirclePacked(JSON.parse(result.value));
     } else if (visualizer == "reingoldtilford") {
-        reingoldit(JSON.parse(result.value));
+        visualizeReingoldTilford(JSON.parse(result.value));
     } else if (visualizer == "parsetree") {
-        parsetreevis(JSON.parse(result.value));
+        visualizeParseTree(JSON.parse(result.value));
     } else if (visualizer == "layerbands") {
         visualizeLayerBands(JSON.parse(result.value));
     } else {
@@ -180,7 +180,7 @@ function make_svg(width, height) {
         .append("g");
 }
 
-function reingoldit(jsonData) {
+function visualizeReingoldTilford(jsonData) {
 
     const width = 400,
         height = 400;
@@ -231,7 +231,7 @@ function reingoldit(jsonData) {
 }
 
 // https://medium.com/analytics-vidhya/creating-a-radial-tree-using-d3-js-for-javascript-be943e23b74e
-function radialdendroit(jsonData) {
+function visualizeRadialDendrogram(jsonData) {
     const radius = 450;
 
     const margin = 120;
@@ -273,7 +273,7 @@ function radialdendroit(jsonData) {
 }
 
 // https://observablehq.com/@d3/circle-packing
-function circlepacked(jsonData) {
+function visualizeCirclePacked(jsonData) {
     const width = 400, height = 400;
     //pack = data => d3.pack()
     //    .size([width, height])
@@ -292,7 +292,7 @@ function removeAllChildNodes(parent) {
     }
 }
 
-function parsetreevis(jsonData) {
+function visualizeParseTree(jsonData) {
     var $ = go.GraphObject.make;  // for conciseness in defining templates
 
     var element = document.getElementById("D3JSIMAGES");
@@ -348,9 +348,7 @@ function parsetreevis(jsonData) {
     svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
 
     const svgimg = document.getElementById('D3JSIMAGES');
-    while (svgimg.firstChild) {
-        svgimg.removeChild(svgimg.firstChild);
-    }
+    removeAllChildNodes(svgimg);
     svgimg.appendChild(svg);
 }
 
@@ -491,9 +489,7 @@ function visualizeLayerBands(jsonData) {
         svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
     
         const svgimg = document.getElementById('D3JSIMAGES');
-        while (svgimg.firstChild) {
-            svgimg.removeChild(svgimg.firstChild);
-        }
+        removeAllChildNodes(svgimg);
         svgimg.appendChild(svg);
     }
     init();

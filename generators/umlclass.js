@@ -32,9 +32,6 @@ function generateUmlClass(yy) {
 	const links = [];
 	const root = getGraphRoot(yy);
 
-	String.prototype.endsWith = function (suffix) {
-		return this.indexOf(suffix, this.length - suffix.length) !== -1;
-	};
 	const nameAndLabel = ln => {
 		// name;name():?? -> name():??
 		// name;:?? -> name():??
@@ -48,7 +45,7 @@ function generateUmlClass(yy) {
 	const getProperties = nodes => {
 		// instead of array of names...{name:???,type=???,visibility=???,default=??}
 		// name;[+-#][name:]String[=xx]
-		return [...nodes].filter(node => !nameAndLabel(node).endsWith(")")).map(p => {
+		return [...nodes].filter(node => !nameAndLabel(node).includes(")")).map(p => {
 			var ret = {
 			};
 			ret['name'] = p.name;
@@ -82,9 +79,10 @@ function generateUmlClass(yy) {
 	const getMethods = nodes => {
 		// instead of array of names...{name:???,parameters:[{name:???,type:???}],visiblity:???}
 		//+public,-private,#protected
-		return [...nodes].filter(node => nameAndLabel(node).endsWith(")")).map(m => {
+		return [...nodes].filter(node => nameAndLabel(node).includes("(")).map(m => {
 			var ret = {
 			};
+			console.log(m.label);
 			ret['name'] = m.name;
 			if (m.label) {
 				const regex = /^([+#-]|)([^:]+:|)([^=]+)(=.+|)/;
@@ -101,19 +99,21 @@ function generateUmlClass(yy) {
 						break;
 				}
 				if (all[2]) {
-					// TODO:STUB
-					if (all[2] = "()"){
+					if (all[2].startsWith("(")){
 						ret['name'] = m.name+all[2];
 					}else{
+						// TODO: separate name and parameters..
 						ret['name'] = all[2];
 					}
 				}
-				if (all[3]) {
-					ret['type'] = all[3];
-				}
-				if (all[4]) {
-					ret['default'] = all[4];
-				}
+				// TODO:
+				// ret["parameters"] = [{name:???,type:???}];
+				// if (all[3]) {
+				// 	ret['type'] = all[3];
+				// }
+				// if (all[4]) {
+				// 	ret['default'] = all[4];
+				// }
 				return ret;
 			}
 		});
@@ -132,6 +132,7 @@ function generateUmlClass(yy) {
 			});
 		}
 	});
+	console.log(groupNameIdMap);
 
 	traverseLinks(yy, l => {
 		relationship = 'generalization';

@@ -1,35 +1,35 @@
 {Person;Person
-name
-birth
-getCurrentAge;getCurrentAge()
+name;name: String
+birth;birth: Date
+getCurrentAge;getCurrentAge(): int
 }
 
 {Student;Student
-classes
+classes;classes: List<Class>
 attend;attend(class: Course)
 sleep;sleep()
 }
 
 {Course;Course
-name
-description
-professor1
-location
-times
-prerequisites
-students
+name;name: String
+description;description: String
+professor1;professor: Professor
+location;location: String
+times;times: List<Time>
+prerequisites;prerequisites: List<Course>
+students;students: List<Student>
 }
 
 {Professor;Professor
-classes1
-teach;teach()
+classes1;classes: List<Class>
+teach;teach(class: Course)
 }
 
 {BankAccount;BankAccount
-owner
-balance
-deposit;deposit()
-withdraw;withdraw()
+owner;owner: String
+balance;balance: Currency=0
+deposit;deposit(amount: Currency)
+withdraw;withdraw(amount: Currency)
 }
 
 Student,Professor>Person

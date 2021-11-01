@@ -46,10 +46,11 @@ function generateUmlClass(yy) {
 		return [...nodes].filter(node => labelOrName(node).endsWith(")"));
 	};
 	var id = 1;
+	const groupNameIdMap = new Map();
 	traverseObjects(root, o => {
 		if (o instanceof Group) {
-			console.log(o);
 			const key = id++;
+			groupNameIdMap.set(o.name, id);
 			groups.push({
 				key: key,
 				name: labelOrName(o),
@@ -62,8 +63,8 @@ function generateUmlClass(yy) {
 	traverseLinks(yy, l => {
 		relationship = 'aggregation';
 		links.push({
-			from: l.left.id,
-			to: l.right.id,
+			from: groupNameIdMap.get(l.left.name),
+			to:  groupNameIdMap.get(l.right.name),
 			relationship: relationship
 		});
 	});

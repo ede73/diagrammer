@@ -120,3 +120,15 @@ end note
 -->(*)
 }
 
+========================
+make new generator
+
+generators/parsetree.js:function parsetree(yy) {
+index.html:			<option value="parsetree">ParseTree(GoJS)</option>
+state.grammar:			}else if ("parsetree" == generator){
+state.grammar:				parsetree(yy);
+web/index.js:    } else if (visualizer == "parsetree") {
+web/index.js:        parsetreevis(JSON.parse(result.value));
+web/index.js:function parsetreevis(jsonData) {
+web/index.js:    // remove parsetree ID
+web/index.js:    // add parsetree ID

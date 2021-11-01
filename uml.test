@@ -1,23 +1,36 @@
 {Person;Person
-a;a()
+name
+birth
+getCurrentAge;getCurrentAge()
 }
 
 {Student;Student
-b
+classes
+attend;attend(class: Course)
+sleep;sleep()
 }
 
 {Course;Course
-c
+name
+description
+professor1
+location
+times
+prerequisites
+students
 }
 
 {Professor;Professor
-p
+classes1
+teach;teach()
 }
 
 {BankAccount;BankAccount
-ba
+owner
+balance
+deposit;deposit()
+withdraw;withdraw()
 }
 
 Student,Professor>Person
 Course>Professor
-

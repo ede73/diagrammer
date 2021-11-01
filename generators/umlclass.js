@@ -35,15 +35,15 @@ function generateUmlClass(yy) {
 	String.prototype.endsWith = function(suffix) {
 		return this.indexOf(suffix, this.length - suffix.length) !== -1;
 	};
-	const labelOrName = ln => {
-		return (ln.label == undefined) ? ln.name : ln.label;
+	const nameAndLabel = ln => {
+		return ln.name + "" + (ln.label == undefined) ? "" : ln.label;
 	}
 
 	const getProperties = nodes => {
-		return [...nodes].filter(node => !labelOrName(node).endsWith(")"));
+		return [...nodes].filter(node => !nameAndLabel(node).endsWith(")"));
 	};
 	const getMethods = nodes => {
-		return [...nodes].filter(node => labelOrName(node).endsWith(")"));
+		return [...nodes].filter(node => nameAndLabel(node).endsWith(")"));
 	};
 	var id = 1;
 	const groupNameIdMap = new Map();
@@ -53,7 +53,7 @@ function generateUmlClass(yy) {
 			groupNameIdMap.set(o.name, id);
 			groups.push({
 				key: key,
-				name: labelOrName(o),
+				name: nameAndLabel(o),
 				properties: getProperties(o.OBJECTS),
 				methods: getMethods(o.OBJECTS)
 			});

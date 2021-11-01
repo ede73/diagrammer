@@ -391,7 +391,13 @@ function visualizeLayerBands(jsonData) {
     function init() {
         var $ = go.GraphObject.make;
 
-        myDiagram = $(go.Diagram, "D3JSIMAGES",
+        var element = document.getElementById("D3JSIMAGES");
+        removeAllChildNodes(element);
+        const newDiv = document.createElement("div");
+        newDiv.setAttribute("id", "LAYEREDBANDNODE");
+        element.appendChild(newDiv);
+
+        myDiagram = $(go.Diagram, "LAYEREDBANDNODE",
             {
                 layout: $(BandedTreeLayout,  // custom layout is defined above
                     {
@@ -480,6 +486,15 @@ function visualizeLayerBands(jsonData) {
         ];
 
         myDiagram.model = new go.TreeModel(nodearray);
+
+        x = 0; y = 0; printSize = 300;
+        svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
+    
+        const svgimg = document.getElementById('D3JSIMAGES');
+        while (svgimg.firstChild) {
+            svgimg.removeChild(svgimg.firstChild);
+        }
+        svgimg.appendChild(svg);
     }
 }
 

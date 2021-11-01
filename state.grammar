@@ -61,6 +61,8 @@ S
 				sankey(yy);
 			}else if ("parsetree" == generator){
 				parsetree(yy);
+			}else if ("layerbands" == generator){
+				generateLayerBands(yy);
 			}else{
 				//rankdir available ONLY IN dot
 				digraph(yy);

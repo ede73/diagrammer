@@ -32,18 +32,57 @@ function generateUmlClass(yy) {
 	const links = [];
 	const root = getGraphRoot(yy);
 
-	String.prototype.endsWith = function(suffix) {
+	String.prototype.endsWith = function (suffix) {
 		return this.indexOf(suffix, this.length - suffix.length) !== -1;
 	};
 	const nameAndLabel = ln => {
-		return ln.name + "" + (ln.label == undefined) ? "" : ln.label;
+		// name;name():?? -> name():??
+		// name;:?? -> name():??
+		const label = (ln.label == undefined) ? "" : ln.label;
+		if (label.startsWith(ln.name)) {
+			return label;
+		}
+		return ln.name + "" + label;
 	}
 
 	const getProperties = nodes => {
-		return [...nodes].filter(node => !nameAndLabel(node).endsWith(")"));
+		// instead of array of names...{name:???,type=???,visibility=???,default=??}
+		// name;[+-#][name:]String[=xx]
+		return [...nodes].filter(node => !nameAndLabel(node).endsWith(")")).map(p => {
+			var ret = {
+			};
+			ret['name'] = p.name;
+			if (p.label) {
+				const regex = /^([+#-]|)([^:]+:|)([^=]+)(=.+|)/;
+				const all = p.label.match(regex);
+				switch (all[1]) {
+					case "+":
+						ret['visibility'] = 'public';
+						break;
+					case "-":
+						ret['visibility'] = 'private';
+						break;
+					case "#":
+						ret['visibility'] = 'protected';
+						break;
+				}
+				if (all[2]) {
+					ret['name'] = all[2];
+				}
+				if (all[3]) {
+					ret['type'] = all[3];
+				}
+				if (all[4]) {
+					ret['default'] = all[4];
+				}
+				return ret;
+			}
+		});
 	};
 	const getMethods = nodes => {
-		return [...nodes].filter(node => nameAndLabel(node).endsWith(")"));
+		// instead of array of names...{name:???,parameters:[{name:???,type:???}],visiblity:???}
+		//+public,-private,#protected
+		return [...nodes].filter(node => nameAndLabel(node).endsWith(")")).map(m => { return { name: nameAndLabel(m), type: "string", visibility: "public" } });
 	};
 	var id = 1;
 	const groupNameIdMap = new Map();
@@ -61,10 +100,13 @@ function generateUmlClass(yy) {
 	});
 
 	traverseLinks(yy, l => {
-		relationship = 'aggregation';
+		relationship = 'generalization';
+		if (l.linkType != '>') {
+			relationship = 'aggregation';
+		}
 		links.push({
 			from: groupNameIdMap.get(l.left.name),
-			to:  groupNameIdMap.get(l.right.name),
+			to: groupNameIdMap.get(l.right.name),
 			relationship: relationship
 		});
 	});

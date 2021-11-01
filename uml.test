@@ -1,6 +1,6 @@
 {Person;Person
-name;name: String
-birth;birth: Date
+name;+String
+birth;+Date
 getCurrentAge;getCurrentAge(): int
 }
 
@@ -21,7 +21,7 @@ students;students: List<Student>
 }
 
 {Professor;Professor
-classes1;classes: List<Class>
+classes1;+classes: List<Class>
 teach;teach(class: Course)
 }
 

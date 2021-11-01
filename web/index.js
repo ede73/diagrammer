@@ -496,6 +496,7 @@ function visualizeLayerBands(jsonData) {
         }
         svgimg.appendChild(svg);
     }
+    init();
 }
 
 // Customize the TreeLayout to position all of the leaf nodes at the same vertical Y position.

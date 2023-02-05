@@ -1,4 +1,4 @@
-//node parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
+//node js/parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 /*
 a>b>c,d
 a>e;link text

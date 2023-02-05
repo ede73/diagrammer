@@ -22,7 +22,7 @@
 	  ];
 
 
-	  node parse.js verbose uml.test umlclass
+	  node js/parse.js verbose uml.test umlclass
 
 */
 

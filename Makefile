@@ -23,7 +23,7 @@ build/parser.js: build/state.all
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
 .PHONY: export
-export: build/state.js parse.js build/parser.js
+export: build/state.js js/parse.js build/parser.js
 	@sed '/EXPORTREMOVE/{n;d;}' scripts/t.sh |grep -v -E '(^#|^[[:space:]]*$$)' > export/t.sh
 	@cp COPYRIGHT.txt export
 	${foreach f,$^,$(shell uglifyjs $f -o export/$f -c -m)}

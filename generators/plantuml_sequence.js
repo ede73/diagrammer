@@ -17,7 +17,7 @@ b->d
 a->e:link text
 @enduml
 
-node parse.js verbose plantuml_sequence.test plantuml_sequence
+node js/parse.js verbose plantuml_sequence.test plantuml_sequence
 */
 function plantuml_sequence(yy) {
     var processANode = function (o, sbgraph) {

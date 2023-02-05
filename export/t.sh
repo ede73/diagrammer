@@ -37,20 +37,20 @@ OUT=${input%.*}_${generator}.out
 rm -f $OUT
 extras=$verbose
 case "$generator" in
-  dexgraph|nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
-    node $MYPATH/parse.js $extras "$input" $generator >$OUT
+  nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
+    node $MYPATH/js/parse.js $extras "$input" $generator >$OUT
     [[ $text -ne 0 ]] && cat $OUT
   ;;
   neato|twopi|circo|fdp|sfdp)
-   node $MYPATH/parse.js $extras "$input" digraph >$OUT
+   node $MYPATH/js/parse.js $extras "$input" digraph >$OUT
    [[ $text -ne 0 ]] && cat $OUT
   ;;
   ast|dendrogram)
-    node $MYPATH/parse.js $extras "$input" $generator
+    node $MYPATH/js/parse.js $extras "$input" $generator
     exit 0
   ;;
   *)
-    node $MYPATH/parse.js $extras "$input" digraph >$OUT
+    node $MYPATH/js/parse.js $extras "$input" digraph >$OUT
     [[ $text -ne 0 ]] && cat $OUT
   ;;
 esac

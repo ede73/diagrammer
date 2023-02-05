@@ -18,7 +18,7 @@ to
     ]
 }
 
-node parse.js verbose dendrogram.test dendrogram
+node js/parse.js verbose dendrogram.test dendrogram
 */
 function dendrogram(yy) {
 	var tree;

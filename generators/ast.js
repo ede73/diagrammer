@@ -103,7 +103,7 @@ to
     {"link":{"linkType":">","left":"a","right":"e","label":"link text"}},
 }
 
-node parse.js verbose ast.test ast
+node js/parse.js verbose ast.test ast
 */
 function ast(yy) {
     console.log(yy)

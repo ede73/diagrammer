@@ -18,7 +18,7 @@ var raw = fs.readFileSync(path.normalize("./" + myArgs[0]), 'utf8');
 var errors = 0
 
 if (myArgs[1] === "lex") {
-    var lexer = require("./build/state.js");
+    var lexer = require("../build/state.js");
     //LEX
     var st = lexer.state
     st.setInput(raw);
@@ -28,7 +28,7 @@ if (myArgs[1] === "lex") {
         console.log("State:" + h + "(" + st.yytext + ")")
     }
 } else {
-    var parser = require("./build/parser.js");
+    var parser = require("../build/parser.js");
     parser.parser.yy.OUTPUT = myArgs[1];
     parser.parser.trace = function (x) {
         console.log("TRACE:" + x);

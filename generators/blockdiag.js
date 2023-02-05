@@ -1,5 +1,5 @@
 //http://blockdiag.com/en/blockdiag/examples.html#simple-diagram
-//node parse.js state2.txt blockdiag |blockdiag -Tpng -o a.png - && open a.png
+//node js/parse.js state2.txt blockdiag |blockdiag -Tpng -o a.png - && open a.png
 //available shapes
 //box,square,roundedbox,dots
 //circle,ellipse,diamond,minidiamond
@@ -26,7 +26,7 @@ e;
   b -> d;
   a -> e[label = "link text"];
 }
-node parse.js verbose blockdiag.test blockdiag
+node js/parse.js verbose blockdiag.test blockdiag
 */
 function blockdiag(yy) {
     output(yy, "blockdiag{\n default_fontsize = 14");

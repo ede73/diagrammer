@@ -17,7 +17,7 @@ b -> c[];
 b -> d[];
 a -> e[label="link text"];
 }
-node parse.js verbose seqdiag.test seqdiag
+node js/parse.js verbose seqdiag.test seqdiag
 */
 function seqdiag(yy) {
     yy.result("seqdiag {");

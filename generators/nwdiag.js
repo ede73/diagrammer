@@ -1,4 +1,4 @@
-//node parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
+//node js/parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 /*
 a>b>c,d
 a>e;link text
@@ -18,7 +18,7 @@ b -- c;
 b -- d;
 a -- e;
 }
-node parse.js verbose nwdiag.test nwdiag
+node js/parse.js verbose nwdiag.test nwdiag
 */
 function nwdiag(yy) {
     yy.result("nwdiag{\n default_fontsize = 16\n");

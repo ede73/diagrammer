@@ -2,7 +2,7 @@
 OUT="export"
 mkdir -p $OUT/generators
 
-for m in parse.js parser.js build/state.js; do
+for m in js/parse.js parser.js build/state.js; do
   uglifyjs $m -o $OUT/$m -c -m
 done
 #for m in generators/*js; do

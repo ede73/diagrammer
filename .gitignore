@@ -9,8 +9,8 @@ web/result.png
 web/error.txt
 web/icons
 state.all
-tests/*.png
-tests/*.out
+tests/test_outputs/*.png
+tests/test_outputs/*.out
 .idea
 state.iml
 .error

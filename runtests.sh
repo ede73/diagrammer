@@ -28,23 +28,23 @@ setError() {
 test() {
   checkError
   [ $verbose -ne 0 ] && echo "    test($*) using $testbin"
-  ./t.sh skipparsermake silent tests "tests/$1" "$testbin" >/dev/null
+  ./t.sh skipparsermake silent tests "tests/test_inputs/$1" "$testbin" >/dev/null
   rc=$?
   [ $rc -ne 0 ] && setError "$rc" "$1"
   png="${1%.*}_${testbin}.png"
   out="${1%.*}_${testbin}.out"
-  if [ -f "tests/$png" ]; then
-    [ ! -f "ref/$testbin/$png" ] && cp "tests/$png" "ref/$testbin/$png"
-    [ ! -f "ref/$testbin/$out" ] && cp "tests/$out" "ref/$testbin/$out"
-    if ! diff "tests/$png" "ref/$testbin/$png"; then
-      echo "    ERROR: at $1, image tests/$png ref/$testbin/$png differ" >&2
-      diff -u "tests/$out" "ref/$testbin/$out"
-      display_image "tests/$png" "ref/$testbin/$png"
+  if [ -f "tests/test_outputs/$png" ]; then
+    [ ! -f "tests/reference_images/$testbin/$png" ] && cp "tests/test_outputs/$png" "tests/reference_images/$testbin/$png"
+    [ ! -f "tests/reference_images/$testbin/$out" ] && cp "tests/test_outputs/$out" "tests/reference_images/$testbin/$out"
+    if ! diff "tests/test_outputs/$png" "tests/reference_images/$testbin/$png"; then
+      echo "    ERROR: at $1, image tests/test_outputs/$png tests/reference_images/$testbin/$png differ" >&2
+      diff -u "tests/test_outputs/$out" "tests/reference_images/$testbin/$out"
+      display_image "tests/test_outputs/$png" "tests/reference_images/$testbin/$png"
       setError 11 "$1"
     fi
   else
-    echo "ERROR: Could not produce output tests/$png" >&2
-    ls -l "tests/$png"
+    echo "ERROR: Could not produce output tests/test_outputs/$png" >&2
+    ls -l "tests/test_outputs/$png"
     setError 12 "$1"
   fi
 }

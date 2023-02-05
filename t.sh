@@ -55,7 +55,7 @@ FORMAT=png
   FORMAT=svg
 }
 
-input=${1:-tests/state2.txt}
+input=${1:-tests/test_inputs/state2.txt}
 generator=${2:-dot}
 
 #EXPORTREMOVE
@@ -67,10 +67,11 @@ node --max-old-space-size=4096 testStateLexer.js "$input"
 #node parser.js $input $func | tee a.gv
 #EXPORTREMOVE
 # |sed '/digraph/,$!d'
-
-IMAGEFILE=${input%.*}_${generator}.${FORMAT}
+INPUT_PATH=${input%.*}
+OUTPUT_PATH=$(echo "$INPUT_PATH" | sed 's/_inputs/_outputs/')
+IMAGEFILE=${OUTPUT_PATH}_${generator}.${FORMAT}
 rm -f "$IMAGEFILE"
-OUT=${input%.*}_${generator}.out
+OUT=${OUTPUT_PATH}_${generator}.out
 rm -f "$OUT"
 
 #EXPORTREMOVE

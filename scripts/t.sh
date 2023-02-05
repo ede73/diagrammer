@@ -61,7 +61,7 @@ generator=${2:-dot}
 #EXPORTREMOVE
 echo "testing lexing"
 #EXPORTREMOVE
-node --max-old-space-size=4096 testStateLexer.js "$input"
+node --max-old-space-size=4096 js/testStateLexer.js "$input"
 
 #EXPORTREMOVE
 #node build/parser.js $input $func | tee a.gv

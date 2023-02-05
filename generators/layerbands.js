@@ -25,7 +25,7 @@ Only one root supported?
 		{ key: "fourD", parent: "fourB" },
 		{ key: "twoD", parent: "root" }
 	  ];
-	  node parse.js verbose layerbands.test layerbands
+	  node parse.js verbose manual_test_diagrams/layerbands.d layerbands
 
 */
 

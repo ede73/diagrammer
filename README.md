@@ -50,11 +50,11 @@ I just run this locally (in my Mac or in my Windows on WSL2/Ubuntu)
 
 Example TCP state diagram in the editor
 
-<img width=200 src="https://user-images.githubusercontent.com/1845554/216884833-b2f23d32-7f8b-48cc-b1dd-c6b6d7679c6f.png">
+<img width=60% src="https://user-images.githubusercontent.com/1845554/216884833-b2f23d32-7f8b-48cc-b1dd-c6b6d7679c6f.png">
 
 And output
 
-<img width=200 src="https://user-images.githubusercontent.com/1845554/216884941-9cb3c597-c6d7-42f4-9564-3c69cd936370.png">
+<img width=30% src="https://user-images.githubusercontent.com/1845554/216884941-9cb3c597-c6d7-42f4-9564-3c69cd936370.png">
 
 You can select different visualizers from the drop down (without changing your diagram)
 
@@ -226,7 +226,50 @@ Alas, some visualization (renderers) may require X/Display to work, wasn't able 
 
 Browser local storage works nice, but it's local, ie. jump to another machine and you don't have the files anymore. Hence the export/import.
 
-# Project files
+# Project files/folders
+- ace - The ACE editor, and diagrammer highlight rules
+- arrows - Diagrammer arrow styles (icons for UI)
+- build - Jison grammar parser + other derivatives..built
+- css - Stylesheets
+- export - make export makes minimal distribution here
+- ext - External dependencies, CanViz/PlantUml
+- generators - Converting diagrammer AST to **any graph visualizer language** you can come up with
+- grammar - Lex + Grammar of diagrammer
+- icons - Some copyleft icons for UI
+- index.html - Web UI main
+- js - The diagrammer parser (also transpiled mscgen, graphviz)
+  - mscgen / graphviz visualize the graphs in the Web UI in realtime without any backend support, but not required. I was hoping to build backendless visualization, all in browser. And that's what it does, but had I wanted to go all the way..PlantUML, python3 nwdiag/actdiag..etc. uh. 
+- manual_test_diagrams - some diagrammer tests during development, not tied to tests
+- model - Diagrammer parser converts diagrammer language to this AST model comprising of node, link, shapes, subgraph (, graphobject, graphroot, tree, support)
+- scripts - Some utility scripts for building, testing, exporting
+- setup - setup related
+- tests - All the test files, diagrammer language inputs, reference renderings, transpiled outputs. 
+  - Test generates all the test files using all the (related) visualizations, and then does output text + output graph comparison. Super useful if you need to change the grammar, ensures the ever used to work, still does :)
+- types - web UI icons for adding node shapes
+- web - PHP Web Backend, provides access to backend renderers like PlantUml, mscgen (the C version), Python3 *diags, etc. Also provides import/export. Not needed for comman line use
+
+# Installation
+Totally at your own risk!
+I've run this on Linux/Mac, but most recedntly on windows via its awesomely magnificient linux sub WSL2, which also integrates beautifully with Visual Studio Code! Just enter the linux subsystem, pull the repo, type "code ." and You've VSStudio available.
+
+Run scripts/setup.sh (or check it and run by hand). It installs required modules, apache2, php. Latter two are NOT required if you don't need the Web UI.
+
+For me, apache2 config went all the way nicely, userdirectories where available, just had to enable PHP in userdirs, by commenting out few lines in php configs.
+
+
+```
+cd ~/diagrammer
+ln -s diagrammer ~/public_html/ # or ~/Sites on mac
+make all
+# You need plantuml.jar in ext/ to run all the tests successfully
+# make test
+```
+
+Then go to http://localhost/~USERNAMEHERE/diagrammer
+
+And you should be ready to go.
+
+There's also scripts/export.sh that makes a minimal 'distribution' you can copy someplace and use the t.sh to render the graphs.
 
 # External project references:
 - https://github.com/ajaxorg/ace-builds

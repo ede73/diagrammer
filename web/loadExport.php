@@ -1,7 +1,10 @@
 <?php
-$file = "./localstorage_" . $_SERVER['REMOTE_ADDR'] . ".json";
+require('safeip.php');
+$ip = get_safe_ip();
+
+$file = "./exported/localstorage_${ip}.json";
 if (!file_exists($file)) {
-  $file = "./localstorage.json";
+  $file = "./exported/localstorage.json";
 }
 
 if (file_exists($file)) {

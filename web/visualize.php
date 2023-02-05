@@ -27,53 +27,53 @@ if (FALSE === file_put_contents("./post.txt", $postText)) {
   http_response_code(500);
   return;
 }
-//exec("");
-//echo $postText;
 
-//header("Content-Type: image/png");
-//passthru("cat state_dot.png");
-#brew install mscgen
+function visualize(string $executable, string $extra_param = "", string $extra_image_format = "-Tpng"): string
+{
+  return exec(getExe($executable) . " ${extra_image_format} ${extra_param} -o result.png post.txt");
+}
+
 switch ($_REQUEST["visualizer"]) {
   case "mscgen":
-    $r = exec(getExe("mscgen") . " -Tpng -o result.png post.txt");
+    $r = visualize("mscgen");
     break;
   case "actdiag":
-    $r = exec(getExe("actdiag3") . " -Tpng -a -o result.png post.txt");
+    $r = visualize("actdiag3", "-a");
     break;
   case "blockdiag":
-    $r = exec(getExe("blockdiag3") . " -Tpng -a -o result.png post.txt");
+    $r = visualize("blockdiag3", "-a");
     break;
   case "nwdiag":
-    $r = exec(getExe("nwdiag3") . " -Tpng -a -o result.png post.txt");
+    $r = visualize("nwdiag3", "-a");
     break;
   case "seqdiag":
-    $r = exec(getExe("seqdiag") . " -Tpng -a -o result.png post.txt");
+    // TODO: I think this is deprecated
+    $r = visualize("seqdiag3", "-a");
     break;
   case "dot":
-    $r = exec(getExe("dot") . " -Tpng:gd -o result.png post.txt");
+    $r = visualize("dot", "", "-Tpng:gd");
     break;
   case "twopi":
-    $r = exec(getExe("twopi") . " -Tpng -o result.png post.txt");
+    $r = visualize("twopi");
     break;
   case "circo":
-    $r = exec(getExe("circo") . " -Tpng -o result.png post.txt");
+    $r = visualize("circo");
     break;
   case "fdp":
-    $r = exec(getExe("fdp") . " -Tpng -o result.png post.txt");
+    $r = visualize("fdp");
     break;
   case "sfdp":
-    $r = exec(getExe("sfdp") . " -Tpng -o result.png post.txt");
+    $r = visualize("sfdp");
     break;
   case "neato":
-    $r = exec(getExe("neato") . " -Tpng -o result.png post.txt");
+    $r = visualize("neato");
     break;
   case "plantuml_sequence":
-    //cat josha.txt| java -jar ../ext/plantuml.jar -pipe> result.png
     copy("./post.txt", "./result.txt");
     $r = exec(getExe("java") . " -jar ../ext/plantuml.jar result.txt");
     break;
   default:
-    $r = exec(getExe("dot") . " -Tpng -o result.png post.txt");
+    $r = visualize("dot");
     break;
 }
 file_put_contents("./error.txt", $r);

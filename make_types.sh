@@ -1,6 +1,6 @@
 #!/bin/sh
 # shellcheck disable=SC2012
-ls types|sed -e 's/.png//g' -e 's/^x//g'|awk '{print "<li tooltip=\""$1"\" onclick=\"addLine(\""$1" nodeName\");\"><img height=\"30\" src=\"types/x"$1".png\"/></li>";}'
+ls types | sed -e 's/.png//g' -e 's/^x//g' | awk '{print "<li tooltip=\""$1"\" onclick=\"addLine(\""$1" nodeName\");\"><img height=\"30\" src=\"types/x"$1".png\"/></li>";}'
 exit 0
 #while read line
 #do
@@ -17,9 +17,9 @@ exit 0
 #done <types.txt
 
 while read -r line; do
-node="${line%[*}"
-echo "types/$node.png"
-cat <<EOF |dot -Tpng -o "types/$node.png"
+  node="${line%[*}"
+  echo "types/$node.png"
+  cat <<EOF | dot -Tpng -o "types/$node.png"
 digraph {
   compound=true;
   rankdir=TD;

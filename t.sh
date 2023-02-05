@@ -6,11 +6,11 @@ MYPATH=$(dirname "$0")
 EXTPATH=$(pwd)
 #EXPORTREMOVE
 if [ "${1:-skipparsermake}" = "skipparsermake" ]; then
-#EXPORTREMOVE
+  #EXPORTREMOVE
   shift
-#EXPORTREMOVE
-  else
-#EXPORTREMOVE
+  #EXPORTREMOVE
+else
+  #EXPORTREMOVE
   ./makeLexerAndParser.sh >/dev/null
 #EXPORTREMOVE
 fi
@@ -27,33 +27,32 @@ PLANTUML_JAR=ext/plantuml.jar
 
 silent=0
 [ "$1" = "silent" ] && {
- shift
- silent=1
+  shift
+  silent=1
 }
 
 tests=0
 [ "$1" = "tests" ] && {
- shift
- tests=1
+  shift
+  tests=1
 }
 
 verbose=""
 [ "$1" = "verbose" ] && {
- shift
- verbose=" verbose "
+  shift
+  verbose=" verbose "
 }
 
 text=0
 [ "$1" = "text" ] && {
- shift
- text=1
+  shift
+  text=1
 }
-
 
 FORMAT=png
 [ "$1" = "svg" ] && {
- shift
- FORMAT=svg
+  shift
+  FORMAT=svg
 }
 
 input=${1:-tests/state2.txt}
@@ -78,21 +77,21 @@ rm -f "$OUT"
 echo "test parser $verbose $OUT"
 
 case "$generator" in
-  nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
-    node --max-old-space-size=4096  "$MYPATH/parse.js" "$input" "$generator" "$verbose" >"$OUT"
-    [ $text -ne 0 ] && cat "$OUT"
+nwdiag | actdiag | blockdiag | plantuml_sequence | mscgen)
+  node --max-old-space-size=4096 "$MYPATH/parse.js" "$input" "$generator" "$verbose" >"$OUT"
+  [ $text -ne 0 ] && cat "$OUT"
   ;;
-  neato|twopi|circo|fdp|sfdp)
-   node --max-old-space-size=4096  "$MYPATH/parse.js" "$input" digraph "$verbose" > "$OUT"
-   [ $text -ne 0 ] && cat "$OUT"
+neato | twopi | circo | fdp | sfdp)
+  node --max-old-space-size=4096 "$MYPATH/parse.js" "$input" digraph "$verbose" >"$OUT"
+  [ $text -ne 0 ] && cat "$OUT"
   ;;
-  ast|dendrogram|sankey)
-    node --max-old-space-size=4096 "$MYPATH/parse.js" "$input" "$generator" "$verbose"
-    exit 0
+ast | dendrogram | sankey)
+  node --max-old-space-size=4096 "$MYPATH/parse.js" "$input" "$generator" "$verbose"
+  exit 0
   ;;
-  *)
-    node --max-old-space-size=4096 "$MYPATH/parse.js" $verbose "$input" digraph "$verbose" >"$OUT"
-    [ $text -ne 0 ] && cat "$OUT"
+*)
+  node --max-old-space-size=4096 "$MYPATH/parse.js" $verbose "$input" digraph "$verbose" >"$OUT"
+  [ $text -ne 0 ] && cat "$OUT"
   ;;
 esac
 
@@ -118,20 +117,20 @@ nwdiag() {
 }
 
 case "$generator" in
-  plantuml_sequence)
-    java -Xmx2048m -jar "$PLANTUML_JAR" "$OUT" >"$IMAGEFILE"&& [ $silent = 0 ] && display_image "$IMAGEFILE"
+plantuml_sequence)
+  java -Xmx2048m -jar "$PLANTUML_JAR" "$OUT" >"$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-  nwdiag|actdiag|blockdiag)
-    "$generator" < "$OUT" -a -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
+nwdiag | actdiag | blockdiag)
+  "$generator" <"$OUT" -a -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-  mscgen)
-    "$generator" < "$OUT" -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
+mscgen)
+  "$generator" <"$OUT" -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-  neato|twopi|circo|fdp|sfdp)
-    "$generator" < "$OUT" -T"${FORMAT}" -o "$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
+neato | twopi | circo | fdp | sfdp)
+  "$generator" <"$OUT" -T"${FORMAT}" -o "$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-  *)
-    dot < "$OUT" -T"${FORMAT}" -o "$IMAGEFILE"  && [ $silent = 0 ] && display_image "$IMAGEFILE"
+*)
+  dot <"$OUT" -T"${FORMAT}" -o "$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
 esac
 
@@ -140,7 +139,7 @@ esac
   # rm $OUT;
   [ "$FORMAT" = "png" ] && {
     #Compress
-    if which  pngquant >/dev/null ; then
+    if which pngquant >/dev/null; then
       pngquant --ext .png --force --speed 1 --quality 0-10 "$IMAGEFILE"
     fi
   }

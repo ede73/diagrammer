@@ -5,17 +5,17 @@
 }
 
 error() {
-  >&2 echo "ERROR: $*"
+  echo >&2 "ERROR: $*"
 }
 
 get_www_user() {
   case $OSTYPE in
-    darwin*)
-      echo "www"
-      ;;
+  darwin*)
+    echo "www"
+    ;;
   linux*)
-      echo "www-data"
-      ;;
+    echo "www-data"
+    ;;
   *)
     error "Unknown $OSTYPE"
     exit 10
@@ -31,7 +31,6 @@ prepare_file() {
   sudo chmod 775 $1
 }
 
-
 for file in web web/post.txt web/result.png web/result.txt web/error.txt; do
   prepare_file $file
 done
@@ -40,7 +39,6 @@ for file in $(ls web/*.json); do
   prepare_file $file
 done
 
-
 debian_package_search() {
   apt-cache show $* >/dev/null
   return $?
@@ -48,36 +46,36 @@ debian_package_search() {
 
 install() {
   case $OSTYPE in
-    darwin*)
-      # my mach resets these, brew doctor helps..
-      sudo chown -R $(whoami) /usr/local/bin /usr/local/lib /usr/local/sbin
-      chmod u+w /usr/local/bin /usr/local/lib /usr/local/sbin
-      brew install $*
-      ;;
-    linux*)
-      sudo apt-get update
-      sudo apt-get -y install $*
-      return 0
-      ;;
-    *)
-      error "Unknown architecture - no package install command"
-      exit 10
+  darwin*)
+    # my mach resets these, brew doctor helps..
+    sudo chown -R $(whoami) /usr/local/bin /usr/local/lib /usr/local/sbin
+    chmod u+w /usr/local/bin /usr/local/lib /usr/local/sbin
+    brew install $*
+    ;;
+  linux*)
+    sudo apt-get update
+    sudo apt-get -y install $*
+    return 0
+    ;;
+  *)
+    error "Unknown architecture - no package install command"
+    exit 10
     ;;
   esac
 }
 
 apache_enable_mod() {
   case $OSTYPE in
-    darwin*)
-      error "You need to manually enable $*"
+  darwin*)
+    error "You need to manually enable $*"
+    return 0
+    ;;
+  linux*)
+    [[ -x /usr/sbin/a2enmod ]] && {
+      sudo /usr/sbin/a2enmod $*
       return 0
-      ;;
-    linux*)
-      [[ -x /usr/sbin/a2enmod ]] && {
-        sudo /usr/sbin/a2enmod $*
-        return 0
-      }
-      ;;
+    }
+    ;;
   esac
   error "Unknown architecture  $OSTYPE - no a2enmod command"
 }
@@ -92,55 +90,55 @@ apache_restart() {
 
 make_www_dir() {
   case $OSTYPE in
-    darwin*)
-      mkdir -p ~/Sites
-      ;;
-    linux*)
-      mkdir -p ~/public_html
-      ;;
+  darwin*)
+    mkdir -p ~/Sites
+    ;;
+  linux*)
+    mkdir -p ~/public_html
+    ;;
   esac
 }
 
 get_php_apache_module() {
   case $OSTYPE in
-    linux*)
-      debian_package_search libapache2-mod-php7.4 && {
-        echo libapache2-mod-php7.4
-        return 0
-      }
-      debian_package_search libapache2-mod-php7.3 && {
-        echo libapache2-mod-php7.3
-        return 0
-      }
+  linux*)
+    debian_package_search libapache2-mod-php7.4 && {
+      echo libapache2-mod-php7.4
       return 0
-      ;;
-    *)
+    }
+    debian_package_search libapache2-mod-php7.3 && {
+      echo libapache2-mod-php7.3
+      return 0
+    }
+    return 0
     ;;
+  *) ;;
+
   esac
 }
 
 get_apache() {
   case $OSTYPE in
-    linux*)
-      echo "apache2"
-      ;;
+  linux*)
+    echo "apache2"
+    ;;
   esac
 }
 
 get_jison() {
   case $OSTYPE in
-    linux*)
-      echo "jison"
-      ;;
+  linux*)
+    echo "jison"
+    ;;
   esac
   error "jison pkg may be needed"
 }
 
 get_block_crap() {
   case $OSTYPE in
-    linux*)
-      echo "python3-nwdiag python3-blockdiag python3-actdiag"
-      ;;
+  linux*)
+    echo "python3-nwdiag python3-blockdiag python3-actdiag"
+    ;;
   esac
   error "nwdiag blockdiag actdiag pkgs may be needed"
 }
@@ -172,5 +170,7 @@ tar fxj ../ext/canviz-0.1.tar.bz2
 apache_restart
 echo "You need to ENABLE PHP in userdirs manually"
 
-(cd web;ln -s ../icons icons)
-
+(
+  cd web
+  ln -s ../icons icons
+)

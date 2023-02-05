@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 OSTYPE=$(uname | tr '[:upper:]' '[:lower:]')
 # USE AT OWN RISK! Haven't run in a while...
-[[ -d web ]] && [[ -d ace ]] && [[ -d css ]] && [[ -d generators ]] && [[ -d model ]] || {
+[ -d web ] && [ -d ace ] && [ -d css ] && [ -d generators ] && [ -d model ] || {
   echo "Run this is diagrammer folder..."
   exit 10
 }
@@ -37,7 +37,7 @@ for file in web web/post.txt web/result.png web/result.txt web/error.txt; do
   prepare_file $file
 done
 
-for file in $(ls web/*.json); do
+for file in $(find web -name "*.json"); do
   prepare_file $file
 done
 
@@ -73,21 +73,19 @@ apache_enable_mod() {
     return 0
     ;;
   linux*)
-    [[ -x /usr/sbin/a2enmod ]] && {
+    [ -x /usr/sbin/a2enmod ] && {
       sudo /usr/sbin/a2enmod $*
       return 0
     }
     ;;
+  *)
+    error "Unknown architecture ($OSTYPE) - no a2enmod command"
+    ;;
   esac
-  error "Unknown architecture  $OSTYPE - no a2enmod command"
 }
 
 apache_restart() {
-  which systemctl && {
-    sudo systemctl restart apache2
-    return 0
-  }
-  error "Unknown architecture $OSTYPE - no systemctl command"
+  apache2ctl restart
 }
 
 make_www_dir() {
@@ -104,18 +102,17 @@ make_www_dir() {
 get_php_apache_module() {
   case $OSTYPE in
   linux*)
-    debian_package_search libapache2-mod-php7.4 && {
-      echo libapache2-mod-php7.4
+    debian_package_search libapache2-mod-php8.1 && {
+      echo libapache2-mod-php8.1
       return 0
     }
-    debian_package_search libapache2-mod-php7.3 && {
-      echo libapache2-mod-php7.3
+    debian_package_search libapache2-mod-php7.4 && {
+      echo libapache2-mod-php7.4
       return 0
     }
     return 0
     ;;
   *) ;;
-
   esac
 }
 
@@ -132,24 +129,28 @@ get_jison() {
   linux*)
     echo "jison"
     ;;
+  *)
+    error "jison pkg may be needed for arch ($OSTYPE)"
+    ;;
   esac
-  error "jison pkg may be needed"
 }
 
-get_block_crap() {
+get_block_diags() {
   case $OSTYPE in
   linux*)
     echo "python3-nwdiag python3-blockdiag python3-actdiag"
     ;;
+  *)
+    error "nwdiag blockdiag actdiag pkgs may be needed"
+    ;;
   esac
-  error "nwdiag blockdiag actdiag pkgs may be needed"
 }
 
 # Note MAC brew install graphviz --with-pango
 PHP_MODULE=$(get_php_apache_module)
 APACHE=$(get_apache)
 JISON=$(get_jison)
-BLOCKCRAP=$(get_block_crap)
+BLOCK_DIAGS=$(get_block_diags)
 
 # uh oh, rasp zero is armv6 and openjdk-11 doesn't provide armv6 compaible build (openjdk11 is default)
 uname -m | grep armv6 && {
@@ -158,19 +159,21 @@ uname -m | grep armv6 && {
   # but it solved the Vm (armv6 not supported) issue on ca-certificates-java
 }
 
-install "$JISON" "$APACHE" "$PHP_MODULE" graphviz mscgen plantuml "$BLOCKCRAP" node
+# Plantuml requires java
+install "$JISON" "$APACHE" "$PHP_MODULE" graphviz mscgen plantuml openjdk-18-jre "$BLOCK_DIAGS" nodejs
 
 apache_enable_mod userdir
 # either succeeds
-apache_enable_mod php7.3
+apache_enable_mod php8.1
 apache_enable_mod php7.4
 make_www_dir
 
-cd web
-tar fxj ../ext/canviz-0.1.tar.bz2
-
+#cd web
+#tar fxj ../ext/canviz-0.1.tar.bz2
+# cd ..
 apache_restart
-echo "You need to ENABLE PHP in userdirs manually"
+echo "You need to make /home/$USER executable (chmod +x /home/$USER)"
+echo "You may need to ENABLE PHP in userdirs manually(check mods-enabled/php8.1.conf)"
 
 (
   cd web

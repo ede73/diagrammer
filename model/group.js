@@ -9,20 +9,24 @@ class Group extends GraphObject {
         this.name = name;
         this.OBJECTS = [];
         this.ROOTNODES = [];
+        this.equal = undefined;
+        this.linklabel = undefined;
     }
     // Save EQUAL node ranking
     setEqual(value) {
-        return setAttr(this, 'equal', value);
+        this.equal = value;
+        return this;
     }
     getEqual() {
-        return getAttr(this, 'equal');
+        return this.equal;
     }
     // temporary for RHS list array!!
     setLinkLabel(value) {
-        return setAttr(this, 'linklabel', value);
+        this.linklabel = value;
+        return this;
     }
     getLinkLabel() {
-        return getAttr(this, 'linklabel');
+        return this.linklabel;
     }
     /**
      * Set default nodecolor, groupcolor, linkcolor Always ask from the

@@ -52,7 +52,7 @@ String.prototype.formatArray = function (arra) {
  * @param attr Name of the attribute index to return
  */
 function getAttr(cl, attr) {
-    if (cl[attr] === undefined || cl[attr] == 0)
+    if (!cl[attr] || cl[attr] == 0)
         return undefined;
     return cl[attr];
 }
@@ -67,12 +67,11 @@ function getAttr(cl, attr) {
  * @returns (possibly formatted) value of the attribute or "" if attribute not found
  */
 function getAttrFmt(cl, attr, fmt, resultarray) {
-    var tmp;
     if (attr instanceof Array) {
         for (var i in attr) {
             if (!attr.hasOwnProperty(i)) continue;
             // debug("Get FMT attr "+attr[i]+" from "+cl);
-            tmp = getAttrFmt(cl, attr[i], fmt, resultarray);
+            var tmp = getAttrFmt(cl, attr[i], fmt, resultarray);
             if (tmp !== "") {
                 debug("Return " + tmp);
                 return tmp;
@@ -80,9 +79,9 @@ function getAttrFmt(cl, attr, fmt, resultarray) {
         }
         return "";
     }
-    if (cl[attr] == undefined || cl[attr] == 0)
+    if (!cl[attr] || cl[attr] == 0)
         return "";
-    tmp = fmt.format(cl[attr]);
+    var tmp = fmt.format(cl[attr]);
     if (resultarray)
         resultarray.push(tmp);
     return " " + tmp + " ";
@@ -105,7 +104,7 @@ function output(yy, txt, indentOrDedent) {
 }
 
 function outputFmt(yy, txt, a) {
-    if (a === undefined)
+    if (!a)
         yy.result(txt);
     else
         yy.result(txt.formatArray(a));

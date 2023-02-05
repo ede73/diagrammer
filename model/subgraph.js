@@ -3,20 +3,23 @@
  * @param name Name of the container
  * @constructor
  */
-class SubGraph extends Group{
+class SubGraph extends Group {
     constructor(name) {
         super();
         this.name = name;
         this.OBJECTS = [];
         this.ROOTNODES = [];
         this.isSubGraph = true;
+        this.entrance = undefined;
+        this.exit = undefined;
     }
     // temporary for RHS list array!!
     setLinkLabel(value) {
-        return setAttr(this, 'linklabel', value);
+        this.linklabel = value;
+        return this;
     }
     getLinkLabel() {
-        return getAttr(this, 'linklabel');
+        return this.linklabel;
     }
     /**
      * Set default nodecolor, groupcolor, linkcolor Always ask from the
@@ -28,17 +31,19 @@ class SubGraph extends Group{
     }
     setEntrance(entrance) {
         debug("subgraph:Set entrance to " + entrance);
-        return setAttr(this, 'entrance', entrance);
+        this.entrance = entrance;
+        return this;
     }
     getEntrance() {
-        return getAttr(this, 'entrance');
+        return this.entrance;
     }
     setExit(exit) {
         debug("subgraph:Set exit to " + exit);
-        return setAttr(this, 'exit', exit);
+        this.exit = exit;
+        return this;
     }
     getExit() {
-        return getAttr(this, 'exit');
+        return this.exit;
     }
     getDefault(key) {
         //debug("subgrah:Get SubGraph " + key);
@@ -46,14 +51,14 @@ class SubGraph extends Group{
     }
     toString() {
         var fmt = "";
-        if (this.linklabel !== undefined && this.linklabel != '')
+        if (this.linklabel)
             fmt += ",linklabel:" + this.linklabel;
-        if (this.entrance !== undefined)
+        if (this.entrance)
             fmt += ",entrance:" + this.entrance;
 
-        if (this.exit !== undefined)
+        if (this.exit)
             fmt += ",exit:" + this.exit;
-        if (this.ROOTNODES !== undefined)
+        if (this.ROOTNODES)
             fmt += ",rootnodes:" + this.ROOTNODES;
         return "SubGraph(name:" + this.name + fmt + ")";
     };

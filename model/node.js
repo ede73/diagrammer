@@ -12,50 +12,64 @@ class Node extends GraphObject {
         this.shape = shape;
         this.image = undefined;
         this.style = undefined;
+        // UH... this is used in grammar parser to TEMPORARILY store link object
+        this.linklabel = undefined;
     }
     setShape(value) {
-        if (value === undefined) return this;
-        if (value) value = value.toLowerCase();
-        return setAttr(this, 'shape', value);
+        if (value) {
+            this.shape = value.toLowerCase();
+        }
+        return this;
     }
     //noinspection JSUnusedGlobalSymbols
     getShape() {
-        return getAttr(this, 'shape');
+        return this.shape;
     }
     // temporary for RHS list array!!
     setLinkLabel(value) {
-        return setAttr(this, 'linklabel', value);
+        this.linklabel = value;
+        return this;
     }
     getLinkLabel() {
-        var tmp = getAttr(this, 'linklabel'); //xx
-        setAttr(this, 'linklabel', undefined);
+        var tmp = this.linklabel;
+        // TODO: Uhoh, makes no sense! Move away to generator if needed
+        /*
+        Resetting link label breaks:
+          a>"A2B"b,"A2C"c
+          r>"R2C"c
+
+          where link a>b is named A2B, a>c A2c
+          and r>c R2C
+        */
+        this.linklabel = undefined;
         return tmp;
     }
     setStyle(value) {
-        if (value === undefined) return this;
-        if (value) value = value.toLowerCase();
-        return setAttr(this, 'style', value);
+        if (value) {
+            this.style = value.toLowerCase();
+        }
+        return this;
     }
     //noinspection JSUnusedGlobalSymbols
     getStyle() {
-        return getAttr(this, 'style');
+        return this.style;
     }
     setImage(value) {
-        if (value === undefined) return this;
-        return setAttr(this, 'image', value);
+        if (value) {
+            this.image = value;
+        }
+        return this;
     }
     //noinspection JSUnusedGlobalSymbols
     getImage() {
-        return getAttr(this, 'image');
+        return this.image;
     }
     toString() {
         var fmt = "";
-        var tmp = getAttrFmt(this, 'color', '');
-        if (tmp !== undefined && tmp != '')
-            fmt += ",color: " + tmp;
-        tmp = getAttrFmt(this, 'label', '');
-        if (tmp !== undefined && tmp != '')
-            fmt += ",label: " + tmp;
+        if (this.color)
+            fmt += ",color: " + this.color;
+        if (this.label)
+            fmt += ",label: " + this.label;
         return "Node(name:" + this.getName() + fmt + ")";
     }
 };

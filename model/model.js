@@ -114,12 +114,12 @@ function getNode(yy, name, style) {
                 }
                 if (o instanceof Group) {
                     var found = s(o, name);
-                    if (found != undefined) return found;
+                    if (found) return found;
                 }
             }
             return undefined;
         }(getGraphRoot(yy), name);
-        if (search !== undefined) {
+        if (search) {
             return search;
         }
         debug("Create new node name=" + name, true);
@@ -142,7 +142,7 @@ function getNode(yy, name, style) {
     yy.lastSeenNode = node;
     if (yy.collectNextNode) {
         debug("Collect next node");
-        setAttr(yy.collectNextNode, 'exitlink', name);
+        yy.collectNextNode.exitlink = name;
         yy.collectNextNode = undefined;
     }
     debug(false);
@@ -190,7 +190,9 @@ function enterContainer(yy, container) {
 function exitContainer(yy) {
     if (yy.CURRENTCONTAINER.length <= 1)
         throw new Error("INTERNAL ERROR:Trying to exit ROOT container");
-    return setAttr(yy.CURRENTCONTAINER.pop(), 'exitnode', yy.CONTAINER_EXIT++);
+    var currentContainer = yy.CURRENTCONTAINER.pop();
+    currentContainer.exitnode = yy.CONTAINER_EXIT++;
+    return currentContainer;
 }
 
 /**
@@ -239,7 +241,7 @@ function exitSubGraph(yy) {
             g.nolinks = undefined;
             var newLink = getLink(yy, l.linkType, currentSubGraph.entrance, g, l.label,
                 undefined, undefined, undefined, undefined, true);
-            setAttr(newLink, 'container', currentSubGraph);
+            newLink.container = currentSubGraph;
             yy.LINKS.splice(i++, 0, newLink);
         }
     }
@@ -275,7 +277,7 @@ function exitSubGraph(yy) {
 function getGroup(yy, ref) {
     if (ref instanceof Group) return ref;
     debug("getGroup() NEW GROUP:" + yy + "/" + ref, true);
-    if (yy.GROUPIDS === undefined) yy.GROUPIDS = 1;
+    if (!yy.GROUPIDS) yy.GROUPIDS = 1;
     var newGroup = new Group(yy.GROUPIDS++);
     debug("push group " + newGroup + " to " + yy);
     _pushObject(yy, newGroup);
@@ -302,8 +304,8 @@ function getGroup(yy, ref) {
  *
  * @param yy lexer
  * @param linkType Type of the link(grammar)
- * @param l Left hand side (must be Array,Node,Group)
- * @param r Right hand side (must be Array,Node,Group)
+ * @param lhs Left hand side (must be Array,Node,Group)
+ * @param rhs Right hand side (must be Array,Node,Group)
  * @param [inlineLinkLabel] Optional label for the link
  * @param [commonLinkLabel] Optional label for the link
  * @param [linkColor] Optional color for the link
@@ -311,108 +313,109 @@ function getGroup(yy, ref) {
  * @param [rcompass] Reft hand side compass value
  * @return the link that got added
  */
-function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass, dontadd) {
+function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass, dontadd) {
     var lastLink;
-    var i;
     var current_container = getCurrentContainer(yy);
 
     debug(true);
-    if (r instanceof SubGraph && r.getEntrance() == undefined) {
-        r.setEntrance(l);
+    if (rhs instanceof SubGraph && !rhs.getEntrance()) {
+        rhs.setEntrance(lhs);
     }
-    if (r.nolinks === true && current_container !== undefined) {
-        debug('REMOVE ' + r + ' from root nodes of the container ' + current_container);
-        var idx = current_container.ROOTNODES.indexOf(r);
+    if (rhs.nolinks && current_container) {
+        debug('REMOVE ' + rhs + ' from root nodes of the container ' + current_container);
+        var idx = current_container.ROOTNODES.indexOf(rhs);
         if (idx >= 0) {
             current_container.ROOTNODES.splice(idx, 1);
         }
     }
-    l.nolinks = undefined;
-    r.nolinks = undefined;
+    lhs.nolinks = undefined;
+    rhs.nolinks = undefined;
 
     if (current_container instanceof SubGraph &&
-        current_container.getEntrance() == undefined &&
-        l instanceof Node &&
-        !(r instanceof SubGraph)) {
-        current_container.setEntrance(l);
+        !current_container.getEntrance() &&
+        lhs instanceof Node &&
+        !(rhs instanceof SubGraph)) {
+        current_container.setEntrance(lhs);
     }
 
-    if (l instanceof Array) {
-        debug("getLink LHS array, type:" + linkType + " l:[" + l + "] r:" + r + " inlineLinkLabel:" + inlineLinkLabel + " commonLinkLabel: " + commonLinkLabel + " linkColor:" + linkColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
-        for (i = 0; i < l.length; i++) {
-            debug("    1Get link " + l[i]);
-            lastLink = getLink(yy, linkType, l[i], r, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
+    if (lhs instanceof Array) {
+        debug("getLink LHS array, type:" + linkType + " l:[" + lhs + "] r:" + rhs + " inlineLinkLabel:" + inlineLinkLabel + " commonLinkLabel: " + commonLinkLabel + " linkColor:" + linkColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
+        for (var i = 0; i < lhs.length; i++) {
+            debug("    1Get link " + lhs[i]);
+            lastLink = getLink(yy, linkType, lhs[i], rhs, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
         }
         debug(false);
         return lastLink;
     }
-    if (r instanceof Array) {
-        debug("getLink RHS array, type:" + linkType + " l:" + l + " r:[" + r + "] inlineLinkLabel:" + inlineLinkLabel + " commonLinkLabel: " + commonLinkLabel + " linkColor:" + linkColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
-        for (i = 0; i < r.length; i++) {
-            debug("    2Get link " + r[i]);
-            lastLink = getLink(yy, linkType, l, r[i], inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
+    if (rhs instanceof Array) {
+        debug("getLink RHS array, type:" + linkType + " l:" + lhs + " r:[" + rhs + "] inlineLinkLabel:" + inlineLinkLabel + " commonLinkLabel: " + commonLinkLabel + " linkColor:" + linkColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
+        for (var i = 0; i < rhs.length; i++) {
+            debug("    2Get link " + rhs[i]);
+            lastLink = getLink(yy, linkType, lhs, rhs[i], inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
         }
         debug(false);
         return lastLink;
     }
-    var fmt = "";
-    if (inlineLinkLabel !== undefined)
-        fmt += "inlineLinkLabel: " + inlineLinkLabel;
-    if (commonLinkLabel !== undefined)
-        fmt += "commonLinkLabel: " + commonLinkLabel;
-    if (linkColor !== undefined)
-        fmt += "linkColor: " + linkColor;
-    if (lcompass !== undefined)
-        fmt += "lcompass: " + lcompass;
-    if (rcompass !== undefined)
-        fmt += "rcompass: " + rcompass;
-    debug("getLink type:" + linkType + " l:" + l + " r:" + r + fmt);
-    if (!(l instanceof Node) && !(l instanceof Group) & !(l instanceof SubGraph)) {
-        throw new Error("LHS not a Node,Group nor a SubGraph(LHS=" + l + ") RHS=(" + r + ")");
+    {
+        var fmt = "";
+        if (inlineLinkLabel)
+            fmt += "inlineLinkLabel: " + inlineLinkLabel;
+        if (commonLinkLabel)
+            fmt += "commonLinkLabel: " + commonLinkLabel;
+        if (linkColor)
+            fmt += "linkColor: " + linkColor;
+        if (lcompass)
+            fmt += "lcompass: " + lcompass;
+        if (rcompass)
+            fmt += "rcompass: " + rcompass;
+        debug("getLink type:" + linkType + " l:" + lhs + " r:" + rhs + fmt);
     }
-    if (!(r instanceof Node) && !(r instanceof Group) && !(r instanceof SubGraph)) {
-        throw new Error("RHS not a Node,Group nor a SubGraph(LHS=" + l + ") RHS=(" + r + ")");
+    if (!(lhs instanceof Node) && !(lhs instanceof Group) & !(lhs instanceof SubGraph)) {
+        throw new Error("LHS not a Node,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
-    var lnk = new Link(linkType, l, r);
+    if (!(rhs instanceof Node) && !(rhs instanceof Group) && !(rhs instanceof SubGraph)) {
+        throw new Error("RHS not a Node,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
+    }
+    var link = new Link(linkType, lhs, rhs);
 
-    if (lcompass) setAttr(lnk, 'lcompass', lcompass);
-    else if (getAttr(l, 'compass')) setAttr(lnk, 'lcompass', getAttr(l, 'compass'));
+    if (lcompass) link.lcompass = lcompass;
+    else if (getAttr(lhs, 'compass')) link.lcompass = getAttr(lhs, 'compass');
 
-    if (rcompass) setAttr(lnk, 'rcompass', rcompass);
-    else if (getAttr(r, 'compass')) setAttr(lnk, 'rcompass', getAttr(r, 'compass'));
+    if (rcompass) link.rcompass = rcompass;
+    else if (getAttr(rhs, 'compass')) link.rcompass = getAttr(rhs, 'compass');
 
     _getDefaultAttribute(yy, 'linkcolor', function (linkColor) {
-        lnk.setColor(linkColor);
+        link.setColor(linkColor);
     });
     _getDefaultAttribute(yy, 'linktextcolor', function (linkColor) {
-        lnk.setTextColor(linkColor);
+        link.setTextColor(linkColor);
     });
-    if (commonLinkLabel != undefined) {
-        lnk.setLabel(commonLinkLabel);
+    if (commonLinkLabel) {
+        link.setLabel(commonLinkLabel);
         debug("  set commonLinkLabel " + commonLinkLabel);
     }
-    if (inlineLinkLabel != undefined) {
-        lnk.setLabel(inlineLinkLabel);
+    if (inlineLinkLabel) {
+        link.setLabel(inlineLinkLabel);
         debug("  set inlineLinkLabel " + inlineLinkLabel);
     }
-    else if (r instanceof Node && commonLinkLabel != undefined) {
-        lnk.setLabel(commonLinkLabel);
+    else if (rhs instanceof Node && commonLinkLabel) {
+        link.setLabel(commonLinkLabel);
         debug('  set commonLinkLabel ' + commonLinkLabel);
     }
-    if (r instanceof Node) {
-        tmp = r.getLinkLabel();
-        if (tmp != undefined) {
-            lnk.setLabel(tmp);
+    if (rhs instanceof Node) {
+        tmp = rhs.getLinkLabel();
+        if (tmp) {
+            link.setLabel(tmp);
             debug('  reset link label to ' + tmp);
         }
     }
-    if (linkColor != undefined) lnk.setColor(linkColor);
+    if (linkColor) link.setColor(linkColor);
 
     if (!dontadd) {
-        _addLink(yy, lnk);
+        _addLink(yy, link);
     }
     debug(false);
-    return lnk;
+    return link;
 }
 
 // =====================================
@@ -429,7 +432,7 @@ function getGraphRoot(yy) {
     // debug(" getGraphRoot "+yy);
     if (!yy.GRAPHROOT) {
         //debug("no graphroot,init - in getGraphRoot",true);
-        if (yy.result === undefined) {
+        if (!yy.result) {
             yy.result = function (str) {
                 console.log(str);
             }
@@ -467,7 +470,7 @@ function hasInwardLink(yy, node, nodesContainer) {
     for (var i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
         var r = yy.LINKS[i];
-        if (nodesContainer !== undefined &&
+        if (nodesContainer &&
             r.container.name === nodesContainer.name) {
             continue;
         }
@@ -537,32 +540,31 @@ function _getVariables(yy) {
  *
  * @param yy lexer
  * @param attrname Name of the default attribute. If not found, returns undefined
- * @param [x] Pass the attribute to the this function as only argument - if attribute WAS actually defined!
+ * @param [callback] Pass the attribute to the this function as only argument - if attribute WAS actually defined!
  */
-function _getDefaultAttribute(yy, attrname, x) {
+function _getDefaultAttribute(yy, attrname, callback) {
     // no need for the value, but runs init if missing
     getGraphRoot(yy);
     // debug("_getDefaultAttribute "+attrname);
-    var a;
     for (var i in yy.CURRENTCONTAINER) {
         if (!yy.CURRENTCONTAINER.hasOwnProperty(i)) continue;
         var ctr = yy.CURRENTCONTAINER[i];
-        a = ctr.getDefault(attrname);
+        var defaultAttribute = ctr.getDefault(attrname);
         // debug(" traverse _getDefaultAttribute "+attrname+" from "+ctr+" as
         // "+a);
-        if (a !== undefined) {
+        if (defaultAttribute) {
             // debug("_getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
-            if (x !== undefined)
-                x(a);
-            return a;
+            if (callback)
+                callback(defaultAttribute);
+            return defaultAttribute;
         }
     }
-    a = getGraphRoot(yy).getDefault(attrname);
-    if (a !== undefined) {
+    var defaultAttribute = getGraphRoot(yy).getDefault(attrname);
+    if (defaultAttribute) {
         debug("_getDefaultAttribute got from graphroot");
-        if (x !== undefined)
-            x(a);
-        return a;
+        if (callback)
+            callback(defaultAttribute);
+        return defaultAttribute;
     }
     // debug("_getDefaultAttribute FAILED");
     return undefined;
@@ -574,7 +576,7 @@ function _getDefaultAttribute(yy, attrname, x) {
 function _getSubGraph(yy, ref) {
     if (ref instanceof SubGraph) return ref;
     //debug("_getSubGraph() NEW SubGraph:" + yy + "/" + ref,true);
-    if (yy.SUBGRAPHS === undefined) yy.SUBGRAPHS = 1;
+    if (!yy.SUBGRAPHS) yy.SUBGRAPHS = 1;
     var newSubGraph = new SubGraph(yy.SUBGRAPHS++);
     //debug("push SubGraph " + newSubGraph + " to " + yy);
     _pushObject(yy, newSubGraph);
@@ -592,7 +594,7 @@ function _addLink(yy, l) {
         debug("PUSH LINK ARRAY:" + l, true);
     } else {
         debug("PUSH LINK:" + l, true);
-        setAttr(l, 'container', getCurrentContainer(yy));
+        l.container = getCurrentContainer(yy);
     }
     yy.LINKS.push(l);
     debug(false);

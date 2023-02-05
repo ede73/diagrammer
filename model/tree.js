@@ -32,7 +32,7 @@ function findNode(tree, findData) {
 		}
 		if (tn.CHILDREN.length > 0) {
 			var tmp = findNode(tn, findData);
-			if (tmp !== undefined) {
+			if (tmp) {
 				return tmp;
 			}
 		}
@@ -42,8 +42,8 @@ function findNode(tree, findData) {
 
 function traverseTree(root, callback, enter, exit, level, hasSibling, parent) {
 	//debug('process node '+root.data.name + ' childmount'+siblingAmount);
-	if (level === undefined) level = 0;
-	if (hasSibling === undefined) hasSibling = false;
+	if (!level) level = 0;
+	if (!hasSibling) hasSibling = false;
 	if (level === 0) {
 		callback(root, root.CHILDREN.length === 0, false);
 	}

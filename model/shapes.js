@@ -1,5 +1,5 @@
 function getShape(shapes, o, fmt) {
-    if (o == undefined || o == 0) return "";
+    if (!o || o == 0) return "";
     o = o.toLowerCase();
     if (o in shapes)
         return ' ' + fmt.format(shapes[o]) + ' ';

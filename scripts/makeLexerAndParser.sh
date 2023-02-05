@@ -8,7 +8,7 @@ EOF
 cat state.lex >state.all
 # shellcheck disable=SC2129
 echo /lex >>state.all
-cat state.grammar >>state.all
+cat grammar/state.grammar >>state.all
 cat model/*.js >>state.all
 cat generators/*.js >>state.all
 

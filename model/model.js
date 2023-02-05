@@ -1,5 +1,5 @@
 // =====================================
-// ONLY used in state.grammar
+// ONLY used in grammar/state.grammar
 // =====================================
 
 /**
@@ -10,7 +10,7 @@
  * If this is assignment, rewrite the variable, else assign new
  * Always return the current value
  *
- * Usage: state.grammar
+ * Usage: grammar/state.grammar
  *
  * @param yy Lexer yy
  * @param variable ${XXX:yyy} assignment or ${XXX} query
@@ -41,7 +41,7 @@ function processVariable(yy, variable) {
  * Create an array, push LHS,RHS nodes there and return the array as long as
  * processing the list nodes added to array..
  *
- * Usage: state.grammar
+ * Usage: grammar/state.grammar
  *
  * @param yy Lexer yy
  * @param LHS left hand side of the list
@@ -86,7 +86,7 @@ function getList(yy, LHS, RHS, rhsLinkLabel) {
  *
  * node a1 will be dotted instead of being dashed
  *
- * Usage: state.grammar
+ * Usage: grammar/state.grammar
  *
  * @param yy Lexer yy
  * @param name Reference, Node/Array/Group
@@ -152,7 +152,7 @@ function getNode(yy, name, style) {
 /**
  * TODO: DUAL DECLARATION
  *
- * Usage: state.grammar
+ * Usage: grammar/state.grammar
  *
  * Get current container
  * @para, yy Lexer
@@ -166,7 +166,7 @@ function getCurrentContainer(yy) {
 /**
  * Enter into a new container, set it as current container
  *
- * Usage: state.grammar
+ * Usage: grammar/state.grammar
  *
  * @param yy lexer
  * @param container Set this container as current container
@@ -183,7 +183,7 @@ function enterContainer(yy, container) {
  * Return the previous one
  * Previous one also set as current container
  *
- * Usage: state.grammar
+ * Usage: grammar/state.grammar
  *
  * @param yy lexer
  */
@@ -200,14 +200,14 @@ function exitContainer(yy) {
  * Edit grammar so it links a>b and c,d,e to h
  * Ie exit node(s) and enrance node(s) linked properly
  *
- * Usage: state.grammar
+ * Usage: grammar/state.grammar
  */
 function enterSubGraph(yy) {
     return enterContainer(yy, _getSubGraph(yy));
 }
 
 /*
- * Usage: state.grammar
+ * Usage: grammar/state.grammar
  */
 function exitSubGraph(yy) {
     //Now should edit the ENTRANCE LINK to point to a>b, a>d, a>e
@@ -266,7 +266,7 @@ function exitSubGraph(yy) {
  * new anonymous group getGroup(yy,GroupRef) => create a new group if GroupRef
  * is not a Group or return GroupRef if it is...1
  *
- * Usage: state.grammar
+ * Usage: grammar/state.grammar
  *
  * @param yy lexer
  * @param ref Type of reference, if group, return it
@@ -298,7 +298,7 @@ function getGroup(yy, ref) {
  * if there is a list a>b,c,x,d;X then X is gonna e link label for EVERYONE
  * but for a>"1"b,"2"c link label is gonna be individual!
  *
- * Usage: state.grammar
+ * Usage: grammar/state.grammar
  *
  * @param yy lexer
  * @param linkType Type of the link(grammar)
@@ -423,7 +423,7 @@ function getLink(yy, linkType, l, r, inlineLinkLabel, commonLinkLabel, linkColor
  * Get current singleton graphroot or create new one
  * External utility support for generator
  *
- * Usage: state.grammar, generators
+ * Usage: grammar/state.grammar, generators
  */
 function getGraphRoot(yy) {
     // debug(" getGraphRoot "+yy);
@@ -447,7 +447,7 @@ function getGraphRoot(yy) {
 }
 
 /*
- * Usage: state.grammar, generators/digraph.js
+ * Usage: grammar/state.grammar, generators/digraph.js
  */
 function hasOutwardLink(yy, node) {
     for (var i in yy.LINKS) {

@@ -10,7 +10,7 @@ for f in model/*js; do
   MODELS=$MODELS" "$f
 done
 
-FILES="state.lex state.grammar \
+FILES="state.lex grammar/state.grammar \
 $MODELS \
 $GENERATORS"
 

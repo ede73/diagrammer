@@ -41,18 +41,18 @@ function generateLayerBands(yy) {
 	]
 	const root = getGraphRoot(yy);
 
-	traverseObjects(root, o => {
-		if (o instanceof Group) {
-			groups.itemArray.push({ text: o.name });
+	traverseObjects(root, obj => {
+		if (obj instanceof Group) {
+			groups.itemArray.push({ text: obj.name });
 		}
 	});
 
-	traverseLinks(yy, l => {
-		if (!l.left) {
+	traverseLinks(yy, link => {
+		if (!link.left) {
 			// probably our root
 			//linkedNodes.push({key: l.right.name});
 		}else{
-			linkedNodes.push({key: l.right.name , parent: l.left.name});
+			linkedNodes.push({key: link.right.name , parent: link.left.name});
 		}
 	});
 	output(yy, JSON.stringify(linkedNodes));

@@ -20,43 +20,43 @@ node js/parse.js verbose mscgen.test mscgen
 */
 function mscgen(yy) {
     output(yy, "msc {", true);
-    const r = getGraphRoot(yy);
+    const root = getGraphRoot(yy);
     var comma = false;
     // print out all node declarations FIRST (if any)
-    traverseObjects(r, o => {
+    traverseObjects(root, obj => {
         var tmp;
-        if (o instanceof Group) {
-            output(yy, ' /*' + o.getName() + getAttrFmt(o, 'label', ' {0}') + '*/');
-            traverseObjects(o, z => {
+        if (obj instanceof Group) {
+            output(yy, ' /*' + obj.getName() + getAttrFmt(obj, 'label', ' {0}') + '*/');
+            traverseObjects(obj, z => {
                 tmp = getAttrFmt(z, 'color', ',color="{0}"') + getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
                 output(yy, (comma ? "," : "") + "    " + z.getName() + tmp);
                 comma = true;
             });
-        } else if (o instanceof Node) {
-            tmp = getAttrFmt(o, 'color', ',textbgcolor="{0}"') + getAttrFmt(o, 'style', ',style={0}') + getAttrFmt(o, 'label', ',label="{0}"');
+        } else if (obj instanceof Node) {
+            tmp = getAttrFmt(obj, 'color', ',textbgcolor="{0}"') + getAttrFmt(obj, 'style', ',style={0}') + getAttrFmt(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
-            output(yy, (comma ? "," : "") + "  " + o.getName() + tmp);
+            output(yy, (comma ? "," : "") + "  " + obj.getName() + tmp);
             comma = true;
         }
     });
 
     output(yy, ";");
     var id = 1;
-    traverseLinks(yy, l => {
-        var lt = "";
-        var lr = l.right;
-        var ll = l.left;
+    traverseLinks(yy, link => {
+        var linkType = "";
+        var rhs = link.right;
+        var lhs = link.left;
 
-        if (lr instanceof Group) {
+        if (rhs instanceof Group) {
             // just pick ONE Node from group and use lhead
             // TODO: Assuming it is Node (if Recursive groups implemented, it
             // could be smthg else)
-            lt += " lhead=cluster_" + lr.getName();
-            lr = lr.OBJECTS[0];
-            if (lr == undefined) {
+            linkType += " lhead=cluster_" + rhs.getName();
+            rhs = rhs.OBJECTS[0];
+            if (!rhs) {
                 // TODO:Bad thing, EMPTY group..add one invisible node there...
                 // But should add already at TOP
             }
@@ -64,23 +64,23 @@ function mscgen(yy) {
         // TODO:Assuming producing DIGRAPH
         // For GRAPH all edges are type --
         // but we could SET arrow type if we'd like
-        var rightName = lr.getName();
+        var rightName = rhs.getName();
 
         var dot = false;
         var dash = false;
         var broken = false;
-        if (l.linkType.indexOf(".") !== -1) {
+        if (link.linkType.indexOf(".") !== -1) {
             dot = true;
-        } else if (l.linkType.indexOf("-") !== -1) {
+        } else if (link.linkType.indexOf("-") !== -1) {
             dash = true;
-        } else if (l.linkType.indexOf("/") !== -1) {
+        } else if (link.linkType.indexOf("/") !== -1) {
             broken = true;
         }
         var swap = false;
         const attrs = [];
-        var label = getAttr(l, "label");
-        const color = getAttr(l, 'color');
-        var url = getAttr(l, "url");
+        var label = link.label;
+        const color = link.color;
+        var url = link.url;
         var note = "";
         if (url) {
             attrs.push('URL="' + url + '"');
@@ -98,39 +98,39 @@ function mscgen(yy) {
             }
         }
         attrs.push('id="' + id++ + '"');
-        if (l.linkType.indexOf("<") !== -1 && l.linkType.indexOf(">") !== -1) {
+        if (link.linkType.indexOf("<") !== -1 && link.linkType.indexOf(">") !== -1) {
             // Broadcast type (<>)
             // hmh..since seqdiag uses a<>a as broadcast and
             // a<>b as autoreturn, could we do as well?
-            if (ll == lr) {
-                lt = "->";
+            if (lhs == rhs) {
+                linkType = "->";
                 rightName = "*";
             } else {
-                lt = "<=>";
+                linkType = "<=>";
                 swap = true;
             }
-        } else if (l.linkType.indexOf("<") !== -1) {
-            var tmpl = ll;
-            ll = lr;
-            lr = tmpl;
+        } else if (link.linkType.indexOf("<") !== -1) {
+            var tmpl = lhs;
+            lhs = rhs;
+            rhs = tmpl;
             if (dot)
-                lt = ">>";
+                linkType = ">>";
             else if (dash)
-                lt = "->";
+                linkType = "->";
             else if (broken)
-                lt = "-x";
+                linkType = "-x";
             else
-                lt = "=>";
-            rightName = lr.getName();
-        } else if (l.linkType.indexOf(">") !== -1) {
+                linkType = "=>";
+            rightName = rhs.getName();
+        } else if (link.linkType.indexOf(">") !== -1) {
             if (dot)
-                lt = ">>";
+                linkType = ">>";
             else if (dash)
-                lt = "->";
+                linkType = "->";
             else if (broken)
-                lt = "-x";
+                linkType = "-x";
             else
-                lt = "=>";
+                linkType = "=>";
         } else if (dot) {
             // dotted
             if (color) {
@@ -149,11 +149,11 @@ function mscgen(yy) {
             output(yy, "ERROR: SHOULD NOT HAPPEN");
         }
 
-        output(yy, ll.getName() + lt + rightName + "[" + attrs.join(",") + "];");
+        output(yy, lhs.getName() + linkType + rightName + "[" + attrs.join(",") + "];");
         if (note != "")
             // output(yy,ll.getName() +' abox '
             // +lr.getName()+'[label="'+note+'"];');
-            output(yy, lr.getName() + ' abox ' + lr.getName() + '[label="' + note + '"];');
+            output(yy, rhs.getName() + ' abox ' + rhs.getName() + '[label="' + note + '"];');
         // if (swap)
         // output(yy,lr.getName() + lt + ll.getName() + t + ";");
     });

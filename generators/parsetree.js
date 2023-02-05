@@ -49,7 +49,7 @@ function parsetree(yy) {
 		if (!(right instanceof Node)) return;
 		const key=right.id;
 		const parent=left.id;
-		const text=(right.label == undefined) ? right.name : right.label;
+		const text=(!right.label) ? right.name : right.label;
 		nodeList.push({key: key, text: text, fill: "#f8f8f8", stroke: "#4d90fe", parent: parent});
 	}
 
@@ -62,11 +62,11 @@ function parsetree(yy) {
 
 	(() => {
 		root[0].id = 1;
-		const text=(root[0].label == undefined) ? root[0].name : root[0].label;
+		const text=(!root[0].label) ? root[0].name : root[0].label;
 		nodeList.push({key: root[0].id, text: text, fill: "#f8f8f8", stroke: "#4d90fe"});
 		var keyId = 2;
 		getGraphRoot(yy).OBJECTS.forEach((node) => {
-			if (!getAttr(node, 'id')) {
+			if (!node.id) {
 				node.id = keyId++;
 			}
 		});
@@ -74,9 +74,9 @@ function parsetree(yy) {
 
 	//console.log(JSON.stringify(getGraphRoot(yy).OBJECTS));
 
-	traverseLinks(yy, l => {
-		debug('link node '+l.left.name+' to '+l.right.name);
-		addLinkedNode(l.left, l.right);
+	traverseLinks(yy, link => {
+		debug('link node '+link.left.name+' to '+link.right.name);
+		addLinkedNode(link.left, link.right);
 	});
 	//console.log(JSON.stringify(nodeList));
 	output(yy, JSON.stringify(nodeList));

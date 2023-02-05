@@ -30,23 +30,23 @@ node js/parse.js verbose blockdiag.test blockdiag
 */
 function blockdiag(yy) {
     output(yy, "blockdiag{\n default_fontsize = 14");
-    var r = getGraphRoot(yy);
-    if (r.getDirection() === "portrait") {
+    var root = getGraphRoot(yy);
+    if (root.getDirection() === "portrait") {
         output(yy, "  orientation=portrait");
     } else {
         // DEFAULT
         output(yy, "  orientation=landscape");
     }
-    var tmp = r.getStart();
-    var parseObjects = function (o) {
+    var tmp = root.getStart();
+    var parseObjects = function (obj) {
         output(true);
-        if (o instanceof Group) {
-            output(yy, ' group "' + o.getLabel() + '"{', true);
-            output(yy, getAttrFmt(o, 'color', '   color="{0}"'));
-            output(yy, getAttrFmt(o, 'label', '   label="{0}"'));
-            if (tmp !== undefined && tmp.trim() != "")
+        if (obj instanceof Group) {
+            output(yy, ' group "' + obj.getLabel() + '"{', true);
+            output(yy, getAttrFmt(obj, 'color', '   color="{0}"'));
+            output(yy, getAttrFmt(obj, 'label', '   label="{0}"'));
+            if (tmp && tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
-            traverseObjects(o, function (z) {
+            traverseObjects(obj, function (z) {
                 tmp = getAttrFmt(z, 'color', ',color="{0}"') +
                     getShape(shapes.blockdiag, z.shape, ',shape={0}') +
                     getAttrFmt(z, 'label', ',label="{0}"');
@@ -60,24 +60,24 @@ function blockdiag(yy) {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
             // ICON does not work, using background
-            var style = getAttrFmt(o, 'style', ',style="{0}"');
+            var style = getAttrFmt(obj, 'style', ',style="{0}"');
             if (style != "" && style.match(/(dotted|dashed|solid)/) == null) {
                 style = "";
             }
 
-            var s = getAttrFmt(o, 'color', ',color="{0}"') +
-                getAttrFmt(o, 'image', ',background="icons{0}"') +
+            var colorIconShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
+                getAttrFmt(obj, 'image', ',background="icons{0}"') +
                 style +
-                getShape(shapes.blockdiag, o.shape, ',shape="{0}"') +
-                getAttrFmt(o, 'label', ',label="{0}"');
-            if (s.trim() != "")
-                s = "[" + s.trim().substring(1) + "]";
-            output(yy, o.getName() + s + ';');
+                getShape(shapes.blockdiag, obj.shape, ',shape="{0}"') +
+                getAttrFmt(obj, 'label', ',label="{0}"');
+            if (colorIconShapeLabel.trim() != "")
+                colorIconShapeLabel = "[" + colorIconShapeLabel.trim().substring(1) + "]";
+            output(yy, obj.getName() + colorIconShapeLabel + ';');
         }
         output(false);
     };
 
-    traverseObjects(r, parseObjects);
+    traverseObjects(root, parseObjects);
 
     traverseLinks(yy, function (l) {
         var t = "";
@@ -86,9 +86,9 @@ function blockdiag(yy) {
         } else if (l.linkType.indexOf("-") !== -1) {
             t += ',style="dashed" ';
         }
-        var lbl = getAttrFmt(l, 'label', ',label = "{0}"' + getAttrFmt(l, ['color', 'textcolor'], 'textcolor="{0}"'));
+        var labelAndItsColor = getAttrFmt(l, 'label', ',label = "{0}"' + getAttrFmt(l, ['color', 'textcolor'], 'textcolor="{0}"'));
         var color = getAttrFmt(l, 'color', ',color="{0}"');
-        t += lbl + color;
+        t += labelAndItsColor + color;
         t = t.trim();
         if (t.substring(0, 1) == ",")
             t = t.substring(1).trim();

@@ -28,18 +28,18 @@ function actdiag(yy) {
      */
     //var s = r.getStart();
     var i;
-    var parseObjects = function (o) {
+    var parseObjects = function (obj) {
         output(true);
-        if (o instanceof Group) {
-            output(yy, 'lane "' + o.getName() + '"{', true);
-            traverseObjects(o, function (z) {
-                var s1 = getAttrFmt(z, 'color', ',color="{0}"') +
+        if (obj instanceof Group) {
+            output(yy, 'lane "' + obj.getName() + '"{', true);
+            traverseObjects(obj, function (z) {
+                var colorShapeLabel = getAttrFmt(z, 'color', ',color="{0}"') +
                     getShape(shapes.actdiag, z.shape, ',shape={0}') +
                     getAttrFmt(z, 'label', ',label="{0}"');
-                if (s1.trim() != "") {
-                    s1 = "[" + s1.trim().substring(1) + "]";
+                if (colorShapeLabel.trim() != "") {
+                    colorShapeLabel = "[" + colorShapeLabel.trim().substring(1) + "]";
                 }
-                output(yy, z.getName() + s1 + ';');
+                output(yy, z.getName() + colorShapeLabel + ';');
             });
             output(false);
             output(yy, "}");
@@ -47,20 +47,20 @@ function actdiag(yy) {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
             // ICON does not work, using background
-            var style = getAttrFmt(o, 'style', ',style="{0}"');
+            var style = getAttrFmt(obj, 'style', ',style="{0}"');
             if (style != "" && style.match(/(dotted|dashed|solid)/) == null) {
                 style = "";
             }
 
             // ICON does not work, using background
-            var s2 = getAttrFmt(o, 'color', ',color="{0}"') +
-                getAttrFmt(o, 'image', ',background="icons{0}"') +
+            var colorIconShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
+                getAttrFmt(obj, 'image', ',background="icons{0}"') +
                 style +
-                getShape(shapes.actdiag, o.shape, ',shape={0}') +
-                getAttrFmt(o, 'label', ',label="{0}"');
-            if (s2.trim() != "")
-                s2 = "[" + s2.trim().substring(1) + "]";
-            output(yy, o.getName() + s2 + ';');
+                getShape(shapes.actdiag, obj.shape, ',shape={0}') +
+                getAttrFmt(obj, 'label', ',label="{0}"');
+            if (colorIconShapeLabel.trim() != "")
+                colorIconShapeLabel = "[" + colorIconShapeLabel.trim().substring(1) + "]";
+            output(yy, obj.getName() + colorIconShapeLabel + ';');
         }
         output(false);
     };
@@ -73,9 +73,9 @@ function actdiag(yy) {
         } else if (l.linkType.indexOf("-") !== -1) {
             t += ',style="dashed" ';
         }
-        var lbl = getAttrFmt(l, 'label', ',label = "{0}"' + getAttrFmt(l, ['color', 'textcolor'], 'textcolor="{0}"'));
+        var labelAndItsColor = getAttrFmt(l, 'label', ',label = "{0}"' + getAttrFmt(l, ['color', 'textcolor'], 'textcolor="{0}"'));
         var color = getAttrFmt(l, 'color', ',color="{0}"');
-        t += lbl + color;
+        t += labelAndItsColor + color;
         t = t.trim();
         if (t.substring(0, 1) == ",")
             t = t.substring(1).trim();

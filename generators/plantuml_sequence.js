@@ -54,9 +54,9 @@ function plantuml_sequence(yy) {
             t));
     };
 
-    var r = getGraphRoot(yy);
-    if (r.getVisualizer()) {
-        outputFmt(yy, "/* render: {0} */", [r.getVisualizer()])
+    var root = getGraphRoot(yy);
+    if (root.getVisualizer()) {
+        outputFmt(yy, "/* render: {0} */", [root.getVisualizer()])
     }
     output(yy, "@startuml");
     output(yy, "autonumber", true);
@@ -65,8 +65,8 @@ function plantuml_sequence(yy) {
      * else { output(yy, indent("rankdir=TD;")); }
      */
     // This may FORWARD DECLARE a node...which creates problems with coloring
-    var s = r.getStart();
-    if (s != undefined && s != "") {
+    var s = root.getStart();
+    if (s) {
         var fwd = getNode(yy, s);
         processANode(fwd, false);
     }
@@ -109,7 +109,7 @@ function plantuml_sequence(yy) {
                 // attrs.push(" lhead=cluster_" + lr.getName());
                 // TODO:
                 lr = lr.OBJECTS[0];
-                if (lr == undefined) {
+                if (!lr) {
                     // TODO:Bad thing, EMPTY group..add one invisible node
                     // there...
                     // But should add already at TOP
@@ -119,7 +119,7 @@ function plantuml_sequence(yy) {
                 // attrs.push(" ltail=cluster_" + ll.getName());
                 // TODO:
                 ll = ll.OBJECTS[0];
-                if (ll == undefined) {
+                if (!ll ) {
                     // Same as above
                 }
             }
@@ -201,27 +201,26 @@ function plantuml_sequence(yy) {
         }
     };
 
-    var traverseObjects = function traverseObjects(r, isSubGraph) {
+    var traverseObjects = function traverseObjects(root, isSubGraph) {
         // Dump this groups participants first...
         var i;
-        var o;
-        for (i in r.OBJECTS) {
-            if (!r.OBJECTS.hasOwnProperty(i)) continue;
-            o = r.OBJECTS[i];
-            if (o instanceof Node)
-                processANode(o, isSubGraph);
+        for (i in root.OBJECTS) {
+            if (!root.OBJECTS.hasOwnProperty(i)) continue;
+            var obj = root.OBJECTS[i];
+            if (obj instanceof Node)
+                processANode(obj, isSubGraph);
         }
-        printLinks(r, isSubGraph);
-        for (i in r.OBJECTS) {
-            if (!r.OBJECTS.hasOwnProperty(i)) continue;
-            o = r.OBJECTS[i];
-            if (o instanceof Group) {
+        printLinks(root, isSubGraph);
+        for (i in root.OBJECTS) {
+            if (!root.OBJECTS.hasOwnProperty(i)) continue;
+            var obj = root.OBJECTS[i];
+            if (obj instanceof Group) {
                 // TODO:
                 // Group name,OBJECTS,get/setEqual,toString
                 var processAGroup = function (o) {
                     debug('processAGroup:' + JSON.stringify(o));
-                    var cond = getAttr(o, 'conditional');
-                    var nodeIsSubGraph = getAttr(o, 'isSubGraph');
+                    var cond = o.conditional;
+                    var nodeIsSubGraph = o.isSubGraph;
                     if (cond) {
                         if (cond == "if")
                             cond = "alt";
@@ -235,7 +234,7 @@ function plantuml_sequence(yy) {
                     } else {
                         cond = "";//cond = "ref";
                     }
-                    if (o.getColor() !== undefined) {
+                    if (o.getColor()) {
                         output(yy, "style=filled;");
                         output(yy, getAttrFmt(o, 'color',
                             '   color="{0}";\n'));
@@ -243,13 +242,13 @@ function plantuml_sequence(yy) {
                     traverseObjects(o, nodeIsSubGraph);
                     printLinks(o);
                     // output(yy, indent("}//end of " + o.getName()));
-                }(o);
-            } else if (!o instanceof Node) {
+                }(obj);
+            } else if (!obj instanceof Node) {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
         }
-    }(r, false);
-    printLinks(r);
+    }(root, false);
+    printLinks(root);
     output(false);
     output(yy, "@enduml");
 }

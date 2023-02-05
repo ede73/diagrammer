@@ -11,6 +11,8 @@ class Group extends GraphObject {
         this.ROOTNODES = [];
         this.equal = undefined;
         this.linklabel = undefined;
+        this.exitnode = undefined;
+        this.entrylink = undefined;
     }
     // Save EQUAL node ranking
     setEqual(value) {

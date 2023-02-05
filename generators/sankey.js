@@ -22,18 +22,18 @@ node js/parse.js verbose sankey.test sankey
 */
 function sankey(yy) {
 	var tree;
-	function addNode(l, r) {
-		if (tree === undefined) {
-			tree = new TreeNode(l);
+	function addNode(left, right) {
+		if (!tree) {
+			tree = new TreeNode(left);
 		}
-		if (!(l instanceof Node)) return;
-		var cl = findNode(tree, l);
-		if (cl === undefined) {
-			throw new Error('Left node (' + l.name + ') not found from tree');
+		if (!(left instanceof Node)) return;
+		var cl = findNode(tree, left);
+		if (!cl) {
+			throw new Error('Left node (' + left.name + ') not found from tree');
 		}
-		if (undefined === findNode(tree, r) && (r instanceof Node)) {
-			debug('Add ' + r.name + ' as child of ' + cl.data.name + " co " + r.container);
-			cl.CHILDREN.push(new TreeNode(r));
+		if (!findNode(tree, right) && (right instanceof Node)) {
+			debug('Add ' + right.name + ' as child of ' + cl.data.name + " co " + right.container);
+			cl.CHILDREN.push(new TreeNode(right));
 		}
 	}
 

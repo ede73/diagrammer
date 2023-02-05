@@ -1,5 +1,5 @@
 console.log("Reset generator and visualizer");
-VERBOSE = false;
+VERBOSE = true;
 
 parser.yy.parseError = function (str, hash) {
     var pe = "Parsing error:\n" + str + "\n" + hash;
@@ -168,7 +168,7 @@ function visualize(visualizer) {
     } else if (visualizer == "umlclass") {
         visualizeUmlClass(JSON.parse(result.value));
     } else {
-        console.log("UNKNOWN vISUALIZER " + visualizer);
+        console.log("Unkknown WEB UI visualizer " + visualizer);
         document.getElementById('svg').innerHTML = "only for dotty";
     }
 }

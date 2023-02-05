@@ -44,34 +44,34 @@ function processVariable(yy, variable) {
  * Usage: grammar/state.grammar
  *
  * @param yy Lexer yy
- * @param LHS left hand side of the list
- * @param RHS right hand side of the list
+ * @param lhs left hand side of the list
+ * @param rhs right hand side of the list
  * @param rhsLinkLabel optional RHS label
  */
-function getList(yy, LHS, RHS, rhsLinkLabel) {
-    if (LHS instanceof Node) {
-        debug("getList(node:" + LHS + ",rhs:[" + RHS + "])", true);
-        var x = [];
-        x.push(LHS);
+function getList(yy, lhs, rhs, rhsLinkLabel) {
+    if (lhs instanceof Node) {
+        debug("getList(node:" + lhs + ",rhs:[" + rhs + "])", true);
+        var lst = [];
+        lst.push(lhs);
         //TODO assuming RHS is Node
-        x.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
-        debug("return node:" + x, false);
-        return x;
+        lst.push(getNode(yy, rhs).setLinkLabel(rhsLinkLabel));
+        debug("return node:" + lst, false);
+        return lst;
     }
-    if (LHS instanceof Group) {
-        debug("getList(group:[" + LHS + "],rhs:" + RHS + ")", true);
-        var x = [];
-        x.push(LHS);
+    if (lhs instanceof Group) {
+        debug("getList(group:[" + lhs + "],rhs:" + rhs + ")", true);
+        var lst = [];
+        lst.push(lhs);
         //TODO assuming RHS is Group
-        x.push(getGroup(yy, RHS).setLinkLabel(rhsLinkLabel));
-        debug("return group:" + x, false);
-        return x;
+        lst.push(getGroup(yy, rhs).setLinkLabel(rhsLinkLabel));
+        debug("return group:" + lst, false);
+        return lst;
     }
-    debug("getList(lhs:[" + LHS + "],rhs:" + RHS, true);
+    debug("getList(lhs:[" + lhs + "],rhs:" + rhs, true);
     // LHS not a node..
-    LHS.push(getNode(yy, RHS).setLinkLabel(rhsLinkLabel));
-    debug("return [" + LHS + "]", false);
-    return LHS;
+    lhs.push(getNode(yy, rhs).setLinkLabel(rhsLinkLabel));
+    debug("return [" + lhs + "]", false);
+    return lhs;
 }
 
 /**
@@ -94,7 +94,7 @@ function getList(yy, LHS, RHS, rhsLinkLabel) {
  */
 function getNode(yy, name, style) {
     debug("getNode (name:" + name + ",style:" + style + ")", true);
-    function cc(yy, name, style) {
+    function findNode(yy, name, style) {
         if (name instanceof Node) {
             if (style) name.setStyle(style);
             return name;
@@ -123,21 +123,21 @@ function getNode(yy, name, style) {
             return search;
         }
         debug("Create new node name=" + name, true);
-        var n = new Node(name, getGraphRoot(yy).getCurrentShape());
-        if (style) n.setStyle(style);
-        n.nolinks = true;
+        var node = new Node(name, getGraphRoot(yy).getCurrentShape());
+        if (style) node.setStyle(style);
+        node.nolinks = true;
 
         _getDefaultAttribute(yy, 'nodecolor', function (color) {
-            n.setColor(color);
+            node.setColor(color);
         });
         _getDefaultAttribute(yy, 'nodetextcolor', function (color) {
-            n.setTextColor(color);
+            node.setTextColor(color);
         });
         debug(false);
-        return _pushObject(yy, n);
+        return _pushObject(yy, node);
     }
 
-    var node = cc(yy, name, style);
+    var node = findNode(yy, name, style);
     debug("  in getNode gotNode " + node);
     yy.lastSeenNode = node;
     if (yy.collectNextNode) {
@@ -215,31 +215,30 @@ function exitSubGraph(yy) {
     //Now should edit the ENTRANCE LINK to point to a>b, a>d, a>e
     var currentSubGraph = getCurrentContainer(yy);
     debug('Exit subgraph ' + currentSubGraph);
-    var l = null;
-    var i = 0;
+    var link = null;
 
     //fix entrance
-    for (i in yy.LINKS) {
+    for (var i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
-        l = yy.LINKS[i];
-        if (l.right.name == currentSubGraph.name && l.left.name == currentSubGraph.entrance.name) {
+        link = yy.LINKS[i];
+        if (link.right.name == currentSubGraph.name && link.left.name == currentSubGraph.entrance.name) {
             //remove this link!
             yy.LINKS.splice(i, 1);
             //and then relink it to containers nodes that have no LEFT links
             break;
         }
-        l = null;
+        link = null;
     }
 
-    if (l !== null) {
+    if (link !== null) {
         //and then relink it to containers nodes that have no LEFT links
         //traverse
-        for (var o in currentSubGraph.ROOTNODES) {
-            if (!currentSubGraph.ROOTNODES.hasOwnProperty(o)) continue;
-            var g = currentSubGraph.ROOTNODES[o];
+        for (var node in currentSubGraph.ROOTNODES) {
+            if (!currentSubGraph.ROOTNODES.hasOwnProperty(node)) continue;
+            var node = currentSubGraph.ROOTNODES[node];
             currentSubGraph.entrance.nolinks = undefined;
-            g.nolinks = undefined;
-            var newLink = getLink(yy, l.linkType, currentSubGraph.entrance, g, l.label,
+            node.nolinks = undefined;
+            var newLink = getLink(yy, link.linkType, currentSubGraph.entrance, node, link.label,
                 undefined, undefined, undefined, undefined, true);
             newLink.container = currentSubGraph;
             yy.LINKS.splice(i++, 0, newLink);
@@ -249,16 +248,16 @@ function exitSubGraph(yy) {
     //fix exits
     //{"link":{"linkType":">","left":1,"right":"z","label":"from e and h"}}
     var exits = [];
-    for (var o in currentSubGraph.OBJECTS) {
-        if (!currentSubGraph.OBJECTS.hasOwnProperty(o)) continue;
-        var g = currentSubGraph.OBJECTS[o];
-        if (!hasOutwardLink(yy, g)) {
-            exits.push(g);
+    for (var node in currentSubGraph.OBJECTS) {
+        if (!currentSubGraph.OBJECTS.hasOwnProperty(node)) continue;
+        var node = currentSubGraph.OBJECTS[node];
+        if (!hasOutwardLink(yy, node)) {
+            exits.push(node);
         }
     }
 
     debug('exits ' + exits);
-    currentSubGraph.setExit(g);
+    currentSubGraph.setExit(node);
     return exitContainer(yy);
 }
 

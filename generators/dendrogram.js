@@ -22,18 +22,18 @@ node js/parse.js verbose dendrogram.test dendrogram
 */
 function dendrogram(yy) {
 	var tree;
-	function addNode(l, r) {
-		if (tree === undefined) {
-			tree = new TreeNode(l);
+	function addNode(lhs, rhs) {
+		if (!tree) {
+			tree = new TreeNode(lhs);
 		}
-		if (!(l instanceof Node)) return;
-		var cl = findNode(tree, l);
-		if (cl === undefined) {
-			throw new Error('Left node (' + l.name + ') not found from tree');
+		if (!(lhs instanceof Node)) return;
+		var cl = findNode(tree, lhs);
+		if (!cl) {
+			throw new Error('Left node (' + lhs.name + ') not found from tree');
 		}
-		if (undefined === findNode(tree, r) && (r instanceof Node)) {
-			debug('Add ' + r.name + ' as child of ' + cl.data.name + " co " + r.container);
-			cl.CHILDREN.push(new TreeNode(r));
+		if (!findNode(tree, rhs) && (rhs instanceof Node)) {
+			debug('Add ' + rhs.name + ' as child of ' + cl.data.name + " co " + rhs.container);
+			cl.CHILDREN.push(new TreeNode(rhs));
 		}
 	}
 
@@ -42,13 +42,13 @@ function dendrogram(yy) {
 	 * For a dendrogram we're not interested in nodes
 	 * just edges(for now!)
 	 */
-	traverseLinks(yy, function (l) {
+	traverseLinks(yy, link => {
 		//debug('link node '+l.left.name+' to '+l.right.name);
-		addNode(l.left, l.right);
+		addNode(link.left, link.right);
 	});
 
 	//output(yy,'{',true);
-	traverseTree(tree, function (t, isLeaf, hasSibling) {
+	traverseTree(tree, (t, isLeaf, hasSibling) => {
 		if (isLeaf) {
 			comma = '';
 			if (hasSibling)

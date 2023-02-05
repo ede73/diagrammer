@@ -35,7 +35,7 @@ function generateUmlClass(yy) {
 	const nameAndLabel = ln => {
 		// name;name():?? -> name():??
 		// name;:?? -> name():??
-		const label = (ln.label == undefined) ? "" : ln.label;
+		const label = (!ln.label) ? "" : ln.label;
 		if (label.startsWith(ln.name)) {
 			return label;
 		}

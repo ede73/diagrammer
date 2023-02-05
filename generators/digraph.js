@@ -33,16 +33,16 @@ function digraph(yy) {
         return value;
     };
 
-    const processANode = o => {
+    const processANode = obj => {
         const nattrs = [];
         const styles = [];
-        getAttrFmt(o, 'color', 'fillcolor="{0}"', nattrs);
-        getAttrFmt(o, 'color', 'filled', styles);
-        getAttrFmt(o, 'style', '{0}', styles);
+        getAttrFmt(obj, 'color', 'fillcolor="{0}"', nattrs);
+        getAttrFmt(obj, 'color', 'filled', styles);
+        getAttrFmt(obj, 'style', '{0}', styles);
         // if (getAttr(o,'free')===true){
         // nattrs.push("constraint=false");
         // }
-        const url = getAttr(o, 'url');
+        const url = obj.url;
         if (url) {
             nattrs.push('URL="' + url.trim() + '"');
         }
@@ -58,17 +58,17 @@ function digraph(yy) {
                 nattrs.push('style="' + styles.join(",") + '"');
             }
         }
-        getAttrFmt(o, 'image', 'image="icons{0}"', nattrs);
-        getAttrFmt(o, 'textcolor', 'fontcolor="{0}"', nattrs);
-        const r = getShape(shapes.digraph, o.shape, 'shape="{0}"');
+        getAttrFmt(obj, 'image', 'image="icons{0}"', nattrs);
+        getAttrFmt(obj, 'textcolor', 'fontcolor="{0}"', nattrs);
+        const r = getShape(shapes.digraph, obj.shape, 'shape="{0}"');
         if (r) {
             nattrs.push(r);
         }
-        getAttrFmt(o, 'label', 'label="{0}"', nattrs);
+        getAttrFmt(obj, 'label', 'label="{0}"', nattrs);
         var t = "";
         if (nattrs.length > 0)
             t = "[" + nattrs.join(",") + "]";
-        output(yy, o.getName() + t + ';');
+        output(yy, obj.getName() + t + ';');
     };
 
     const r = getGraphRoot(yy);
@@ -88,7 +88,7 @@ function digraph(yy) {
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
     const s = r.getStart();
-    if (s != undefined && s != "") {
+    if (s) {
         const fwd = getNode(yy, s);
         processANode(fwd);
         // {$$=" {rank = same;null}\n {rank = same; "+$2+"}\n null
@@ -97,7 +97,7 @@ function digraph(yy) {
         output(yy, "//startnode setup\n  {rank = same;null} {rank = same; " + s + "}\n  null [shape=plaintext, label=\"\"];\n  " + s + "[shape=doublecircle];\n  null->" + s + ";\n");
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
-    if (r.getEqual() != undefined && r.getEqual().length > 0) {
+    if (r.getEqual() && r.getEqual().length > 0) {
         output(yy, "{rank=same;", true);
         for (var x = 0; x < r.getEqual().length; x++) {
             output(yy, r.getEqual()[x].getName() + ";");
@@ -158,55 +158,55 @@ function digraph(yy) {
 
     var lastexit = undefined;
     var lastendif = undefined;
-    const traverseObjects = function traverseObjects(r) {
-        for (var i in r.OBJECTS) {
-            if (!r.OBJECTS.hasOwnProperty(i)) continue;
-            const o = r.OBJECTS[i];
-            if (o instanceof Group) {
-                const cond = getAttr(o, 'conditional');
+    const traverseObjects = function traverseObjects(root) {
+        for (var i in root.OBJECTS) {
+            if (!root.OBJECTS.hasOwnProperty(i)) continue;
+            const obj = root.OBJECTS[i];
+            if (obj instanceof Group) {
+                const cond = obj.conditional;
                 //	if (cond=="endif")continue;
                 // Group name,OBJECTS,get/setEqual,toString
-                const processAGroup = (o => {
-                    debug(JSON.stringify(o, skipEntrances));
-                    output(yy, 'subgraph cluster_' + o.getName() + ' {', true);
-                    if (o.isSubGraph) {
+                const processAGroup = (grp => {
+                    debug(JSON.stringify(grp, skipEntrances));
+                    output(yy, 'subgraph cluster_' + grp.getName() + ' {', true);
+                    if (grp.isSubGraph) {
                         output(yy, 'graph[style=invis];');
                     }
-                    if (o.getLabel())
-                        output(yy, getAttrFmt(o, 'label',
+                    if (grp.getLabel())
+                        output(yy, getAttrFmt(grp, 'label',
                             '   label="{0}";'));
-                    if (o.getColor() !== undefined) {
+                    if (grp.getColor()) {
                         output(yy, "style=filled;");
-                        output(yy, getAttrFmt(o, 'color',
+                        output(yy, getAttrFmt(grp, 'color',
                             '   color="{0}";\n'));
                     }
-                    traverseObjects(o);
+                    traverseObjects(grp);
                     output(false);
-                    output(yy, "}//end of " + o.getName() + " " + cond);
+                    output(yy, "}//end of " + grp.getName() + " " + cond);
                     if (cond) {
-                        output(yy, "//COND " + o.getName() + " " + cond);
+                        output(yy, "//COND " + grp.getName() + " " + cond);
                         if (cond == "endif") {
                             //never reached
-                            const exitlink = getAttr(o, 'exitlink');
+                            const exitlink = grp.exitlink;
                             if (exitlink) {
                                 output(yy, lastexit + "->" + exitlink + "[color=red];");
                                 output(yy, lastendif + "->" + exitlink + ";");
                             }
                         } else {
-                            const sn = "entry" + getAttr(o, 'exitnode');
+                            const sn = "entry" + grp.exitnode;
                             if (!lastendif) {
-                                lastendif = "endif" + getAttr(o, 'exitnode');
+                                lastendif = "endif" + grp.exitnode;
                                 output(yy, lastendif + "[shape=circle,label=\"\",width=0.01,height=0.01];");
                             }
                             //TODO:else does not need diamond
-                            output(yy, sn + "[shape=diamond,fixedsize=true,width=1,height=1,label=\"" + o.getLabel() + "\"];");
+                            output(yy, sn + "[shape=diamond,fixedsize=true,width=1,height=1,label=\"" + grp.getLabel() + "\"];");
                             if (cond == "if") {
                                 //entrylink!
-                                output(yy, getAttr(o, 'entrylink').getName() + "->" + sn + ";");
+                                output(yy, grp.entrylink.getName() + "->" + sn + ";");
                             }
                             // FIRST node of group and LAST node in group..
-                            const fn = getFirstLinkOfTheGroup(o);
-                            const ln = getLastLinkInGroup(o);
+                            const lastLink = getFirstLinkOfTheGroup(grp);
+                            const ln = getLastLinkInGroup(grp);
                             // decision node
                             //var en = "exit" + getAttr(o, 'exitnode');
 
@@ -215,14 +215,14 @@ function digraph(yy) {
                                 //lastexit = undefined;
                             }
                             // YES LINK to first node of the group
-                            output(yy, sn + "->" + fn.getName() + "[label=\"YES\",color=green,lhead=cluster_" + o.getName() + "];");
+                            output(yy, sn + "->" + lastLink.getName() + "[label=\"YES\",color=green,lhead=cluster_" + grp.getName() + "];");
                             output(yy, ln.getName() + "->" + lastendif + "[label=\"\"];");
                             lastexit = sn;
                         }
                     }
-                })(o);
-            } else if (o instanceof Node) {
-                processANode(o);
+                })(obj);
+            } else if (obj instanceof Node) {
+                processANode(obj);
             } else {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
@@ -232,9 +232,9 @@ function digraph(yy) {
     output(yy, "//links start");
     for (var i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
-        const l = yy.LINKS[i];
+        const link = yy.LINKS[i];
         const attrs = [];
-        var label = getAttr(l, 'label');
+        var label = link.label;
         if (label) {
             if (label.indexOf("::") !== -1) {
                 label = label.split("::");
@@ -244,96 +244,94 @@ function digraph(yy) {
                 attrs.push('label="' + label.trim() + '"');
             }
         }
-        const url = getAttr(l, 'url');
+        const url = link.url;
         if (url) {
             attrs.push('URL="' + url.trim() + '"');
         }
-        getAttrFmt(l, 'color', 'color="{0}"', attrs);
-        getAttrFmt(l, ['textcolor', 'color'], 'fontcolor="{0}"', attrs);
-        var lt;
-        var lr = l.right;
-        var ll = l.left;
+        getAttrFmt(link, 'color', 'color="{0}"', attrs);
+        getAttrFmt(link, ['textcolor', 'color'], 'fontcolor="{0}"', attrs);
+        var linkType;
+        var rhs = link.right;
+        var lhs = link.left;
 
-        //output(yy,"// link from "+ll+" to "+lr);
-        if (lr instanceof Group) {
+        debug("// link from "+lhs+" to "+rhs);
+        if (rhs instanceof Group) {
             //debug('huuhuu');
             // just pick ONE Node from group and use lhead
             // TODO: Assuming it is Node (if Recursive groups implemented, it
             // could be smthg else)
-            if (!lr.isSubGraph)
-                attrs.push(" lhead=cluster_" + lr.getName());
-            lr = lr.OBJECTS[0];
-            //debug('lr is '+lr);
-            if (lr == undefined) {
-                // TODO:Bad thing, EMPTY group..add one invisible node there...
-                // But should add already at TOP
+            if (!rhs.isSubGraph) {
+                attrs.push(" lhead=cluster_" + rhs.getName());
+            }
+            if (rhs.OBJECTS[0]) {
+                rhs = rhs.OBJECTS[0];
             }
         }
-        if (ll instanceof Group) {
-            if (!ll.isSubGraph)
-                attrs.push(" ltail=cluster_" + ll.getName());
-            if (ll instanceof SubGraph && ll.getExit() !== undefined) {
+        if (lhs instanceof Group) {
+            if (!lhs.isSubGraph)
+                attrs.push(" ltail=cluster_" + lhs.getName());
+            if (lhs instanceof SubGraph && lhs.getExit()) {
                 //get containers all nodes that have no outward links...(TODO:should be in model actually!)
                 //perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
                 const exits = [];
-                for (var i in ll.OBJECTS) {
-                    if (!ll.OBJECTS.hasOwnProperty(i)) continue;
-                    var go = ll.OBJECTS[i];
+                for (var i in lhs.OBJECTS) {
+                    if (!lhs.OBJECTS.hasOwnProperty(i)) continue;
+                    var go = lhs.OBJECTS[i];
                     if (!hasOutwardLink(yy, go)) {
                         //debug('test node '+go);
                         exits.push(go);
                     }
                 }
-                ll = exits;
+                lhs = exits;
                 //debug('got '+exits);
             } else {
-                ll = ll.OBJECTS[0];
+                lhs = lhs.OBJECTS[0];
             }
             //debug('ll is.. '+ll);
             //debug('lr is '+lr);
-            if (ll == undefined) {
+            if (!lhs ) {
                 // Same as above
             }
         }
         // TODO:Assuming producing DIGRAPH
         // For GRAPH all edges are type --
         // but we could SET arrow type if we'd like
-        if (l.linkType.indexOf(".") !== -1) {
+        if (link.linkType.indexOf(".") !== -1) {
             attrs.push('style="dotted"');
-        } else if (l.linkType.indexOf("-") !== -1) {
+        } else if (link.linkType.indexOf("-") !== -1) {
             attrs.push('style="dashed"');
         }
-        if (l.linkType.indexOf("/") !== -1) {
+        if (link.linkType.indexOf("/") !== -1) {
             // TODO: Somehow denote better this "quite does not reach"
             // even though such an edge type MAKES NO SENSE in a graph
             attrs.push('arrowhead="tee"');
         }
-        if (l.linkType.indexOf("<") !== -1 && l.linkType.indexOf(">") !== -1) {
-            lt = "->";
+        if (link.linkType.indexOf("<") !== -1 && link.linkType.indexOf(">") !== -1) {
+            linkType = "->";
             attrs.push("dir=both");
-        } else if (l.linkType.indexOf("<") !== -1) {
-            const tmp = ll;
-            ll = lr;
-            lr = tmp;
-            lt = "->";
-        } else if (l.linkType.indexOf(">") !== -1) {
-            lt = "->";
+        } else if (link.linkType.indexOf("<") !== -1) {
+            const tmp = lhs;
+            lhs = rhs;
+            rhs = tmp;
+            linkType = "->";
+        } else if (link.linkType.indexOf(">") !== -1) {
+            linkType = "->";
         } else {
             // is dotted or dashed no direction
-            lt = "->";
+            linkType = "->";
             attrs.push("dir=none");
         }
         var t = "";
         if (attrs.length > 0)
             t = "[" + attrs.join(",") + "]";
-        //debug('print ll '+ll);
-        //debug('print lr '+lr);
-        if (ll instanceof Array) {
-            ll.forEach((element, index, array) => {
-                output(yy, element.getName() + getAttrFmt(l, 'lcompass', '{0}').trim() + lt + lr.getName() + getAttrFmt(l, 'rcompass', '{0}').trim() + t + ";");
+        debug('print lhs '+lhs);
+        debug('print rhs '+rhs);
+        if (lhs instanceof Array) {
+            lhs.forEach((element, index, array) => {
+                output(yy, element.getName() + getAttrFmt(link, 'lcompass', '{0}').trim() + linkType + rhs.getName() + getAttrFmt(link, 'rcompass', '{0}').trim() + t + ";");
             });
         } else {
-            output(yy, ll.getName() + getAttrFmt(l, 'lcompass', '{0}').trim() + lt + lr.getName() + getAttrFmt(l, 'rcompass', '{0}').trim() + t + ";");
+            output(yy, lhs.getName() + getAttrFmt(link, 'lcompass', '{0}').trim() + linkType + rhs.getName() + getAttrFmt(link, 'rcompass', '{0}').trim() + t + ";");
         }
     }
     output(false);

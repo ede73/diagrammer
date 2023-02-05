@@ -1,6 +1,3 @@
-Node.prototype = new GraphObject();
-Node.prototype.constructor = Node;
-
 /**
  * Construct a new node
  *
@@ -8,47 +5,50 @@ Node.prototype.constructor = Node;
  * @param [shape] Optional shape for the node, if not give, will default to what ever default is being used at the moment
  * @constructor
  */
-function Node(name, shape) {
-    this.name = name;
-    this.shape = shape;
-    this.image = undefined;
-    this.style = undefined;
-    this.setShape = function (value) {
+class Node extends GraphObject {
+    constructor(name, shape) {
+        super();
+        this.name = name;
+        this.shape = shape;
+        this.image = undefined;
+        this.style = undefined;
+    }
+    setShape(value) {
         if (value === undefined) return this;
         if (value) value = value.toLowerCase();
         return setAttr(this, 'shape', value);
-    };
+    }
     //noinspection JSUnusedGlobalSymbols
-    this.getShape = function () {
+    getShape() {
         return getAttr(this, 'shape');
-    };
+    }
     // temporary for RHS list array!!
-    this.setLinkLabel = function (value) {
+    setLinkLabel(value) {
         return setAttr(this, 'linklabel', value);
-    };
-    this.getLinkLabel = function () {
-        $tmp = getAttr(this, 'linklabel');
+    }
+    getLinkLabel() {
+        var tmp = getAttr(this, 'linklabel'); //xx
         setAttr(this, 'linklabel', undefined);
-        return $tmp;
-    };
-    this.setStyle = function (value) {
+        return tmp;
+    }
+    setStyle(value) {
         if (value === undefined) return this;
         if (value) value = value.toLowerCase();
         return setAttr(this, 'style', value);
-    };
+    }
     //noinspection JSUnusedGlobalSymbols
-    this.getStyle = function () {
+    getStyle() {
         return getAttr(this, 'style');
-    };
-    this.setImage = function (value) {
+    }
+    setImage(value) {
         if (value === undefined) return this;
         return setAttr(this, 'image', value);
-    };
+    }
     //noinspection JSUnusedGlobalSymbols
-    this.getImage = function () {
+    getImage() {
         return getAttr(this, 'image');
-    };
-    this.toString = function () {
+    }
+    toString() {
         var fmt = "";
         var tmp = getAttrFmt(this, 'color', '');
         if (tmp !== undefined && tmp != '')
@@ -57,5 +57,5 @@ function Node(name, shape) {
         if (tmp !== undefined && tmp != '')
             fmt += ",label: " + tmp;
         return "Node(name:" + this.getName() + fmt + ")";
-    };
-}
+    }
+};

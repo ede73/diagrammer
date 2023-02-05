@@ -1,6 +1,3 @@
-Link.prototype = new GraphObject();
-Link.prototype.constructor = Link;
-
 /**
  * Create a new link between objects (nodes,groups,lists)
  *
@@ -9,11 +6,14 @@ Link.prototype.constructor = Link;
  * @param r Right hand side of the link
  * @constructor
  */
-function Link(linkType, l, r) {
-	this.linkType = linkType.trim();
-	this.left = l;
-	this.right = r;
-	this.toString = function () {
+class Link extends GraphObject {
+	constructor(linkType, l, r) {
+		super();
+		this.linkType = linkType.trim();
+		this.left = l;
+		this.right = r;
+	}
+	toString() {
 		var fmt = "";
 		var tmp = getAttrFmt(this, 'lcompass', '');
 		if (tmp !== undefined && tmp != '')
@@ -31,5 +31,5 @@ function Link(linkType, l, r) {
 			this.left.toString() + ", R:" +
 			this.right.toString() + ",label=" +
 			this.getLabel() + fmt + ")";
-	};
-}
+	}
+};

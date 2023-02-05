@@ -3,40 +3,47 @@
  * @param [label] Optional label
  * @constructor
  */
-function GraphObject(label) {
-    this.setName = function (value) {
-        if (value === undefined) return this;
+class GraphObject {
+    constructor(label) {
+        this.label = label;
+    }
+    setName(value) {
+        if (value === undefined)
+            return this;
         return setAttr(this, 'name', value);
-    };
-    this.getName = function () {
+    }
+    getName() {
         return getAttr(this, 'name');
-    };
-    this.setColor = function (value) {
-        if (value === undefined) return this;
+    }
+    setColor(value) {
+        if (value === undefined)
+            return this;
         return setAttr(this, 'color', value);
-    };
-    this.getColor = function () {
+    }
+    getColor() {
         return getAttr(this, 'color');
-    };
-    this.setTextColor = function (value) {
-        if (value === undefined) return this;
+    }
+    setTextColor(value) {
+        if (value === undefined)
+            return this;
         return setAttr(this, 'textcolor', value);
-    };
+    }
     //noinspection JSUnusedGlobalSymbols
-    this.getTextColor = function () {
+    getTextColor() {
         return getAttr(this, 'textcolor');
-    };
-    this.setUrl = function (value) {
-        if (value === undefined) return this;
+    }
+    setUrl(value) {
+        if (value === undefined)
+            return this;
         return setAttr(this, 'url', value);
-    };
+    }
     //noinspection JSUnusedGlobalSymbols
-    this.getUrl = function () {
+    getUrl() {
         return getAttr(this, 'url');
-    };
-    this.label = label;
-    this.setLabel = function (value) {
-        if (!value) return this;
+    }
+    setLabel(value) {
+        if (!value)
+            return this;
         value = value.trim().replace(/"/gi, "");
         //debug("graphobject:TEST value(" + value + ") for color");
         //Take out COLOR if preset
@@ -52,11 +59,11 @@ function GraphObject(label) {
             value = m[2].trim();
         }
         return setAttr(this, 'label', value);
-    };
-    this.getLabel = function () {
+    }
+    getLabel() {
         return getAttr(this, 'label');
-    };
-    this.toString = function () {
+    }
+    toString() {
         return "GraphObject";
-    };
-}
+    }
+};

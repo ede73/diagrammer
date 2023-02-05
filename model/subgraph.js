@@ -1,57 +1,60 @@
-//SubGraph.prototype = new GraphObject();
-SubGraph.prototype = new Group();
-SubGraph.prototype.constructor = SubGraph;
-
 /**
  * Create a new container SubGraph
  * @param name Name of the container
  * @constructor
  */
-function SubGraph(name) {
-    this.name = name;
-    this.OBJECTS = [];
-    this.ROOTNODES = [];
-    this.isSubGraph = true;
+class SubGraph extends Group{
+    constructor(name) {
+        super();
+        this.name = name;
+        this.OBJECTS = [];
+        this.ROOTNODES = [];
+        this.isSubGraph = true;
+    }
     // temporary for RHS list array!!
-    this.setLinkLabel = function (value) {
+    setLinkLabel(value) {
         return setAttr(this, 'linklabel', value);
-    };
-    this.getLinkLabel = function () {
+    }
+    getLinkLabel() {
         return getAttr(this, 'linklabel');
-    };
+    }
     /**
      * Set default nodecolor, groupcolor, linkcolor Always ask from the
      * currentContainer first
      */
-    this.setDefault = function (key, value) {
+    setDefault(key, value) {
         //debug("Set SubGraph " + key + " to " + value);
         return setAttr(this, key, value);
-    };
-    this.setEntrance = function (entrance) {
+    }
+    setEntrance(entrance) {
         debug("subgraph:Set entrance to " + entrance);
         return setAttr(this, 'entrance', entrance);
-    };
-    this.getEntrance = function () {
+    }
+    getEntrance() {
         return getAttr(this, 'entrance');
-    };
-    this.setExit = function (exit) {
+    }
+    setExit(exit) {
         debug("subgraph:Set exit to " + exit);
         return setAttr(this, 'exit', exit);
-    };
-    this.getExit = function () {
+    }
+    getExit() {
         return getAttr(this, 'exit');
-    };
-    this.getDefault = function (key) {
+    }
+    getDefault(key) {
         //debug("subgrah:Get SubGraph " + key);
         return getAttr(this, key);
-    };
-    this.toString = function () {
+    }
+    toString() {
         var fmt = "";
-        if (this.linklabel !== undefined && this.linklabel != '') fmt += ",linklabel:" + this.linklabel;
-        if (this.entrance !== undefined) fmt += ",entrance:" + this.entrance;
+        if (this.linklabel !== undefined && this.linklabel != '')
+            fmt += ",linklabel:" + this.linklabel;
+        if (this.entrance !== undefined)
+            fmt += ",entrance:" + this.entrance;
 
-        if (this.exit !== undefined) fmt += ",exit:" + this.exit;
-        if (this.ROOTNODES !== undefined) fmt += ",rootnodes:" + this.ROOTNODES;
+        if (this.exit !== undefined)
+            fmt += ",exit:" + this.exit;
+        if (this.ROOTNODES !== undefined)
+            fmt += ",rootnodes:" + this.ROOTNODES;
         return "SubGraph(name:" + this.name + fmt + ")";
     };
-}
+};

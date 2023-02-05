@@ -1,19 +1,20 @@
-TreeNode.prototype.constructor = TreeNode
 /**
  * Create a new tree node with data
  * @constructor
  */
-function TreeNode(data) {
-	this.CHILDREN = [];
-	this.data = data;
-	this.toString = function () {
+class TreeNode {
+	constructor(data) {
+		this.CHILDREN = [];
+		this.data = data;
+	}
+	toString() {
 		return "tree(" +
 			data +
 			",children=[" +
 			JSON.stringify(this.data) +
 			"])";
-	};
-}
+	}
+};
 
 /**
  * Find a tree node from a tree if one exists

@@ -1,70 +1,73 @@
-GraphRoot.prototype = new GraphObject();
-GraphRoot.prototype.constructor = GraphRoot;
-
 /**
  * Create a new graph root
  * @constructor
  */
-function GraphRoot() {
-    this.OBJECTS = [];
-    this.ROOTNODES = [];
-    this.setGenerator = function (value) {
-        if (value) value = value.toLowerCase();
+class GraphRoot extends GraphObject {
+    constructor() {
+        super()
+        this.OBJECTS = [];
+        this.ROOTNODES = [];
+    }
+    setGenerator(value) {
+        if (value)
+            value = value.toLowerCase();
         return setAttr(this, 'generator', value);
-    };
-    this.getGenerator = function () {
+    }
+    getGenerator() {
         return getAttr(this, 'generator');
-    };
-    this.setVisualizer = function (value) {
-        if (value) value = value.toLowerCase();
+    }
+    setVisualizer(value) {
+        if (value)
+            value = value.toLowerCase();
         return setAttr(this, 'visualizer', value);
-    };
+    }
     /* TODO: make meta.getVisualizer() */
-    this.getVisualizer = function () {
+    getVisualizer() {
         return getAttr(this, 'visualizer');
-    };
-    this.setCurrentShape = function (value) {
-        if (value) value = value.toLowerCase();
+    }
+    setCurrentShape(value) {
+        if (value)
+            value = value.toLowerCase();
         return setAttr(this, 'shape', value);
-    };
-    this.getCurrentShape = function () {
+    }
+    getCurrentShape() {
         return getAttr(this, 'shape');
-    };
-    this.setDirection = function (value) {
+    }
+    setDirection(value) {
         return setAttr(this, 'direction', value);
-    };
+    }
     /* TODO: make meta.getDirection() */
-    this.getDirection = function () {
+    getDirection() {
         return getAttr(this, 'direction');
-    };
-    this.setStart = function (value) {
+    }
+    setStart(value) {
         return setAttr(this, 'start', value);
-    };
+    }
     /* TODO: make meta.getStart() */
-    this.getStart = function () {
+    getStart() {
         return getAttr(this, 'start');
-    };
+    }
     // Save EQUAL node ranking
-    this.setEqual = function (value) {
+    setEqual(value) {
         return setAttr(this, 'equal', value);
-    };
+    }
     /* TODO: make meta.getEqual() */
-    this.getEqual = function () {
+    getEqual() {
         return getAttr(this, 'equal');
-    };
+    }
     /**
      * Set default nodecolor, groupcolor, linkcolor Always ask from the
      * currentContainer first
      */
-    this.setDefault = function (key, value) {
+    setDefault(key, value) {
         //debug("graphroot:Set ROOT " + key + " to " + value);
         return setAttr(this, key, value);
-    };
-    this.getDefault = function (key) {
+    }
+    getDefault(key) {
         // debug("graphroot:Get ROOT "+key);
         return getAttr(this, key);
-    };
-    this.toString = function () {
+    }
+    toString() {
         return "GraphRoot";
-    };
-}
+    }
+};

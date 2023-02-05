@@ -1,3 +1,4 @@
+apt-get install make jison graphviz # for debian 
 brew install graphviz --with-pango
 
 http://www.gnu.org/software/make/manual/html_node/Foreach-Function.html#Foreach-Function

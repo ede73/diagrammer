@@ -9,5 +9,5 @@ done
 #  uglifyjs $m -o $OUT/$m
 #done
 
-sed '/EXPORTREMOVE/{n;d;}' t.sh >$OUT/t.sh
+sed '/EXPORTREMOVE/{n;d;}' scripts/t.sh >$OUT/t.sh
 cp COPYRIGHT.txt $OUT

@@ -4,7 +4,7 @@ if ! which node >/dev/null; then
   PATH=$PATH:/usr/local/bin
 fi
 
-. ./display_image.sh
+. ./scripts/display_image.sh
 
 #parallelism for 8 cores
 PARALLEL=${2:-8}
@@ -28,7 +28,7 @@ setError() {
 test() {
   checkError
   [ $verbose -ne 0 ] && echo "    test($*) using $testbin"
-  ./t.sh skipparsermake silent tests "tests/test_inputs/$1" "$testbin" >/dev/null
+  ./scripts/t.sh skipparsermake silent tests "tests/test_inputs/$1" "$testbin" >/dev/null
   rc=$?
   [ $rc -ne 0 ] && setError "$rc" "$1"
   png="${1%.*}_${testbin}.png"

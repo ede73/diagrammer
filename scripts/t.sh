@@ -1,6 +1,6 @@
 #!/bin/sh
 #TODO:ALLOW SVG
-MYPATH=$(dirname "$0")
+MYPATH=$(dirname "$0")/../
 # Will be used in export
 # shellcheck disable=SC2148,SC2034
 EXTPATH=$(pwd)
@@ -111,7 +111,7 @@ rc=$?
 
 echo "Generate sequence $generator"
 
-. ./display_image.sh
+. ./scripts/display_image.sh
 
 nwdiag() {
   nwdiag3 $*

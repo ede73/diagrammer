@@ -1,4 +1,5 @@
 #!/bin/bash
+# USE AT OWN RISK! Haven't run in a while...
 [[ -d web ]] && [[ -d ace ]] && [[ -d css ]] && [[ -d generators ]] && [[ -d model ]] || {
   echo "Run this is diagrammer folder..."
   exit 10

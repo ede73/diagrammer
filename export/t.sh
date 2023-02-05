@@ -1,92 +1,140 @@
-MYPATH=$(dirname $0)
+#!/bin/sh
+#TODO:ALLOW SVG
+MYPATH=$(dirname "$0")/../
+# Will be used in export
+# shellcheck disable=SC2148,SC2034
 EXTPATH=$(pwd)
-if [ $# -eq 0 ];then
+#EXPORTREMOVE
+  #EXPORTREMOVE
+  #EXPORTREMOVE
+  #EXPORTREMOVE
+#EXPORTREMOVE
+
+PLANTUML_JAR=ext/plantuml.jar
+[ -f "$PLANTUML_JAR" ] && {
+  echo "# Warning, you may need ext/plantuml.jar, check ext/README.txt"
+}
+
+[ $# -eq 0 ] && {
   echo "USAGE: [skipparsermake] [silent] [tests] [verbose] [text] [svg] [INPUT] [GENERATOR|dot]"
   exit 0
-fi
+}
+
 silent=0
-if [ "$1" = "silent" ]; then
- shift
- silent=1
-fi
+[ "$1" = "silent" ] && {
+  shift
+  silent=1
+}
+
 tests=0
-if [ "$1" = "tests" ]; then
- shift
- tests=1
-fi
+[ "$1" = "tests" ] && {
+  shift
+  tests=1
+}
+
 verbose=""
-if [ "$1" = "verbose" ]; then
- shift
- verbose=" verbose "
-fi
+[ "$1" = "verbose" ] && {
+  shift
+  verbose=" verbose "
+}
+
 text=0
-if [ "$1" = "text" ]; then
- shift
- text=1
-fi
+[ "$1" = "text" ] && {
+  shift
+  text=1
+}
+
 FORMAT=png
-if [ "$1" == "svg" ]; then
- shift
- FORMAT=svg
-fi
-input=${1:-state2.txt}
+[ "$1" = "svg" ] && {
+  shift
+  FORMAT=svg
+}
+
+input=${1:-tests/test_inputs/state2.txt}
 generator=${2:-dot}
-IMAGEFILE=${input%.*}_${generator}.${FORMAT}
-rm -f $IMAGEFILE
-OUT=${input%.*}_${generator}.out
-rm -f $OUT
-extras=$verbose
+
+#EXPORTREMOVE
+#EXPORTREMOVE
+
+#EXPORTREMOVE
+#EXPORTREMOVE
+INPUT_PATH=${input%.*}
+OUTPUT_PATH=$(echo "$INPUT_PATH" | sed 's/_inputs/_outputs/')
+IMAGEFILE=${OUTPUT_PATH}_${generator}.${FORMAT}
+rm -f "$IMAGEFILE"
+OUT=${OUTPUT_PATH}_${generator}.out
+rm -f "$OUT"
+
+#EXPORTREMOVE
+
 case "$generator" in
-  nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
-    node $MYPATH/js/parse.js $extras "$input" $generator >$OUT
-    [[ $text -ne 0 ]] && cat $OUT
+nwdiag | actdiag | blockdiag | plantuml_sequence | mscgen)
+  node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" "$generator" "$verbose" >"$OUT"
+  [ $text -ne 0 ] && cat "$OUT"
   ;;
-  neato|twopi|circo|fdp|sfdp)
-   node $MYPATH/js/parse.js $extras "$input" digraph >$OUT
-   [[ $text -ne 0 ]] && cat $OUT
+neato | twopi | circo | fdp | sfdp)
+  node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" digraph "$verbose" >"$OUT"
+  [ $text -ne 0 ] && cat "$OUT"
   ;;
-  ast|dendrogram)
-    node $MYPATH/js/parse.js $extras "$input" $generator
-    exit 0
+ast | dendrogram | sankey)
+  node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" "$generator" "$verbose"
+  exit 0
   ;;
-  *)
-    node $MYPATH/js/parse.js $extras "$input" digraph >$OUT
-    [[ $text -ne 0 ]] && cat $OUT
+*)
+  node --max-old-space-size=4096 "$MYPATH/js/parse.js" $verbose "$input" digraph "$verbose" >"$OUT"
+  [ $text -ne 0 ] && cat "$OUT"
   ;;
 esac
+
 rc=$?
-[[ $? -ne 0 ]] && {
-  echo Fatal parsing error $rc
+# shellcheck disable=SC2181
+[ $? -ne 0 ] && {
+  echo "Fatal parsing error $rc"
   exit $rc
 }
-[[ $text -ne 0 ]] && exit 0
+[ $text -ne 0 ] && exit 0
+
+[ $(stat --format=%s "$OUT") -eq 0 ] && {
+  echo "Something went wrong, generator produced EMPTY file $OUT"
+  exit 10
+}
+
 echo "Generate sequence $generator"
+
+. ./display_image.sh
+
+nwdiag() {
+  nwdiag3 $*
+}
+
 case "$generator" in
-  plantuml_sequence)
-    java -Xmx2048m -jar ext/plantuml.jar $OUT >"$IMAGEFILE"&& [[ $silent = 0 ]] && open "$IMAGEFILE"
+plantuml_sequence)
+  java -Xmx2048m -jar "$PLANTUML_JAR" "$OUT" >"$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-  nwdiag|actdiag|blockdiag)
-    cat $OUT |$generator -a -T${FORMAT} -o $IMAGEFILE - && [[ $silent = 0 ]] && open "$IMAGEFILE" 
+nwdiag | actdiag | blockdiag)
+  "$generator" <"$OUT" -a -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-  mscgen)
-    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE - && [[ $silent = 0 ]] && open "$IMAGEFILE" 
+mscgen)
+  "$generator" <"$OUT" -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-  neato|twopi|circo|fdp|sfdp)
-    cat $OUT |$generator -T${FORMAT} -o $IMAGEFILE && [[ $silent = 0 ]] && open "$IMAGEFILE" 
+neato | twopi | circo | fdp | sfdp)
+  "$generator" <"$OUT" -T"${FORMAT}" -o "$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-  *)
-    cat $OUT |dot -T${FORMAT} -o $IMAGEFILE  && [[ $silent = 0 ]] && open "$IMAGEFILE" 
+*)
+  dot <"$OUT" -T"${FORMAT}" -o "$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
 esac
-[[ $tests -eq 0 ]] && {
-  rm $OUT;
-  [[ $FORMAT -eq "png" ]] && {
+
+#When running tests, these are important
+[ $tests -eq 0 ] && {
+  # rm $OUT;
+  [ "$FORMAT" = "png" ] && {
     #Compress
-    which  pngquant >/dev/null
-    if [ $? -eq 0 ]; then
-      pngquant --ext .png --force --speed 1 --quality 0-10 $IMAGEFILE
+    if which pngquant >/dev/null; then
+      pngquant --ext .png --force --speed 1 --quality 0-10 "$IMAGEFILE"
     fi
   }
-  echo $IMAGEFILE
+  echo "$IMAGEFILE"
 }
+
 exit 0

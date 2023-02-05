@@ -10,16 +10,21 @@ for f in model/*js; do
   MODELS=$MODELS" "$f
 done
 
-FILE="state.lex state.grammar \
+FILES="state.lex state.grammar \
 $MODELS \
 $GENERATORS"
 
-touch "$FILE"
-stat -f"%N %m%b%z%v" "$FILE" >"$old"
+# we want globbing
+# shellcheck disable=SC2086
+touch $FILES
+# shellcheck disable=SC2086
+# IIRC mac had -f
+stat -c"%N %m%b%z%v" $FILES >"$old"
 while true; do
-  stat -f"%N %m%b%z%v" "$FILE" >"$new"
+  # shellcheck disable=SC2086
+  stat -c"%N %m%b%z%v" $FILES >"$new"
   rb=0
-  for c in $(cat $new $old | sort | uniq -u | cut -d" " -f1); do
+  for c in $(cat "$new" "$old" | sort | uniq -u | cut -d" " -f1); do
     echo "$c changed...fire runner"
     rb=1
   done

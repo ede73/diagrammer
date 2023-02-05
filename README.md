@@ -276,6 +276,111 @@ I wanted everything to be Javascript and run fluently which ever way.
 Alas, some visualization (renderers) may require X/Display to work, wasn't able to get all renderers compiled(transpiled?) to JS with Emscripten/LLVM, and not all renderers (d3.js) work from command line as they require browser.
 
 Browser local storage works nice, but it's local, ie. jump to another machine and you don't have the files anymore. Hence the export/import.
+# AST / model
+
+Briefly as:
+```
+SHAPE RECORD
+graphobject;GraphObject | {name | color | textcolor | url | label }
+anode;Node | { shape | image | style}
+alink;Link | { linktype | left | right}
+agroup;Group | { name | OBJECTS[] | ROOTNODES[] | linklabel | "defaults"}
+asubgraph;SubGraph | { name | OBJECTS[] | ROOTNODES[] | linklabel | entrance | exit | "defaults"}
+
+anode>"inherit"graphobject
+alink>"inherit"graphobject
+agroup>"inherit"graphobject
+asubgraph>"inherit"graphobject
+
+graphroot;GraphRoot | {OBJECTS[] | ROOTNODES[] | generator | visualizer | (current)shape | direction | start | equal | "defaults"}
+
+graphobject->"many:1"graphroot
+```
+
+## GraphRoot
+Represents the diagram/graph and necessary properties excluding Links (stored separately)
+
+Holds all the objects and rootnodes. The diagram may have more than one root node, not all visualizers support these though!
+
+It also holds the chosen generator (e.g. graphviz) / visualizer (e.g. circo).
+
+It has list of nodes marked equal - if any.
+
+Which direction the graph is to be drawn - if specified.
+
+What's the current default shape - only used during parsing the diagrammer languge while generating Nodes.
+
+AST/Model note. Links are not stored in GraphRoot, but separately! Why? It's easier to handle them in the generators and nodes and links are output separately to separate sections anyway.
+
+GraphRoot:
+- OBJECTS[Node(a), SubGraph(Node(b), Node(c), Node(d), Group(Node(f), Node(g)))]
+- ROOTNODES[Node, SubGraph] # this graph has two root nodes
+- generator digraph
+- visualizer circo
+- shape ..
+- start ..
+- equals ..
+- defaults ..
+
+
+## GraphObject
+Represents all the objects in the diagram.
+
+## Link (edge)
+Represents link between two objects and all related visualization properties associated with the link.
+
+Own properties are linktype, left- and righthand sides (+GraphObject properties)
+
+Links are stored separately and available for the generator in yy.LINKS
+
+## Node
+
+Own properties are name, shape, image - if specified, style - if specified (+GraphObject properties)
+
+## Group
+
+Own properties are name, linklabel, defaults and list of OBJECTS and ROOTNODES.
+
+## SubGraph
+Only used to represented "sub graphs" ie. like in :
+```
+a>(b,c,d>(f,g))
+```
+
+Ie. a graph where output node is connected to all the inner nodes.
+
+That constructs
+
+GraphRoot:
+- OBJECTS[Node(a), SubGraph(Node(b), Node(c), Node(d), SubGraph(Node(f), Node(g)))]
+- ROOTNODES[same as objects]
+- generator
+- visualizer
+- shape
+- start
+- equals
+- defaults
+
+Own properties are name, linklabel, defaults and list of OBJECTS and ROOTNODES, entrance and exit.
+
+# Generators
+Two convenience methods available:
+
+```
+traverseLinks(yy, link => {
+  // do what ever you like for all the link objects
+})
+```
+```
+traverseTree(root, (node, isLeaf, hasSiblings) => {
+  // process the node
+}, enterSubtree => {
+  // called then entering new subtree
+}, exitSubtree => {
+  // called when exiting a sub tree
+}) {
+}
+```
 
 # Project files/folders
 - ace - The ACE editor, and diagrammer highlight rules

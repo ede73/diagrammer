@@ -1,4 +1,5 @@
 #!/bin/bash
+OSTYPE=$(uname | tr '[:upper:]' '[:lower:]')
 # USE AT OWN RISK! Haven't run in a while...
 [[ -d web ]] && [[ -d ace ]] && [[ -d css ]] && [[ -d generators ]] && [[ -d model ]] || {
   echo "Run this is diagrammer folder..."
@@ -18,7 +19,7 @@ get_www_user() {
     echo "www-data"
     ;;
   *)
-    error "Unknown $OSTYPE"
+    error "Unknown unsupported OS $(uname)"
     exit 10
     ;;
   esac

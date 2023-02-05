@@ -244,6 +244,31 @@ It'll make 5 node groups:
 
 PlantUML + GraphViz visualizer support conditionals (visually)
 
+### Record shapes
+Not all renderers support record types (GraphViz does)
+```
+SHAPE RECORD
+a1;<f0> foo | x | <f1> bar
+b1;a | { <f0> foo | x | <f1> bar } | b
+a2;<f0> foo | x | <f1> bar
+b2;a | { <f0> foo | x | <f1> bar } | b
+a1>b1
+a2:f0>b2:f1
+```
+
+Note! a2:f0 isn't actually a diagrammer language construct!
+In AST it appears as a node named "a2:f0" (and for b2:f1 same thing).
+It'll be passed as a2:f0 node to the renderer, which then may do something with it. In GraphViz case, renderer outputs
+```
+digraph{
+  ...
+  a2:f0->b2:f1
+  ...
+}
+```
+
+GraphViz knows this links record a2 to b2 from (a2)f0 to (b2)f1 specifically.
+
 # Downsides
 
 Nothing's ever perfect. This tool works as a command line tool and as a web tool, but not perfectly.

@@ -218,6 +218,32 @@ e>f;signal::and a big\nlined\nnote\nie.multiline edge text
 a-$(b:#0000ff)a;jotain kay tassanain
 b-$(colorvariable)b;jotain kay tassanain
 ```
+
+### Conditionals
+To speed mindmapping capabilities, diagrammer language has a if then/else if/else construction
+
+```
+starting
+if something would happend then
+  a1>b1
+elseif something probably would not happen then
+ a2>b2
+elseif or if i see a flying bird then
+ a3>b3
+else
+  a4>b4
+endif
+```
+
+It'll make 5 node groups:
+1) Beginning of the conditional block, the **if** part ie. *something would happen*, nodes a1,b1 (or links if the nodes were introduced earlier)
+2) Elseif section **something probably would not happen**, nodes a2,b2 (or links if the nodes were introduced earlier)
+3) **or if i see a flying bird* part and it's nodes
+4) Else part and it's nodes
+5) End of the conditional block, no nodes
+
+PlantUML + GraphViz visualizer support conditionals (visually)
+
 # Downsides
 
 Nothing's ever perfect. This tool works as a command line tool and as a web tool, but not perfectly.

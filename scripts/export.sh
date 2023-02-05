@@ -15,4 +15,4 @@ cp scripts/display_image.sh "$OUT"
 
 sed '/EXPORTREMOVE/{n;d;}' scripts/t.sh >$OUT/t.sh
 sed -i -e 's,scripts/display_image,display_image,g' $OUT/t.sh
-cp COPYRIGHT.txt $OUT
+cp LICENSE.txt $OUT

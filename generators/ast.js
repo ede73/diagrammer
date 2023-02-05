@@ -110,7 +110,7 @@ function ast(yy) {
     const processANode = o => {
     };
 
-    output(yy, "{");
+    output(yy, "[");
     const skipEntrances = (key, value) => {
         if (key === 'entrance' || key === 'exit') {
             return value;
@@ -144,9 +144,9 @@ function ast(yy) {
                 output(yy, JSON.stringify({
                     group: n
                 }) + ",");
-                output(yy, '{');
+                output(yy, '[');
                 traverseObjects(o, objectHandler);
-                output(yy, '},');
+                output(yy, ']');
             })(o);
         } else if (o instanceof SubGraph) {
             const processASubGraph = (o => {
@@ -155,9 +155,9 @@ function ast(yy) {
                 output(yy, JSON.stringify({
                     subgraph: n
                 }) + ",");
-                output(yy, '{');
+                output(yy, '[');
                 traverseObjects(o, objectHandler);
-                output(yy, '},');
+                output(yy, ']');
             })(o);
         } else if (o instanceof Node) {
             output(yy, JSON.stringify({
@@ -185,5 +185,5 @@ function ast(yy) {
         output(yy, JSON.stringify({ link: n }) + ",");
     });
     output(false);
-    output(yy, "}", false);
+    output(yy, "]", false);
 }

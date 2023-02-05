@@ -18,7 +18,7 @@ var raw = fs.readFileSync(path.normalize("./" + myArgs[0]), 'utf8');
 var errors = 0
 
 if (myArgs[1] === "lex") {
-    var lexer = require("./state.js");
+    var lexer = require("./build/state.js");
     //LEX
     var st = lexer.state
     st.setInput(raw);

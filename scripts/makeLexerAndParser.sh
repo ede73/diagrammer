@@ -1,7 +1,7 @@
 #!/bin/sh
 echo Make lexer
-jison-lex state.lex >/dev/null
-cat >>state.js <<EOF
+jison-lex state.lex -o build/state.js >/dev/null
+cat >>build/state.js <<EOF
 exports.state=state;
 EOF
 

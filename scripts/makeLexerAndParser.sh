@@ -5,15 +5,15 @@ cat >>state.js <<EOF
 exports.state=state;
 EOF
 
-cat state.lex >state.all
+cat state.lex >build/state.all
 # shellcheck disable=SC2129
-echo /lex >>state.all
-cat grammar/state.grammar >>state.all
-cat model/*.js >>state.all
-cat generators/*.js >>state.all
+echo /lex >>build/state.all
+cat grammar/state.grammar >>build/state.all
+cat model/*.js >>build/state.all
+cat generators/*.js >>build/state.all
 
 echo make parser
-if ! jison state.all -o parser.js; then
+if ! jison build/state.all -o parser.js; then
     echo Generation error
     exit 10
 fi

@@ -3,7 +3,7 @@
 #Loosely based on makeLexerAndParser.js
 #Also you get MATCHES=a/b/c.file:c/b/d.file
 #And DIRNAMES=a/:c/
-all: state.js state.all parser.js Makefile
+all: state.js build/state.all parser.js Makefile
 	@echo Make ALL
 	@echo done
 
@@ -13,11 +13,11 @@ state.js: state.lex
 	@echo "exports.state=state;" >> $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
-state.all: state.lex lexmarker.txt grammar/state.grammar model/support.js model/model.js model/graphobject.js model/node.js model/group.js model/graphroot.js model/link.js model/shapes.js model/subgraph.js model/tree.js generators/*.js
-	@echo Compile state.all
+build/state.all: state.lex lexmarker.txt grammar/state.grammar model/support.js model/model.js model/graphobject.js model/node.js model/group.js model/graphroot.js model/link.js model/shapes.js model/subgraph.js model/tree.js generators/*.js
+	@echo Compile build/state.all
 	@cat $^ >$@
 
-parser.js: state.all
+parser.js: build/state.all
 	@echo make parser
 	@jison $< -o $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
@@ -36,4 +36,4 @@ test: all
 	@echo matches are "$(MATCHES)" dirnames are "$(DIRNAMES)"
 
 clean:
-	rm -f state.js state.all parser.js
+	rm -f state.js build/state.all parser.js

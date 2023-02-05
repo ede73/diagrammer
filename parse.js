@@ -28,7 +28,7 @@ if (myArgs[1] === "lex") {
         console.log("State:" + h + "(" + st.yytext + ")")
     }
 } else {
-    var parser = require("./parser.js");
+    var parser = require("./build/parser.js");
     parser.parser.yy.OUTPUT = myArgs[1];
     parser.parser.trace = function (x) {
         console.log("TRACE:" + x);

@@ -20,5 +20,4 @@ js/canviz-0.1
 node_modules
 ext/plantuml.jar
 ext/canviz-0.1.tar.bz2
-parser.js
 build/*

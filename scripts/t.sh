@@ -64,7 +64,7 @@ echo "testing lexing"
 node --max-old-space-size=4096 testStateLexer.js "$input"
 
 #EXPORTREMOVE
-#node parser.js $input $func | tee a.gv
+#node build/parser.js $input $func | tee a.gv
 #EXPORTREMOVE
 # |sed '/digraph/,$!d'
 INPUT_PATH=${input%.*}

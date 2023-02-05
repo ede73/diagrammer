@@ -1,4 +1,5 @@
-OUT=export
+#!/bin/sh
+OUT="export"
 mkdir -p $OUT/generators
 
 for m in parse.js parser.js state.js; do

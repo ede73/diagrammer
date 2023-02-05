@@ -1,9 +1,8 @@
-
-while read line    
-do
+#!/bin/sh
+while read -r line; do
 node=${line%-*}
-echo arrows/$node.png
-cat <<EOF |dot -Tpng -o arrows/$node.png
+echo "arrows/$node.png"
+cat <<EOF |dot -Tpng -o "arrows/$node.png"
 digraph {
   compound=true;
   rankdir=TD;
@@ -12,4 +11,5 @@ digraph {
 EOF
 done <arrows2.txt
 
+# shellcheck disable=SC2012
 ls arrows|sed -e 's/.png//g' -e 's/^x//g'|awk '{print "<li tooltip=\""$1"\" onclick=\"addLine(\""$1" nodeName\");\"><img height=\"30\" src=\"types/x"$1".png\"/></li>";}'

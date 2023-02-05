@@ -1,3 +1,4 @@
+#!/bin/bash
 [[ -d web ]] && [[ -d ace ]] && [[ -d css ]] && [[ -d generators ]] && [[ -d model ]] || {
   echo "Run this is diagrammer folder..."
   exit 10
@@ -157,7 +158,7 @@ uname -m | grep armv6 && {
   # but it solved the Vm (armv6 not supported) issue on ca-certificates-java
 }
 
-install $JISON $APACHE "$PHP_MODULE" graphviz mscgen plantuml $BLOCKCRAP node
+install "$JISON" "$APACHE" "$PHP_MODULE" graphviz mscgen plantuml "$BLOCKCRAP" node
 
 apache_enable_mod userdir
 # either succeeds

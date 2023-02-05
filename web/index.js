@@ -1,8 +1,8 @@
 console.log("Reset generator and visualizer");
-VERBOSE = true;
+const VERBOSE = false;
 
 parser.yy.parseError = function (str, hash) {
-    var pe = "Parsing error:\n" + str + "\n" + hash;
+    const pe = "Parsing error:\n" + str + "\n" + hash;
     console.log("pe");
     document.getElementById("error").innerText = pe;
     cancelVTimer();
@@ -27,40 +27,40 @@ function openImage(imageUrl) {
 }
 
 function getSavedGraph() {
-    var data = {};
+    let data = {};
     if (!localStorage.getItem("graphs")) {
         localStorage.setItem("graphs", JSON.stringify(data));
         return data;
     }
-    var graph = localStorage.getItem("graphs");
+    const graph = localStorage.getItem("graphs");
     // console.log("Have graph"+graph);
     data = eval("(" + graph + ")");
     return data;
 }
 
 function getSavedFiles() {
-    var t = "";
-    for (var k in getSavedGraph()) {
+    let t = "";
+    for (const k in getSavedGraph()) {
         console.log("Stored file:" + k);
         t += '<option value="' + k + '">' + k + '</option>';
     }
-    var e = document.getElementById("saved");
+    const e = document.getElementById("saved");
     e.innerHTML = t;
 }
 
 function save() {
-    var filename = document.getElementById("filename").value;
-    var editable = getText();
-    var data = getSavedGraph();
+    const filename = document.getElementById("filename").value;
+    const editable = getText();
+    const data = getSavedGraph();
     data[filename] = editable;
-    var jd = JSON.stringify(data);
+    const jd = JSON.stringify(data);
     localStorage.setItem("graphs", jd);
     // clipboardData.setData("text",jd);
 }
 
 function load() {
-    var filename = document.getElementById("filename").value;
-    var data = getSavedGraph();
+    const filename = document.getElementById("filename").value;
+    const data = getSavedGraph();
     if (data[filename])
         setText(data[filename]);
 }
@@ -114,11 +114,11 @@ function importGraphs() {
 }
 
 function visualize(visualizer) {
-    var statelang = document.getElementById("result").value;
+    const statelang = document.getElementById("result").value;
     if (!visualizer) {
         visualizer = getVisualizer();
     }
-    var visualizeUrl = "web/visualize.php?visualizer=" + visualizer;
+    const visualizeUrl = "web/visualize.php?visualizer=" + visualizer;
     $.ajax({
         type: "POST",
         async: true,
@@ -238,19 +238,19 @@ function visualizeRadialDendrogram(jsonData) {
 
     const margin = 120;
     const angle = 360;
-    var cluster = d3.layout.cluster()
+    const cluster = d3.layout.cluster()
         .size([angle, radius - margin]);
 
-    var diagonal = d3.svg.diagonal.radial()
+    const diagonal = d3.svg.diagonal.radial()
         .projection(function (d) { return [d.y, d.x / 180 * Math.PI]; });
 
     const svg = make_svg(2 * radius, 2 * radius)
         .attr("transform", "translate(" + radius + "," + radius + ")");
 
-    var nodes = cluster.nodes(root);
-    var links = cluster.links(nodes);
+    const nodes = cluster.nodes(root);
+    const links = cluster.links(nodes);
 
-    var link = svg.selectAll(".link")
+    const link = svg.selectAll(".link")
         .data(links)
         .join("path")
         .attr("class", "link")
@@ -258,7 +258,7 @@ function visualizeRadialDendrogram(jsonData) {
             .angle(d => d.x)
             .radius(d => d.y));
 
-    var node = svg.selectAll(".node")
+    const node = svg.selectAll(".node")
         .data(nodes)
         .enter().append("g")
         .attr("class", "node")
@@ -295,9 +295,9 @@ function removeAllChildNodes(parent) {
 }
 
 function visualizeParseTree(jsonData) {
-    var $ = go.GraphObject.make;  // for conciseness in defining templates
+    const $ = go.GraphObject.make;  // for conciseness in defining templates
 
-    var element = document.getElementById("D3JSIMAGES");
+    const element = document.getElementById("D3JSIMAGES");
     removeAllChildNodes(element);
     const newDiv = document.createElement("div");
     newDiv.setAttribute("id", "PARSETREENODE");
@@ -346,7 +346,7 @@ function visualizeParseTree(jsonData) {
     myDiagram.model =
         $(go.TreeModel,
             { nodeDataArray: nodeDataArray });
-    x = 0; y = 0; printSize = 300;
+    const x = 0; const y = 0; const printSize = 300;
     svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
 
     const svgimg = document.getElementById('D3JSIMAGES');
@@ -391,7 +391,7 @@ function visualizeLayerBands(jsonData) {
     function init() {
         var $ = go.GraphObject.make;
 
-        var element = document.getElementById("D3JSIMAGES");
+        const element = document.getElementById("D3JSIMAGES");
         removeAllChildNodes(element);
         const newDiv = document.createElement("div");
         newDiv.setAttribute("id", "LAYEREDBANDNODE");
@@ -507,7 +507,7 @@ go.Diagram.inherit(FlatTreeLayout, go.TreeLayout);
 FlatTreeLayout.prototype.commitLayout = function () {
     go.TreeLayout.prototype.commitLayout.call(this);  // call base method first
     // find maximum Y position of all Nodes
-    var y = -Infinity;
+    let y = -Infinity;
     this.network.vertexes.each(function (v) {
         y = Math.max(y, v.node.position.y);
     });
@@ -527,7 +527,7 @@ FlatTreeLayout.prototype.commitLayout = function () {
 function visualizeUmlClass(jsonData) {
     var $ = go.GraphObject.make;
 
-    var element = document.getElementById("D3JSIMAGES");
+    const element = document.getElementById("D3JSIMAGES");
     removeAllChildNodes(element);
     const newDiv = document.createElement("div");
     newDiv.setAttribute("id", "UMLCLASS");
@@ -584,7 +584,7 @@ function visualizeUmlClass(jsonData) {
         );
 
     // the item template for methods
-    var methodTemplate =
+    const methodTemplate =
         $(go.Panel, "Horizontal",
             // method visibility/access
             $(go.TextBlock,
@@ -599,9 +599,9 @@ function visualizeUmlClass(jsonData) {
             $(go.TextBlock, "()",
                 // this does not permit adding/editing/removing of parameters via inplace edits
                 new go.Binding("text", "parameters", function (parr) {
-                    var s = "(";
+                    let s = "(";
                     for (var i = 0; i < parr.length; i++) {
-                        var param = parr[i];
+                        const param = parr[i];
                         if (i > 0) s += ", ";
                         s += param.name + ": " + param.type;
                     }
@@ -699,8 +699,8 @@ function visualizeUmlClass(jsonData) {
         );
 
     // setup a few example class nodes and relationships
-    var nodedata = jsonData[0];
-    var linkdata = jsonData[1];
+    const nodedata = jsonData[0];
+    const linkdata = jsonData[1];
     myDiagram.model = $(go.GraphLinksModel,
         {
             copiesArrays: true,
@@ -708,7 +708,7 @@ function visualizeUmlClass(jsonData) {
             nodeDataArray: nodedata,
             linkDataArray: linkdata
         });
-    x = 0; y = 0; printSize = 300;
+    const x = 0; const y = 0; const printSize = 300;
     svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
 
     const svgimg = document.getElementById('D3JSIMAGES');

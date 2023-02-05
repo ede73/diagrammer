@@ -1,7 +1,7 @@
 /*
 
 	  // setup a few example class nodes and relationships
-	  var nodedata = [
+	  const nodedata = [
 		{
 		  key: 1,
 		  name: "BankAccount",
@@ -15,7 +15,7 @@
 		  ]
 		},
 
-	  var linkdata = [
+	  const linkdata = [
 		{ from: 12, to: 11, relationship: "generalization" },
 		{ from: 13, to: 11, relationship: "generalization" },
 		{ from: 14, to: 13, relationship: "aggregation" }
@@ -46,7 +46,7 @@ function generateUmlClass(yy) {
 		// instead of array of names...{name:???,type=???,visibility=???,default=??}
 		// name;[+-#][name:]String[=xx]
 		return [...nodes].filter(node => !nameAndLabel(node).includes(")")).map(p => {
-			var ret = {
+			const ret = {
 			};
 			ret['name'] = p.name;
 			if (p.label) {
@@ -80,7 +80,7 @@ function generateUmlClass(yy) {
 		// instead of array of names...{name:???,parameters:[{name:???,type:???}],visiblity:???}
 		//+public,-private,#protected
 		return [...nodes].filter(node => nameAndLabel(node).includes("(")).map(m => {
-			var ret = {
+			const ret = {
 			};
 			console.log(m.label);
 			ret['name'] = m.name;
@@ -118,7 +118,7 @@ function generateUmlClass(yy) {
 			}
 		});
 	};
-	var id = 1;
+	let id = 1;
 	const groupNameIdMap = new Map();
 	traverseObjects(root, o => {
 		if (o instanceof Group) {

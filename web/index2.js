@@ -2,10 +2,10 @@
 getSavedFiles();
 result = document.getElementById("result");
 var vtimer = null;
-var vdelay = 1000;
+const vdelay = 1000;
 
 //Set to 0 to fall back to textarea(enable textarea in index.html)
-var acemode = 1;
+const acemode = 1;
 
 //get all
 function getText() {
@@ -33,13 +33,13 @@ function setText(data) {
 function addTop(data) {
     if (acemode) {
         //using ace
-        var cursor = editor.getCursorPosition();
+        const cursor = editor.getCursorPosition();
         editor.navigateFileStart();
         editor.insert(data);
         //should roughly
         editor.getSession().getSelection().selectionLead.setPosition(cursor.column, cursor.row - data.split("\n").length + 1);
     } else {
-        var comp = document.getElementById("editable");
+        const comp = document.getElementById("editable");
         //using textarea
         comp.value = data + comp.value;
     }
@@ -51,7 +51,7 @@ function appendLine(data, comp) {
         //using ace insert text into wherever the cursor is pointing.
         editor.navigateLineEnd();
         //TODO: If this is empty line, no need for linefeed
-        var cursor = editor.getCursorPosition();
+        const cursor = editor.getCursorPosition();
         if (cursor.column > 1)
             editor.insert("\n");
         editor.insert(data.trim());
@@ -99,19 +99,19 @@ function addLine(i) {
     return false;
 }
 
-var win;
+let win;
 function openPicWindow() {
     win = window.open('web/result.png', 'extpic');
 }
 
 function reloadImg(id) {
-    var obj = document.getElementById(id);
-    var src = obj.src;
-    var pos = src.indexOf('?');
+    const obj = document.getElementById(id);
+    let src = obj.src;
+    const pos = src.indexOf('?');
     if (pos >= 0) {
         src = src.substr(0, pos);
     }
-    var date = new Date();
+    const date = new Date();
     obj.src = src + '?v=' + date.getTime();
     if (win)
         win.location.reload();
@@ -120,16 +120,16 @@ function reloadImg(id) {
 
 // Get currently selected generator
 function getGenerator() {
-    var e = document.getElementById("generator");
-    var gen = e.options[e.selectedIndex].value;
+    const e = document.getElementById("generator");
+    const gen = e.options[e.selectedIndex].value;
     if (gen.indexOf(":") > -1)
         return gen.split(":")[0];
     return gen;
 }
 
 function getVisualizer() {
-    var e = document.getElementById("generator");
-    var gen = e.options[e.selectedIndex].value;
+    const e = document.getElementById("generator");
+    const gen = e.options[e.selectedIndex].value;
     if (gen.indexOf(":") > -1) {
         console.log("Return visualizer " + gen.split(":")[1]);
         return gen.split(":")[1];
@@ -159,7 +159,7 @@ function cancelVTimer() {
  */
 
 function parse(generator, visualizer) {
-    var data = getText() + "\n";
+    const data = getText() + "\n";
     console.log("parse " + generator + "," + visualizer);
     document.getElementById("error").innerText = "";
     parsingStarted = true;
@@ -188,10 +188,10 @@ function generatorChanged() {
 
 function savedChanged() {
     // read the example...place to textArea(overwrite)
-    var e = document.getElementById("saved");
-    var doc = e.options[e.selectedIndex].value;
-    var filename = document.getElementById("filename");
-    var data = getSavedGraph();
+    const e = document.getElementById("saved");
+    const doc = e.options[e.selectedIndex].value;
+    const filename = document.getElementById("filename");
+    const data = getSavedGraph();
     if (data[doc]) {
         setText(data[doc]);
         filename.value = doc;
@@ -202,8 +202,8 @@ function savedChanged() {
 
 function exampleChanged() {
     // read the example...place to textArea(overwrite)
-    var e = document.getElementById("example");
-    var doc = e.options[e.selectedIndex].value;
+    const e = document.getElementById("example");
+    const doc = e.options[e.selectedIndex].value;
     $.ajax({
         url: "tests/" + doc,
         cache: false
@@ -215,7 +215,7 @@ function exampleChanged() {
 }
 
 function textAreaOnChange(callback, delay) {
-    var timer = null;
+    let timer = null;
     document.getElementById("editable").onkeyup = function () { // onchange does not work on
         // chrome/mac(elsewhere?)
         if (timer) {
@@ -230,8 +230,8 @@ function textAreaOnChange(callback, delay) {
 }
 
 function visualizeOnChange(callback, delay) {
-    var timer = null;
-    var tt = document.getElementById("result");
+    let timer = null;
+    const tt = document.getElementById("result");
     tt.onkeyup = function () { // onchange does not work on
         // chrome/mac(elsewhere?)
         if (timer) {
@@ -249,7 +249,7 @@ textAreaOnChange(parse, 150);
 visualizeOnChange(visualize, 250);
 
 if (acemode) {
-    var timer2 = null;
+    let timer2 = null;
     // some init race condition, editor null on page load
     if (typeof editor != 'undefined') {
         editor.getSession().on('change', function () {

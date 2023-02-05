@@ -20,20 +20,18 @@ e;
 */
 function actdiag(yy) {
     output(yy, "actdiag{\n  default_fontsize = 14");
-    var r = getGraphRoot(yy);
+    const r = getGraphRoot(yy);
     /*
      * does not really work..but portrait mode if
      * (r.getDirection()==="portrait"){ output(yy," orientation=portrait");
      * }else{ //DEFAULT output(yy," orientation=landscape"); }
      */
-    //var s = r.getStart();
-    var i;
-    var parseObjects = function (obj) {
+    const parseObjects =  (obj) => {
         output(true);
         if (obj instanceof Group) {
             output(yy, 'lane "' + obj.getName() + '"{', true);
             traverseObjects(obj, function (z) {
-                var colorShapeLabel = getAttrFmt(z, 'color', ',color="{0}"') +
+                let colorShapeLabel = getAttrFmt(z, 'color', ',color="{0}"') +
                     getShape(shapes.actdiag, z.shape, ',shape={0}') +
                     getAttrFmt(z, 'label', ',label="{0}"');
                 if (colorShapeLabel.trim() != "") {
@@ -47,13 +45,13 @@ function actdiag(yy) {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
             // ICON does not work, using background
-            var style = getAttrFmt(obj, 'style', ',style="{0}"');
+            let style = getAttrFmt(obj, 'style', ',style="{0}"');
             if (style != "" && style.match(/(dotted|dashed|solid)/) == null) {
                 style = "";
             }
 
             // ICON does not work, using background
-            var colorIconShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
+            let colorIconShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
                 getAttrFmt(obj, 'image', ',background="icons{0}"') +
                 style +
                 getShape(shapes.actdiag, obj.shape, ',shape={0}') +
@@ -66,22 +64,22 @@ function actdiag(yy) {
     };
     traverseObjects(r, parseObjects);
 
-    traverseLinks(yy, function (l) {
-        var t = "";
-        if (l.linkType.indexOf(".") !== -1) {
+    traverseLinks(yy, function (link) {
+        let t = "";
+        if (link.isDotted()) {
             t += ',style="dotted" ';
-        } else if (l.linkType.indexOf("-") !== -1) {
+        } else if (link.isDashed()) {
             t += ',style="dashed" ';
         }
-        var labelAndItsColor = getAttrFmt(l, 'label', ',label = "{0}"' + getAttrFmt(l, ['color', 'textcolor'], 'textcolor="{0}"'));
-        var color = getAttrFmt(l, 'color', ',color="{0}"');
+        const labelAndItsColor = getAttrFmt(link, 'label', ',label = "{0}"' + getAttrFmt(link, ['color', 'textcolor'], 'textcolor="{0}"'));
+        const color = getAttrFmt(link, 'color', ',color="{0}"');
         t += labelAndItsColor + color;
         t = t.trim();
         if (t.substring(0, 1) == ",")
             t = t.substring(1).trim();
         if (t != "")
             t = "[" + t + "]";
-        output(yy, "  " + l.left.getName() + " -> " + l.right.getName() + t + ";");
+        output(yy, "  " + link.left.getName() + " -> " + link.right.getName() + t + ";");
     });
     output(yy, "}");
 }

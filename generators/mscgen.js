@@ -21,21 +21,20 @@ node js/parse.js verbose mscgen.test mscgen
 function mscgen(yy) {
     output(yy, "msc {", true);
     const root = getGraphRoot(yy);
-    var comma = false;
+    let comma = false;
     // print out all node declarations FIRST (if any)
     traverseObjects(root, obj => {
-        var tmp;
         if (obj instanceof Group) {
             output(yy, ' /*' + obj.getName() + getAttrFmt(obj, 'label', ' {0}') + '*/');
             traverseObjects(obj, z => {
-                tmp = getAttrFmt(z, 'color', ',color="{0}"') + getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
+                let tmp = getAttrFmt(z, 'color', ',color="{0}"') + getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
                 output(yy, (comma ? "," : "") + "    " + z.getName() + tmp);
                 comma = true;
             });
         } else if (obj instanceof Node) {
-            tmp = getAttrFmt(obj, 'color', ',textbgcolor="{0}"') + getAttrFmt(obj, 'style', ',style={0}') + getAttrFmt(obj, 'label', ',label="{0}"');
+            let tmp = getAttrFmt(obj, 'color', ',textbgcolor="{0}"') + getAttrFmt(obj, 'style', ',style={0}') + getAttrFmt(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
             output(yy, (comma ? "," : "") + "  " + obj.getName() + tmp);
@@ -44,11 +43,11 @@ function mscgen(yy) {
     });
 
     output(yy, ";");
-    var id = 1;
+    let id = 1;
     traverseLinks(yy, link => {
-        var linkType = "";
-        var rhs = link.right;
-        var lhs = link.left;
+        let linkType = "";
+        let rhs = link.right;
+        let lhs = link.left;
 
         if (rhs instanceof Group) {
             // just pick ONE Node from group and use lhead
@@ -64,24 +63,18 @@ function mscgen(yy) {
         // TODO:Assuming producing DIGRAPH
         // For GRAPH all edges are type --
         // but we could SET arrow type if we'd like
-        var rightName = rhs.getName();
+        let rightName = rhs.getName();
 
-        var dot = false;
-        var dash = false;
-        var broken = false;
-        if (link.linkType.indexOf(".") !== -1) {
-            dot = true;
-        } else if (link.linkType.indexOf("-") !== -1) {
-            dash = true;
-        } else if (link.linkType.indexOf("/") !== -1) {
-            broken = true;
-        }
-        var swap = false;
+        const dot = link.isDotted();
+        const dash = link.isDashed()
+        const broken = link.isBroken();
+
+        let swap = false;
         const attrs = [];
-        var label = link.label;
+        let label = link.label;
         const color = link.color;
-        var url = link.url;
-        var note = "";
+        const url = link.url;
+        let note = "";
         if (url) {
             attrs.push('URL="' + url + '"');
         }
@@ -98,7 +91,7 @@ function mscgen(yy) {
             }
         }
         attrs.push('id="' + id++ + '"');
-        if (link.linkType.indexOf("<") !== -1 && link.linkType.indexOf(">") !== -1) {
+        if (link.isBidirectional()) {
             // Broadcast type (<>)
             // hmh..since seqdiag uses a<>a as broadcast and
             // a<>b as autoreturn, could we do as well?
@@ -109,8 +102,8 @@ function mscgen(yy) {
                 linkType = "<=>";
                 swap = true;
             }
-        } else if (link.linkType.indexOf("<") !== -1) {
-            var tmpl = lhs;
+        } else if (link.isLeftLink()) {
+            const tmpl = lhs;
             lhs = rhs;
             rhs = tmpl;
             if (dot)
@@ -122,7 +115,7 @@ function mscgen(yy) {
             else
                 linkType = "=>";
             rightName = rhs.getName();
-        } else if (link.linkType.indexOf(">") !== -1) {
+        } else if (link.isRightLink()) {
             if (dot)
                 linkType = ">>";
             else if (dash)

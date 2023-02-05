@@ -7,7 +7,7 @@ function getShape(shapes, o, fmt) {
         return ' ' + fmt.format(shapes['default']) + ' ';
 }
 
-var shapes = {
+const shapes = {
     blockdiag: {
         default: "box",
         invis: "invis",

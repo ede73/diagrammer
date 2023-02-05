@@ -20,12 +20,12 @@ a->e:link text
 node js/parse.js verbose plantuml_sequence.test plantuml_sequence
 */
 function plantuml_sequence(yy) {
-    var processANode = function (o, sbgraph) {
-        var nattrs = [];
-        var styles = [];
+    const processANode = function (obj, sbgraph) {
+        const nattrs = [];
+        const styles = [];
         // getAttrFmt(o, 'color', 'fillcolor="{0}"',nattrs);
         // getAttrFmt(o,'color','filled',styles);
-        getAttrFmt(o, 'style', '{0}', styles);
+        getAttrFmt(obj, 'style', '{0}', styles);
         if (styles.length > 0) {
             if (styles.join("").indexOf('singularity') !== -1) {
                 // invis node is not singularity!, circle with minimal
@@ -38,23 +38,23 @@ function plantuml_sequence(yy) {
                 nattrs.push('style="' + styles.join(",") + '"');
             }
         }
-        getAttrFmt(o, 'image', 'image="icons{0}"', nattrs);
-        getAttrFmt(o, 'textcolor', 'fontcolor="{0}"', nattrs);
-        var r = getShape(shapes.digraph, o.shape, 'shape="{0}"');
-        if (r) {
-            nattrs.push(r);
+        getAttrFmt(obj, 'image', 'image="icons{0}"', nattrs);
+        getAttrFmt(obj, 'textcolor', 'fontcolor="{0}"', nattrs);
+        const shape = getShape(shapes.digraph, obj.shape, 'shape="{0}"');
+        if (shape) {
+            nattrs.push(shape);
         }
-        var t = "";
+        let t = "";
         if (nattrs.length > 0)
             t = "[" + nattrs.join(",") + "]";
         //yy.result(indent("participant " + getAttrFmt(o, 'label', '"{0}" as') + " " + o.getName() + t));
         output(yy, "participant {0} {1} {2}".format(
-            getAttrFmt(o, 'label', '"{0}" as'),
-            o.getName(),
+            getAttrFmt(obj, 'label', '"{0}" as'),
+            obj.getName(),
             t));
     };
 
-    var root = getGraphRoot(yy);
+    const root = getGraphRoot(yy);
     if (root.getVisualizer()) {
         outputFmt(yy, "/* render: {0} */", [root.getVisualizer()])
     }
@@ -65,29 +65,26 @@ function plantuml_sequence(yy) {
      * else { output(yy, indent("rankdir=TD;")); }
      */
     // This may FORWARD DECLARE a node...which creates problems with coloring
-    var s = root.getStart();
+    const s = root.getStart();
     if (s) {
-        var fwd = getNode(yy, s);
+        const fwd = getNode(yy, s);
         processANode(fwd, false);
     }
     // print only NON PRINTED container links. If first non printed link is NOT
     // for this container, break out immediately
     // this is to emulate ORDERED nodes of plantuml
     // (node=edge,node,link.group...all in order for this fucker)
-    var printLinks = function printLinks(container, sbgraph) {
-        for (var i in yy.LINKS) {
-            if (!yy.LINKS.hasOwnProperty(i)) continue;
-            var l = yy.LINKS[i];
-            if (l.printed)
+    const printLinks = function printLinks(container, sbgraph) {
+        for (const link of iterateLinks(yy)){
+            if (link.printed)
                 continue;
             // if container given, print ONLY THOSE links that match this
             // container!
-            if (l.container !== container)
+            if (link.container !== container)
                 break;
-            l.printed = true;
-            //var attrs = [];
-            var note = "";
-            var label = getAttr(l, 'label');
+            link.printed = true;
+            let note = "";
+            let label = link.label;
             if (label) {
                 if (label.indexOf("::") !== -1) {
                     label = label.split("::");
@@ -95,132 +92,121 @@ function plantuml_sequence(yy) {
                     label = label[0].trim();
                 }
             }
-            var color = getAttrFmt(l, 'color', '[{0}]').trim();
+            const color = getAttrFmt(link, 'color', '[{0}]').trim();
             // getAttrFmt(l, ['textcolor','color'] ,'fontcolor="{0}"',attrs);
-            var lt;
-            var lr = l.right;
-            var ll = l.left;
+            let lt;
+            let rhs = link.right;
+            let lhs = link.left;
 
             // output(yy, indent("//"+lr));
-            if (lr instanceof Group) {
+            if (rhs instanceof Group) {
                 // just pick ONE Node from group and use lhead
                 // TODO: Assuming it is Node (if Recursive groups implemented,
                 // it could be smthg else)
                 // attrs.push(" lhead=cluster_" + lr.getName());
                 // TODO:
-                lr = lr.OBJECTS[0];
-                if (!lr) {
+                rhs = rhs.OBJECTS[0];
+                if (!rhs) {
                     // TODO:Bad thing, EMPTY group..add one invisible node
                     // there...
                     // But should add already at TOP
                 }
             }
-            if (ll instanceof Group) {
+            if (lhs instanceof Group) {
                 // attrs.push(" ltail=cluster_" + ll.getName());
                 // TODO:
-                ll = ll.OBJECTS[0];
-                if (!ll ) {
+                lhs = lhs.OBJECTS[0];
+                if (!lhs ) {
                     // Same as above
                 }
             }
             // TODO:Assuming producing DIGRAPH
             // For GRAPH all edges are type --
             // but we could SET arrow type if we'd like
-            if (l.linkType.indexOf("/") !== -1) {
+            if (link.isBroken()) {
                 // TODO: Somehow denote better this "quite does not reach"
                 // even though such an edge type MAKES NO SENSE in a graph
                 // attrs.push('arrowhead="tee"');
                 // TODO:
             }
-            var dot = false;
-            var dash = false;
-            //var broken = false;
-            if (l.linkType.indexOf(".") !== -1) {
-                dot = true;
-            } else if (l.linkType.indexOf("-") !== -1) {
-                dash = true;
-            } else if (l.linkType.indexOf("/") !== -1) {
-                // attrs.push("failed");
-                // TODO:
-            }
-            var swap = false;
-            if (l.linkType.indexOf("<") !== -1 && l.linkType.indexOf(">") !== -1) {
+            const dot = link.isDotted();
+            const dash = link.isDashed();
+            let swap = false;
+            if (link.linkType.indexOf("<") !== -1 && link.linkType.indexOf(">") !== -1) {
                 lt = (dot ? "-" : "") + "-" + color + ">";
                 swap = true;
-            } else if (l.linkType.indexOf("<") !== -1) {
-                var tmp = ll;
-                ll = lr;
-                lr = tmp;
+            } else if (link.linkType.indexOf("<") !== -1) {
+                const tmp = lhs;
+                lhs = rhs;
+                rhs = tmp;
                 lt = (dot ? "-" : "") + "-" + color + ">";
-            } else if (l.linkType.indexOf(">") !== -1) {
+            } else if (link.linkType.indexOf(">") !== -1) {
                 lt = (dot ? "-" : "") + "-" + color + ">";
             } else if (dot) {
                 // dotted
-                output(yy, getAttrFmt(l, 'label', '...{0}...'));
+                output(yy, getAttrFmt(link, 'label', '...{0}...'));
                 continue;
             } else if (dash) {
                 // dashed
-                output(yy, getAttrFmt(l, 'label', '=={0}=='));
+                output(yy, getAttrFmt(link, 'label', '=={0}=='));
                 continue;
             } else {
                 // is dotted or dashed no direction
                 lt = "-" + color + ">";
                 // attrs.push("dir=none");
             }
-            var t = "";
+            let t = "";
             // if (attrs.length>0)
             // t = "[" + attrs.join(",") + "]";
             if (label)
                 label = ":" + label;
             else
                 label = "";
-            output(yy, ll.getName() + lt + lr.getName() + t + label);
+            output(yy, lhs.getName() + lt + rhs.getName() + t + label);
             if (swap)
-                output(yy, lr.getName() + lt + ll.getName() + t + label);
+                output(yy, rhs.getName() + lt + lhs.getName() + t + label);
             if (sbgraph) {
-                if (!lr.active) {
-                    output(yy, "activate " + lr.getName(), true);
-                    lr.active = true;
+                if (!rhs.active) {
+                    output(yy, "activate " + rhs.getName(), true);
+                    rhs.active = true;
                 } else {
-                    ll.active = false;
+                    lhs.active = false;
                     output(false);
-                    output(yy, "deactivate " + ll.getName());
+                    output(yy, "deactivate " + lhs.getName());
                 }
             } else {
-                if (ll.active) {
-                    ll.active = false;
+                if (lhs.active) {
+                    lhs.active = false;
                     output(false);
-                    output(yy, "deactivate " + ll.getName());
+                    output(yy, "deactivate " + lhs.getName());
                 }
             }
             if (note != "") {
-                output(yy, "note over " + lr.getName());
+                output(yy, "note over " + rhs.getName());
                 outputFmt(yy, note.replace(/\\n/g, "\n"));
                 output(yy, "end note");
             }
         }
     };
 
-    var traverseObjects = function traverseObjects(root, isSubGraph) {
+    const traverseObjects = function traverseObjects(root, isSubGraph) {
         // Dump this groups participants first...
-        var i;
-        for (i in root.OBJECTS) {
+        for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
-            var obj = root.OBJECTS[i];
+            const obj = root.OBJECTS[i];
             if (obj instanceof Node)
                 processANode(obj, isSubGraph);
         }
         printLinks(root, isSubGraph);
-        for (i in root.OBJECTS) {
+        for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
-            var obj = root.OBJECTS[i];
+            const obj = root.OBJECTS[i];
             if (obj instanceof Group) {
                 // TODO:
                 // Group name,OBJECTS,get/setEqual,toString
-                var processAGroup = function (o) {
+                const processAGroup = function (o) {
                     debug('processAGroup:' + JSON.stringify(o));
-                    var cond = o.conditional;
-                    var nodeIsSubGraph = o.isSubGraph;
+                    let cond = o.conditional;
                     if (cond) {
                         if (cond == "if")
                             cond = "alt";
@@ -234,6 +220,7 @@ function plantuml_sequence(yy) {
                     } else {
                         cond = "";//cond = "ref";
                     }
+                    const nodeIsSubGraph = o.isSubGraph;
                     if (o.getColor()) {
                         output(yy, "style=filled;");
                         output(yy, getAttrFmt(o, 'color',

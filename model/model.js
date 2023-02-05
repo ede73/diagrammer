@@ -21,10 +21,10 @@ function processVariable(yy, variable) {
     // or
     // refer variable
     // $(NAME)
-    var vari = variable.slice(2, -1);
+    const vari = variable.slice(2, -1);
     if (vari.indexOf(":") !== -1) {
         // Assignment
-        var tmp = vari.split(":");
+        const tmp = vari.split(":");
         debug("GOT assignment " + tmp[0] + "=" + tmp[1]);
         _getVariables(yy)[tmp[0]] = tmp[1];
         return tmp[1];
@@ -51,7 +51,7 @@ function processVariable(yy, variable) {
 function getList(yy, lhs, rhs, rhsLinkLabel) {
     if (lhs instanceof Node) {
         debug("getList(node:" + lhs + ",rhs:[" + rhs + "])", true);
-        var lst = [];
+        const lst = [];
         lst.push(lhs);
         //TODO assuming RHS is Node
         lst.push(getNode(yy, rhs).setLinkLabel(rhsLinkLabel));
@@ -60,7 +60,7 @@ function getList(yy, lhs, rhs, rhsLinkLabel) {
     }
     if (lhs instanceof Group) {
         debug("getList(group:[" + lhs + "],rhs:" + rhs + ")", true);
-        var lst = [];
+        const lst = [];
         lst.push(lhs);
         //TODO assuming RHS is Group
         lst.push(getGroup(yy, rhs).setLinkLabel(rhsLinkLabel));
@@ -103,17 +103,17 @@ function getNode(yy, name, style) {
             return name;
         }
 
-        var search = function s(container, name) {
+        const search = function s(container, name) {
             if (container.getName() == name) return container;
-            for (var i in container.OBJECTS) {
+            for (const i in container.OBJECTS) {
                 if (!container.OBJECTS.hasOwnProperty(i)) continue;
-                var o = container.OBJECTS[i];
+                const o = container.OBJECTS[i];
                 if (o instanceof Node && o.getName() == name) {
                     if (style) o.setStyle(style);
                     return o;
                 }
                 if (o instanceof Group) {
-                    var found = s(o, name);
+                    const found = s(o, name);
                     if (found) return found;
                 }
             }
@@ -123,7 +123,7 @@ function getNode(yy, name, style) {
             return search;
         }
         debug("Create new node name=" + name, true);
-        var node = new Node(name, getGraphRoot(yy).getCurrentShape());
+        const node = new Node(name, getGraphRoot(yy).getCurrentShape());
         if (style) node.setStyle(style);
         node.nolinks = true;
 
@@ -137,7 +137,7 @@ function getNode(yy, name, style) {
         return _pushObject(yy, node);
     }
 
-    var node = findNode(yy, name, style);
+    const node = findNode(yy, name, style);
     debug("  in getNode gotNode " + node);
     yy.lastSeenNode = node;
     if (yy.collectNextNode) {
@@ -190,7 +190,7 @@ function enterContainer(yy, container) {
 function exitContainer(yy) {
     if (yy.CURRENTCONTAINER.length <= 1)
         throw new Error("INTERNAL ERROR:Trying to exit ROOT container");
-    var currentContainer = yy.CURRENTCONTAINER.pop();
+    const currentContainer = yy.CURRENTCONTAINER.pop();
     currentContainer.exitnode = yy.CONTAINER_EXIT++;
     return currentContainer;
 }
@@ -213,9 +213,9 @@ function enterSubGraph(yy) {
  */
 function exitSubGraph(yy) {
     //Now should edit the ENTRANCE LINK to point to a>b, a>d, a>e
-    var currentSubGraph = getCurrentContainer(yy);
+    const currentSubGraph = getCurrentContainer(yy);
     debug('Exit subgraph ' + currentSubGraph);
-    var link = null;
+    let link = null;
 
     //fix entrance
     for (var i in yy.LINKS) {
@@ -233,12 +233,12 @@ function exitSubGraph(yy) {
     if (link !== null) {
         //and then relink it to containers nodes that have no LEFT links
         //traverse
-        for (var node in currentSubGraph.ROOTNODES) {
-            if (!currentSubGraph.ROOTNODES.hasOwnProperty(node)) continue;
-            var node = currentSubGraph.ROOTNODES[node];
+        for (var n in currentSubGraph.ROOTNODES) {
+            if (!currentSubGraph.ROOTNODES.hasOwnProperty(n)) continue;
+            const node = currentSubGraph.ROOTNODES[n];
             currentSubGraph.entrance.nolinks = undefined;
             node.nolinks = undefined;
-            var newLink = getLink(yy, link.linkType, currentSubGraph.entrance, node, link.label,
+            const newLink = getLink(yy, link.linkType, currentSubGraph.entrance, node, link.label,
                 undefined, undefined, undefined, undefined, true);
             newLink.container = currentSubGraph;
             yy.LINKS.splice(i++, 0, newLink);
@@ -247,10 +247,10 @@ function exitSubGraph(yy) {
 
     //fix exits
     //{"link":{"linkType":">","left":1,"right":"z","label":"from e and h"}}
-    var exits = [];
+    const exits = [];
     for (var node in currentSubGraph.OBJECTS) {
         if (!currentSubGraph.OBJECTS.hasOwnProperty(node)) continue;
-        var node = currentSubGraph.OBJECTS[node];
+        node = currentSubGraph.OBJECTS[node];
         if (!hasOutwardLink(yy, node)) {
             exits.push(node);
         }
@@ -277,7 +277,7 @@ function getGroup(yy, ref) {
     if (ref instanceof Group) return ref;
     debug("getGroup() NEW GROUP:" + yy + "/" + ref, true);
     if (!yy.GROUPIDS) yy.GROUPIDS = 1;
-    var newGroup = new Group(yy.GROUPIDS++);
+    const newGroup = new Group(yy.GROUPIDS++);
     debug("push group " + newGroup + " to " + yy);
     _pushObject(yy, newGroup);
 
@@ -313,8 +313,8 @@ function getGroup(yy, ref) {
  * @return the link that got added
  */
 function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass, dontadd) {
-    var lastLink;
-    var current_container = getCurrentContainer(yy);
+    let lastLink;
+    const current_container = getCurrentContainer(yy);
 
     debug(true);
     if (rhs instanceof SubGraph && !rhs.getEntrance()) {
@@ -322,7 +322,7 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
     }
     if (rhs.nolinks && current_container) {
         debug('REMOVE ' + rhs + ' from root nodes of the container ' + current_container);
-        var idx = current_container.ROOTNODES.indexOf(rhs);
+        const idx = current_container.ROOTNODES.indexOf(rhs);
         if (idx >= 0) {
             current_container.ROOTNODES.splice(idx, 1);
         }
@@ -339,7 +339,7 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
 
     if (lhs instanceof Array) {
         debug("getLink LHS array, type:" + linkType + " l:[" + lhs + "] r:" + rhs + " inlineLinkLabel:" + inlineLinkLabel + " commonLinkLabel: " + commonLinkLabel + " linkColor:" + linkColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
-        for (var i = 0; i < lhs.length; i++) {
+        for (let i = 0; i < lhs.length; i++) {
             debug("    1Get link " + lhs[i]);
             lastLink = getLink(yy, linkType, lhs[i], rhs, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
         }
@@ -348,7 +348,7 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
     }
     if (rhs instanceof Array) {
         debug("getLink RHS array, type:" + linkType + " l:" + lhs + " r:[" + rhs + "] inlineLinkLabel:" + inlineLinkLabel + " commonLinkLabel: " + commonLinkLabel + " linkColor:" + linkColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
-        for (var i = 0; i < rhs.length; i++) {
+        for (let i = 0; i < rhs.length; i++) {
             debug("    2Get link " + rhs[i]);
             lastLink = getLink(yy, linkType, lhs, rhs[i], inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
         }
@@ -356,7 +356,7 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
         return lastLink;
     }
     {
-        var fmt = "";
+        let fmt = "";
         if (inlineLinkLabel)
             fmt += "inlineLinkLabel: " + inlineLinkLabel;
         if (commonLinkLabel)
@@ -375,7 +375,7 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
     if (!(rhs instanceof Node) && !(rhs instanceof Group) && !(rhs instanceof SubGraph)) {
         throw new Error("RHS not a Node,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
-    var link = new Link(linkType, lhs, rhs);
+    const link = new Link(linkType, lhs, rhs);
 
     if (lcompass) link.lcompass = lcompass;
     else if (getAttr(lhs, 'compass')) link.lcompass = getAttr(lhs, 'compass');
@@ -402,7 +402,7 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
         debug('  set commonLinkLabel ' + commonLinkLabel);
     }
     if (rhs instanceof Node) {
-        tmp = rhs.getLinkLabel();
+        const tmp = rhs.getLinkLabel();
         if (tmp) {
             link.setLabel(tmp);
             debug('  reset link label to ' + tmp);
@@ -452,9 +452,9 @@ function getGraphRoot(yy) {
  * Usage: grammar/state.grammar, generators/digraph.js
  */
 function hasOutwardLink(yy, node) {
-    for (var i in yy.LINKS) {
+    for (const i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
-        var r = yy.LINKS[i];
+        const r = yy.LINKS[i];
         if (r.left.name === node.name) {
             return true;
         }
@@ -466,9 +466,9 @@ function hasOutwardLink(yy, node) {
  * return true if node has inward link OUTSIDE container it is in
  */
 function hasInwardLink(yy, node, nodesContainer) {
-    for (var i in yy.LINKS) {
+    for (const i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
-        var r = yy.LINKS[i];
+        const r = yy.LINKS[i];
         if (nodesContainer &&
             r.container.name === nodesContainer.name) {
             continue;
@@ -484,9 +484,9 @@ function hasInwardLink(yy, node, nodesContainer) {
  * test if container has the object
  */
 function containsObject(container, o) {
-    for (var i in container.OBJECTS) {
+    for (const i in container.OBJECTS) {
         if (!container.OBJECTS.hasOwnProperty(i)) continue;
-        var c = container.OBJECTS[i];
+        const c = container.OBJECTS[i];
         if (c == o) {
             return true;
         }
@@ -503,7 +503,7 @@ function containsObject(container, o) {
  * Usage: generators
  */
 function traverseLinks(yy, callback) {
-    for (var i in yy.LINKS) {
+    for (const i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
         callback(yy.LINKS[i]);
     }
@@ -513,7 +513,7 @@ function traverseLinks(yy, callback) {
  * Usage: generators
  */
 function traverseObjects(container, callback) {
-    for (var i in container.OBJECTS) {
+    for (const i in container.OBJECTS) {
         if (!container.OBJECTS.hasOwnProperty(i)) continue;
         callback(container.OBJECTS[i]);
     }
@@ -545,10 +545,10 @@ function _getDefaultAttribute(yy, attrname, callback) {
     // no need for the value, but runs init if missing
     getGraphRoot(yy);
     // debug("_getDefaultAttribute "+attrname);
-    for (var i in yy.CURRENTCONTAINER) {
+    for (const i in yy.CURRENTCONTAINER) {
         if (!yy.CURRENTCONTAINER.hasOwnProperty(i)) continue;
-        var ctr = yy.CURRENTCONTAINER[i];
-        var defaultAttribute = ctr.getDefault(attrname);
+        const ctr = yy.CURRENTCONTAINER[i];
+        const defaultAttribute = ctr.getDefault(attrname);
         // debug(" traverse _getDefaultAttribute "+attrname+" from "+ctr+" as
         // "+a);
         if (defaultAttribute) {
@@ -558,7 +558,7 @@ function _getDefaultAttribute(yy, attrname, callback) {
             return defaultAttribute;
         }
     }
-    var defaultAttribute = getGraphRoot(yy).getDefault(attrname);
+    const defaultAttribute = getGraphRoot(yy).getDefault(attrname);
     if (defaultAttribute) {
         debug("_getDefaultAttribute got from graphroot");
         if (callback)
@@ -576,7 +576,7 @@ function _getSubGraph(yy, ref) {
     if (ref instanceof SubGraph) return ref;
     //debug("_getSubGraph() NEW SubGraph:" + yy + "/" + ref,true);
     if (!yy.SUBGRAPHS) yy.SUBGRAPHS = 1;
-    var newSubGraph = new SubGraph(yy.SUBGRAPHS++);
+    const newSubGraph = new SubGraph(yy.SUBGRAPHS++);
     //debug("push SubGraph " + newSubGraph + " to " + yy);
     _pushObject(yy, newSubGraph);
     //debug(false);
@@ -604,7 +604,7 @@ function _addLink(yy, l) {
  * Push given object into a current container
  */
 function _pushObject(yy, o) {
-    var cnt = getCurrentContainer(yy)
+    const cnt = getCurrentContainer(yy)
     debug("_pushObject " + o + "to " + cnt, true);
     cnt.OBJECTS.push(o);
     cnt.ROOTNODES.push(o);

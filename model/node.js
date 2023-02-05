@@ -31,7 +31,7 @@ class Node extends GraphObject {
         return this;
     }
     getLinkLabel() {
-        var tmp = this.linklabel;
+        const tmp = this.linklabel;
         // TODO: Uhoh, makes no sense! Move away to generator if needed
         /*
         Resetting link label breaks:
@@ -65,7 +65,7 @@ class Node extends GraphObject {
         return this.image;
     }
     toString() {
-        var fmt = "";
+        let fmt = "";
         if (this.color)
             fmt += ",color: " + this.color;
         if (this.label)

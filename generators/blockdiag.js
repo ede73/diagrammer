@@ -30,15 +30,15 @@ node js/parse.js verbose blockdiag.test blockdiag
 */
 function blockdiag(yy) {
     output(yy, "blockdiag{\n default_fontsize = 14");
-    var root = getGraphRoot(yy);
+    const root = getGraphRoot(yy);
     if (root.getDirection() === "portrait") {
         output(yy, "  orientation=portrait");
     } else {
         // DEFAULT
         output(yy, "  orientation=landscape");
     }
-    var tmp = root.getStart();
-    var parseObjects = function (obj) {
+    let tmp = root.getStart();
+    const parseObjects = function (obj) {
         output(true);
         if (obj instanceof Group) {
             output(yy, ' group "' + obj.getLabel() + '"{', true);
@@ -47,7 +47,7 @@ function blockdiag(yy) {
             if (tmp && tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
             traverseObjects(obj, function (z) {
-                tmp = getAttrFmt(z, 'color', ',color="{0}"') +
+                const tmp = getAttrFmt(z, 'color', ',color="{0}"') +
                     getShape(shapes.blockdiag, z.shape, ',shape={0}') +
                     getAttrFmt(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
@@ -60,12 +60,12 @@ function blockdiag(yy) {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
             // ICON does not work, using background
-            var style = getAttrFmt(obj, 'style', ',style="{0}"');
+            let style = getAttrFmt(obj, 'style', ',style="{0}"');
             if (style != "" && style.match(/(dotted|dashed|solid)/) == null) {
                 style = "";
             }
 
-            var colorIconShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
+            let colorIconShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
                 getAttrFmt(obj, 'image', ',background="icons{0}"') +
                 style +
                 getShape(shapes.blockdiag, obj.shape, ',shape="{0}"') +
@@ -79,22 +79,22 @@ function blockdiag(yy) {
 
     traverseObjects(root, parseObjects);
 
-    traverseLinks(yy, function (l) {
-        var t = "";
-        if (l.linkType.indexOf(".") !== -1) {
+    traverseLinks(yy,  (link)=> {
+        let t = "";
+        if (link.isDotted()) {
             t += ',style="dotted" ';
-        } else if (l.linkType.indexOf("-") !== -1) {
+        } else if (link.isDashed()) {
             t += ',style="dashed" ';
         }
-        var labelAndItsColor = getAttrFmt(l, 'label', ',label = "{0}"' + getAttrFmt(l, ['color', 'textcolor'], 'textcolor="{0}"'));
-        var color = getAttrFmt(l, 'color', ',color="{0}"');
+        const labelAndItsColor = getAttrFmt(link, 'label', ',label = "{0}"' + getAttrFmt(link, ['color', 'textcolor'], 'textcolor="{0}"'));
+        const color = getAttrFmt(link, 'color', ',color="{0}"');
         t += labelAndItsColor + color;
         t = t.trim();
         if (t.substring(0, 1) == ",")
             t = t.substring(1).trim();
         if (t != "")
             t = "[" + t + "]";
-        output(yy, "  " + l.left.getName() + " -> " + l.right.getName() + t + ";");
+        output(yy, "  " + link.left.getName() + " -> " + link.right.getName() + t + ";");
     });
     output(yy, "}");
 }

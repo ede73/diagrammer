@@ -25,42 +25,42 @@ function seqdiag(yy) {
     // quite fucked up life line activations and no control over..skip
     // it,shrimpy!
     yy.result(" activation = none;");
-    var root = getGraphRoot(yy);
+    const root = getGraphRoot(yy);
     // print out all node declarations FIRST (if any)
-    for (var i in root.OBJECTS) {
+    for (const i in root.OBJECTS) {
         if (!root.OBJECTS.hasOwnProperty(i)) continue;
-        var obj = root.OBJECTS[i];
+        const obj = root.OBJECTS[i];
         if (obj instanceof Group) {
             yy.result(' /*' + obj.getName() + getAttrFmt(obj, 'label', ' {0}*/'));
-            for (var j in obj.OBJECTS) {
+            for (const j in obj.OBJECTS) {
                 if (!obj.OBJECTS.hasOwnProperty(j)) continue;
-                var z = obj.OBJECTS[j];
+                const z = obj.OBJECTS[j];
                 // no color support either..
-                var styleAndLabel = getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
+                let styleAndLabel = getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
                 if (styleAndLabel.trim() != "")
                     styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
                 yy.result(z.getName() + styleAndLabel + ";");
             }
         } else if (obj instanceof Node) {
-            var styleAndLabel = getAttrFmt(obj, 'style', ',style={0}') + getAttrFmt(obj, 'label', ',label="{0}"') + getAttrFmt(obj, 'color', ',color="{0}"');
+            let styleAndLabel = getAttrFmt(obj, 'style', ',style={0}') + getAttrFmt(obj, 'label', ',label="{0}"') + getAttrFmt(obj, 'color', ',color="{0}"');
             if (styleAndLabel.trim() != "")
                 styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
             yy.result(obj.getName() + styleAndLabel + ";");
         }
     }
-    for (var i in yy.LINKS) {
+    for (const i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
-        var link = yy.LINKS[i];
-        var attrs = [];
-        var linkType = "";
-        var rhs = link.right;
-        var lhs = link.left;
+        const link = yy.LINKS[i];
+        const attrs = [];
+        let linkType = "";
+        let rhs = link.right;
+        let lhs = link.left;
 
-        var color = link.color;
+        const color = link.color;
         if (color) {
             attrs.push('color="' + color + '"');
         }
-        var label = link.label;
+        let label = link.label;
         if (label) {
             if (label.indexOf("::") !== -1) {
                 label = label.split("::");
@@ -84,15 +84,10 @@ function seqdiag(yy) {
         // TODO:Assuming producing DIGRAPH
         // For GRAPH all edges are type --
         // but we could SET arrow type if we'd like
-        var rightName = rhs.getName();
-        var dot = false;
-        var dash = false;
-        //var broken = false;
-        if (link.linkType.indexOf(".") !== -1) {
-            dot = true;
-        } else if (link.linkType.indexOf("-") !== -1) {
-            dash = true;
-        } else if (link.linkType.indexOf("/") !== -1) {
+        let rightName = rhs.getName();
+        const dot = link.isDotted();
+        const dash = link.isDashed();
+        if (link.isBroken()) {
             attrs.push("failed");
         }
         if (link.linkType.indexOf("<") !== -1 && link.linkType.indexOf(">") !== -1) {

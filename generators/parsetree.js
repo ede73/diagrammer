@@ -43,7 +43,7 @@ Only one root supported?
 */
 
 function parsetree(yy) {
-	var nodeList = [];
+	const nodeList = [];
 	function addLinkedNode(left, right) {
 		if (!(left instanceof Node)) return;
 		if (!(right instanceof Node)) return;
@@ -64,7 +64,7 @@ function parsetree(yy) {
 		root[0].id = 1;
 		const text=(!root[0].label) ? root[0].name : root[0].label;
 		nodeList.push({key: root[0].id, text: text, fill: "#f8f8f8", stroke: "#4d90fe"});
-		var keyId = 2;
+		let keyId = 2;
 		getGraphRoot(yy).OBJECTS.forEach((node) => {
 			if (!node.id) {
 				node.id = keyId++;

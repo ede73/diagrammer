@@ -21,14 +21,6 @@ class SubGraph extends Group {
     getLinkLabel() {
         return this.linklabel;
     }
-    /**
-     * Set default nodecolor, groupcolor, linkcolor Always ask from the
-     * currentContainer first
-     */
-    setDefault(key, value) {
-        //debug("Set SubGraph " + key + " to " + value);
-        return setAttr(this, key, value);
-    }
     setEntrance(entrance) {
         debug("subgraph:Set entrance to " + entrance);
         this.entrance = entrance;
@@ -45,12 +37,8 @@ class SubGraph extends Group {
     getExit() {
         return this.exit;
     }
-    getDefault(key) {
-        //debug("subgrah:Get SubGraph " + key);
-        return getAttr(this, key);
-    }
     toString() {
-        var fmt = "";
+        let fmt = "";
         if (this.linklabel)
             fmt += ",linklabel:" + this.linklabel;
         if (this.entrance)

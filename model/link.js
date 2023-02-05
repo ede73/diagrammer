@@ -17,8 +17,49 @@ class Link extends GraphObject {
 		this.linktextcolor = undefined;
 		this.container = undefined;
 	}
+
+	isDotted() {
+		return this.linkType.indexOf(".") !== -1;
+	}
+
+	isDashed() {
+		return this.linkType.indexOf("-") !== -1;
+	}
+
+	isBroken() {
+		return this.linkType.indexOf("/") !== -1;
+	}
+
+	/**
+	 * @returns True if link has arrows on both sides
+	 */
+	isBidirectional() {
+		return this.isLeftLink() && this.isRightLink();
+	}
+
+	/**
+	 * @returns true if this link is undirected (no arrows)
+	 */
+	isUndirected() {
+		return !this.isLeftLink() && !this.isRightLink();
+	}
+
+	/**
+	 * @returns true if link points left. Notice! Link can still be birectional!
+	 */
+	isLeftLink() {
+		return this.linkType.indexOf("<") !== -1;
+	}
+
+	/**
+	 * @returns true if link points right. Notice! Link can still be birectional!
+	 */
+	isRightLink() {
+		return this.linkType.indexOf(">") !== -1;
+	}
+
 	toString() {
-		var fmt = "";
+		let fmt = "";
 		if (this.lcompass)
 			fmt += ",lcompass: " + this.lcompass;
 		if (this.rcompass)

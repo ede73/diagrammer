@@ -24,14 +24,14 @@ function findNode(tree, findData) {
 	if (tree.data === findData) {
 		return tree;
 	}
-	for (var i in tree.CHILDREN) {
+	for (const i in tree.CHILDREN) {
 		if (!tree.CHILDREN.hasOwnProperty(i)) continue;
-		var tn = tree.CHILDREN[i];
+		const tn = tree.CHILDREN[i];
 		if (tn.data === findData) {
 			return tn;
 		}
 		if (tn.CHILDREN.length > 0) {
-			var tmp = findNode(tn, findData);
+			const tmp = findNode(tn, findData);
 			if (tmp) {
 				return tmp;
 			}
@@ -52,9 +52,9 @@ function traverseTree(root, callback, enter, exit, level, hasSibling, parent) {
 	}
 	for (var i in root.CHILDREN) {
 		if (!root.CHILDREN.hasOwnProperty(i)) continue;
-		var tn = root.CHILDREN[i];
-		var isLeaf = tn.CHILDREN.length === 0;
-		var hasNodeSiblings = (parseInt(i) + 1) !== root.CHILDREN.length;
+		const tn = root.CHILDREN[i];
+		const isLeaf = tn.CHILDREN.length === 0;
+		const hasNodeSiblings = (parseInt(i) + 1) !== root.CHILDREN.length;
 		debug('node ' + tn.data.name + ' is leaf?' + isLeaf + " hasSiblings" + hasNodeSiblings + " i=" + (parseInt(i) + 1) + "/");
 		callback(tn, isLeaf, hasNodeSiblings);
 		if (tn.CHILDREN.length > 0) {

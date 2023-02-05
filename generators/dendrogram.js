@@ -21,13 +21,13 @@ to
 node js/parse.js verbose dendrogram.test dendrogram
 */
 function dendrogram(yy) {
-	var tree;
+	let tree;
 	function addNode(lhs, rhs) {
 		if (!tree) {
 			tree = new TreeNode(lhs);
 		}
 		if (!(lhs instanceof Node)) return;
-		var cl = findNode(tree, lhs);
+		const cl = findNode(tree, lhs);
 		if (!cl) {
 			throw new Error('Left node (' + lhs.name + ') not found from tree');
 		}
@@ -58,9 +58,9 @@ function dendrogram(yy) {
 			output(yy, '{', true);
 			output(yy, '"name": "' + t.data.name + '",');
 		}
-	}, function (t) {
+	}, (t)=> {
 		output(yy, '"children": [', true);
-	}, function (t, hasNextSibling) {
+	},  (t, hasNextSibling)=> {
 		output(false);
 		output(yy, ']', false);
 		if (hasNextSibling) {

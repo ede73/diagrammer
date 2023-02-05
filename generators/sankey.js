@@ -21,13 +21,13 @@ to
 node js/parse.js verbose sankey.test sankey
 */
 function sankey(yy) {
-	var tree;
+	let tree;
 	function addNode(left, right) {
 		if (!tree) {
 			tree = new TreeNode(left);
 		}
 		if (!(left instanceof Node)) return;
-		var cl = findNode(tree, left);
+		const cl = findNode(tree, left);
 		if (!cl) {
 			throw new Error('Left node (' + left.name + ') not found from tree');
 		}
@@ -42,9 +42,9 @@ function sankey(yy) {
 	 * For a dendrogram we're not interested in nodes
 	 * just edges(for now!)
 	 */
-	traverseLinks(yy, function (l) {
+	traverseLinks(yy, function (link) {
 		//debug('link node '+l.left.name+' to '+l.right.name);
-		addNode(l.left, l.right);
+		addNode(link.left, link.right);
 	});
 
 	//output(yy,'{',true);

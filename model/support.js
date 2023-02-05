@@ -39,8 +39,8 @@ String.prototype.format = function () {
     return formatted;
 };
 String.prototype.formatArray = function (arra) {
-    var formatted = this;
-    for (var i = 0; i < arra.length; i++) {
+    let formatted = this;
+    for (let i = 0; i < arra.length; i++) {
         formatted = formatted.replace("{" + i + "}", arra[i]);
     }
     return formatted;
@@ -68,10 +68,10 @@ function getAttr(cl, attr) {
  */
 function getAttrFmt(cl, attr, fmt, resultarray) {
     if (attr instanceof Array) {
-        for (var i in attr) {
+        for (const i in attr) {
             if (!attr.hasOwnProperty(i)) continue;
             // debug("Get FMT attr "+attr[i]+" from "+cl);
-            var tmp = getAttrFmt(cl, attr[i], fmt, resultarray);
+            const tmp = getAttrFmt(cl, attr[i], fmt, resultarray);
             if (tmp !== "") {
                 debug("Return " + tmp);
                 return tmp;
@@ -81,7 +81,7 @@ function getAttrFmt(cl, attr, fmt, resultarray) {
     }
     if (!cl[attr] || cl[attr] == 0)
         return "";
-    var tmp = fmt.format(cl[attr]);
+    const tmp = fmt.format(cl[attr]);
     if (resultarray)
         resultarray.push(tmp);
     return " " + tmp + " ";
@@ -89,9 +89,9 @@ function getAttrFmt(cl, attr, fmt, resultarray) {
 
 var indentLevel = 0;
 function output(yy, txt, indentOrDedent) {
-    var prefix = "";
+    let prefix = "";
     if (txt !== true && txt !== false && yy !== true && yy !== false) {
-        for (var i = 0; i < indentLevel; i++) {
+        for (let i = 0; i < indentLevel; i++) {
             prefix += "    ";
         }
         yy.result(prefix + txt);
@@ -108,4 +108,13 @@ function outputFmt(yy, txt, a) {
         yy.result(txt);
     else
         yy.result(txt.formatArray(a));
+}
+
+function* iterateLinks(yy) {
+    for (const i in yy.LINKS) {
+        if (!yy.LINKS.hasOwnProperty(i)) continue;
+        /** @type {Link} */
+        let foolTypeChecker = yy.LINKS[i];
+        yield foolTypeChecker;
+    }
 }

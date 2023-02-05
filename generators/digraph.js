@@ -65,7 +65,7 @@ function digraph(yy) {
             nattrs.push(r);
         }
         getAttrFmt(obj, 'label', 'label="{0}"', nattrs);
-        var t = "";
+        let t = "";
         if (nattrs.length > 0)
             t = "[" + nattrs.join(",") + "]";
         output(yy, obj.getName() + t + ';');
@@ -99,13 +99,13 @@ function digraph(yy) {
     // This may FORWARD DECLARE a node...which creates problems with coloring
     if (r.getEqual() && r.getEqual().length > 0) {
         output(yy, "{rank=same;", true);
-        for (var x = 0; x < r.getEqual().length; x++) {
+        for (let x = 0; x < r.getEqual().length; x++) {
             output(yy, r.getEqual()[x].getName() + ";");
         }
         output(yy, "}", false);
     }
     const fixgroup = (c => {
-        for (var i in c.OBJECTS) {
+        for (const i in c.OBJECTS) {
             if (!c.OBJECTS.hasOwnProperty(i)) continue;
             const o = c.OBJECTS[i];
             if (o instanceof Group) {
@@ -122,10 +122,10 @@ function digraph(yy) {
 
     function getFirstLinkOfTheGroup(grp) {
         //output(yy,"FIRST NODE"+JSON.stringify(grp));
-        for (var i in yy.LINKS) {
+        for (const i in yy.LINKS) {
             if (!yy.LINKS.hasOwnProperty(i)) continue;
             const l = yy.LINKS[i];
-            for (var j in grp.OBJECTS) {
+            for (const j in grp.OBJECTS) {
                 if (!grp.OBJECTS.hasOwnProperty(j)) continue;
                 const n = grp.OBJECTS[j];
                 if (n == l.left) {
@@ -138,12 +138,12 @@ function digraph(yy) {
     }
 
     function getLastLinkInGroup(grp) {
-        var nod = undefined;
+        let nod = undefined;
         // output(yy,"LAST NODE"+JSON.stringify(grp));
-        for (var i in yy.LINKS) {
+        for (const i in yy.LINKS) {
             if (!yy.LINKS.hasOwnProperty(i)) continue;
             const l = yy.LINKS[i];
-            for (var j in grp.OBJECTS) {
+            for (const j in grp.OBJECTS) {
                 if (!grp.OBJECTS.hasOwnProperty(j)) continue;
                 const n = grp.OBJECTS[j];
                 if (n == l.left)
@@ -156,10 +156,10 @@ function digraph(yy) {
         return nod;
     }
 
-    var lastexit = undefined;
-    var lastendif = undefined;
+    let lastexit = undefined;
+    let lastendif = undefined;
     const traverseObjects = function traverseObjects(root) {
-        for (var i in root.OBJECTS) {
+        for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
             const obj = root.OBJECTS[i];
             if (obj instanceof Group) {
@@ -208,7 +208,7 @@ function digraph(yy) {
                             const lastLink = getFirstLinkOfTheGroup(grp);
                             const ln = getLastLinkInGroup(grp);
                             // decision node
-                            //var en = "exit" + getAttr(o, 'exitnode');
+                            //const en = "exit" + o.exitnode
 
                             if (lastexit) {
                                 output(yy, lastexit + "->" + sn + "[label=\"NO\",color=red];");
@@ -230,11 +230,11 @@ function digraph(yy) {
     }(r);
 
     output(yy, "//links start");
-    for (var i in yy.LINKS) {
+    for (const i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
         const link = yy.LINKS[i];
         const attrs = [];
-        var label = link.label;
+        let label = link.label;
         if (label) {
             if (label.indexOf("::") !== -1) {
                 label = label.split("::");
@@ -250,9 +250,9 @@ function digraph(yy) {
         }
         getAttrFmt(link, 'color', 'color="{0}"', attrs);
         getAttrFmt(link, ['textcolor', 'color'], 'fontcolor="{0}"', attrs);
-        var linkType;
-        var rhs = link.right;
-        var lhs = link.left;
+        let linkType;
+        let rhs = link.right;
+        let lhs = link.left;
 
         debug("// link from "+lhs+" to "+rhs);
         if (rhs instanceof Group) {
@@ -274,9 +274,9 @@ function digraph(yy) {
                 //get containers all nodes that have no outward links...(TODO:should be in model actually!)
                 //perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
                 const exits = [];
-                for (var i in lhs.OBJECTS) {
+                for (const i in lhs.OBJECTS) {
                     if (!lhs.OBJECTS.hasOwnProperty(i)) continue;
-                    var go = lhs.OBJECTS[i];
+                    const go = lhs.OBJECTS[i];
                     if (!hasOutwardLink(yy, go)) {
                         //debug('test node '+go);
                         exits.push(go);
@@ -296,32 +296,32 @@ function digraph(yy) {
         // TODO:Assuming producing DIGRAPH
         // For GRAPH all edges are type --
         // but we could SET arrow type if we'd like
-        if (link.linkType.indexOf(".") !== -1) {
+        if (link.isDotted()) {
             attrs.push('style="dotted"');
-        } else if (link.linkType.indexOf("-") !== -1) {
+        } else if (link.isDashed()) {
             attrs.push('style="dashed"');
         }
-        if (link.linkType.indexOf("/") !== -1) {
+        if (link.isBroken()) {
             // TODO: Somehow denote better this "quite does not reach"
             // even though such an edge type MAKES NO SENSE in a graph
             attrs.push('arrowhead="tee"');
         }
-        if (link.linkType.indexOf("<") !== -1 && link.linkType.indexOf(">") !== -1) {
+        if (link.isBidirectional()) {
             linkType = "->";
             attrs.push("dir=both");
-        } else if (link.linkType.indexOf("<") !== -1) {
+        } else if (link.isLeftLink()) {
             const tmp = lhs;
             lhs = rhs;
             rhs = tmp;
             linkType = "->";
-        } else if (link.linkType.indexOf(">") !== -1) {
+        } else if (link.isRightLink()) {
             linkType = "->";
         } else {
             // is dotted or dashed no direction
             linkType = "->";
             attrs.push("dir=none");
         }
-        var t = "";
+        let t = "";
         if (attrs.length > 0)
             t = "[" + attrs.join(",") + "]";
         debug('print lhs '+lhs);

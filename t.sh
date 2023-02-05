@@ -56,7 +56,7 @@ FORMAT=png
  FORMAT=svg
 }
 
-input=${1:-state2.txt}
+input=${1:-tests/state2.txt}
 generator=${2:-dot}
 
 #EXPORTREMOVE
@@ -74,28 +74,28 @@ rm -f "$IMAGEFILE"
 OUT=${input%.*}_${generator}.out
 rm -f "$OUT"
 
-extras=$verbose
 #EXPORTREMOVE
-echo "test parser $extras $OUT"
+echo "test parser $verbose $OUT"
 
 case "$generator" in
-  dexgraph|nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
-    node --max-old-space-size=4096  "$MYPATH/parse.js" "$extras" "$input" "$generator" >"$OUT"
+  nwdiag|actdiag|blockdiag|plantuml_sequence|mscgen)
+    node --max-old-space-size=4096  "$MYPATH/parse.js" "$input" "$generator" "$verbose" >"$OUT"
     [ $text -ne 0 ] && cat "$OUT"
   ;;
   neato|twopi|circo|fdp|sfdp)
-   node --max-old-space-size=4096  "$MYPATH/parse.js" "$extras" "$input" digraph >"$OUT"
+   node --max-old-space-size=4096  "$MYPATH/parse.js" "$input" digraph "$verbose" > "$OUT"
    [ $text -ne 0 ] && cat "$OUT"
   ;;
   ast|dendrogram|sankey)
-    node --max-old-space-size=4096 "$MYPATH/parse.js" "$extras" "$input" "$generator"
+    node --max-old-space-size=4096 "$MYPATH/parse.js" "$input" "$generator" "$verbose"
     exit 0
   ;;
   *)
-    node --max-old-space-size=4096 "$MYPATH/parse.js" "$extras" "$input" digraph >"$OUT"
+    node --max-old-space-size=4096 "$MYPATH/parse.js" $verbose "$input" digraph "$verbose" >"$OUT"
     [ $text -ne 0 ] && cat "$OUT"
   ;;
 esac
+
 rc=$?
 # shellcheck disable=SC2181
 [ $? -ne 0 ] && {
@@ -104,23 +104,34 @@ rc=$?
 }
 [ $text -ne 0 ] && exit 0
 
+[ $(stat --format=%s "$OUT") -eq 0 ] && {
+  echo "Something went wrong, generator produced EMPTY file $OUT"
+  exit 10
+}
+
 echo "Generate sequence $generator"
+
+. ./display_image.sh
+
+nwdiag() {
+  nwdiag3 $*
+}
 
 case "$generator" in
   plantuml_sequence)
-    java -Xmx2048m -jar "$PLANTUML_JAR" "$OUT" >"$IMAGEFILE"&& [ $silent = 0 ] && open "$IMAGEFILE"
+    java -Xmx2048m -jar "$PLANTUML_JAR" "$OUT" >"$IMAGEFILE"&& [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
   nwdiag|actdiag|blockdiag)
-    "$generator" < "$OUT" -a -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && open "$IMAGEFILE"
+    "$generator" < "$OUT" -a -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
   mscgen)
-    "$generator" < "$OUT" -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && open "$IMAGEFILE"
+    "$generator" < "$OUT" -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
   neato|twopi|circo|fdp|sfdp)
-    "$generator" < "$OUT" -T"${FORMAT}" -o "$IMAGEFILE" && [ $silent = 0 ] && open "$IMAGEFILE"
+    "$generator" < "$OUT" -T"${FORMAT}" -o "$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
   *)
-    dot < "$OUT" -T"${FORMAT}" -o "$IMAGEFILE"  && [ $silent = 0 ] && open "$IMAGEFILE"
+    dot < "$OUT" -T"${FORMAT}" -o "$IMAGEFILE"  && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
 esac
 

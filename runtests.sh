@@ -1,100 +1,102 @@
 #!/bin/sh
 #./makeLexerAndParser.sh >/dev/null
-#parallelism for 8 cores
-if ! which node>/dev/null; then
- PATH=$PATH:/usr/local/bin
+if ! which node >/dev/null; then
+  PATH=$PATH:/usr/local/bin
 fi
 
+. ./display_image.sh
+
+#parallelism for 8 cores
 PARALLEL=${2:-8}
 verbose=1
 
 rm -f .error
 
-checkError(){
+checkError() {
   if [ -f .error ]; then
     echo ERROR
     exit 10
   fi
 }
 
-setError(){
+setError() {
   touch .error
   echo "ERROR $1 in $2"
   checkError
 }
 
-test(){
- checkError
- [ $verbose -ne 0 ] && echo "Run test $1 using $x"
- ./t.sh skipparsermake silent tests "tests/$1" "$x" >/dev/null
- rc=$?
- [ $rc -ne 0 ] && setError "$rc" "$1"
- png="${1%.*}_${x}.png"
- out="${1%.*}_${x}.out"
- if [ -f "tests/$png" ]; then
-   [ ! -f "ref/$x/$png" ] && cp "tests/$png" "ref/$x/$png"
-   [ ! -f "ref/$x/$out" ] && cp "tests/$out" "ref/$x/$out"
-   if ! diff "tests/$png" "ref/$x/$png"; then
-	echo "ERROR: at $1, image tests/$png ref/$x/$png differ" >&2
-        diff -u "tests/$out" "ref/$x/$out"
-	open -Fn "tests/$png" "ref/$x/$png"
-	setError 11 "$1"
-   fi
- else
-   echo "ERROR: Could not produce output tests/$png" >&2
-   ls -l "tests/$png"
-   setError 12 "$1"
- fi
+test() {
+  checkError
+  [ $verbose -ne 0 ] && echo "    test($*) using $testbin"
+  ./t.sh skipparsermake silent tests "tests/$1" "$testbin" >/dev/null
+  rc=$?
+  [ $rc -ne 0 ] && setError "$rc" "$1"
+  png="${1%.*}_${testbin}.png"
+  out="${1%.*}_${testbin}.out"
+  if [ -f "tests/$png" ]; then
+    [ ! -f "ref/$testbin/$png" ] && cp "tests/$png" "ref/$testbin/$png"
+    [ ! -f "ref/$testbin/$out" ] && cp "tests/$out" "ref/$testbin/$out"
+    if ! diff "tests/$png" "ref/$testbin/$png"; then
+      echo "    ERROR: at $1, image tests/$png ref/$testbin/$png differ" >&2
+      diff -u "tests/$out" "ref/$testbin/$out"
+      display_image "tests/$png" "ref/$testbin/$png"
+      setError 11 "$1"
+    fi
+  else
+    echo "ERROR: Could not produce output tests/$png" >&2
+    ls -l "tests/$png"
+    setError 12 "$1"
+  fi
 }
 
 i=0
-runtest(){
- checkError
- i=$((i + 1))
- [ $verbose -ne 0 ] && echo "Running test $i"
- test "$*" &
- [ $((i % PARALLEL)) = 0 ] && wait
- checkError
- [ $verbose -ne 0 ] && echo "test $i ok"
+runtest() {
+  checkError
+  i=$((i + 1))
+  [ $verbose -ne 0 ] && echo "  runtest($*) #$i with testbin=$testbin"
+  test "$*" &
+  [ $((i % PARALLEL)) = 0 ] && wait
+  checkError
+  [ $verbose -ne 0 ] && echo "      test #$i ok"
 }
 
 #EDE:New act dag is fucked..instead of Lane1 it prints out random number as lane title, groups work though
 tests="${1:-dot }" #actdiag } #blockdiag}
 for test in $tests; do
   echo "Test suite $test" >&2
-  x=$test
+  testbin=$test
   runtest ast.txt
-[ "$test" != "actdiag" ] && runtest state_nodelinktests.txt
-[ "$test" != "actdiag" ] && runtest url.txt
-[ "$test" != "actdiag" ] && runtest state.txt
-[ "$test" != "actdiag" ] && runtest state2.txt
-[ "$test" != "actdiag" ] && runtest state3.txt
-[ "$test" != "actdiag" ] && runtest state4.txt
-[ "$test" != "actdiag" ] && [ "$test" != "blockdiag" ] && runtest state5.txt
-[ "$test" != "actdiag" ] && runtest state6.txt
-[ "$test" != "actdiag" ] && runtest state7.txt
-[ "$test" != "actdiag" ] && runtest state8.txt
-[ "$test" != "actdiag" ] && runtest state9.txt
-[ "$test" != "actdiag" ] && runtest state10.txt
-[ "$test" != "actdiag" ] && runtest state11.txt
-[ "$test" != "actdiag" ] && runtest state12.txt
-[ "$test" != "actdiag" ] && runtest state_cluster_edge.txt
-[ "$test" != "actdiag" ] && runtest state_dual_node.txt
-[ "$test" != "actdiag" ] && runtest state_innergroups.txt
-[ "$test" != "actdiag" ] && runtest state_recursive_linking.txt
-[ "$test" != "actdiag" ] && runtest state_images.txt
-[ "$test" != "actdiag" ] && runtest fulltest.txt
-[ "$test" != "blockdiag" ] && runtest state_tcp.txt
-[ "$test" != "actdiag" ] && runtest state_y_edge.txt
-[ "$test" != "actdiag" ] && runtest state_conditionals.txt
-runtest state_group.txt
-[ "$test" != "actdiag" ] && runtest nodes.txt
-[ "$test" != "actdiag" ] && runtest events.txt
-[ "$test" != "actdiag" ] && runtest compass.txt
-runtest group_group_link.txt
+  [ "$test" != "actdiag" ] && runtest state_nodelinktests.txt
+  [ "$test" != "actdiag" ] && runtest url.txt
+  [ "$test" != "actdiag" ] && runtest state.txt
+  [ "$test" != "actdiag" ] && runtest state2.txt
+  [ "$test" != "actdiag" ] && runtest state3.txt
+  [ "$test" != "actdiag" ] && runtest state4.txt
+  [ "$test" != "actdiag" ] && [ "$test" != "blockdiag" ] && runtest state5.txt
+  [ "$test" != "actdiag" ] && runtest state6.txt
+  [ "$test" != "actdiag" ] && runtest state7.txt
+  [ "$test" != "actdiag" ] && runtest state8.txt
+  [ "$test" != "actdiag" ] && runtest state9.txt
+  [ "$test" != "actdiag" ] && runtest state10.txt
+  [ "$test" != "actdiag" ] && runtest state11.txt
+  [ "$test" != "actdiag" ] && runtest state12.txt
+  [ "$test" != "actdiag" ] && runtest state_cluster_edge.txt
+  [ "$test" != "actdiag" ] && runtest state_dual_node.txt
+  [ "$test" != "actdiag" ] && runtest state_innergroups.txt
+  [ "$test" != "actdiag" ] && runtest state_recursive_linking.txt
+  [ "$test" != "actdiag" ] && runtest state_images.txt
+  [ "$test" != "actdiag" ] && runtest fulltest.txt
+  [ "$test" != "blockdiag" ] && runtest state_tcp.txt
+  [ "$test" != "actdiag" ] && runtest state_y_edge.txt
+  [ "$test" != "actdiag" ] && runtest state_conditionals.txt
+  runtest state_group.txt
+  [ "$test" != "actdiag" ] && runtest nodes.txt
+  [ "$test" != "actdiag" ] && runtest events.txt
+  [ "$test" != "actdiag" ] && runtest compass.txt
+  runtest group_group_link.txt
 done
 
-x=nwdiag
+testbin=nwdiag
 runtest state13.txt
 runtest state14.txt
 runtest state15.txt
@@ -102,14 +104,14 @@ runtest state16.txt
 
 tests=${1:-mscgen seqdiag plantuml_sequence}
 for test in $tests; do
-  x=$test
+  testbin=$test
   runtest state_sequence.txt
   runtest state_sequence2.txt
   runtest state_conditionals.txt
   runtest events.txt
 done
 
-x=plantuml_sequence
+testbin=plantuml_sequence
 runtest plantuml_context.txt
 runtest plantuml_context2.txt
 

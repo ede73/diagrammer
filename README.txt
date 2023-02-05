@@ -1,4 +1,5 @@
-apt-get install make jison graphviz # for debian 
+apt-get install make jison graphviz wslu # for debian 
+# sudo apt install openjdk-18-jre # if you want plantuml
 brew install graphviz --with-pango
 
 http://www.gnu.org/software/make/manual/html_node/Foreach-Function.html#Foreach-Function

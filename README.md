@@ -297,6 +297,8 @@ graphroot;GraphRoot | {OBJECTS[] | ROOTNODES[] | generator | visualizer | (curre
 graphobject->"many:1"graphroot
 ```
 
+<img width=30% src="https://user-images.githubusercontent.com/1845554/217098499-26c7b5ce-8f97-4b5e-b2a3-175cb35697d8.png">
+
 ## GraphRoot
 Represents the diagram/graph and necessary properties excluding Links (stored separately)
 

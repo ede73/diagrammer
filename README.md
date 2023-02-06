@@ -1,5 +1,5 @@
 # Introduction
-I'm a visual learner and I've always liked visual representation instead of reading boring endless blahblah from a book.
+I'm a visual learner and I've always liked visual representation instead of reading boring endless blahblah from a book. Or just documenting my own projects.
 
 There are plethora of awesome visualization tools available for any of your needs:
 - Sequence diagrams
@@ -15,11 +15,11 @@ And so so many tools to choose from:
 - [GoJS](https://gojs.net/latest/samples/parseTree.html) and it's parse trees and other goodies
 - [d3.js](https://d3js.org/) and it's awesome visualization
 
-Make one graph/diagram, and it **can't be re-used** anywhere :) Not without a lot of editing.
+Alas all suffer from the same dilemma, make one graph/diagram, and it **can't be re-used** anywhere :) Not without a lot of editing.
 
-Add a visualization to your document, and it's on track to be outdated. But You don't want to update it, because it is **hard to maintain**.
+And to add the visualization to your document, it's on track to be outdated. And You don't want to update it, because it is **hard to maintain**, you have to re-run the visualization again, export the image to the doc ans so forth.
 
-Also **privacy**, many visualization tools are available, but would you use that to visualize your secrets? You've no control over how the remote site might use information on your graph.
+Also **privacy**, many online visualization tools are available, but would you use that to visualize your secrets? You've no control over how the remote site might use information on your graph.
 
 And not limited there, but who ever designed those graph representations in the first place didn't think of simplicity. Some are really awkward to write and learn.
 (Of course in the end, this project is no exception :) )
@@ -34,9 +34,9 @@ LLVM! Anything to anything transpiler (well kinda). Node, javascript on server s
 
 That's so cool! I could have graphviz run in browser! And I could use the SAME rendering engine from command line.
 
-AND I could finally design a proper lexer/parser for the language to be.
+AND I could finally design a proper lexer/parser for the language to be. This could just as well be integrated into the wiki.
 
-# Diagrammer
+# Diagrammer and the language
 
 Main components:
 - Language grammar / lexical rules in grammar/
@@ -49,22 +49,28 @@ Main components:
 I just run this locally (in my Mac or in my Windows on WSL2/Ubuntu)
 
 Example TCP state diagram in the editor
-![image](https://user-images.githubusercontent.com/1845554/216884833-b2f23d32-7f8b-48cc-b1dd-c6b6d7679c6f.png)
+
+<img width=200 src="https://user-images.githubusercontent.com/1845554/216884833-b2f23d32-7f8b-48cc-b1dd-c6b6d7679c6f.png">
 
 And output
-![image](https://user-images.githubusercontent.com/1845554/216884941-9cb3c597-c6d7-42f4-9564-3c69cd936370.png)
+
+<img width=200 src="https://user-images.githubusercontent.com/1845554/216884941-9cb3c597-c6d7-42f4-9564-3c69cd936370.png">
 
 You can select different visualizers from the drop down (without changing your diagram)
-![image](https://user-images.githubusercontent.com/1845554/216885102-38ef5450-ecf0-4583-945e-f1b7954eb674.png)
+
+<img width=200 src="https://user-images.githubusercontent.com/1845554/216885102-38ef5450-ecf0-4583-945e-f1b7954eb674.png">
 
 Plenty of examples (also used in tests)
-![image](https://user-images.githubusercontent.com/1845554/216885127-25ba26bb-194d-4c92-b610-e33999ea005c.png)
+
+<img width=200 src="https://user-images.githubusercontent.com/1845554/216885127-25ba26bb-194d-4c92-b610-e33999ea005c.png">
 
 You can use brower's localstorage to save the diagrams (and load them). You can also export/import then to the 'backend' if needed (requires apache/php)
-![image](https://user-images.githubusercontent.com/1845554/216885227-edf5800a-0585-4df1-b8c9-f022f459d670.png)
+
+<img width=200 src="https://user-images.githubusercontent.com/1845554/216885227-edf5800a-0585-4df1-b8c9-f022f459d670.png">
 
 And if you don't remember how exactly in diagrammer language something was done, you can just click the shapes, arrows, types and it'll output that in the editor
-![image](https://user-images.githubusercontent.com/1845554/216885357-8a1ba706-05ad-41a9-abf9-95745a2f884c.png)
+
+<img width=200 src="https://user-images.githubusercontent.com/1845554/216885357-8a1ba706-05ad-41a9-abf9-95745a2f884c.png">
 
 # The language
 
@@ -77,8 +83,8 @@ In diagrammer you write the graph as
 a>b>c<d<e<(f,g,h)
 ```
 
-That gived you graph:
-![image](https://user-images.githubusercontent.com/1845554/216885697-fbd13681-b728-41da-bfa9-9ee6be5a0f69.png)
+That gives you a graph:
+<img width=200 src="https://user-images.githubusercontent.com/1845554/216885697-fbd13681-b728-41da-bfa9-9ee6be5a0f69.png">
 
 ### Node text
 You can change text of the code by declaring it somewhere as
@@ -150,10 +156,12 @@ or
   {InnerGroup2#5555ff;Inner group2
   xy2
   }
-}```
+}
+```
 
 Gives (on graphviz/dot)
-![image](https://user-images.githubusercontent.com/1845554/216887257-3e134de7-1434-4392-abb3-f98d43afca20.png)
+
+<img width=200 src="https://user-images.githubusercontent.com/1845554/216887257-3e134de7-1434-4392-abb3-f98d43afca20.png">
 
 ### Images
 SOME visualizers(graphviz/dotty) allow using own icons.
@@ -161,7 +169,8 @@ SOME visualizers(graphviz/dotty) allow using own icons.
 a/barcode.png,b/basestation.png,c/battery.png > d/camera.png,e/cpu.png,f/documents.png
 ...
 ```
-![image](https://user-images.githubusercontent.com/1845554/216887662-1aa6fd1c-e7f8-4a70-9fe0-b3abdf0c13b8.png)
+
+<img width=200 src="https://user-images.githubusercontent.com/1845554/216887662-1aa6fd1c-e7f8-4a70-9fe0-b3abdf0c13b8.png">
 
 ### Edge pointing to a group
 Edge can point to a node or two a group. Depending on visualizer group pointing edges may work or not :)
@@ -170,7 +179,8 @@ Edge can point to a node or two a group. Depending on visualizer group pointing 
 ```
 r>singularity y>splita,splitb
 ```
-![image](https://user-images.githubusercontent.com/1845554/216887887-fa72462d-e6fa-4f41-97bb-d464e7815eb8.png)
+
+<img width=200 src="https://user-images.githubusercontent.com/1845554/216887887-fa72462d-e6fa-4f41-97bb-d464e7815eb8.png">
 
 ### Edge compass
 Some visualizer allow hinting where to connect the edge if possivle
@@ -178,7 +188,8 @@ Some visualizer allow hinting where to connect the edge if possivle
 ```
 a#ff0000:se.>b:s,c:se,d:w,e:ne,f:s,g:nw,h:e,i:sw
 ```
-![image](https://user-images.githubusercontent.com/1845554/216888027-4f633927-9129-489c-af69-b95ef2a5883c.png)
+
+<img width=200 src="https://user-images.githubusercontent.com/1845554/216888027-4f633927-9129-489c-af69-b95ef2a5883c.png">
 
 ### Edge types
 Just list of:
@@ -207,6 +218,13 @@ e>f;signal::and a big\nlined\nnote\nie.multiline edge text
 a-$(b:#0000ff)a;jotain kay tassanain
 b-$(colorvariable)b;jotain kay tassanain
 ```
+# Downsides
+
+Nothing's ever perfect. This tool works as a command line tool and as a web tool, but not perfectly.
+I wanted everything to be Javascript and run fluently which ever way.
+Alas, some visualization (renderers) may require X/Display to work, wasn't able to get all renderers compiled(transpiled?) to JS with Emscripten/LLVM, and not all renderers (d3.js) work from command line as they require browser.
+
+Browser local storage works nice, but it's local, ie. jump to another machine and you don't have the files anymore. Hence the export/import.
 
 # Project files
 

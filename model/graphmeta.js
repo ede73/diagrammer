@@ -1,3 +1,4 @@
+//@ts-check
 class GraphMeta {
     /**
      * Which generator to use. Generator converts diagrammer to language understood by visualizer
@@ -28,7 +29,7 @@ class GraphMeta {
     GRAPHROOT=new GraphRoot();
 
     /**
-     * @type {Array[Link]}
+     * @type {Link[]}
      */
     LINKS=[];
 

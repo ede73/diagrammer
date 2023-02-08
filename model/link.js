@@ -1,28 +1,31 @@
+// @ts-check
 /**
- * Create a new link between objects (nodes,groups,lists)
+ * Represents an link (edge) between objects (nodes,groups,lists)
  */
 class Link extends GraphObject {
 	/**
 	 * 
  	 * @param {string} linkType Type of the link(grammar!)
- 	 * @param {GraphObject} l Left hand side of the link
-	 * @param {GraphObject} r Right hand side of the link
+ 	 * @param {GraphObject} lhs Left hand side of the link
+	 * @param {GraphObject} rhs Right hand side of the link
 	 * @constuctor
 	 */
-	constructor(linkType, l, r) {
-		super();
+	constructor(linkType, lhs, rhs) {
+		super(undefined); // TODO:
 		/** @type {string} */
 		this.linkType = linkType.trim();
 		/** @type {GraphObject} */
-		this.left = l;
+		this.left = lhs;
 		/** @type {GraphObject} */
-		this.right = r;
+		this.right = rhs;
 		/** @type {string} */
 		this.lcompass = undefined;
 		/** @type {string} */
 		this.rcompass = undefined;
 		/** @type {string} */
 		this.linktextcolor = undefined;
+		/** @type {string} */
+		this.linkcolor = undefined;
 		/** @type {GraphObject} */
 		this.container = undefined;
 	}

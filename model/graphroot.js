@@ -1,17 +1,17 @@
+// @ts-check 
 /**
  * Create a new graph root.
  * 
  * Even if the TREE has multiple root nodes (or basically multiple trees)
  * the graph will only EVER have one GraphRoot
  * 
- * @constructor
  */
 class GraphRoot extends GraphObject {
     constructor() {
-        super()
-        /** @type {Array[GraphObject]} */
+        super(undefined); // TODO:
+        /** @type {GraphObject[]} */
         this.OBJECTS = [];
-        /** @type {Array[GraphObject]} */
+        /** @type {GraphObject[]} */
         this.ROOTNODES = [];
         // TODO: MOVING TO GraphMeta
         /** @type {string} */
@@ -27,8 +27,8 @@ class GraphRoot extends GraphObject {
         // TODO: MOVING TO GraphMeta
         /** @type {string} */
         this.start = undefined;
-        /** @type {Array[string]} */
-        this.equal = undefined;
+        /** @type {string[]} */
+        this.equal = [];
     }
 
     // TODO: MOVING TO GraphMeta
@@ -112,7 +112,7 @@ class GraphRoot extends GraphObject {
 
     // Save EQUAL node ranking
     /**
-     * @param {Array[string]} value
+     * @param {string[]} value
      * @return {GraphRoot}
      */
     setEqual(value) {
@@ -122,7 +122,7 @@ class GraphRoot extends GraphObject {
 
     /* TODO: make meta.getEqual() */
     /**
-     * @return {Array[string]}
+     * @return {string[]}
      */
     getEqual() {
         return this.equal;
@@ -132,10 +132,12 @@ class GraphRoot extends GraphObject {
      * Set default nodecolor, groupcolor, linkcolor Always ask from the
      * currentContainer first
      * @param {string} key
+     * @param {any} value
      * @return {GraphRoot}
      */
     setDefault(key, value) {
         //debug("graphroot:Set ROOT " + key + " to " + value);
+        // @ts-ignore
         return setAttr(this, key, value);
     }
 

@@ -1,11 +1,15 @@
-debugIndent = 0;
+//@ts-check
+/** @type {number} */
+var debugIndent = 0;
+/** @type {boolean} */
+var VERBOSE;
 
 /**
  * Simple debugger, uses console.log
- * @param {string} msg Message
- * @param {boolean} indentOrDedent whether to indent or dedent
+ * @param {(string|boolean)} msg Message
+ * @param {(boolean|any)} indentOrDedent whether to indent or dedent
  */
-function debug(msg, indentOrDedent) {
+function debug(msg, indentOrDedent = undefined) {
     if (VERBOSE == true && msg !== false && msg !== true) {
         var d = "";
         for (var i = 0; i < debugIndent; i++) d += "    ";
@@ -32,14 +36,17 @@ function setAttr(cl, attr, value) {
 }
 
 /**
- * Create string formatter. Format string according to format rules with positional arguments like xxx={0} yyy={1}
+ * Create a string formatter.
+ * Format string according to format rules with positional arguments like xxx={0} yyy={1}
  * @returns {string}
  */
+// @ts-ignore
 String.prototype.format = function () {
     var formatted = this;
     for (const arg in arguments) {
         formatted = formatted.replace("{" + arg + "}", arguments[arg]);
     }
+    // @ts-ignore
     return formatted;
 };
 
@@ -47,14 +54,16 @@ String.prototype.format = function () {
  * Format a string with provided array of values
  * For example. "{2}{0}{1}".formatArray([2,3,1]) prints 123
  * 
- * @param {Array[any]} array 
+ * @param {Array} array 
  * @returns {string} Formatted string
  */
+// @ts-ignore
 String.prototype.formatArray = function (array) {
     let formatted = this;
     for (let i = 0; i < array.length; i++) {
         formatted = formatted.replace("{" + i + "}", array[i]);
     }
+    // @ts-ignore
     return formatted;
 };
 
@@ -75,7 +84,7 @@ function getAttr(cl, attr) {
  * Return formatted attribute value
  *
  * @param {GraphObject} cl Object to scan thru
- * @param {string} attr Name of the attribute to return
+ * @param {(string|Array)} attr Name of the attribute to return
  * @param {string} fmt Format string to apply to returned variable (optional), example: fillcolor="{0}"
  * @param {Array[any]} [resultarray] If given, in addition for returning, will PUSH the result to this array
  * @returns {string} (possibly formatted) value of the attribute or "" if attribute not found
@@ -93,8 +102,10 @@ function getAttrFmt(cl, attr, fmt, resultarray) {
         }
         return "";
     }
-    if (!cl[attr] || cl[attr] == 0)
+    if (!cl[attr] || cl[attr] == 0) {
         return "";
+    }
+    // @ts-ignore
     const tmp = fmt.format(cl[attr]);
     if (resultarray)
         resultarray.push(tmp);
@@ -106,10 +117,10 @@ var indentLevel = 0;
 /**
  * Output given string, potentially indenting or dedenting
  * @param {(boolean|GraphMeta)} graphmeta 
- * @param {string} txt Text to output
+ * @param {(string|boolean)} txt Text to output
  * @param {boolean} [indentOrDedent] whether to indent to dedent, OPTIONAL
  */
-function output(graphmeta, txt, indentOrDedent=undefined) {
+function output(graphmeta, txt, indentOrDedent = undefined) {
     let prefix = "";
     if (txt !== true && txt !== false && graphmeta !== true && graphmeta !== false) {
         for (let i = 0; i < indentLevel; i++) {
@@ -131,10 +142,12 @@ function output(graphmeta, txt, indentOrDedent=undefined) {
  * @param {Array[any]} [array] Optional array format
  */
 function outputFmt(graphmeta, txt, array) {
-    if (!array)
+    if (!array) {
         graphmeta.result(txt);
-    else
+    } else {
+        // @ts-ignore
         graphmeta.result(txt.formatArray(array));
+    }
 }
 
 /**

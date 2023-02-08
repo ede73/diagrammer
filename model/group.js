@@ -1,19 +1,19 @@
+// @ts-check
+
 /**
- * Create a new container group
- * @param name Name of the container
- * @constructor
+ * Represents a container
  */
 class Group extends GraphObject {
     /** @param {string} name */
     constructor(name) {
-        super();
+        super(undefined); // TODO:
         /** @type {string} */
         this.name = name;
-        /** @type {Array[GraphObject]} */
+        /** @type {GraphObject[]} */
         this.OBJECTS = [];
-        /** @type {Array[GraphObject]} */
+        /** @type {GraphObject[]} */
         this.ROOTNODES = [];
-        /** @type {Array[string]} */
+        /** @type {Node[]} */
         this.equal = undefined;
         /** @type {string} */
         this.linklabel = undefined;
@@ -25,7 +25,7 @@ class Group extends GraphObject {
 
     /**
      * Save EQUAL node ranking
-     * @param {string} value
+     * @param {Node[]} value
      * @return {Group}
      */
     setEqual(value) {
@@ -34,7 +34,7 @@ class Group extends GraphObject {
     }
 
     /**
-     * @return {Array[string]}
+     * @return {Node[]}
      */
     getEqual() {
         return this.equal;
@@ -63,6 +63,7 @@ class Group extends GraphObject {
      */
     setDefault(key, value) {
         debug("group:Set group " + key + " to " + value);
+        // @ts-ignore
         return setAttr(this, key, value);
     }
 

@@ -1,3 +1,4 @@
+//@ts-check
 /**
  * Create a new container SubGraph
  * @param name Name of the container
@@ -6,12 +7,12 @@
 class SubGraph extends Group {
     /** @param {string} name */
     constructor(name) {
-        super();
+        super(undefined); // TODO:
         /** @type {string} */
         this.name = name;
-        /** @type {Array[GraphObject]} */
+        /** @type {GraphObject[]} */
         this.OBJECTS = [];
-        /** @type {Array[GraphObject]} */
+        /** @type {GraphObject[]} */
         this.ROOTNODES = [];
         /** @type {boolean} */
         this.isSubGraph = true;

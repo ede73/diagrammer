@@ -1,17 +1,22 @@
+//@ts-check
 /**
  * Return a targetshape (like actdiga style shapes) matching 'diagrammer' shape representation 
- * @param {Array[string]} shapes like shapes.blockdiag
- * @param {string} shapeKey like doublecircle
+ * @param {string[]} shapes like shapes.blockdiag
+ * @param {(string|number)} shapeKey like doublecircle (or index)
  * @param {string} fmt Format string like ',shape={0}'
  * @returns {string}
  */
 function getShape(shapes, shapeKey, fmt) {
     if (!shapeKey || shapeKey == 0) return "";
+    // @ts-ignore
     shapeKey = shapeKey.toLowerCase();
-    if (shapeKey in shapes)
+    if (shapeKey in shapes) {
+        // @ts-ignore
         return ' ' + fmt.format(shapes[shapeKey]) + ' ';
-    else
+    } else {
+        // @ts-ignore
         return ' ' + fmt.format(shapes['default']) + ' ';
+    }
 }
 
 const shapes = {

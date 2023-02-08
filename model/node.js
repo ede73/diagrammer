@@ -1,5 +1,6 @@
+//@ts-check
 /**
- * Construct a new node
+ * Represents a Node in a visualization
  *
  * @param name Name of the node
  * @param [shape] Optional shape for the node, if not give, will default to what ever default is being used at the moment
@@ -7,7 +8,7 @@
  */
 class Node extends GraphObject {
     constructor(name, shape) {
-        super();
+        super(undefined); // TODO:
         /** @type {string} */
         this.name = name;
         /** @type {string} */

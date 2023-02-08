@@ -1,7 +1,6 @@
+// @ts-check 
 /**
- * Create a new generic graph object
- * @param [label] Optional label
- * @constructor
+ * GraphObject: Anything that is represented in a graph (diagram/visualization)
  */
 class GraphObject {
     /** @param {string} label */

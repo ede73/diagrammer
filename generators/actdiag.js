@@ -21,16 +21,17 @@ e;
 function actdiag(yy) {
     output(yy, "actdiag{\n  default_fontsize = 14");
     const r = getGraphRoot(yy);
-    /*
+    /**
      * does not really work..but portrait mode if
      * (r.getDirection()==="portrait"){ output(yy," orientation=portrait");
      * }else{ //DEFAULT output(yy," orientation=landscape"); }
+     * @param {(Node|Group)} obj
      */
     const parseObjects =  (obj) => {
         output(true);
         if (obj instanceof Group) {
             output(yy, 'lane "' + obj.getName() + '"{', true);
-            traverseObjects(obj, function (z) {
+            traverseObjects(obj, (z)=> {
                 let colorShapeLabel = getAttrFmt(z, 'color', ',color="{0}"') +
                     getShape(shapes.actdiag, z.shape, ',shape={0}') +
                     getAttrFmt(z, 'label', ',label="{0}"');
@@ -64,7 +65,7 @@ function actdiag(yy) {
     };
     traverseObjects(r, parseObjects);
 
-    traverseLinks(yy, function (link) {
+    traverseLinks(yy, (link)=> {
         let t = "";
         if (link.isDotted()) {
             t += ',style="dotted" ';

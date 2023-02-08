@@ -2,33 +2,31 @@
 //Usage: node parse.js [verbose] inputFile [lex] digraph|nwdiag|actdiag|blockdiag|plantuml_sequence >output
 //Usage: node parse.js verbose tests/state_group.txt ast
 
-var fs = require('fs');
-var path = require('path');
-var myArgs = process.argv.slice(2);
+const fs = require('fs');
+const path = require('path');
+const myArgs = process.argv.slice(2);
 
 VERBOSE = false;
 if (myArgs[0] === "verbose") {
     VERBOSE = true;
     myArgs = myArgs.slice(1);
 }
-//var parserSource = generator.generate({moduleName: "state"});
-//The moduleName you specify can also include a namespace, 
-//var parserSource = parser.generate({moduleName: "myCalculator.parser"});
-var raw = fs.readFileSync(path.normalize("./" + myArgs[0]), 'utf8');
-var errors = 0
+
+const raw = fs.readFileSync(path.normalize("./" + myArgs[0]), 'utf8');
+let errors = 0
 
 if (myArgs[1] === "lex") {
-    var lexer = require("../build/state.js");
+    const lexer = require("../build/state.js");
     //LEX
-    var st = lexer.state
+    const st = lexer.state
     st.setInput(raw);
-    var h
+    let h;
     while (h != "EOF" && h != 1) {
         h = st.lex()
         console.log("State:" + h + "(" + st.yytext + ")")
     }
 } else {
-    var parser = require("../build/parser.js");
+    const parser = require("../build/parser.js");
     parser.parser.yy.OUTPUT = myArgs[1];
     parser.parser.trace = function (x) {
         console.log("TRACE:" + x);

@@ -4,39 +4,73 @@
  * @constructor
  */
 class SubGraph extends Group {
+    /** @param {string} name */
     constructor(name) {
         super();
+        /** @type {string} */
         this.name = name;
+        /** @type {Array[GraphObject]} */
         this.OBJECTS = [];
+        /** @type {Array[GraphObject]} */
         this.ROOTNODES = [];
+        /** @type {boolean} */
         this.isSubGraph = true;
+        /** @type {string} */
         this.entrance = undefined;
+        /** @type {string} */
         this.exit = undefined;
     }
-    // temporary for RHS list array!!
+
+    /**
+     * temporary for RHS list array!!
+     * @param {string} value
+     * @return {SubGraph}
+     */
     setLinkLabel(value) {
         this.linklabel = value;
         return this;
     }
+
+    /**
+     * @return {string}
+     */
     getLinkLabel() {
         return this.linklabel;
     }
+
+    /**
+     * @return {*}
+     */
     setEntrance(entrance) {
         debug("subgraph:Set entrance to " + entrance);
         this.entrance = entrance;
         return this;
     }
+
+    /**
+     * @return {*}
+     */
     getEntrance() {
         return this.entrance;
     }
+
+    /**
+     * @param {string} exit Exit node name
+     * @return {SubGraph}
+     */
     setExit(exit) {
         debug("subgraph:Set exit to " + exit);
         this.exit = exit;
         return this;
     }
+
+    /**
+     * @return {*}
+     */
     getExit() {
         return this.exit;
     }
+
     toString() {
         let fmt = "";
         if (this.linklabel)

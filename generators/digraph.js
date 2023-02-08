@@ -19,6 +19,8 @@ digraph {
     a->e[label="link text"];
 }
 node js/parse.js verbose digraph.test digraph
+
+@param {module:"../model/link.js".Link} yy
 */
 function digraph(yy) {
     // TODO: See splines control
@@ -26,6 +28,11 @@ function digraph(yy) {
     // TODO: Start note fdp/neato
     // http://www.graphviz.org/doc/info/attrs.html#d:start
 
+    /**
+     * 
+     * @param {string} key 
+     * @returns 
+     */
     const skipEntrances = (key, value) => {
         if (key === 'entrance' || key === 'exit') {
             return null;
@@ -33,6 +40,9 @@ function digraph(yy) {
         return value;
     };
 
+    /**
+     * @param {GraphObject} obj 
+     */
     const processANode = obj => {
         const nattrs = [];
         const styles = [];
@@ -87,14 +97,14 @@ function digraph(yy) {
         output(yy, "rankdir=TD;");
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
-    const s = r.getStart();
-    if (s) {
-        const fwd = getNode(yy, s);
+    const start = r.getStart();
+    if (start) {
+        const fwd = getNode(yy, start);
         processANode(fwd);
         // {$$=" {rank = same;null}\n {rank = same; "+$2+"}\n null
         // [shape=plaintext,
         // label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-        output(yy, "//startnode setup\n  {rank = same;null} {rank = same; " + s + "}\n  null [shape=plaintext, label=\"\"];\n  " + s + "[shape=doublecircle];\n  null->" + s + ";\n");
+        output(yy, "//startnode setup\n  {rank = same;null} {rank = same; " + start + "}\n  null [shape=plaintext, label=\"\"];\n  " + start + "[shape=doublecircle];\n  null->" + start + ";\n");
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
     if (r.getEqual() && r.getEqual().length > 0) {
@@ -230,9 +240,11 @@ function digraph(yy) {
     }(r);
 
     output(yy, "//links start");
-    for (const i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i)) continue;
-        const link = yy.LINKS[i];
+    //     traverseLinks(yy,  (link)=> {
+    // for (const i in yy.LINKS) {
+    //     if (!yy.LINKS.hasOwnProperty(i)) continue;
+    //     const link = yy.LINKS[i];
+    traverseLinks(yy, (link) => {
         const attrs = [];
         let label = link.label;
         if (label) {
@@ -254,7 +266,7 @@ function digraph(yy) {
         let rhs = link.right;
         let lhs = link.left;
 
-        debug("// link from "+lhs+" to "+rhs);
+        debug("// link from " + lhs + " to " + rhs);
         if (rhs instanceof Group) {
             //debug('huuhuu');
             // just pick ONE Node from group and use lhead
@@ -289,7 +301,7 @@ function digraph(yy) {
             }
             //debug('ll is.. '+ll);
             //debug('lr is '+lr);
-            if (!lhs ) {
+            if (!lhs) {
                 // Same as above
             }
         }
@@ -324,8 +336,8 @@ function digraph(yy) {
         let t = "";
         if (attrs.length > 0)
             t = "[" + attrs.join(",") + "]";
-        debug('print lhs '+lhs);
-        debug('print rhs '+rhs);
+        debug('print lhs ' + lhs);
+        debug('print rhs ' + rhs);
         if (lhs instanceof Array) {
             lhs.forEach((element, index, array) => {
                 output(yy, element.getName() + getAttrFmt(link, 'lcompass', '{0}').trim() + linkType + rhs.getName() + getAttrFmt(link, 'rcompass', '{0}').trim() + t + ";");
@@ -333,7 +345,7 @@ function digraph(yy) {
         } else {
             output(yy, lhs.getName() + getAttrFmt(link, 'lcompass', '{0}').trim() + linkType + rhs.getName() + getAttrFmt(link, 'rcompass', '{0}').trim() + t + ";");
         }
-    }
+    });
     output(false);
     output(yy, "}");
 }

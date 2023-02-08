@@ -171,8 +171,8 @@ function ast(yy) {
     traverseObjects(r, objectHandler);
 
     output(true);
-    traverseLinks(yy, l => {
-        const n = JSON.parse(JSON.stringify(l, skipEntrances));
+    traverseLinks(yy, link => {
+        const n = JSON.parse(JSON.stringify(link, skipEntrances));
         n.left = n.left.name;
         n.right = n.right.name;
         n.container.OBJECTS = undefined;

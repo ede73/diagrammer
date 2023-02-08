@@ -10,17 +10,17 @@ Jison adds negative lookahead using /!
 %{
 /*could have a codeblock here*/
 collectNextNode=undefined;
-function haistvittu(t) {
-	//FUCKSAKE! unput is broken, fixed MONTH ago, not seen in npm..fuck fuck
+function fixBrokenUnPut(t) {
+	// Ynput is broken, fixed MONTH ago, not seen in npm
 	// https://github.com/zaach/jison/pull/135
-	//I CANNOT see it in npm install, and it is NOT seen in jison master branch, but jison-lex..does not show it EITHER
-	//but PR merged 3 months ago!WTF..Manually fixed to
+	// I CANNOT see it in npm install, and it is NOT seen in jison master branch, but jison-lex..does not show it EITHER
+	// but PR merged 3 months ago!WTF..Manually fixed to
 	//  nano /usr/local/share//npm/lib/node_modules/jison/node_modules/jison-lex/regexp-lexer.js
 	//  nano /usr/local/share//npm/lib/node_modules/jison-lex/regexp-lexer.js
-        var c=t.input();
+        const c=t.input();
         if (c==":"){
-        	var c1=t.input();
-                var c2=t.input();
+        	const c1=t.input();
+                const c2=t.input();
                 if (c1.match(/[ns]/i) && c2.match(/[ew]/i)
                 	|| (c1.match(/[ensw]/i) && (c2.match(/\s/) || !c2.match(/A-Za-z0-9_/)))){
                         //console.log("compass "+c+c1+c2);
@@ -32,7 +32,7 @@ function haistvittu(t) {
                 //console.log("somethign else");
                 //read as long as A-Z0-9_
                 while(true){
-                	var cz=t.input();
+                	const cz=t.input();
                         if (!cz.match(/[A-Za-z_0-9]/i)) {
                         	if (!cz.match(/\n/)) t.unput(cz);
                                 break;
@@ -126,7 +126,7 @@ Special arrow is /> and </ that denotes a broken signal...
 "</"|"/>"|"<.>"|"<->"|"<>"|"<-"|"<."|"<"|"->"|".>"|">"|"-"|"."	return 'EVENT';
 {IMAGE}		return 'IMAGE';
 {COMPASS}	return 'COMPASS';
-{NAME}		return haistvittu(this);
+{NAME}		return fixBrokenUnPut(this);
 <GROUP>{NAME}	return 'GROUPNAME';
 {D}+		return 'NUMBER';
 <<EOF>>		return 'EOF';

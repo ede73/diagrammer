@@ -1,8 +1,15 @@
-function getShape(shapes, o, fmt) {
-    if (!o || o == 0) return "";
-    o = o.toLowerCase();
-    if (o in shapes)
-        return ' ' + fmt.format(shapes[o]) + ' ';
+/**
+ * Return a targetshape (like actdiga style shapes) matching 'diagrammer' shape representation 
+ * @param {Array[string]} shapes like shapes.blockdiag
+ * @param {string} shapeKey like doublecircle
+ * @param {string} fmt Format string like ',shape={0}'
+ * @returns {string}
+ */
+function getShape(shapes, shapeKey, fmt) {
+    if (!shapeKey || shapeKey == 0) return "";
+    shapeKey = shapeKey.toLowerCase();
+    if (shapeKey in shapes)
+        return ' ' + fmt.format(shapes[shapeKey]) + ' ';
     else
         return ' ' + fmt.format(shapes['default']) + ' ';
 }

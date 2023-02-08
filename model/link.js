@@ -1,20 +1,29 @@
 /**
  * Create a new link between objects (nodes,groups,lists)
- *
- * @param linkType Type of the link(grammar!)
- * @param l Left hand side of the link
- * @param r Right hand side of the link
- * @constructor
  */
 class Link extends GraphObject {
+	/**
+	 * 
+ 	 * @param {string} linkType Type of the link(grammar!)
+ 	 * @param {GraphObject} l Left hand side of the link
+	 * @param {GraphObject} r Right hand side of the link
+	 * @constuctor
+	 */
 	constructor(linkType, l, r) {
 		super();
+		/** @type {string} */
 		this.linkType = linkType.trim();
+		/** @type {GraphObject} */
 		this.left = l;
+		/** @type {GraphObject} */
 		this.right = r;
+		/** @type {string} */
 		this.lcompass = undefined;
+		/** @type {string} */
 		this.rcompass = undefined;
+		/** @type {string} */
 		this.linktextcolor = undefined;
+		/** @type {GraphObject} */
 		this.container = undefined;
 	}
 

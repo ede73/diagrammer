@@ -38,7 +38,11 @@ function blockdiag(yy) {
         output(yy, "  orientation=landscape");
     }
     let tmp = root.getStart();
-    const parseObjects = function (obj) {
+
+    /**
+     * @param {(Node|Group)} obj
+     */
+    const parseObjects = (obj)=> {
         output(true);
         if (obj instanceof Group) {
             output(yy, ' group "' + obj.getLabel() + '"{', true);

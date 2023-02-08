@@ -22,6 +22,10 @@ node js/parse.js verbose dendrogram.test dendrogram
 */
 function dendrogram(yy) {
 	let tree;
+    /**
+     * @param {GraphObject} lhs
+     * @param {GraphObject} rhs
+     */
 	function addNode(lhs, rhs) {
 		if (!tree) {
 			tree = new TreeNode(lhs);

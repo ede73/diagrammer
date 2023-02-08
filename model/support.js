@@ -1,6 +1,9 @@
 debugIndent = 0;
+
 /**
  * Simple debugger, uses console.log
+ * @param {string} msg Message
+ * @param {boolean} indentOrDedent whether to indent or dedent
  */
 function debug(msg, indentOrDedent) {
     if (VERBOSE == true && msg !== false && msg !== true) {
@@ -14,13 +17,14 @@ function debug(msg, indentOrDedent) {
         debugIndent--;
     }
 }
+
 /**
  * Set attribute of an object
  *
- * @param cl Object
- * @param attr Attribute name
- * @param value Value
- * @returns Object itself(cl)
+ * @param {GraphObject} cl Object
+ * @param {string} attr Attribute name
+ * @param {any} value Value
+ * @returns {GraphObject} Object itself(cl)
  */
 function setAttr(cl, attr, value) {
     cl[attr] = value;
@@ -29,27 +33,37 @@ function setAttr(cl, attr, value) {
 
 /**
  * Create string formatter. Format string according to format rules with positional arguments like xxx={0} yyy={1}
- * @returns {String}
+ * @returns {string}
  */
 String.prototype.format = function () {
     var formatted = this;
-    for (var arg in arguments) {
+    for (const arg in arguments) {
         formatted = formatted.replace("{" + arg + "}", arguments[arg]);
     }
     return formatted;
 };
-String.prototype.formatArray = function (arra) {
+
+/**
+ * Format a string with provided array of values
+ * For example. "{2}{0}{1}".formatArray([2,3,1]) prints 123
+ * 
+ * @param {Array[any]} array 
+ * @returns {string} Formatted string
+ */
+String.prototype.formatArray = function (array) {
     let formatted = this;
-    for (let i = 0; i < arra.length; i++) {
-        formatted = formatted.replace("{" + i + "}", arra[i]);
+    for (let i = 0; i < array.length; i++) {
+        formatted = formatted.replace("{" + i + "}", array[i]);
     }
     return formatted;
 };
+
 /**
  * Return attribute like prefix="ATTRHERE" with padding at both sides or "" if 0
  * or undefined
- * @param cl Object to scan
- * @param attr Name of the attribute index to return
+ * @param {GraphObject} cl Object to scan
+ * @param {string} attr Name of the attribute index to return
+ * @return {string} Return the attribute
  */
 function getAttr(cl, attr) {
     if (!cl[attr] || cl[attr] == 0)
@@ -60,11 +74,11 @@ function getAttr(cl, attr) {
 /**
  * Return formatted attribute value
  *
- * @param cl Object to scan thru
- * @param attr Name of the attribute to return
- * @param fmt Format string to apply to returned variable (optional), example: fillcolor="{0}"
- * @param [resultarray] If given, in addition for returning, will PUSH the result to this array
- * @returns (possibly formatted) value of the attribute or "" if attribute not found
+ * @param {GraphObject} cl Object to scan thru
+ * @param {string} attr Name of the attribute to return
+ * @param {string} fmt Format string to apply to returned variable (optional), example: fillcolor="{0}"
+ * @param {Array[any]} [resultarray] If given, in addition for returning, will PUSH the result to this array
+ * @returns {string} (possibly formatted) value of the attribute or "" if attribute not found
  */
 function getAttrFmt(cl, attr, fmt, resultarray) {
     if (attr instanceof Array) {
@@ -88,7 +102,14 @@ function getAttrFmt(cl, attr, fmt, resultarray) {
 }
 
 var indentLevel = 0;
-function output(yy, txt, indentOrDedent) {
+
+/**
+ * Output given string, potentially indenting or dedenting
+ * @param {*} yy 
+ * @param {string} txt Text to output
+ * @param {boolean} [indentOrDedent] whether to indent to dedent, OPTIONAL
+ */
+function output(yy, txt, indentOrDedent=undefined) {
     let prefix = "";
     if (txt !== true && txt !== false && yy !== true && yy !== false) {
         for (let i = 0; i < indentLevel; i++) {
@@ -103,11 +124,17 @@ function output(yy, txt, indentOrDedent) {
     }
 }
 
-function outputFmt(yy, txt, a) {
-    if (!a)
+/**
+ * Send the text to the output, or format the array
+ * @param {*} yy 
+ * @param {string} txt 
+ * @param {Array[any]} [array] Optional array format
+ */
+function outputFmt(yy, txt, array) {
+    if (!array)
         yy.result(txt);
     else
-        yy.result(txt.formatArray(a));
+        yy.result(txt.formatArray(array));
 }
 
 function* iterateLinks(yy) {

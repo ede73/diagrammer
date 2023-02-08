@@ -70,10 +70,14 @@ function plantuml_sequence(yy) {
         const fwd = getNode(yy, s);
         processANode(fwd, false);
     }
-    // print only NON PRINTED container links. If first non printed link is NOT
-    // for this container, break out immediately
-    // this is to emulate ORDERED nodes of plantuml
-    // (node=edge,node,link.group...all in order for this fucker)
+    /**
+     * print only NON PRINTED container links. If first non printed link is NOT
+     * for this container, break out immediately
+     * this is to emulate ORDERED nodes of plantuml
+     * (node=edge,node,link.group...all in order for this fucker)
+     * @param {GraphRoot|Group} container 
+     * @param {boolean} sbgraph 
+     */
     const printLinks = function printLinks(container, sbgraph) {
         for (const link of iterateLinks(yy)){
             if (link.printed)

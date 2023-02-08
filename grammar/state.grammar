@@ -25,7 +25,7 @@ S
 				- Caller can then (willingly) check for LANGUAGE given visualizer(or generator) and
 				  override those or obey to those. Those would be suggested tools to use...
 			*/
-			var generator=getGraphRoot(yy).getGenerator();
+			let generator=getGraphRoot(yy).getGenerator();
 			if (yy.OUTPUT)
 			  generator=yy.OUTPUT;
 			if (!yy.OUTPUT)

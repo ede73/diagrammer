@@ -146,7 +146,7 @@ function cancelVTimer() {
 
 /*
  function highlight(tc) {
- var s = document.getElementById("editable");
+ const s = document.getElementById("editable");
  s.innerHTML = tc.replace("->", "->>").replace(".>", ".>>").replace("<-",
  "<<-").replace("<.", "<<.").replace("<", "<<").replace(">", ">>")
  .replace("->>", '<text id="event">-&gt;</text>').replace(".>>",
@@ -171,7 +171,7 @@ function parse(generator, visualizer) {
     console.log("Parse, set generator to " + parser.yy.OUTPUT + " visualizer to " + parser.yy.VISUALIZER);
     parser.parse(data);
     /*
-     * var tc=textArea.textContent; parser.parse(tc+"\n"); highlight(tc);
+     * const tc=textArea.textContent; parser.parse(tc+"\n"); highlight(tc);
      */
     cancelVTimer();
     vtimer = window.setTimeout(function () {

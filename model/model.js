@@ -13,7 +13,8 @@
  * Usage: grammar/state.grammar
  *
  * @param yy Lexer yy
- * @param variable ${XXX:yyy} assignment or ${XXX} query
+ * @param {string} variable ${XXX:yyy} assignment or ${XXX} query
+ * @return {string} Value of the variable
  */
 function processVariable(yy, variable) {
     // ASSIGN VARIABLE
@@ -44,9 +45,10 @@ function processVariable(yy, variable) {
  * Usage: grammar/state.grammar
  *
  * @param yy Lexer yy
- * @param lhs left hand side of the list
- * @param rhs right hand side of the list
- * @param rhsLinkLabel optional RHS label
+ * @param {GraphObject} lhs left hand side of the list
+ * @param {GraphObject} rhs right hand side of the list
+ * @param {string} rhsLinkLabel optional RHS label
+ * @return {Array[any]}
  */
 function getList(yy, lhs, rhs, rhsLinkLabel) {
     if (lhs instanceof Node) {
@@ -89,8 +91,9 @@ function getList(yy, lhs, rhs, rhsLinkLabel) {
  * Usage: grammar/state.grammar
  *
  * @param yy Lexer yy
- * @param name Reference, Node/Array/Group
- * @param [style] OPTIONAL if style given, update (only if name refers to node)
+ * @param {(string|GraphObject|Array)} name Reference, Node/Array/Group
+ * @param {string} [style] OPTIONAL if style given, update (only if name refers to node)
+ * @return {GraphObject}
  */
 function getNode(yy, name, style) {
     debug("getNode (name:" + name + ",style:" + style + ")", true);
@@ -103,7 +106,7 @@ function getNode(yy, name, style) {
             return name;
         }
 
-        const search = function s(container, name) {
+        const search = function s(container, /** @type {string} */ name) {
             if (container.getName() == name) return container;
             for (const i in container.OBJECTS) {
                 if (!container.OBJECTS.hasOwnProperty(i)) continue;
@@ -155,7 +158,8 @@ function getNode(yy, name, style) {
  * Usage: grammar/state.grammar
  *
  * Get current container
- * @para, yy Lexer
+ * @param yy Lexer
+ * @return {(GraphRoot|Group|SubGroup)}
  */
 function getCurrentContainer(yy) {
     // no need for value, but runs init if missing
@@ -169,7 +173,8 @@ function getCurrentContainer(yy) {
  * Usage: grammar/state.grammar
  *
  * @param yy lexer
- * @param container Set this container as current container
+ * @param {(GraphRoot|Group|SubGroup)} container Set this container as current container
+ * @return {(GraphRoot|Group|SubGroup)}
  */
 function enterContainer(yy, container) {
     yy.CURRENTCONTAINER.push(container);
@@ -302,15 +307,15 @@ function getGroup(yy, ref) {
  * Usage: grammar/state.grammar
  *
  * @param yy lexer
- * @param linkType Type of the link(grammar)
- * @param lhs Left hand side (must be Array,Node,Group)
- * @param rhs Right hand side (must be Array,Node,Group)
- * @param [inlineLinkLabel] Optional label for the link
- * @param [commonLinkLabel] Optional label for the link
- * @param [linkColor] Optional color for the link
- * @param [lcompass] Left hand side compass value
- * @param [rcompass] Reft hand side compass value
- * @return the link that got added
+ * @param {string} linkType Type of the link(grammar)
+ * @param {GraphObject} lhs Left hand side (must be Array,Node,Group)
+ * @param {GraphObject} rhs Right hand side (must be Array,Node,Group)
+ * @param {string} [inlineLinkLabel] Optional label for the link
+ * @param {string} [commonLinkLabel] Optional label for the link
+ * @param {string} [linkColor] Optional color for the link
+ * @param {string} [lcompass] Left hand side compass value
+ * @param {string} [rcompass] Reft hand side compass value
+ * @return {Link} the link that got added
  */
 function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass, dontadd) {
     let lastLink;
@@ -426,6 +431,7 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
  * External utility support for generator
  *
  * Usage: grammar/state.grammar, generators
+ * @return {GraphRoot}
  */
 function getGraphRoot(yy) {
     // debug(" getGraphRoot "+yy);
@@ -437,9 +443,14 @@ function getGraphRoot(yy) {
             }
         }
         debug("...Initialize emptyroot " + yy);
+        // TODO: DOESN'T WORK as type hint! Modularize to own obj..
+        /** @type  {(GraphRoot|Group|SubGroup)} */
         yy.CURRENTCONTAINER = [];
+        /** @type {Array[Link]} */
         yy.LINKS = [];
+        /** @type {int} */
         yy.CONTAINER_EXIT = 1;
+        /** @type  {GraphRoot} */
         yy.GRAPHROOT = new GraphRoot();
         // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
         enterContainer(yy, yy.GRAPHROOT);
@@ -448,14 +459,15 @@ function getGraphRoot(yy) {
     return yy.GRAPHROOT;
 }
 
-/*
+/** 
  * Usage: grammar/state.grammar, generators/digraph.js
+ * @param {GraphObject} node
  */
 function hasOutwardLink(yy, node) {
     for (const i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
-        const r = yy.LINKS[i];
-        if (r.left.name === node.name) {
+        const link = yy.LINKS[i];
+        if (link.left.name === node.name) {
             return true;
         }
     }
@@ -464,16 +476,18 @@ function hasOutwardLink(yy, node) {
 
 /**
  * return true if node has inward link OUTSIDE container it is in
+ * @param {GraphObject} node
+ * @param {GraphObject} nodesContainer (Group?)
  */
 function hasInwardLink(yy, node, nodesContainer) {
     for (const i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
-        const r = yy.LINKS[i];
+        const link = yy.LINKS[i];
         if (nodesContainer &&
-            r.container.name === nodesContainer.name) {
+            link.container.name === nodesContainer.name) {
             continue;
         }
-        if (r.right.name === node.name) {
+        if (link.right.name === node.name) {
             return true;
         }
     }
@@ -482,16 +496,18 @@ function hasInwardLink(yy, node, nodesContainer) {
 
 /**
  * test if container has the object
+ * @param {Group} container
+ * @param {GraphObject} obj
  */
-function containsObject(container, o) {
+function containsObject(container, obj) {
     for (const i in container.OBJECTS) {
         if (!container.OBJECTS.hasOwnProperty(i)) continue;
         const c = container.OBJECTS[i];
-        if (c == o) {
+        if (c == obj) {
             return true;
         }
         if (c instanceof Group) {
-            if (containsObject(c, o)) {
+            if (containsObject(c, obj)) {
                 return true;
             }
         }
@@ -499,8 +515,9 @@ function containsObject(container, o) {
     return false;
 }
 
-/*
+/** 
  * Usage: generators
+ * @param {function(Link)} callback
  */
 function traverseLinks(yy, callback) {
     for (const i in yy.LINKS) {
@@ -509,8 +526,10 @@ function traverseLinks(yy, callback) {
     }
 }
 
-/*
+/**
  * Usage: generators
+ * @param {GraphObject} container
+ * @param {function((Node|Group)):void} callback
  */
 function traverseObjects(container, callback) {
     for (const i in container.OBJECTS) {
@@ -538,8 +557,9 @@ function _getVariables(yy) {
  * otherwise 'unobtainable'
  *
  * @param yy lexer
- * @param attrname Name of the default attribute. If not found, returns undefined
- * @param [callback] Pass the attribute to the this function as only argument - if attribute WAS actually defined!
+ * @param {string} attrname Name of the default attribute. If not found, returns undefined
+ * @param {function(string):void} [callback] Pass the attribute to the this function as only argument - if attribute WAS actually defined!
+ * @return {string}
  */
 function _getDefaultAttribute(yy, attrname, callback) {
     // no need for the value, but runs init if missing
@@ -570,7 +590,8 @@ function _getDefaultAttribute(yy, attrname, callback) {
 }
 
 /**
- * Create a new sub graph
+ * Create a new sub graph or return passed in reference (if it is a subgraph)
+ * @param {SubGraph} [ref]
  */
 function _getSubGraph(yy, ref) {
     if (ref instanceof SubGraph) return ref;
@@ -586,7 +607,7 @@ function _getSubGraph(yy, ref) {
 /**
  * Add link to the list of links, return the LINK
  * @param yy lexer
- * @param l Link (Array or Link)
+ * @param {Link} l Link (Array or Link)
  */
 function _addLink(yy, l) {
     if (l instanceof Array) {
@@ -602,6 +623,7 @@ function _addLink(yy, l) {
 
 /**
  * Push given object into a current container
+ * @param {GraphObject} o
  */
 function _pushObject(yy, o) {
     const cnt = getCurrentContainer(yy)

@@ -25,3 +25,5 @@ export/parser.js
 export/state.js
 export/display_image.sh
 web/exported
+jsconfig.json
+model/jsconfig.json

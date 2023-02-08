@@ -1,3 +1,36 @@
+const NetworkDiagShapeMap =
+{
+    default: "box",
+    invis: "invis",
+    record: "box",
+    doublecircle: "endpoint",
+    box: "box",
+    rect: "box",
+    rectangle: "box",
+    square: "square",
+    roundedbox: "roundedbox",
+    dots: "dots",
+    circle: "circle",
+    ellipse: "ellipse",
+    diamond: "diamond",
+    minidiamond: "minidiamond",
+    minisquare: "minidiamond",
+    note: "note",
+    mail: "mail",
+    cloud: "cloud",
+    actor: "actor",
+    beginpoint: "flowchart.beginpoint",
+    endpoint: "flowchart.endpoint",
+    condition: "flowchart.condition",
+    database: "flowchart.database",
+    terminator: "flowchart.terminator",
+    input: "flowchart.input",
+    loopin: "flowchart.loopin",
+    loop: "flowchart.loop",
+    loopstart: "flowchart.loopin",
+    loopout: "flowchart.loopout",
+    loopend: "flowchart.loopout",
+};
 //node js/parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 /**
 a>b>c,d
@@ -26,16 +59,22 @@ function nwdiag(graphmeta) {
     const r = graphmeta.GRAPHROOT;
     for (const i in r.OBJECTS) {
         if (!r.OBJECTS.hasOwnProperty(i)) continue;
-        const o = r.OBJECTS[i];
-        if (o instanceof Group) {
+        const obj = r.OBJECTS[i];
+        if (obj instanceof Group) {
             // split the label to two, NAME and address
-            graphmeta.result('  network ' + o.getName() + '{');
-            if (o.getLabel() != "")
-                graphmeta.result('    address="' + o.getLabel() + '"');
-            for (const j in o.OBJECTS) {
-                if (!o.OBJECTS.hasOwnProperty(j)) continue;
-                const z = o.OBJECTS[j];
-                let tmp = getAttrFmt(z, 'color', ',color="{0}"') + getShape(shapes.actdiag, z.shape, ',shape="{0}"') + getAttrFmt(z, 'label', ',address="{0}"');
+            graphmeta.result('  network ' + obj.getName() + '{');
+            if (obj.getLabel() != "")
+                graphmeta.result('    address="' + obj.getLabel() + '"');
+            for (const j in obj.OBJECTS) {
+                if (!obj.OBJECTS.hasOwnProperty(j)) continue;
+                const z = obj.OBJECTS[j];
+
+                if (z.shape && !NetworkDiagShapeMap[z.shape]) {
+                    throw new Error("Missing shape mapping");
+                }
+                const mappedShape = NetworkDiagShapeMap[z.shape] ? NetworkDiagShapeMap[z.shape] : NetworkDiagShapeMap['default'];
+
+                let tmp = getAttrFmt(z, 'color', ',color="{0}"') + ',shape="{0}"'.format(mappedShape) + getAttrFmt(z, 'label', ',address="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
                 graphmeta.result("    " + z.getName() + tmp + ';');
@@ -45,20 +84,24 @@ function nwdiag(graphmeta) {
                 if (!graphmeta.EDGES.hasOwnProperty(il)) continue;
                 const edge = graphmeta.EDGES[il];
                 tmp = getAttrFmt(edge, 'label', '[address="{0}"]');
-                if (edge.left == o) {
+                if (edge.left == obj) {
                     graphmeta.result("  " + edge.right.getName() + tmp + ";");
                 }
-                if (edge.right == o) {
+                if (edge.right == obj) {
                     graphmeta.result("  " + edge.left.getName() + tmp + ";");
                 }
             }
             graphmeta.result("  }");
         } else {
-            // ICON does not work, using background
-            let tmp = getAttrFmt(o, 'color', ',color="{0}"') + getAttrFmt(o, 'image', ',background="icons{0}"') + getShape(shapes.actdiag, o.shape, ',shape="{0}"') + getAttrFmt(o, 'label', ',label="{0}"');
+            if (obj.shape && !NetworkDiagShapeMap[obj.shape]) {
+                throw new Error("Missing shape mapping");
+            }
+            const mappedShape = NetworkDiagShapeMap[obj.shape] ? NetworkDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
+        // ICON does not work, using background
+            let tmp = getAttrFmt(obj, 'color', ',color="{0}"') + getAttrFmt(obj, 'image', ',background="icons{0}"') + ',shape="{0}"'.format(mappedShape) + getAttrFmt(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
-            graphmeta.result("    " + o.getName() + tmp + ';');
+            graphmeta.result("    " + obj.getName() + tmp + ';');
         }
     }
     for (const i in graphmeta.EDGES) {

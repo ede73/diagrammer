@@ -1,3 +1,36 @@
+const BlockDiagShapeMap = {
+    default: "box",
+    invis: "invis",
+    record: "box",
+    doublecircle: "endpoint",
+    box: "box",
+    rect: "box",
+    rectangle: "box",
+    square: "square",
+    roundedbox: "roundedbox",
+    dots: "dots",
+    circle: "circle",
+    ellipse: "ellipse",
+    diamond: "diamond",
+    minidiamond: "minidiamond",
+    minisquare: "minidiamond",
+    note: "note",
+    mail: "mail",
+    cloud: "cloud",
+    actor: "actor",
+    beginpoint: "flowchart.beginpoint",
+    endpoint: "flowchart.endpoint",
+    condition: "flowchart.condition",
+    database: "flowchart.database",
+    terminator: "flowchart.terminator",
+    input: "flowchart.input",
+    loopin: "flowchart.loopin",
+    loop: "flowchart.loop",
+    loopstart: "flowchart.loopin",
+    loopout: "flowchart.loopout",
+    loopend: "flowchart.loopout",
+};
+
 //http://blockdiag.com/en/blockdiag/examples.html#simple-diagram
 //node js/parse.js state2.txt blockdiag |blockdiag -Tpng -o a.png - && open a.png
 //available shapes
@@ -43,7 +76,7 @@ function blockdiag(graphmeta) {
     /**
      * @param {(Vertex|Group)} obj
      */
-    const parseObjects = (obj)=> {
+    const parseObjects = (obj) => {
         output(true);
         if (obj instanceof Group) {
             output(graphmeta, ' group "' + obj.getLabel() + '"{', true);
@@ -51,13 +84,17 @@ function blockdiag(graphmeta) {
             output(graphmeta, getAttrFmt(obj, 'label', '   label="{0}"'));
             if (tmp && tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
-            traverseObjects(obj, function (z) {
-                const tmp = getAttrFmt(z, 'color', ',color="{0}"') +
-                    getShape(shapes.blockdiag, z.shape, ',shape={0}') +
-                    getAttrFmt(z, 'label', ',label="{0}"');
+            traverseObjects(obj, function (obj) {
+                if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
+                    throw new Error("Missing shape mapping");
+                }
+                const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
+                const tmp = getAttrFmt(obj, 'color', ',color="{0}"') +
+                    ',shape={0}'.format(mappedShape) +
+                    getAttrFmt(obj, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
-                output(graphmeta, z.getName() + tmp + ';');
+                output(graphmeta, obj.getName() + tmp + ';');
             });
             output(false);
             output(graphmeta, "}");
@@ -70,10 +107,15 @@ function blockdiag(graphmeta) {
                 style = "";
             }
 
+            if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
+                throw new Error("Missing shape mapping");
+            }
+            const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
+
             let colorIconShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
                 getAttrFmt(obj, 'image', ',background="icons{0}"') +
                 style +
-                getShape(shapes.blockdiag, obj.shape, ',shape="{0}"') +
+                ',shape="{0}"'.format(mappedShape) +
                 getAttrFmt(obj, 'label', ',label="{0}"');
             if (colorIconShapeLabel.trim() != "")
                 colorIconShapeLabel = "[" + colorIconShapeLabel.trim().substring(1) + "]";
@@ -84,7 +126,7 @@ function blockdiag(graphmeta) {
 
     traverseObjects(root, parseObjects);
 
-    traverseEdges(graphmeta , (edge)=> {
+    traverseEdges(graphmeta, (edge) => {
         let t = "";
         if (edge.isDotted()) {
             t += ',style="dotted" ';

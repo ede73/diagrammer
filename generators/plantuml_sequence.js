@@ -1,3 +1,35 @@
+const PlantUMLShapeMap = {
+    default: "box",
+    invis: "invis",
+    record: "record",
+    doublecircle: "doublecircle",
+    box: "box",
+    rect: "box",
+    rectangle: "box",
+    square: "square",
+    roundedbox: "box",
+    dots: "point",
+    circle: "circle",
+    ellipse: "ellipse",
+    diamond: "diamond",
+    minidiamond: "Mdiamond",
+    minisquare: "Msquare",
+    note: "note",
+    mail: "tab",
+    cloud: "tripleoctagon",
+    actor: "cds",
+    beginpoint: "circle",
+    endpoint: "doublecircle",
+    condition: "MDiamond",
+    database: "Mcircle",
+    terminator: "ellipse",
+    input: "parallelogram",
+    loopin: "house",
+    loop: "house",
+    loopstart: "house",
+    loopout: "invhouse",
+    loopend: "invhouse",
+};
 /**
 a>b>c,d
 a>e;edge text
@@ -41,8 +73,12 @@ function plantuml_sequence(graphmeta) {
         }
         getAttrFmt(obj, 'image', 'image="icons{0}"', nattrs);
         getAttrFmt(obj, 'textcolor', 'fontcolor="{0}"', nattrs);
-        const shape = getShape(shapes.digraph, obj.shape, 'shape="{0}"');
-        if (shape) {
+
+        if (obj.shape && !PlantUMLShapeMap[obj.shape]) {
+            throw new Error("Missing shape mapping");
+        }
+        if (obj.shape) {
+            const shape = 'shape="{0}"'.format(PlantUMLShapeMap[obj.shape]);
             nattrs.push(shape);
         }
         let t = "";
@@ -80,7 +116,7 @@ function plantuml_sequence(graphmeta) {
      * @param {boolean} sbgraph 
      */
     const printEdges = function printEdges(container, sbgraph) {
-        for (const edge of iterateEdges(graphmeta)){
+        for (const edge of iterateEdges(graphmeta)) {
             if (edge.printed)
                 continue;
             // if container given, print ONLY THOSE edges that match this
@@ -121,7 +157,7 @@ function plantuml_sequence(graphmeta) {
                 // attrs.push(" ltail=cluster_" + ll.getName());
                 // TODO:
                 lhs = lhs.OBJECTS[0];
-                if (!lhs ) {
+                if (!lhs) {
                     // Same as above
                 }
             }

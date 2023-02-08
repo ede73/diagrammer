@@ -1,3 +1,37 @@
+const ActDiagShapeMap =
+{
+    default: "box",
+    invis: "invis",
+    record: "box",
+    doublecircle: "endpoint",
+    box: "box",
+    rect: "box",
+    rectangle: "box",
+    square: "square",
+    roundedbox: "roundedbox",
+    dots: "dots",
+    circle: "circle",
+    ellipse: "ellipse",
+    diamond: "diamond",
+    minidiamond: "minidiamond",
+    minisquare: "minidiamond",
+    note: "note",
+    mail: "mail",
+    cloud: "cloud",
+    actor: "actor",
+    beginpoint: "flowchart.beginpoint",
+    endpoint: "flowchart.endpoint",
+    condition: "flowchart.condition",
+    database: "flowchart.database",
+    terminator: "flowchart.terminator",
+    input: "flowchart.input",
+    loopin: "flowchart.loopin",
+    loop: "flowchart.loop",
+    loopstart: "flowchart.loopin",
+    loopout: "flowchart.loopout",
+    loopend: "flowchart.loopout",
+};
+
 //node js/parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 /**
 a>b>c,d
@@ -32,9 +66,14 @@ function actdiag(graphmeta) {
         output(true);
         if (obj instanceof Group) {
             output(graphmeta, 'lane "' + obj.getName() + '"{', true);
-            traverseObjects(obj, (z) => {
-                let colorShapeLabel = getAttrFmt(z, 'color', ',color="{0}"') +
-                    getShape(shapes.actdiag, z.shape, ',shape={0}') +
+            traverseObjects(obj, (obj) => {
+                if (obj.shape && !ActDiagShapeMap[obj.shape]) {
+                    throw new Error("Missing shape mapping");
+                }
+                const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
+
+                let colorShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
+                    ',shape={0}'.format(mappedShape) +
                     getAttrFmt(z, 'label', ',label="{0}"');
                 if (colorShapeLabel.trim() != "") {
                     colorShapeLabel = "[" + colorShapeLabel.trim().substring(1) + "]";
@@ -52,11 +91,16 @@ function actdiag(graphmeta) {
                 style = "";
             }
 
+            if (obj.shape && !ActDiagShapeMap[obj.shape]) {
+                throw new Error("Missing shape mapping");
+            }
+            const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
+
             // ICON does not work, using background
             let colorIconShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
                 getAttrFmt(obj, 'image', ',background="icons{0}"') +
                 style +
-                getShape(shapes.actdiag, obj.shape, ',shape={0}') +
+                ',shape={0}'.format(mappedShape) +
                 getAttrFmt(obj, 'label', ',label="{0}"');
             if (colorIconShapeLabel.trim() != "")
                 colorIconShapeLabel = "[" + colorIconShapeLabel.trim().substring(1) + "]";

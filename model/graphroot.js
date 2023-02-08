@@ -5,6 +5,7 @@
  * Even if the TREE has multiple root vertices (or basically multiple trees)
  * the graph will only EVER have one GraphRoot
  * 
+ * TODO: Merge to GraphMeta
  */
 class GraphRoot extends GraphObject {
     constructor() {

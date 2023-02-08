@@ -1,3 +1,35 @@
+const DigraphShapeMap = {
+    default: "box",
+    invis: "invis",
+    record: "record",
+    doublecircle: "doublecircle",
+    box: "box",
+    rect: "box",
+    rectangle: "box",
+    square: "square",
+    roundedbox: "box",
+    dots: "point",
+    circle: "circle",
+    ellipse: "ellipse",
+    diamond: "diamond",
+    minidiamond: "Mdiamond",
+    minisquare: "Msquare",
+    note: "note",
+    mail: "tab",
+    cloud: "tripleoctagon",
+    actor: "cds",
+    beginpoint: "circle",
+    endpoint: "doublecircle",
+    condition: "MDiamond",
+    database: "Mcircle",
+    terminator: "ellipse",
+    input: "parallelogram",
+    loopin: "house",
+    loop: "house",
+    loopstart: "house",
+    loopout: "invhouse",
+    loopend: "invhouse",
+};
 /**
 a>b>c,d
 a>e;edhe text
@@ -70,14 +102,19 @@ function digraph(graphmeta) {
         }
         getAttrFmt(obj, 'image', 'image="icons{0}"', nattrs);
         getAttrFmt(obj, 'textcolor', 'fontcolor="{0}"', nattrs);
-        const r = getShape(shapes.digraph, obj.shape, 'shape="{0}"');
-        if (r) {
+        if (obj.shape) {
+            if (obj.shape && !DigraphShapeMap[obj.shape]) {
+                throw new Error("Missing shape mapping");
+            }
+            const mappedShape = DigraphShapeMap[obj.shape] ? DigraphShapeMap[obj.shape] : DigraphShapeMap['default'];
+            const r = 'shape="{0}"'.format(mappedShape);
             nattrs.push(r);
         }
         getAttrFmt(obj, 'label', 'label="{0}"', nattrs);
         let t = "";
-        if (nattrs.length > 0)
+        if (nattrs.length > 0) {
             t = "[" + nattrs.join(",") + "]";
+        }
         output(graphmeta, obj.getName() + t + ';');
     };
 

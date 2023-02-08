@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const myArgs = process.argv.slice(2);
+let myArgs = process.argv.slice(2);
 
 VERBOSE = false;
 if (myArgs[0] === "verbose") {

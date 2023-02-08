@@ -1,6 +1,6 @@
 /**
 a>b>c,d
-a>e;link text
+a>e;edge text
 a;node text
 
 to
@@ -14,7 +14,7 @@ participant  e
 a->b
 b->c
 b->d
-a->e:link text
+a->e:edge text
 @enduml
 
 node js/parse.js verbose plantuml_sequence.test plantuml_sequence
@@ -72,24 +72,24 @@ function plantuml_sequence(graphmeta) {
         processAVertex(fwd, false);
     }
     /**
-     * print only NON PRINTED container links. If first non printed link is NOT
+     * print only NON PRINTED container edges. If first non printed edge is NOT
      * for this container, break out immediately
      * this is to emulate ORDERED nodes of plantuml
-     * (node=edge,node,link.group...all in order for this fucker)
+     * (node=edge,node,edge.group...all in order for this fucker)
      * @param {GraphRoot|Group} container 
      * @param {boolean} sbgraph 
      */
-    const printLinks = function printLinks(container, sbgraph) {
-        for (const link of iterateLinks(graphmeta)){
-            if (link.printed)
+    const printEdges = function printEdges(container, sbgraph) {
+        for (const edge of iterateEdges(graphmeta)){
+            if (edge.printed)
                 continue;
-            // if container given, print ONLY THOSE links that match this
+            // if container given, print ONLY THOSE edges that match this
             // container!
-            if (link.container !== container)
+            if (edge.container !== container)
                 break;
-            link.printed = true;
+            edge.printed = true;
             let note = "";
-            let label = link.label;
+            let label = edge.label;
             if (label) {
                 if (label.indexOf("::") !== -1) {
                     label = label.split("::");
@@ -97,11 +97,11 @@ function plantuml_sequence(graphmeta) {
                     label = label[0].trim();
                 }
             }
-            const color = getAttrFmt(link, 'color', '[{0}]').trim();
+            const color = getAttrFmt(edge, 'color', '[{0}]').trim();
             // getAttrFmt(l, ['textcolor','color'] ,'fontcolor="{0}"',attrs);
             let lt;
-            let rhs = link.right;
-            let lhs = link.left;
+            let rhs = edge.right;
+            let lhs = edge.left;
 
             // output(graphmeta, indent("//"+lr));
             if (rhs instanceof Group) {
@@ -128,32 +128,32 @@ function plantuml_sequence(graphmeta) {
             // TODO:Assuming producing DIGRAPH
             // For GRAPH all edges are type --
             // but we could SET arrow type if we'd like
-            if (link.isBroken()) {
+            if (edge.isBroken()) {
                 // TODO: Somehow denote better this "quite does not reach"
                 // even though such an edge type MAKES NO SENSE in a graph
                 // attrs.push('arrowhead="tee"');
                 // TODO:
             }
-            const dot = link.isDotted();
-            const dash = link.isDashed();
+            const dot = edge.isDotted();
+            const dash = edge.isDashed();
             let swap = false;
-            if (link.linkType.indexOf("<") !== -1 && link.linkType.indexOf(">") !== -1) {
+            if (edge.edgeType.indexOf("<") !== -1 && edge.edgeType.indexOf(">") !== -1) {
                 lt = (dot ? "-" : "") + "-" + color + ">";
                 swap = true;
-            } else if (link.linkType.indexOf("<") !== -1) {
+            } else if (edge.edgeType.indexOf("<") !== -1) {
                 const tmp = lhs;
                 lhs = rhs;
                 rhs = tmp;
                 lt = (dot ? "-" : "") + "-" + color + ">";
-            } else if (link.linkType.indexOf(">") !== -1) {
+            } else if (edge.edgeType.indexOf(">") !== -1) {
                 lt = (dot ? "-" : "") + "-" + color + ">";
             } else if (dot) {
                 // dotted
-                output(graphmeta, getAttrFmt(link, 'label', '...{0}...'));
+                output(graphmeta, getAttrFmt(edge, 'label', '...{0}...'));
                 continue;
             } else if (dash) {
                 // dashed
-                output(graphmeta, getAttrFmt(link, 'label', '=={0}=='));
+                output(graphmeta, getAttrFmt(edge, 'label', '=={0}=='));
                 continue;
             } else {
                 // is dotted or dashed no direction
@@ -202,7 +202,7 @@ function plantuml_sequence(graphmeta) {
             if (obj instanceof Vertex)
                 processAVertex(obj, isSubGraph);
         }
-        printLinks(root, isSubGraph);
+        printEdges(root, isSubGraph);
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
             const obj = root.OBJECTS[i];
@@ -232,7 +232,7 @@ function plantuml_sequence(graphmeta) {
                             '   color="{0}";\n'));
                     }
                     traverseObjects(o, nodeIsSubGraph);
-                    printLinks(o);
+                    printEdges(o);
                     // output(graphmeta, indent("}//end of " + o.getName()));
                 }(obj);
             } else if (!obj instanceof Vertex) {
@@ -240,7 +240,7 @@ function plantuml_sequence(graphmeta) {
             }
         }
     }(root, false);
-    printLinks(root);
+    printEdges(root);
     output(false);
     output(graphmeta, "@enduml");
 }

@@ -50,7 +50,7 @@ S
 			  }
 			}
 			graphmeta.GRAPHROOT = yy.GRAPHROOT;
-			graphmeta.LINKS = yy.LINKS;
+			graphmeta.EDGES = yy.EDGES;
 			graphmeta.parseError = yy.parseError;
 			graphmeta.result = yy.result;
 
@@ -115,7 +115,7 @@ vertexGroupListOrAttrs
 	/* TOOD: Could concatenate $4,$6 or if $4 defined AND $6, $6 could be appended as ::, unless already(note)*/
 readEvents
         /*   1         2       3       4        5               6              7                   8*/
-	: readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> getLink(yy,$EVENT,$readEvents,$vertexGroupListOrAttrs,$6,$8?$8.substring(1):$8,$5,$2,$4).right
+	: readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> getEdge(yy,$EVENT,$readEvents,$vertexGroupListOrAttrs,$6,$8?$8.substring(1):$8,$5,$2,$4).right
 	| readEvents LABEL														-> $$.setLabel($LABEL.substring(1))
 	| vertexGroupListOrAttrs
 	;
@@ -140,10 +140,10 @@ graphContent
 	| COMMENT 			-> "/*"+$COMMENT.substring(2)+"*/\n"
 	| VERTEX_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('vertexcolor'    ,$2=="default"?undefined:$2)
 	| VERTEXTEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('vertextextcolor',$2=="default"?undefined:$2)
-	| LINK_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('linkcolor'    ,$2=="default"?undefined:$2)
-	| LINKTEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('linktextcolor',$2=="default"?undefined:$2)
+	| EDGE_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('edgecolor'    ,$2=="default"?undefined:$2)
+	| EDGETEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('edgetextcolor',$2=="default"?undefined:$2)
 	| GROUP_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('groupcolor'   ,$2=="default"?undefined:$2)
-	| IF 	 ->	setAttr(setAttr(enterContainer(yy,getGroup(yy).setLabel($IF.replace(/\s+then\s*$/,"").replace(/^\s*if\s*/,""))),'conditional','if'),'entrylink',yy.lastSeenVertex)
+	| IF 	 ->	setAttr(setAttr(enterContainer(yy,getGroup(yy).setLabel($IF.replace(/\s+then\s*$/,"").replace(/^\s*if\s*/,""))),'conditional','if'),'entryedge',yy.lastSeenVertex)
 	| ELSEIF {
 		exitContainer(yy);
 		$$=setAttr(enterContainer(yy,getGroup(yy).setLabel($ELSEIF.replace(/\s+then\s*$/,"").replace(/^\s*elseif\s*/,""))),'conditional','elseif')

@@ -27,16 +27,16 @@ class SubGraph extends Group {
      * @param {string} value
      * @return {SubGraph}
      */
-    setLinkLabel(value) {
-        this.linklabel = value;
+    setEdgeLabel(value) {
+        this.edgelabel = value;
         return this;
     }
 
     /**
      * @return {string}
      */
-    getLinkLabel() {
-        return this.linklabel;
+    getEdgeLabel() {
+        return this.edgelabel;
     }
 
     /**
@@ -74,8 +74,8 @@ class SubGraph extends Group {
 
     toString() {
         let fmt = "";
-        if (this.linklabel)
-            fmt += ",linklabel:" + this.linklabel;
+        if (this.edgelabel)
+            fmt += ",edgelabel:" + this.edgelabel;
         if (this.entrance)
             fmt += ",entrance:" + this.entrance;
 

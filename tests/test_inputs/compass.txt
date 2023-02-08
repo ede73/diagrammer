@@ -1,9 +1,9 @@
 $(r:#ff0000)
 
-link color #0000ff
+edge color #0000ff
 a#ff0000:se.>b:s,c:se,d:w,e:ne,f:s,g:nw,h:e,i:sw
 
-link color $(r)
+edge color $(r)
 q#0000ff:ne>b:n
 q:e>c:ne
 q:se>d:e

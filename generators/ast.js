@@ -11,15 +11,15 @@ yy={
             0: Vertex
                 compass: undefined
                 getImage: ƒ ()
-                getLinkLabel: ƒ ()
+                getEdgeLabel: ƒ ()
                 getShape: ƒ ()
                 getStyle: ƒ ()
                 image: undefined
                 label: "node text"
                 name: "a"
-                nolinks: undefined
+                noedges: undefined
                 setImage: ƒ (value)
-                setLinkLabel: ƒ (value)
+                setEdgeLabel: ƒ (value)
                 setShape: ƒ (value)
                 setStyle: ƒ (value)
                 shape: undefined
@@ -51,34 +51,34 @@ yy={
     setVisualizer: ƒ (value)
     toString: ƒ ()
     [[Prototype]]: GraphObject
-    LINKS: (4) [Link, Link, Link, Link]
-        0: Link
+    EDGES: (4) [Edge, Edge, Edge, Edge]
+        0: Edge
             container: GraphRoot {OBJECTS: Array(5), ROOTVERTICES: Array(1), setGenerator: ƒ, getGenerator: ƒ, setVisualizer: ƒ, …}
             left: Vertex
                 compass: undefined
                 getImage: ƒ ()
-                getLinkLabel: ƒ ()
+                getEdgeLabel: ƒ ()
                 getShape: ƒ ()
                 getStyle: ƒ ()
                 image: undefined
                 label: "node text"
                 name: "a"
-                nolinks: undefined
+                noedges: undefined
                 setImage: ƒ (value)
-                setLinkLabel: ƒ (value)
+                setEdgeLabel: ƒ (value)
                 setShape: ƒ (value)
                 setStyle: ƒ (value)
                 shape: undefined
                 style: undefined
                 toString: ƒ ()
                 [[Prototype]]: GraphObject
-                linkType: ">"
+                edgeType: ">"
             right: Vertex {name: 'b', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
             toString: ƒ ()
             [[Prototype]]: GraphObject
-        1: Link {linkType: '>', left: Vertex, right: Vertex, container: GraphRoot, toString: ƒ}
-        2: Link {linkType: '>', left: Vertex, right: Vertex, container: GraphRoot, toString: ƒ}
-        3: Link {linkType: '>', left: Vertex, right: Vertex, label: 'link text', toString: ƒ, …}
+        1: Edge {edgeType: '>', left: Vertex, right: Vertex, container: GraphRoot, toString: ƒ}
+        2: Edge {edgeType: '>', left: Vertex, right: Vertex, container: GraphRoot, toString: ƒ}
+        3: Edge {edgeType: '>', left: Vertex, right: Vertex, label: 'link text', toString: ƒ, …}
         length: 4
     OUTPUT: "ast"
     VISUALIZER: "ast"
@@ -97,10 +97,10 @@ to
     {"node":{"name":"c"}},
     {"node":{"name":"d"}},
     {"node":{"name":"e"}},
-    {"link":{"linkType":">","left":"a","right":"b"}},
-    {"link":{"linkType":">","left":"b","right":"c"}},
-    {"link":{"linkType":">","left":"b","right":"d"}},
-    {"link":{"linkType":">","left":"a","right":"e","label":"link text"}},
+    {"link":{"edgeType":">","left":"a","right":"b"}},
+    {"link":{"edgeType":">","left":"b","right":"c"}},
+    {"link":{"edgeType":">","left":"b","right":"d"}},
+    {"link":{"edgeType":">","left":"a","right":"e","label":"link text"}},
 }
 
 node js/parse.js verbose ast.test ast
@@ -172,8 +172,8 @@ function ast(graphmeta) {
     traverseObjects(r, objectHandler);
 
     output(true);
-    traverseLinks(graphmeta, link => {
-        const n = JSON.parse(JSON.stringify(link, skipEntrances));
+    traverseEdges(graphmeta, edge => {
+        const n = JSON.parse(JSON.stringify(edge, skipEntrances));
         n.left = n.left.name;
         n.right = n.right.name;
         n.container.OBJECTS = undefined;
@@ -183,7 +183,7 @@ function ast(graphmeta) {
         n.container.exitvertex = n.container.exitvertex ? n.container.exitvertex.name : undefined;
         n.container.conditional = undefined;
         n.container = n.container.name;
-        output(graphmeta, JSON.stringify({ link: n }) + ",");
+        output(graphmeta, JSON.stringify({ edge: n }) + ",");
     });
     output(false);
     output(graphmeta, "]", false);

@@ -16,11 +16,11 @@ class Group extends GraphObject {
         /** @type {Vertex[]} */
         this.equal = undefined;
         /** @type {string} */
-        this.linklabel = undefined;
+        this.edgelabel = undefined;
         /** @type {string} */
         this.exitvertex = undefined;
         /** @type {string} */
-        this.entrylink = undefined;
+        this.entryedge = undefined;
     }
 
     /**
@@ -45,17 +45,17 @@ class Group extends GraphObject {
      * @param {string} value
      * @return {Group}
      */
-    setLinkLabel(value) {
-        this.linklabel = value;
+    setEdgeLabel(value) {
+        this.edgelabel = value;
         return this;
     }
 
-    getLinkLabel() {
-        return this.linklabel;
+    getEdgeLabel() {
+        return this.edgelabel;
     }
 
     /**
-     * Set default vertexcolor, groupcolor, linkcolor Always ask from the
+     * Set default vertexcolor, groupcolor, edgecolor Always ask from the
      * currentContainer first
      * @param {string} key
      * @param {any} value

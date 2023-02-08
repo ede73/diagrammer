@@ -1,6 +1,6 @@
 /**
 a>b>c,d
-a>e;link text
+a>e;edge text
 a;node text
 
 to
@@ -42,14 +42,14 @@ function dendrogram(graphmeta) {
 		}
 	}
 
-	//debug(JSON.stringify(graphmeta.LINKS));
+	//debug(JSON.stringify(graphmeta.EDGES));
 	/**
 	 * For a dendrogram we're not interested in vertices
 	 * just edges(for now!)
 	 */
-	traverseLinks(graphmeta, link => {
-		//debug('link node '+l.left.name+' to '+l.right.name);
-		addVertex(link.left, link.right);
+	traverseEdges(graphmeta, edge => {
+		//debug('edge '+l.left.name+' to '+l.right.name);
+		addVertex(edge.left, edge.right);
 	});
 
 	//output(graphmeta,'{',true);

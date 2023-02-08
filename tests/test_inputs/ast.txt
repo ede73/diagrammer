@@ -38,19 +38,19 @@ $(par:#ccccff)
   right
 }
 
-link color #0000ff
+edge color #0000ff
 GraphObject.>GraphRoot;extends(GraphObject->GraphRoot)
 GraphObject.>Node;extends(GraphObject->Node)
 GraphObject.>xGroup;extends(GraphObject->xGroup)
 GraphObject.>Link;extends::extends(GraphObject->Link)
 
-link color #00ff00
+edge color #00ff00
 left<->"links"Node
 left<->"links"xGroup
 right<->"links"xGroup
 right<->"links"Node
 
-link color #ff0000
+edge color #ff0000
 OBJECTS1>"contains"Node
 OBJECTS1>"contains"xGroup
 OBJECTS2>"contains"Node

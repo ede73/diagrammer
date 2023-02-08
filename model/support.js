@@ -151,14 +151,14 @@ function outputFmt(graphmeta, txt, array) {
 }
 
 /**
- * Iterate links
+ * Iterate edges
  * @param {GraphMeta} graphmeta 
  */
-function* iterateLinks(graphmeta) {
-    for (const i in graphmeta.LINKS) {
-        if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
-        /** @type {Link} */
-        let foolTypeChecker = graphmeta.LINKS[i];
+function* iterateEdges(graphmeta) {
+    for (const i in graphmeta.EDGES) {
+        if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
+        /** @type {Edge} */
+        let foolTypeChecker = graphmeta.EDGES[i];
         yield foolTypeChecker;
     }
 }

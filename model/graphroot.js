@@ -129,7 +129,7 @@ class GraphRoot extends GraphObject {
     }
 
     /**
-     * Set default vertexcolor, groupcolor, linkcolor Always ask from the
+     * Set default vertexcolor, groupcolor, edgecolor Always ask from the
      * currentContainer first
      * @param {string} key
      * @param {any} value

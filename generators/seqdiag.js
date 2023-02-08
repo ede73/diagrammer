@@ -1,6 +1,6 @@
 /**
 a>b>c,d
-a>e;link text
+a>e;edge text
 a;node text
 
 to
@@ -15,7 +15,7 @@ e;
 a -> b[];
 b -> c[];
 b -> d[];
-a -> e[label="link text"];
+a -> e[label="edge text"];
 }
 node js/parse.js verbose seqdiag.test seqdiag
 @param {GraphMeta} graphmeta
@@ -49,19 +49,19 @@ function seqdiag(graphmeta) {
             graphmeta.result(obj.getName() + styleAndLabel + ";");
         }
     }
-    for (const i in graphmeta.LINKS) {
-        if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
-        const link = graphmeta.LINKS[i];
+    for (const i in graphmeta.EDGES) {
+        if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
+        const edge = graphmeta.EDGES[i];
         const attrs = [];
-        let linkType = "";
-        let rhs = link.right;
-        let lhs = link.left;
+        let edgeType = "";
+        let rhs = edge.right;
+        let lhs = edge.left;
 
-        const color = link.color;
+        const color = edge.color;
         if (color) {
             attrs.push('color="' + color + '"');
         }
-        let label = link.label;
+        let label = edge.label;
         if (label) {
             if (label.indexOf("::") !== -1) {
                 label = label.split("::");
@@ -75,7 +75,7 @@ function seqdiag(graphmeta) {
             // just pick ONE Vertex from group and use lhead
             // TODO: Assuming it is Vertex (if Recursive groups implemented, it
             // could be smthg else)
-            linkType += " lhead=cluster_" + rhs.getName();
+            edgeType += " lhead=cluster_" + rhs.getName();
             rhs = rhs.OBJECTS[0];
             if (!rhs) {
                 // TODO:Bad thing, EMPTY group..add one invisible node there...
@@ -86,12 +86,12 @@ function seqdiag(graphmeta) {
         // For GRAPH all edges are type --
         // but we could SET arrow type if we'd like
         let rightName = rhs.getName();
-        const dot = link.isDotted();
-        const dash = link.isDashed();
-        if (link.isBroken()) {
+        const dot = edge.isDotted();
+        const dash = edge.isDashed();
+        if (edge.isBroken()) {
             attrs.push("failed");
         }
-        if (link.linkType.indexOf("<") !== -1 && link.linkType.indexOf(">") !== -1) {
+        if (edge.edgeType.indexOf("<") !== -1 && edge.edgeType.indexOf(">") !== -1) {
             // Broadcast type (<>)
             // Alas not supported...
             // HMh..since one could use the === as broadcast
@@ -100,38 +100,38 @@ function seqdiag(graphmeta) {
             // hm.. solve a<>a is broadcast, where as
             // a<>b (any else than node itself) is autoreturn
             if (rhs == lhs) {
-                graphmeta.result(getAttrFmt(link, 'label', '===BROADCAST:{0}==='));
+                graphmeta.result(getAttrFmt(edge, 'label', '===BROADCAST:{0}==='));
                 continue;
             }
-            linkType = '=>';
-        } else if (link.linkType.indexOf("<") !== -1) {
+            edgeType = '=>';
+        } else if (edge.edgeType.indexOf("<") !== -1) {
             if (dot)
-                linkType = "<--";
+                edgeType = "<--";
             else if (dash)
-                linkType = "<<--";
+                edgeType = "<<--";
             else
-                linkType = "<-";
+                edgeType = "<-";
             rightName = rhs.getName();
-        } else if (link.linkType.indexOf(">") !== -1) {
+        } else if (edge.edgeType.indexOf(">") !== -1) {
             if (dot)
-                linkType = "-->";
+                edgeType = "-->";
             else if (dash)
-                linkType = "-->>";
+                edgeType = "-->>";
             else
-                linkType = "->";
+                edgeType = "->";
         } else if (dot) {
             // dotted
-            graphmeta.result(getAttrFmt(link, 'label', '...{0}...'));
+            graphmeta.result(getAttrFmt(edge, 'label', '...{0}...'));
             continue;
         } else if (dash) {
             // dashed
-            graphmeta.result(getAttrFmt(link, 'label', '==={0}==='));
+            graphmeta.result(getAttrFmt(edge, 'label', '==={0}==='));
             continue;
         } else {
             graphmeta.result("ERROR: SHOULD NOT HAPPEN");
         }
         // MUST HAVE whitespace at both sides of the "arrow"
-        graphmeta.result(lhs.getName() + " " + linkType + " " + rightName + "[" + attrs.join(",") + "];");
+        graphmeta.result(lhs.getName() + " " + edgeType + " " + rightName + "[" + attrs.join(",") + "];");
     }
     graphmeta.result("}");
 }

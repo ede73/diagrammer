@@ -43,7 +43,7 @@ Only one root supported?
 */
 function parsetree(graphmeta) {
 	const nodeList = [];
-	function addLinkedVertex(left, right) {
+	function addEdgeedVertex(left, right) {
 		if (!(left instanceof Vertex)) return;
 		if (!(right instanceof Vertex)) return;
 		const key=right.id;
@@ -52,7 +52,7 @@ function parsetree(graphmeta) {
 		nodeList.push({key: key, text: text, fill: "#f8f8f8", stroke: "#4d90fe", parent: parent});
 	}
 
-	//console.log(JSON.stringify(graphmeta.LINKS));
+	//console.log(JSON.stringify(graphmeta.EDGES));
 
 	const root = graphmeta.GRAPHROOT.ROOTVERTICES;
 	if (root.length > 1) {
@@ -71,9 +71,9 @@ function parsetree(graphmeta) {
 		});
 	})();
 
-	traverseLinks(graphmeta, link => {
-		debug('link node '+link.left.name+' to '+link.right.name);
-		addLinkedVertex(link.left, link.right);
+	traverseEdges(graphmeta, edge => {
+		debug('edge '+edge.left.name+' to '+edge.right.name);
+		addEdgeedVertex(edge.left, edge.right);
 	});
 	//console.log(JSON.stringify(nodeList));
 	output(graphmeta, JSON.stringify(nodeList));

@@ -1,6 +1,6 @@
 /**
 a>b>c,d
-a>e;link text
+a>e;edhe text
 a;node text
 
 to
@@ -12,11 +12,11 @@ digraph {
     c;
     d;
     e;
-    //links start
+    //edhes start
     a->b;
     b->c;
     b->d;
-    a->e[label="link text"];
+    a->e[label="edhe text"];
 }
 node js/parse.js verbose digraph.test digraph
 
@@ -130,11 +130,11 @@ function digraph(graphmeta) {
         }
     })(r.OBJECTS);
 
-    function getFirstLinkOfTheGroup(grp) {
+    function getFirstEdgeOfTheGroup(grp) {
         //output(graphmeta,"FIRST VERTEX"+JSON.stringify(grp));
-        for (const i in graphmeta.LINKS) {
-            if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
-            const l = graphmeta.LINKS[i];
+        for (const i in graphmeta.EDGES) {
+            if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
+            const l = graphmeta.EDGES[i];
             for (const j in grp.OBJECTS) {
                 if (!grp.OBJECTS.hasOwnProperty(j)) continue;
                 const n = grp.OBJECTS[j];
@@ -147,12 +147,12 @@ function digraph(graphmeta) {
         return undefined;
     }
 
-    function getLastLinkInGroup(grp) {
+    function getLastEdgeInGroup(grp) {
         let nod = undefined;
         // output(graphmeta,"LAST VERTEX"+JSON.stringify(grp));
-        for (const i in graphmeta.LINKS) {
-            if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
-            const l = graphmeta.LINKS[i];
+        for (const i in graphmeta.EDGES) {
+            if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
+            const l = graphmeta.EDGES[i];
             for (const j in grp.OBJECTS) {
                 if (!grp.OBJECTS.hasOwnProperty(j)) continue;
                 const n = grp.OBJECTS[j];
@@ -197,10 +197,10 @@ function digraph(graphmeta) {
                         output(graphmeta, "//COND " + grp.getName() + " " + cond);
                         if (cond == "endif") {
                             //never reached
-                            const exitlink = grp.exitlink;
-                            if (exitlink) {
-                                output(graphmeta, lastexit + "->" + exitlink + "[color=red];");
-                                output(graphmeta, lastendif + "->" + exitlink + ";");
+                            const exitedge = grp.exitedge;
+                            if (exitedge) {
+                                output(graphmeta, lastexit + "->" + exitedge + "[color=red];");
+                                output(graphmeta, lastendif + "->" + exitedge + ";");
                             }
                         } else {
                             const sn = "entry" + grp.exitvertex;
@@ -211,12 +211,12 @@ function digraph(graphmeta) {
                             //TODO:else does not need diamond
                             output(graphmeta, sn + "[shape=diamond,fixedsize=true,width=1,height=1,label=\"" + grp.getLabel() + "\"];");
                             if (cond == "if") {
-                                //entrylink!
-                                output(graphmeta, grp.entrylink.getName() + "->" + sn + ";");
+                                //entryedge!
+                                output(graphmeta, grp.entryedge.getName() + "->" + sn + ";");
                             }
                             // FIRST node of group and LAST node in group..
-                            const lastLink = getFirstLinkOfTheGroup(grp);
-                            const ln = getLastLinkInGroup(grp);
+                            const lastEdge = getFirstEdgeOfTheGroup(grp);
+                            const ln = getLastEdgeInGroup(grp);
                             // decision node
                             //const en = "exit" + o.exitvertex
 
@@ -225,7 +225,7 @@ function digraph(graphmeta) {
                                 //lastexit = undefined;
                             }
                             // YES LINK to first node of the group
-                            output(graphmeta, sn + "->" + lastLink.getName() + "[label=\"YES\",color=green,lhead=cluster_" + grp.getName() + "];");
+                            output(graphmeta, sn + "->" + lastEdge.getName() + "[label=\"YES\",color=green,lhead=cluster_" + grp.getName() + "];");
                             output(graphmeta, ln.getName() + "->" + lastendif + "[label=\"\"];");
                             lastexit = sn;
                         }
@@ -240,9 +240,9 @@ function digraph(graphmeta) {
     }(r);
 
     output(graphmeta, "//links start");
-    traverseLinks(graphmeta, (link) => {
+    traverseEdges(graphmeta, (edge) => {
         const attrs = [];
-        let label = link.label;
+        let label = edge.label;
         if (label) {
             if (label.indexOf("::") !== -1) {
                 label = label.split("::");
@@ -252,15 +252,15 @@ function digraph(graphmeta) {
                 attrs.push('label="' + label.trim() + '"');
             }
         }
-        const url = link.url;
+        const url = edge.url;
         if (url) {
             attrs.push('URL="' + url.trim() + '"');
         }
-        getAttrFmt(link, 'color', 'color="{0}"', attrs);
-        getAttrFmt(link, ['textcolor', 'color'], 'fontcolor="{0}"', attrs);
-        let linkType;
-        let rhs = link.right;
-        let lhs = link.left;
+        getAttrFmt(edge, 'color', 'color="{0}"', attrs);
+        getAttrFmt(edge, ['textcolor', 'color'], 'fontcolor="{0}"', attrs);
+        let edgeType;
+        let rhs = edge.right;
+        let lhs = edge.left;
 
         debug("// link from " + lhs + " to " + rhs);
         if (rhs instanceof Group) {
@@ -285,7 +285,7 @@ function digraph(graphmeta) {
                 for (const i in lhs.OBJECTS) {
                     if (!lhs.OBJECTS.hasOwnProperty(i)) continue;
                     const go = lhs.OBJECTS[i];
-                    if (!hasOutwardLink(graphmeta.yy, go)) {
+                    if (!hasOutwardEdge(graphmeta.yy, go)) {
                         //debug('test node '+go);
                         exits.push(go);
                     }
@@ -304,29 +304,29 @@ function digraph(graphmeta) {
         // TODO:Assuming producing DIGRAPH
         // For GRAPH all edges are type --
         // but we could SET arrow type if we'd like
-        if (link.isDotted()) {
+        if (edge.isDotted()) {
             attrs.push('style="dotted"');
-        } else if (link.isDashed()) {
+        } else if (edge.isDashed()) {
             attrs.push('style="dashed"');
         }
-        if (link.isBroken()) {
+        if (edge.isBroken()) {
             // TODO: Somehow denote better this "quite does not reach"
             // even though such an edge type MAKES NO SENSE in a graph
             attrs.push('arrowhead="tee"');
         }
-        if (link.isBidirectional()) {
-            linkType = "->";
+        if (edge.isBidirectional()) {
+            edgeType = "->";
             attrs.push("dir=both");
-        } else if (link.isLeftLink()) {
+        } else if (edge.isLeftPointingEdge()) {
             const tmp = lhs;
             lhs = rhs;
             rhs = tmp;
-            linkType = "->";
-        } else if (link.isRightLink()) {
-            linkType = "->";
+            edgeType = "->";
+        } else if (edge.isRightPointingEdge()) {
+            edgeType = "->";
         } else {
             // is dotted or dashed no direction
-            linkType = "->";
+            edgeType = "->";
             attrs.push("dir=none");
         }
         let t = "";
@@ -336,10 +336,10 @@ function digraph(graphmeta) {
         debug('print rhs ' + rhs);
         if (lhs instanceof Array) {
             lhs.forEach((element, index, array) => {
-                output(graphmeta, element.getName() + getAttrFmt(link, 'lcompass', '{0}').trim() + linkType + rhs.getName() + getAttrFmt(link, 'rcompass', '{0}').trim() + t + ";");
+                output(graphmeta, element.getName() + getAttrFmt(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() + getAttrFmt(edge, 'rcompass', '{0}').trim() + t + ";");
             });
         } else {
-            output(graphmeta, lhs.getName() + getAttrFmt(link, 'lcompass', '{0}').trim() + linkType + rhs.getName() + getAttrFmt(link, 'rcompass', '{0}').trim() + t + ";");
+            output(graphmeta, lhs.getName() + getAttrFmt(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() + getAttrFmt(edge, 'rcompass', '{0}').trim() + t + ";");
         }
     });
     output(false);

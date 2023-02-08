@@ -29,7 +29,7 @@ function parse(generator, visualizer) {
     document.getElementById("error").innerText = "";
     parsingStarted = true;
     delete (parser.yy.GRAPHROOT);
-    delete (parser.yy.LINKS);
+    delete (parser.yy.EDGES);
     delete (parser.yy.OBJECTS);
     // TODO: MOVING TO GraphMeta
     parser.yy.USE_GENERATOR = generator;

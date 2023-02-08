@@ -106,8 +106,8 @@ Special arrow is /> and </ that denotes a broken signal...
 "("|")" /*skip for now*/
 {COMMENT}	return 'COMMENT';
 {LISTSEP}	return 'LISTSEP';
-"link color" return 'LINK_COLOR';
-"link textcolor"|"link text color" return 'LINKTEXT_COLOR';
+"edge color" return 'EDGE_COLOR';
+"edge textcolor"|"edge text color" return 'EDGETEXT_COLOR';
 "vertex color" return 'VERTEX_COLOR';
 "vertex textcolor"|"vertex text color" return 'VERTEXTEXT_COLOR';
 "group color" return 'GROUP_COLOR';

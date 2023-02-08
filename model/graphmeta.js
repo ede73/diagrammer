@@ -29,9 +29,9 @@ class GraphMeta {
     GRAPHROOT=new GraphRoot();
 
     /**
-     * @type {Link[]}
+     * @type {Edge[]}
      */
-    LINKS=[];
+    EDGES=[];
 
     /**
      * @type {function(string,string):void}
@@ -58,7 +58,7 @@ class GraphMeta {
      * 
      * yy.result = function()
      * yy.CURRENTCONTAINER = [];
-     * yy.LINKS = []; (!)
+     * yy.EDGES = []; (!)
      * yy.CONTAINER_EXIT = 1;
      * yy.GRAPHROOT = new GraphRoot(); (!)
      *

@@ -109,7 +109,7 @@ var DocCommentHighlightRules = require("./doc_comment_highlight_rules").DocComme
 var StateHighlightRules = function() {
 
    var keywords = lang.arrayToMap(
-        ("generator|visualizer|color|vertex|textcolor|group|color|group|end|group|link|color|link|textcolor|landscape|portrait|equal|shape|start").split("|")
+        ("generator|visualizer|color|vertex|textcolor|group|color|group|end|group|edge|color|edge|textcolor|landscape|portrait|equal|shape|start").split("|")
    );
    var attributes = lang.arrayToMap(
         ("dotted|dashed|solid|bold|rounded|diagonals|invis|singularity|actor|beginpoint|box|circle|cloud|condition|database|default|diamond|dots|doublecircle|ellipse|endpoint|input|loopin|loopout|mail|minidiamond|minisquare|note|record|roundedbox|square|terminator|loop|loopend|loopstart|rect|rectangle").split("|")

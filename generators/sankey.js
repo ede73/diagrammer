@@ -1,6 +1,6 @@
 /**
 a>b>c,d
-a>e;link text
+a>e;edge text
 a;node text
 
 to
@@ -38,14 +38,14 @@ function sankey(graphmeta) {
 		}
 	}
 
-	//debug(JSON.stringify(grpahmeta.LINKS));
+	//debug(JSON.stringify(grpahmeta.EDGES));
 	/**
 	 * For a dendrogram we're not interested in vertices
 	 * just edges(for now!)
 	 */
-	traverseLinks(graphmeta, function (link) {
-		//debug('link node '+l.left.name+' to '+l.right.name);
-		addVertex(link.left, link.right);
+	traverseEdges(graphmeta, function (edge) {
+		//debug('edge '+l.left.name+' to '+l.right.name);
+		addVertex(edge.left, edge.right);
 	});
 
 	//output(graphmeta,'{',true);

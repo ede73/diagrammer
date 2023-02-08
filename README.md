@@ -236,8 +236,8 @@ endif
 ```
 
 It'll make 5 vertex groups:
-1) Beginning of the conditional block, the **if** part ie. *something would happen*, vertices a1,b1 (or links if the vertices were introduced earlier)
-2) Elseif section **something probably would not happen**, vertices a2,b2 (or links if the vertices were introduced earlier)
+1) Beginning of the conditional block, the **if** part ie. *something would happen*, vertices a1,b1 (or edges if the vertices were introduced earlier)
+2) Elseif section **something probably would not happen**, vertices a2,b2 (or edges if the vertices were introduced earlier)
 3) **or if i see a flying bird* part and it's vertices
 4) Else part and it's vertices
 5) End of the conditional block, no vertices
@@ -283,9 +283,9 @@ Briefly as:
 SHAPE RECORD
 graphobject;GraphObject | {name | color | textcolor | url | label }
 avertex;Vertex | { shape | image | style}
-alink;Link | { linktype | left | right}
-agroup;Group | { name | OBJECTS[] | ROOTVERTICES[] | linklabel | "defaults"}
-asubgraph;SubGraph | { name | OBJECTS[] | ROOTVERTICES[] | linklabel | entrance | exit | "defaults"}
+alink;Edge | { edgetype | left | right}
+agroup;Group | { name | OBJECTS[] | ROOTVERTICES[] | edgelabel | "defaults"}
+asubgraph;SubGraph | { name | OBJECTS[] | ROOTVERTICES[] | edgelabel | entrance | exit | "defaults"}
 
 avertex>"inherit"graphobject
 alink>"inherit"graphobject
@@ -300,7 +300,7 @@ graphobject->"many:1"graphroot
 <img width=30% src="https://user-images.githubusercontent.com/1845554/217098499-26c7b5ce-8f97-4b5e-b2a3-175cb35697d8.png">
 
 ## GraphRoot
-Represents the diagram/graph and necessary properties excluding Links (stored separately)
+Represents the diagram/graph and necessary properties excluding Edges (stored separately)
 
 Holds all the objects and rootvertices. The diagram may have more than one root vertex, not all visualizers support these though!
 
@@ -312,7 +312,7 @@ Which direction the graph is to be drawn - if specified.
 
 What's the current default shape - only used during parsing the diagrammer languge while generating Vertexs.
 
-AST/Model note. Links are not stored in GraphRoot, but separately! Why? It's easier to handle them in the generators and vertices and links are output separately to separate sections anyway.
+AST/Model note. Edges are not stored in GraphRoot, but separately! Why? It's easier to handle them in the generators and vertices and edges are output separately to separate sections anyway.
 
 GraphRoot:
 - OBJECTS[Vertex(a), SubGraph(Vertex(b), Vertex(c), Vertex(d), Group(Vertex(f), Vertex(g)))]
@@ -328,12 +328,12 @@ GraphRoot:
 ## GraphObject
 Represents all the objects in the diagram.
 
-## Link (edge)
-Represents link between two objects and all related visualization properties associated with the link.
+## Edge (link)
+Represents edge between two objects(vertices or groups) and all related visualization properties associated with the edge.
 
-Own properties are linktype, left- and righthand sides (+GraphObject properties)
+Own properties are edgetype, left- and righthand sides (+GraphObject properties)
 
-Links are stored separately and available for the generator in yy.LINKS
+Edges are stored separately and available for the generator in yy.EDGES
 
 ## Vertex
 
@@ -341,7 +341,7 @@ Own properties are name, shape, image - if specified, style - if specified (+Gra
 
 ## Group
 
-Own properties are name, linklabel, defaults and list of OBJECTS and ROOTVERTICES.
+Own properties are name, edgelabel, defaults and list of OBJECTS and ROOTVERTICES.
 
 ## SubGraph
 Only used to represented "sub graphs" ie. like in :
@@ -363,14 +363,14 @@ GraphRoot:
 - equals
 - defaults
 
-Own properties are name, linklabel, defaults and list of OBJECTS and ROOTVERTICES, entrance and exit.
+Own properties are name, edgelabel, defaults and list of OBJECTS and ROOTVERTICES, entrance and exit.
 
 # Generators
 Two convenience methods available:
 
 ```
-traverseLinks(yy, link => {
-  // do what ever you like for all the link objects
+traverseEdges(yy, edge => {
+  // do what ever you like for all the edges
 })
 ```
 ```
@@ -398,7 +398,7 @@ traverseTree(root, (vertex, isLeaf, hasSiblings) => {
 - js - The diagrammer parser (also transpiled mscgen, graphviz)
   - mscgen / graphviz visualize the graphs in the Web UI in realtime without any backend support, but not required. I was hoping to build backendless visualization, all in browser. And that's what it does, but had I wanted to go all the way..PlantUML, python3 nwdiag/actdiag..etc. uh. 
 - manual_test_diagrams - some diagrammer tests during development, not tied to tests
-- model - Diagrammer parser converts diagrammer language to this AST model comprising of vertex, link, shapes, subgraph (, graphobject, graphroot, tree, support)
+- model - Diagrammer parser converts diagrammer language to this AST model comprising of vertex, edge, shapes, subgraph (, graphobject, graphroot, tree, support)
 - scripts - Some utility scripts for building, testing, exporting
 - setup - setup related
 - tests - All the test files, diagrammer language inputs, reference renderings, transpiled outputs. 

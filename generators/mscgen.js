@@ -1,6 +1,6 @@
 /**
 a>b>c,d
-a>e;link text
+a>e;edge text
 a;node text
 
 to
@@ -14,7 +14,7 @@ msc {
     a=>b[id="1"];
     b=>c[id="2"];
     b=>d[id="3"];
-    a=>e[label="link text",id="4"];
+    a=>e[label="edge text",id="4"];
 }
 node js/parse.js verbose mscgen.test mscgen
 @param {GraphMeta} graphmeta
@@ -45,16 +45,16 @@ function mscgen(graphmeta) {
 
     output(graphmeta, ";");
     let id = 1;
-    traverseLinks(graphmeta, link => {
-        let linkType = "";
-        let rhs = link.right;
-        let lhs = link.left;
+    traverseEdges(graphmeta, edge => {
+        let edgeType = "";
+        let rhs = edge.right;
+        let lhs = edge.left;
 
         if (rhs instanceof Group) {
             // just pick ONE Vertex from group and use lhead
             // TODO: Assuming it is Vertex (if Recursive groups implemented, it
             // could be smthg else)
-            linkType += " lhead=cluster_" + rhs.getName();
+            edgeType += " lhead=cluster_" + rhs.getName();
             rhs = rhs.OBJECTS[0];
             if (!rhs) {
                 // TODO:Bad thing, EMPTY group..add one invisible node there...
@@ -66,15 +66,15 @@ function mscgen(graphmeta) {
         // but we could SET arrow type if we'd like
         let rightName = rhs.getName();
 
-        const dot = link.isDotted();
-        const dash = link.isDashed()
-        const broken = link.isBroken();
+        const dot = edge.isDotted();
+        const dash = edge.isDashed()
+        const broken = edge.isBroken();
 
         let swap = false;
         const attrs = [];
-        let label = link.label;
-        const color = link.color;
-        const url = link.url;
+        let label = edge.label;
+        const color = edge.color;
+        const url = edge.url;
         let note = "";
         if (url) {
             attrs.push('URL="' + url + '"');
@@ -92,39 +92,39 @@ function mscgen(graphmeta) {
             }
         }
         attrs.push('id="' + id++ + '"');
-        if (link.isBidirectional()) {
+        if (edge.isBidirectional()) {
             // Broadcast type (<>)
             // hmh..since seqdiag uses a<>a as broadcast and
             // a<>b as autoreturn, could we do as well?
             if (lhs == rhs) {
-                linkType = "->";
+                edgeType = "->";
                 rightName = "*";
             } else {
-                linkType = "<=>";
+                edgeType = "<=>";
                 swap = true;
             }
-        } else if (link.isLeftLink()) {
+        } else if (edge.isLeftPointingEdge()) {
             const tmpl = lhs;
             lhs = rhs;
             rhs = tmpl;
             if (dot)
-                linkType = ">>";
+                edgeType = ">>";
             else if (dash)
-                linkType = "->";
+                edgeType = "->";
             else if (broken)
-                linkType = "-x";
+                edgeType = "-x";
             else
-                linkType = "=>";
+                edgeType = "=>";
             rightName = rhs.getName();
-        } else if (link.isRightLink()) {
+        } else if (edge.isRightPointingEdge()) {
             if (dot)
-                linkType = ">>";
+                edgeType = ">>";
             else if (dash)
-                linkType = "->";
+                edgeType = "->";
             else if (broken)
-                linkType = "-x";
+                edgeType = "-x";
             else
-                linkType = "=>";
+                edgeType = "=>";
         } else if (dot) {
             // dotted
             if (color) {
@@ -143,7 +143,7 @@ function mscgen(graphmeta) {
             output(graphmeta, "ERROR: SHOULD NOT HAPPEN");
         }
 
-        output(graphmeta, lhs.getName() + linkType + rightName + "[" + attrs.join(",") + "];");
+        output(graphmeta, lhs.getName() + edgeType + rightName + "[" + attrs.join(",") + "];");
         if (note != "")
             // output(grpahmeta,ll.getName() +' abox '
             // +lr.getName()+'[label="'+note+'"];');

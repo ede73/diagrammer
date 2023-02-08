@@ -35,7 +35,7 @@ function generateLayerBands(graphmeta) {
 		category: "Bands",
 		itemArray: [],
 	};
-	const linkedVertexs = [
+	const linkedVertices = [
 		groups,
 	]
 	const root = graphmeta.GRAPHROOT;
@@ -46,14 +46,14 @@ function generateLayerBands(graphmeta) {
 		}
 	});
 
-	traverseLinks(graphmeta, link => {
-		if (!link.left) {
+	traverseEdges(graphmeta, edge => {
+		if (!edge.left) {
 			// probably our root
 			//linkedVertexs.push({key: l.right.name});
 		}else{
-			linkedVertexs.push({key: link.right.name , parent: link.left.name});
+			linkedVertices.push({key: edge.right.name , parent: edge.left.name});
 		}
 	});
-	output(graphmeta, JSON.stringify(linkedVertexs));
+	output(graphmeta, JSON.stringify(linkedVertices));
 }
 generators.set('layerbands', generateLayerBands);

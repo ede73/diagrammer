@@ -17,9 +17,9 @@ class Vertex extends GraphObject {
         this.image = undefined;
         /** @type {string} */
         this.style = undefined;
-        // UH... this is used in grammar parser to TEMPORARILY store link object
+        // UH... this is used in grammar parser to TEMPORARILY store edge object
         /** @type {string} */
-        this.linklabel = undefined;
+        this.edgelabel = undefined;
     }
 
     /**
@@ -42,23 +42,23 @@ class Vertex extends GraphObject {
      * @param {string} value 
      * @returns {Vertex}
      */
-    setLinkLabel(value) {
-        this.linklabel = value;
+    setEdgeLabel(value) {
+        this.edgelabel = value;
         return this;
     }
 
-    getLinkLabel() {
-        const tmp = this.linklabel;
+    getEdgeLabel() {
+        const tmp = this.edgelabel;
         // TODO: Uhoh, makes no sense! Move away to generator if needed
         /*
-        Resetting link label breaks:
+        Resetting edge label breaks:
           a>"A2B"b,"A2C"c
           r>"R2C"c
 
-          where link a>b is named A2B, a>c A2c
+          where edge a>b is named A2B, a>c A2c
           and r>c R2C
         */
-        this.linklabel = undefined;
+        this.edgelabel = undefined;
         return tmp;
     }
 

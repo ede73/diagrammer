@@ -1,7 +1,7 @@
 //node js/parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 /**
 a>b>c,d
-a>e;link text
+a>e;edge text
 a;node text
 
 to
@@ -15,7 +15,7 @@ e;
   a -> b;
   b -> c;
   b -> d;
-  a -> e[label = "link text"];
+  a -> e[label = "edge text"];
 }
 @param {GraphMeta} graphmeta
 */
@@ -66,22 +66,22 @@ function actdiag(graphmeta) {
     };
     traverseObjects(r, parseObjects);
 
-    traverseLinks(graphmeta, (link) => {
+    traverseEdges(graphmeta, (edge) => {
         let t = "";
-        if (link.isDotted()) {
+        if (edge.isDotted()) {
             t += ',style="dotted" ';
-        } else if (link.isDashed()) {
+        } else if (edge.isDashed()) {
             t += ',style="dashed" ';
         }
-        const labelAndItsColor = getAttrFmt(link, 'label', ',label = "{0}"' + getAttrFmt(link, ['color', 'textcolor'], 'textcolor="{0}"'));
-        const color = getAttrFmt(link, 'color', ',color="{0}"');
+        const labelAndItsColor = getAttrFmt(edge, 'label', ',label = "{0}"' + getAttrFmt(edge, ['color', 'textcolor'], 'textcolor="{0}"'));
+        const color = getAttrFmt(edge, 'color', ',color="{0}"');
         t += labelAndItsColor + color;
         t = t.trim();
         if (t.substring(0, 1) == ",")
             t = t.substring(1).trim();
         if (t != "")
             t = "[" + t + "]";
-        output(graphmeta, "  " + link.left.getName() + " -> " + link.right.getName() + t + ";");
+        output(graphmeta, "  " + edge.left.getName() + " -> " + edge.right.getName() + t + ";");
     });
     output(graphmeta, "}");
 }

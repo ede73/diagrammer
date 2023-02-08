@@ -47,16 +47,16 @@ function processVariable(yy, variable) {
  * @param yy Lexer yy
  * @param {GraphObject} lhs left hand side of the list
  * @param {GraphObject} rhs right hand side of the list
- * @param {string} rhsLinkLabel optional RHS label
+ * @param {string} rhsEdgeLabel optional RHS label
  * @return {Array[any]}
  */
-function getList(yy, lhs, rhs, rhsLinkLabel) {
+function getList(yy, lhs, rhs, rhsEdgeLabel) {
     if (lhs instanceof Vertex) {
         debug("getList(vertex:" + lhs + ",rhs:[" + rhs + "])", true);
         const lst = [];
         lst.push(lhs);
         //TODO assuming RHS is Vertex
-        lst.push(getVertex(yy, rhs).setLinkLabel(rhsLinkLabel));
+        lst.push(getVertex(yy, rhs).setEdgeLabel(rhsEdgeLabel));
         debug("return vertex:" + lst, false);
         return lst;
     }
@@ -65,13 +65,13 @@ function getList(yy, lhs, rhs, rhsLinkLabel) {
         const lst = [];
         lst.push(lhs);
         //TODO assuming RHS is Group
-        lst.push(getGroup(yy, rhs).setLinkLabel(rhsLinkLabel));
+        lst.push(getGroup(yy, rhs).setEdgeLabel(rhsEdgeLabel));
         debug("return group:" + lst, false);
         return lst;
     }
     debug("getList(lhs:[" + lhs + "],rhs:" + rhs, true);
     // LHS not a vertex..
-    lhs.push(getVertex(yy, rhs).setLinkLabel(rhsLinkLabel));
+    lhs.push(getVertex(yy, rhs).setEdgeLabel(rhsEdgeLabel));
     debug("return [" + lhs + "]", false);
     return lhs;
 }
@@ -128,7 +128,7 @@ function getVertex(yy, name, style) {
         debug("Create new vertex name=" + name, true);
         const vertex = new Vertex(name, getGraphRoot(yy).getCurrentShape());
         if (style) vertex.setStyle(style);
-        vertex.nolinks = true;
+        vertex.noedges = true;
 
         _getDefaultAttribute(yy, 'vertexcolor', function (color) {
             vertex.setColor(color);
@@ -147,7 +147,7 @@ function getVertex(yy, name, style) {
     if (yy.collectNextVertex) {
         debug("Collect next vertex");
         // TODO: MOVING TO GraphMeta
-        yy.collectNextVertex.exitlink = name;
+        yy.collectNextVertex.exitedge = name;
         // TODO: MOVING TO GraphMeta
         yy.collectNextVertex = undefined;
     }
@@ -207,8 +207,8 @@ function exitContainer(yy) {
  * Enter to a new parented sub graph
  * like in a>(b>c,d,e)>h
  *
- * Edit grammar so it links a>b and c,d,e to h
- * Ie exit vertex(s) and enrance vertex(s) linked properly
+ * Edit grammar so it edges a>b and c,d,e to h
+ * Ie exit vertex(s) and entrance vertex(s) linked properly
  *
  * Usage: grammar/state.grammar
  */
@@ -220,46 +220,46 @@ function enterSubGraph(yy) {
  * Usage: grammar/state.grammar
  */
 function exitSubGraph(yy) {
-    //Now should edit the ENTRANCE LINK to point to a>b, a>d, a>e
+    //Now should edit the ENTRANCE EDGE to point to a>b, a>d, a>e
     const currentSubGraph = getCurrentContainer(yy);
     debug('Exit subgraph ' + currentSubGraph);
-    let link = null;
+    let edge = null;
 
     //fix entrance
-    for (var i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i)) continue;
-        link = yy.LINKS[i];
-        if (link.right.name == currentSubGraph.name && link.left.name == currentSubGraph.entrance.name) {
-            //remove this link!
-            yy.LINKS.splice(i, 1);
-            //and then relink it to containers vertices that have no LEFT links
+    for (var i in yy.EDGES) {
+        if (!yy.EDGES.hasOwnProperty(i)) continue;
+        edge = yy.EDGES[i];
+        if (edge.right.name == currentSubGraph.name && edge.left.name == currentSubGraph.entrance.name) {
+            //remove this edge!
+            yy.EDGES.splice(i, 1);
+            //and then relink it to containers vertices that have no LEFT edges
             break;
         }
-        link = null;
+        edge = null;
     }
 
-    if (link !== null) {
-        //and then relink it to containers vertices that have no LEFT links
+    if (edge !== null) {
+        //and then relink it to containers vertices that have no LEFT edges
         //traverse
         for (var n in currentSubGraph.ROOTVERTICES) {
             if (!currentSubGraph.ROOTVERTICES.hasOwnProperty(n)) continue;
             const vertex = currentSubGraph.ROOTVERTICES[n];
-            currentSubGraph.entrance.nolinks = undefined;
-            vertex.nolinks = undefined;
-            const newLink = getLink(yy, link.linkType, currentSubGraph.entrance, vertex, link.label,
+            currentSubGraph.entrance.noedges = undefined;
+            vertex.noedges = undefined;
+            const newEdge = getEdge(yy, edge.edgeType, currentSubGraph.entrance, vertex, edge.label,
                 undefined, undefined, undefined, undefined, true);
-            newLink.container = currentSubGraph;
-            yy.LINKS.splice(i++, 0, newLink);
+            newEdge.container = currentSubGraph;
+            yy.EDGES.splice(i++, 0, newEdge);
         }
     }
 
     //fix exits
-    //{"link":{"linkType":">","left":1,"right":"z","label":"from e and h"}}
+    //{"link":{"edgeType":">","left":1,"right":"z","label":"from e and h"}}
     const exits = [];
     for (var vertex in currentSubGraph.OBJECTS) {
         if (!currentSubGraph.OBJECTS.hasOwnProperty(vertex)) continue;
         vertex = currentSubGraph.OBJECTS[vertex];
-        if (!hasOutwardLink(yy, vertex)) {
+        if (!hasOutwardEdge(yy, vertex)) {
             exits.push(vertex);
         }
     }
@@ -297,47 +297,47 @@ function getGroup(yy, ref) {
     return newGroup;
 }
 
-// Get a link such that l links to r, return the added LINK or LINKS
+// Get an edge such that l links to r, return the added Edge or EDGES
 
 //noinspection JSUnusedGlobalSymbols
 /**
- * linkType >,<,.>,<.,->,<-,<> l = left side, Vertex(xxx) or Group(yyy), or
+ * edgeType >,<,.>,<.,->,<-,<> l = left side, Vertex(xxx) or Group(yyy), or
  * Array(smthg) r = right side, Vertex(xxx) or Group(yyy), or Array(smthg) label =
- * if defined, LABEL for the link color = if defined, COLOR for the link
+ * if defined, LABEL for the edge color = if defined, COLOR for the edge
  *
- * if there is a list a>b,c,x,d;X then X is gonna e link label for EVERYONE
- * but for a>"1"b,"2"c link label is gonna be individual!
+ * if there is a list a>b,c,x,d;X then X is gonna be edge label for EVERYONE
+ * but for a>"1"b,"2"c edge label is gonna be individual!
  *
  * Usage: grammar/state.grammar
  *
  * @param yy lexer
- * @param {string} linkType Type of the link(grammar)
+ * @param {string} edgeType Type of the edge(grammar)
  * @param {GraphObject} lhs Left hand side (must be Array,Vertex,Group)
  * @param {GraphObject} rhs Right hand side (must be Array,Vertex,Group)
- * @param {string} [inlineLinkLabel] Optional label for the link
- * @param {string} [commonLinkLabel] Optional label for the link
- * @param {string} [linkColor] Optional color for the link
+ * @param {string} [inlineEdgeLabel] Optional label for the edge
+ * @param {string} [commonEdgeLabel] Optional label for the edge
+ * @param {string} [edgeColor] Optional color for the edge
  * @param {string} [lcompass] Left hand side compass value
  * @param {string} [rcompass] Reft hand side compass value
- * @return {Link} the link that got added
+ * @return {Edge} the edge that got added
  */
-function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass, dontadd) {
-    let lastLink;
+function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass, dontadd) {
+    let lastEdge;
     const current_container = getCurrentContainer(yy);
 
     debug(true);
     if (rhs instanceof SubGraph && !rhs.getEntrance()) {
         rhs.setEntrance(lhs);
     }
-    if (rhs.nolinks && current_container) {
+    if (rhs.noedges && current_container) {
         debug('REMOVE ' + rhs + ' from root vertices of the container ' + current_container);
         const idx = current_container.ROOTVERTICES.indexOf(rhs);
         if (idx >= 0) {
             current_container.ROOTVERTICES.splice(idx, 1);
         }
     }
-    lhs.nolinks = undefined;
-    rhs.nolinks = undefined;
+    lhs.noedges = undefined;
+    rhs.noedges = undefined;
 
     if (current_container instanceof SubGraph &&
         !current_container.getEntrance() &&
@@ -347,36 +347,36 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
     }
 
     if (lhs instanceof Array) {
-        debug("getLink LHS array, type:" + linkType + " l:[" + lhs + "] r:" + rhs + " inlineLinkLabel:" + inlineLinkLabel + " commonLinkLabel: " + commonLinkLabel + " linkColor:" + linkColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
+        debug("getEdge LHS array, type:" + edgeType + " l:[" + lhs + "] r:" + rhs + " inlineEdgeLabel:" + inlineEdgeLabel + " commonEdgeLabel: " + commonEdgeLabel + " edgeColor:" + edgeColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
         for (let i = 0; i < lhs.length; i++) {
-            debug("    1Get link " + lhs[i]);
-            lastLink = getLink(yy, linkType, lhs[i], rhs, inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
+            debug("    1Get edge " + lhs[i]);
+            lastEdge = getEdge(yy, edgeType, lhs[i], rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass);
         }
         debug(false);
-        return lastLink;
+        return lastEdge;
     }
     if (rhs instanceof Array) {
-        debug("getLink RHS array, type:" + linkType + " l:" + lhs + " r:[" + rhs + "] inlineLinkLabel:" + inlineLinkLabel + " commonLinkLabel: " + commonLinkLabel + " linkColor:" + linkColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
+        debug("getEdge RHS array, type:" + edgeType + " l:" + lhs + " r:[" + rhs + "] inlineEdgeLabel:" + inlineEdgeLabel + " commonEdgeLabel: " + commonEdgeLabel + " edgeColor:" + edgeColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
         for (let i = 0; i < rhs.length; i++) {
-            debug("    2Get link " + rhs[i]);
-            lastLink = getLink(yy, linkType, lhs, rhs[i], inlineLinkLabel, commonLinkLabel, linkColor, lcompass, rcompass);
+            debug("    2Get edge " + rhs[i]);
+            lastEdge = getEdge(yy, edgeType, lhs, rhs[i], inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass);
         }
         debug(false);
-        return lastLink;
+        return lastEdge;
     }
     {
         let fmt = "";
-        if (inlineLinkLabel)
-            fmt += "inlineLinkLabel: " + inlineLinkLabel;
-        if (commonLinkLabel)
-            fmt += "commonLinkLabel: " + commonLinkLabel;
-        if (linkColor)
-            fmt += "linkColor: " + linkColor;
+        if (inlineEdgeLabel)
+            fmt += "inlineEdgeLabel: " + inlineEdgeLabel;
+        if (commonEdgeLabel)
+            fmt += "commonEdgeLabel: " + commonEdgeLabel;
+        if (edgeColor)
+            fmt += "edgeColor: " + edgeColor;
         if (lcompass)
             fmt += "lcompass: " + lcompass;
         if (rcompass)
             fmt += "rcompass: " + rcompass;
-        debug("getLink type:" + linkType + " l:" + lhs + " r:" + rhs + fmt);
+        debug("getEdge type:" + edgeType + " l:" + lhs + " r:" + rhs + fmt);
     }
     if (!(lhs instanceof Vertex) && !(lhs instanceof Group) & !(lhs instanceof SubGraph)) {
         throw new Error("LHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
@@ -384,46 +384,46 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
     if (!(rhs instanceof Vertex) && !(rhs instanceof Group) && !(rhs instanceof SubGraph)) {
         throw new Error("RHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
-    const link = new Link(linkType, lhs, rhs);
+    const edge = new Edge(edgeType, lhs, rhs);
 
-    if (lcompass) link.lcompass = lcompass;
-    else if (getAttr(lhs, 'compass')) link.lcompass = getAttr(lhs, 'compass');
+    if (lcompass) edge.lcompass = lcompass;
+    else if (getAttr(lhs, 'compass')) edge.lcompass = getAttr(lhs, 'compass');
 
-    if (rcompass) link.rcompass = rcompass;
-    else if (getAttr(rhs, 'compass')) link.rcompass = getAttr(rhs, 'compass');
+    if (rcompass) edge.rcompass = rcompass;
+    else if (getAttr(rhs, 'compass')) edge.rcompass = getAttr(rhs, 'compass');
 
-    _getDefaultAttribute(yy, 'linkcolor', function (linkColor) {
-        link.setColor(linkColor);
+    _getDefaultAttribute(yy, 'edgecolor', function (edgeColor) {
+        edge.setColor(edgeColor);
     });
-    _getDefaultAttribute(yy, 'linktextcolor', function (linkColor) {
-        link.setTextColor(linkColor);
+    _getDefaultAttribute(yy, 'edgetextcolor', function (edgeColor) {
+        edge.setTextColor(edgeColor);
     });
-    if (commonLinkLabel) {
-        link.setLabel(commonLinkLabel);
-        debug("  set commonLinkLabel " + commonLinkLabel);
+    if (commonEdgeLabel) {
+        edge.setLabel(commonEdgeLabel);
+        debug("  set commonEdgeLabel " + commonEdgeLabel);
     }
-    if (inlineLinkLabel) {
-        link.setLabel(inlineLinkLabel);
-        debug("  set inlineLinkLabel " + inlineLinkLabel);
+    if (inlineEdgeLabel) {
+        edge.setLabel(inlineEdgeLabel);
+        debug("  set inlineEdgeLabel " + inlineEdgeLabel);
     }
-    else if (rhs instanceof Vertex && commonLinkLabel) {
-        link.setLabel(commonLinkLabel);
-        debug('  set commonLinkLabel ' + commonLinkLabel);
+    else if (rhs instanceof Vertex && commonEdgeLabel) {
+        edge.setLabel(commonEdgeLabel);
+        debug('  set commonEdgeLabel ' + commonEdgeLabel);
     }
     if (rhs instanceof Vertex) {
-        const tmp = rhs.getLinkLabel();
+        const tmp = rhs.getEdgeLabel();
         if (tmp) {
-            link.setLabel(tmp);
-            debug('  reset link label to ' + tmp);
+            edge.setLabel(tmp);
+            debug('  reset edge label to ' + tmp);
         }
     }
-    if (linkColor) link.setColor(linkColor);
+    if (edgeColor) edge.setColor(edgeColor);
 
     if (!dontadd) {
-        _addLink(yy, link);
+        _addEdge(yy, edge);
     }
     debug(false);
-    return link;
+    return edge;
 }
 
 // =====================================
@@ -455,8 +455,8 @@ function getGraphRoot(yy) {
         // TODO: DOESN'T WORK as type hint! Modularize to own obj..
         /** @type  {(GraphRoot|Group|SubGroup)} */
         yy.CURRENTCONTAINER = [];
-        /** @type {Array[Link]} */
-        yy.LINKS = [];
+        /** @type {Array[Edge]} */
+        yy.EDGES = [];
         /** @type {int} */
         yy.CONTAINER_EXIT = 1;
         /** @type  {GraphRoot} */
@@ -472,11 +472,11 @@ function getGraphRoot(yy) {
  * Usage: grammar/state.grammar, generators/digraph.js
  * @param {GraphObject} vertex
  */
-function hasOutwardLink(yy, vertex) {
-    for (const i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i)) continue;
-        const link = yy.LINKS[i];
-        if (link.left.name === vertex.name) {
+function hasOutwardEdge(yy, vertex) {
+    for (const i in yy.EDGES) {
+        if (!yy.EDGES.hasOwnProperty(i)) continue;
+        const edge = yy.EDGES[i];
+        if (edge.left.name === vertex.name) {
             return true;
         }
     }
@@ -484,19 +484,19 @@ function hasOutwardLink(yy, vertex) {
 }
 
 /**
- * return true if vertex has inward link OUTSIDE container it is in
+ * return true if vertex has inward edge OUTSIDE container it is in
  * @param {GraphObject} vertex
  * @param {GraphObject} verticesContainer (Group?)
  */
-function hasInwardLink(yy, vertex, verticesContainer) {
-    for (const i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i)) continue;
-        const link = yy.LINKS[i];
+function hasInwardEdge(yy, vertex, verticesContainer) {
+    for (const i in yy.EDGES) {
+        if (!yy.EDGES.hasOwnProperty(i)) continue;
+        const edge = yy.EDGES[i];
         if (verticesContainer &&
-            link.container.name === verticesContainer.name) {
+            edge.container.name === verticesContainer.name) {
             continue;
         }
-        if (link.right.name === vertex.name) {
+        if (edge.right.name === vertex.name) {
             return true;
         }
     }
@@ -527,12 +527,12 @@ function containsObject(container, obj) {
 /** 
  * Usage: generators
  * @param {GraphMeta} graphmeta
- * @param {function(Link)} callback
+ * @param {function(Edge)} callback
  */
-function traverseLinks(graphmeta, callback) {
-    for (const i in graphmeta.LINKS) {
-        if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
-        callback(graphmeta.LINKS[i]);
+function traverseEdges(graphmeta, callback) {
+    for (const i in graphmeta.EDGES) {
+        if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
+        callback(graphmeta.EDGES[i]);
     }
 }
 
@@ -564,7 +564,7 @@ function _getVariables(yy) {
 }
 
 /**
- * Get default attribute vertexcolor,linkcolor,groupcolor and bubble upwards if
+ * Get default attribute vertexcolor,edgecolor,groupcolor and bubble upwards if
  * otherwise 'unobtainable'
  *
  * @param yy lexer
@@ -616,20 +616,21 @@ function _getSubGraph(yy, ref) {
 }
 
 /**
- * Add link to the list of links, return the LINK
+ * Add edge to the list of edges, return the Edge
  * @param yy lexer
- * @param {Link} l Link (Array or Link)
+ * @param {(Edge[]|Edge)} edge Edge (Edge or Edge[])
+ * @return {(Edge[]|Edge)} Return What ever passed in
  */
-function _addLink(yy, l) {
-    if (l instanceof Array) {
-        debug("PUSH LINK ARRAY:" + l, true);
+function _addEdge(yy, edge) {
+    if (edge instanceof Array) {
+        debug("PUSH EDGE ARRAY:" + edge, true);
     } else {
-        debug("PUSH LINK:" + l, true);
-        l.container = getCurrentContainer(yy);
+        debug("PUSH EDGE:" + edge, true);
+        edge.container = getCurrentContainer(yy);
     }
-    yy.LINKS.push(l);
+    yy.EDGES.push(edge);
     debug(false);
-    return l;
+    return edge;
 }
 
 /**

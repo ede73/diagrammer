@@ -1,7 +1,7 @@
 //node js/parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 /**
 a>b>c,d
-a>e;link text
+a>e;edge text
 a;node text
 
 to
@@ -40,16 +40,16 @@ function nwdiag(graphmeta) {
                     tmp = "[" + tmp.trim().substring(1) + "]";
                 graphmeta.result("    " + z.getName() + tmp + ';');
             }
-            // find if there are ANY links that have this GROUP as participant!
-            for (const il in graphmeta.LINKS) {
-                if (!graphmeta.LINKS.hasOwnProperty(il)) continue;
-                const link = graphmeta.LINKS[il];
-                tmp = getAttrFmt(link, 'label', '[address="{0}"]');
-                if (link.left == o) {
-                    graphmeta.result("  " + link.right.getName() + tmp + ";");
+            // find if there are ANY edges that have this GROUP as participant!
+            for (const il in graphmeta.EDGES) {
+                if (!graphmeta.EDGES.hasOwnProperty(il)) continue;
+                const edge = graphmeta.EDGES[il];
+                tmp = getAttrFmt(edge, 'label', '[address="{0}"]');
+                if (edge.left == o) {
+                    graphmeta.result("  " + edge.right.getName() + tmp + ";");
                 }
-                if (link.right == o) {
-                    graphmeta.result("  " + link.left.getName() + tmp + ";");
+                if (edge.right == o) {
+                    graphmeta.result("  " + edge.left.getName() + tmp + ";");
                 }
             }
             graphmeta.result("  }");
@@ -61,9 +61,9 @@ function nwdiag(graphmeta) {
             graphmeta.result("    " + o.getName() + tmp + ';');
         }
     }
-    for (const i in graphmeta.LINKS) {
-        if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
-        const l1 = graphmeta.LINKS[i];
+    for (const i in graphmeta.EDGES) {
+        if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
+        const l1 = graphmeta.EDGES[i];
         if (l1.left instanceof Group || l1.right instanceof Group)
             continue;
         graphmeta.result(l1.left.getName() + " -- " + l1.right.getName() + ";");

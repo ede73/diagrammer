@@ -28,7 +28,7 @@
 function generateUmlClass(graphmeta) {
 	//console.log(graphmeta)
 	const groups = [];
-	const links = [];
+	const edges = [];
 	const root = graphmeta.GRAPHROOT;
 
 	const nameAndLabel = ln => {
@@ -133,17 +133,17 @@ function generateUmlClass(graphmeta) {
 	});
 	console.log(groupNameIdMap);
 
-	traverseLinks(graphmeta, l => {
+	traverseEdges(graphmeta, l => {
 		relationship = 'generalization';
-		if (l.linkType != '>') {
+		if (l.edgeType != '>') {
 			relationship = 'aggregation';
 		}
-		links.push({
+		edges.push({
 			from: groupNameIdMap.get(l.left.name),
 			to: groupNameIdMap.get(l.right.name),
 			relationship: relationship
 		});
 	});
-	output(graphmeta, JSON.stringify([groups, links]));
+	output(graphmeta, JSON.stringify([groups, edges]));
 }
 generators.set("umlclass", generateUmlClass);

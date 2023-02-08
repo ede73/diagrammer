@@ -28,7 +28,7 @@ Only one root supported?
 	  node js/parse.js verbose manual_test_diagrams/layerbands.d layerbands
 @param {GraphMeta} graphmeta
 */
-function generateLayerBands(graphmety) {
+function generateLayerBands(graphmeta) {
 	//console.log(graphmeta)
 	const groups = {
 		key: "_BANDS",

@@ -7,6 +7,10 @@ const vdelay = 1000;
 //Set to 0 to fall back to textarea(enable textarea in index.html)
 const acemode = 1;
 
+function openImage(imageUrl) {
+    window.open(imageUrl + '?x=' + new Date().getTime());
+}
+
 //get all
 function getText() {
     if (acemode) {

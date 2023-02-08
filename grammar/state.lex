@@ -9,7 +9,7 @@ Jison adds negative lookahead using /!
 */
 %{
 /*could have a codeblock here*/
-collectNextNode=undefined;
+collectNextVertex=undefined;
 function fixBrokenUnPut(t) {
 	// Ynput is broken, fixed MONTH ago, not seen in npm
 	// https://github.com/zaach/jison/pull/135
@@ -108,8 +108,8 @@ Special arrow is /> and </ that denotes a broken signal...
 {LISTSEP}	return 'LISTSEP';
 "link color" return 'LINK_COLOR';
 "link textcolor"|"link text color" return 'LINKTEXT_COLOR';
-"node color" return 'NODE_COLOR';
-"node textcolor"|"node text color" return 'NODETEXT_COLOR';
+"vertex color" return 'VERTEX_COLOR';
+"vertex textcolor"|"vertex text color" return 'VERTEXTEXT_COLOR';
 "group color" return 'GROUP_COLOR';
 <INITIAL,GROUP>{COLOR}		return 'COLOR';
 ^("landscape"|"horizontal"|"lr") return 'LANDSCAPE';

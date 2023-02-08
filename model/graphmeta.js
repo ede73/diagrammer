@@ -21,7 +21,7 @@ class GraphMeta {
     direction=undefined;
 
     /**
-     * Marks start node for the graph
+     * Marks start vertex for the graph
      *  @type {string}
      */
     start=undefined;
@@ -66,7 +66,7 @@ class GraphMeta {
      * yy.VARIABLES = {};
      * 
      * yy.GROUPIDS
-     * yy.collectNextNode
+     * yy.collectNextVertex
      * yy.lastSeen
      * 
      * ===parse.js===

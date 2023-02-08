@@ -39,8 +39,8 @@ function processVariable(yy, variable) {
 }
 
 /**
- * Create an array, push LHS,RHS nodes there and return the array as long as
- * processing the list nodes added to array..
+ * Create an array, push LHS,RHS vertices there and return the array as long as
+ * processing the list vertices added to array..
  *
  * Usage: grammar/state.grammar
  *
@@ -51,13 +51,13 @@ function processVariable(yy, variable) {
  * @return {Array[any]}
  */
 function getList(yy, lhs, rhs, rhsLinkLabel) {
-    if (lhs instanceof Node) {
-        debug("getList(node:" + lhs + ",rhs:[" + rhs + "])", true);
+    if (lhs instanceof Vertex) {
+        debug("getList(vertex:" + lhs + ",rhs:[" + rhs + "])", true);
         const lst = [];
         lst.push(lhs);
-        //TODO assuming RHS is Node
-        lst.push(getNode(yy, rhs).setLinkLabel(rhsLinkLabel));
-        debug("return node:" + lst, false);
+        //TODO assuming RHS is Vertex
+        lst.push(getVertex(yy, rhs).setLinkLabel(rhsLinkLabel));
+        debug("return vertex:" + lst, false);
         return lst;
     }
     if (lhs instanceof Group) {
@@ -70,35 +70,35 @@ function getList(yy, lhs, rhs, rhsLinkLabel) {
         return lst;
     }
     debug("getList(lhs:[" + lhs + "],rhs:" + rhs, true);
-    // LHS not a node..
-    lhs.push(getNode(yy, rhs).setLinkLabel(rhsLinkLabel));
+    // LHS not a vertex..
+    lhs.push(getVertex(yy, rhs).setLinkLabel(rhsLinkLabel));
     debug("return [" + lhs + "]", false);
     return lhs;
 }
 
 /**
- * See readNodeOrGroup in grammar
+ * See readVertexOrGroup in grammar
  *
- * Return matching Node,Array,Group
+ * Return matching Vertex,Array,Group
  *
- * If no match, create a new node
+ * If no match, create a new vertex
  *
  * STYLE will always be updated on last occurance (ie. dashed a1
- * dotted a1>b1 - only for nodes!
+ * dotted a1>b1 - only for vertices!
  *
- * node a1 will be dotted instead of being dashed
+ * vertex a1 will be dotted instead of being dashed
  *
  * Usage: grammar/state.grammar
  *
  * @param yy Lexer yy
- * @param {(string|GraphObject|Array)} name Reference, Node/Array/Group
- * @param {string} [style] OPTIONAL if style given, update (only if name refers to node)
+ * @param {(string|GraphObject|Array)} name Reference, Vertex/Array/Group
+ * @param {string} [style] OPTIONAL if style given, update (only if name refers to vertex)
  * @return {GraphObject}
  */
-function getNode(yy, name, style) {
-    debug("getNode (name:" + name + ",style:" + style + ")", true);
-    function findNode(yy, name, style) {
-        if (name instanceof Node) {
+function getVertex(yy, name, style) {
+    debug("getVertex (name:" + name + ",style:" + style + ")", true);
+    function findVertex(yy, name, style) {
+        if (name instanceof Vertex) {
             if (style) name.setStyle(style);
             return name;
         }
@@ -111,7 +111,7 @@ function getNode(yy, name, style) {
             for (const i in container.OBJECTS) {
                 if (!container.OBJECTS.hasOwnProperty(i)) continue;
                 const o = container.OBJECTS[i];
-                if (o instanceof Node && o.getName() == name) {
+                if (o instanceof Vertex && o.getName() == name) {
                     if (style) o.setStyle(style);
                     return o;
                 }
@@ -125,34 +125,34 @@ function getNode(yy, name, style) {
         if (search) {
             return search;
         }
-        debug("Create new node name=" + name, true);
-        const node = new Node(name, getGraphRoot(yy).getCurrentShape());
-        if (style) node.setStyle(style);
-        node.nolinks = true;
+        debug("Create new vertex name=" + name, true);
+        const vertex = new Vertex(name, getGraphRoot(yy).getCurrentShape());
+        if (style) vertex.setStyle(style);
+        vertex.nolinks = true;
 
-        _getDefaultAttribute(yy, 'nodecolor', function (color) {
-            node.setColor(color);
+        _getDefaultAttribute(yy, 'vertexcolor', function (color) {
+            vertex.setColor(color);
         });
-        _getDefaultAttribute(yy, 'nodetextcolor', function (color) {
-            node.setTextColor(color);
+        _getDefaultAttribute(yy, 'vertextextcolor', function (color) {
+            vertex.setTextColor(color);
         });
         debug(false);
-        return _pushObject(yy, node);
+        return _pushObject(yy, vertex);
     }
 
-    const node = findNode(yy, name, style);
-    debug("  in getNode gotNode " + node);
+    const vertex = findVertex(yy, name, style);
+    debug("  in getVertex gotVertex " + vertex);
     // TODO: MOVING TO GraphMeta
-    yy.lastSeenNode = node;
-    if (yy.collectNextNode) {
-        debug("Collect next node");
+    yy.lastSeenVertex = vertex;
+    if (yy.collectNextVertex) {
+        debug("Collect next vertex");
         // TODO: MOVING TO GraphMeta
-        yy.collectNextNode.exitlink = name;
+        yy.collectNextVertex.exitlink = name;
         // TODO: MOVING TO GraphMeta
-        yy.collectNextNode = undefined;
+        yy.collectNextVertex = undefined;
     }
     debug(false);
-    return node;
+    return vertex;
 }
 
 /**
@@ -199,7 +199,7 @@ function exitContainer(yy) {
     if (yy.CURRENTCONTAINER.length <= 1)
         throw new Error("INTERNAL ERROR:Trying to exit ROOT container");
     const currentContainer = yy.CURRENTCONTAINER.pop();
-    currentContainer.exitnode = yy.CONTAINER_EXIT++;
+    currentContainer.exitvertex = yy.CONTAINER_EXIT++;
     return currentContainer;
 }
 
@@ -208,7 +208,7 @@ function exitContainer(yy) {
  * like in a>(b>c,d,e)>h
  *
  * Edit grammar so it links a>b and c,d,e to h
- * Ie exit node(s) and enrance node(s) linked properly
+ * Ie exit vertex(s) and enrance vertex(s) linked properly
  *
  * Usage: grammar/state.grammar
  */
@@ -232,21 +232,21 @@ function exitSubGraph(yy) {
         if (link.right.name == currentSubGraph.name && link.left.name == currentSubGraph.entrance.name) {
             //remove this link!
             yy.LINKS.splice(i, 1);
-            //and then relink it to containers nodes that have no LEFT links
+            //and then relink it to containers vertices that have no LEFT links
             break;
         }
         link = null;
     }
 
     if (link !== null) {
-        //and then relink it to containers nodes that have no LEFT links
+        //and then relink it to containers vertices that have no LEFT links
         //traverse
-        for (var n in currentSubGraph.ROOTNODES) {
-            if (!currentSubGraph.ROOTNODES.hasOwnProperty(n)) continue;
-            const node = currentSubGraph.ROOTNODES[n];
+        for (var n in currentSubGraph.ROOTVERTICES) {
+            if (!currentSubGraph.ROOTVERTICES.hasOwnProperty(n)) continue;
+            const vertex = currentSubGraph.ROOTVERTICES[n];
             currentSubGraph.entrance.nolinks = undefined;
-            node.nolinks = undefined;
-            const newLink = getLink(yy, link.linkType, currentSubGraph.entrance, node, link.label,
+            vertex.nolinks = undefined;
+            const newLink = getLink(yy, link.linkType, currentSubGraph.entrance, vertex, link.label,
                 undefined, undefined, undefined, undefined, true);
             newLink.container = currentSubGraph;
             yy.LINKS.splice(i++, 0, newLink);
@@ -256,16 +256,16 @@ function exitSubGraph(yy) {
     //fix exits
     //{"link":{"linkType":">","left":1,"right":"z","label":"from e and h"}}
     const exits = [];
-    for (var node in currentSubGraph.OBJECTS) {
-        if (!currentSubGraph.OBJECTS.hasOwnProperty(node)) continue;
-        node = currentSubGraph.OBJECTS[node];
-        if (!hasOutwardLink(yy, node)) {
-            exits.push(node);
+    for (var vertex in currentSubGraph.OBJECTS) {
+        if (!currentSubGraph.OBJECTS.hasOwnProperty(vertex)) continue;
+        vertex = currentSubGraph.OBJECTS[vertex];
+        if (!hasOutwardLink(yy, vertex)) {
+            exits.push(vertex);
         }
     }
 
     debug('exits ' + exits);
-    currentSubGraph.setExit(node);
+    currentSubGraph.setExit(vertex);
     return exitContainer(yy);
 }
 
@@ -301,8 +301,8 @@ function getGroup(yy, ref) {
 
 //noinspection JSUnusedGlobalSymbols
 /**
- * linkType >,<,.>,<.,->,<-,<> l = left side, Node(xxx) or Group(yyy), or
- * Array(smthg) r = right side, Node(xxx) or Group(yyy), or Array(smthg) label =
+ * linkType >,<,.>,<.,->,<-,<> l = left side, Vertex(xxx) or Group(yyy), or
+ * Array(smthg) r = right side, Vertex(xxx) or Group(yyy), or Array(smthg) label =
  * if defined, LABEL for the link color = if defined, COLOR for the link
  *
  * if there is a list a>b,c,x,d;X then X is gonna e link label for EVERYONE
@@ -312,8 +312,8 @@ function getGroup(yy, ref) {
  *
  * @param yy lexer
  * @param {string} linkType Type of the link(grammar)
- * @param {GraphObject} lhs Left hand side (must be Array,Node,Group)
- * @param {GraphObject} rhs Right hand side (must be Array,Node,Group)
+ * @param {GraphObject} lhs Left hand side (must be Array,Vertex,Group)
+ * @param {GraphObject} rhs Right hand side (must be Array,Vertex,Group)
  * @param {string} [inlineLinkLabel] Optional label for the link
  * @param {string} [commonLinkLabel] Optional label for the link
  * @param {string} [linkColor] Optional color for the link
@@ -330,10 +330,10 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
         rhs.setEntrance(lhs);
     }
     if (rhs.nolinks && current_container) {
-        debug('REMOVE ' + rhs + ' from root nodes of the container ' + current_container);
-        const idx = current_container.ROOTNODES.indexOf(rhs);
+        debug('REMOVE ' + rhs + ' from root vertices of the container ' + current_container);
+        const idx = current_container.ROOTVERTICES.indexOf(rhs);
         if (idx >= 0) {
-            current_container.ROOTNODES.splice(idx, 1);
+            current_container.ROOTVERTICES.splice(idx, 1);
         }
     }
     lhs.nolinks = undefined;
@@ -341,7 +341,7 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
 
     if (current_container instanceof SubGraph &&
         !current_container.getEntrance() &&
-        lhs instanceof Node &&
+        lhs instanceof Vertex &&
         !(rhs instanceof SubGraph)) {
         current_container.setEntrance(lhs);
     }
@@ -378,11 +378,11 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
             fmt += "rcompass: " + rcompass;
         debug("getLink type:" + linkType + " l:" + lhs + " r:" + rhs + fmt);
     }
-    if (!(lhs instanceof Node) && !(lhs instanceof Group) & !(lhs instanceof SubGraph)) {
-        throw new Error("LHS not a Node,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
+    if (!(lhs instanceof Vertex) && !(lhs instanceof Group) & !(lhs instanceof SubGraph)) {
+        throw new Error("LHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
-    if (!(rhs instanceof Node) && !(rhs instanceof Group) && !(rhs instanceof SubGraph)) {
-        throw new Error("RHS not a Node,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
+    if (!(rhs instanceof Vertex) && !(rhs instanceof Group) && !(rhs instanceof SubGraph)) {
+        throw new Error("RHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
     const link = new Link(linkType, lhs, rhs);
 
@@ -406,11 +406,11 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
         link.setLabel(inlineLinkLabel);
         debug("  set inlineLinkLabel " + inlineLinkLabel);
     }
-    else if (rhs instanceof Node && commonLinkLabel) {
+    else if (rhs instanceof Vertex && commonLinkLabel) {
         link.setLabel(commonLinkLabel);
         debug('  set commonLinkLabel ' + commonLinkLabel);
     }
-    if (rhs instanceof Node) {
+    if (rhs instanceof Vertex) {
         const tmp = rhs.getLinkLabel();
         if (tmp) {
             link.setLabel(tmp);
@@ -470,13 +470,13 @@ function getGraphRoot(yy) {
 
 /** 
  * Usage: grammar/state.grammar, generators/digraph.js
- * @param {GraphObject} node
+ * @param {GraphObject} vertex
  */
-function hasOutwardLink(yy, node) {
+function hasOutwardLink(yy, vertex) {
     for (const i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
         const link = yy.LINKS[i];
-        if (link.left.name === node.name) {
+        if (link.left.name === vertex.name) {
             return true;
         }
     }
@@ -484,19 +484,19 @@ function hasOutwardLink(yy, node) {
 }
 
 /**
- * return true if node has inward link OUTSIDE container it is in
- * @param {GraphObject} node
- * @param {GraphObject} nodesContainer (Group?)
+ * return true if vertex has inward link OUTSIDE container it is in
+ * @param {GraphObject} vertex
+ * @param {GraphObject} verticesContainer (Group?)
  */
-function hasInwardLink(yy, node, nodesContainer) {
+function hasInwardLink(yy, vertex, verticesContainer) {
     for (const i in yy.LINKS) {
         if (!yy.LINKS.hasOwnProperty(i)) continue;
         const link = yy.LINKS[i];
-        if (nodesContainer &&
-            link.container.name === nodesContainer.name) {
+        if (verticesContainer &&
+            link.container.name === verticesContainer.name) {
             continue;
         }
-        if (link.right.name === node.name) {
+        if (link.right.name === vertex.name) {
             return true;
         }
     }
@@ -539,7 +539,7 @@ function traverseLinks(graphmeta, callback) {
 /**
  * Usage: generators
  * @param {GraphObject} container
- * @param {function((Node|Group)):void} callback
+ * @param {function((Vertex|Group)):void} callback
  */
 function traverseObjects(container, callback) {
     for (const i in container.OBJECTS) {
@@ -564,7 +564,7 @@ function _getVariables(yy) {
 }
 
 /**
- * Get default attribute nodecolor,linkcolor,groupcolor and bubble upwards if
+ * Get default attribute vertexcolor,linkcolor,groupcolor and bubble upwards if
  * otherwise 'unobtainable'
  *
  * @param yy lexer
@@ -640,7 +640,7 @@ function _pushObject(yy, o) {
     const cnt = getCurrentContainer(yy)
     debug("_pushObject " + o + "to " + cnt, true);
     cnt.OBJECTS.push(o);
-    cnt.ROOTNODES.push(o);
+    cnt.ROOTVERTICES.push(o);
     debug(false);
     return o;
 }

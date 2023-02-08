@@ -2,7 +2,7 @@
 /**
  * Create a new graph root.
  * 
- * Even if the TREE has multiple root nodes (or basically multiple trees)
+ * Even if the TREE has multiple root vertices (or basically multiple trees)
  * the graph will only EVER have one GraphRoot
  * 
  */
@@ -12,7 +12,7 @@ class GraphRoot extends GraphObject {
         /** @type {GraphObject[]} */
         this.OBJECTS = [];
         /** @type {GraphObject[]} */
-        this.ROOTNODES = [];
+        this.ROOTVERTICES = [];
         // TODO: MOVING TO GraphMeta
         /** @type {string} */
         this.generator = undefined;
@@ -110,7 +110,7 @@ class GraphRoot extends GraphObject {
         return this.start;
     }
 
-    // Save EQUAL node ranking
+    // Save EQUAL vertex ranking
     /**
      * @param {string[]} value
      * @return {GraphRoot}
@@ -129,7 +129,7 @@ class GraphRoot extends GraphObject {
     }
 
     /**
-     * Set default nodecolor, groupcolor, linkcolor Always ask from the
+     * Set default vertexcolor, groupcolor, linkcolor Always ask from the
      * currentContainer first
      * @param {string} key
      * @param {any} value

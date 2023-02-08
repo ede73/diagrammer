@@ -21,7 +21,7 @@ node js/parse.js verbose plantuml_sequence.test plantuml_sequence
 @param {GraphMeta} graphmeta
 */
 function plantuml_sequence(graphmeta) {
-    const processANode = function (obj, sbgraph) {
+    const processAVertex = function (obj, sbgraph) {
         const nattrs = [];
         const styles = [];
         // getAttrFmt(o, 'color', 'fillcolor="{0}"',nattrs);
@@ -68,8 +68,8 @@ function plantuml_sequence(graphmeta) {
     // This may FORWARD DECLARE a node...which creates problems with coloring
     const s = root.getStart();
     if (s) {
-        const fwd = getNode(graphmeta.yy, s);
-        processANode(fwd, false);
+        const fwd = getVertex(graphmeta.yy, s);
+        processAVertex(fwd, false);
     }
     /**
      * print only NON PRINTED container links. If first non printed link is NOT
@@ -105,8 +105,8 @@ function plantuml_sequence(graphmeta) {
 
             // output(graphmeta, indent("//"+lr));
             if (rhs instanceof Group) {
-                // just pick ONE Node from group and use lhead
-                // TODO: Assuming it is Node (if Recursive groups implemented,
+                // just pick ONE Vertex from group and use lhead
+                // TODO: Assuming it is Vertex (if Recursive groups implemented,
                 // it could be smthg else)
                 // attrs.push(" lhead=cluster_" + lr.getName());
                 // TODO:
@@ -199,8 +199,8 @@ function plantuml_sequence(graphmeta) {
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
             const obj = root.OBJECTS[i];
-            if (obj instanceof Node)
-                processANode(obj, isSubGraph);
+            if (obj instanceof Vertex)
+                processAVertex(obj, isSubGraph);
         }
         printLinks(root, isSubGraph);
         for (const i in root.OBJECTS) {
@@ -235,7 +235,7 @@ function plantuml_sequence(graphmeta) {
                     printLinks(o);
                     // output(graphmeta, indent("}//end of " + o.getName()));
                 }(obj);
-            } else if (!obj instanceof Node) {
+            } else if (!obj instanceof Vertex) {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
         }

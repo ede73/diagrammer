@@ -1,6 +1,6 @@
 /**
 
-	  // setup a few example class nodes and relationships
+	  // setup a few example class vertices and relationships
 	  const nodedata = [
 		{
 		  key: 1,
@@ -41,10 +41,10 @@ function generateUmlClass(graphmeta) {
 		return ln.name + "" + label;
 	}
 
-	const getProperties = nodes => {
+	const getProperties = vertices => {
 		// instead of array of names...{name:???,type=???,visibility=???,default=??}
 		// name;[+-#][name:]String[=xx]
-		return [...nodes].filter(node => !nameAndLabel(node).includes(")")).map(p => {
+		return [...vertices].filter(node => !nameAndLabel(node).includes(")")).map(p => {
 			const ret = {
 			};
 			ret['name'] = p.name;
@@ -75,10 +75,10 @@ function generateUmlClass(graphmeta) {
 			}
 		});
 	};
-	const getMethods = nodes => {
+	const getMethods = vertices => {
 		// instead of array of names...{name:???,parameters:[{name:???,type:???}],visiblity:???}
 		//+public,-private,#protected
-		return [...nodes].filter(node => nameAndLabel(node).includes("(")).map(m => {
+		return [...vertices].filter(node => nameAndLabel(node).includes("(")).map(m => {
 			const ret = {
 			};
 			console.log(m.label);

@@ -43,7 +43,7 @@ function digraph(graphmeta) {
     /**
      * @param {GraphObject} obj 
      */
-    const processANode = obj => {
+    const processAVertex = obj => {
         const nattrs = [];
         const styles = [];
         getAttrFmt(obj, 'color', 'fillcolor="{0}"', nattrs);
@@ -99,8 +99,8 @@ function digraph(graphmeta) {
     // This may FORWARD DECLARE a node...which creates problems with coloring
     const start = r.getStart();
     if (start) {
-        const fwd = getNode(graphmeta.yy, start);
-        processANode(fwd);
+        const fwd = getVertex(graphmeta.yy, start);
+        processAVertex(fwd);
         // {$$=" {rank = same;null}\n {rank = same; "+$2+"}\n null
         // [shape=plaintext,
         // label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
@@ -120,7 +120,7 @@ function digraph(graphmeta) {
             const o = c.OBJECTS[i];
             if (o instanceof Group) {
                 if (o.OBJECTS.length == 0) {
-                    o.OBJECTS.push(new Node("invis_" + o.getName())
+                    o.OBJECTS.push(new Vertex("invis_" + o.getName())
                         .setStyle("invis"));
                 } else {
                     // A group...non empty...parse inside
@@ -131,7 +131,7 @@ function digraph(graphmeta) {
     })(r.OBJECTS);
 
     function getFirstLinkOfTheGroup(grp) {
-        //output(graphmeta,"FIRST NODE"+JSON.stringify(grp));
+        //output(graphmeta,"FIRST VERTEX"+JSON.stringify(grp));
         for (const i in graphmeta.LINKS) {
             if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
             const l = graphmeta.LINKS[i];
@@ -149,7 +149,7 @@ function digraph(graphmeta) {
 
     function getLastLinkInGroup(grp) {
         let nod = undefined;
-        // output(graphmeta,"LAST NODE"+JSON.stringify(grp));
+        // output(graphmeta,"LAST VERTEX"+JSON.stringify(grp));
         for (const i in graphmeta.LINKS) {
             if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
             const l = graphmeta.LINKS[i];
@@ -203,9 +203,9 @@ function digraph(graphmeta) {
                                 output(graphmeta, lastendif + "->" + exitlink + ";");
                             }
                         } else {
-                            const sn = "entry" + grp.exitnode;
+                            const sn = "entry" + grp.exitvertex;
                             if (!lastendif) {
-                                lastendif = "endif" + grp.exitnode;
+                                lastendif = "endif" + grp.exitvertex;
                                 output(graphmeta, lastendif + "[shape=circle,label=\"\",width=0.01,height=0.01];");
                             }
                             //TODO:else does not need diamond
@@ -218,7 +218,7 @@ function digraph(graphmeta) {
                             const lastLink = getFirstLinkOfTheGroup(grp);
                             const ln = getLastLinkInGroup(grp);
                             // decision node
-                            //const en = "exit" + o.exitnode
+                            //const en = "exit" + o.exitvertex
 
                             if (lastexit) {
                                 output(graphmeta, lastexit + "->" + sn + "[label=\"NO\",color=red];");
@@ -231,8 +231,8 @@ function digraph(graphmeta) {
                         }
                     }
                 })(obj);
-            } else if (obj instanceof Node) {
-                processANode(obj);
+            } else if (obj instanceof Vertex) {
+                processAVertex(obj);
             } else {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
@@ -265,8 +265,8 @@ function digraph(graphmeta) {
         debug("// link from " + lhs + " to " + rhs);
         if (rhs instanceof Group) {
             //debug('huuhuu');
-            // just pick ONE Node from group and use lhead
-            // TODO: Assuming it is Node (if Recursive groups implemented, it
+            // just pick ONE Vertex from group and use lhead
+            // TODO: Assuming it is Vertex (if Recursive groups implemented, it
             // could be smthg else)
             if (!rhs.isSubGraph) {
                 attrs.push(" lhead=cluster_" + rhs.getName());
@@ -279,7 +279,7 @@ function digraph(graphmeta) {
             if (!lhs.isSubGraph)
                 attrs.push(" ltail=cluster_" + lhs.getName());
             if (lhs instanceof SubGraph && lhs.getExit()) {
-                //get containers all nodes that have no outward links...(TODO:should be in model actually!)
+                //get containers all vertices that have no outward links...(TODO:should be in model actually!)
                 //perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
                 const exits = [];
                 for (const i in lhs.OBJECTS) {

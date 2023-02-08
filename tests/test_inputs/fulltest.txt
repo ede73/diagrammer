@@ -1,4 +1,4 @@
-// predeclare nodes
+// predeclare vertices
 solid a;dotted
 solid b;dashed
 solid c;solid

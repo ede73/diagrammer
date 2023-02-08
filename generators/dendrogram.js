@@ -27,29 +27,29 @@ function dendrogram(graphmeta) {
 	 * @param {GraphObject} lhs
 	 * @param {GraphObject} rhs
 	 */
-	function addNode(lhs, rhs) {
+	function addVertex(lhs, rhs) {
 		if (!tree) {
-			tree = new TreeNode(lhs);
+			tree = new TreeVertex(lhs);
 		}
-		if (!(lhs instanceof Node)) return;
-		const cl = findNode(tree, lhs);
+		if (!(lhs instanceof Vertex)) return;
+		const cl = findVertex(tree, lhs);
 		if (!cl) {
 			throw new Error('Left node (' + lhs.name + ') not found from tree');
 		}
-		if (!findNode(tree, rhs) && (rhs instanceof Node)) {
+		if (!findVertex(tree, rhs) && (rhs instanceof Vertex)) {
 			debug('Add ' + rhs.name + ' as child of ' + cl.data.name + " co " + rhs.container);
-			cl.CHILDREN.push(new TreeNode(rhs));
+			cl.CHILDREN.push(new TreeVertex(rhs));
 		}
 	}
 
 	//debug(JSON.stringify(graphmeta.LINKS));
 	/**
-	 * For a dendrogram we're not interested in nodes
+	 * For a dendrogram we're not interested in vertices
 	 * just edges(for now!)
 	 */
 	traverseLinks(graphmeta, link => {
 		//debug('link node '+l.left.name+' to '+l.right.name);
-		addNode(link.left, link.right);
+		addVertex(link.left, link.right);
 	});
 
 	//output(graphmeta,'{',true);

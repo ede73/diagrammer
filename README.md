@@ -24,13 +24,13 @@ Also **privacy**, many online visualization tools are available, but would you u
 And not limited there, but who ever designed those graph representations in the first place didn't think of simplicity. Some are really awkward to write and learn.
 (Of course in the end, this project is no exception :) )
 
-All the graphs have something in common, they describe simple relations between edges and nodes.
+All the graphs have something in common, they describe simple relations between edges and vertices.
 ```
 a > b > c < d
 ```
 
 Also lot of other interesting things popped up and was available 2013 :)
-LLVM! Anything to anything transpiler (well kinda). Node, javascript on server side. JISON! Lexer/Grammar for JS!
+LLVM! Anything to anything transpiler (well kinda). Vertex, javascript on server side. JISON! Lexer/Grammar for JS!
 
 That's so cool! I could have graphviz run in browser! And I could use the SAME rendering engine from command line.
 
@@ -76,7 +76,7 @@ And if you don't remember how exactly in diagrammer language something was done,
 
 I wanted the diagrammer be super easy to use and get going, but with ability for expressivity and visual help (colors, texts, notes).
 
-## Nodes and edges(links)
+## Vertexs and edges(links)
 
 In diagrammer you write the graph as
 ```
@@ -86,16 +86,16 @@ a>b>c<d<e<(f,g,h)
 That gives you a graph:
 <img width=200 src="https://user-images.githubusercontent.com/1845554/216885697-fbd13681-b728-41da-bfa9-9ee6be5a0f69.png">
 
-### Node text
+### Vertex text
 You can change text of the code by declaring it somewhere as
 ```
-a;This is a node
+a;This is a vertex
 ```
 
 It doesn't matter where the statement is. There's no error resolution, last declaration stands.
 
-### Node shape
-Shape declaration is added LHS of the node
+### Vertex shape
+Shape declaration is added LHS of the vertex
 ```
 box a
 diamond b
@@ -106,35 +106,35 @@ You can also use special syntax:
 ```
 shape box
 ```
-Which will make all the rest of the shapes be boxes. Statement can appead many times, always shaping the next introduced nodes as such.
+Which will make all the rest of the shapes be boxes. Statement can appead many times, always shaping the next introduced vertices as such.
 
-### Node colors
+### Vertex colors
 Well everyone needs a bit of color, so do graphs
 
 ```
 a#ff0000
 ```
-Make a red node
+Make a red vertex
 
 ### Color variables
 And changing all the colors is tedious, so we have variable. Of course.
 
 ```
 $(greencolor:#00ff00)
-greennode$(greencolor)
+greenvertex$(greencolor)
 ```
 
 ### Marking the beginning
 ```
-START nodename
+START vertexname
 ```
-May apply to some visualizers, some don't care/support start nodes
+May apply to some visualizers, some don't care/support start vertices
 
-### Node equality
+### Vertex equality
 Since most visualizers are dynamic, there's little to guide them.
-You can mark nodes to be equal to one other.
+You can mark vertices to be equal to one other.
 ```
-equal nodea, nodeb
+equal vertexa, vertexb
 ```
 GraphViz usually tries to obey.
 
@@ -143,7 +143,7 @@ There's two syntaxes (old and new :) )
 ```
 group color #7722ee
 group NAME1;Label the group1
-//Nodes
+//Vertexs
   group InnerGroup1#00ff00;Inner group1
   xy1
   group end
@@ -152,7 +152,7 @@ group end
 or
 ```
 { NAME2#ff0000;Label the group2
-//Nodes
+//Vertexs
   {InnerGroup2#5555ff;Inner group2
   xy2
   }
@@ -173,9 +173,9 @@ a/barcode.png,b/basestation.png,c/battery.png > d/camera.png,e/cpu.png,f/documen
 <img width=200 src="https://user-images.githubusercontent.com/1845554/216887662-1aa6fd1c-e7f8-4a70-9fe0-b3abdf0c13b8.png">
 
 ### Edge pointing to a group
-Edge can point to a node or two a group. Depending on visualizer group pointing edges may work or not :)
+Edge can point to a vertex or two a group. Depending on visualizer group pointing edges may work or not :)
 
-### Edge singularity (aka. invisible node)
+### Edge singularity (aka. invisible vertex)
 ```
 r>singularity y>splita,splitb
 ```
@@ -208,7 +208,7 @@ Some types may not be available on all visualization
 
 ### Edge texts
 ```
-a>b;Instead of renaming nodes (since they are connected) this make edge text
+a>b;Instead of renaming vertices (since they are connected) this make edge text
 c>"signal::and a big\nlined\nnote\nie.multiline edge text"d
 e>f;signal::and a big\nlined\nnote\nie.multiline edge text
 ```
@@ -235,12 +235,12 @@ else
 endif
 ```
 
-It'll make 5 node groups:
-1) Beginning of the conditional block, the **if** part ie. *something would happen*, nodes a1,b1 (or links if the nodes were introduced earlier)
-2) Elseif section **something probably would not happen**, nodes a2,b2 (or links if the nodes were introduced earlier)
-3) **or if i see a flying bird* part and it's nodes
-4) Else part and it's nodes
-5) End of the conditional block, no nodes
+It'll make 5 vertex groups:
+1) Beginning of the conditional block, the **if** part ie. *something would happen*, vertices a1,b1 (or links if the vertices were introduced earlier)
+2) Elseif section **something probably would not happen**, vertices a2,b2 (or links if the vertices were introduced earlier)
+3) **or if i see a flying bird* part and it's vertices
+4) Else part and it's vertices
+5) End of the conditional block, no vertices
 
 PlantUML + GraphViz visualizer support conditionals (visually)
 
@@ -257,8 +257,8 @@ a2:f0>b2:f1
 ```
 
 Note! a2:f0 isn't actually a diagrammer language construct!
-In AST it appears as a node named "a2:f0" (and for b2:f1 same thing).
-It'll be passed as a2:f0 node to the renderer, which then may do something with it. In GraphViz case, renderer outputs
+In AST it appears as a vertex named "a2:f0" (and for b2:f1 same thing).
+It'll be passed as a2:f0 vertex to the renderer, which then may do something with it. In GraphViz case, renderer outputs
 ```
 digraph{
   ...
@@ -282,17 +282,17 @@ Briefly as:
 ```
 SHAPE RECORD
 graphobject;GraphObject | {name | color | textcolor | url | label }
-anode;Node | { shape | image | style}
+avertex;Vertex | { shape | image | style}
 alink;Link | { linktype | left | right}
-agroup;Group | { name | OBJECTS[] | ROOTNODES[] | linklabel | "defaults"}
-asubgraph;SubGraph | { name | OBJECTS[] | ROOTNODES[] | linklabel | entrance | exit | "defaults"}
+agroup;Group | { name | OBJECTS[] | ROOTVERTICES[] | linklabel | "defaults"}
+asubgraph;SubGraph | { name | OBJECTS[] | ROOTVERTICES[] | linklabel | entrance | exit | "defaults"}
 
-anode>"inherit"graphobject
+avertex>"inherit"graphobject
 alink>"inherit"graphobject
 agroup>"inherit"graphobject
 asubgraph>"inherit"graphobject
 
-graphroot;GraphRoot | {OBJECTS[] | ROOTNODES[] | generator | visualizer | (current)shape | direction | start | equal | "defaults"}
+graphroot;GraphRoot | {OBJECTS[] | ROOTVERTICES[] | generator | visualizer | (current)shape | direction | start | equal | "defaults"}
 
 graphobject->"many:1"graphroot
 ```
@@ -302,21 +302,21 @@ graphobject->"many:1"graphroot
 ## GraphRoot
 Represents the diagram/graph and necessary properties excluding Links (stored separately)
 
-Holds all the objects and rootnodes. The diagram may have more than one root node, not all visualizers support these though!
+Holds all the objects and rootvertices. The diagram may have more than one root vertex, not all visualizers support these though!
 
 It also holds the chosen generator (e.g. graphviz) / visualizer (e.g. circo).
 
-It has list of nodes marked equal - if any.
+It has list of vertices marked equal - if any.
 
 Which direction the graph is to be drawn - if specified.
 
-What's the current default shape - only used during parsing the diagrammer languge while generating Nodes.
+What's the current default shape - only used during parsing the diagrammer languge while generating Vertexs.
 
-AST/Model note. Links are not stored in GraphRoot, but separately! Why? It's easier to handle them in the generators and nodes and links are output separately to separate sections anyway.
+AST/Model note. Links are not stored in GraphRoot, but separately! Why? It's easier to handle them in the generators and vertices and links are output separately to separate sections anyway.
 
 GraphRoot:
-- OBJECTS[Node(a), SubGraph(Node(b), Node(c), Node(d), Group(Node(f), Node(g)))]
-- ROOTNODES[Node, SubGraph] # this graph has two root nodes
+- OBJECTS[Vertex(a), SubGraph(Vertex(b), Vertex(c), Vertex(d), Group(Vertex(f), Vertex(g)))]
+- ROOTVERTICES[Vertex, SubGraph] # this graph has two root vertices
 - generator digraph
 - visualizer circo
 - shape ..
@@ -335,13 +335,13 @@ Own properties are linktype, left- and righthand sides (+GraphObject properties)
 
 Links are stored separately and available for the generator in yy.LINKS
 
-## Node
+## Vertex
 
 Own properties are name, shape, image - if specified, style - if specified (+GraphObject properties)
 
 ## Group
 
-Own properties are name, linklabel, defaults and list of OBJECTS and ROOTNODES.
+Own properties are name, linklabel, defaults and list of OBJECTS and ROOTVERTICES.
 
 ## SubGraph
 Only used to represented "sub graphs" ie. like in :
@@ -349,13 +349,13 @@ Only used to represented "sub graphs" ie. like in :
 a>(b,c,d>(f,g))
 ```
 
-Ie. a graph where output node is connected to all the inner nodes.
+Ie. a graph where output vertex is connected to all the inner vertices.
 
 That constructs
 
 GraphRoot:
-- OBJECTS[Node(a), SubGraph(Node(b), Node(c), Node(d), SubGraph(Node(f), Node(g)))]
-- ROOTNODES[same as objects]
+- OBJECTS[Vertex(a), SubGraph(Vertex(b), Vertex(c), Vertex(d), SubGraph(Vertex(f), Vertex(g)))]
+- ROOTVERTICES[same as objects]
 - generator
 - visualizer
 - shape
@@ -363,7 +363,7 @@ GraphRoot:
 - equals
 - defaults
 
-Own properties are name, linklabel, defaults and list of OBJECTS and ROOTNODES, entrance and exit.
+Own properties are name, linklabel, defaults and list of OBJECTS and ROOTVERTICES, entrance and exit.
 
 # Generators
 Two convenience methods available:
@@ -374,8 +374,8 @@ traverseLinks(yy, link => {
 })
 ```
 ```
-traverseTree(root, (node, isLeaf, hasSiblings) => {
-  // process the node
+traverseTree(root, (vertex, isLeaf, hasSiblings) => {
+  // process the vertex
 }, enterSubtree => {
   // called then entering new subtree
 }, exitSubtree => {
@@ -398,12 +398,12 @@ traverseTree(root, (node, isLeaf, hasSiblings) => {
 - js - The diagrammer parser (also transpiled mscgen, graphviz)
   - mscgen / graphviz visualize the graphs in the Web UI in realtime without any backend support, but not required. I was hoping to build backendless visualization, all in browser. And that's what it does, but had I wanted to go all the way..PlantUML, python3 nwdiag/actdiag..etc. uh. 
 - manual_test_diagrams - some diagrammer tests during development, not tied to tests
-- model - Diagrammer parser converts diagrammer language to this AST model comprising of node, link, shapes, subgraph (, graphobject, graphroot, tree, support)
+- model - Diagrammer parser converts diagrammer language to this AST model comprising of vertex, link, shapes, subgraph (, graphobject, graphroot, tree, support)
 - scripts - Some utility scripts for building, testing, exporting
 - setup - setup related
 - tests - All the test files, diagrammer language inputs, reference renderings, transpiled outputs. 
   - Test generates all the test files using all the (related) visualizations, and then does output text + output graph comparison. Super useful if you need to change the grammar, ensures the ever used to work, still does :)
-- types - web UI icons for adding node shapes
+- types - web UI icons for adding vertex shapes
 - web - PHP Web Backend, provides access to backend renderers like PlantUml, mscgen (the C version), Python3 *diags, etc. Also provides import/export. Not needed for comman line use
 
 # Installation

@@ -84,18 +84,18 @@ shapeOrVariable
 	| SHAPES -> $SHAPES
 	;
 
-/* read node's attributes basically like: [STYLES] [SHAPES] NAME [IMAGE|COLOR]*/
-readNodeAttrs
+/* read vertice's attributes basically like: [STYLES] [SHAPES] NAME [IMAGE|COLOR]*/
+readVertexAttrs
     /*  1      2       3       4        5            6          7*/
-	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> getNode(yy,$NAME,$1).setColor($5);if ($$ instanceof Node) setAttr($$.setShape($2).setImage($6),'compass',$4)
+	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> getVertex(yy,$NAME,$1).setColor($5);if ($$ instanceof Vertex) setAttr($$.setShape($2).setImage($6),'compass',$4)
 	;
 
 /*
-NOT BEST...return Node or Group, but some commands allow only Node and some just Group...
+NOT BEST...return Vertex or Group, but some commands allow only Vertex and some just Group...
 But it gets thing done..for now!
 TODO: Fix it
 
-This means getNode MUST be able to return a Group as well! If name matches!!
+This means getVertex MUST be able to return a Group as well! If name matches!!
 
 left recursive
   X=[STYLES] [SHAPES] NAME [IMAGE|COLOR]
@@ -104,20 +104,20 @@ See Cris Dodds good explanation of right recursion
 http://stackoverflow.com/questions/12715961/grammar-spec-resolving-shift-reduce-conflicts
 And even better thorough explanation from IBM
 http://publib.boulder.ibm.com/infocenter/zvm/v5r4/index.jsp?topic=/com.ibm.zvm.v54.dmsp4/hcsp4b10120.htm
-nodeGroupListOrAttrs cumulates an array of nodes, RHS is latest node
+vertexGroupListOrAttrs cumulates an array of vertices, RHS is the latest vertex
 */
-nodeGroupListOrAttrs
+vertexGroupListOrAttrs
 	: OPAREN -> enterSubGraph(yy)
-	| nodeGroupListOrAttrs LISTSEP INLINE_STRING? readNodeAttrs -> getList(yy,$nodeGroupListOrAttrs,$readNodeAttrs,$3)
-	| readNodeAttrs -> $readNodeAttrs
+	| vertexGroupListOrAttrs LISTSEP INLINE_STRING? readVertexAttrs -> getList(yy,$vertexGroupListOrAttrs,$readVertexAttrs,$3)
+	| readVertexAttrs -> $readVertexAttrs
 	| CPAREN -> exitSubGraph(yy)
 	;
 	/* TOOD: Could concatenate $4,$6 or if $4 defined AND $6, $6 could be appended as ::, unless already(note)*/
 readEvents
         /*   1         2       3       4        5               6              7                   8*/
-	: readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? nodeGroupListOrAttrs LABEL? -> getLink(yy,$EVENT,$readEvents,$nodeGroupListOrAttrs,$6,$8?$8.substring(1):$8,$5,$2,$4).right
+	: readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> getLink(yy,$EVENT,$readEvents,$vertexGroupListOrAttrs,$6,$8?$8.substring(1):$8,$5,$2,$4).right
 	| readEvents LABEL														-> $$.setLabel($LABEL.substring(1))
-	| nodeGroupListOrAttrs
+	| vertexGroupListOrAttrs
 	;
 
 graphContent
@@ -128,9 +128,9 @@ graphContent
 			if ($2=="default") $2=undefined;
 			$$=getGraphRoot(yy).setCurrentShape($2);
 		}
-	| EQUAL nodeGroupListOrAttrs
+	| EQUAL vertexGroupListOrAttrs
 		{
-			getCurrentContainer(yy).setEqual($2 instanceof Node?new Array($2):$2);
+			getCurrentContainer(yy).setEqual($2 instanceof Vertex?new Array($2):$2);
 		}
 	| SHAPE NAME {throw new Error("Expecting one of the shapes, got ("+$2+")");}
 	| LANDSCAPE 		-> getGraphRoot(yy).setDirection("landscape")
@@ -138,12 +138,12 @@ graphContent
 	| VISUALIZER NAME 	-> getGraphRoot(yy).setVisualizer($NAME)
 	| PORTRAIT 			-> getGraphRoot(yy).setDirection("portrait")
 	| COMMENT 			-> "/*"+$COMMENT.substring(2)+"*/\n"
-	| NODE_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('nodecolor'    ,$2=="default"?undefined:$2)
-	| NODETEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('nodetextcolor',$2=="default"?undefined:$2)
+	| VERTEX_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('vertexcolor'    ,$2=="default"?undefined:$2)
+	| VERTEXTEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('vertextextcolor',$2=="default"?undefined:$2)
 	| LINK_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('linkcolor'    ,$2=="default"?undefined:$2)
 	| LINKTEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('linktextcolor',$2=="default"?undefined:$2)
 	| GROUP_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('groupcolor'   ,$2=="default"?undefined:$2)
-	| IF 	 ->	setAttr(setAttr(enterContainer(yy,getGroup(yy).setLabel($IF.replace(/\s+then\s*$/,"").replace(/^\s*if\s*/,""))),'conditional','if'),'entrylink',yy.lastSeenNode)
+	| IF 	 ->	setAttr(setAttr(enterContainer(yy,getGroup(yy).setLabel($IF.replace(/\s+then\s*$/,"").replace(/^\s*if\s*/,""))),'conditional','if'),'entrylink',yy.lastSeenVertex)
 	| ELSEIF {
 		exitContainer(yy);
 		$$=setAttr(enterContainer(yy,getGroup(yy).setLabel($ELSEIF.replace(/\s+then\s*$/,"").replace(/^\s*elseif\s*/,""))),'conditional','elseif')
@@ -154,10 +154,10 @@ graphContent
 		}
 	| ENDIF	 { 
 		exitContainer(yy);
-		//TODO: is ENDIF container necessary?YES, it could be invisible node! Could link to that instead of endif kludge in digraph
+		//TODO: is ENDIF container necessary?YES, it could be invisible vertex! Could link to that instead of endif kludge in digraph
         // TODO: MOVING TO GraphMeta??
-		yy.collectNextNode=setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif')
-		debug("XXXXXXXXXXXXXXXXXXXXX collectNextNode"+yy.collectNextNode);
+		yy.collectNextVertex=setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif')
+		debug("XXXXXXXXXXXXXXXXXXXXX collectNextVertex"+yy.collectNextVertex);
 		$$=exitContainer(yy)
 	}
 	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */

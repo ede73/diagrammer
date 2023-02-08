@@ -1,4 +1,4 @@
-node color #ff0000
+vertex color #ff0000
 outside1;Group to node
 outside3;Inner group to node
 { master
@@ -10,7 +10,7 @@ outside3;Inner group to node
    ima2
   }
 }
-node color #ffff00
+vertex color #ffff00
 
 outside2;Node to group
 outside4;Node to inner group

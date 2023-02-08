@@ -42,7 +42,7 @@ function seqdiag(graphmeta) {
                     styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
                 graphmeta.result(z.getName() + styleAndLabel + ";");
             }
-        } else if (obj instanceof Node) {
+        } else if (obj instanceof Vertex) {
             let styleAndLabel = getAttrFmt(obj, 'style', ',style={0}') + getAttrFmt(obj, 'label', ',label="{0}"') + getAttrFmt(obj, 'color', ',color="{0}"');
             if (styleAndLabel.trim() != "")
                 styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
@@ -72,8 +72,8 @@ function seqdiag(graphmeta) {
             }
         }
         if (rhs instanceof Group) {
-            // just pick ONE Node from group and use lhead
-            // TODO: Assuming it is Node (if Recursive groups implemented, it
+            // just pick ONE Vertex from group and use lhead
+            // TODO: Assuming it is Vertex (if Recursive groups implemented, it
             // could be smthg else)
             linkType += " lhead=cluster_" + rhs.getName();
             rhs = rhs.OBJECTS[0];

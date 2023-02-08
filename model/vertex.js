@@ -1,12 +1,12 @@
 //@ts-check
 /**
- * Represents a Node in a visualization
+ * Represents a Vertex in a visualization
  *
- * @param name Name of the node
- * @param [shape] Optional shape for the node, if not give, will default to what ever default is being used at the moment
+ * @param name Name of the vertex
+ * @param [shape] Optional shape for the vertex, if not give, will default to what ever default is being used at the moment
  * @constructor
  */
-class Node extends GraphObject {
+class Vertex extends GraphObject {
     constructor(name, shape) {
         super(undefined); // TODO:
         /** @type {string} */
@@ -24,7 +24,7 @@ class Node extends GraphObject {
 
     /**
      * @param {string} value 
-     * @returns {Node}
+     * @returns {Vertex}
      */
     setShape(value) {
         if (value) {
@@ -40,7 +40,7 @@ class Node extends GraphObject {
     /**
      * Temporary for RHS list array!!
      * @param {string} value 
-     * @returns {Node}
+     * @returns {Vertex}
      */
     setLinkLabel(value) {
         this.linklabel = value;
@@ -64,7 +64,7 @@ class Node extends GraphObject {
 
     /**
      * @param {string} value 
-     * @returns {Node}
+     * @returns {Vertex}
      */
     setStyle(value) {
         if (value) {
@@ -79,7 +79,7 @@ class Node extends GraphObject {
 
     /**
      * @param {string} value 
-     * @returns {Node}
+     * @returns {Vertex}
      */
     setImage(value) {
         if (value) {
@@ -98,6 +98,6 @@ class Node extends GraphObject {
             fmt += ",color: " + this.color;
         if (this.label)
             fmt += ",label: " + this.label;
-        return "Node(name:" + this.getName() + fmt + ")";
+        return "Vertex(name:" + this.getName() + fmt + ")";
     }
 };

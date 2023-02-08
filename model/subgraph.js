@@ -13,7 +13,7 @@ class SubGraph extends Group {
         /** @type {GraphObject[]} */
         this.OBJECTS = [];
         /** @type {GraphObject[]} */
-        this.ROOTNODES = [];
+        this.ROOTVERTICES = [];
         /** @type {boolean} */
         this.isSubGraph = true;
         /** @type {string} */
@@ -56,7 +56,7 @@ class SubGraph extends Group {
     }
 
     /**
-     * @param {string} exit Exit node name
+     * @param {string} exit Exit vertex name
      * @return {SubGraph}
      */
     setExit(exit) {
@@ -81,8 +81,8 @@ class SubGraph extends Group {
 
         if (this.exit)
             fmt += ",exit:" + this.exit;
-        if (this.ROOTNODES)
-            fmt += ",rootnodes:" + this.ROOTNODES;
+        if (this.ROOTVERTICES)
+            fmt += ",rootvertices:" + this.ROOTVERTICES;
         return "SubGraph(name:" + this.name + fmt + ")";
     };
 };

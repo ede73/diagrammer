@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Represents an link (edge) between objects (nodes,groups,lists)
+ * Represents an link (edge) between objects (vertices,groups,lists)
  */
 class Link extends GraphObject {
 	/**

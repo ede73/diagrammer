@@ -12,20 +12,20 @@ class Group extends GraphObject {
         /** @type {GraphObject[]} */
         this.OBJECTS = [];
         /** @type {GraphObject[]} */
-        this.ROOTNODES = [];
-        /** @type {Node[]} */
+        this.ROOTVERTICES = [];
+        /** @type {Vertex[]} */
         this.equal = undefined;
         /** @type {string} */
         this.linklabel = undefined;
         /** @type {string} */
-        this.exitnode = undefined;
+        this.exitvertex = undefined;
         /** @type {string} */
         this.entrylink = undefined;
     }
 
     /**
-     * Save EQUAL node ranking
-     * @param {Node[]} value
+     * Save EQUAL vertex ranking
+     * @param {Vertex[]} value
      * @return {Group}
      */
     setEqual(value) {
@@ -34,7 +34,7 @@ class Group extends GraphObject {
     }
 
     /**
-     * @return {Node[]}
+     * @return {Vertex[]}
      */
     getEqual() {
         return this.equal;
@@ -55,7 +55,7 @@ class Group extends GraphObject {
     }
 
     /**
-     * Set default nodecolor, groupcolor, linkcolor Always ask from the
+     * Set default vertexcolor, groupcolor, linkcolor Always ask from the
      * currentContainer first
      * @param {string} key
      * @param {any} value

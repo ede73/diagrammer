@@ -1,4 +1,4 @@
-NODE COLOR #0000ff
+VERTEX COLOR #0000ff
 GROUP COLOR #33ff33
 START s
 actor s#ff0000>#00ff00 actor c#0000ff;#ff00ffconnect,s=red\nlink=green\n this node=blue

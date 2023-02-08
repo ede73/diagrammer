@@ -26,7 +26,7 @@ function actdiag(graphmeta) {
      * does not really work..but portrait mode if
      * (r.getDirection()==="portrait"){ output(graphmeta," orientation=portrait");
      * }else{ //DEFAULT output(graphmeta," orientation=landscape"); }
-     * @param {(Node|Group)} obj
+     * @param {(Vertex|Group)} obj
      */
     const parseObjects = (obj) => {
         output(true);

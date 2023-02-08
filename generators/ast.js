@@ -6,9 +6,9 @@ a;node text
 yy={
     CONTAINER_EXIT: 1
     CURRENTCONTAINER: [GraphRoot]
-    GRAPHROOT: GraphRoot {OBJECTS: Array(5), ROOTNODES: Array(1), setGenerator: ƒ, getGenerator: ƒ, setVisualizer: ƒ, …}
+    GRAPHROOT: GraphRoot {OBJECTS: Array(5), ROOTVERTICES: Array(1), setGenerator: ƒ, getGenerator: ƒ, setVisualizer: ƒ, …}
         OBJECTS: Array(5)
-            0: Node
+            0: Vertex
                 compass: undefined
                 getImage: ƒ ()
                 getLinkLabel: ƒ ()
@@ -26,13 +26,13 @@ yy={
                 style: undefined
                 toString: ƒ ()
                 [[Prototype]]: GraphObject
-            1: Node {name: 'b', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
-            2: Node {name: 'c', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
-            3: Node {name: 'd', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
-            4: Node {name: 'e', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+            1: Vertex {name: 'b', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+            2: Vertex {name: 'c', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+            3: Vertex {name: 'd', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+            4: Vertex {name: 'e', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
             length: 5
-    ROOTNODES: Array(1)
-        0: Node {name: 'a', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+    ROOTVERTICES: Array(1)
+        0: Vertex {name: 'a', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
         length: 1
     [[Prototype]]: Array(0)
     getCurrentShape: ƒ ()
@@ -53,8 +53,8 @@ yy={
     [[Prototype]]: GraphObject
     LINKS: (4) [Link, Link, Link, Link]
         0: Link
-            container: GraphRoot {OBJECTS: Array(5), ROOTNODES: Array(1), setGenerator: ƒ, getGenerator: ƒ, setVisualizer: ƒ, …}
-            left: Node
+            container: GraphRoot {OBJECTS: Array(5), ROOTVERTICES: Array(1), setGenerator: ƒ, getGenerator: ƒ, setVisualizer: ƒ, …}
+            left: Vertex
                 compass: undefined
                 getImage: ƒ ()
                 getLinkLabel: ƒ ()
@@ -73,16 +73,16 @@ yy={
                 toString: ƒ ()
                 [[Prototype]]: GraphObject
                 linkType: ">"
-            right: Node {name: 'b', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+            right: Vertex {name: 'b', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
             toString: ƒ ()
             [[Prototype]]: GraphObject
-        1: Link {linkType: '>', left: Node, right: Node, container: GraphRoot, toString: ƒ}
-        2: Link {linkType: '>', left: Node, right: Node, container: GraphRoot, toString: ƒ}
-        3: Link {linkType: '>', left: Node, right: Node, label: 'link text', toString: ƒ, …}
+        1: Link {linkType: '>', left: Vertex, right: Vertex, container: GraphRoot, toString: ƒ}
+        2: Link {linkType: '>', left: Vertex, right: Vertex, container: GraphRoot, toString: ƒ}
+        3: Link {linkType: '>', left: Vertex, right: Vertex, label: 'link text', toString: ƒ, …}
         length: 4
     OUTPUT: "ast"
     VISUALIZER: "ast"
-    lastSeenNode: Node {name: 'a', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
+    lastSeenVertex: Vertex {name: 'a', shape: undefined, image: undefined, style: undefined, setShape: ƒ, …}
     lexer: {yy: {…}, _input: '', done: true, _backtrack: false, _more: false, …}
     parseError: ƒ (str, hash)
     parser: Parser {yy: {…}, trace: ƒ, parseError: ƒ}
@@ -108,7 +108,7 @@ node js/parse.js verbose ast.test ast
 */
 function ast(graphmeta) {
     console.log(graphmeta)
-    const processANode = o => {
+    const processAVertex = o => {
     };
 
     output(graphmeta, "[");
@@ -160,7 +160,7 @@ function ast(graphmeta) {
                 traverseObjects(o, objectHandler);
                 output(graphmeta, ']');
             })(o);
-        } else if (o instanceof Node) {
+        } else if (o instanceof Vertex) {
             output(graphmeta, JSON.stringify({
                 node: o
             }) + ",");
@@ -180,7 +180,7 @@ function ast(graphmeta) {
         n.container.label = undefined;
         n.container.isSubGraph = undefined;
         n.container.entrance = n.container.entrance ? n.container.entrance.name : undefined;
-        n.container.exitnode = n.container.exitnode ? n.container.exitnode.name : undefined;
+        n.container.exitvertex = n.container.exitvertex ? n.container.exitvertex.name : undefined;
         n.container.conditional = undefined;
         n.container = n.container.name;
         output(graphmeta, JSON.stringify({ link: n }) + ",");

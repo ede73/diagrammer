@@ -43,9 +43,9 @@ Only one root supported?
 */
 function parsetree(graphmeta) {
 	const nodeList = [];
-	function addLinkedNode(left, right) {
-		if (!(left instanceof Node)) return;
-		if (!(right instanceof Node)) return;
+	function addLinkedVertex(left, right) {
+		if (!(left instanceof Vertex)) return;
+		if (!(right instanceof Vertex)) return;
 		const key=right.id;
 		const parent=left.id;
 		const text=(!right.label) ? right.name : right.label;
@@ -54,7 +54,7 @@ function parsetree(graphmeta) {
 
 	//console.log(JSON.stringify(graphmeta.LINKS));
 
-	const root = graphmeta.GRAPHROOT.ROOTNODES;
+	const root = graphmeta.GRAPHROOT.ROOTVERTICES;
 	if (root.length > 1) {
 		throw new Error('Only one root node supported');
 	}
@@ -73,7 +73,7 @@ function parsetree(graphmeta) {
 
 	traverseLinks(graphmeta, link => {
 		debug('link node '+link.left.name+' to '+link.right.name);
-		addLinkedNode(link.left, link.right);
+		addLinkedVertex(link.left, link.right);
 	});
 	//console.log(JSON.stringify(nodeList));
 	output(graphmeta, JSON.stringify(nodeList));

@@ -41,7 +41,7 @@ function blockdiag(graphmeta) {
     let tmp = root.getStart();
 
     /**
-     * @param {(Node|Group)} obj
+     * @param {(Vertex|Group)} obj
      */
     const parseObjects = (obj)=> {
         output(true);

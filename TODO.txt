@@ -1,6 +1,6 @@
 {result:
     {"node":{"name":"b"}}
-    {"group":{"name":1,"isSubGraph":true,"entrance":null,"exitnode":1,"exit":null}}
+    {"group":{"name":1,"isSubGraph":true,"entrance":null,"exitvertex":1,"exit":null}}
     {
         {"node":{"name":"c"}}
         {"node":{"name":"d"}}
@@ -20,9 +20,9 @@
 }
 
 b>(c>d>e,f>g>h)>"eandh"z
-when linking to subgraph, link all entrance nodes b>c,f and all exit nodes e,h>z (if exit exists)
-ie link all entrance to container to all nodes that have no links coming into
-ie. link all exit nodes to container exit node that have no links coming from
+when linking to subgraph, link all entrance vertices b>c,f and all exit vertices e,h>z (if exit exists)
+ie link all entrance to container to all vertices that have no links coming into
+ie. link all exit vertices to container exit vertex that have no links coming from
 instead of
     {"link":{"linkType":">","left":"b","right":1,"container":1}}
 should have
@@ -51,7 +51,7 @@ shoulg have
   needed to be implemented on each generator)
 - make landscape/portrait be container properties(blockdiag support, dotty should as well subgraph cluster_1{rankdir=LR})
 - FIX if/elseif/else lexing/parsing (now a bit hackish) - need context(in lexer)
-- move collectNextNode from yy property (like entrylink when implemented) to GROUP property (allowing inner if/elseif/elses)...
+- move collectNextVertex from yy property (like entrylink when implemented) to GROUP property (allowing inner if/elseif/elses)...
 - rectangle does not work in lexer..rect works..wtf?
 - For plantuml 
   alt succesfull case
@@ -69,7 +69,7 @@ shoulg have
   else if x==y then
   end if
 
-- ambiguity in group definitions {xxx could be group named xxx, or a group that has a node xxx. 
+- ambiguity in group definitions {xxx could be group named xxx, or a group that has a vertex xxx. 
   Fix so that group declarations in one line! Always!
 - Check if something could be done for network graphs .. 
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
@@ -82,7 +82,7 @@ shoulg have
 	pagedir="BL", "BR", "TL", "TR", "RB", "RT", "LB", "LT"
 	colorList red:blue(depends on style/gradientangle) red;0.3:blue;0.7
    
-- Make LIST (nodelist,grouplist what ever list) actual object, not array kludge
+- Make LIST (vertexlist,grouplist what ever list) actual object, not array kludge
 	- one could then map setLabel to all contained objects in one call
 - Instead of exploding links in GRAMMAR(parser) it could save the link cluster as such and utilize the dotty
       graph test123 {
@@ -97,13 +97,13 @@ shoulg have
 - compass 4 plantuml
 -------
 (DONE)- GROUP>"a"group1,"b"group2,"c"group3  use all same label a
-(DONE)- GROUP>group1,group2,group3 not functional, (NODE>node1,node2,node3 does work)
-(DONE)- Have LINK be defined to node (lazily) like with xxx[http://xx.yy.xx] creates node xxx with HLINK or updates xxx with HLINK
+(DONE)- GROUP>group1,group2,group3 not functional, (VERTEX>vertex1,vertex2,vertex3 does work)
+(DONE)- Have LINK be defined to vertex (lazily) like with xxx[http://xx.yy.xx] creates vertex xxx with HLINK or updates xxx with HLINK
 (DONE)- compass (a:ne->b:nw) for edges in graphviz might help the layout to be as user wants (ie. direct the edge start/end to compass directions)
   plant uml also supports these, but just for simple ones up,down,left,right(n,s,e,w)
-(DONE) - entrylink attribute collection(to getNode) for IF group!
-(DONE) - Each group has UNIQUE name and UNIQUE exitnode attr. That is enuf to and EXIT LINK as well
-  Exit link is FIRST NODE that is referred or created AFTER endif
+(DONE) - entrylink attribute collection(to getVertex) for IF group!
+(DONE) - Each group has UNIQUE name and UNIQUE exitvertex attr. That is enuf to and EXIT LINK as well
+  Exit link is FIRST VERTEX that is referred or created AFTER endif
   The diamonds are FABRICATED! Earlier had just GROUPs, but flowchartish wey may be better
 <> -YES- .(name)
  |     ------
@@ -111,7 +111,7 @@ shoulg have
  |     | |  |
  |     | b  |
  |     ------
- |--NO-- . (exitnode)
+ |--NO-- . (exitvertex)
          |
          <> -YES- .(name)
          |     ------
@@ -119,38 +119,38 @@ shoulg have
          |     | |  |
          |     | d  |
          |     ------
-         |--NO-- . (exitnode)
-  I thought about entrynode>if xxx then ... else ... endif >exitnode, but gave up on that
+         |--NO-- . (exitvertex)
+  I thought about entryvertex>if xxx then ... else ... endif >exitvertex, but gave up on that
   For GRAPHS that would work NICE! But for sequences...they are unrelated to each other and there the
    if/else/elseif is just a grouping construct
-  With contract of saying the first preceding node and first seen node after endif gets 'linked' in graphs
+  With contract of saying the first preceding vertex and first seen vertex after endif gets 'linked' in graphs
   For sequences those are not handled allows the if/Else/elseif construct to work on both graph types!
-  This got implemented as collectNextNode in grammar/state.grammar and then used in model/getNode
+  This got implemented as collectNextVertex in grammar/state.grammar and then used in model/getVertex
   if/elseif/else/endif are all GROUPS now, each have special attributes
 	conditional	if/elseif/else/endif
-	exitnode	a UNIQUE exitnode within the graph.
-	exitlink	only with endif, first node seen after
-	entrylink	only with IF, first preceding node seen before "if"
+	exitvertex	a UNIQUE exitvertex within the graph.
+	exitlink	only with endif, first vertex seen after
+	entrylink	only with IF, first preceding vertex seen before "if"
     {"node":{"name":"w","label":"on"}}
-    {"group":{"name":1,"label":"if something would happend then","conditional":"if","exitnode":1}}
+    {"group":{"name":1,"label":"if something would happend then","conditional":"if","exitvertex":1}}
         {"node":{"name":"a1"}}
         {"node":{"name":"b1"}}
-    {"group":{"name":2,"label":"elseif something probably would not happen then","conditional":"elseif","exitnode":2}}
+    {"group":{"name":2,"label":"elseif something probably would not happen then","conditional":"elseif","exitvertex":2}}
         {"node":{"name":"a2"}}
         {"node":{"name":"b2"}}
-    {"group":{"name":3,"label":"elseif or if i see a flying bird then","conditional":"elseif","exitnode":3}}
+    {"group":{"name":3,"label":"elseif or if i see a flying bird then","conditional":"elseif","exitvertex":3}}
         {"node":{"name":"a3"}}
-        {"node":{"name":"b3"}}
-    {"group":{"name":4,"label":"else","conditional":"else","exitnode":4}}
+        {"vertex":{"name":"b3"}}
+    {"group":{"name":4,"label":"else","conditional":"else","exitvertex":4}}
         {"node":{"name":"a4"}}
         {"node":{"name":"b4"}}
-    {"group":{"name":5,"label":"endif","conditional":"endif","exitnode":5,"exitlink":"outside"}}
+    {"group":{"name":5,"label":"endif","conditional":"endif","exitvertex":5,"exitlink":"outside"}}
     {"node":{"name":"outside"}}
  
 (DONE)- Make EQUAL container property (not it ALWAYS belongs to graphroot, but network diag can have groups inside network..
 	well dotty can have subcluster inside subcluster)
 (DONE + way of last suggestion) - WHILE links have a container specification now, it is not yet enuf for plantuml.. It needs the LINKS and GROUPS (and participants) appear IN ORDER
- sequentially, from top of the file...so as this approach works for graphviz and msc/seqdiag..with node/group ordering, plantuml needs to know order like
+ sequentially, from top of the file...so as this approach works for graphviz and msc/seqdiag..with vertex/group ordering, plantuml needs to know order like
   1 link
   2 link
   3 group
@@ -163,8 +163,8 @@ shoulg have
   9 group end
  10 link outside all
  11 link outside all groups...
- This can be done YES, but it will require stacking all attributes in order. now OBJECTS store groups/nodes and theres a separate array for LINKS (which do appear in order as well)
- a) Actually One could..traverse AST to see if it has groups..If not, print nodes and links
+ This can be done YES, but it will require stacking all attributes in order. now OBJECTS store groups/vertices and theres a separate array for LINKS (which do appear in order as well)
+ a) Actually One could..traverse AST to see if it has groups..If not, print vertices and links
  b) If having groups, print LINKS until first containment.. then process groups and links in that group and so forth 
  c) when last group is processed, traverse link list until no container(root container) links are left, print those
 eh..like above link has following containers
@@ -179,14 +179,14 @@ eh..like above link has following containers
 
 
 (DONE) -- for all links add CURRENT CONTAINER in which context the link was added, plantuml_sequence requires links to be IN CONTEXT of the group
-  where as the graphviz is not so picky...node definition is what counts (plantuml does not seem to care about node definitions in sequence mode)
+  where as the graphviz is not so picky...vertex definition is what counts (plantuml does not seem to care about vertex definitions in sequence mode)
 (DONE)- make a dot or singularity  xxx[shape=circle,label="",width=0.01,height=0.01] so a>xxx>b,c becomes nice combo arrow until split to b,c
 (DONE)- groups as {} for simplicity
 (DONE)- broken links (for sequence / msc)
 (DONE)- external labels, label with :: the :: part becomes xlabel or note !
-(DONE)- Add node STYLES:  solid,dashed,dotted,bold,rounded,diagonals,filled,striped,wedged
+(DONE)- Add vertex STYLES:  solid,dashed,dotted,bold,rounded,diagonals,filled,striped,wedged
    solid x > dashed masa;link here
-   solid x#ff0000>$(link)rounded targetnode;#fffffflink label
+   solid x#ff0000>$(link)rounded targetvertex;#fffffflink label
 (NOT)   Also could target GROUPs as well!!
 (NOT)   Perhaps the EVENTs could have same styles (instead of compressed form >, .> and ->)
    nah...they have solid,dashed,dotted,bold. 
@@ -199,15 +199,15 @@ eh..like above link has following containers
 (DONE)- OH, make defaults CONTAINER SPECIFIC!! If a default inside a group is visible only within that group! 
    Meaning setDefault is current container specific setting.. (easy piecey!)
 (DONE) - Combine setDefaultXXXX to setDefault(xxx,) for better versatility and lesser code...
-(DONE)- Make DEFAULT COLOR for nodes...
+(DONE)- Make DEFAULT COLOR for vertices...
 (DONE)- Make DEFAULT COLOR for groups...
 (DONE)- Make DEFAULT COLOR for links...
 (DONE) - Make STACKED containers(ie. pop on exit)
 (DONE) - - Pass the actual visualizing engine information to generator as well (dotty can draw directional graphs and accept
 	> and <, but other visualizing engines accept undirected graphs only - graphviz only), in getVisualizer(yy) and getGenerator(yy)
 (DONE)- Make group RECURSIVE...ie. real container. Now it is shallow
-(DONE)- Add ability to connect node to graph in dotty (nwdiag does it already) ltail,lhead dotty only
-(DONE)- RESET default shape (shape default) instead of explicitly adding shape=default that results shape=box to all nodes
+(DONE)- Add ability to connect vertex to graph in dotty (nwdiag does it already) ltail,lhead dotty only
+(DONE)- RESET default shape (shape default) instead of explicitly adding shape=default that results shape=box to all vertices
 (DONE)- EQUAL (rank same) printed when no declaration, remove it
 (DONE)- replace shape=invis as style=invis
 

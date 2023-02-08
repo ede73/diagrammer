@@ -37,13 +37,13 @@ q:w>g:sw
 q:nw>h:w
 q:n>i:nw
 
-node1;#ff0000This Is Label::And This Is NOT XLabel, click on node for google[http://www.google.com/]
-node2;#ccffccTHis node leads to mtv3[http://www.mtv3.fi/]
+vertex1;#ff0000This Is Label::And This Is NOT XLabel, click on vertex for google[http://www.google.com/]
+vertex2;#ccffccTHis vertex leads to mtv3[http://www.mtv3.fi/]
 
-node1-node2;THis is edge label::and edge XLabel, this edge leads to nelonen[http://www.nelonen.fi/]
+vertex1-vertex2;THis is edge label::and edge XLabel, this edge leads to nelonen[http://www.nelonen.fi/]
 
 START xstart
-NODE COLOR #7473b3
+VERTEX COLOR #7473b3
 
 $(green:#00ff00)
 dashed idle$(red:#ff0000);idle\nevent
@@ -57,10 +57,10 @@ stop_motor>idle
 EQUAL start_forward,moving_backward
 EQUAL start_backward,moving_forward
 
-NODE COLOR #0000ff
+VERTEX COLOR #0000ff
 GROUP COLOR #33ff33
 START s
-actor s#ff0000>#00ff00 actor c#0000ff;#ff00ffconnect,s=red\nlink=green\n this node=blue
+actor s#ff0000>#00ff00 actor c#0000ff;#ff00ffconnect,s=red\nlink=green\n this vertex=blue
 SHAPE box
 //a comment is a good thing
 {#777777;vpn connector

@@ -1,5 +1,5 @@
 START xstart
-NODE COLOR #7473b3
+VERTEX COLOR #7473b3
 
 $(green:#00ff00)
 dashed idle$(red:#ff0000);idle\nevent

@@ -1,5 +1,5 @@
 group color #33FF33
-node color #ffff00
+vertex color #ffff00
 { Sample_front;192.168.10.0/24
 	web01
 	web02

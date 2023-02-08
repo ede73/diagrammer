@@ -23,29 +23,29 @@ node js/parse.js verbose sankey.test sankey
 */
 function sankey(graphmeta) {
 	let tree;
-	function addNode(left, right) {
+	function addVertex(left, right) {
 		if (!tree) {
-			tree = new TreeNode(left);
+			tree = new TreeVertex(left);
 		}
-		if (!(left instanceof Node)) return;
-		const cl = findNode(tree, left);
+		if (!(left instanceof Vertex)) return;
+		const cl = findVertex(tree, left);
 		if (!cl) {
 			throw new Error('Left node (' + left.name + ') not found from tree');
 		}
-		if (!findNode(tree, right) && (right instanceof Node)) {
+		if (!findVertex(tree, right) && (right instanceof Vertex)) {
 			debug('Add ' + right.name + ' as child of ' + cl.data.name + " co " + right.container);
-			cl.CHILDREN.push(new TreeNode(right));
+			cl.CHILDREN.push(new TreeVertex(right));
 		}
 	}
 
 	//debug(JSON.stringify(grpahmeta.LINKS));
 	/**
-	 * For a dendrogram we're not interested in nodes
+	 * For a dendrogram we're not interested in vertices
 	 * just edges(for now!)
 	 */
 	traverseLinks(graphmeta, function (link) {
 		//debug('link node '+l.left.name+' to '+l.right.name);
-		addNode(link.left, link.right);
+		addVertex(link.left, link.right);
 	});
 
 	//output(graphmeta,'{',true);

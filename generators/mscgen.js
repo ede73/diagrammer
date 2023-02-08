@@ -34,7 +34,7 @@ function mscgen(graphmeta) {
                 output(graphmeta, (comma ? "," : "") + "    " + z.getName() + tmp);
                 comma = true;
             });
-        } else if (obj instanceof Node) {
+        } else if (obj instanceof Vertex) {
             let tmp = getAttrFmt(obj, 'color', ',textbgcolor="{0}"') + getAttrFmt(obj, 'style', ',style={0}') + getAttrFmt(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
@@ -51,8 +51,8 @@ function mscgen(graphmeta) {
         let lhs = link.left;
 
         if (rhs instanceof Group) {
-            // just pick ONE Node from group and use lhead
-            // TODO: Assuming it is Node (if Recursive groups implemented, it
+            // just pick ONE Vertex from group and use lhead
+            // TODO: Assuming it is Vertex (if Recursive groups implemented, it
             // could be smthg else)
             linkType += " lhead=cluster_" + rhs.getName();
             rhs = rhs.OBJECTS[0];

@@ -5,17 +5,17 @@ a;node text
 
 to
 {
-    "name": "a",
-    "children": [
-        {
-            "name": "b",
-            "children": [
-                {"name": "c", "size": 1},
-                {"name": "d", "size": 1}
-            ]
-        },
-        {"name": "e", "size": 1}
-    ]
+	"name": "a",
+	"children": [
+		{
+			"name": "b",
+			"children": [
+				{"name": "c", "size": 1},
+				{"name": "d", "size": 1}
+			]
+		},
+		{"name": "e", "size": 1}
+	]
 }
 
 node js/parse.js verbose dendrogram.test dendrogram
@@ -23,10 +23,10 @@ node js/parse.js verbose dendrogram.test dendrogram
 */
 function dendrogram(graphmeta) {
 	let tree;
-    /**
-     * @param {GraphObject} lhs
-     * @param {GraphObject} rhs
-     */
+	/**
+	 * @param {GraphObject} lhs
+	 * @param {GraphObject} rhs
+	 */
 	function addNode(lhs, rhs) {
 		if (!tree) {
 			tree = new TreeNode(lhs);
@@ -63,9 +63,9 @@ function dendrogram(graphmeta) {
 			output(graphmeta, '{', true);
 			output(graphmeta, '"name": "' + t.data.name + '",');
 		}
-	}, (t)=> {
+	}, (t) => {
 		output(graphmeta, '"children": [', true);
-	},  (t, hasNextSibling)=> {
+	}, (t, hasNextSibling) => {
 		output(false);
 		output(graphmeta, ']', false);
 		if (hasNextSibling) {
@@ -77,3 +77,4 @@ function dendrogram(graphmeta) {
 	output(false);
 }
 generators.set('dendrogram', dendrogram);
+visualizations.set('dendrogram', ['radialdendrogram', 'circlepacked', 'reingoldtilford']);

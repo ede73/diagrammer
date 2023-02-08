@@ -3,6 +3,7 @@
 %ebnf
 %{
 	generators = new Map();
+	visualizations = new Map();
 %}
 %%
 S

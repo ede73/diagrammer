@@ -126,15 +126,15 @@ function output(graphmeta, txt, indentOrDedent=undefined) {
 
 /**
  * Send the text to the output, or format the array
- * @param {*} yy 
+ * @param {GraphMeta} graphmeta 
  * @param {string} txt 
  * @param {Array[any]} [array] Optional array format
  */
-function outputFmt(yy, txt, array) {
+function outputFmt(graphmeta, txt, array) {
     if (!array)
-        yy.result(txt);
+        graphmeta.result(txt);
     else
-        yy.result(txt.formatArray(array));
+        graphmeta.result(txt.formatArray(array));
 }
 
 /**

@@ -126,8 +126,9 @@ function reloadImg(id) {
 function getGenerator() {
     const e = document.getElementById("generator");
     const gen = e.options[e.selectedIndex].value;
-    if (gen.indexOf(":") > -1)
+    if (gen.indexOf(":") > -1) {
         return gen.split(":")[0];
+    }
     return gen;
 }
 

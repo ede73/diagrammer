@@ -36,6 +36,7 @@
 	<!-- top menu strip - horizontal -->
 	<form name="contact" action="">
 		<label for="generator">Generator</label> <select id="generator" name="generator" onChange="generatorChanged()">
+			<!-- TODO: Load from generators/visualizations map -->
 			<option value="digraph:dot">Graphviz - dot</option>
 			<option value="digraph:circo">Graphviz - circo</option>
 			<option value="digraph:twopi">Graphviz - twopi</option>
@@ -71,6 +72,9 @@
 		<!-- handling examples -->
 		<label for="example">Examples:</label> <select id="example" name="example" onChange="exampleChanged()">
 			<!--ls tests/test_inputs/*txt|awk -F/ '{print "<option value=\""$2"\">"$2"</option>"}'-->
+			<!-- <option value="manual_test_diagrams/uml.d">UML Layout</option>
+			<option value="manual_test_diagrams/layerbands.d">Layer bands</option>
+			<option value="manual_test_diagrams/parsetree.d">Parse tree</option> -->
 			<option value="test_inputs/ast.txt">ast.txt</option>
 			<option value="test_inputs/dendrogram.txt">dendrogram.txt</option>
 			<option value="test_inputs/dendrogram_spec.txt">dendrogram_spec.txt</option>

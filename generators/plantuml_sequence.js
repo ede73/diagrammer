@@ -57,7 +57,7 @@ function plantuml_sequence(graphmeta) {
 
     const root = graphmeta.GRAPHROOT;
     if (root.getVisualizer()) {
-        outputFmt(graphmeta.yy, "/* render: {0} */", [root.getVisualizer()])
+        outputFmt(graphmeta, "/* render: {0} */", [root.getVisualizer()])
     }
     output(graphmeta, "@startuml");
     output(graphmeta, "autonumber", true);
@@ -188,7 +188,7 @@ function plantuml_sequence(graphmeta) {
             }
             if (note != "") {
                 output(graphmeta, "note over " + rhs.getName());
-                outputFmt(graphmeta.yy, note.replace(/\\n/g, "\n"));
+                outputFmt(graphmeta, note.replace(/\\n/g, "\n"));
                 output(graphmeta, "end note");
             }
         }

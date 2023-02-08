@@ -346,3 +346,4 @@ function digraph(graphmeta) {
     output(graphmeta, "}");
 }
 generators.set('digraph', digraph);
+visualizations.set('digraph', ['dot', 'circo', 'twopi', 'neato', 'fdp', 'sfpd']);

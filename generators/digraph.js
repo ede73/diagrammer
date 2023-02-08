@@ -1,4 +1,4 @@
-/*
+/**
 a>b>c,d
 a>e;link text
 a;node text
@@ -20,9 +20,9 @@ digraph {
 }
 node js/parse.js verbose digraph.test digraph
 
-@param {module:"../model/link.js".Link} yy
+@param {GraphMeta} graphmeta
 */
-function digraph(yy) {
+function digraph(graphmeta) {
     // TODO: See splines control
     // http://www.graphviz.org/doc/info/attrs.html#d:splines
     // TODO: Start note fdp/neato
@@ -78,41 +78,41 @@ function digraph(yy) {
         let t = "";
         if (nattrs.length > 0)
             t = "[" + nattrs.join(",") + "]";
-        output(yy, obj.getName() + t + ';');
+        output(graphmeta, obj.getName() + t + ';');
     };
 
-    const r = getGraphRoot(yy);
+    const r = graphmeta.GRAPHROOT;
     if (r.getVisualizer()) {
-        output(yy, "/* render:" + r.getVisualizer() + "*/")
+        output(graphmeta, "/* render:" + r.getVisualizer() + "*/")
     }
-    output(yy, "digraph {", true);
-    //output(yy,"edge[weight=1]")
-    //output(yy,"ranksep=0.75")
-    //output(yy,"nodesep=0.75")
+    output(graphmeta, "digraph {", true);
+    //output(graphmeta,"edge[weight=1]")
+    //output(graphmeta,"ranksep=0.75")
+    //output(graphmeta,"nodesep=0.75")
 
-    output(yy, "compound=true;");
+    output(graphmeta, "compound=true;");
     if (r.getDirection() === "portrait") {
-        output(yy, "rankdir=LR;");
+        output(graphmeta, "rankdir=LR;");
     } else {
-        output(yy, "rankdir=TD;");
+        output(graphmeta, "rankdir=TD;");
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
     const start = r.getStart();
     if (start) {
-        const fwd = getNode(yy, start);
+        const fwd = getNode(graphmeta.yy, start);
         processANode(fwd);
         // {$$=" {rank = same;null}\n {rank = same; "+$2+"}\n null
         // [shape=plaintext,
         // label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-        output(yy, "//startnode setup\n  {rank = same;null} {rank = same; " + start + "}\n  null [shape=plaintext, label=\"\"];\n  " + start + "[shape=doublecircle];\n  null->" + start + ";\n");
+        output(graphmeta, "//startnode setup\n  {rank = same;null} {rank = same; " + start + "}\n  null [shape=plaintext, label=\"\"];\n  " + start + "[shape=doublecircle];\n  null->" + start + ";\n");
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
     if (r.getEqual() && r.getEqual().length > 0) {
-        output(yy, "{rank=same;", true);
+        output(graphmeta, "{rank=same;", true);
         for (let x = 0; x < r.getEqual().length; x++) {
-            output(yy, r.getEqual()[x].getName() + ";");
+            output(graphmeta, r.getEqual()[x].getName() + ";");
         }
-        output(yy, "}", false);
+        output(graphmeta, "}", false);
     }
     const fixgroup = (c => {
         for (const i in c.OBJECTS) {
@@ -131,15 +131,15 @@ function digraph(yy) {
     })(r.OBJECTS);
 
     function getFirstLinkOfTheGroup(grp) {
-        //output(yy,"FIRST NODE"+JSON.stringify(grp));
-        for (const i in yy.LINKS) {
-            if (!yy.LINKS.hasOwnProperty(i)) continue;
-            const l = yy.LINKS[i];
+        //output(graphmeta,"FIRST NODE"+JSON.stringify(grp));
+        for (const i in graphmeta.LINKS) {
+            if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
+            const l = graphmeta.LINKS[i];
             for (const j in grp.OBJECTS) {
                 if (!grp.OBJECTS.hasOwnProperty(j)) continue;
                 const n = grp.OBJECTS[j];
                 if (n == l.left) {
-                    // output(yy,"ReturnF "+n);
+                    // output(graphmeta,"ReturnF "+n);
                     return n;
                 }
             }
@@ -149,10 +149,10 @@ function digraph(yy) {
 
     function getLastLinkInGroup(grp) {
         let nod = undefined;
-        // output(yy,"LAST NODE"+JSON.stringify(grp));
-        for (const i in yy.LINKS) {
-            if (!yy.LINKS.hasOwnProperty(i)) continue;
-            const l = yy.LINKS[i];
+        // output(graphmeta,"LAST NODE"+JSON.stringify(grp));
+        for (const i in graphmeta.LINKS) {
+            if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
+            const l = graphmeta.LINKS[i];
             for (const j in grp.OBJECTS) {
                 if (!grp.OBJECTS.hasOwnProperty(j)) continue;
                 const n = grp.OBJECTS[j];
@@ -162,7 +162,7 @@ function digraph(yy) {
                     nod = n;
             }
         }
-        // output(yy,"ReturnL "+nod);
+        // output(graphmeta,"ReturnL "+nod);
         return nod;
     }
 
@@ -178,41 +178,41 @@ function digraph(yy) {
                 // Group name,OBJECTS,get/setEqual,toString
                 const processAGroup = (grp => {
                     debug(JSON.stringify(grp, skipEntrances));
-                    output(yy, 'subgraph cluster_' + grp.getName() + ' {', true);
+                    output(graphmeta, 'subgraph cluster_' + grp.getName() + ' {', true);
                     if (grp.isSubGraph) {
-                        output(yy, 'graph[style=invis];');
+                        output(graphmeta, 'graph[style=invis];');
                     }
                     if (grp.getLabel())
-                        output(yy, getAttrFmt(grp, 'label',
+                        output(graphmeta, getAttrFmt(grp, 'label',
                             '   label="{0}";'));
                     if (grp.getColor()) {
-                        output(yy, "style=filled;");
-                        output(yy, getAttrFmt(grp, 'color',
+                        output(graphmeta, "style=filled;");
+                        output(graphmeta, getAttrFmt(grp, 'color',
                             '   color="{0}";\n'));
                     }
                     traverseObjects(grp);
                     output(false);
-                    output(yy, "}//end of " + grp.getName() + " " + cond);
+                    output(graphmeta, "}//end of " + grp.getName() + " " + cond);
                     if (cond) {
-                        output(yy, "//COND " + grp.getName() + " " + cond);
+                        output(graphmeta, "//COND " + grp.getName() + " " + cond);
                         if (cond == "endif") {
                             //never reached
                             const exitlink = grp.exitlink;
                             if (exitlink) {
-                                output(yy, lastexit + "->" + exitlink + "[color=red];");
-                                output(yy, lastendif + "->" + exitlink + ";");
+                                output(graphmeta, lastexit + "->" + exitlink + "[color=red];");
+                                output(graphmeta, lastendif + "->" + exitlink + ";");
                             }
                         } else {
                             const sn = "entry" + grp.exitnode;
                             if (!lastendif) {
                                 lastendif = "endif" + grp.exitnode;
-                                output(yy, lastendif + "[shape=circle,label=\"\",width=0.01,height=0.01];");
+                                output(graphmeta, lastendif + "[shape=circle,label=\"\",width=0.01,height=0.01];");
                             }
                             //TODO:else does not need diamond
-                            output(yy, sn + "[shape=diamond,fixedsize=true,width=1,height=1,label=\"" + grp.getLabel() + "\"];");
+                            output(graphmeta, sn + "[shape=diamond,fixedsize=true,width=1,height=1,label=\"" + grp.getLabel() + "\"];");
                             if (cond == "if") {
                                 //entrylink!
-                                output(yy, grp.entrylink.getName() + "->" + sn + ";");
+                                output(graphmeta, grp.entrylink.getName() + "->" + sn + ";");
                             }
                             // FIRST node of group and LAST node in group..
                             const lastLink = getFirstLinkOfTheGroup(grp);
@@ -221,12 +221,12 @@ function digraph(yy) {
                             //const en = "exit" + o.exitnode
 
                             if (lastexit) {
-                                output(yy, lastexit + "->" + sn + "[label=\"NO\",color=red];");
+                                output(graphmeta, lastexit + "->" + sn + "[label=\"NO\",color=red];");
                                 //lastexit = undefined;
                             }
                             // YES LINK to first node of the group
-                            output(yy, sn + "->" + lastLink.getName() + "[label=\"YES\",color=green,lhead=cluster_" + grp.getName() + "];");
-                            output(yy, ln.getName() + "->" + lastendif + "[label=\"\"];");
+                            output(graphmeta, sn + "->" + lastLink.getName() + "[label=\"YES\",color=green,lhead=cluster_" + grp.getName() + "];");
+                            output(graphmeta, ln.getName() + "->" + lastendif + "[label=\"\"];");
                             lastexit = sn;
                         }
                     }
@@ -239,12 +239,8 @@ function digraph(yy) {
         }
     }(r);
 
-    output(yy, "//links start");
-    //     traverseLinks(yy,  (link)=> {
-    // for (const i in yy.LINKS) {
-    //     if (!yy.LINKS.hasOwnProperty(i)) continue;
-    //     const link = yy.LINKS[i];
-    traverseLinks(yy, (link) => {
+    output(graphmeta, "//links start");
+    traverseLinks(graphmeta, (link) => {
         const attrs = [];
         let label = link.label;
         if (label) {
@@ -289,7 +285,7 @@ function digraph(yy) {
                 for (const i in lhs.OBJECTS) {
                     if (!lhs.OBJECTS.hasOwnProperty(i)) continue;
                     const go = lhs.OBJECTS[i];
-                    if (!hasOutwardLink(yy, go)) {
+                    if (!hasOutwardLink(graphmeta.yy, go)) {
                         //debug('test node '+go);
                         exits.push(go);
                     }
@@ -340,12 +336,13 @@ function digraph(yy) {
         debug('print rhs ' + rhs);
         if (lhs instanceof Array) {
             lhs.forEach((element, index, array) => {
-                output(yy, element.getName() + getAttrFmt(link, 'lcompass', '{0}').trim() + linkType + rhs.getName() + getAttrFmt(link, 'rcompass', '{0}').trim() + t + ";");
+                output(graphmeta, element.getName() + getAttrFmt(link, 'lcompass', '{0}').trim() + linkType + rhs.getName() + getAttrFmt(link, 'rcompass', '{0}').trim() + t + ";");
             });
         } else {
-            output(yy, lhs.getName() + getAttrFmt(link, 'lcompass', '{0}').trim() + linkType + rhs.getName() + getAttrFmt(link, 'rcompass', '{0}').trim() + t + ";");
+            output(graphmeta, lhs.getName() + getAttrFmt(link, 'lcompass', '{0}').trim() + linkType + rhs.getName() + getAttrFmt(link, 'rcompass', '{0}').trim() + t + ";");
         }
     });
     output(false);
-    output(yy, "}");
+    output(graphmeta, "}");
 }
+generators.set('digraph', digraph);

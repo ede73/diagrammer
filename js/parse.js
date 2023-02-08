@@ -27,19 +27,24 @@ if (myArgs[1] === "lex") {
     }
 } else {
     const parser = require("../build/parser.js");
-    parser.parser.yy.OUTPUT = myArgs[1];
+    // TODO: MOVING TO GraphMeta
+    parser.parser.yy.USE_GENERATOR = myArgs[1];
+    // TODO: MOVING TO GraphMeta
     parser.parser.trace = function (x) {
         console.log("TRACE:" + x);
     }
+    // TODO: MOVING TO GraphMeta
     parser.parser.debug = function (x) {
         console.log("DEBUG:" + x);
     }
+    // TODO: MOVING TO GraphMeta
     parser.parser.yy.result = function (result) {
         console.log(result);
     }
 
     //this.parseError(errStr, 
     //{text: this.lexer.match, token: this.terminals_[symbol] || symbol, line: this.lexer.yylineno, loc: yyloc, expected: expected});
+    // TODO: MOVING TO GraphMeta
     parser.parser.yy.parseError = function (str, hash) {
         console.log("Parsing error found:");
         console.log(str);

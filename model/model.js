@@ -142,10 +142,13 @@ function getNode(yy, name, style) {
 
     const node = findNode(yy, name, style);
     debug("  in getNode gotNode " + node);
+    // TODO: MOVING TO GraphMeta
     yy.lastSeenNode = node;
     if (yy.collectNextNode) {
         debug("Collect next node");
+        // TODO: MOVING TO GraphMeta
         yy.collectNextNode.exitlink = name;
+        // TODO: MOVING TO GraphMeta
         yy.collectNextNode = undefined;
     }
     debug(false);
@@ -281,6 +284,7 @@ function exitSubGraph(yy) {
 function getGroup(yy, ref) {
     if (ref instanceof Group) return ref;
     debug("getGroup() NEW GROUP:" + yy + "/" + ref, true);
+    // TODO: MOVING TO GraphMeta
     if (!yy.GROUPIDS) yy.GROUPIDS = 1;
     const newGroup = new Group(yy.GROUPIDS++);
     debug("push group " + newGroup + " to " + yy);
@@ -426,6 +430,10 @@ function getLink(yy, linkType, lhs, rhs, inlineLinkLabel, commonLinkLabel, linkC
 // exposed to generators also
 // =====================================
 
+function getGraphMeta(yy) {
+    return new GraphMeta(yy);
+}
+
 /**
  * Get current singleton graphroot or create new one
  * External utility support for generator
@@ -438,6 +446,7 @@ function getGraphRoot(yy) {
     if (!yy.GRAPHROOT) {
         //debug("no graphroot,init - in getGraphRoot",true);
         if (!yy.result) {
+            // TODO: MOVING TO GraphMeta
             yy.result = function (str) {
                 console.log(str);
             }
@@ -517,12 +526,13 @@ function containsObject(container, obj) {
 
 /** 
  * Usage: generators
+ * @param {GraphMeta} graphmeta
  * @param {function(Link)} callback
  */
-function traverseLinks(yy, callback) {
-    for (const i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i)) continue;
-        callback(yy.LINKS[i]);
+function traverseLinks(graphmeta, callback) {
+    for (const i in graphmeta.LINKS) {
+        if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
+        callback(graphmeta.LINKS[i]);
     }
 }
 
@@ -547,6 +557,7 @@ function traverseObjects(container, callback) {
  */
 function _getVariables(yy) {
     if (!yy.VARIABLES) {
+        // TODO: MOVING TO GraphMeta
         yy.VARIABLES = {}
     }
     return yy.VARIABLES;

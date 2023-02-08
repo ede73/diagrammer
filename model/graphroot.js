@@ -1,5 +1,9 @@
 /**
- * Create a new graph root
+ * Create a new graph root.
+ * 
+ * Even if the TREE has multiple root nodes (or basically multiple trees)
+ * the graph will only EVER have one GraphRoot
+ * 
  * @constructor
  */
 class GraphRoot extends GraphObject {
@@ -9,20 +13,25 @@ class GraphRoot extends GraphObject {
         this.OBJECTS = [];
         /** @type {Array[GraphObject]} */
         this.ROOTNODES = [];
+        // TODO: MOVING TO GraphMeta
         /** @type {string} */
         this.generator = undefined;
+        // TODO: MOVING TO GraphMeta
         /** @type {string} */
         this.visualizer = undefined;
         /** @type {string} */
         this.shape = undefined;
+        // TODO: MOVING TO GraphMeta
         /** @type {string} */
         this.direction = undefined;
+        // TODO: MOVING TO GraphMeta
         /** @type {string} */
         this.start = undefined;
         /** @type {Array[string]} */
         this.equal = undefined;
     }
 
+    // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
      * @return {GraphRoot}
@@ -32,10 +41,12 @@ class GraphRoot extends GraphObject {
         return this;
     }
 
+    // TODO: MOVING TO GraphMeta
     getGenerator() {
         return this.generator;
     }
 
+    // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
      * @return {GraphRoot}
@@ -45,6 +56,7 @@ class GraphRoot extends GraphObject {
         return this;
     }
 
+    // TODO: MOVING TO GraphMeta
     /* TODO: make meta.getVisualizer() */
     getVisualizer() {
         return this.visualizer;
@@ -66,6 +78,7 @@ class GraphRoot extends GraphObject {
         return this.shape;
     }
 
+    // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
      * @return {GraphRoot}
@@ -75,11 +88,13 @@ class GraphRoot extends GraphObject {
         return this;
     }
 
+    // TODO: MOVING TO GraphMeta
     /* TODO: make meta.getDirection() */
     getDirection() {
         return this.direction;
     }
 
+    // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
      * @return {GraphRoot}
@@ -89,6 +104,7 @@ class GraphRoot extends GraphObject {
         return this;
     }
 
+    // TODO: MOVING TO GraphMeta
     /* TODO: make meta.getStart() */
     getStart() {
         return this.start;
@@ -122,7 +138,7 @@ class GraphRoot extends GraphObject {
         //debug("graphroot:Set ROOT " + key + " to " + value);
         return setAttr(this, key, value);
     }
-  
+
     /**
      *  @param {string} key
      */

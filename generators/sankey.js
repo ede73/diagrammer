@@ -1,4 +1,4 @@
-/*
+/**
 a>b>c,d
 a>e;link text
 a;node text
@@ -7,20 +7,21 @@ to
 {
 "name": "a",
 "children": [
-    {
-        "name": "b",
-        "children": [
-            {"name": "c", "size": 1},
-            {"name": "d", "size": 1}
-        ]
-    },
-    {"name": "e", "size": 1}
+	{
+		"name": "b",
+		"children": [
+			{"name": "c", "size": 1},
+			{"name": "d", "size": 1}
+		]
+	},
+	{"name": "e", "size": 1}
 ]
 }
 
 node js/parse.js verbose sankey.test sankey
+@param {GraphMeta} graphmeta
 */
-function sankey(yy) {
+function sankey(graphmeta) {
 	let tree;
 	function addNode(left, right) {
 		if (!tree) {
@@ -37,37 +38,38 @@ function sankey(yy) {
 		}
 	}
 
-	//debug(JSON.stringify(yy.LINKS));
+	//debug(JSON.stringify(grpahmeta.LINKS));
 	/**
 	 * For a dendrogram we're not interested in nodes
 	 * just edges(for now!)
 	 */
-	traverseLinks(yy, function (link) {
+	traverseLinks(graphmeta, function (link) {
 		//debug('link node '+l.left.name+' to '+l.right.name);
 		addNode(link.left, link.right);
 	});
 
-	//output(yy,'{',true);
+	//output(graphmeta,'{',true);
 	traverseTree(tree, function (t, isLeaf, hasSibling) {
 		if (isLeaf) {
 			comma = '';
 			if (hasSibling)
 				comma = ',';
-			output(yy, '{"name": "' + t.data.name + '", "size": 1}' + comma);
+			output(graphmeta, '{"name": "' + t.data.name + '", "size": 1}' + comma);
 		} else {
-			output(yy, '{', true);
-			output(yy, '"name": "' + t.data.name + '",');
+			output(graphmeta, '{', true);
+			output(graphmeta, '"name": "' + t.data.name + '",');
 		}
 	}, function (t) {
-		output(yy, '"children": [', true);
+		output(graphmeta, '"children": [', true);
 	}, function (t, hasNextSibling) {
 		output(false);
-		output(yy, ']', false);
+		output(graphmeta, ']', false);
 		if (hasNextSibling) {
-			output(yy, '},');
+			output(graphmeta, '},');
 		} else {
-			output(yy, '}');
+			output(graphmeta, '}');
 		}
 	});
 	output(false);
 }
+generators.set('sankey', sankey);

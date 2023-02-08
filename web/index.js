@@ -1,6 +1,7 @@
 console.log("Reset generator and visualizer");
 const VERBOSE = false;
 
+// TODO: MOVING TO GraphMeta
 parser.yy.parseError = function (str, hash) {
     const pe = "Parsing error:\n" + str + "\n" + hash;
     console.log("pe");
@@ -9,15 +10,17 @@ parser.yy.parseError = function (str, hash) {
     throw new Error(str);
 };
 // called line by line...
+// TODO: MOVING TO GraphMeta
 parser.yy.result = function (line) {
     if (parsingStarted) {
-        console.log("Parsing results coming in for " + parser.yy.OUTPUT + " / " + parser.yy.VISUALIZER);
+        console.log("Parsing results coming in for " + parser.yy.USE_GENERATOR + " / " + parser.yy.VISUALIZER);
         parsingStarted = false;
         result.value = "";
     }
     result.value = result.value + line + "\n";
 }
 
+// TODO: MOVING TO GraphMeta
 parser.trace = function (x) {
     console.log("TRACE:" + x);
 }

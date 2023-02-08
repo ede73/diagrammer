@@ -1,8 +1,10 @@
 /*https://github.com/zaach/jison/wiki/Deviations-From-Flex-Bison*/
 %start S
 %ebnf
+%{
+	generators = new Map();
+%}
 %%
-
 S
 	: graphContent 			-> $graphContent
 	| S graphContent  		-> $S + $graphContent
@@ -25,49 +27,38 @@ S
 				- Caller can then (willingly) check for LANGUAGE given visualizer(or generator) and
 				  override those or obey to those. Those would be suggested tools to use...
 			*/
-			let generator=getGraphRoot(yy).getGenerator();
-			if (yy.OUTPUT)
-			  generator=yy.OUTPUT;
-			if (!yy.OUTPUT)
-			  yy.OUTPUT=generator;
-			if (!yy.VISUALIZER)
-			  yy.VISUALIZER=getGraphRoot(yy).getVisualizer();
-			if (!yy.VISUALIZER){
-			  if( generator=="digraph")
-			    yy.VISUALIZER="dot";
-		  	  else
-			    yy.VISUALIZER=generator;
+			const graphmeta = getGraphMeta(yy);
+			const generator = (() => {
+				if (yy.USE_GENERATOR) {
+			      return yy.USE_GENERATOR;
+				} else {
+				  return getGraphRoot(yy).getGenerator();
+				}
+			})();
+
+			graphmeta.USE_GENERATOR=generator;
+
+			if (!yy.USE_VISUALIZER) {
+			  graphmeta.USE_VISUALIZER=getGraphRoot(yy).getVisualizer();
 			}
-			if ("ast" == generator){
-				ast(yy);
-			}else if ("dexgraph" == generator){
-				dexgraph(yy);
-			}else if ("actdiag" == generator){
-				actdiag(yy);
-			}else if ("blockdiag" == generator){
-				blockdiag(yy);
-			}else if ("nwdiag" == generator){
-				nwdiag(yy);
-			}else if ("seqdiag" == generator){
-				seqdiag(yy);
-			}else if ("mscgen" == generator){
-				mscgen(yy);
-			}else if ("plantuml_sequence" == generator){
-				plantuml_sequence(yy);
-			//could be tree/dendrogram rather!
-			}else if ("dendrogram" == generator){
-				dendrogram(yy);
-			}else if ("sankey" == generator){
-				sankey(yy);
-			}else if ("parsetree" == generator){
-				parsetree(yy);
-			}else if ("layerbands" == generator){
-				generateLayerBands(yy);
-			}else if ("umlclass" == generator){
-				generateUmlClass(yy);
-			}else{
+			if (!yy.USE_VISUALIZER) {
+			  if( generator == "digraph") {
+			    graphmeta.USE_VISUALIZER="dot";
+		  	  } else {
+			    graphmeta.USE_VISUALIZER=generator;
+			  }
+			}
+			graphmeta.GRAPHROOT = yy.GRAPHROOT;
+			graphmeta.LINKS = yy.LINKS;
+			graphmeta.parseError = yy.parseError;
+			graphmeta.result = yy.result;
+
+			const usegen = generators.get(generator);
+			if (usegen) {
+				usegen(graphmeta);
+			} else {
 				//rankdir available ONLY IN dot
-				digraph(yy);
+				digraph(graphmeta);
 			}
 			return $1;
 		}
@@ -163,6 +154,7 @@ graphContent
 	| ENDIF	 { 
 		exitContainer(yy);
 		//TODO: is ENDIF container necessary?YES, it could be invisible node! Could link to that instead of endif kludge in digraph
+        // TODO: MOVING TO GraphMeta??
 		yy.collectNextNode=setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif')
 		debug("XXXXXXXXXXXXXXXXXXXXX collectNextNode"+yy.collectNextNode);
 		$$=exitContainer(yy)

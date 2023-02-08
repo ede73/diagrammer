@@ -1,4 +1,4 @@
-/*
+/**
 a>b>c,d
 a>e;link text
 a;node text
@@ -18,8 +18,9 @@ a->e:link text
 @enduml
 
 node js/parse.js verbose plantuml_sequence.test plantuml_sequence
+@param {GraphMeta} graphmeta
 */
-function plantuml_sequence(yy) {
+function plantuml_sequence(graphmeta) {
     const processANode = function (obj, sbgraph) {
         const nattrs = [];
         const styles = [];
@@ -47,27 +48,27 @@ function plantuml_sequence(yy) {
         let t = "";
         if (nattrs.length > 0)
             t = "[" + nattrs.join(",") + "]";
-        //yy.result(indent("participant " + getAttrFmt(o, 'label', '"{0}" as') + " " + o.getName() + t));
-        output(yy, "participant {0} {1} {2}".format(
+        //graphmeta.result(indent("participant " + getAttrFmt(o, 'label', '"{0}" as') + " " + o.getName() + t));
+        output(graphmeta, "participant {0} {1} {2}".format(
             getAttrFmt(obj, 'label', '"{0}" as'),
             obj.getName(),
             t));
     };
 
-    const root = getGraphRoot(yy);
+    const root = graphmeta.GRAPHROOT;
     if (root.getVisualizer()) {
-        outputFmt(yy, "/* render: {0} */", [root.getVisualizer()])
+        outputFmt(graphmeta.yy, "/* render: {0} */", [root.getVisualizer()])
     }
-    output(yy, "@startuml");
-    output(yy, "autonumber", true);
+    output(graphmeta, "@startuml");
+    output(graphmeta, "autonumber", true);
     /*
-     * if (r.getDirection() === "portrait") { output(yy, indent("rankdir=LR;")); }
-     * else { output(yy, indent("rankdir=TD;")); }
+     * if (r.getDirection() === "portrait") { output(graphmeta, indent("rankdir=LR;")); }
+     * else { output(graphmeta, indent("rankdir=TD;")); }
      */
     // This may FORWARD DECLARE a node...which creates problems with coloring
     const s = root.getStart();
     if (s) {
-        const fwd = getNode(yy, s);
+        const fwd = getNode(graphmeta.yy, s);
         processANode(fwd, false);
     }
     /**
@@ -79,7 +80,7 @@ function plantuml_sequence(yy) {
      * @param {boolean} sbgraph 
      */
     const printLinks = function printLinks(container, sbgraph) {
-        for (const link of iterateLinks(yy)){
+        for (const link of iterateLinks(graphmeta)){
             if (link.printed)
                 continue;
             // if container given, print ONLY THOSE links that match this
@@ -102,7 +103,7 @@ function plantuml_sequence(yy) {
             let rhs = link.right;
             let lhs = link.left;
 
-            // output(yy, indent("//"+lr));
+            // output(graphmeta, indent("//"+lr));
             if (rhs instanceof Group) {
                 // just pick ONE Node from group and use lhead
                 // TODO: Assuming it is Node (if Recursive groups implemented,
@@ -148,11 +149,11 @@ function plantuml_sequence(yy) {
                 lt = (dot ? "-" : "") + "-" + color + ">";
             } else if (dot) {
                 // dotted
-                output(yy, getAttrFmt(link, 'label', '...{0}...'));
+                output(graphmeta, getAttrFmt(link, 'label', '...{0}...'));
                 continue;
             } else if (dash) {
                 // dashed
-                output(yy, getAttrFmt(link, 'label', '=={0}=='));
+                output(graphmeta, getAttrFmt(link, 'label', '=={0}=='));
                 continue;
             } else {
                 // is dotted or dashed no direction
@@ -166,29 +167,29 @@ function plantuml_sequence(yy) {
                 label = ":" + label;
             else
                 label = "";
-            output(yy, lhs.getName() + lt + rhs.getName() + t + label);
+            output(graphmeta, lhs.getName() + lt + rhs.getName() + t + label);
             if (swap)
-                output(yy, rhs.getName() + lt + lhs.getName() + t + label);
+                output(graphmeta, rhs.getName() + lt + lhs.getName() + t + label);
             if (sbgraph) {
                 if (!rhs.active) {
-                    output(yy, "activate " + rhs.getName(), true);
+                    output(graphmeta, "activate " + rhs.getName(), true);
                     rhs.active = true;
                 } else {
                     lhs.active = false;
                     output(false);
-                    output(yy, "deactivate " + lhs.getName());
+                    output(graphmeta, "deactivate " + lhs.getName());
                 }
             } else {
                 if (lhs.active) {
                     lhs.active = false;
                     output(false);
-                    output(yy, "deactivate " + lhs.getName());
+                    output(graphmeta, "deactivate " + lhs.getName());
                 }
             }
             if (note != "") {
-                output(yy, "note over " + rhs.getName());
-                outputFmt(yy, note.replace(/\\n/g, "\n"));
-                output(yy, "end note");
+                output(graphmeta, "note over " + rhs.getName());
+                outputFmt(graphmeta.yy, note.replace(/\\n/g, "\n"));
+                output(graphmeta, "end note");
             }
         }
     };
@@ -220,19 +221,19 @@ function plantuml_sequence(yy) {
                             cond = "else";
                         else if (cond == "endif")
                             cond = "end";
-                        output(yy, cond + ' ' + o.getLabel());
+                        output(graphmeta, cond + ' ' + o.getLabel());
                     } else {
                         cond = "";//cond = "ref";
                     }
                     const nodeIsSubGraph = o.isSubGraph;
                     if (o.getColor()) {
-                        output(yy, "style=filled;");
-                        output(yy, getAttrFmt(o, 'color',
+                        output(graphmeta, "style=filled;");
+                        output(graphmeta, getAttrFmt(o, 'color',
                             '   color="{0}";\n'));
                     }
                     traverseObjects(o, nodeIsSubGraph);
                     printLinks(o);
-                    // output(yy, indent("}//end of " + o.getName()));
+                    // output(graphmeta, indent("}//end of " + o.getName()));
                 }(obj);
             } else if (!obj instanceof Node) {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
@@ -241,5 +242,6 @@ function plantuml_sequence(yy) {
     }(root, false);
     printLinks(root);
     output(false);
-    output(yy, "@enduml");
+    output(graphmeta, "@enduml");
 }
+generators.set('plantuml_sequence', plantuml_sequence);

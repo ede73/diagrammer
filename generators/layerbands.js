@@ -1,4 +1,4 @@
-/*
+/**
 
 Only one root supported?
 { // this is the information needed for the headers of the bands
@@ -26,11 +26,10 @@ Only one root supported?
 		{ key: "twoD", parent: "root" }
 	  ];
 	  node js/parse.js verbose manual_test_diagrams/layerbands.d layerbands
-
+@param {GraphMeta} graphmeta
 */
-
-function generateLayerBands(yy) {
-	//console.log(yy)
+function generateLayerBands(graphmety) {
+	//console.log(graphmeta)
 	const groups = {
 		key: "_BANDS",
 		category: "Bands",
@@ -39,7 +38,7 @@ function generateLayerBands(yy) {
 	const linkedNodes = [
 		groups,
 	]
-	const root = getGraphRoot(yy);
+	const root = graphmeta.GRAPHROOT;
 
 	traverseObjects(root, obj => {
 		if (obj instanceof Group) {
@@ -47,7 +46,7 @@ function generateLayerBands(yy) {
 		}
 	});
 
-	traverseLinks(yy, link => {
+	traverseLinks(graphmeta, link => {
 		if (!link.left) {
 			// probably our root
 			//linkedNodes.push({key: l.right.name});
@@ -55,5 +54,6 @@ function generateLayerBands(yy) {
 			linkedNodes.push({key: link.right.name , parent: link.left.name});
 		}
 	});
-	output(yy, JSON.stringify(linkedNodes));
+	output(graphmeta, JSON.stringify(linkedNodes));
 }
+generators.set('layerbands', generateLayerBands);

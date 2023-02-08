@@ -1,4 +1,4 @@
-/*
+/**
 a>b>c,d
 a>e;link text
 a;node text
@@ -18,20 +18,21 @@ b -> d[];
 a -> e[label="link text"];
 }
 node js/parse.js verbose seqdiag.test seqdiag
+@param {GraphMeta} graphmeta
 */
-function seqdiag(yy) {
-    yy.result("seqdiag {");
-    yy.result("autonumber = True;");
+function seqdiag(graphmeta) {
+    graphmeta.result("seqdiag {");
+    graphmeta.result("autonumber = True;");
     // quite fucked up life line activations and no control over..skip
     // it,shrimpy!
-    yy.result(" activation = none;");
-    const root = getGraphRoot(yy);
+    graphmeta.result(" activation = none;");
+    const root = graphmeta.GRAPHROOT;
     // print out all node declarations FIRST (if any)
     for (const i in root.OBJECTS) {
         if (!root.OBJECTS.hasOwnProperty(i)) continue;
         const obj = root.OBJECTS[i];
         if (obj instanceof Group) {
-            yy.result(' /*' + obj.getName() + getAttrFmt(obj, 'label', ' {0}*/'));
+            graphmeta.result(' /*' + obj.getName() + getAttrFmt(obj, 'label', ' {0}*/'));
             for (const j in obj.OBJECTS) {
                 if (!obj.OBJECTS.hasOwnProperty(j)) continue;
                 const z = obj.OBJECTS[j];
@@ -39,18 +40,18 @@ function seqdiag(yy) {
                 let styleAndLabel = getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
                 if (styleAndLabel.trim() != "")
                     styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
-                yy.result(z.getName() + styleAndLabel + ";");
+                graphmeta.result(z.getName() + styleAndLabel + ";");
             }
         } else if (obj instanceof Node) {
             let styleAndLabel = getAttrFmt(obj, 'style', ',style={0}') + getAttrFmt(obj, 'label', ',label="{0}"') + getAttrFmt(obj, 'color', ',color="{0}"');
             if (styleAndLabel.trim() != "")
                 styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
-            yy.result(obj.getName() + styleAndLabel + ";");
+            graphmeta.result(obj.getName() + styleAndLabel + ";");
         }
     }
-    for (const i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i)) continue;
-        const link = yy.LINKS[i];
+    for (const i in graphmeta.LINKS) {
+        if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
+        const link = graphmeta.LINKS[i];
         const attrs = [];
         let linkType = "";
         let rhs = link.right;
@@ -99,7 +100,7 @@ function seqdiag(yy) {
             // hm.. solve a<>a is broadcast, where as
             // a<>b (any else than node itself) is autoreturn
             if (rhs == lhs) {
-                yy.result(getAttrFmt(link, 'label', '===BROADCAST:{0}==='));
+                graphmeta.result(getAttrFmt(link, 'label', '===BROADCAST:{0}==='));
                 continue;
             }
             linkType = '=>';
@@ -120,17 +121,18 @@ function seqdiag(yy) {
                 linkType = "->";
         } else if (dot) {
             // dotted
-            yy.result(getAttrFmt(link, 'label', '...{0}...'));
+            graphmeta.result(getAttrFmt(link, 'label', '...{0}...'));
             continue;
         } else if (dash) {
             // dashed
-            yy.result(getAttrFmt(link, 'label', '==={0}==='));
+            graphmeta.result(getAttrFmt(link, 'label', '==={0}==='));
             continue;
         } else {
-            yy.result("ERROR: SHOULD NOT HAPPEN");
+            graphmeta.result("ERROR: SHOULD NOT HAPPEN");
         }
         // MUST HAVE whitespace at both sides of the "arrow"
-        yy.result(lhs.getName() + " " + linkType + " " + rightName + "[" + attrs.join(",") + "];");
+        graphmeta.result(lhs.getName() + " " + linkType + " " + rightName + "[" + attrs.join(",") + "];");
     }
-    yy.result("}");
+    graphmeta.result("}");
 }
+generators.set('seqdiag', seqdiag);

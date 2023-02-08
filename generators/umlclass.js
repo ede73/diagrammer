@@ -1,4 +1,4 @@
-/*
+/**
 
 	  // setup a few example class nodes and relationships
 	  const nodedata = [
@@ -23,14 +23,13 @@
 
 
 	  node js/parse.js verbose uml.test umlclass
-
+@param {GraphMeta} graphmeta
 */
-
-function generateUmlClass(yy) {
-	//console.log(yy)
+function generateUmlClass(graphmeta) {
+	//console.log(graphmeta)
 	const groups = [];
 	const links = [];
-	const root = getGraphRoot(yy);
+	const root = graphmeta.GRAPHROOT;
 
 	const nameAndLabel = ln => {
 		// name;name():?? -> name():??
@@ -99,9 +98,9 @@ function generateUmlClass(yy) {
 						break;
 				}
 				if (all[2]) {
-					if (all[2].startsWith("(")){
-						ret['name'] = m.name+all[2];
-					}else{
+					if (all[2].startsWith("(")) {
+						ret['name'] = m.name + all[2];
+					} else {
 						// TODO: separate name and parameters..
 						ret['name'] = all[2];
 					}
@@ -134,7 +133,7 @@ function generateUmlClass(yy) {
 	});
 	console.log(groupNameIdMap);
 
-	traverseLinks(yy, l => {
+	traverseLinks(graphmeta, l => {
 		relationship = 'generalization';
 		if (l.linkType != '>') {
 			relationship = 'aggregation';
@@ -145,5 +144,6 @@ function generateUmlClass(yy) {
 			relationship: relationship
 		});
 	});
-	output(yy, JSON.stringify([groups, links]));
+	output(graphmeta, JSON.stringify([groups, links]));
 }
+generators.set("umlclass", generateUmlClass);

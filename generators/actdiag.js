@@ -1,5 +1,5 @@
 //node js/parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
-/*
+/**
 a>b>c,d
 a>e;link text
 a;node text
@@ -17,31 +17,32 @@ e;
   b -> d;
   a -> e[label = "link text"];
 }
+@param {GraphMeta} graphmeta
 */
-function actdiag(yy) {
-    output(yy, "actdiag{\n  default_fontsize = 14");
-    const r = getGraphRoot(yy);
+function actdiag(graphmeta) {
+    output(graphmeta, "actdiag{\n  default_fontsize = 14");
+    const r = graphmeta.GRAPHROOT;
     /**
      * does not really work..but portrait mode if
-     * (r.getDirection()==="portrait"){ output(yy," orientation=portrait");
-     * }else{ //DEFAULT output(yy," orientation=landscape"); }
+     * (r.getDirection()==="portrait"){ output(graphmeta," orientation=portrait");
+     * }else{ //DEFAULT output(graphmeta," orientation=landscape"); }
      * @param {(Node|Group)} obj
      */
-    const parseObjects =  (obj) => {
+    const parseObjects = (obj) => {
         output(true);
         if (obj instanceof Group) {
-            output(yy, 'lane "' + obj.getName() + '"{', true);
-            traverseObjects(obj, (z)=> {
+            output(graphmeta, 'lane "' + obj.getName() + '"{', true);
+            traverseObjects(obj, (z) => {
                 let colorShapeLabel = getAttrFmt(z, 'color', ',color="{0}"') +
                     getShape(shapes.actdiag, z.shape, ',shape={0}') +
                     getAttrFmt(z, 'label', ',label="{0}"');
                 if (colorShapeLabel.trim() != "") {
                     colorShapeLabel = "[" + colorShapeLabel.trim().substring(1) + "]";
                 }
-                output(yy, z.getName() + colorShapeLabel + ';');
+                output(graphmeta, z.getName() + colorShapeLabel + ';');
             });
             output(false);
-            output(yy, "}");
+            output(graphmeta, "}");
         } else {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
@@ -59,13 +60,13 @@ function actdiag(yy) {
                 getAttrFmt(obj, 'label', ',label="{0}"');
             if (colorIconShapeLabel.trim() != "")
                 colorIconShapeLabel = "[" + colorIconShapeLabel.trim().substring(1) + "]";
-            output(yy, obj.getName() + colorIconShapeLabel + ';');
+            output(graphmeta, obj.getName() + colorIconShapeLabel + ';');
         }
         output(false);
     };
     traverseObjects(r, parseObjects);
 
-    traverseLinks(yy, (link)=> {
+    traverseLinks(graphmeta, (link) => {
         let t = "";
         if (link.isDotted()) {
             t += ',style="dotted" ';
@@ -80,7 +81,8 @@ function actdiag(yy) {
             t = t.substring(1).trim();
         if (t != "")
             t = "[" + t + "]";
-        output(yy, "  " + link.left.getName() + " -> " + link.right.getName() + t + ";");
+        output(graphmeta, "  " + link.left.getName() + " -> " + link.right.getName() + t + ";");
     });
-    output(yy, "}");
+    output(graphmeta, "}");
 }
+generators.set('actdiag', actdiag);

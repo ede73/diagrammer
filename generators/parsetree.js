@@ -1,4 +1,4 @@
-/*
+/**
 
 Only one root supported?
 [
@@ -39,10 +39,9 @@ Only one root supported?
     { key: 35, text: ".", fill: "#ccc", stroke: "#4d90fe", parent: 1 },
     { key: 36, text: ".", fill: "#f8f8f8", stroke: "#4d90fe", parent: 35 }
 ]
-
+@param {GraphMeta} graphmeta
 */
-
-function parsetree(yy) {
+function parsetree(graphmeta) {
 	const nodeList = [];
 	function addLinkedNode(left, right) {
 		if (!(left instanceof Node)) return;
@@ -53,9 +52,9 @@ function parsetree(yy) {
 		nodeList.push({key: key, text: text, fill: "#f8f8f8", stroke: "#4d90fe", parent: parent});
 	}
 
-	//console.log(JSON.stringify(yy.LINKS));
+	//console.log(JSON.stringify(graphmeta.LINKS));
 
-	const root = getGraphRoot(yy).ROOTNODES;
+	const root = graphmeta.GRAPHROOT.ROOTNODES;
 	if (root.length > 1) {
 		throw new Error('Only one root node supported');
 	}
@@ -65,20 +64,19 @@ function parsetree(yy) {
 		const text=(!root[0].label) ? root[0].name : root[0].label;
 		nodeList.push({key: root[0].id, text: text, fill: "#f8f8f8", stroke: "#4d90fe"});
 		let keyId = 2;
-		getGraphRoot(yy).OBJECTS.forEach((node) => {
+		graphmeta.GRAPHROOT.OBJECTS.forEach((node) => {
 			if (!node.id) {
 				node.id = keyId++;
 			}
 		});
 	})();
 
-	//console.log(JSON.stringify(getGraphRoot(yy).OBJECTS));
-
-	traverseLinks(yy, link => {
+	traverseLinks(graphmeta, link => {
 		debug('link node '+link.left.name+' to '+link.right.name);
 		addLinkedNode(link.left, link.right);
 	});
 	//console.log(JSON.stringify(nodeList));
-	output(yy, JSON.stringify(nodeList));
+	output(graphmeta, JSON.stringify(nodeList));
 	output(false);
 }
+generators.set('parsetree', parsetree);

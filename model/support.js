@@ -105,21 +105,21 @@ var indentLevel = 0;
 
 /**
  * Output given string, potentially indenting or dedenting
- * @param {*} yy 
+ * @param {(boolean|GraphMeta)} graphmeta 
  * @param {string} txt Text to output
  * @param {boolean} [indentOrDedent] whether to indent to dedent, OPTIONAL
  */
-function output(yy, txt, indentOrDedent=undefined) {
+function output(graphmeta, txt, indentOrDedent=undefined) {
     let prefix = "";
-    if (txt !== true && txt !== false && yy !== true && yy !== false) {
+    if (txt !== true && txt !== false && graphmeta !== true && graphmeta !== false) {
         for (let i = 0; i < indentLevel; i++) {
             prefix += "    ";
         }
-        yy.result(prefix + txt);
+        graphmeta.result(prefix + txt);
     }
-    if (indentOrDedent === true || yy === true || txt === true) {
+    if (indentOrDedent === true || graphmeta === true || txt === true) {
         indentLevel++;
-    } else if (indentOrDedent === false || yy === false || txt === false) {
+    } else if (indentOrDedent === false || graphmeta === false || txt === false) {
         indentLevel--;
     }
 }
@@ -137,11 +137,15 @@ function outputFmt(yy, txt, array) {
         yy.result(txt.formatArray(array));
 }
 
-function* iterateLinks(yy) {
-    for (const i in yy.LINKS) {
-        if (!yy.LINKS.hasOwnProperty(i)) continue;
+/**
+ * Iterate links
+ * @param {GraphMeta} graphmeta 
+ */
+function* iterateLinks(graphmeta) {
+    for (const i in graphmeta.LINKS) {
+        if (!graphmeta.LINKS.hasOwnProperty(i)) continue;
         /** @type {Link} */
-        let foolTypeChecker = yy.LINKS[i];
+        let foolTypeChecker = graphmeta.LINKS[i];
         yield foolTypeChecker;
     }
 }

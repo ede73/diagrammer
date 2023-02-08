@@ -1,4 +1,4 @@
-/*
+/**
 a>b>c,d
 a>e;link text
 a;node text
@@ -17,34 +17,35 @@ msc {
     a=>e[label="link text",id="4"];
 }
 node js/parse.js verbose mscgen.test mscgen
+@param {GraphMeta} graphmeta
 */
-function mscgen(yy) {
-    output(yy, "msc {", true);
-    const root = getGraphRoot(yy);
+function mscgen(graphmeta) {
+    output(graphmeta, "msc {", true);
+    const root = graphmeta.GRAPHROOT;
     let comma = false;
     // print out all node declarations FIRST (if any)
     traverseObjects(root, obj => {
         if (obj instanceof Group) {
-            output(yy, ' /*' + obj.getName() + getAttrFmt(obj, 'label', ' {0}') + '*/');
+            output(graphmeta, ' /*' + obj.getName() + getAttrFmt(obj, 'label', ' {0}') + '*/');
             traverseObjects(obj, z => {
                 let tmp = getAttrFmt(z, 'color', ',color="{0}"') + getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
-                output(yy, (comma ? "," : "") + "    " + z.getName() + tmp);
+                output(graphmeta, (comma ? "," : "") + "    " + z.getName() + tmp);
                 comma = true;
             });
         } else if (obj instanceof Node) {
             let tmp = getAttrFmt(obj, 'color', ',textbgcolor="{0}"') + getAttrFmt(obj, 'style', ',style={0}') + getAttrFmt(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
-            output(yy, (comma ? "," : "") + "  " + obj.getName() + tmp);
+            output(graphmeta, (comma ? "," : "") + "  " + obj.getName() + tmp);
             comma = true;
         }
     });
 
-    output(yy, ";");
+    output(graphmeta, ";");
     let id = 1;
-    traverseLinks(yy, link => {
+    traverseLinks(graphmeta, link => {
         let linkType = "";
         let rhs = link.right;
         let lhs = link.left;
@@ -129,27 +130,28 @@ function mscgen(yy) {
             if (color) {
                 attrs.push('textcolor="' + color + '"');
             }
-            output(yy, "...[" + attrs.join(",") + "];");
+            output(graphmeta, "...[" + attrs.join(",") + "];");
             return;
         } else if (dash) {
             // dashed
             if (color) {
                 attrs.push('textcolor="' + color + '"');
             }
-            output(yy, "---[" + attrs.join(",") + "];");
+            output(graphmeta, "---[" + attrs.join(",") + "];");
             return;
         } else {
-            output(yy, "ERROR: SHOULD NOT HAPPEN");
+            output(graphmeta, "ERROR: SHOULD NOT HAPPEN");
         }
 
-        output(yy, lhs.getName() + linkType + rightName + "[" + attrs.join(",") + "];");
+        output(graphmeta, lhs.getName() + linkType + rightName + "[" + attrs.join(",") + "];");
         if (note != "")
-            // output(yy,ll.getName() +' abox '
+            // output(grpahmeta,ll.getName() +' abox '
             // +lr.getName()+'[label="'+note+'"];');
-            output(yy, rhs.getName() + ' abox ' + rhs.getName() + '[label="' + note + '"];');
+            output(graphmeta, rhs.getName() + ' abox ' + rhs.getName() + '[label="' + note + '"];');
         // if (swap)
-        // output(yy,lr.getName() + lt + ll.getName() + t + ";");
+        // output(graphmeta,lr.getName() + lt + ll.getName() + t + ";");
     });
     output(false);
-    output(yy, "}");
+    output(graphmeta, "}");
 }
+generators.set('mscgen', mscgen);

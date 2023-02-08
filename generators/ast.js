@@ -1,4 +1,4 @@
-/*
+/**
 a>b>c,d
 a>e;link text
 a;node text
@@ -104,34 +104,35 @@ to
 }
 
 node js/parse.js verbose ast.test ast
+@param {GraphMeta} graphmeta
 */
-function ast(yy) {
-    console.log(yy)
+function ast(graphmeta) {
+    console.log(graphmeta)
     const processANode = o => {
     };
 
-    output(yy, "[");
+    output(graphmeta, "[");
     const skipEntrances = (key, value) => {
         if (key === 'entrance' || key === 'exit') {
             return value;
         }
         return value;
     };
-    const r = getGraphRoot(yy);
+    const r = graphmeta.GRAPHROOT;
     if (r.getVisualizer())
-        output(yy, JSON.stringify({
+        output(graphmeta, JSON.stringify({
             visualizer: r.getVisualizer()
         }));
     if (r.getDirection())
-        output(yy, JSON.stringify({
+        output(graphmeta, JSON.stringify({
             direction: r.getDirection()
         }));
     if (r.getStart())
-        output(yy, JSON.stringify({
+        output(graphmeta, JSON.stringify({
             start: r.getStart()
         }));
     if (r.getEqual())
-        output(yy, JSON.stringify({
+        output(graphmeta, JSON.stringify({
             equal: r.getEqual()
         }));
 
@@ -141,26 +142,26 @@ function ast(yy) {
             const processAGroup = (o => {
                 const n = JSON.parse(JSON.stringify(o, skipEntrances));
                 n.OBJECTS = undefined;
-                output(yy, JSON.stringify({
+                output(graphmeta, JSON.stringify({
                     group: n
                 }) + ",");
-                output(yy, '[');
+                output(graphmeta, '[');
                 traverseObjects(o, objectHandler);
-                output(yy, ']');
+                output(graphmeta, ']');
             })(o);
         } else if (o instanceof SubGraph) {
             const processASubGraph = (o => {
                 const n = JSON.parse(JSON.stringify(o, skipEntrances));
                 n.OBJECTS = undefined;
-                output(yy, JSON.stringify({
+                output(graphmeta, JSON.stringify({
                     subgraph: n
                 }) + ",");
-                output(yy, '[');
+                output(graphmeta, '[');
                 traverseObjects(o, objectHandler);
-                output(yy, ']');
+                output(graphmeta, ']');
             })(o);
         } else if (o instanceof Node) {
-            output(yy, JSON.stringify({
+            output(graphmeta, JSON.stringify({
                 node: o
             }) + ",");
         } else {
@@ -171,7 +172,7 @@ function ast(yy) {
     traverseObjects(r, objectHandler);
 
     output(true);
-    traverseLinks(yy, link => {
+    traverseLinks(graphmeta, link => {
         const n = JSON.parse(JSON.stringify(link, skipEntrances));
         n.left = n.left.name;
         n.right = n.right.name;
@@ -182,8 +183,9 @@ function ast(yy) {
         n.container.exitnode = n.container.exitnode ? n.container.exitnode.name : undefined;
         n.container.conditional = undefined;
         n.container = n.container.name;
-        output(yy, JSON.stringify({ link: n }) + ",");
+        output(graphmeta, JSON.stringify({ link: n }) + ",");
     });
     output(false);
-    output(yy, "]", false);
+    output(graphmeta, "]", false);
 }
+generators.set('ast', ast);

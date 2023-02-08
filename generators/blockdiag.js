@@ -7,7 +7,7 @@
 //flowchart.beginpoint,flowchart.endpoint
 //flowchart.condition,flowchart.database,flowchart.terminator,flowchart.input
 //flowchart.loopin,flowchart.loopout
-/*
+/**
 a>b>c,d
 a>e;link text
 a;node text
@@ -27,15 +27,16 @@ e;
   a -> e[label = "link text"];
 }
 node js/parse.js verbose blockdiag.test blockdiag
+@param {GraphMeta} graphmeta
 */
-function blockdiag(yy) {
-    output(yy, "blockdiag{\n default_fontsize = 14");
-    const root = getGraphRoot(yy);
+function blockdiag(graphmeta) {
+    output(graphmeta, "blockdiag{\n default_fontsize = 14");
+    const root = graphmeta.GRAPHROOT;
     if (root.getDirection() === "portrait") {
-        output(yy, "  orientation=portrait");
+        output(graphmeta, "  orientation=portrait");
     } else {
         // DEFAULT
-        output(yy, "  orientation=landscape");
+        output(graphmeta, "  orientation=landscape");
     }
     let tmp = root.getStart();
 
@@ -45,9 +46,9 @@ function blockdiag(yy) {
     const parseObjects = (obj)=> {
         output(true);
         if (obj instanceof Group) {
-            output(yy, ' group "' + obj.getLabel() + '"{', true);
-            output(yy, getAttrFmt(obj, 'color', '   color="{0}"'));
-            output(yy, getAttrFmt(obj, 'label', '   label="{0}"'));
+            output(graphmeta, ' group "' + obj.getLabel() + '"{', true);
+            output(graphmeta, getAttrFmt(obj, 'color', '   color="{0}"'));
+            output(graphmeta, getAttrFmt(obj, 'label', '   label="{0}"'));
             if (tmp && tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
             traverseObjects(obj, function (z) {
@@ -56,10 +57,10 @@ function blockdiag(yy) {
                     getAttrFmt(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
-                output(yy, z.getName() + tmp + ';');
+                output(graphmeta, z.getName() + tmp + ';');
             });
             output(false);
-            output(yy, "}");
+            output(graphmeta, "}");
         } else {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
@@ -76,14 +77,14 @@ function blockdiag(yy) {
                 getAttrFmt(obj, 'label', ',label="{0}"');
             if (colorIconShapeLabel.trim() != "")
                 colorIconShapeLabel = "[" + colorIconShapeLabel.trim().substring(1) + "]";
-            output(yy, obj.getName() + colorIconShapeLabel + ';');
+            output(graphmeta, obj.getName() + colorIconShapeLabel + ';');
         }
         output(false);
     };
 
     traverseObjects(root, parseObjects);
 
-    traverseLinks(yy,  (link)=> {
+    traverseLinks(graphmeta , (link)=> {
         let t = "";
         if (link.isDotted()) {
             t += ',style="dotted" ';
@@ -98,7 +99,8 @@ function blockdiag(yy) {
             t = t.substring(1).trim();
         if (t != "")
             t = "[" + t + "]";
-        output(yy, "  " + link.left.getName() + " -> " + link.right.getName() + t + ";");
+        output(graphmeta, "  " + link.left.getName() + " -> " + link.right.getName() + t + ";");
     });
-    output(yy, "}");
+    output(graphmeta, "}");
 }
+generators.set('blockdiag', blockdiag);

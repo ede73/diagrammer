@@ -1,8 +1,10 @@
+import { getSavedGraph } from './localStorage.js';
+
 function ParseResult(err) {
     alert(err);
 }
 
-function exportGraphs() {
+export function exportGraphs() {
     $.ajax({
         type: "POST",
         async: true,
@@ -25,7 +27,7 @@ function exportGraphs() {
     });
 }
 
-function importGraphs() {
+export function importGraphs() {
     $.ajax({
         type: "GET",
         async: true,
@@ -35,8 +37,8 @@ function importGraphs() {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (msg) {
-            // alert(JSON.stringify(msg));
             localStorage.setItem("graphs", JSON.stringify(msg));
+            alert("Imported, reload the page!");
         },
         error: function (err) {
             alert("ERROR: " + JSON.stringify(err));

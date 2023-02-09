@@ -3,6 +3,9 @@
 #Loosely based on makeLexerAndParser.js
 #Also you get MATCHES=a/b/c.file:c/b/d.file
 #And DIRNAMES=a/:c/
+GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.grammar
+MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js
+
 all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile
 	@echo Make ALL
 	@echo done
@@ -14,7 +17,7 @@ build/diagrammer_lexer.js: grammar/diagrammer.lex
 	@echo "exports.diagrammer_lexer=diagrammer_lexer;" >> $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
-build/diagrammer.all: grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.grammar model/model.js model/shapes.js model/tree.js generators/*.js
+build/diagrammer.all: $(GRAMMAR_FILES) model/model.js model/shapes.js model/tree.js generators/*.js
 	@mkdir -p build
 	@echo Compile build/diagrammer.all
 	@cat $^ >$@

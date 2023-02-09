@@ -1,5 +1,5 @@
 
-function getSavedGraph() {
+export function getSavedGraph() {
     let data = {};
     if (!localStorage.getItem("graphs")) {
         localStorage.setItem("graphs", JSON.stringify(data));
@@ -11,19 +11,17 @@ function getSavedGraph() {
     return data;
 }
 
-function getSavedFiles() {
+export function getSavedFiles() {
     let t = "";
     for (const k in getSavedGraph()) {
         console.log("Stored file:" + k);
         t += '<option value="' + k + '">' + k + '</option>';
     }
-    const e = document.getElementById("saved");
+    const e = document.getElementById("saved"); // TODO: move up
     e.innerHTML = t;
 }
 
-function save() {
-    const filename = document.getElementById("filename").value;
-    const editable = getText();
+export function saveCurrentGraph(filename, editable) {
     const data = getSavedGraph();
     data[filename] = editable;
     const jd = JSON.stringify(data);
@@ -31,10 +29,10 @@ function save() {
     // clipboardData.setData("text",jd);
 }
 
-function load() {
-    const filename = document.getElementById("filename").value;
+export function loadGraph(filename) {
     const data = getSavedGraph();
-    if (data[filename])
-        setText(data[filename]);
+    if (data[filename]) {
+        return data[filename];
+    }
 }
 

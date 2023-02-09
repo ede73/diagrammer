@@ -1,21 +1,20 @@
 <html>
 <link rel="stylesheet" type="text/css" href="css/textarea.css" />
 <!-- canviz support start-->
-<link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz.css" />
-<script type="text/javascript" src="build/diagrammer_parser.js"></script>
+<!-- <link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz.css" />-->
+<script type="module" src="build/diagrammer_parser.js"></script>
 <script src="https://unpkg.com/gojs/release/go-debug.js"></script>
-<script type="text/javascript" src="web/index.js"></script>
+<script type="module" src="web/index.js"></script>
 <script type="text/javascript" src="web/visualizations/visualizeCirclePacked.js"></script>
 <script type="text/javascript" src="web/visualizations/visualizeReingoldTilford.js"></script>
 <script type="text/javascript" src="web/visualizations/visualizeRadialDendrogram.js"></script>
 <script type="text/javascript" src="web/visualizations/visualizeUmlClass.js"></script>
 <script type="text/javascript" src="web/visualizations/visualizeLayerBands.js"></script>
 <script type="text/javascript" src="web/visualizations/visualizeParseTree.js"></script>
-
 <script type="text/javascript" src="web/d3support.js"></script>
-<script type="text/javascript" src="web/parserInteraction.js"></script>
-<script type="text/javascript" src="web/backendInteraction.js"></script>
-<script type="text/javascript" src="web/localStorage.js"></script>
+<!--<script type="text/javascript" src="web/parserInteraction.js"></script>-->
+<script type="module" src="web/backendInteraction.js"></script>
+<script type="module" src="web/localStorage.js"></script>
 <!--<script type="text/javascript" src="js/mscgen.js"></script>-->
 
 <!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz-ie6.css" /><![endif]-->
@@ -116,13 +115,13 @@
 		</select>
 		<label for="filename">Filename</label>
 		<input type="text" id="filename" name="filename" value="output" />
-		<button onclick="save();return false;">Save</button>
-		<button onclick="load();return false;">Load</button>
+		<button onclick="saveCurrentGraph(document.getElementById('filename').value,getGraphText());return false;">Save</button>
+		<button onclick="setGraphText(loadGraph(document.getElementById('filename').value));return false;">Load</button>
 		<button onclick="importGraphs();return false;">Import</button>
 		<button onclick="exportGraphs();return false;">Export</button>
 		<!-- saved combobox and handlers -->
 		<label for="saved">Saved graphs</label> <select id="saved" name="saved" onChange="savedChanged()"></select>
-		<button onclick="visualize();return false;">Visualize</button>
+		<button onclick="visualize(getVisualizer(), reloadImg);return false;">Visualize</button>
 		<br />
 
 		<!-- one could have EDITABLE content here...parsed using lexer-->
@@ -186,7 +185,7 @@
 				padding: 5px;
 				margin: 5px;
 				border-radius: 8px;
-				//font-family: Helvetica;
+				/*font-family: Helvetica;*/
 				font-family: 'Droid Sans Mono';
 				font-size: 12px;
 				line-height: 30px;
@@ -367,13 +366,34 @@
 </body>
 <script src="js/viz.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script type="text/javascript" src="web/parserInteraction.js"></script>
-<script type="text/javascript" src="web/editorInteractions.js"></script>
+<script type="module" src="web/parserInteraction.js"></script>
+<script type="module" src="web/editorInteractions.js"></script>
 <script src="ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
-<script>
-	var editor = ace.edit("editable");
+<script type="module">
+	const editor = ace.edit("editable");
 	//editor.setTheme("ace/theme/kr");
 	editor.getSession().setMode("ace/mode/state");
+
+	import { addLine, generatorChanged, exampleChanged, savedChanged, getVisualizer, reloadImg, getGraphText, setGraphText } from "./web/editorInteractions.js";
+	window.exampleChanged = exampleChanged;
+	window.generatorChanged = generatorChanged;
+	window.addLine = addLine;
+	window.savedChanged = savedChanged;
+	window.getVisualizer = getVisualizer;
+	window.reloadImg = reloadImg;
+	window.getGraphText = getGraphText;
+	window.setGraphText = setGraphText;
+
+	import { saveCurrentGraph, loadGraph } from "./web/localStorage.js";
+	window.saveCurrentGraph = saveCurrentGraph;
+	window.loadGraph = loadGraph;
+
+	import { importGraphs, exportGraphs } from "./web/backendInteraction.js";
+	window.importGraphs = importGraphs;
+	window.exportGraphs = exportGraphs;
+
+	import { visualize } from "./web/parserInteraction.js";
+	window.visualize = visualize;
 </script>
 <script type="text/javascript">
 	//_MscParse("a>b");

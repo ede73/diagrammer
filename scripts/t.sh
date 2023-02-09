@@ -11,7 +11,7 @@ if [ "${1:-skipparsermake}" = "skipparsermake" ]; then
   #EXPORTREMOVE
 else
   #EXPORTREMOVE
-  ./makeLexerAndParser.sh >/dev/null
+  ./scripts/makeLexerAndParser.sh >/dev/null
 #EXPORTREMOVE
 fi
 

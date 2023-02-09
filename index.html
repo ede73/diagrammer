@@ -116,13 +116,13 @@
 		</select>
 		<label for="filename">Filename</label>
 		<input type="text" id="filename" name="filename" value="output" />
-		<button onclick="save();return false;">Save</button>
-		<button onclick="load();return false;">Load</button>
+		<button onclick="saveCurrentGraph(document.getElementById('filename').value,getGraphText());return false;">Save</button>
+		<button onclick="setGraphText(loadGraph(document.getElementById('filename').value));return false;">Load</button>
 		<button onclick="importGraphs();return false;">Import</button>
 		<button onclick="exportGraphs();return false;">Export</button>
 		<!-- saved combobox and handlers -->
 		<label for="saved">Saved graphs</label> <select id="saved" name="saved" onChange="savedChanged()"></select>
-		<button onclick="visualize();return false;">Visualize</button>
+		<button onclick="visualize(getVisualizer(), reloadImg);return false;">Visualize</button>
 		<br />
 
 		<!-- one could have EDITABLE content here...parsed using lexer-->
@@ -186,7 +186,7 @@
 				padding: 5px;
 				margin: 5px;
 				border-radius: 8px;
-				//font-family: Helvetica;
+				/*font-family: Helvetica;*/
 				font-family: 'Droid Sans Mono';
 				font-size: 12px;
 				line-height: 30px;

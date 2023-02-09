@@ -19,7 +19,7 @@ build/diagrammer.all: grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagr
 	@echo Compile build/diagrammer.all
 	@cat $^ >$@
 
-build/diagrammer_parser.js: build/diagrammer.all
+build/diagrammer_parser.js: build/diagrammer.all Makefile
 	@mkdir -p build
 	@echo make parser
 	@jison $< -o $@

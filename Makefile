@@ -17,7 +17,7 @@ build/diagrammer_lexer.js: grammar/diagrammer.lex
 	@echo "exports.diagrammer_lexer=diagrammer_lexer;" >> $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
-build/diagrammer.all: $(GRAMMAR_FILES) model/support.js model/model.js $(MODEL_CLASSES)  model/shapes.js model/tree.js generators/*.js
+build/diagrammer.all: $(GRAMMAR_FILES) model/model.js model/shapes.js model/tree.js generators/*.js
 	@mkdir -p build
 	@echo Compile build/diagrammer.all
 	@cat $^ >$@
@@ -26,7 +26,25 @@ build/diagrammer_parser.js: build/diagrammer.all Makefile
 	@mkdir -p build
 	@echo make parser
 	@jison $< -o $@
+	sed -i "1 i\\\\" $@
+	sed -i "1 i\var collectNextVertex;" $@
+	sed -i "1 i\var visualizations;" $@
+	sed -i "1 i\var generators;" $@
+	sed -i "1 i\\\\" $@
+	sed -i "1 i\import * as model from '../model/model.js';" $@
+	sed -i "1 i\import {iterateEdges, outputFormattedText, getAttributeAndFormat, output, getAttribute, setAttr, debug} from '../model/support.js';" $@
+	sed -i "1 i\import {GraphInner} from '../model/graphinner.js';" $@
+	sed -i "1 i\import {GraphEdge} from '../model/graphedge.js';" $@
+	sed -i "1 i\import {GraphCanvas} from '../model/graphcanvas.js';" $@
+	sed -i "1 i\import {GraphGroup} from '../model/graphgroup.js';" $@
+	sed -i "1 i\import {GraphVertex} from '../model/graphvertex.js';" $@
+	sed -i "1 i\import {GraphObject} from '../model/graphobject.js';" $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
+	echo '{"type":"module"}' > build/package.json
+	sed -i 's/^var diagrammer_parser/export var diagrammer_parser/g' $@
+	sed -i 's/exports.diagrammer_lexer=diagrammer_lexer;//g' build/diagrammer_lexer.js
+	sed -i 's/^var diagrammer_lexer/export var diagrammer_lexer/g' build/diagrammer_lexer.js
+	sed -i "1 i\var collectNextVertex;" build/diagrammer_lexer.js
 
 .PHONY: export
 export: build/diagrammer_lexer.js build/diagrammer_parser.js js/diagrammer.js

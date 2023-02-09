@@ -2,8 +2,16 @@
 //Usage: node js/diagrammer.js [verbose] inputFile [lex] digraph|nwdiag|actdiag|blockdiag|plantuml_sequence >output
 //Usage: node js/diagrammer.js verbose tests/test_inputs/state_group.txt ast
 
-const fs = require('fs');
-const path = require('path');
+// CommonJS crap
+// const fs = require('fs');
+// const path = require('path');
+
+// ES
+import * as fs from 'fs';
+import * as path from 'path';
+import * as lexer from '../build/diagrammer_lexer.js';
+import {diagrammer_parser} from '../build/diagrammer_parser.js';
+
 let myArgs = process.argv.slice(2);
 
 let VERBOSE = false;
@@ -15,7 +23,7 @@ if (myArgs[0] === "verbose") {
 const raw = fs.readFileSync(path.normalize("./" + myArgs[0]), 'utf8');
 
 if (myArgs[1] === "lex") {
-    const lexer = require("../build/diagrammer_lexer.js");
+    //const lexer = require("../build/diagrammer_lexer.js");
     //LEX
     const st = lexer.diagrammer_lexer
     st.setInput(raw);
@@ -25,27 +33,26 @@ if (myArgs[1] === "lex") {
         console.log("State:" + h + "(" + st.yytext + ")")
     }
 } else {
-    const diagrammer_parser = require("../build/diagrammer_parser.js");
+    //const diagrammer_parser = require("../build/diagrammer_parser.js");
     let errors = 0;
     // TODO: MOVING TO GraphCanvas
-    diagrammer_parser.parser.yy.USE_GENERATOR = myArgs[1];
+    diagrammer_parser.yy.USE_GENERATOR = myArgs[1];
     // TODO: MOVING TO GraphCanvas
-    diagrammer_parser.parser.trace = function (x) {
+    diagrammer_parser.trace = function (x) {
         console.log("TRACE:" + x);
     }
     // TODO: MOVING TO GraphCanvas
-    diagrammer_parser.parser.debug = function (x) {
+    diagrammer_parser.debug = function (x) {
         console.log("DEBUG:" + x);
     }
     // TODO: MOVING TO GraphCanvas
-    diagrammer_parser.parser.yy.result = function (result) {
+    diagrammer_parser.yy.result = function (result) {
         console.log(result);
     }
 
-    //this.parseError(errStr, 
     //{text: this.lexer.match, token: this.terminals_[symbol] || symbol, line: this.lexer.yylineno, loc: yyloc, expected: expected});
     // TODO: MOVING TO GraphCanvas
-    diagrammer_parser.parser.yy.parseError = function (str, hash) {
+    diagrammer_parser.yy.parseError = function (str, hash) {
         console.log("Parsing error found:");
         console.log(str);
         console.log(hash);

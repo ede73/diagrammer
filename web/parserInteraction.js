@@ -1,3 +1,5 @@
+import {diagrammer_parser} from '../build/diagrammer_parser.js';
+
 /**
  * @type {boolean}
  */
@@ -6,7 +8,7 @@ var parsingStarted;
 /**
  * @type {HTMLElement}
  */
-var result;
+//var result;
 
 /**
  * 
@@ -18,7 +20,7 @@ diagrammer_parser.yy.parseError = function (str, hash) {
     const pe = "Parsing error:\n" + str + "\n" + hash;
     console.log("pe");
     document.getElementById("error").innerText = pe;
-    cancelVTimer();
+    //cancelVTimer();
     throw new Error(str);
 };
 
@@ -46,11 +48,11 @@ diagrammer_parser.trace = function (x) {
 }
 
 /**
- * @param {string} data Diagrammer graph to parse using 
+ * @param {string} data Diagrammer graph to parse using
  * @param {string} generator this generator
  * @param {string} visualizer and possibly this visualizer
  */
-function parse(data, generator, visualizer, reloadImg) {
+export function parse(data, generator, visualizer, reloadImg) {
     if (!generator) {
         throw new Error("Generator not defined");
     }
@@ -75,16 +77,16 @@ function parse(data, generator, visualizer, reloadImg) {
     /*
      * const tc=textArea.textContent; diagrammer_parser.parse(tc+"\n"); highlight(tc);
      */
-    cancelVTimer();
-    const vdelay = 1000;
-    vtimer = window.setTimeout(function () {
-        vtimer = null;
+    //cancelVTimer();
+    const vdelay  = 1000;
+    const vtimer = window.setTimeout(function () {
+        //vtimer = null;
         console.log("Visualize now using " + diagrammer_parser.yy.USE_VISUALIZER);
         visualize(diagrammer_parser.yy.USE_VISUALIZER, reloadImg);
     }, vdelay);
 }
 
-function visualize(visualizer, reloadImg) {
+export function visualize(visualizer, reloadImg) {
     const statelang = document.getElementById("result").value;
     if (!visualizer) {
         throw new Error("Visualizer not defined");

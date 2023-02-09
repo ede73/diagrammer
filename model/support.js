@@ -1,4 +1,8 @@
 //@ts-check
+import {GraphObject} from '../model/graphobject.js';
+import {GraphCanvas} from '../model/graphcanvas.js';
+import {GraphEdge} from '../model/graphedge.js';
+
 /** @type {number} */
 var debugIndent = 0;
 /** @type {boolean} */
@@ -9,7 +13,7 @@ var VERBOSE;
  * @param {(string|boolean)} msg Message
  * @param {(boolean|any)} indentOrDedent whether to indent or dedent
  */
-function debug(msg, indentOrDedent = undefined) {
+export function debug(msg, indentOrDedent = undefined) {
     if (VERBOSE == true && msg !== false && msg !== true) {
         var d = "";
         for (var i = 0; i < debugIndent; i++) d += "    ";
@@ -30,7 +34,7 @@ function debug(msg, indentOrDedent = undefined) {
  * @param {any} value Value
  * @returns {GraphObject} Object itself(cl)
  */
-function setAttr(cl, attr, value) {
+export function setAttr(cl, attr, value) {
     cl[attr] = value;
     return cl;
 }
@@ -74,7 +78,7 @@ String.prototype.formatArray = function (array) {
  * @param {string} attr Name of the attribute index to return
  * @return {string} Return the attribute
  */
-function getAttribute(cl, attr) {
+export function getAttribute(cl, attr) {
     if (!cl[attr] || cl[attr] == 0)
         return undefined;
     return cl[attr];
@@ -89,7 +93,7 @@ function getAttribute(cl, attr) {
  * @param {Array} [resultarray] If given, in addition for returning, will PUSH the result to this array
  * @returns {string} (possibly formatted) value of the attribute or "" if attribute not found
  */
-function getAttributeAndFormat(cl, attr, fmt, resultarray) {
+export function getAttributeAndFormat(cl, attr, fmt, resultarray) {
     if (attr instanceof Array) {
         for (const i in attr) {
             if (!attr.hasOwnProperty(i)) continue;
@@ -120,7 +124,7 @@ var indentLevel = 0;
  * @param {(string|boolean)} txt Text to output
  * @param {boolean} [indentOrDedent] whether to indent to dedent, OPTIONAL
  */
-function output(graphcanvas, txt, indentOrDedent = undefined) {
+export function output(graphcanvas, txt, indentOrDedent = undefined) {
     let prefix = "";
     if (txt !== true && txt !== false && graphcanvas !== true && graphcanvas !== false) {
         for (let i = 0; i < indentLevel; i++) {
@@ -141,7 +145,7 @@ function output(graphcanvas, txt, indentOrDedent = undefined) {
  * @param {string} txt 
  * @param {Array} [array] Optional array format
  */
-function outputFormattedText(graphcanvas, txt, array) {
+export function outputFormattedText(graphcanvas, txt, array) {
     if (!array) {
         graphcanvas.result(txt);
     } else {
@@ -154,7 +158,7 @@ function outputFormattedText(graphcanvas, txt, array) {
  * Iterate edges
  * @param {GraphCanvas} graphcanvas 
  */
-function* iterateEdges(graphcanvas) {
+export function* iterateEdges(graphcanvas) {
     for (const i in graphcanvas.EDGES) {
         if (!graphcanvas.EDGES.hasOwnProperty(i)) continue;
         /** @type {GraphEdge} */

@@ -1,8 +1,10 @@
+import { getSavedGraph } from './localStorage.js';
+
 function ParseResult(err) {
     alert(err);
 }
 
-function exportGraphs() {
+export function exportGraphs() {
     $.ajax({
         type: "POST",
         async: true,
@@ -25,7 +27,7 @@ function exportGraphs() {
     });
 }
 
-function importGraphs() {
+export function importGraphs() {
     $.ajax({
         type: "GET",
         async: true,

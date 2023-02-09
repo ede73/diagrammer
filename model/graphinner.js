@@ -1,11 +1,15 @@
 //@ts-check
+import {GraphObject} from '../model/graphobject.js';
+import {GraphGroup} from '../model/graphgroup.js';
+import {setAttr, getAttribute, debug} from '../model/support.js';
+
 /**
  * An inner graph, where outside is linked to all the Vertices in side, like
  * outerVertex > ( LinkedToInnerVertex AndThese>Inner>VerticesAlso)
  * @param name Name of the container
  * @constructor
  */
-class GraphInner extends GraphGroup {
+export class GraphInner extends GraphGroup {
     /** @param {string} name */
     constructor(name) {
         super(undefined); // TODO:

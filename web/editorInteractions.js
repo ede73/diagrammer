@@ -1,3 +1,6 @@
+import { visualize, parse } from './parserInteraction.js';
+import { getSavedFiles, getSavedGraph } from './localStorage.js';
+
 /**
  * @type {HTMLElement}
  */
@@ -6,7 +9,8 @@ var result;
 /**
  * @type {Editor}
  */
-var editor;
+//var editor;
+const editor = ace.edit("editable");
 
 //afterbody
 getSavedFiles();
@@ -22,7 +26,7 @@ function openImage(imageUrl) {
 }
 
 //get all
-function getGraphText() {
+export function getGraphText() {
     if (acemode) {
         return editor.getSession().getValue();
     } else {
@@ -31,7 +35,7 @@ function getGraphText() {
 }
 
 //replace all
-function setGraphText(data) {
+export function setGraphText(data) {
     if (acemode) {
         //EDE:editor.destroy does not work reliably
         //editor.destroy();
@@ -80,7 +84,7 @@ function appendLine(data, comp) {
  * @param {(string|number)} i 
  * @returns 
  */
-function addLine(i) {
+export function addLine(i) {
     if (typeof i == "string") {
         appendLine(i + "\n");
     } else
@@ -123,7 +127,7 @@ function openPicWindow() {
     win = window.open('web/result.png', 'extpic');
 }
 
-function reloadImg(id) {
+export function reloadImg(id) {
     const obj = document.getElementById(id);
     let src = obj.src;
     const pos = src.indexOf('?');
@@ -147,7 +151,7 @@ function getGenerator() {
     return gen;
 }
 
-function getVisualizer() {
+export function getVisualizer() {
     const e = document.getElementById("generator");
     const gen = e.options[e.selectedIndex].value;
     if (gen.indexOf(":") > -1) {
@@ -178,7 +182,7 @@ function cancelVTimer() {
  }
  */
 
-function generatorChanged() {
+export function generatorChanged() {
     console.log("generatorChanged..parse");
     parseAndRegenerate();
 }
@@ -188,7 +192,7 @@ function parseAndRegenerate() {
     parse(data, getGenerator(), getVisualizer(), reloadImg);
 }
 
-function savedChanged() {
+export function savedChanged() {
     // read the example...place to textArea(overwrite)
     const e = document.getElementById("saved");
     const doc = e.options[e.selectedIndex].value;
@@ -202,7 +206,7 @@ function savedChanged() {
     }
 }
 
-function exampleChanged() {
+export function exampleChanged() {
     // read the example...place to textArea(overwrite)
     const e = document.getElementById("example");
     const doc = e.options[e.selectedIndex].value;
@@ -247,7 +251,7 @@ function visualizeOnNewParseResults(visualizeCallback, delay) {
     //obj = null;
 }
 
-textAreaOnChange(150);
+textAreaOnChange(parse, 150);
 visualizeOnNewParseResults(visualize, 550);
 
 if (acemode) {

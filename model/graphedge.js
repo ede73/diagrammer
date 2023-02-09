@@ -1,8 +1,10 @@
 // @ts-check
+import {GraphObject} from '../model/graphobject.js';
+
 /**
  * Represents an edge(link) between objects (vertices,groups,lists)
  */
-class GraphEdge extends GraphObject {
+export class GraphEdge extends GraphObject {
 	/**
 	 * 
  	 * @param {string} edgeType Type of the edge(grammar!)

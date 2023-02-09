@@ -89,12 +89,12 @@ runtest() {
 
 webvisualizer=0
 #EDE:New act dag is fucked..instead of Lane1 it prints out random number as lane title, groups work though
-tests="${1:-dot actdiag}" #blockdiag}
+tests="${1:-dot actdiag blockdiag}"
 for test in $tests; do
   echo "Test suite $test" >&2
   testbin=$test
   runtest ast.txt
-  [ "$test" != "actdiag" ] && {
+  [ "$test" != "actdiag" && "$test" != "blockdiag" ] && {
     runtest state_nodelinktests.txt
     runtest url.txt
     runtest state.txt

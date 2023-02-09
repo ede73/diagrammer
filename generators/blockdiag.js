@@ -65,15 +65,16 @@ node js/parse.js verbose blockdiag.test blockdiag
 @param {GraphCanvas} graphcanvas
 */
 function blockdiag(graphcanvas) {
-    output(graphcanvas, "blockdiag{\n default_fontsize = 14");
-    const root = graphcanvas.GRAPHROOT;
-    if (root.getDirection() === "portrait") {
-        output(graphcanvas, "  orientation=portrait");
+    output(graphcanvas, "blockdiag {",true);
+    output(graphcanvas, "default_fontsize = 14");
+    if (graphcanvas.getDirection() === "portrait") {
+        output(graphcanvas, "orientation=portrait");
     } else {
         // DEFAULT
-        output(graphcanvas, "  orientation=landscape");
+        output(graphcanvas, "orientation=landscape");
     }
-    let tmp = root.getStart();
+
+    var lastNode = graphcanvas.getStart();
 
     /**
      * @param {(GraphVertex|GraphGroup)} obj
@@ -84,15 +85,15 @@ function blockdiag(graphcanvas) {
             output(graphcanvas, ' group "' + obj.getLabel() + '"{', true);
             output(graphcanvas, getAttributeAndFormat(obj, 'color', '   color="{0}"'));
             output(graphcanvas, getAttributeAndFormat(obj, 'label', '   label="{0}"'));
-            if (tmp && tmp.trim() != "") {
-                tmp = "[" + tmp.trim().substring(1) + "]";
-            }
+            if (lastNode && lastNode.trim() != "") {
+                 lastNode = "[" + lastNode.trim().substring(1) + "]";
+             }
             traverseVertices(obj,  obj => {
                 if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
                     throw new Error("Missing shape mapping");
                 }
                 const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
-                const tmp = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
+                let tmp = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
                     ',shape={0}'.format(mappedShape) +
                     getAttributeAndFormat(obj, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
@@ -127,7 +128,7 @@ function blockdiag(graphcanvas) {
         output(false);
     };
 
-    traverseVertices(root, parseObjects);
+    traverseVertices(graphcanvas, parseObjects);
 
     traverseEdges(graphcanvas, edge => {
         let t = "";
@@ -137,7 +138,7 @@ function blockdiag(graphcanvas) {
             t += ',style="dashed" ';
         }
         const labelAndItsColor = getAttributeAndFormat(edge, 'label', ',label = "{0}"' +
-            getAttributeAndFormat(edge, ['color', 'textcolor'], 'textcolor="{0}"'));
+            "" /*getAttributeAndFormat(edge, ['color', 'textcolor'], 'textcolor="{0}"')*/);
         const color = getAttributeAndFormat(edge, 'color', ',color="{0}"');
         t += labelAndItsColor + color;
         t = t.trim();

@@ -1,39 +1,39 @@
-blockdiag{
- default_fontsize = 14
-  orientation=landscape
-  group "undefined"{
-
-
-    notgroupA1;
-    notgroupB1;
-  }
-  group "undefined"{
-
-
-    notgroupA2;
-    notgroupB2;
-  }
-  group "undefined"{
-    color="#ff0000" 
-
-    notgroupA3;
-    notgroupB3;
-  }
-  group "sfvhsihdhfg"{
-    color="#ff0000" 
-    label="sfvhsihdhfg" 
-    notgroupA4;
-    notgroupB4;
-  }
-  group "sfvhsihdhfg"{
-
-    label="sfvhsihdhfg" 
-    notgroupA5;
-    notgroupB6;
-  }
-  group "rgsergset"{
-
-    label="rgsergset" 
-    notgroupA6;
-  }
-}
+blockdiag {
+    default_fontsize = 14
+    orientation=landscape
+         group "undefined"{
+            
+            
+            notgroupA1[shape=box];
+            notgroupB1[shape=box];
+        }
+         group "undefined"{
+            
+            
+            notgroupA2[shape=box];
+            notgroupB2[shape=box];
+        }
+         group "undefined"{
+                color="#ff0000" 
+            
+            notgroupA3[shape=box];
+            notgroupB3[shape=box];
+        }
+         group "sfvhsihdhfg"{
+                color="#ff0000" 
+                label="sfvhsihdhfg" 
+            notgroupA4[shape=box];
+            notgroupB4[shape=box];
+        }
+         group "sfvhsihdhfg"{
+            
+                label="sfvhsihdhfg" 
+            notgroupA5[shape=box];
+            notgroupB6[shape=box];
+        }
+         group "rgsergset"{
+            
+                label="rgsergset" 
+            notgroupA6[shape=box];
+        }
+    }

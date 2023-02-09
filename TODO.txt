@@ -1,6 +1,6 @@
 {result:
     {"node":{"name":"b"}}
-    {"group":{"name":1,"isSubGraph":true,"entrance":null,"exitvertex":1,"exit":null}}
+    {"group":{"name":1,"isInnerGraph":true,"entrance":null,"exitvertex":1,"exit":null}}
     {
         {"node":{"name":"c"}}
         {"node":{"name":"d"}}

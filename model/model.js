@@ -326,7 +326,7 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
     const current_container = getCurrentContainer(yy);
 
     debug(true);
-    if (rhs instanceof SubGraph && !rhs.getEntrance()) {
+    if (rhs instanceof GraphInner && !rhs.getEntrance()) {
         rhs.setEntrance(lhs);
     }
     if (rhs.noedges && current_container) {
@@ -339,10 +339,10 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
     lhs.noedges = undefined;
     rhs.noedges = undefined;
 
-    if (current_container instanceof SubGraph &&
+    if (current_container instanceof GraphInner &&
         !current_container.getEntrance() &&
         lhs instanceof GraphVertex &&
-        !(rhs instanceof SubGraph)) {
+        !(rhs instanceof GraphInner)) {
         current_container.setEntrance(lhs);
     }
 
@@ -378,10 +378,10 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
             fmt += "rcompass: " + rcompass;
         debug("getEdge type:" + edgeType + " l:" + lhs + " r:" + rhs + fmt);
     }
-    if (!(lhs instanceof GraphVertex) && !(lhs instanceof Group) & !(lhs instanceof SubGraph)) {
+    if (!(lhs instanceof GraphVertex) && !(lhs instanceof Group) & !(lhs instanceof GraphInner)) {
         throw new Error("LHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
-    if (!(rhs instanceof GraphVertex) && !(rhs instanceof Group) && !(rhs instanceof SubGraph)) {
+    if (!(rhs instanceof GraphVertex) && !(rhs instanceof Group) && !(rhs instanceof GraphInner)) {
         throw new Error("RHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
     const edge = new GraphEdge(edgeType, lhs, rhs);
@@ -599,13 +599,13 @@ function _getDefaultAttribute(yy, attrname, callback) {
 
 /**
  * Create a new sub graph or return passed in reference (if it is a subgraph)
- * @param {SubGraph} [ref]
+ * @param {GraphInner} [ref]
  */
 function _getSubGraph(yy, ref) {
-    if (ref instanceof SubGraph) return ref;
+    if (ref instanceof GraphInner) return ref;
     //debug("_getSubGraph() NEW SubGraph:" + yy + "/" + ref,true);
     if (!yy.SUBGRAPHS) yy.SUBGRAPHS = 1;
-    const newSubGraph = new SubGraph(yy.SUBGRAPHS++);
+    const newSubGraph = new GraphInner(yy.SUBGRAPHS++);
     //debug("push SubGraph " + newSubGraph + " to " + yy);
     _pushObject(yy, newSubGraph);
     //debug(false);

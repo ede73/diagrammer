@@ -230,15 +230,15 @@ function plantuml_sequence(graphmeta) {
         }
     };
 
-    const traverseVertices = (/** @type {GraphRoot}*/root, /** @type {boolean}*/isSubGraph) => {
+    const traverseVertices = (/** @type {GraphRoot}*/root, /** @type {boolean}*/isInnerGraph) => {
         // Dump this groups participants first...
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
             const obj = root.OBJECTS[i];
             if (obj instanceof GraphVertex)
-                processAVertex(obj, isSubGraph);
+                processAVertex(obj, isInnerGraph);
         }
-        printEdges(root, isSubGraph);
+        printEdges(root, isInnerGraph);
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
             const obj = root.OBJECTS[i];
@@ -261,7 +261,7 @@ function plantuml_sequence(graphmeta) {
                     } else {
                         cond = "";//cond = "ref";
                     }
-                    const nodeIsSubGraph = o.isSubGraph;
+                    const nodeIsSubGraph = o.isInnerGraph;
                     if (o.getColor()) {
                         output(graphmeta, "style=filled;");
                         output(graphmeta, getAttributeAndFormat(o, 'color',

@@ -217,7 +217,7 @@ function digraph(graphmeta) {
                 const processAGroup = (grp => {
                     debug(JSON.stringify(grp, skipEntrances));
                     output(graphmeta, 'subgraph cluster_' + grp.getName() + ' {', true);
-                    if (grp.isSubGraph) {
+                    if (grp.isInnerGraph) {
                         output(graphmeta, 'graph[style=invis];');
                     }
                     if (grp.getLabel())
@@ -308,7 +308,7 @@ function digraph(graphmeta) {
             // just pick ONE Vertex from group and use lhead
             // TODO: Assuming it is Vertex (if Recursive groups implemented, it
             // could be smthg else)
-            if (!rhs.isSubGraph) {
+            if (!rhs.isInnerGraph) {
                 attrs.push(" lhead=cluster_" + rhs.getName());
             }
             if (rhs.OBJECTS[0]) {
@@ -316,9 +316,9 @@ function digraph(graphmeta) {
             }
         }
         if (lhs instanceof Group) {
-            if (!lhs.isSubGraph)
+            if (!lhs.isInnerGraph)
                 attrs.push(" ltail=cluster_" + lhs.getName());
-            if (lhs instanceof SubGraph && lhs.getExit()) {
+            if (lhs instanceof GraphInner && lhs.getExit()) {
                 //get containers all vertices that have no outward links...(TODO:should be in model actually!)
                 //perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
                 const exits = [];

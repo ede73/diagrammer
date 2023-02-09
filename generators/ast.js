@@ -62,7 +62,7 @@ function ast(graphmeta) {
                 traverseVertices(o, objectHandler);
                 output(graphmeta, ']');
             })(obj);
-        } else if (obj instanceof SubGraph) {
+        } else if (obj instanceof GraphInner) {
             const processASubGraph = (o => {
                 const n = JSON.parse(JSON.stringify(o, skipEntrances));
                 n.OBJECTS = undefined;
@@ -91,7 +91,7 @@ function ast(graphmeta) {
         n.right = n.right.name;
         n.container.OBJECTS = undefined;
         n.container.label = undefined;
-        n.container.isSubGraph = undefined;
+        n.container.isInnerGraph = undefined;
         n.container.entrance = n.container.entrance ? n.container.entrance.name : undefined;
         n.container.exitvertex = n.container.exitvertex ? n.container.exitvertex.name : undefined;
         n.container.conditional = undefined;

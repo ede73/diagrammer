@@ -1,10 +1,11 @@
 //@ts-check
 /**
- * Create a new container SubGraph
+ * An inner graph, where outside is linked to all the Vertices in side, like
+ * outerVertex > ( LinkedToInnerVertex AndThese>Inner>VerticesAlso)
  * @param name Name of the container
  * @constructor
  */
-class SubGraph extends Group {
+class GraphInner extends Group {
     /** @param {string} name */
     constructor(name) {
         super(undefined); // TODO:
@@ -15,7 +16,7 @@ class SubGraph extends Group {
         /** @type {GraphObject[]} */
         this.ROOTVERTICES = [];
         /** @type {boolean} */
-        this.isSubGraph = true;
+        this.isInnerGraph = true;
         /** @type {string} */
         this.entrance = undefined;
         /** @type {string} */
@@ -25,7 +26,7 @@ class SubGraph extends Group {
     /**
      * temporary for RHS list array!!
      * @param {string} value
-     * @return {SubGraph}
+     * @return {GraphInner}
      */
     setEdgeLabel(value) {
         this.edgelabel = value;
@@ -57,7 +58,7 @@ class SubGraph extends Group {
 
     /**
      * @param {string} exit Exit vertex name
-     * @return {SubGraph}
+     * @return {GraphInner}
      */
     setExit(exit) {
         debug("subgraph:Set exit to " + exit);

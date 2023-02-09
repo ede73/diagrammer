@@ -1,14 +1,14 @@
 #!/bin/sh
 OUT="export"
-mkdir -p $OUT/generators
 
-for m in js/diagrammer.js build/parser.js build/state.js; do
+for m in js/diagrammer.js build/diagrammer_parser.js build/lexer.js; do
   uglifyjs $m -o $OUT/$(basename $m) -c -m
-  sed -i -e 's,build/state.js,state.js,g' -e 's,build/parser.js,parser.js,g' $OUT/$(basename $m) 
+  sed -i -e 's,build/lexer.js,lexer.js,g' -e 's,build/diagrammer_parser.js,diagrammer_parser.js,g' $OUT/$(basename $m) 
 done
 
 cp scripts/display_image.sh "$OUT"
 
+#mkdir -p $OUT/generators
 #for m in generators/*js; do
 #  uglifyjs $m -o $OUT/$m
 #done

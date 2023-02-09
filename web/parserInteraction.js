@@ -14,7 +14,7 @@ var result;
  * @param {string} hash 
  */
 // TODO: MOVING TO GraphCanvas
-parser.yy.parseError = function (str, hash) {
+diagrammer_parser.yy.parseError = function (str, hash) {
     const pe = "Parsing error:\n" + str + "\n" + hash;
     console.log("pe");
     document.getElementById("error").innerText = pe;
@@ -28,9 +28,9 @@ parser.yy.parseError = function (str, hash) {
  */
 // called line by line...
 // TODO: MOVING TO GraphCanvas
-parser.yy.result = function (line) {
+diagrammer_parser.yy.result = function (line) {
     if (parsingStarted) {
-        console.log("Parsing results coming in for " + parser.yy.USE_GENERATOR + " / " + parser.yy.VISUALIZER);
+        console.log("Parsing results coming in for " + diagrammer_parser.yy.USE_GENERATOR + " / " + diagrammer_parser.yy.VISUALIZER);
         parsingStarted = false;
         result.value = "";
     }
@@ -41,7 +41,7 @@ parser.yy.result = function (line) {
  * @param {string} x 
  */
 // TODO: MOVING TO GraphCanvas
-parser.trace = function (x) {
+diagrammer_parser.trace = function (x) {
     console.log("TRACE:" + x);
 }
 
@@ -61,22 +61,22 @@ function parse(generator, visualizer) {
     console.log("parse generator=" + generator + ", visualizer=" + visualizer);
     document.getElementById("error").innerText = "";
     parsingStarted = true;
-    delete (parser.yy.GRAPHVANVAS);
-    delete (parser.yy.EDGES);
-    delete (parser.yy.OBJECTS);
+    delete (diagrammer_parser.yy.GRAPHVANVAS);
+    delete (diagrammer_parser.yy.EDGES);
+    delete (diagrammer_parser.yy.OBJECTS);
     // TODO: MOVING TO GraphCanvas
-    parser.yy.USE_GENERATOR = generator;
+    diagrammer_parser.yy.USE_GENERATOR = generator;
     // TODO: MOVING TO GraphCanvas
-    parser.yy.USE_VISUALIZER = visualizer;
-    console.log("Parse, set generator to " + parser.yy.USE_GENERATOR + " visualizer to " + parser.yy.USE_VISUALIZER);
-    parser.parse(data);
+    diagrammer_parser.yy.USE_VISUALIZER = visualizer;
+    console.log("Parse, set generator to " + diagrammer_parser.yy.USE_GENERATOR + " visualizer to " + diagrammer_parser.yy.USE_VISUALIZER);
+    diagrammer_parser.parse(data);
     /*
-     * const tc=textArea.textContent; parser.parse(tc+"\n"); highlight(tc);
+     * const tc=textArea.textContent; diagrammer_parser.parse(tc+"\n"); highlight(tc);
      */
     cancelVTimer();
     vtimer = window.setTimeout(function () {
         vtimer = null;
-        console.log("Visualize now using " + parser.yy.USE_VISUALIZER);
-        visualize(parser.yy.USE_VISUALIZER);
+        console.log("Visualize now using " + diagrammer_parser.yy.USE_VISUALIZER);
+        visualize(diagrammer_parser.yy.USE_VISUALIZER);
     }, vdelay);
 }

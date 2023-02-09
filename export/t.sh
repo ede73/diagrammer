@@ -8,6 +8,7 @@ EXTPATH=$(pwd)
   #EXPORTREMOVE
   #EXPORTREMOVE
   #EXPORTREMOVE
+  make all
 #EXPORTREMOVE
 
 PLANTUML_JAR=ext/plantuml.jar
@@ -44,6 +45,12 @@ text=0
   text=1
 }
 
+dont_run_visualizer=0
+[ "$1" = "dont_run_visualizer" ] && {
+  shift
+  dont_run_visualizer=1
+}
+
 FORMAT=png
 [ "$1" = "svg" ] && {
   shift
@@ -52,6 +59,7 @@ FORMAT=png
 
 input=${1:-tests/test_inputs/state2.txt}
 generator=${2:-dot}
+echo $generator
 
 #EXPORTREMOVE
 #EXPORTREMOVE
@@ -67,25 +75,20 @@ rm -f "$OUT"
 
 #EXPORTREMOVE
 
-DIAGRAMMER="$MYPATH/js/diagrammer.js"
-case "$generator" in
-nwdiag | actdiag | blockdiag | plantuml_sequence | mscgen)
-  node --max-old-space-size=4096 "$DIAGRAMMER" "$input" "$generator" "$verbose" >"$OUT"
-  [ $text -ne 0 ] && cat "$OUT"
-  ;;
-neato | twopi | circo | fdp | sfdp)
-  node --max-old-space-size=4096 "$DIAGRAMMER" "$input" digraph "$verbose" >"$OUT"
-  [ $text -ne 0 ] && cat "$OUT"
-  ;;
-ast | dendrogram | sankey)
-  node --max-old-space-size=4096 "$DIAGRAMMER" "$input" "$generator" "$verbose"
-  exit 0
-  ;;
-*)
-  node --max-old-space-size=4096 "$DIAGRAMMER" $verbose "$input" digraph "$verbose" >"$OUT"
-  [ $text -ne 0 ] && cat "$OUT"
-  ;;
-esac
+getgenerator() {
+  case "$1" in
+  neato | twopi | circo | fdp | sfdp | dot)
+    echo digraph
+    ;;
+  *)
+    echo "$1"
+    ;;
+  esac
+}
+
+echo Using generator $(getgenerator $generator)
+node --max-old-space-size=4096 "$MYPATH/js/diagrammer.js" "$input" "$(getgenerator $generator)" "$verbose" >"$OUT"
+[ $text -ne 0 ] && cat "$OUT"
 
 rc=$?
 # shellcheck disable=SC2181
@@ -100,7 +103,9 @@ rc=$?
   exit 10
 }
 
-echo "Generate sequence $generator"
+[ $dont_run_visualizer -eq 1 ] && exit 0
+
+echo "Visualize $generator generated output"
 
 . ./display_image.sh
 
@@ -108,17 +113,26 @@ nwdiag() {
   nwdiag3 $*
 }
 
+seqdiag() {
+  seqdiag3 $*
+}
+
+actdiag() {
+  actdiag3 $*
+}
+
+blockdiag() {
+  blockdiag3 $*
+}
+
 case "$generator" in
 plantuml_sequence)
   java -Xmx2048m -jar "$PLANTUML_JAR" "$OUT" >"$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-nwdiag | actdiag | blockdiag)
+nwdiag | actdiag | blockdiag | seqdiag)
   "$generator" <"$OUT" -a -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-mscgen)
-  "$generator" <"$OUT" -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
-  ;;
-neato | twopi | circo | fdp | sfdp)
+mscgen | neato | twopi | circo | fdp | sfdp | dot)
   "$generator" <"$OUT" -T"${FORMAT}" -o "$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
 *)

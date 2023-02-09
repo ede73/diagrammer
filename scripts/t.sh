@@ -72,7 +72,7 @@ echo "testing lexing"
 node --max-old-space-size=4096 js/testStateLexer.js "$input"
 
 #EXPORTREMOVE
-#node build/parser.js $input $func | tee a.gv
+#node build/diagrammer_parser.js $input $func | tee a.gv
 #EXPORTREMOVE
 # |sed '/digraph/,$!d'
 INPUT_PATH=${input%.*}
@@ -83,7 +83,7 @@ OUT=${OUTPUT_PATH}_${generator}.out
 rm -f "$OUT"
 
 #EXPORTREMOVE
-echo "test parser $verbose $OUT"
+echo "test diagrammer_parser $verbose $OUT"
 
 getgenerator() {
   case "$1" in

@@ -76,15 +76,16 @@ function blockdiag(graphmeta) {
     /**
      * @param {(Vertex|Group)} obj
      */
-    const parseObjects = (obj) => {
+    const parseObjects = /** @type {function((Group|Vertex))}*/obj => {
         output(true);
         if (obj instanceof Group) {
             output(graphmeta, ' group "' + obj.getLabel() + '"{', true);
             output(graphmeta, getAttributeAndFormat(obj, 'color', '   color="{0}"'));
             output(graphmeta, getAttributeAndFormat(obj, 'label', '   label="{0}"'));
-            if (tmp && tmp.trim() != "")
+            if (tmp && tmp.trim() != "") {
                 tmp = "[" + tmp.trim().substring(1) + "]";
-            traverseVertices(obj, function (obj) {
+            }
+            traverseVertices(obj,  obj => {
                 if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
                     throw new Error("Missing shape mapping");
                 }
@@ -126,14 +127,15 @@ function blockdiag(graphmeta) {
 
     traverseVertices(root, parseObjects);
 
-    traverseEdges(graphmeta, (edge) => {
+    traverseEdges(graphmeta, edge => {
         let t = "";
         if (edge.isDotted()) {
             t += ',style="dotted" ';
         } else if (edge.isDashed()) {
             t += ',style="dashed" ';
         }
-        const labelAndItsColor = getAttributeAndFormat(edge, 'label', ',label = "{0}"' + getAttributeAndFormat(edge, ['color', 'textcolor'], 'textcolor="{0}"'));
+        const labelAndItsColor = getAttributeAndFormat(edge, 'label', ',label = "{0}"' +
+            getAttributeAndFormat(edge, ['color', 'textcolor'], 'textcolor="{0}"'));
         const color = getAttributeAndFormat(edge, 'color', ',color="{0}"');
         t += labelAndItsColor + color;
         t = t.trim();

@@ -20,7 +20,7 @@ node js/parse.js verbose ast.test ast
 @param {GraphMeta} graphmeta
 */
 function ast(graphmeta) {
-    console.log(graphmeta)
+    debug(graphmeta)
     const processAVertex = o => {
     };
 
@@ -49,9 +49,9 @@ function ast(graphmeta) {
             equal: r.getEqual()
         }));
 
-    const objectHandler = o => {
+    const objectHandler = /** @type {function((Group|Vertex))}*/obj => {
         output(true);
-        if (o instanceof Group) {
+        if (obj instanceof Group) {
             const processAGroup = (o => {
                 const n = JSON.parse(JSON.stringify(o, skipEntrances));
                 n.OBJECTS = undefined;
@@ -61,8 +61,8 @@ function ast(graphmeta) {
                 output(graphmeta, '[');
                 traverseVertices(o, objectHandler);
                 output(graphmeta, ']');
-            })(o);
-        } else if (o instanceof SubGraph) {
+            })(obj);
+        } else if (obj instanceof SubGraph) {
             const processASubGraph = (o => {
                 const n = JSON.parse(JSON.stringify(o, skipEntrances));
                 n.OBJECTS = undefined;
@@ -72,10 +72,10 @@ function ast(graphmeta) {
                 output(graphmeta, '[');
                 traverseVertices(o, objectHandler);
                 output(graphmeta, ']');
-            })(o);
-        } else if (o instanceof Vertex) {
+            })(obj);
+        } else if (obj instanceof Vertex) {
             output(graphmeta, JSON.stringify({
-                node: o
+                node: obj
             }) + ",");
         } else {
             throw new Error("Not a node nor a group, NOT SUPPORTED");

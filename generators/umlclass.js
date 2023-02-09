@@ -26,7 +26,7 @@
 @param {GraphMeta} graphmeta
 */
 function generateUmlClass(graphmeta) {
-	//console.log(graphmeta)
+	//debug(graphmeta)
 	const groups = [];
 	const edges = [];
 	const root = graphmeta.GRAPHROOT;
@@ -81,7 +81,7 @@ function generateUmlClass(graphmeta) {
 		return [...vertices].filter(node => nameAndLabel(node).includes("(")).map(m => {
 			const ret = {
 			};
-			console.log(m.label);
+			debug(m.label);
 			ret['name'] = m.name;
 			if (m.label) {
 				const regex = /^([+#-]|)([^:]+:|)([^=]+)(=.+|)/;
@@ -131,7 +131,7 @@ function generateUmlClass(graphmeta) {
 			});
 		}
 	});
-	console.log(groupNameIdMap);
+	debug(groupNameIdMap);
 
 	traverseEdges(graphmeta, l => {
 		relationship = 'generalization';

@@ -31,7 +31,7 @@ Only one root supported?
 @param {GraphMeta} graphmeta
 */
 function generateLayerBands(graphmeta) {
-	//console.log(graphmeta)
+	//debug(graphmeta)
 	const groups = {
 		key: "_BANDS",
 		category: "Bands",

@@ -52,7 +52,7 @@ function parsetree(graphmeta) {
 		nodeList.push({key: key, text: text, fill: "#f8f8f8", stroke: "#4d90fe", parent: parent});
 	}
 
-	//console.log(JSON.stringify(graphmeta.EDGES));
+	//debug(JSON.stringify(graphmeta.EDGES));
 
 	const root = graphmeta.GRAPHROOT.ROOTVERTICES;
 	if (root.length > 1) {
@@ -75,7 +75,7 @@ function parsetree(graphmeta) {
 		debug('edge '+edge.left.name+' to '+edge.right.name);
 		addEdgeedVertex(edge.left, edge.right);
 	});
-	//console.log(JSON.stringify(nodeList));
+	//debug(JSON.stringify(nodeList));
 	output(graphmeta, JSON.stringify(nodeList));
 	output(false);
 }

@@ -37,21 +37,23 @@ function seqdiag(graphmeta) {
                 if (!obj.OBJECTS.hasOwnProperty(j)) continue;
                 const z = obj.OBJECTS[j];
                 // no color support either..
-                let styleAndLabel = getAttributeAndFormat(z, 'style', ',style={0}') + getAttributeAndFormat(z, 'label', ',label="{0}"');
+                let styleAndLabel = getAttributeAndFormat(z, 'style', ',style={0}') +
+                    getAttributeAndFormat(z, 'label', ',label="{0}"');
                 if (styleAndLabel.trim() != "")
                     styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
                 graphmeta.result(z.getName() + styleAndLabel + ";");
             }
         } else if (obj instanceof Vertex) {
-            let styleAndLabel = getAttributeAndFormat(obj, 'style', ',style={0}') + getAttributeAndFormat(obj, 'label', ',label="{0}"') + getAttributeAndFormat(obj, 'color', ',color="{0}"');
+            let styleAndLabel = getAttributeAndFormat(obj, 'style', ',style={0}') +
+                getAttributeAndFormat(obj, 'label', ',label="{0}"') +
+                getAttributeAndFormat(obj, 'color', ',color="{0}"');
             if (styleAndLabel.trim() != "")
                 styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
             graphmeta.result(obj.getName() + styleAndLabel + ";");
         }
     }
-    for (const i in graphmeta.EDGES) {
-        if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
-        const edge = graphmeta.EDGES[i];
+
+    traverseEdges(graphmeta, edge => {
         const attrs = [];
         let edgeType = "";
         let rhs = edge.right;
@@ -101,7 +103,7 @@ function seqdiag(graphmeta) {
             // a<>b (any else than node itself) is autoreturn
             if (rhs == lhs) {
                 graphmeta.result(getAttributeAndFormat(edge, 'label', '===BROADCAST:{0}==='));
-                continue;
+                return;
             }
             edgeType = '=>';
         } else if (edge.edgeType.indexOf("<") !== -1) {
@@ -122,17 +124,17 @@ function seqdiag(graphmeta) {
         } else if (dot) {
             // dotted
             graphmeta.result(getAttributeAndFormat(edge, 'label', '...{0}...'));
-            continue;
+            return;
         } else if (dash) {
             // dashed
             graphmeta.result(getAttributeAndFormat(edge, 'label', '==={0}==='));
-            continue;
+            return;
         } else {
             graphmeta.result("ERROR: SHOULD NOT HAPPEN");
         }
         // MUST HAVE whitespace at both sides of the "arrow"
         graphmeta.result(lhs.getName() + " " + edgeType + " " + rightName + "[" + attrs.join(",") + "];");
-    }
+    });
     graphmeta.result("}");
 }
 generators.set('seqdiag', seqdiag);

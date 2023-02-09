@@ -115,7 +115,7 @@ function plantuml_sequence(graphmeta) {
      * @param {GraphRoot|Group} container 
      * @param {boolean} sbgraph 
      */
-    const printEdges = function printEdges(container, sbgraph) {
+    const printEdges = (container, sbgraph) => {
         for (const edge of iterateEdges(graphmeta)) {
             if (edge.printed)
                 continue;
@@ -230,7 +230,7 @@ function plantuml_sequence(graphmeta) {
         }
     };
 
-    const traverseVertices = function traverseVertices(root, isSubGraph) {
+    const traverseVertices = (/** @type {GraphRoot}*/root, /** @type {boolean}*/isSubGraph) => {
         // Dump this groups participants first...
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
@@ -275,7 +275,8 @@ function plantuml_sequence(graphmeta) {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
         }
-    }(root, false);
+    };
+    traverseVertices(root, false);
     printEdges(root);
     output(false);
     output(graphmeta, "@enduml");

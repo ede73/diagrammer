@@ -74,7 +74,8 @@ function nwdiag(graphmeta) {
                 }
                 const mappedShape = NetworkDiagShapeMap[z.shape] ? NetworkDiagShapeMap[z.shape] : NetworkDiagShapeMap['default'];
 
-                let tmp = getAttributeAndFormat(z, 'color', ',color="{0}"') + ',shape="{0}"'.format(mappedShape) + getAttributeAndFormat(z, 'label', ',address="{0}"');
+                let tmp = getAttributeAndFormat(z, 'color', ',color="{0}"') + ',shape="{0}"'.format(mappedShape) +
+                    getAttributeAndFormat(z, 'label', ',address="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
                 graphmeta.result("    " + z.getName() + tmp + ';');
@@ -97,20 +98,21 @@ function nwdiag(graphmeta) {
                 throw new Error("Missing shape mapping");
             }
             const mappedShape = NetworkDiagShapeMap[obj.shape] ? NetworkDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
-        // ICON does not work, using background
-            let tmp = getAttributeAndFormat(obj, 'color', ',color="{0}"') + getAttributeAndFormat(obj, 'image', ',background="icons{0}"') + ',shape="{0}"'.format(mappedShape) + getAttributeAndFormat(obj, 'label', ',label="{0}"');
+            // ICON does not work, using background
+            let tmp = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
+                getAttributeAndFormat(obj, 'image', ',background="icons{0}"') + ',shape="{0}"'.format(mappedShape) +
+                getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
             graphmeta.result("    " + obj.getName() + tmp + ';');
         }
     }
-    for (const i in graphmeta.EDGES) {
-        if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
-        const l1 = graphmeta.EDGES[i];
-        if (l1.left instanceof Group || l1.right instanceof Group)
-            continue;
-        graphmeta.result(l1.left.getName() + " -- " + l1.right.getName() + ";");
-    }
+
+    traverseEdges(graphmeta, edge => {
+        if (!(edge.left instanceof Group || edge.right instanceof Group)) {
+            graphmeta.result(edge.left.getName() + " -- " + edge.right.getName() + ";");
+        }
+    });
     graphmeta.result("}");
 }
 generators.set('nwdiag', nwdiag);

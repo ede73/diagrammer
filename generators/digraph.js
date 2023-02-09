@@ -141,7 +141,8 @@ function digraph(graphmeta) {
         // {$$=" {rank = same;null}\n {rank = same; "+$2+"}\n null
         // [shape=plaintext,
         // label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-        output(graphmeta, "//startnode setup\n  {rank = same;null} {rank = same; " + start + "}\n  null [shape=plaintext, label=\"\"];\n  " + start + "[shape=doublecircle];\n  null->" + start + ";\n");
+        output(graphmeta, "//startnode setup\n  {rank = same;null} {rank = same; " +
+            start + "}\n  null [shape=plaintext, label=\"\"];\n  " + start + "[shape=doublecircle];\n  null->" + start + ";\n");
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
     if (r.getEqual() && r.getEqual().length > 0) {
@@ -205,7 +206,7 @@ function digraph(graphmeta) {
 
     let lastexit = undefined;
     let lastendif = undefined;
-    const traverseVertices = function traverseVertices(root) {
+    const traverseVertices = /** @type {function((Group|Vertex))}*/root => {
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
             const obj = root.OBJECTS[i];
@@ -262,7 +263,8 @@ function digraph(graphmeta) {
                                 //lastexit = undefined;
                             }
                             // YES LINK to first node of the group
-                            output(graphmeta, sn + "->" + lastEdge.getName() + "[label=\"YES\",color=green,lhead=cluster_" + grp.getName() + "];");
+                            output(graphmeta, sn + "->" + lastEdge.getName() + "[label=\"YES\",color=green,lhead=cluster_" +
+                                grp.getName() + "];");
                             output(graphmeta, ln.getName() + "->" + lastendif + "[label=\"\"];");
                             lastexit = sn;
                         }
@@ -274,10 +276,11 @@ function digraph(graphmeta) {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
         }
-    }(r);
+    };
+    traverseVertices(r);
 
     output(graphmeta, "//links start");
-    traverseEdges(graphmeta, (edge) => {
+    traverseEdges(graphmeta, edge => {
         const attrs = [];
         let label = edge.label;
         if (label) {
@@ -373,10 +376,14 @@ function digraph(graphmeta) {
         debug('print rhs ' + rhs);
         if (lhs instanceof Array) {
             lhs.forEach((element, index, array) => {
-                output(graphmeta, element.getName() + getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() + getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ";");
+                output(graphmeta, element.getName() +
+                    getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() +
+                    getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ";");
             });
         } else {
-            output(graphmeta, lhs.getName() + getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() + getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ";");
+            output(graphmeta, lhs.getName() +
+                getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() +
+                getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ";");
         }
     });
     output(false);

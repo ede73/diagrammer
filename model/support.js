@@ -5,7 +5,7 @@ var debugIndent = 0;
 var VERBOSE;
 
 /**
- * Simple debugger, uses console.log
+ * Pass debug messages 
  * @param {(string|boolean)} msg Message
  * @param {(boolean|any)} indentOrDedent whether to indent or dedent
  */

@@ -446,10 +446,7 @@ function getGraphRoot(yy) {
     if (!yy.GRAPHROOT) {
         //debug("no graphroot,init - in getGraphRoot",true);
         if (!yy.result) {
-            // TODO: MOVING TO GraphMeta
-            yy.result = function (str) {
-                console.log(str);
-            }
+            throw new Error("Initialization has failed!");
         }
         debug("...Initialize emptyroot " + yy);
         // TODO: DOESN'T WORK as type hint! Modularize to own obj..

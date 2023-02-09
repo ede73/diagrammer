@@ -61,7 +61,7 @@ function parse(generator, visualizer) {
     console.log("parse generator=" + generator + ", visualizer=" + visualizer);
     document.getElementById("error").innerText = "";
     parsingStarted = true;
-    delete (parser.yy.GRAPHROOT);
+    delete (parser.yy.GRAPHVANVAS);
     delete (parser.yy.EDGES);
     delete (parser.yy.OBJECTS);
     // TODO: MOVING TO GraphCanvas

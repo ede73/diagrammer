@@ -1,19 +1,18 @@
 //Usage: (typically called from t.sh or CLI in general, web uses parser.js directly via index.js)
 //Usage: node js/diagrammer.js [verbose] inputFile [lex] digraph|nwdiag|actdiag|blockdiag|plantuml_sequence >output
-//Usage: node js/diagrammer.js verbose tests/state_group.txt ast
+//Usage: node js/diagrammer.js verbose tests/test_inputs/state_group.txt ast
 
 const fs = require('fs');
 const path = require('path');
 let myArgs = process.argv.slice(2);
 
-VERBOSE = false;
+let VERBOSE = false;
 if (myArgs[0] === "verbose") {
     VERBOSE = true;
     myArgs = myArgs.slice(1);
 }
 
 const raw = fs.readFileSync(path.normalize("./" + myArgs[0]), 'utf8');
-let errors = 0
 
 if (myArgs[1] === "lex") {
     const lexer = require("../build/state.js");
@@ -27,6 +26,7 @@ if (myArgs[1] === "lex") {
     }
 } else {
     const parser = require("../build/parser.js");
+    let errors = 0;
     // TODO: MOVING TO GraphCanvas
     parser.parser.yy.USE_GENERATOR = myArgs[1];
     // TODO: MOVING TO GraphCanvas

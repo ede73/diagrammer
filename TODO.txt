@@ -147,7 +147,7 @@ shoulg have
     {"group":{"name":5,"label":"endif","conditional":"endif","exitvertex":5,"exitedge":"outside"}}
     {"node":{"name":"outside"}}
  
-(DONE)- Make EQUAL container property (not it ALWAYS belongs to graphroot, but network diag can have groups inside network..
+(DONE)- Make EQUAL container property (not it ALWAYS belongs to graphcanvas(root), but network diag can have groups inside network..
 	well dotty can have subcluster inside subcluster)
 (DONE + way of last suggestion) - WHILE links have a container specification now, it is not yet enuf for plantuml.. It needs the LINKS and GROUPS (and participants) appear IN ORDER
  sequentially, from top of the file...so as this approach works for graphviz and msc/seqdiag..with vertex/group ordering, plantuml needs to know order like

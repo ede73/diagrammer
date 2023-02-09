@@ -121,12 +121,12 @@ function getVertex(yy, name, style) {
                 }
             }
             return undefined;
-        }(getGraphRoot(yy), name);
+        }(getGraphCanvas(yy), name);
         if (search) {
             return search;
         }
         debug("Create new vertex name=" + name, true);
-        const vertex = new GraphVertex(name, getGraphRoot(yy).getCurrentShape());
+        const vertex = new GraphVertex(name, getGraphCanvas(yy).getCurrentShape());
         if (style) vertex.setStyle(style);
         vertex.noedges = true;
 
@@ -166,7 +166,7 @@ function getVertex(yy, name, style) {
  */
 function getCurrentContainer(yy) {
     // no need for value, but runs init if missing
-    getGraphRoot(yy);
+    getGraphCanvas(yy);
     return yy.CURRENTCONTAINER[yy.CURRENTCONTAINER.length - 1];
 }
 
@@ -181,7 +181,7 @@ function getCurrentContainer(yy) {
  */
 function enterContainer(yy, container) {
     yy.CURRENTCONTAINER.push(container);
-    // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
+    // yy.GRAPHVANVAS.setCurrentContainer(yy.GRAPHVANVAS);
     return container;
 }
 
@@ -431,16 +431,16 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
 // =====================================
 
 /**
- * Get current singleton graphroot or create new one
+ * Get current singleton graphcanvas or create new one
  * External utility support for generator
  *
  * Usage: grammar/state.grammar, generators
  * @return {GraphCanvas}
  */
-function getGraphRoot(yy) {
-    // debug(" getGraphRoot "+yy);
-    if (!yy.GRAPHROOT) {
-        //debug("no graphroot,init - in getGraphRoot",true);
+function getGraphCanvas(yy) {
+    // debug(" getGraphCanvas "+yy);
+    if (!yy.GRAPHVANVAS) {
+        //debug("no graphcanvas,init - in getGraphCanvas",true);
         if (!yy.result) {
             throw new Error("Initialization has failed!");
         }
@@ -453,11 +453,11 @@ function getGraphRoot(yy) {
         /** @type {int} */
         yy.CONTAINER_EXIT = 1;
         /** @type  {GraphCanvas} */
-        yy.GRAPHROOT = new GraphCanvas();
-        enterContainer(yy, yy.GRAPHROOT);
+        yy.GRAPHVANVAS = new GraphCanvas();
+        enterContainer(yy, yy.GRAPHVANVAS);
         //debug(false);
     }
-    return yy.GRAPHROOT;
+    return yy.GRAPHVANVAS;
 }
 
 /** 
@@ -566,7 +566,7 @@ function _getVariables(yy) {
  */
 function _getDefaultAttribute(yy, attrname, callback) {
     // no need for the value, but runs init if missing
-    getGraphRoot(yy);
+    getGraphCanvas(yy);
     // debug("_getDefaultAttribute "+attrname);
     for (const i in yy.CURRENTCONTAINER) {
         if (!yy.CURRENTCONTAINER.hasOwnProperty(i)) continue;
@@ -581,9 +581,9 @@ function _getDefaultAttribute(yy, attrname, callback) {
             return defaultAttribute;
         }
     }
-    const defaultAttribute = getGraphRoot(yy).getDefault(attrname);
+    const defaultAttribute = getGraphCanvas(yy).getDefault(attrname);
     if (defaultAttribute) {
-        debug("_getDefaultAttribute got from graphroot");
+        debug("_getDefaultAttribute got from graphcanvas");
         if (callback)
             callback(defaultAttribute);
         return defaultAttribute;

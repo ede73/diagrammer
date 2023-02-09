@@ -141,7 +141,7 @@ class GraphCanvas extends GraphObject {
      * @return {GraphCanvas}
      */
     setDefault(key, value) {
-        //debug("graphroot:Set ROOT " + key + " to " + value);
+        //debug("graphcanvas:Set ROOT " + key + " to " + value);
         // @ts-ignore
         return setAttr(this, key, value);
     }
@@ -150,7 +150,7 @@ class GraphCanvas extends GraphObject {
      *  @param {string} key
      */
     getDefault(key) {
-        // debug("graphroot:Get ROOT "+key);
+        // debug("graphcanvas:Get ROOT "+key);
         return getAttribute(this, key);
     }
 

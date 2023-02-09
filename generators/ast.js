@@ -81,7 +81,7 @@ function ast(graphcanvas) {
         }
         output(false);
     };
-    traverseVertices(graphcanvas.OBJECTS, objectHandler);
+    traverseVertices(graphcanvas, objectHandler);
 
     output(true);
     traverseEdges(graphcanvas, edge => {

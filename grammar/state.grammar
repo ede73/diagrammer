@@ -30,7 +30,7 @@ S
 			*/
 
 			// Generator can be defined by the caller(user) or suggested by the graph
-			const graphcanvas = getGraphRoot(yy);
+			const graphcanvas = getGraphCanvas(yy);
 			if (yy.USE_GENERATOR) {
 			  graphcanvas.setGenerator(yy.USE_GENERATOR);
 			}
@@ -123,17 +123,17 @@ graphContent
 		{
 			debug("SHAPE getShapeOrVariablleee ");
 			if ($2=="default") $2=undefined;
-			$$=getGraphRoot(yy).setCurrentShape($2);
+			$$=getGraphCanvas(yy).setCurrentShape($2);
 		}
 	| EQUAL vertexGroupListOrAttrs
 		{
 			getCurrentContainer(yy).setEqual($2 instanceof GraphVertex?new Array($2):$2);
 		}
 	| SHAPE NAME {throw new Error("Expecting one of the shapes, got ("+$2+")");}
-	| LANDSCAPE 		-> getGraphRoot(yy).setDirection("landscape")
-	| GENERATOR NAME 	-> getGraphRoot(yy).setGenerator($NAME)
-	| VISUALIZER NAME 	-> getGraphRoot(yy).setVisualizer($NAME)
-	| PORTRAIT 			-> getGraphRoot(yy).setDirection("portrait")
+	| LANDSCAPE 		-> getGraphCanvas(yy).setDirection("landscape")
+	| GENERATOR NAME 	-> getGraphCanvas(yy).setGenerator($NAME)
+	| VISUALIZER NAME 	-> getGraphCanvas(yy).setVisualizer($NAME)
+	| PORTRAIT 			-> getGraphCanvas(yy).setDirection("portrait")
 	| COMMENT 			-> "/*"+$COMMENT.substring(2)+"*/\n"
 	| VERTEX_COLOR colorOrVariable	 -> getCurrentContainer(yy).setDefault('vertexcolor'    ,$2=="default"?undefined:$2)
 	| VERTEXTEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('vertextextcolor',$2=="default"?undefined:$2)
@@ -160,7 +160,7 @@ graphContent
 	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */
 	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END -> enterContainer(yy,getGroup(yy).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
 	| GROUP_END 	-> exitContainer(yy)
-	| START NAME 	-> getGraphRoot(yy).setStart($NAME)
+	| START NAME 	-> getGraphCanvas(yy).setStart($NAME)
 	| readEvents {
 	}
 	;

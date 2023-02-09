@@ -1,5 +1,5 @@
 //@ts-check
-const Shapes =
+export const Shapes =
 {
     default: "default",
     invis: "invis",

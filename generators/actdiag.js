@@ -57,7 +57,8 @@ http://blockdiag.com/en/actdiag/
 @param {GraphCanvas} graphcanvas
 */
 function actdiag(graphcanvas) {
-    output(graphcanvas, "actdiag{\n  default_fontsize = 14");
+    output(graphcanvas, "actdiag {", true);
+    output(graphcanvas, "default_fontsize = 14");
     /**
      * does not really work..but portrait mode if
      * (r.getDirection()==="portrait"){ output(graphcanvas," orientation=portrait");
@@ -75,11 +76,11 @@ function actdiag(graphcanvas) {
 
                 let colorShapeLabel = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
                     ',shape={0}'.format(mappedShape) +
-                    getAttributeAndFormat(z, 'label', ',label="{0}"');
+                    getAttributeAndFormat(obj, 'label', ',label="{0}"');
                 if (colorShapeLabel.trim() != "") {
                     colorShapeLabel = "[" + colorShapeLabel.trim().substring(1) + "]";
                 }
-                output(graphcanvas, z.getName() + colorShapeLabel + ';');
+                output(graphcanvas, obj.getName() + colorShapeLabel + ';');
             });
             output(false);
             output(graphcanvas, "}");
@@ -109,7 +110,7 @@ function actdiag(graphcanvas) {
         }
         output(false);
     };
-    traverseVertices(graphcanvas.OBJECTS, parseObjects);
+    traverseVertices(graphcanvas, parseObjects);
 
     traverseEdges(graphcanvas, (edge) => {
         let t = "";
@@ -118,7 +119,8 @@ function actdiag(graphcanvas) {
         } else if (edge.isDashed()) {
             t += ',style="dashed" ';
         }
-        const labelAndItsColor = getAttributeAndFormat(edge, 'label', ',label = "{0}"' + getAttributeAndFormat(edge, ['color', 'textcolor'], 'textcolor="{0}"'));
+        const labelAndItsColor = getAttributeAndFormat(edge, 'label', ',label = "{0}"' +
+            ""/*getAttributeAndFormat(edge, ['color', 'textcolor'], 'textcolor="{0}"')*/);
         const color = getAttributeAndFormat(edge, 'color', ',color="{0}"');
         t += labelAndItsColor + color;
         t = t.trim();

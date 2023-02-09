@@ -126,6 +126,13 @@ seqdiag() {
   seqdiag3 $*
 }
 
+actdiag() {
+  actdiag3 $*
+}
+
+blockdiag() {
+  blockdiag3 $*
+}
 
 case "$generator" in
 plantuml_sequence)

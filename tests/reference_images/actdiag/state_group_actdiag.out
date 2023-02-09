@@ -1,26 +1,26 @@
-actdiag{
-  default_fontsize = 14
-  lane "1"{
-    notgroupA1;
-    notgroupB1;
-  }
-  lane "groupname2"{
-    notgroupA2;
-    notgroupB2;
-  }
-  lane "groupname3"{
-    notgroupA3;
-    notgroupB3;
-  }
-  lane "groupname4"{
-    notgroupA4;
-    notgroupB4;
-  }
-  lane "groupname5"{
-    notgroupA5;
-    notgroupB6;
-  }
-  lane "6"{
-    notgroupA6;
-  }
-}
+actdiag {
+    default_fontsize = 14
+        lane "1"{
+            notgroupA1[shape=box];
+            notgroupB1[shape=box];
+        }
+        lane "groupname2"{
+            notgroupA2[shape=box];
+            notgroupB2[shape=box];
+        }
+        lane "groupname3"{
+            notgroupA3[shape=box];
+            notgroupB3[shape=box];
+        }
+        lane "groupname4"{
+            notgroupA4[shape=box];
+            notgroupB4[shape=box];
+        }
+        lane "groupname5"{
+            notgroupA5[shape=box];
+            notgroupB6[shape=box];
+        }
+        lane "6"{
+            notgroupA6[shape=box];
+        }
+    }

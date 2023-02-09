@@ -1,45 +1,45 @@
-actdiag{
-  default_fontsize = 14
-  lane "GraphObject"{
-    name[color="#ccccff"];
-    color[color="#ccccff"];
-    textColor[color="#ccccff"];
-    label[color="#ccccff"  ,label="label\nspecial syntax with :: for links\n(label::xlabel)"];
-  }
-  lane "GraphRoot"{
-    OBJECTS1[shape=flowchart.database  ,label="OBJECTS"];
-    xGenerator[color="#ccffcc"  ,label="generator"];
-    xVisualizer[color="#ccffcc"  ,label="visualizer"];
-    direction[color="#ccffcc"];
-    xStart[color="#ccffcc"  ,label="start"];
-    xEqual[color="#ccffcc"  ,label="equal"];
-    currentShape;
-    default2[label="default\nnodecolor\ngroupcolor\nlinkcolor"];
-  }
-  lane "xGroup"{
-    equal2[label="equal"];
-    OBJECTS2[shape=flowchart.database  ,label="OBJECTS"];
-  }
-  lane "Node"{
-    xShape[label="shape"];
-    image;
-    style;
-  }
-  lane "Link"{
-    linkType;
-    left;
-    right;
-  }
-  GraphObject -> GraphRoot[style="dotted"  ,label = "extends" textcolor="#0000ff"   ,color="#0000ff"];
-  GraphObject -> Node[style="dotted"  ,label = "extends" textcolor="#0000ff"   ,color="#0000ff"];
-  GraphObject -> xGroup[style="dotted"  ,label = "extends" textcolor="#0000ff"   ,color="#0000ff"];
-  GraphObject -> Link[style="dotted"  ,label = "extends::extends" textcolor="#0000ff"   ,color="#0000ff"];
-  left -> Node[style="dashed"  ,label = "links" textcolor="#00ff00"   ,color="#00ff00"];
-  left -> xGroup[style="dashed"  ,label = "links" textcolor="#00ff00"   ,color="#00ff00"];
-  right -> xGroup[style="dashed"  ,label = "links" textcolor="#00ff00"   ,color="#00ff00"];
-  right -> Node[style="dashed"  ,label = "links" textcolor="#00ff00"   ,color="#00ff00"];
-  OBJECTS1 -> Node[label = "contains" textcolor="#ff0000"   ,color="#ff0000"];
-  OBJECTS1 -> xGroup[label = "contains" textcolor="#ff0000"   ,color="#ff0000"];
-  OBJECTS2 -> Node[label = "contains" textcolor="#ff0000"   ,color="#ff0000"];
-  OBJECTS2 -> xGroup[label = "contains" textcolor="#ff0000"   ,color="#ff0000"];
-}
+actdiag {
+    default_fontsize = 14
+        lane "GraphObject"{
+            name[color="#ccccff" ,shape=box];
+            color[color="#ccccff" ,shape=box];
+            textColor[color="#ccccff" ,shape=box];
+            label[color="#ccccff" ,shape=box ,label="label\nspecial syntax with :: for links\n(label::xlabel)"];
+        }
+        lane "GraphRoot"{
+            OBJECTS1[shape=flowchart.database ,label="OBJECTS"];
+            xGenerator[color="#ccffcc" ,shape=box ,label="generator"];
+            xVisualizer[color="#ccffcc" ,shape=box ,label="visualizer"];
+            direction[color="#ccffcc" ,shape=box];
+            xStart[color="#ccffcc" ,shape=box ,label="start"];
+            xEqual[color="#ccffcc" ,shape=box ,label="equal"];
+            currentShape[shape=box];
+            default2[shape=box ,label="default\nnodecolor\ngroupcolor\nlinkcolor"];
+        }
+        lane "xGroup"{
+            equal2[shape=box ,label="equal"];
+            OBJECTS2[shape=flowchart.database ,label="OBJECTS"];
+        }
+        lane "Node"{
+            xShape[shape=box ,label="shape"];
+            image[shape=box];
+            style[shape=box];
+        }
+        lane "Link"{
+            linkType[shape=box];
+            left[shape=box];
+            right[shape=box];
+        }
+      GraphObject -> GraphRoot[style="dotted"  ,label = "extends(GraphObject->GraphRoot)"  ,color="#0000ff"];
+      GraphObject -> Node[style="dotted"  ,label = "extends(GraphObject->Node)"  ,color="#0000ff"];
+      GraphObject -> xGroup[style="dotted"  ,label = "extends(GraphObject->xGroup)"  ,color="#0000ff"];
+      GraphObject -> Link[style="dotted"  ,label = "extends::extends(GraphObject->Link)"  ,color="#0000ff"];
+      left -> Node[style="dashed"  ,label = "links"  ,color="#00ff00"];
+      left -> xGroup[style="dashed"  ,label = "links"  ,color="#00ff00"];
+      right -> xGroup[style="dashed"  ,label = "links"  ,color="#00ff00"];
+      right -> Node[style="dashed"  ,label = "links"  ,color="#00ff00"];
+      OBJECTS1 -> Node[label = "contains"  ,color="#ff0000"];
+      OBJECTS1 -> xGroup[label = "contains"  ,color="#ff0000"];
+      OBJECTS2 -> Node[label = "contains"  ,color="#ff0000"];
+      OBJECTS2 -> xGroup[label = "contains"  ,color="#ff0000"];
+    }

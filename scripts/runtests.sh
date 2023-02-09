@@ -89,38 +89,40 @@ runtest() {
 
 webvisualizer=0
 #EDE:New act dag is fucked..instead of Lane1 it prints out random number as lane title, groups work though
-tests="${1:-dot }" #actdiag } #blockdiag}
+tests="${1:-dot actdiag}" #blockdiag}
 for test in $tests; do
   echo "Test suite $test" >&2
   testbin=$test
   runtest ast.txt
-  [ "$test" != "actdiag" ] && runtest state_nodelinktests.txt
-  [ "$test" != "actdiag" ] && runtest url.txt
-  [ "$test" != "actdiag" ] && runtest state.txt
-  [ "$test" != "actdiag" ] && runtest state2.txt
-  [ "$test" != "actdiag" ] && runtest state3.txt
-  [ "$test" != "actdiag" ] && runtest state4.txt
+  [ "$test" != "actdiag" ] && {
+    runtest state_nodelinktests.txt
+    runtest url.txt
+    runtest state.txt
+    runtest state2.txt
+    runtest state3.txt
+    runtest state4.txt
+    runtest state6.txt
+    runtest state7.txt
+    runtest state8.txt
+    runtest state9.txt
+    runtest state10.txt
+    runtest state11.txt
+    runtest state12.txt
+    runtest state_cluster_edge.txt
+    runtest state_dual_node.txt
+    runtest state_innergroups.txt
+    runtest state_recursive_linking.txt
+    runtest state_images.txt
+    runtest fulltest.txt
+    runtest state_y_edge.txt
+    runtest state_conditionals.txt
+    runtest nodes.txt
+    runtest events.txt
+    runtest compass.txt
+  }
   [ "$test" != "actdiag" ] && [ "$test" != "blockdiag" ] && runtest state5.txt
-  [ "$test" != "actdiag" ] && runtest state6.txt
-  [ "$test" != "actdiag" ] && runtest state7.txt
-  [ "$test" != "actdiag" ] && runtest state8.txt
-  [ "$test" != "actdiag" ] && runtest state9.txt
-  [ "$test" != "actdiag" ] && runtest state10.txt
-  [ "$test" != "actdiag" ] && runtest state11.txt
-  [ "$test" != "actdiag" ] && runtest state12.txt
-  [ "$test" != "actdiag" ] && runtest state_cluster_edge.txt
-  [ "$test" != "actdiag" ] && runtest state_dual_node.txt
-  [ "$test" != "actdiag" ] && runtest state_innergroups.txt
-  [ "$test" != "actdiag" ] && runtest state_recursive_linking.txt
-  [ "$test" != "actdiag" ] && runtest state_images.txt
-  [ "$test" != "actdiag" ] && runtest fulltest.txt
   [ "$test" != "blockdiag" ] && runtest state_tcp.txt
-  [ "$test" != "actdiag" ] && runtest state_y_edge.txt
-  [ "$test" != "actdiag" ] && runtest state_conditionals.txt
   runtest state_group.txt
-  [ "$test" != "actdiag" ] && runtest nodes.txt
-  [ "$test" != "actdiag" ] && runtest events.txt
-  [ "$test" != "actdiag" ] && runtest compass.txt
   runtest group_group_link.txt
 done
 

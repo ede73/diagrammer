@@ -1,40 +1,40 @@
-actdiag{
-  default_fontsize = 14
-  closed[color="#ff0000"  ,shape=box  ,label="CLOSED"];
-  closed_end[color="#ff0000"  ,shape=box  ,label="closed\nBack to start"];
-  listen[color="#ffff00"  ,shape=box  ,label="LISTEN"];
-  syn_received[color="#888888"  ,shape=box  ,label="SYN\nRECEIVED"];
-  syn_sent[color="#888888"  ,shape=box  ,label="SYN\nSENT"];
-  established[color="#00ff00"  ,shape=box  ,label="ESTABLISHED\ndata xchange occurs"];
-  lane "PassiveClose"{
-    close_wait[color="#ffff00"  ,shape=box  ,label="CLOSE WAIT"];
-    last_ack[color="#ffff00"  ,shape=box  ,label="LAST ACK"];
-  }
-  lane "ActiveClose"{
-    fin_wait1[color="#ffff00"  ,shape=box  ,label="FIN WAIT 1"];
-    closing[color="#ffff00"  ,shape=box  ,label="CLOSING"];
-    fin_wait2[color="#ffff00"  ,shape=box  ,label="FIN WAIT 2"];
-    time_wait[color="#ffff00"  ,shape=box  ,label="TIME WAIT"];
-  }
-  syn_sent -> closed[style="dotted"  ,label = "CLOSE/-"];
-  syn_sent -> syn_received[style="dotted"  ,label = "SYN/SYN+ACK\n(simultaneous open)"];
-  listen -> syn_sent[style="dotted"  ,label = "SEND/SYN"];
-  listen -> closed[style="dotted"  ,label = "CLOSE/-"];
-  syn_received -> listen[style="dotted"  ,label = "RST/-"];
-  syn_received -> fin_wait1[style="dotted"  ,label = "CLOSE/FIN"];
-  fin_wait1 -> closing[style="dotted"  ,label = "FIN/ACK"];
-  fin_wait1 -> time_wait[style="dotted"  ,label = "FIN+ACK/ACK"];
-  closing -> time_wait[style="dotted"];
-  closed -> syn_sent[label = "CONNECT/SYN(1/3 of 3w/hs)" textcolor="#ff0000"   ,color="#ff0000"];
-  syn_sent -> established[label = "SYN+ACK/ACK(3/3 of 3w/hs)" textcolor="#ff0000"   ,color="#ff0000"];
-  established -> fin_wait1[label = "CLOSE/FIN" textcolor="#ff0000"   ,color="#ff0000"];
-  fin_wait1 -> fin_wait2[label = "ACK/-" textcolor="#ff0000"   ,color="#ff0000"];
-  fin_wait2 -> time_wait[label = "FIN/ACK" textcolor="#ff0000"   ,color="#ff0000"];
-  time_wait -> closed_end[label = "Timeout" textcolor="#ff0000"   ,color="#ff0000"];
-  closed -> listen[label = "LISTEN/-" textcolor="#0000ff"   ,color="#0000ff"];
-  listen -> syn_received[label = "SYN/SYN+ACK(2/3 of 3w/hs)" textcolor="#0000ff"   ,color="#0000ff"];
-  syn_received -> established[label = "ACK/-" textcolor="#0000ff"   ,color="#0000ff"];
-  established -> close_wait[label = "FIN/ACK" textcolor="#0000ff"   ,color="#0000ff"];
-  close_wait -> last_ack[label = "CLOSE/FIN" textcolor="#0000ff"   ,color="#0000ff"];
-  last_ack -> closed_end[color="#0000ff"];
-}
+actdiag {
+    default_fontsize = 14
+        closed[color="#ff0000" ,shape=box ,label="CLOSED"];
+        closed_end[color="#ff0000" ,shape=box ,label="closed\nBack to start"];
+        listen[color="#ffff00" ,shape=box ,label="LISTEN"];
+        syn_received[color="#888888" ,shape=box ,label="SYN\nRECEIVED"];
+        syn_sent[color="#888888" ,shape=box ,label="SYN\nSENT"];
+        established[color="#00ff00" ,shape=box ,label="ESTABLISHED\ndata xchange occurs"];
+        lane "PassiveClose"{
+            close_wait[color="#ffff00" ,shape=box ,label="CLOSE WAIT"];
+            last_ack[color="#ffff00" ,shape=box ,label="LAST ACK"];
+        }
+        lane "ActiveClose"{
+            fin_wait1[color="#ffff00" ,shape=box ,label="FIN WAIT 1"];
+            closing[color="#ffff00" ,shape=box ,label="CLOSING"];
+            fin_wait2[color="#ffff00" ,shape=box ,label="FIN WAIT 2"];
+            time_wait[color="#ffff00" ,shape=box ,label="TIME WAIT"];
+        }
+      syn_sent -> closed[style="dotted"  ,label = "CLOSE/-"];
+      syn_sent -> syn_received[style="dotted"  ,label = "SYN/SYN+ACK\n(simultaneous open)"];
+      listen -> syn_sent[style="dotted"  ,label = "SEND/SYN"];
+      listen -> closed[style="dotted"  ,label = "CLOSE/-"];
+      syn_received -> listen[style="dotted"  ,label = "RST/-"];
+      syn_received -> fin_wait1[style="dotted"  ,label = "CLOSE/FIN"];
+      fin_wait1 -> closing[style="dotted"  ,label = "FIN/ACK"];
+      fin_wait1 -> time_wait[style="dotted"  ,label = "FIN+ACK/ACK"];
+      closing -> time_wait[style="dotted"];
+      closed -> syn_sent[label = "CONNECT/SYN(1/3 of 3w/hs)"  ,color="#ff0000"];
+      syn_sent -> established[label = "SYN+ACK/ACK(3/3 of 3w/hs)"  ,color="#ff0000"];
+      established -> fin_wait1[label = "CLOSE/FIN"  ,color="#ff0000"];
+      fin_wait1 -> fin_wait2[label = "ACK/-"  ,color="#ff0000"];
+      fin_wait2 -> time_wait[label = "FIN/ACK"  ,color="#ff0000"];
+      time_wait -> closed_end[label = "Timeout"  ,color="#ff0000"];
+      closed -> listen[label = "LISTEN/-"  ,color="#0000ff"];
+      listen -> syn_received[label = "SYN/SYN+ACK(2/3 of 3w/hs)"  ,color="#0000ff"];
+      syn_received -> established[label = "ACK/-"  ,color="#0000ff"];
+      established -> close_wait[label = "FIN/ACK"  ,color="#0000ff"];
+      close_wait -> last_ack[label = "CLOSE/FIN"  ,color="#0000ff"];
+      last_ack -> closed_end[color="#0000ff"];
+    }

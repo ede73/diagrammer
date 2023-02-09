@@ -1,14 +1,14 @@
-actdiag{
-  default_fontsize = 14
-  lane "z"{
-    x;
-  }
-  lane "a"{
-    b;
-  }
-  lane "c"{
-    d;
-  }
-  z -> a[label = "edge1"];
-  z -> c[label = "edge1"];
-}
+actdiag {
+    default_fontsize = 14
+        lane "z"{
+            x[shape=box];
+        }
+        lane "a"{
+            b[shape=box];
+        }
+        lane "c"{
+            d[shape=box];
+        }
+      z -> a[label = "edge1"];
+      z -> c[label = "edge1"];
+    }

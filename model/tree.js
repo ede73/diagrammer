@@ -1,7 +1,7 @@
 /**
  * Tree representration
  */
-class TreeVertex {
+export class TreeVertex {
 	constructor(data) {
 		this.CHILDREN = [];
 		this.data = data;
@@ -23,7 +23,7 @@ class TreeVertex {
  * @param {any} findData What ever data the tree vertex might have
  * @return {TreeVertex}
  */
-function findVertex(tree, findData) {
+export function findVertex(tree, findData) {
 	if (tree.data === findData) {
 		return tree;
 	}
@@ -54,7 +54,7 @@ function findVertex(tree, findData) {
  * @param {boolean} hasSibling Just used internally, omit
  * @param {TreeVertex} parent Just used internally, omit
  */
-function traverseTree(root, callback, enter, exit, level=undefined, hasSibling=undefined, parent=undefined) {
+export function traverseTree(root, callback, enter, exit, level=undefined, hasSibling=undefined, parent=undefined) {
 	//debug('process vertex '+root.data.name + ' childmount'+siblingAmount);
 	if (!level) level = 0;
 	if (!hasSibling) hasSibling = false;

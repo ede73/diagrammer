@@ -8,7 +8,7 @@
 
 GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.grammar
 MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js
-MODEL_REST = model/shapes.js
+MODEL_REST = model/shapes.js model/tree.js
 
 all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST)
 	@echo Make ALL
@@ -22,7 +22,7 @@ build/diagrammer_lexer.js: grammar/diagrammer.lex
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
 
-build/diagrammer.all: $(GRAMMAR_FILES) model/model.js model/tree.js generators/*.js
+build/diagrammer.all: $(GRAMMAR_FILES) model/model.js generators/*.js
 	@mkdir -p build
 	@echo Compile build/diagrammer.all
 	@cat $^ >$@
@@ -37,6 +37,7 @@ build/diagrammer_parser.js: build/diagrammer.all Makefile
 	sed -i "1 i\var generators;" $@
 	sed -i "1 i\\\\" $@
 	sed -i "1 i\import * as model from '../model/model.js';" $@
+	sed -i "1 i\import {traverseTree, findVertex, TreeVertex} from '../model/tree.js';" $@
 	sed -i "1 i\import {Shapes} from '../model/shapes.js';" $@
 	sed -i "1 i\import {iterateEdges, outputFormattedText, getAttributeAndFormat, output, getAttribute, setAttr, debug} from '../model/support.js';" $@
 	sed -i "1 i\import {GraphInner} from '../model/graphinner.js';" $@

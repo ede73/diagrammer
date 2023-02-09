@@ -56,7 +56,7 @@ function dendrogram(graphcanvas) {
 	//output(graphcanvas,'{',true);
 	traverseTree(tree, (t, isLeaf, hasSibling) => {
 		if (isLeaf) {
-			comma = '';
+			let comma = '';
 			if (hasSibling)
 				comma = ',';
 			output(graphcanvas, '{"name": "' + t.data.name + '", "size": 1}' + comma);

@@ -86,7 +86,7 @@ function nwdiag(graphcanvas) {
             for (const il in graphcanvas.EDGES) {
                 if (!graphcanvas.EDGES.hasOwnProperty(il)) continue;
                 const edge = graphcanvas.EDGES[il];
-                tmp = getAttributeAndFormat(edge, 'label', '[address="{0}"]');
+                let tmp = getAttributeAndFormat(edge, 'label', '[address="{0}"]');
                 if (edge.left == obj) {
                     graphcanvas.result("  " + edge.right.getName() + tmp + ";");
                 }

@@ -1,9 +1,12 @@
 // @ts-check
+import {GraphObject} from '../model/graphobject.js';
+import {GraphVertex} from '../model/graphvertex.js';
+import {setAttr, getAttribute, debug} from '../model/support.js';
 
 /**
  * Represents a container
  */
-class GraphGroup extends GraphObject {
+export class GraphGroup extends GraphObject {
     /** @param {string} name */
     constructor(name) {
         super(undefined); // TODO:

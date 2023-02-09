@@ -2,7 +2,7 @@
 /**
  * GraphObject: Anything that is represented in a graph (diagram/visualization)
  */
-class GraphObject {
+export class GraphObject {
     /** @param {string} label */
     constructor(label) {
         /** @type {string} */

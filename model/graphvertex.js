@@ -1,4 +1,6 @@
 //@ts-check
+import {GraphObject} from '../model/graphobject.js';
+
 /**
  * Represents a Vertex in a visualization
  *
@@ -6,7 +8,7 @@
  * @param [shape] Optional shape for the vertex, if not give, will default to what ever default is being used at the moment
  * @constructor
  */
-class GraphVertex extends GraphObject {
+export class GraphVertex extends GraphObject {
     constructor(name, shape) {
         super(undefined); // TODO:
         /** @type {string} */

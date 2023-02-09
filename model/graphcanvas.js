@@ -1,4 +1,8 @@
 // @ts-check 
+import {GraphObject} from '../model/graphobject.js';
+import {GraphEdge} from '../model/graphedge.js';
+import {setAttr, getAttribute, debug} from '../model/support.js';
+
 /**
  * Represents the graph canvas. 
  * 
@@ -14,7 +18,7 @@
  * the graph will only EVER have one GraphCanvas
  * 
  */
-class GraphCanvas extends GraphObject {
+export class GraphCanvas extends GraphObject {
     /**
      * @type {function(string,string):void}
      */

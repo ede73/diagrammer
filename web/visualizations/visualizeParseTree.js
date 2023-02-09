@@ -1,14 +1,17 @@
+// @ts-check
+import { getHTMLElement } from "../uiComponentAccess.js";
+
 // use ../manual_test_diagrams/parsetree.d
-function visualizeParseTree(jsonData) {
+export function visualizeParseTree(jsonData) {
     const $ = go.GraphObject.make;  // for conciseness in defining templates
 
-    const element = document.getElementById("D3JSIMAGES");
+    const element = getHTMLElement("D3JSIMAGES");
     removeAllChildNodes(element);
     const newDiv = document.createElement("div");
     newDiv.setAttribute("id", "PARSETREENODE");
     element.appendChild(newDiv);
 
-    myDiagram =
+    const myDiagram =
         $(go.Diagram, "PARSETREENODE",
             {
                 allowCopy: false,
@@ -52,9 +55,9 @@ function visualizeParseTree(jsonData) {
         $(go.TreeModel,
             { nodeDataArray: nodeDataArray });
     const x = 0; const y = 0; const printSize = 300;
-    svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
+    const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
 
-    const svgimg = document.getElementById('D3JSIMAGES');
+    const svgimg = getHTMLElement('D3JSIMAGES');
     removeAllChildNodes(svgimg);
     svgimg.appendChild(svg);
     console.log("Done visualizing ParseTree");

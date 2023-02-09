@@ -1,13 +1,7 @@
-{
-    "name": "a",
-    "children": [
-        {
-            "name": "b",
-            "children": [
-                {"name": "c", "size": 1},
-                {"name": "d", "size": 1}
-            ]
-        },
-        {"name": "e", "size": 1}
-    ]
-}
+[
+    ["autovero","budjetti",10]
+    ,["tupakkavero","budjetti",8]
+    ,["kakkavero","budjetti",3]
+    ,["budjetti","sotaan",18]
+    ,["budjetti","sossuun",1]
+]

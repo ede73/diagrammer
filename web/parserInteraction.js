@@ -1,5 +1,12 @@
 // ignore for now ts-check
 import { diagrammer_parser } from '../build/diagrammer_parser.js';
+import { getHTMLElement, getInputElement, setError, updateImage } from './uiComponentAccess.js';
+import { visualizeCirclePacked } from './visualizations/visualizeCirclePacked.js';
+import { visualizeLayerBands } from './visualizations/visualizeLayerBands.js';
+import { visualizeParseTree } from './visualizations/visualizeParseTree.js';
+import { visualizeRadialDendrogram } from './visualizations/visualizeRadialDendrogram.js';
+import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilford.js';
+import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
 
 /**
  * @type {boolean}
@@ -9,16 +16,7 @@ var parsingStarted;
 /**
  * @type {HTMLInputElement}
  */
-var result = getResultElement();
-
-/**
- * 
- * @returns {HTMLInputElement}
- */
-function getResultElement() {
-    // @ts-ignore
-    return document.getElementById("result");
-}
+var result = getInputElement("result");
 
 function ParseResult(err) {
     alert(err);
@@ -33,7 +31,7 @@ function ParseResult(err) {
 diagrammer_parser.yy.parseError = function (str, hash) {
     const pe = "Parsing error:\n" + str + "\n" + hash;
     console.log("pe");
-    document.getElementById("error").innerText = pe;
+    setError(pe);
     //cancelVTimer();
     throw new Error(str);
 };
@@ -66,18 +64,15 @@ diagrammer_parser.trace = function (x) {
  * @param {string} generator this generator
  * @param {string} visualizer and possibly this visualizer
  */
-export function parse(data, generator, visualizer, reloadImg) {
+export function parse(data, generator, visualizer) {
     if (!generator) {
         throw new Error("Generator not defined");
     }
     if (!visualizer) {
         throw new Error("Visualizer not defined");
     }
-    if (!reloadImg) {
-        throw new Error("Image reloader not defined");
-    }
     console.log("parse generator=" + generator + ", visualizer=" + visualizer);
-    document.getElementById("error").innerText = "";
+    setError("");
     parsingStarted = true;
     delete (diagrammer_parser.yy.GRAPHVANVAS);
     delete (diagrammer_parser.yy.EDGES);
@@ -96,12 +91,12 @@ export function parse(data, generator, visualizer, reloadImg) {
     const vtimer = window.setTimeout(function () {
         //vtimer = null;
         console.log("Visualize now using " + diagrammer_parser.yy.USE_VISUALIZER);
-        visualize(diagrammer_parser.yy.USE_VISUALIZER, reloadImg);
+        visualize(diagrammer_parser.yy.USE_VISUALIZER);
     }, vdelay);
 }
 
-export function visualize(visualizer, reloadImg) {
-    const statelang = getResultElement().value;
+export function visualize(visualizer) {
+    const statelang = result.value;
     if (!visualizer) {
         throw new Error("Visualizer not defined");
     }
@@ -119,8 +114,7 @@ export function visualize(visualizer, reloadImg) {
         success: function (msg) {
             // UseReturnedData(msg.d);
             // alert(msg);
-            document.getElementById("image").setAttribute("src", msg);
-            reloadImg('image');
+            updateImage(msg);
         },
         error: function (err) {
             alert("ERROR: " + JSON.stringify(err));
@@ -133,7 +127,7 @@ export function visualize(visualizer, reloadImg) {
     });
     if (visualizer == "dot") {
         try {
-            document.getElementById('svg').innerHTML = Viz(statelang, 'svg');
+            getHTMLElement('svg').innerHTML = Viz(statelang, 'svg');
         } catch (err) {
             console.log(err);
         }
@@ -164,6 +158,6 @@ export function visualize(visualizer, reloadImg) {
         visualizeUmlClass(JSON.parse(result.value));
     } else {
         console.log("Unkknown WEB UI visualizer " + visualizer);
-        document.getElementById('svg').innerHTML = "only for dotty";
+        getHTMLElement('svg').innerHTML = "only for dotty";
     }
 }

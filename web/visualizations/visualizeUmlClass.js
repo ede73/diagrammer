@@ -1,14 +1,17 @@
+// @ts-check
+import { getHTMLElement } from "../uiComponentAccess.js";
+
 // use ../manual_test_diagrams/uml.d
-function visualizeUmlClass(jsonData) {
+export function visualizeUmlClass(jsonData) {
     var $ = go.GraphObject.make;
 
-    const element = document.getElementById("D3JSIMAGES");
+    const element = getHTMLElement("D3JSIMAGES");
     removeAllChildNodes(element);
     const newDiv = document.createElement("div");
     newDiv.setAttribute("id", "UMLCLASS");
     element.appendChild(newDiv);
 
-    myDiagram =
+    const myDiagram =
         $(go.Diagram, "UMLCLASS",
             {
                 "undoManager.isEnabled": true,
@@ -184,9 +187,9 @@ function visualizeUmlClass(jsonData) {
             linkDataArray: linkdata
         });
     const x = 0; const y = 0; const printSize = 300;
-    svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
+    const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
 
-    const svgimg = document.getElementById('D3JSIMAGES');
+    const svgimg = getHTMLElement('D3JSIMAGES');
     removeAllChildNodes(svgimg);
     svgimg.appendChild(svg);
     console.log("Done visualizing UmlClass");

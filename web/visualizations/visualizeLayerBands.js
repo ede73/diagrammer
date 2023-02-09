@@ -1,5 +1,8 @@
+// @ts-check
+import { getHTMLElement } from "../uiComponentAccess.js";
+
 // use ../manual_test_diagrams/layerbands.d
-function visualizeLayerBands(jsonData) {
+export function visualizeLayerBands(jsonData) {
     const HORIZONTAL = true;
     // Perform a TreeLayout where commitLayers is overridden to modify the background Part whose key is "_BANDS".
     function BandedTreeLayout() {
@@ -36,13 +39,13 @@ function visualizeLayerBands(jsonData) {
     function init() {
         var $ = go.GraphObject.make;
 
-        const element = document.getElementById("D3JSIMAGES");
+        const element = getHTMLElement("D3JSIMAGES");
         removeAllChildNodes(element);
         const newDiv = document.createElement("div");
         newDiv.setAttribute("id", "LAYEREDBANDNODE");
         element.appendChild(newDiv);
 
-        myDiagram = $(go.Diagram, "LAYEREDBANDNODE",
+        const myDiagram = $(go.Diagram, "LAYEREDBANDNODE",
             {
                 layout: $(BandedTreeLayout,  // custom layout is defined above
                     {
@@ -132,10 +135,10 @@ function visualizeLayerBands(jsonData) {
 
         myDiagram.model = new go.TreeModel(nodearray);
 
-        x = 0; y = 0; printSize = 300;
-        svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
+        const x = 0; const y = 0; const printSize = 300;
+        const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
 
-        const svgimg = document.getElementById('D3JSIMAGES');
+        const svgimg = getHTMLElement('D3JSIMAGES');
         removeAllChildNodes(svgimg);
         svgimg.appendChild(svg);
     }

@@ -1,5 +1,6 @@
 *.png
 *.out
+node_modules
 web/post.txt
 web/result.txt
 web/result.png

@@ -5,14 +5,15 @@
 <script type="module" src="build/diagrammer_parser.js"></script>
 <script src="https://unpkg.com/gojs/release/go-debug.js"></script>
 <script type="module" src="web/index.js"></script>
-<script type="text/javascript" src="web/visualizations/visualizeCirclePacked.js"></script>
-<script type="text/javascript" src="web/visualizations/visualizeReingoldTilford.js"></script>
-<script type="text/javascript" src="web/visualizations/visualizeRadialDendrogram.js"></script>
-<script type="text/javascript" src="web/visualizations/visualizeUmlClass.js"></script>
-<script type="text/javascript" src="web/visualizations/visualizeLayerBands.js"></script>
-<script type="text/javascript" src="web/visualizations/visualizeParseTree.js"></script>
+<script type="module" src="web/visualizations/visualizeCirclePacked.js"></script>
+<script type="module" src="web/visualizations/visualizeReingoldTilford.js"></script>
+<script type="module" src="web/visualizations/visualizeRadialDendrogram.js"></script>
+<script type="module" src="web/visualizations/visualizeUmlClass.js"></script>
+<script type="module" src="web/visualizations/visualizeLayerBands.js"></script>
+<script type="module" src="web/visualizations/visualizeParseTree.js"></script>
 <script type="text/javascript" src="web/d3support.js"></script>
 <!--<script type="text/javascript" src="web/parserInteraction.js"></script>-->
+<script type="module" src="web/uiComponentAccess.js"></script>
 <script type="module" src="web/backendInteraction.js"></script>
 <script type="module" src="web/localStorage.js"></script>
 <!--<script type="text/javascript" src="js/mscgen.js"></script>-->
@@ -48,10 +49,10 @@
 			<option value="seqdiag">Sequence diagram(cli)</option>
 			<option value="mscgen">MSCGEN(cli)</option>
 			<option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
-			<option value="sankey">Sankey(TBD)</option>
+			<option value="sankey">Sankey</option>
 			<option value="dendrogram:radialdendrogram">Radial Dendrogram</option>
-			<option value="dendrogram:circlepacked">Circle packed(TBD)</option>
 			<option value="dendrogram:reingoldtilford">Reingold-Tilford</option>
+			<option value="dendrogram:circlepacked">Circle packed(TBD)</option>
 			<option value="ast">AST</option>
 			<!-- https://gojs.net/latest/samples/parseTree.html -->
 			<option value="parsetree">ParseTree(GoJS)</option>
@@ -78,6 +79,7 @@
 			<option value="test_inputs/dendrogram.txt">dendrogram.txt</option>
 			<option value="test_inputs/dendrogram_spec.txt">dendrogram_spec.txt</option>
 			<option value="test_inputs/parsetree.txt">parsetree.txt</option>
+			<option value="test_inputs/sankey.txt">sankey.txt</option>
 			<option value="test_inputs/umlclass.txt">umlclass.txt</option>
 			<option value="test_inputs/url.txt">url.txt</option>
 			<option value="test_inputs/compass.txt">compass.txt</option>
@@ -117,8 +119,8 @@
 		</select>
 		<label for="filename">Filename</label>
 		<input type="text" id="filename" name="filename" value="output" />
-		<button onclick="saveCurrentGraph(document.getElementById('filename').value,getGraphText());return false;">Save</button>
-		<button onclick="setGraphText(loadGraph(document.getElementById('filename').value));return false;">Load</button>
+		<button onclick="saveCurrentGraph(getCurrentFilename(), getGraphText());return false;">Save</button>
+		<button onclick="setGraphText(loadGraph(getCurrentFilename()));return false;">Load</button>
 		<button onclick="importGraphs();return false;">Import</button>
 		<button onclick="exportGraphs();return false;">Export</button>
 		<!-- saved combobox and handlers -->
@@ -376,15 +378,20 @@
 	//editor.setTheme("ace/theme/kr");
 	editor.getSession().setMode("ace/mode/state");
 
-	import { addLine, generatorChanged, exampleChanged, savedChanged, getVisualizer, reloadImg, getGraphText, setGraphText } from "./web/editorInteractions.js";
+	import { addLine, generatorChanged, exampleChanged, savedChanged, getVisualizer, getGraphText, setGraphText } from "./web/editorInteractions.js";
 	window.exampleChanged = exampleChanged;
 	window.generatorChanged = generatorChanged;
 	window.addLine = addLine;
 	window.savedChanged = savedChanged;
 	window.getVisualizer = getVisualizer;
-	window.reloadImg = reloadImg;
 	window.getGraphText = getGraphText;
 	window.setGraphText = setGraphText;
+
+	import { getCurrentFilename, openImage, openPicWindow, reloadImg } from './web/uiComponentAccess.js';
+	window.getCurrentFilename = getCurrentFilename;
+	window.openImage = openImage;
+	window.reloadImg = reloadImg;
+	window.openPicWindow = openPicWindow;
 
 	import { saveCurrentGraph, loadGraph } from "./web/localStorage.js";
 	window.saveCurrentGraph = saveCurrentGraph;

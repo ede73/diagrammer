@@ -1,7 +1,8 @@
 //@ts-check
 import { visualize, parse } from './parserInteraction.js';
-import { getSavedFiles, getSavedGraph } from './localStorage.js';
+import { getSavedFilesAsOptionList, getSavedGraph } from './localStorage.js';
 //import { Editor } from '../ace/src-noconflict/ace.js';
+import { getInputElement, getSelectElement } from './uiComponentAccess.js';
 
 /**
  * @type {HTMLElement}
@@ -9,30 +10,30 @@ import { getSavedFiles, getSavedGraph } from './localStorage.js';
 var result;
 
 /**
- * @type {Editor}
+ * type {Editor}
  */
 //var editor;
+//@ts-ignore
 const editor = ace.edit("editable");
 
 //afterbody
-getSavedFiles();
-result = document.getElementById("result");
+
+const e = getInputElement("saved"); // TODO: move up
+e.innerHTML = getSavedFilesAsOptionList();
+
+result = getInputElement("result");
 var vtimer = null;
 const vdelay = 1000;
 
 //Set to 0 to fall back to textarea(enable textarea in index.html)
 const acemode = 1;
 
-function openImage(imageUrl) {
-    window.open(imageUrl + '?x=' + new Date().getTime());
-}
-
 //get all
 export function getGraphText() {
     if (acemode) {
         return editor.getSession().getValue();
     } else {
-        return document.getElementById("editable").value;
+        return getInputElement('editable').value;
     }
 }
 
@@ -44,13 +45,13 @@ export function setGraphText(data) {
         editor.selectAll();
         editor.insert(data);
     } else {
-        document.getElementById("editable").value = data;
+        getInputElement('editable').value = data;
     }
 }
 
 //Add text to top of document
 //try to maintain cursor position(TODO:fucked up)
-function addTop(data) {
+function prependLine(data) {
     if (acemode) {
         //using ace
         const cursor = editor.getCursorPosition();
@@ -59,8 +60,8 @@ function addTop(data) {
         //should roughly
         editor.getSession().getSelection().selectionLead.setPosition(cursor.column, cursor.row - data.split("\n").length + 1);
     } else {
-        const comp = document.getElementById("editable");
         //using textarea
+        const comp = getInputElement('editable');
         comp.value = data + comp.value;
     }
 }
@@ -77,6 +78,7 @@ function appendLine(data, comp) {
         editor.insert(data.trim());
     } else {
         //using textarea
+        const comp = getInputElement('editable');
         comp.value = comp.value + data;
     }
 }
@@ -104,16 +106,16 @@ export function addLine(i) {
                 appendLine("a/barcode.png,b/basestation.png,c/battery.png>d/camera.png,e/cpu.png,f/documents.png\n" + "a1/harddisk.png,b1/keyboard.png,c1/laptop.png>d1/laser.png,e1/monitor.png,f1/mouse.png\n" + "a2/phone.png,b2/printer.png,c2/ram.png>d2/satellite.png,e2/scanner.png,f2/sim.png\n" + "u/usbmemory.png>w/wifi.png\n" + "a1/actor1.png>a2/actor2.png>a3/actor3.png");
                 break;
             case 5:
-                addTop("start NODENAME\n");
+                prependLine("start NODENAME\n");
                 break;
             case 6:
                 appendLine("//shapes: default, invis, record, dots, actor, cloud\n" + "//beginpoint,endpoint,condition,database,terminator,input,loopin,loopout\n" + "//square,ellipse,diamond,minidiamond,note,mail\n" + "shape box\n");
                 break;
             case 7:
-                addTop("equal node1,node2\n");
+                prependLine("equal node1,node2\n");
                 break;
             case 8:
-                addTop("$(color1:#12ede0)\nclr$(color1)\nclr2$(color1)\n");
+                prependLine("$(color1:#12ede0)\nclr$(color1)\nclr2$(color1)\n");
                 break;
             case 9:
                 appendLine("if something would happend then\n" + "  a1>b1\n" + "elseif something probably would not happen then\n" + " a2>b2\n" + "elseif or if i see a flying bird then\n" + " a3>b3\n" + "else\n" + "  a4>b4\n" + "endif\n");
@@ -124,28 +126,9 @@ export function addLine(i) {
     return false;
 }
 
-let win;
-function openPicWindow() {
-    win = window.open('web/result.png', 'extpic');
-}
-
-export function reloadImg(id) {
-    const obj = document.getElementById(id);
-    let src = obj.src;
-    const pos = src.indexOf('?');
-    if (pos >= 0) {
-        src = src.substr(0, pos);
-    }
-    const date = new Date();
-    obj.src = src + '?v=' + date.getTime();
-    if (win)
-        win.location.reload();
-    return false;
-}
-
 // Get currently selected generator
 function getGenerator() {
-    const e = document.getElementById("generator");
+    const e = getSelectElement("generator");
     const gen = e.options[e.selectedIndex].value;
     if (gen.indexOf(":") > -1) {
         return gen.split(":")[0];
@@ -154,7 +137,7 @@ function getGenerator() {
 }
 
 export function getVisualizer() {
-    const e = document.getElementById("generator");
+    const e = getSelectElement("generator");
     const gen = e.options[e.selectedIndex].value;
     if (gen.indexOf(":") > -1) {
         console.log("Return visualizer " + gen.split(":")[1]);
@@ -170,20 +153,6 @@ function cancelVTimer() {
     }
 }
 
-/*
- function highlight(tc) {
- const s = document.getElementById("editable");
- s.innerHTML = tc.replace("->", "->>").replace(".>", ".>>").replace("<-",
- "<<-").replace("<.", "<<.").replace("<", "<<").replace(">", ">>")
- .replace("->>", '<text id="event">-&gt;</text>').replace(".>>",
- '<text id="event">.&gt;</text>').replace("<<-",
- '<text id="event">&lt;-</text>').replace("<<.",
- '<text id="event">&lt;.</text>').replace(">>",
- '<text id="event">&gt;</text>').replace("<<",
- '<text id="event">&lt;</text>');
- }
- */
-
 export function generatorChanged() {
     console.log("generatorChanged..parse");
     parseAndRegenerate();
@@ -191,14 +160,14 @@ export function generatorChanged() {
 
 function parseAndRegenerate() {
     const data = getGraphText() + "\n";
-    parse(data, getGenerator(), getVisualizer(), reloadImg);
+    parse(data, getGenerator(), getVisualizer());
 }
 
 export function savedChanged() {
     // read the example...place to textArea(overwrite)
-    const e = document.getElementById("saved");
+    const e = getSelectElement("saved");
     const doc = e.options[e.selectedIndex].value;
-    const filename = document.getElementById("filename");
+    const filename = getInputElement("filename");
     const data = getSavedGraph();
     if (data[doc]) {
         setGraphText(data[doc]);
@@ -210,8 +179,9 @@ export function savedChanged() {
 
 export function exampleChanged() {
     // read the example...place to textArea(overwrite)
-    const e = document.getElementById("example");
+    const e = getSelectElement("example");
     const doc = e.options[e.selectedIndex].value;
+    // @ts-ignore
     $.ajax({
         url: "tests/" + doc,
         cache: false
@@ -222,9 +192,13 @@ export function exampleChanged() {
     });
 }
 
+/**
+ * 
+ * @param {number} delay 
+ */
 function textAreaOnChange(delay) {
     let timer = null;
-    document.getElementById("editable").onkeyup = function () { // onchange does not work on
+    getInputElement("editable").onkeyup = function () { // onchange does not work on
         // chrome/mac(elsewhere?)
         if (timer) {
             window.clearTimeout(timer);
@@ -239,7 +213,7 @@ function textAreaOnChange(delay) {
 
 function visualizeOnNewParseResults(visualizeCallback, delay) {
     let timer = null;
-    const tt = document.getElementById("result");
+    const tt = getInputElement("result");
     tt.onkeyup = function () { // onchange does not work on
         // chrome/mac(elsewhere?)
         if (timer) {
@@ -247,13 +221,13 @@ function visualizeOnNewParseResults(visualizeCallback, delay) {
         }
         timer = window.setTimeout(function () {
             timer = null;
-            visualizeCallback(getVisualizer(), reloadImg);
+            visualizeCallback(getVisualizer());
         }, delay);
     };
     //obj = null;
 }
 
-textAreaOnChange(parse, 150);
+textAreaOnChange(150);
 visualizeOnNewParseResults(visualize, 550);
 
 if (acemode) {

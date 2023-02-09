@@ -1,3 +1,4 @@
+//@ts-check
 import { getSavedGraph } from './localStorage.js';
 
 function ParseResult(err) {
@@ -5,6 +6,7 @@ function ParseResult(err) {
 }
 
 export function exportGraphs() {
+    //@ts-ignore JQuery
     $.ajax({
         type: "POST",
         async: true,
@@ -28,6 +30,7 @@ export function exportGraphs() {
 }
 
 export function importGraphs() {
+    //@ts-ignore JQuery
     $.ajax({
         type: "GET",
         async: true,

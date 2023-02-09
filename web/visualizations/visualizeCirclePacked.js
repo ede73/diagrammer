@@ -1,5 +1,6 @@
+// @ts-check
 // https://observablehq.com/@d3/circle-packing
-function visualizeCirclePacked(jsonData) {
+export function visualizeCirclePacked(jsonData) {
     const width = 400, height = 400;
     //pack = data => d3.pack()
     //    .size([width, height])

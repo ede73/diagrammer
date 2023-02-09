@@ -12,14 +12,13 @@ export function getSavedGraph() {
     return data;
 }
 
-export function getSavedFiles() {
+export function getSavedFilesAsOptionList() {
     let t = "";
     for (const k in getSavedGraph()) {
         console.log("Stored file:" + k);
         t += '<option value="' + k + '">' + k + '</option>';
     }
-    const e = document.getElementById("saved"); // TODO: move up
-    e.innerHTML = t;
+    return t;
 }
 
 export function saveCurrentGraph(filename, editable) {

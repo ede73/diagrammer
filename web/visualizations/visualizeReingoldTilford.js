@@ -1,5 +1,8 @@
-function visualizeReingoldTilford(jsonData) {
+// @ts-check
+///import * as d3 from "https://cdn.skypack.dev/d3@7.8.2";
+//import * as d3 from 'd3';
 
+export function visualizeReingoldTilford(jsonData) {
     const width = 400,
         height = 400;
 

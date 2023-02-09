@@ -119,7 +119,7 @@ export function blockdiag(graphcanvas) {
             if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
                 throw new Error("Missing shape mapping");
             }
-            const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
+            const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : BlockDiagShapeMap['default'];
 
             let colorIconShapeLabel = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
                 getAttributeAndFormat(obj, 'image', ',background="icons{0}"') +

@@ -1,4 +1,10 @@
 import { generators } from '../model/graphcanvas.js';
+import { debug, output } from '../model/support.js';
+import { traverseVertices, traverseEdges } from '../model/model.js';
+import { GraphGroup } from '../model/graphgroup.js';
+import { GraphInner } from '../model/graphinner.js';
+import { GraphVertex } from '../model/graphvertex.js';
+
 /**
 a>b>c,d
 a>e;link text

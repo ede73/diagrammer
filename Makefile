@@ -26,9 +26,9 @@ build/diagrammer_parser.js: build/diagrammer.all
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
 .PHONY: export
-export: build/lexer.js js/parse.js build/diagrammer_parser.js
+export: build/lexer.js build/diagrammer_parser.js js/diagrammer.js
 	@./scripts/export.sh
-	@echo 'Add alias depict="~/state/t.sh silent " to your profile/bashrc etc.\nYou need (depending) visualizers graphviz,mscgen,plantuml.jar,nwdiag,blockdiag,actdiag.\nplantuml requires java\nblockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html\nPlantuml from http://plantuml.sourceforge.net/\n' >export/README.txt
+	@echo 'Add alias depict="~/{EXPORT_DIR_HERE}/t.sh silent " to your profile/bashrc etc.\nYou need (depending) visualizers graphviz,mscgen,plantuml.jar,nwdiag,blockdiag,actdiag.\nplantuml requires java\nblockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html\nPlantuml from http://plantuml.sourceforge.net/\n' >export/README.txt
 
 .PHONY: test
 test: all

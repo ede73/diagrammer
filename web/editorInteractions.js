@@ -22,7 +22,7 @@ function openImage(imageUrl) {
 }
 
 //get all
-function getText() {
+function getGraphText() {
     if (acemode) {
         return editor.getSession().getValue();
     } else {
@@ -31,7 +31,7 @@ function getText() {
 }
 
 //replace all
-function setText(data) {
+function setGraphText(data) {
     if (acemode) {
         //EDE:editor.destroy does not work reliably
         //editor.destroy();
@@ -114,7 +114,7 @@ function addLine(i) {
                 break;
         }
     console.log("getSavedFilesChanged..parse");
-    parse(getText() + "\n", getGenerator());
+    parseAndRegenerate();
     return false;
 }
 
@@ -180,7 +180,12 @@ function cancelVTimer() {
 
 function generatorChanged() {
     console.log("generatorChanged..parse");
-    parse(getGenerator(), getVisualizer());
+    parseAndRegenerate();
+}
+
+function parseAndRegenerate() {
+    const data = getGraphText() + "\n";
+    parse(data, getGenerator(), getVisualizer(), reloadImg);
 }
 
 function savedChanged() {
@@ -190,10 +195,10 @@ function savedChanged() {
     const filename = document.getElementById("filename");
     const data = getSavedGraph();
     if (data[doc]) {
-        setText(data[doc]);
+        setGraphText(data[doc]);
         filename.value = doc;
         console.log("savedChanged..parse");
-        parse(getGenerator(), getVisualizer());
+        parseAndRegenerate();
     }
 }
 
@@ -205,13 +210,13 @@ function exampleChanged() {
         url: "tests/" + doc,
         cache: false
     }).done(function (data) {
-        setText(data);
+        setGraphText(data);
         console.log("exampleChanged..parse");
-        parse(getGenerator(), getVisualizer());
+        parseAndRegenerate();
     });
 }
 
-function textAreaOnChange(callback, delay) {
+function textAreaOnChange(delay) {
     let timer = null;
     document.getElementById("editable").onkeyup = function () { // onchange does not work on
         // chrome/mac(elsewhere?)
@@ -220,13 +225,13 @@ function textAreaOnChange(callback, delay) {
         }
         timer = window.setTimeout(function () {
             timer = null;
-            callback(getGenerator(), getVisualizer());
+            parseAndRegenerate();
         }, delay);
     };
-    obj = null;
+    //obj = null;
 }
 
-function visualizeOnChange(callback, delay) {
+function visualizeOnNewParseResults(visualizeCallback, delay) {
     let timer = null;
     const tt = document.getElementById("result");
     tt.onkeyup = function () { // onchange does not work on
@@ -236,14 +241,14 @@ function visualizeOnChange(callback, delay) {
         }
         timer = window.setTimeout(function () {
             timer = null;
-            callback(tt, getGenerator(), getVisualizer());
+            visualizeCallback(getVisualizer(), reloadImg);
         }, delay);
     };
-    obj = null;
+    //obj = null;
 }
 
-textAreaOnChange(parse, 150);
-visualizeOnChange(visualize, 250);
+textAreaOnChange(150);
+visualizeOnNewParseResults(visualize, 550);
 
 if (acemode) {
     let timer2 = null;
@@ -254,9 +259,10 @@ if (acemode) {
             if (timer2) {
                 window.clearTimeout(timer2);
             }
-            timer = window.setTimeout(function () {
+            const delay = 5000;
+            const timer = window.setTimeout(function () {
                 timer2 = null;
-                parse(getGenerator(), getVisualizer());
+                parseAndRegenerate();
             }, delay);
         });
     }

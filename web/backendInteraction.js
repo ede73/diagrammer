@@ -35,8 +35,8 @@ function importGraphs() {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (msg) {
-            // alert(JSON.stringify(msg));
             localStorage.setItem("graphs", JSON.stringify(msg));
+            alert("Imported, reload the page!");
         },
         error: function (err) {
             alert("ERROR: " + JSON.stringify(err));

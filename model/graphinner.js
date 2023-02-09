@@ -4,6 +4,7 @@ import { GraphGroup } from '../model/graphgroup.js';
 import { GraphVertex } from '../model/graphvertex.js';
 import { GraphContainer } from '../model/graphcontainer.js';
 import { debug } from '../model/support.js';
+import { GraphConnectable } from './graphconnectable.js';
 
 /**
  * An inner graph, where outside is linked to all the Vertices in side, like
@@ -19,14 +20,14 @@ export class GraphInner extends GraphGroup {
         this.name = name;
         /** @type {boolean} */
         this.isInnerGraph = true;
-        /** @type {(GraphVertex|GraphContainer|(GraphContainer|GraphVertex)[])} */ // TODO: Definitely not a string
+        /** @type {(GraphConnectable|GraphConnectable[])} */ // TODO: Point of GraphConnectable[]
         this.entrance = undefined;
-        /** @type {GraphObject} */
+        /** @type {GraphConnectable} */
         this.exit = undefined;
     }
 
     /**
-     * @param {(GraphVertex|GraphContainer|(GraphContainer|GraphVertex)[])} entrance
+     * @param {(GraphConnectable|GraphConnectable[])} entrance
      * @return {*}
      */
     setEntrance(entrance) {
@@ -35,15 +36,12 @@ export class GraphInner extends GraphGroup {
         return this;
     }
 
-    /**
-     * @return {*}
-     */
     getEntrance() {
         return this.entrance;
     }
 
     /**
-     * @param {GraphObject} exit Exit vertex name
+     * @param {GraphConnectable} exit
      * @return {GraphInner}
      */
     setExit(exit) {
@@ -57,6 +55,36 @@ export class GraphInner extends GraphGroup {
      */
     getExit() {
         return this.exit;
+    }
+
+    /**
+     * Edge labels only on Group and Vertex
+     */
+    // @ts-ignore
+    setEdgeLabel(value) {
+        throw new Error("EdgeLabel N/A");
+        return this;
+    }
+
+    // @ts-ignore
+    getEdgeLabel() {
+        throw new Error("EdgeLabel N/A");
+        return "";
+    }
+
+    /**
+     * Equals only on Group and Vertex
+     */
+    // @ts-ignore
+    setEqual(value) {
+        throw new Error("Equals N/A");
+        return this;
+    }
+
+    // @ts-ignore
+    getEqual() {
+        throw new Error("Equals N/A");
+        return [];
     }
 
     toString() {

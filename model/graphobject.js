@@ -15,18 +15,11 @@ export class GraphObject {
         this.textcolor = undefined;
         /** @type {string} */
         this.url = undefined;
-        /**
-         * Internal flag for no edge objects. Applies to all but Edges
-         * (We'd need another abstraction between GraphObject and Inner/Vertex/Group (and Edges))
-         * @type {boolean}
-         */
-        this.noedges = undefined;
     }
 
     /**
      * Set name
      * @param {string} value 
-     * @returns {GraphObject}
      */
     setName(value) {
         // TODO: Something odd in the parser
@@ -43,7 +36,6 @@ export class GraphObject {
     /**
      * Set color
      * @param {string} value 
-     * @returns {GraphObject}
      */
     setColor(value) {
         // TODO: Something odd in the parser
@@ -60,7 +52,6 @@ export class GraphObject {
     /**
      * Set text color
      * @param {string} value 
-     * @returns {GraphObject}
      */
     setTextColor(value) {
         this.textcolor = value;
@@ -74,7 +65,6 @@ export class GraphObject {
     /**
      * Set URL
      * @param {string} value 
-     * @returns {GraphObject}
      */
     setUrl(value) {
         this.url = value;
@@ -88,7 +78,6 @@ export class GraphObject {
     /**
      * Set label
      * @param {string} value 
-     * @returns {GraphObject}
      */
     setLabel(value) {
         if (value) {

@@ -80,7 +80,7 @@ export function digraph(graphcanvas) {
     };
 
     /**
-     * @param {GraphObject} obj 
+     * @param {GraphConnectable} obj 
      */
     const processAVertex = obj => {
         const nattrs = [];

@@ -1,5 +1,5 @@
 //@ts-check
-import { GraphObject } from '../model/graphobject.js';
+import { GraphConnectable } from './graphconnectable.js';
 
 /**
  * Represents a Vertex in a visualization
@@ -8,7 +8,7 @@ import { GraphObject } from '../model/graphobject.js';
  * @param [shape] Optional shape for the vertex, if not give, will default to what ever default is being used at the moment
  * @constructor
  */
-export class GraphVertex extends GraphObject {
+export class GraphVertex extends GraphConnectable {
     constructor(name, shape) {
         super(undefined); // TODO:
         /** @type {string} */
@@ -19,11 +19,6 @@ export class GraphVertex extends GraphObject {
         this.image = undefined;
         /** @type {string} */
         this.style = undefined;
-        // UH... this is used in grammar parser to TEMPORARILY store edge object
-        /** @type {string} */
-        this.edgelabel = undefined;
-        /** @type {boolean} */
-        this.noedges = undefined;
     }
 
     /**
@@ -39,31 +34,6 @@ export class GraphVertex extends GraphObject {
 
     getShape() {
         return this.shape;
-    }
-
-    /**
-     * Temporary for RHS list array!!
-     * @param {string} value 
-     * @returns {GraphVertex}
-     */
-    setEdgeLabel(value) {
-        this.edgelabel = value;
-        return this;
-    }
-
-    getEdgeLabel() {
-        const tmp = this.edgelabel;
-        // TODO: Uhoh, makes no sense! Move away to generator if needed
-        /*
-        Resetting edge label breaks:
-          a>"A2B"b,"A2C"c
-          r>"R2C"c
-
-          where edge a>b is named A2B, a>c A2c
-          and r>c R2C
-        */
-        this.edgelabel = undefined;
-        return tmp;
     }
 
     /**

@@ -8,7 +8,7 @@
 # @^ first dependency on the list
 
 GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.grammar
-MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js model/graphcontainer.js
+MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js model/graphcontainer.js model/graphconnectable.js
 MODEL_REST = model/shapes.js model/tree.js
 
 all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST)
@@ -50,6 +50,7 @@ build/diagrammer_parser.js: build/diagrammer.all Makefile
 	sed -i "1 i\import {iterateEdges, outputFormattedText, getAttributeAndFormat, output, getAttribute, setAttr, debug} from '../model/support.js';" $@
 	sed -i "1 i\import {GraphInner} from '../model/graphinner.js';" $@
 	sed -i "1 i\import {GraphEdge} from '../model/graphedge.js';" $@
+	sed -i "1 i\import {GraphConnectable} from '../model/graphconnectable.js';" $@
 	sed -i "1 i\import {GraphContainer} from '../model/graphcontainer.js';" $@
 	sed -i "1 i\import {generators, visualizations, GraphCanvas} from '../model/graphcanvas.js';" $@
 	sed -i "1 i\import {GraphGroup} from '../model/graphgroup.js';" $@

@@ -3,6 +3,7 @@ import { GraphObject } from '../model/graphobject.js';
 import { GraphVertex } from '../model/graphvertex.js';
 import { setAttr, getAttribute, debug } from '../model/support.js';
 import { GraphContainer } from '../model/graphcontainer.js';
+import { GraphConnectable } from './graphconnectable.js';
 
 /**
  * Represents a container
@@ -13,47 +14,12 @@ export class GraphGroup extends GraphContainer {
         super(undefined); // TODO:
         /** @type {string} */
         this.name = name;
-        /** @type {GraphVertex[]} */
-        this.equal = undefined;
-        /** @type {string} */
-        this.edgelabel = undefined;
         /** @type {string} */
         this.exitvertex = undefined;
         /** @type {string} */
         this.entryedge = undefined;
-        /** @type {(GraphVertex|GraphContainer|(GraphContainer|GraphVertex)[])} */ // TODO: never used here really
+        /** @type {(GraphConnectable|GraphConnectable[])} */ // TODO: never used here really
         this.entrance = undefined;
-    }
-
-    /**
-     * Save EQUAL vertex ranking
-     * @param {GraphVertex[]} value
-     * @return {GraphGroup}
-     */
-    setEqual(value) {
-        this.equal = value;
-        return this;
-    }
-
-    /**
-     * @return {GraphVertex[]}
-     */
-    getEqual() {
-        return this.equal;
-    }
-
-    /**
-     * Temporary for RHS list array!!
-     * @param {string} value
-     * @return {GraphGroup}
-     */
-    setEdgeLabel(value) {
-        this.edgelabel = value;
-        return this;
-    }
-
-    getEdgeLabel() {
-        return this.edgelabel;
     }
 
     /**
@@ -61,10 +27,11 @@ export class GraphGroup extends GraphContainer {
      * currentContainer first
      * @param {string} key
      * @param {any} value
-     * @return {GraphGroup}
      */
     setDefault(key, value) {
-        debug("group:Set group " + key + " to " + value);
+        if (this.ALLOWED_DEFAULTS.indexOf(key.toLowerCase()) == -1) {
+            throw new Error("Trying to set unknown default " + key);
+        }
         // @ts-ignore
         return setAttr(this, key, value);
     }

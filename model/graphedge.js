@@ -1,24 +1,24 @@
 // @ts-check
 import { GraphObject } from '../model/graphobject.js';
+import { GraphConnectable } from './graphconnectable.js';
 
 /**
  * Represents an edge(link) between objects (vertices,groups,lists)
  */
 export class GraphEdge extends GraphObject {
 	/**
-	 * 
-	   * @param {string} edgeType Type of the edge(grammar!)
-	   * @param {GraphObject} lhs Left hand side of the edge
-	 * @param {GraphObject} rhs Right hand side of the edge
+	 * @param {string} edgeType Type of the edge(grammar!)
+	 * @param {GraphConnectable} lhs Left hand side of the edge
+	 * @param {GraphConnectable} rhs Right hand side of the edge
 	 * @constuctor
 	 */
 	constructor(edgeType, lhs, rhs) {
 		super(undefined); // TODO:
 		/** @type {string} */
 		this.edgeType = edgeType.trim();
-		/** @type {GraphObject} */
+		/** @type {GraphConnectable} */
 		this.left = lhs;
-		/** @type {GraphObject} */
+		/** @type {GraphConnectable} */
 		this.right = rhs;
 		/** @type {string} */
 		this.lcompass = undefined;
@@ -28,7 +28,7 @@ export class GraphEdge extends GraphObject {
 		this.edgetextcolor = undefined;
 		/** @type {string} */
 		this.edgecolor = undefined;
-		/** @type {GraphObject} */
+		/** @type {GraphConnectable} */
 		this.container = undefined;
 	}
 

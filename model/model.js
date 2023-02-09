@@ -7,10 +7,10 @@ import { GraphCanvas } from "../model/graphcanvas.js";
 import { GraphGroup } from "../model/graphgroup.js";
 import { GraphVertex } from "../model/graphvertex.js";
 import { GraphInner } from "../model/graphinner.js";
-import { GraphObject } from "../model/graphobject.js";
 import { GraphEdge } from "../model/graphedge.js";
 import { getAttribute } from "../model/support.js";
 import { GraphContainer } from "../model/graphcontainer.js";
+import { GraphConnectable } from "./graphconnectable.js";
 
 /**
  *
@@ -55,18 +55,24 @@ export function processVariable(yy, variable) {
  * Usage: grammar/diagrammer.grammar
  *
  * @param yy Lexer yy
- * @param {(GraphObject|GraphObject[])} lhs left hand side of the list
- * @param {GraphObject} rhs right hand side of the list
+ * @param {(GraphConnectable|GraphConnectable[])} lhs left hand side of the list
+ * @param {GraphConnectable} rhs right hand side of the list
  * @param {string} rhsEdgeLabel optional RHS label
- * @return {Array}
+ * @return {(GraphConnectable|GraphConnectable[])}
  */
 export function getList(yy, lhs, rhs, rhsEdgeLabel) {
     if (lhs instanceof GraphVertex) {
         debug("getList(vertex:" + lhs + ",rhs:[" + rhs + "])", true);
+        /** @type {(GraphConnectable|GraphConnectable[])} */
         const lst = [];
         lst.push(lhs);
         //TODO assuming RHS is Vertex
-        lst.push(getVertex(yy, rhs).setEdgeLabel(rhsEdgeLabel));
+        const rhsFound = getVertex(yy, rhs);
+        if (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex) {
+            rhsFound.setEdgeLabel(rhsEdgeLabel);
+        }
+        // @ts-ignore
+        lst.push(rhsFound);
         debug("return vertex:" + lst, false);
         return lst;
     } else if (lhs instanceof GraphGroup) {
@@ -83,7 +89,12 @@ export function getList(yy, lhs, rhs, rhsEdgeLabel) {
     }
     debug("getList(lhs:[" + lhs + "],rhs:" + rhs, true);
     // LHS not a vertex..
-    lhs.push(getVertex(yy, rhs).setEdgeLabel(rhsEdgeLabel));
+    const rhsFound = getVertex(yy, rhs);
+    if (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex) {
+        rhsFound.setEdgeLabel(rhsEdgeLabel);
+    }
+    // @ts-ignore
+    lhs.push(rhsFound);
     debug("return [" + lhs + "]", false);
     return lhs;
 }
@@ -103,24 +114,26 @@ export function getList(yy, lhs, rhs, rhsEdgeLabel) {
  * Usage: grammar/diagrammer.grammar
  *
  * @param yy Lexer yy
- * @param {(string|GraphObject|Array)} name Reference, Vertex/Array/Group
+ * @param {(string|GraphConnectable)} objOrName Reference, Vertex/(never observed Array)/Group
  * @param {string} [style] OPTIONAL if style given, update (only if name refers to vertex)
- * @return {(GraphVertex|GraphGroup)} Comment claims to return Array, but quick run didn't reveal Array ever returned..
+ * @return {GraphConnectable} Comment claims to return Array, but quick run didn't reveal Array ever returned..
  */
-export function getVertex(yy, name, style) {
-    debug("getVertex (name:" + name + ",style:" + style + ")", true);
-    function findVertex(yy, name, style) {
-        if (name instanceof GraphVertex) {
-            if (style) name.setStyle(style);
-            return name;
+export function getVertex(yy, objOrName, style) {
+    debug("getVertex (name:" + objOrName + ",style:" + style + ")", true);
+
+    function findVertex(yy, /** @type {(string|GraphConnectable)}*/obj, style) {
+        if (obj instanceof GraphVertex) {
+            if (style) obj.setStyle(style);
+            return obj;
         }
-        if (name instanceof Array) {
+        // TODO: remove
+        if (obj instanceof Array || Array.isArray(obj)) {
             // TODO: Get rid of this block, makes no sense...?? ANymore??
             throw new Error("Should never happen");
-            return name;
+            return obj;
         }
 
-        const search = function s(/** @type {(GraphContainer)} */container, /** @type {string} */ name) {
+        const search = function s(/**@type {GraphContainer} */container, name) {
             if (container.getName() == name) return container;
             for (const i in container.OBJECTS) {
                 if (!container.OBJECTS.hasOwnProperty(i)) continue;
@@ -135,12 +148,12 @@ export function getVertex(yy, name, style) {
                 }
             }
             return undefined;
-        }(getGraphCanvas(yy), name);
+        }(getGraphCanvas(yy), obj);
         if (search) {
             return search;
         }
-        debug("Create new vertex name=" + name, true);
-        const vertex = new GraphVertex(name, getGraphCanvas(yy).getCurrentShape());
+        debug("Create new vertex name=" + obj, true);
+        const vertex = new GraphVertex(obj, getGraphCanvas(yy).getCurrentShape());
         if (style) vertex.setStyle(style);
         vertex.noedges = true;
 
@@ -154,14 +167,14 @@ export function getVertex(yy, name, style) {
         return _pushObject(yy, vertex);
     }
 
-    const vertex = findVertex(yy, name, style);
+    const vertex = findVertex(yy, objOrName, style);
     debug("  in getVertex gotVertex " + vertex);
     // TODO: MOVING TO GraphCanvas
     yy.lastSeenVertex = vertex;
     if (yy.collectNextVertex) {
         debug("Collect next vertex");
         // TODO: MOVING TO GraphCanvas
-        yy.collectNextVertex.exitedge = name;
+        yy.collectNextVertex.exitedge = objOrName;
         // TODO: MOVING TO GraphCanvas
         yy.collectNextVertex = undefined;
     }
@@ -195,11 +208,9 @@ export function getCurrentContainer(yy) {
  */
 export function enterContainer(yy, container) {
     yy.CURRENTCONTAINER.push(container);
-    // yy.GRAPHVANVAS.setCurrentContainer(yy.GRAPHVANVAS);
     return container;
 }
 
-//noinspection JSUnusedGlobalSymbols
 /**
  * Exit the current container
  * Return the previous one
@@ -246,6 +257,7 @@ export function exitSubGraph(yy) {
     const currentSubGraph = currentSubGraph_TypeCheckerFix;
 
     debug('Exit subgraph ' + currentSubGraph);
+    /** @type {GraphEdge} */
     let edge = null;
 
     let edgeIndex = undefined;
@@ -254,7 +266,8 @@ export function exitSubGraph(yy) {
     for (const idx in yy.EDGES) {
         if (!yy.EDGES.hasOwnProperty(idx)) continue;
         edge = yy.EDGES[idx];
-        if (edge.right.name == currentSubGraph.name && edge.left.name == currentSubGraph.entrance.name) {
+        if (edge.right.name == currentSubGraph.name && currentSubGraph.entrance instanceof GraphConnectable &&
+            edge.left.name == currentSubGraph.entrance.name) {
             //remove this edge!
             edgeIndex = Number(idx);
             yy.EDGES.splice(edgeIndex, 1);
@@ -282,7 +295,7 @@ export function exitSubGraph(yy) {
         }
     }
 
-    /** @type {GraphObject} */
+    /** @type {GraphConnectable} */
     let lastVertex;
 
     //fix exits
@@ -304,7 +317,6 @@ export function exitSubGraph(yy) {
     return exitContainer(yy);
 }
 
-//noinspection JSUnusedGlobalSymbols
 /**
  * Create a NEW GROUP if one (ref) does not exist yet getGroup(yy) => create a
  * new anonymous group getGroup(yy,GroupRef) => create a new group if GroupRef
@@ -346,8 +358,8 @@ export function getGroup(yy, ref) {
  *
  * @param yy lexer
  * @param {string} edgeType Type of the edge(grammar)
- * @param {(GraphVertex|GraphContainer|(GraphContainer|GraphVertex)[])} lhs Left hand side (must be Array,Vertex,Group)
- * @param {(GraphVertex|GraphContainer|(GraphContainer|GraphVertex)[])} rhs Right hand side (must be Array,Vertex,Group)
+ * @param {(GraphConnectable|GraphConnectable[])} lhs Left hand side (must be Array,Vertex,Group)
+ * @param {(GraphConnectable|GraphConnectable[])} rhs Right hand side (must be Array,Vertex,Group)
  * @param {string} [inlineEdgeLabel] Optional label for the edge
  * @param {string} [commonEdgeLabel] Optional label for the edge
  * @param {string} [edgeColor] Optional color for the edge
@@ -371,7 +383,7 @@ export function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel
                 current_container.ROOTVERTICES.splice(idx, 1);
             }
         }
-        // TODO: Should noedges be set to GraphObject (except Edge..)
+        // TODO: Should noedges be set to GraphConnectable (except Edge..)
         // TODO: Also if this is an array, this assignment makes no sense
         if (lhs instanceof GraphVertex) {
             lhs.noedges = undefined;
@@ -501,7 +513,7 @@ export function getGraphCanvas(yy) {
 
 /** 
  * Usage: grammar/diagrammer.grammar, generators/digraph.js
- * @param {GraphObject} vertex
+ * @param {GraphConnectable} vertex
  */
 export function hasOutwardEdge(yy, vertex) {
     for (const i in yy.EDGES) {
@@ -516,8 +528,8 @@ export function hasOutwardEdge(yy, vertex) {
 
 /**
  * return true if vertex has inward edge OUTSIDE container it is in
- * @param {GraphObject} vertex
- * @param {GraphObject} verticesContainer (Group?)
+ * @param {GraphConnectable} vertex
+ * @param {GraphContainer} verticesContainer (Group?)
  */
 function hasInwardEdge(yy, vertex, verticesContainer) {
     for (const i in yy.EDGES) {
@@ -537,7 +549,7 @@ function hasInwardEdge(yy, vertex, verticesContainer) {
 /**
  * test if container has the object
  * @param {GraphContainer} container
- * @param {GraphObject} obj
+ * @param {GraphConnectable} obj
  */
 function containsObject(container, obj) {
     for (const i in container.OBJECTS) {

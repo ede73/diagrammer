@@ -4,6 +4,7 @@ import { debug, output } from '../model/support.js';
 import { GraphVertex } from '../model/graphvertex.js';
 import { traverseEdges } from '../model/model.js';
 import { TreeVertex, findVertex, traverseTree } from '../model/tree.js';
+import { GraphConnectable } from '../model/graphconnectable.js';
 /**
 a>b>c,d
 a>e;edge text
@@ -30,8 +31,8 @@ node js/diagrammer.js verbose dendrogram.test dendrogram
 export function dendrogram(graphcanvas) {
 	let tree;
 	/**
-	 * @param {GraphObject} lhs
-	 * @param {GraphObject} rhs
+	 * @param {GraphConnectable} lhs
+	 * @param {GraphConnectable} rhs
 	 */
 	function addVertex(lhs, rhs) {
 		if (!tree) {

@@ -1,7 +1,7 @@
 // @ts-check 
-import { GraphObject } from '../model/graphobject.js';
 import { GraphEdge } from '../model/graphedge.js';
 import { setAttr, getAttribute } from '../model/support.js';
+import { GraphConnectable } from './graphconnectable.js';
 import { GraphContainer } from './graphcontainer.js';
 
 export const generators = new Map();
@@ -21,6 +21,7 @@ export const visualizations = new Map();
  * Even if the TREE has multiple root vertices (or basically multiple trees)
  * the graph will only EVER have one GraphCanvas
  * 
+ * TODO: Shouldn't inherit from GraphConnectable!
  */
 export class GraphCanvas extends GraphContainer {
     /**
@@ -48,8 +49,6 @@ export class GraphCanvas extends GraphContainer {
         this.direction = undefined;
         /** @type {string} */
         this.start = undefined;
-        /** @type {string[]} */
-        this.equal = [];
     }
 
     /**
@@ -96,7 +95,6 @@ export class GraphCanvas extends GraphContainer {
 
     /**
      * @param {string} value
-     * @return {GraphCanvas}
      */
     setDirection(value) {
         this.direction = value;
@@ -109,7 +107,6 @@ export class GraphCanvas extends GraphContainer {
 
     /**
      * @param {string} value
-     * @return {GraphCanvas}
      */
     setStart(value) {
         this.start = value;
@@ -121,30 +118,15 @@ export class GraphCanvas extends GraphContainer {
     }
 
     /**
-     * Save EQUAL vertex ranking
-     * @param {string[]} value
-     * @return {GraphCanvas}
-     */
-    setEqual(value) {
-        this.equal = value;
-        return this;
-    }
-
-    /**
-     * @return {string[]}
-     */
-    getEqual() {
-        return this.equal;
-    }
-
-    /**
      * Set default vertexcolor, groupcolor, edgecolor Always ask from the
      * currentContainer first
      * @param {string} key
      * @param {any} value
-     * @return {GraphCanvas}
      */
     setDefault(key, value) {
+        if (this.ALLOWED_DEFAULTS.indexOf(key.toLowerCase()) == -1) {
+            throw new Error("Trying to set unknown default " + key);
+        }
         //debug("graphcanvas:Set ROOT " + key + " to " + value);
         // @ts-ignore
         return setAttr(this, key, value);

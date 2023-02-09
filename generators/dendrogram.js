@@ -19,7 +19,7 @@ to
 	]
 }
 
-node js/parse.js verbose dendrogram.test dendrogram
+node js/diagrammer.js verbose dendrogram.test dendrogram
 @param {GraphCanvas} graphcanvas
 */
 function dendrogram(graphcanvas) {

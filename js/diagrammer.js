@@ -1,6 +1,6 @@
-//Usage: (typically called from t.sh/depict)
-//Usage: node parse.js [verbose] inputFile [lex] digraph|nwdiag|actdiag|blockdiag|plantuml_sequence >output
-//Usage: node parse.js verbose tests/state_group.txt ast
+//Usage: (typically called from t.sh or CLI in general, web uses parser.js directly via index.js)
+//Usage: node js/diagrammer.js [verbose] inputFile [lex] digraph|nwdiag|actdiag|blockdiag|plantuml_sequence >output
+//Usage: node js/diagrammer.js verbose tests/state_group.txt ast
 
 const fs = require('fs');
 const path = require('path');

@@ -23,7 +23,7 @@
 	  ];
 
 
-	  node js/parse.js verbose uml.test umlclass
+	  node js/diagrammer.js verbose uml.test umlclass
 @param {GraphCanvas} graphcanvas
 */
 function generateUmlClass(graphcanvas) {

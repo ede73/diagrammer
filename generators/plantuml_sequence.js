@@ -49,7 +49,7 @@ b->d
 a->e:edge text
 @enduml
 
-node js/parse.js verbose plantuml_sequence.test plantuml_sequence
+node js/diagrammer.js verbose plantuml_sequence.test plantuml_sequence
 @param {GraphCanvas} graphcanvas
 */
 function plantuml_sequence(graphcanvas) {

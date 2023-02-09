@@ -19,7 +19,7 @@ a -> e[label="edge text"];
 }
 http://blockdiag.com/en/seqdiag/index.html
 
-node js/parse.js verbose seqdiag.test seqdiag
+node js/diagrammer.js verbose seqdiag.test seqdiag
 @param {GraphCanvas} graphcanvas
 */
 function seqdiag(graphcanvas) {

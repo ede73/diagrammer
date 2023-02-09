@@ -31,7 +31,7 @@ const BlockDiagShapeMap = {
     loopend: "flowchart.loopout",
 };
 
-//node js/parse.js state2.txt blockdiag |blockdiag -Tpng -o a.png - && open a.png
+//node js/diagrammer.js state2.txt blockdiag |blockdiag -Tpng -o a.png - && open a.png
 //available shapes
 //box,square,roundedbox,dots
 //circle,ellipse,diamond,minidiamond
@@ -61,7 +61,7 @@ e;
 
 http://blockdiag.com/en/blockdiag/
 
-node js/parse.js verbose blockdiag.test blockdiag
+node js/diagrammer.js verbose blockdiag.test blockdiag
 @param {GraphCanvas} graphcanvas
 */
 function blockdiag(graphcanvas) {

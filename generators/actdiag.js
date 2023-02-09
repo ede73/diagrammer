@@ -32,7 +32,7 @@ const ActDiagShapeMap =
     loopend: "flowchart.loopout",
 };
 
-//node js/parse.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
+//node js/diagrammer.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 /**
 a>b>c,d
 a>e;edge text

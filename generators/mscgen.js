@@ -16,7 +16,7 @@ msc {
     b=>d[id="3"];
     a=>e[label="edge text",id="4"];
 }
-node js/parse.js verbose mscgen.test mscgen
+node js/diagrammer.js verbose mscgen.test mscgen
 @param {GraphCanvas} graphcanvas
 */
 function mscgen(graphcanvas) {

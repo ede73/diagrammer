@@ -16,7 +16,7 @@ to
     {"link":{"edgeType":">","left":"a","right":"e","label":"link text"}},
 }
 
-node js/parse.js verbose ast.test ast
+node js/diagrammer.js verbose ast.test ast
 @param {GraphCanvas} graphcanvas
 */
 function ast(graphcanvas) {

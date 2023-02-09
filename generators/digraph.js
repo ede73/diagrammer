@@ -50,7 +50,7 @@ digraph {
     b->d;
     a->e[label="edhe text"];
 }
-node js/parse.js verbose digraph.test digraph
+node js/diagrammer.js verbose digraph.test digraph
 
 @param {GraphCanvas} graphcanvas
 */

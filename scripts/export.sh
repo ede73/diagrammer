@@ -2,7 +2,7 @@
 OUT="export"
 mkdir -p $OUT/generators
 
-for m in js/parse.js build/parser.js build/state.js; do
+for m in js/diagrammer.js build/parser.js build/state.js; do
   uglifyjs $m -o $OUT/$(basename $m) -c -m
   sed -i -e 's,build/state.js,state.js,g' -e 's,build/parser.js,parser.js,g' $OUT/$(basename $m) 
 done

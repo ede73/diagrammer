@@ -19,7 +19,7 @@ to
 ]
 }
 
-node js/parse.js verbose sankey.test sankey
+node js/diagrammer.js verbose sankey.test sankey
 @param {GraphCanvas} graphcanvas
 */
 function sankey(graphcanvas) {

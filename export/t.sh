@@ -67,21 +67,22 @@ rm -f "$OUT"
 
 #EXPORTREMOVE
 
+DIAGRAMMER="$MYPATH/js/diagrammer.js"
 case "$generator" in
 nwdiag | actdiag | blockdiag | plantuml_sequence | mscgen)
-  node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" "$generator" "$verbose" >"$OUT"
+  node --max-old-space-size=4096 "$DIAGRAMMER" "$input" "$generator" "$verbose" >"$OUT"
   [ $text -ne 0 ] && cat "$OUT"
   ;;
 neato | twopi | circo | fdp | sfdp)
-  node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" digraph "$verbose" >"$OUT"
+  node --max-old-space-size=4096 "$DIAGRAMMER" "$input" digraph "$verbose" >"$OUT"
   [ $text -ne 0 ] && cat "$OUT"
   ;;
 ast | dendrogram | sankey)
-  node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" "$generator" "$verbose"
+  node --max-old-space-size=4096 "$DIAGRAMMER" "$input" "$generator" "$verbose"
   exit 0
   ;;
 *)
-  node --max-old-space-size=4096 "$MYPATH/js/parse.js" $verbose "$input" digraph "$verbose" >"$OUT"
+  node --max-old-space-size=4096 "$DIAGRAMMER" $verbose "$input" digraph "$verbose" >"$OUT"
   [ $text -ne 0 ] && cat "$OUT"
   ;;
 esac

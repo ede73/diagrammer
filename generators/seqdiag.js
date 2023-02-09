@@ -32,18 +32,18 @@ function seqdiag(graphmeta) {
         if (!root.OBJECTS.hasOwnProperty(i)) continue;
         const obj = root.OBJECTS[i];
         if (obj instanceof Group) {
-            graphmeta.result(' /*' + obj.getName() + getAttrFmt(obj, 'label', ' {0}*/'));
+            graphmeta.result(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'));
             for (const j in obj.OBJECTS) {
                 if (!obj.OBJECTS.hasOwnProperty(j)) continue;
                 const z = obj.OBJECTS[j];
                 // no color support either..
-                let styleAndLabel = getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
+                let styleAndLabel = getAttributeAndFormat(z, 'style', ',style={0}') + getAttributeAndFormat(z, 'label', ',label="{0}"');
                 if (styleAndLabel.trim() != "")
                     styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
                 graphmeta.result(z.getName() + styleAndLabel + ";");
             }
         } else if (obj instanceof Vertex) {
-            let styleAndLabel = getAttrFmt(obj, 'style', ',style={0}') + getAttrFmt(obj, 'label', ',label="{0}"') + getAttrFmt(obj, 'color', ',color="{0}"');
+            let styleAndLabel = getAttributeAndFormat(obj, 'style', ',style={0}') + getAttributeAndFormat(obj, 'label', ',label="{0}"') + getAttributeAndFormat(obj, 'color', ',color="{0}"');
             if (styleAndLabel.trim() != "")
                 styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
             graphmeta.result(obj.getName() + styleAndLabel + ";");
@@ -100,7 +100,7 @@ function seqdiag(graphmeta) {
             // hm.. solve a<>a is broadcast, where as
             // a<>b (any else than node itself) is autoreturn
             if (rhs == lhs) {
-                graphmeta.result(getAttrFmt(edge, 'label', '===BROADCAST:{0}==='));
+                graphmeta.result(getAttributeAndFormat(edge, 'label', '===BROADCAST:{0}==='));
                 continue;
             }
             edgeType = '=>';
@@ -121,11 +121,11 @@ function seqdiag(graphmeta) {
                 edgeType = "->";
         } else if (dot) {
             // dotted
-            graphmeta.result(getAttrFmt(edge, 'label', '...{0}...'));
+            graphmeta.result(getAttributeAndFormat(edge, 'label', '...{0}...'));
             continue;
         } else if (dash) {
             // dashed
-            graphmeta.result(getAttrFmt(edge, 'label', '==={0}==='));
+            graphmeta.result(getAttributeAndFormat(edge, 'label', '==={0}==='));
             continue;
         } else {
             graphmeta.result("ERROR: SHOULD NOT HAPPEN");

@@ -59,7 +59,7 @@ function ast(graphmeta) {
                     group: n
                 }) + ",");
                 output(graphmeta, '[');
-                traverseObjects(o, objectHandler);
+                traverseVertices(o, objectHandler);
                 output(graphmeta, ']');
             })(o);
         } else if (o instanceof SubGraph) {
@@ -70,7 +70,7 @@ function ast(graphmeta) {
                     subgraph: n
                 }) + ",");
                 output(graphmeta, '[');
-                traverseObjects(o, objectHandler);
+                traverseVertices(o, objectHandler);
                 output(graphmeta, ']');
             })(o);
         } else if (o instanceof Vertex) {
@@ -82,7 +82,7 @@ function ast(graphmeta) {
         }
         output(false);
     };
-    traverseObjects(r, objectHandler);
+    traverseVertices(r, objectHandler);
 
     output(true);
     traverseEdges(graphmeta, edge => {

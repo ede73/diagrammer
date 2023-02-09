@@ -147,7 +147,7 @@ class GraphRoot extends GraphObject {
      */
     getDefault(key) {
         // debug("graphroot:Get ROOT "+key);
-        return getAttr(this, key);
+        return getAttribute(this, key);
     }
 
     toString() {

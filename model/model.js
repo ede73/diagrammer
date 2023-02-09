@@ -387,10 +387,10 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
     const edge = new Edge(edgeType, lhs, rhs);
 
     if (lcompass) edge.lcompass = lcompass;
-    else if (getAttr(lhs, 'compass')) edge.lcompass = getAttr(lhs, 'compass');
+    else if (getAttribute(lhs, 'compass')) edge.lcompass = getAttribute(lhs, 'compass');
 
     if (rcompass) edge.rcompass = rcompass;
-    else if (getAttr(rhs, 'compass')) edge.rcompass = getAttr(rhs, 'compass');
+    else if (getAttribute(rhs, 'compass')) edge.rcompass = getAttribute(rhs, 'compass');
 
     _getDefaultAttribute(yy, 'edgecolor', function (edgeColor) {
         edge.setColor(edgeColor);
@@ -541,7 +541,7 @@ function traverseEdges(graphmeta, callback) {
  * @param {GraphObject} container
  * @param {function((Vertex|Group)):void} callback
  */
-function traverseObjects(container, callback) {
+function traverseVertices(container, callback) {
     for (const i in container.OBJECTS) {
         if (!container.OBJECTS.hasOwnProperty(i)) continue;
         callback(container.OBJECTS[i]);

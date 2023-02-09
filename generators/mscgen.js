@@ -24,18 +24,18 @@ function mscgen(graphmeta) {
     const root = graphmeta.GRAPHROOT;
     let comma = false;
     // print out all node declarations FIRST (if any)
-    traverseObjects(root, obj => {
+    traverseVertices(root, obj => {
         if (obj instanceof Group) {
-            output(graphmeta, ' /*' + obj.getName() + getAttrFmt(obj, 'label', ' {0}') + '*/');
-            traverseObjects(obj, z => {
-                let tmp = getAttrFmt(z, 'color', ',color="{0}"') + getAttrFmt(z, 'style', ',style={0}') + getAttrFmt(z, 'label', ',label="{0}"');
+            output(graphmeta, ' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/');
+            traverseVertices(obj, z => {
+                let tmp = getAttributeAndFormat(z, 'color', ',color="{0}"') + getAttributeAndFormat(z, 'style', ',style={0}') + getAttributeAndFormat(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
                 output(graphmeta, (comma ? "," : "") + "    " + z.getName() + tmp);
                 comma = true;
             });
         } else if (obj instanceof Vertex) {
-            let tmp = getAttrFmt(obj, 'color', ',textbgcolor="{0}"') + getAttrFmt(obj, 'style', ',style={0}') + getAttrFmt(obj, 'label', ',label="{0}"');
+            let tmp = getAttributeAndFormat(obj, 'color', ',textbgcolor="{0}"') + getAttributeAndFormat(obj, 'style', ',style={0}') + getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
             output(graphmeta, (comma ? "," : "") + "  " + obj.getName() + tmp);

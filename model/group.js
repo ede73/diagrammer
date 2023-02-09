@@ -72,7 +72,7 @@ class Group extends GraphObject {
      */
     getDefault(key) {
         debug("group:Get group " + key);
-        return getAttr(this, key);
+        return getAttribute(this, key);
     }
 
     toString() {

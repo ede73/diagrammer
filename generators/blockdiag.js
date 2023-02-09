@@ -80,18 +80,18 @@ function blockdiag(graphmeta) {
         output(true);
         if (obj instanceof Group) {
             output(graphmeta, ' group "' + obj.getLabel() + '"{', true);
-            output(graphmeta, getAttrFmt(obj, 'color', '   color="{0}"'));
-            output(graphmeta, getAttrFmt(obj, 'label', '   label="{0}"'));
+            output(graphmeta, getAttributeAndFormat(obj, 'color', '   color="{0}"'));
+            output(graphmeta, getAttributeAndFormat(obj, 'label', '   label="{0}"'));
             if (tmp && tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
-            traverseObjects(obj, function (obj) {
+            traverseVertices(obj, function (obj) {
                 if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
                     throw new Error("Missing shape mapping");
                 }
                 const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
-                const tmp = getAttrFmt(obj, 'color', ',color="{0}"') +
+                const tmp = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
                     ',shape={0}'.format(mappedShape) +
-                    getAttrFmt(obj, 'label', ',label="{0}"');
+                    getAttributeAndFormat(obj, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
                 output(graphmeta, obj.getName() + tmp + ';');
@@ -102,7 +102,7 @@ function blockdiag(graphmeta) {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
             // ICON does not work, using background
-            let style = getAttrFmt(obj, 'style', ',style="{0}"');
+            let style = getAttributeAndFormat(obj, 'style', ',style="{0}"');
             if (style != "" && style.match(/(dotted|dashed|solid)/) == null) {
                 style = "";
             }
@@ -112,11 +112,11 @@ function blockdiag(graphmeta) {
             }
             const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
 
-            let colorIconShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
-                getAttrFmt(obj, 'image', ',background="icons{0}"') +
+            let colorIconShapeLabel = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
+                getAttributeAndFormat(obj, 'image', ',background="icons{0}"') +
                 style +
                 ',shape="{0}"'.format(mappedShape) +
-                getAttrFmt(obj, 'label', ',label="{0}"');
+                getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (colorIconShapeLabel.trim() != "")
                 colorIconShapeLabel = "[" + colorIconShapeLabel.trim().substring(1) + "]";
             output(graphmeta, obj.getName() + colorIconShapeLabel + ';');
@@ -124,7 +124,7 @@ function blockdiag(graphmeta) {
         output(false);
     };
 
-    traverseObjects(root, parseObjects);
+    traverseVertices(root, parseObjects);
 
     traverseEdges(graphmeta, (edge) => {
         let t = "";
@@ -133,8 +133,8 @@ function blockdiag(graphmeta) {
         } else if (edge.isDashed()) {
             t += ',style="dashed" ';
         }
-        const labelAndItsColor = getAttrFmt(edge, 'label', ',label = "{0}"' + getAttrFmt(edge, ['color', 'textcolor'], 'textcolor="{0}"'));
-        const color = getAttrFmt(edge, 'color', ',color="{0}"');
+        const labelAndItsColor = getAttributeAndFormat(edge, 'label', ',label = "{0}"' + getAttributeAndFormat(edge, ['color', 'textcolor'], 'textcolor="{0}"'));
+        const color = getAttributeAndFormat(edge, 'color', ',color="{0}"');
         t += labelAndItsColor + color;
         t = t.trim();
         if (t.substring(0, 1) == ",")

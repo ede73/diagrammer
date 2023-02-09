@@ -56,9 +56,9 @@ function plantuml_sequence(graphmeta) {
     const processAVertex = function (obj, sbgraph) {
         const nattrs = [];
         const styles = [];
-        // getAttrFmt(o, 'color', 'fillcolor="{0}"',nattrs);
-        // getAttrFmt(o,'color','filled',styles);
-        getAttrFmt(obj, 'style', '{0}', styles);
+        // getAttributeAndFormat(o, 'color', 'fillcolor="{0}"',nattrs);
+        // getAttributeAndFormat(o,'color','filled',styles);
+        getAttributeAndFormat(obj, 'style', '{0}', styles);
         if (styles.length > 0) {
             if (styles.join("").indexOf('singularity') !== -1) {
                 // invis node is not singularity!, circle with minimal
@@ -71,8 +71,8 @@ function plantuml_sequence(graphmeta) {
                 nattrs.push('style="' + styles.join(",") + '"');
             }
         }
-        getAttrFmt(obj, 'image', 'image="icons{0}"', nattrs);
-        getAttrFmt(obj, 'textcolor', 'fontcolor="{0}"', nattrs);
+        getAttributeAndFormat(obj, 'image', 'image="icons{0}"', nattrs);
+        getAttributeAndFormat(obj, 'textcolor', 'fontcolor="{0}"', nattrs);
 
         if (obj.shape && !PlantUMLShapeMap[obj.shape]) {
             throw new Error("Missing shape mapping");
@@ -84,16 +84,16 @@ function plantuml_sequence(graphmeta) {
         let t = "";
         if (nattrs.length > 0)
             t = "[" + nattrs.join(",") + "]";
-        //graphmeta.result(indent("participant " + getAttrFmt(o, 'label', '"{0}" as') + " " + o.getName() + t));
+        //graphmeta.result(indent("participant " + getAttributeAndFormat(o, 'label', '"{0}" as') + " " + o.getName() + t));
         output(graphmeta, "participant {0} {1} {2}".format(
-            getAttrFmt(obj, 'label', '"{0}" as'),
+            getAttributeAndFormat(obj, 'label', '"{0}" as'),
             obj.getName(),
             t));
     };
 
     const root = graphmeta.GRAPHROOT;
     if (root.getVisualizer()) {
-        outputFmt(graphmeta, "/* render: {0} */", [root.getVisualizer()])
+        outputFormattedText(graphmeta, "/* render: {0} */", [root.getVisualizer()])
     }
     output(graphmeta, "@startuml");
     output(graphmeta, "autonumber", true);
@@ -133,8 +133,8 @@ function plantuml_sequence(graphmeta) {
                     label = label[0].trim();
                 }
             }
-            const color = getAttrFmt(edge, 'color', '[{0}]').trim();
-            // getAttrFmt(l, ['textcolor','color'] ,'fontcolor="{0}"',attrs);
+            const color = getAttributeAndFormat(edge, 'color', '[{0}]').trim();
+            // getAttributeAndFormat(l, ['textcolor','color'] ,'fontcolor="{0}"',attrs);
             let lt;
             let rhs = edge.right;
             let lhs = edge.left;
@@ -185,11 +185,11 @@ function plantuml_sequence(graphmeta) {
                 lt = (dot ? "-" : "") + "-" + color + ">";
             } else if (dot) {
                 // dotted
-                output(graphmeta, getAttrFmt(edge, 'label', '...{0}...'));
+                output(graphmeta, getAttributeAndFormat(edge, 'label', '...{0}...'));
                 continue;
             } else if (dash) {
                 // dashed
-                output(graphmeta, getAttrFmt(edge, 'label', '=={0}=='));
+                output(graphmeta, getAttributeAndFormat(edge, 'label', '=={0}=='));
                 continue;
             } else {
                 // is dotted or dashed no direction
@@ -224,13 +224,13 @@ function plantuml_sequence(graphmeta) {
             }
             if (note != "") {
                 output(graphmeta, "note over " + rhs.getName());
-                outputFmt(graphmeta, note.replace(/\\n/g, "\n"));
+                outputFormattedText(graphmeta, note.replace(/\\n/g, "\n"));
                 output(graphmeta, "end note");
             }
         }
     };
 
-    const traverseObjects = function traverseObjects(root, isSubGraph) {
+    const traverseVertices = function traverseVertices(root, isSubGraph) {
         // Dump this groups participants first...
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
@@ -264,10 +264,10 @@ function plantuml_sequence(graphmeta) {
                     const nodeIsSubGraph = o.isSubGraph;
                     if (o.getColor()) {
                         output(graphmeta, "style=filled;");
-                        output(graphmeta, getAttrFmt(o, 'color',
+                        output(graphmeta, getAttributeAndFormat(o, 'color',
                             '   color="{0}";\n'));
                     }
-                    traverseObjects(o, nodeIsSubGraph);
+                    traverseVertices(o, nodeIsSubGraph);
                     printEdges(o);
                     // output(graphmeta, indent("}//end of " + o.getName()));
                 }(obj);

@@ -74,7 +74,7 @@ String.prototype.formatArray = function (array) {
  * @param {string} attr Name of the attribute index to return
  * @return {string} Return the attribute
  */
-function getAttr(cl, attr) {
+function getAttribute(cl, attr) {
     if (!cl[attr] || cl[attr] == 0)
         return undefined;
     return cl[attr];
@@ -89,12 +89,12 @@ function getAttr(cl, attr) {
  * @param {Array[any]} [resultarray] If given, in addition for returning, will PUSH the result to this array
  * @returns {string} (possibly formatted) value of the attribute or "" if attribute not found
  */
-function getAttrFmt(cl, attr, fmt, resultarray) {
+function getAttributeAndFormat(cl, attr, fmt, resultarray) {
     if (attr instanceof Array) {
         for (const i in attr) {
             if (!attr.hasOwnProperty(i)) continue;
             // debug("Get FMT attr "+attr[i]+" from "+cl);
-            const tmp = getAttrFmt(cl, attr[i], fmt, resultarray);
+            const tmp = getAttributeAndFormat(cl, attr[i], fmt, resultarray);
             if (tmp !== "") {
                 debug("Return " + tmp);
                 return tmp;
@@ -141,7 +141,7 @@ function output(graphmeta, txt, indentOrDedent = undefined) {
  * @param {string} txt 
  * @param {Array[any]} [array] Optional array format
  */
-function outputFmt(graphmeta, txt, array) {
+function outputFormattedText(graphmeta, txt, array) {
     if (!array) {
         graphmeta.result(txt);
     } else {

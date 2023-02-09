@@ -74,7 +74,7 @@ function nwdiag(graphmeta) {
                 }
                 const mappedShape = NetworkDiagShapeMap[z.shape] ? NetworkDiagShapeMap[z.shape] : NetworkDiagShapeMap['default'];
 
-                let tmp = getAttrFmt(z, 'color', ',color="{0}"') + ',shape="{0}"'.format(mappedShape) + getAttrFmt(z, 'label', ',address="{0}"');
+                let tmp = getAttributeAndFormat(z, 'color', ',color="{0}"') + ',shape="{0}"'.format(mappedShape) + getAttributeAndFormat(z, 'label', ',address="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
                 graphmeta.result("    " + z.getName() + tmp + ';');
@@ -83,7 +83,7 @@ function nwdiag(graphmeta) {
             for (const il in graphmeta.EDGES) {
                 if (!graphmeta.EDGES.hasOwnProperty(il)) continue;
                 const edge = graphmeta.EDGES[il];
-                tmp = getAttrFmt(edge, 'label', '[address="{0}"]');
+                tmp = getAttributeAndFormat(edge, 'label', '[address="{0}"]');
                 if (edge.left == obj) {
                     graphmeta.result("  " + edge.right.getName() + tmp + ";");
                 }
@@ -98,7 +98,7 @@ function nwdiag(graphmeta) {
             }
             const mappedShape = NetworkDiagShapeMap[obj.shape] ? NetworkDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
         // ICON does not work, using background
-            let tmp = getAttrFmt(obj, 'color', ',color="{0}"') + getAttrFmt(obj, 'image', ',background="icons{0}"') + ',shape="{0}"'.format(mappedShape) + getAttrFmt(obj, 'label', ',label="{0}"');
+            let tmp = getAttributeAndFormat(obj, 'color', ',color="{0}"') + getAttributeAndFormat(obj, 'image', ',background="icons{0}"') + ',shape="{0}"'.format(mappedShape) + getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
             graphmeta.result("    " + obj.getName() + tmp + ';');

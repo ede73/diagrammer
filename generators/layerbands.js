@@ -1,3 +1,5 @@
+// requires export (Typescript, not ES6 compatible not does node.js support it..)
+//import {GraphMeta} from '../model/graphmeta.js';
 /**
 
 Only one root supported?
@@ -40,7 +42,7 @@ function generateLayerBands(graphmeta) {
 	]
 	const root = graphmeta.GRAPHROOT;
 
-	traverseObjects(root, obj => {
+	traverseVertices(root, obj => {
 		if (obj instanceof Group) {
 			groups.itemArray.push({ text: obj.name });
 		}

@@ -119,7 +119,7 @@ function generateUmlClass(graphmeta) {
 	};
 	let id = 1;
 	const groupNameIdMap = new Map();
-	traverseObjects(root, o => {
+	traverseVertices(root, o => {
 		if (o instanceof Group) {
 			const key = id++;
 			groupNameIdMap.set(o.name, key);

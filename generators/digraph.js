@@ -78,10 +78,10 @@ function digraph(graphmeta) {
     const processAVertex = obj => {
         const nattrs = [];
         const styles = [];
-        getAttrFmt(obj, 'color', 'fillcolor="{0}"', nattrs);
-        getAttrFmt(obj, 'color', 'filled', styles);
-        getAttrFmt(obj, 'style', '{0}', styles);
-        // if (getAttr(o,'free')===true){
+        getAttributeAndFormat(obj, 'color', 'fillcolor="{0}"', nattrs);
+        getAttributeAndFormat(obj, 'color', 'filled', styles);
+        getAttributeAndFormat(obj, 'style', '{0}', styles);
+        // if (getAttribute(o,'free')===true){
         // nattrs.push("constraint=false");
         // }
         const url = obj.url;
@@ -100,8 +100,8 @@ function digraph(graphmeta) {
                 nattrs.push('style="' + styles.join(",") + '"');
             }
         }
-        getAttrFmt(obj, 'image', 'image="icons{0}"', nattrs);
-        getAttrFmt(obj, 'textcolor', 'fontcolor="{0}"', nattrs);
+        getAttributeAndFormat(obj, 'image', 'image="icons{0}"', nattrs);
+        getAttributeAndFormat(obj, 'textcolor', 'fontcolor="{0}"', nattrs);
         if (obj.shape) {
             if (obj.shape && !DigraphShapeMap[obj.shape]) {
                 throw new Error("Missing shape mapping");
@@ -110,7 +110,7 @@ function digraph(graphmeta) {
             const r = 'shape="{0}"'.format(mappedShape);
             nattrs.push(r);
         }
-        getAttrFmt(obj, 'label', 'label="{0}"', nattrs);
+        getAttributeAndFormat(obj, 'label', 'label="{0}"', nattrs);
         let t = "";
         if (nattrs.length > 0) {
             t = "[" + nattrs.join(",") + "]";
@@ -205,7 +205,7 @@ function digraph(graphmeta) {
 
     let lastexit = undefined;
     let lastendif = undefined;
-    const traverseObjects = function traverseObjects(root) {
+    const traverseVertices = function traverseVertices(root) {
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
             const obj = root.OBJECTS[i];
@@ -220,14 +220,14 @@ function digraph(graphmeta) {
                         output(graphmeta, 'graph[style=invis];');
                     }
                     if (grp.getLabel())
-                        output(graphmeta, getAttrFmt(grp, 'label',
+                        output(graphmeta, getAttributeAndFormat(grp, 'label',
                             '   label="{0}";'));
                     if (grp.getColor()) {
                         output(graphmeta, "style=filled;");
-                        output(graphmeta, getAttrFmt(grp, 'color',
+                        output(graphmeta, getAttributeAndFormat(grp, 'color',
                             '   color="{0}";\n'));
                     }
-                    traverseObjects(grp);
+                    traverseVertices(grp);
                     output(false);
                     output(graphmeta, "}//end of " + grp.getName() + " " + cond);
                     if (cond) {
@@ -293,8 +293,8 @@ function digraph(graphmeta) {
         if (url) {
             attrs.push('URL="' + url.trim() + '"');
         }
-        getAttrFmt(edge, 'color', 'color="{0}"', attrs);
-        getAttrFmt(edge, ['textcolor', 'color'], 'fontcolor="{0}"', attrs);
+        getAttributeAndFormat(edge, 'color', 'color="{0}"', attrs);
+        getAttributeAndFormat(edge, ['textcolor', 'color'], 'fontcolor="{0}"', attrs);
         let edgeType;
         let rhs = edge.right;
         let lhs = edge.left;
@@ -373,10 +373,10 @@ function digraph(graphmeta) {
         debug('print rhs ' + rhs);
         if (lhs instanceof Array) {
             lhs.forEach((element, index, array) => {
-                output(graphmeta, element.getName() + getAttrFmt(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() + getAttrFmt(edge, 'rcompass', '{0}').trim() + t + ";");
+                output(graphmeta, element.getName() + getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() + getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ";");
             });
         } else {
-            output(graphmeta, lhs.getName() + getAttrFmt(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() + getAttrFmt(edge, 'rcompass', '{0}').trim() + t + ";");
+            output(graphmeta, lhs.getName() + getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() + getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ";");
         }
     });
     output(false);

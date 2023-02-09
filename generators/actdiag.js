@@ -66,15 +66,15 @@ function actdiag(graphmeta) {
         output(true);
         if (obj instanceof Group) {
             output(graphmeta, 'lane "' + obj.getName() + '"{', true);
-            traverseObjects(obj, (obj) => {
+            traverseVertices(obj, (obj) => {
                 if (obj.shape && !ActDiagShapeMap[obj.shape]) {
                     throw new Error("Missing shape mapping");
                 }
                 const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
 
-                let colorShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
+                let colorShapeLabel = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
                     ',shape={0}'.format(mappedShape) +
-                    getAttrFmt(z, 'label', ',label="{0}"');
+                    getAttributeAndFormat(z, 'label', ',label="{0}"');
                 if (colorShapeLabel.trim() != "") {
                     colorShapeLabel = "[" + colorShapeLabel.trim().substring(1) + "]";
                 }
@@ -86,7 +86,7 @@ function actdiag(graphmeta) {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
             // ICON does not work, using background
-            let style = getAttrFmt(obj, 'style', ',style="{0}"');
+            let style = getAttributeAndFormat(obj, 'style', ',style="{0}"');
             if (style != "" && style.match(/(dotted|dashed|solid)/) == null) {
                 style = "";
             }
@@ -97,18 +97,18 @@ function actdiag(graphmeta) {
             const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
 
             // ICON does not work, using background
-            let colorIconShapeLabel = getAttrFmt(obj, 'color', ',color="{0}"') +
-                getAttrFmt(obj, 'image', ',background="icons{0}"') +
+            let colorIconShapeLabel = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
+                getAttributeAndFormat(obj, 'image', ',background="icons{0}"') +
                 style +
                 ',shape={0}'.format(mappedShape) +
-                getAttrFmt(obj, 'label', ',label="{0}"');
+                getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (colorIconShapeLabel.trim() != "")
                 colorIconShapeLabel = "[" + colorIconShapeLabel.trim().substring(1) + "]";
             output(graphmeta, obj.getName() + colorIconShapeLabel + ';');
         }
         output(false);
     };
-    traverseObjects(r, parseObjects);
+    traverseVertices(r, parseObjects);
 
     traverseEdges(graphmeta, (edge) => {
         let t = "";
@@ -117,8 +117,8 @@ function actdiag(graphmeta) {
         } else if (edge.isDashed()) {
             t += ',style="dashed" ';
         }
-        const labelAndItsColor = getAttrFmt(edge, 'label', ',label = "{0}"' + getAttrFmt(edge, ['color', 'textcolor'], 'textcolor="{0}"'));
-        const color = getAttrFmt(edge, 'color', ',color="{0}"');
+        const labelAndItsColor = getAttributeAndFormat(edge, 'label', ',label = "{0}"' + getAttributeAndFormat(edge, ['color', 'textcolor'], 'textcolor="{0}"'));
+        const color = getAttributeAndFormat(edge, 'color', ',color="{0}"');
         t += labelAndItsColor + color;
         t = t.trim();
         if (t.substring(0, 1) == ",")

@@ -1,12 +1,12 @@
 msc {
-  b[label="browser"]
-,  d[label="database"]
-,  w[label="webserver"]
-;
-b=>w[label="GET /index.html",id="1"];
-w>>b[id="2"];
-b=>w[label="POST /blog/comment",id="3"];
-w>>d[label="INSERT comment",id="4"];
-d>>w[id="5"];
-w=>b[id="6"];
+      b[label="browser"]
+    ,  d[label="database"]
+    ,  w[label="webserver"]
+    ;
+    b=>w[label="GET /index.html",id="1"];
+    w>>b[id="2"];
+    b=>w[label="POST /blog/comment",id="3"];
+    w>>d[label="INSERT comment",id="4"];
+    d>>w[id="5"];
+    w=>b[id="6"];
 }

@@ -51,6 +51,9 @@ b -- c;
 b -- d;
 a -- e;
 }
+
+http://blockdiag.com/en/nwdiag/
+
 node js/parse.js verbose nwdiag.test nwdiag
 @param {GraphCanvas} graphcanvas
 */

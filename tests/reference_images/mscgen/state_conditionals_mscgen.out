@@ -1,26 +1,26 @@
 msc {
-  q[label="tamakin"]
-,  w[label="on"]
- /*1  if something would happend then*/ 
-,    a[label="Jotain"]
-,    b[label="muuta"]
- /*2  elseif something probably would not happen then*/ 
-,    c[label="erikoista"]
- /*3  elseif or if i see a flying bird then*/ 
-,    then[label="mita"]
-,    elseif[label="lie"]
-,    z[label="turhaa"]
- /*4  else*/ 
-,    m[label="homppaa"]
- /*5  endif*/ 
-,  outside
-,  end
-;
-q=>w[id="1"];
-a=>b[id="2"];
-b=>c[id="3"];
-elseif=>then[id="4"];
-c=>z[id="5"];
-q=>m[id="6"];
-outside=>end[id="7"];
+      q[label="tamakin"]
+    ,  w[label="on"]
+     /*1  something would happend */
+    ,    a1
+    ,    b1
+     /*2  something probably would not happen */
+    ,    a2
+    ,    b2
+     /*3  or if i see a flying bird */
+    ,    a3
+    ,    b3
+     /*4  else */
+    ,    a4
+    ,    b4
+     /*5  endif */
+    ,  outside
+    ,  end
+    ;
+    q=>w[id="1"];
+    a1=>b1[id="2"];
+    a2=>b2[id="3"];
+    a3=>b3[id="4"];
+    a4=>b4[id="5"];
+    outside=>end[id="6"];
 }

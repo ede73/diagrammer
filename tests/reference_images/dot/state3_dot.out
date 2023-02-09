@@ -1,33 +1,34 @@
+/* render:digraph*/
 digraph {
-  compound=true;
-  rankdir=TD;
-  a;
-  b[fillcolor="#ff0000",style="filled"];
-  c[label="b is red"];
-  d[fillcolor="#00ff00",style="filled",label="Green"];
-  e;
-  f;
-  g;
-  h;
-  i[fillcolor="#ffff00",style="filled"];
-  j;
-  k;
-  l;
-  za;
-  zb[fillcolor="#ff0000",style="filled"];
-  zc[label="zb red"];
-  zd[fillcolor="#00ff00",style="filled",label="this is greeen"];
-  ze;
-  zg;
-  zi[fillcolor="#ffff00",style="filled"];
-  zk;
-//links start
-  e->f;
-  g->h[color="#ff00ff",fontcolor="#ff00ff"];
-  i->j;
-  k->l[label="moro"];
-  ze->f[color="#772222",fontcolor="#772222"];
-  zg->h[color="#ff00ff",fontcolor="#ff00ff"];
-  zi->j[color="#aaaaaa",fontcolor="#aaaaaa"];
-  zk->l[label="moro",color="#f0f0f0",fontcolor="#f0f0f0"];
+    compound=true;
+    rankdir=TD;
+    a;
+    b[fillcolor="#ff0000",style="filled"];
+    c[label="b is red"];
+    d[fillcolor="#00ff00",style="filled",label="Green"];
+    e;
+    f;
+    g;
+    h;
+    i[fillcolor="#ffff00",style="filled"];
+    j;
+    k;
+    l;
+    za;
+    zb[fillcolor="#ff0000",style="filled"];
+    zc[label="zb red"];
+    zd[fillcolor="#00ff00",style="filled",label="this is greeen"];
+    ze;
+    zg;
+    zi[fillcolor="#ffff00",style="filled"];
+    zk;
+    //links start
+    e->f;
+    g->h[color="#ff00ff",fontcolor="#ff00ff"];
+    i->j;
+    k->l[label="moro"];
+    ze->f[color="#772222",fontcolor="#772222"];
+    zg->h[color="#ff00ff",fontcolor="#ff00ff"];
+    zi->j[color="#aaaaaa",fontcolor="#aaaaaa"];
+    zk->l[label="moro",color="#f0f0f0",fontcolor="#f0f0f0"];
 }

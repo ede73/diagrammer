@@ -1,40 +1,41 @@
+/* render:digraph*/
 digraph {
-  compound=true;
-  rankdir=TD;
-  xstart[ shape="Mdiamond" ];
-  end[ shape="Msquare" ];
-  subgraph cluster_1 {
-        label="process #1"; 
-    style=filled;
-        color="#ff0000";
+    compound=true;
+    rankdir=TD;
+    xstart[shape="Mdiamond"];
+    end[shape="Msquare"];
+    subgraph cluster_1 {
+            label="process #1"; 
+        style=filled;
+            color="#ff0000";
  
-      a0[ shape="ellipse" ];
-      a1[ shape="ellipse" ];
-      a2[ shape="ellipse" ];
-      a3[ shape="ellipse" ];
-  }//end of 1
-  subgraph cluster_2 {
-        label="process #2"; 
-    style=filled;
-        color="#00ff00";
+        a0[shape="ellipse"];
+        a1[shape="ellipse"];
+        a2[shape="ellipse"];
+        a3[shape="ellipse"];
+    }//end of 1 undefined
+    subgraph cluster_2 {
+            label="process #2"; 
+        style=filled;
+            color="#00ff00";
  
-      b0[ shape="ellipse" ];
-      b1[ shape="ellipse" ];
-      b2[ shape="ellipse" ];
-      b3[ shape="ellipse" ];
-  }//end of 2
-//links start
-  a0->a1;
-  a1->a2;
-  a2->a3;
-  b0->b1;
-  b1->b2;
-  b2->b3;
-  xstart->a0;
-  xstart->b0;
-  a1->b3;
-  b2->a3;
-  a3->a0;
-  a3->end;
-  b3->end;
+        b0[shape="ellipse"];
+        b1[shape="ellipse"];
+        b2[shape="ellipse"];
+        b3[shape="ellipse"];
+    }//end of 2 undefined
+    //links start
+    a0->a1;
+    a1->a2;
+    a2->a3;
+    b0->b1;
+    b1->b2;
+    b2->b3;
+    xstart->a0;
+    xstart->b0;
+    a1->b3;
+    b2->a3;
+    a3->a0;
+    a3->end;
+    b3->end;
 }

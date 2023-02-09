@@ -3,15 +3,15 @@ nwdiag{
 
   network Sample_front{
     address="192.168.10.0/24"
-    web01[color="#ffff00"  ,address=".1"];
-    web02[color="#ffff00"  ,address=".2"];
+    web01[color="#ffff00" ,shape="box" ,address=".1"];
+    web02[color="#ffff00" ,shape="box" ,address=".2"];
   web01 [address=".1"] ;
   web02 [address=".2"] ;
   }
   network Sample_back{
     address="192.168.20.0/24"
-    db01[color="#ffff00"  ,address=".101"];
-    db02[color="#ffff00"  ,address=".102"];
+    db01[color="#ffff00" ,shape="box" ,address=".101"];
+    db02[color="#ffff00" ,shape="box" ,address=".102"];
   web01 [address=".1"] ;
   web02 [address=".2"] ;
   }

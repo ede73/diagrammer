@@ -1,23 +1,24 @@
+/* render: plantuml_sequence */
 @startuml
 autonumber
-participant  User
-  participant  A
-  participant  B
-  participant  C
-  User->A:DoWork
-  activate A
-  A->B:createRequest
-  activate B
-  B->A:back call
-  deactivate B
-  A->B:response
-  activate B
-  B->C:DoWork
-  activate C
-  C->B:WorkDone
-  deactivate C
-  B->A:RequestCreated
-  deactivate B
-A->User:Done
-deactivate A
+    participant  User 
+    participant  A 
+    participant  B 
+    participant  C 
+    User->A:1DoWork
+    activate A
+        A->B:createRequest
+        activate B
+            B->A:back call
+        deactivate B
+        A->B:response
+        activate B
+            B->C:2DoWork
+            activate C
+                C->B:WorkDone
+            deactivate C
+            B->A:RequestCreated
+        deactivate B
+        A->User:Done
+    deactivate A
 @enduml

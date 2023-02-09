@@ -4,9 +4,9 @@ nwdiag{
     inet[shape="cloud"];
   network empty{
     address="x"
-    router;
-    web01;
-    web02;
+    router[shape="box"];
+    web01[shape="box"];
+    web02[shape="box"];
   }
 inet -- router;
 }

@@ -3,14 +3,14 @@ nwdiag{
 
   network dmz{
     address="y"
-    web01;
-    web02;
+    web01[shape="box"];
+    web02[shape="box"];
   web01;
   web02;
   }
   network internal{
     address="x"
-    db01;
+    db01[shape="box"];
   web01;
   web02;
   }

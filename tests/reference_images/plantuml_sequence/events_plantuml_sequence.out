@@ -1,67 +1,68 @@
+/* render: plantuml_sequence */
 @startuml
 autonumber
-participant  aLINE
-participant  bLINE
-participant  anl
-participant  bnl
-participant  aDOT
-participant  bDOT
-participant  aDASHED
-participant  bDASHED
-participant  aDUAL
-participant  bDUAL
-participant  aDUALDOTTED
-participant  bDUALDOTTED
-participant  aDUALDASHED
-participant  bDUALDASHED
-participant  AREVERSE
-participant  bREVERSE
-participant  AREVERSEDOTTED
-participant  bReverseDotted
-participant  AREVERSEDASHED
-participant  bReverseDashed
-participant  aDotted
-participant  bDOTTED
-participant  aDashed
-participant  bdasHed
-participant  alr
-participant  bLR
-participant  arr
-participant  bRR
-participant  a1
-participant  b1
-participant  a2
-participant  b2
-participant  a3
-participant  b3
-participant  a4
-participant  b4
-participant  c4
-participant  c5
-participant  d5
-participant  a5
-aLINE->bLINE
-anl->bnl:This is label for EVENT, NOT node bnl
-aDOT-->bDOT
-aDASHED->bDASHED
-aDUAL->bDUAL
-bDUAL->aDUAL
-aDUALDOTTED-->bDUALDOTTED
-bDUALDOTTED-->aDUALDOTTED
-aDUALDASHED->bDUALDASHED
-bDUALDASHED->aDUALDASHED
-bREVERSE->AREVERSE
-bReverseDotted-->AREVERSEDOTTED
-bReverseDashed->AREVERSEDASHED
-
-
-bLR->alr
-arr->bRR
-a1-[#ff0000]>b1
-a2->b2:event label
-a3-[#ff0000]>b3:event label
-a4->b4
-a4->c4
-c5->a5
-d5->a5
+    participant  aLINE 
+    participant  bLINE 
+    participant  anl 
+    participant  bnl 
+    participant  aDOT 
+    participant  bDOT 
+    participant  aDASHED 
+    participant  bDASHED 
+    participant  aDUAL 
+    participant  bDUAL 
+    participant  aDUALDOTTED 
+    participant  bDUALDOTTED 
+    participant  aDUALDASHED 
+    participant  bDUALDASHED 
+    participant  AREVERSE 
+    participant  bREVERSE 
+    participant  AREVERSEDOTTED 
+    participant  bReverseDotted 
+    participant  AREVERSEDASHED 
+    participant  bReverseDashed 
+    participant  aDotted 
+    participant  bDOTTED 
+    participant  aDashed 
+    participant  bdasHed 
+    participant  alr 
+    participant  bLR 
+    participant  arr 
+    participant  bRR 
+    participant  a1 
+    participant  b1 
+    participant  a2 
+    participant  b2 
+    participant  a3 
+    participant  b3 
+    participant  a4 
+    participant  b4 
+    participant  c4 
+    participant  c5 
+    participant  d5 
+    participant  a5 
+    aLINE->bLINE
+    anl->bnl:This is label for EVENT, NOT node bnl
+    aDOT-->bDOT
+    aDASHED->bDASHED
+    aDUAL->bDUAL
+    bDUAL->aDUAL
+    aDUALDOTTED-->bDUALDOTTED
+    bDUALDOTTED-->aDUALDOTTED
+    aDUALDASHED->bDUALDASHED
+    bDUALDASHED->aDUALDASHED
+    bREVERSE->AREVERSE
+    bReverseDotted-->AREVERSEDOTTED
+    bReverseDashed->AREVERSEDASHED
+    
+    
+    bLR->alr
+    arr->bRR
+    a1-[#ff0000]>b1
+    a2->b2:event label
+    a3-[#ff0000]>b3:event label
+    a4->b4
+    a4->c4
+    c5->a5
+    d5->a5
 @enduml

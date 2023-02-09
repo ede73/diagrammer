@@ -1,10 +1,11 @@
+/* render:digraph*/
 digraph {
-  compound=true;
-  rankdir=TD;
-  s[ shape="cds" ];
-  subgraph cluster_dummy {
-      a[ shape="cds" ];
-  }//end of dummy
-//links start
-  a->s;
+    compound=true;
+    rankdir=TD;
+    s[shape="cds"];
+    subgraph cluster_dummy {
+        a[shape="cds"];
+    }//end of dummy undefined
+    //links start
+    a->s;
 }

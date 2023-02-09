@@ -1,12 +1,13 @@
+/* render: plantuml_sequence */
 @startuml
 autonumber
-participant  "browser" as  b
-participant  "database" as  d
-participant  "webserver" as  w
-b->w:GET /index.html
-w-->b
-b->w:POST /blog/comment
-w-->d:INSERT comment
-d-->w
-w->b
+    participant  "browser" as  b 
+    participant  "database" as  d 
+    participant  "webserver" as  w 
+    b->w:GET /index.html
+    w-->b
+    b->w:POST /blog/comment
+    w-->d:INSERT comment
+    d-->w
+    w->b
 @enduml

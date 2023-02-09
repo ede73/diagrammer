@@ -51,6 +51,9 @@ e;
   b -> d;
   a -> e[label = "edge text"];
 }
+
+http://blockdiag.com/en/actdiag/
+
 @param {GraphCanvas} graphcanvas
 */
 function actdiag(graphcanvas) {

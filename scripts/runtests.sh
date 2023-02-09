@@ -30,9 +30,11 @@ test() {
   [ $verbose -ne 0 ] && echo "    test($*) using $testbin"
   no_visual=''
   [ $webvisualizer -ne 0 ] && no_visual="dont_run_visualizer"
+
   ./scripts/t.sh skipparsermake silent tests $no_visual "tests/test_inputs/$1" "$testbin" >/dev/null
   rc=$?
   [ $rc -ne 0 ] && setError "$rc" "$1"
+
   out="${1%.*}_${testbin}.out"
   textoutput="tests/test_outputs/$out"
   textreference="tests/reference_images/$testbin/$out"
@@ -41,22 +43,26 @@ test() {
       setError 11 "$1"
       return
   fi
+
+  # Verify that the generated output matches what it used to
+  if ! diff "$textoutput" "$textreference"; then
+    echo "    ERROR: at $1, $textoutput $textreference differ for $testbin" >&2
+    diff -u "$textoutput" "$textreference"
+    setError 11 "$1"
+  fi
+
   [ $webvisualizer -ne 0 ] && {
-    # Web Visualizers cannot be (currently) ran in CLI
+    # Web Visualizers cannot be (currently) run in CLI
     # So only thing we could do is test the final output
-    if ! diff "$textoutput" "$textreference"; then
-      echo "    ERROR: at $1, $textoutput $textreference differ" >&2
-      diff -u "$textoutput" "$textreference"
-      setError 11 "$1"
-    fi
     return
   }
+
   png="${1%.*}_${testbin}.png"
   renderoutput="tests/test_outputs/$png"
   renderreference="tests/reference_images/$testbin/$png"
   if [ -f "$renderoutput" ]; then
     [ ! -f "$renderreference" ] && cp "$renderoutput" "$renderreference"
-    [ ! -f "$textoutput" ] && cp "tests/test_outputs/$out" "$textreference"
+    [ ! -f "$textoutput" ] && cp "$textoutput" "$textreference"
     if ! diff "$renderoutput" "$renderreference"; then
       echo "    ERROR: at $1, image $renderoutput $renderreference differ" >&2
       diff -u "$textoutput" "$textreference"
@@ -64,7 +70,7 @@ test() {
       setError 11 "$1"
     fi
   else
-    echo "ERROR: Could not produce output $renderoutput" >&2
+    echo "ERROR: Failed visualizing $testbin dit not produce output $renderoutput" >&2
     ls -l "$renderoutput"
     setError 12 "$1"
   fi

@@ -1,42 +1,43 @@
+/* render:digraph*/
 digraph {
-  compound=true;
-  rankdir=TD;
-  s[fillcolor="#ff0000",style="filled", shape="cds" ];
-  //startnode setup
+    compound=true;
+    rankdir=TD;
+    s[fillcolor="#ff0000",style="filled",shape="cds"];
+    //startnode setup
   {rank = same;null} {rank = same; s}
   null [shape=plaintext, label=""];
   s[shape=doublecircle];
   null->s;
 
-  s[fillcolor="#ff0000",style="filled", shape="cds" ];
-  c[fillcolor="#0000ff",style="filled", shape="cds" ];
-  subgraph cluster_1 {
-        label="vpn connector"; 
-    style=filled;
-        color="#777777";
+    s[fillcolor="#ff0000",style="filled",shape="cds"];
+    c[fillcolor="#0000ff",style="filled",shape="cds"];
+    subgraph cluster_1 {
+            label="vpn connector"; 
+        style=filled;
+            color="#777777";
  
-      m[fillcolor="#0000ff",style="filled", shape="box" ];
-      vb[fillcolor="#0000ff",style="filled", shape="box" ];
-      mo[fillcolor="#0000ff",style="filled", shape="box" ];
-      b[fillcolor="#0000ff",style="filled", shape="box" ];
-      v[fillcolor="#0000ff",style="filled", shape="box" ];
-  }//end of 1
-  subgraph cluster_2 {
-        label="Phone state listener"; 
-    style=filled;
-        color="#33ff33";
+        m[fillcolor="#0000ff",style="filled",shape="box"];
+        vb[fillcolor="#0000ff",style="filled",shape="box"];
+        mo[fillcolor="#0000ff",style="filled",shape="box"];
+        b[fillcolor="#0000ff",style="filled",shape="box"];
+        v[fillcolor="#0000ff",style="filled",shape="box"];
+    }//end of 1 undefined
+    subgraph cluster_2 {
+            label="Phone state listener"; 
+        style=filled;
+            color="#33ff33";
  
-      e[fillcolor="#0000ff",style="filled", shape="box" ];
-  }//end of 2
-//links start
-  s->c[label="connect,s=red\nlink=green\n this node=blue",color="#00ff00",fontcolor="#ff00ff"];
-  c->m[label="turn off mobile data"];
-  m->vb[label="create blackhole VPN"];
-  vb->mo[label="turn on mobile data"];
-  mo->b[label="do bootstrap"];
-  b->v[label="connect vpn"];
-  e->s[label="wifi connected"];
-  e->s[label="wifi disconnected"];
-  e->s[label="mobile connected"];
-  e->s[label="mobile disconnected"];
+        e[fillcolor="#0000ff",style="filled",shape="box"];
+    }//end of 2 undefined
+    //links start
+    s->c[label="connect,s=red\nlink=green\n this node=blue",color="#00ff00",fontcolor="#ff00ff"];
+    c->m[label="turn off mobile data"];
+    m->vb[label="create blackhole VPN"];
+    vb->mo[label="turn on mobile data"];
+    mo->b[label="do bootstrap"];
+    b->v[label="connect vpn"];
+    e->s[label="wifi connected"];
+    e->s[label="wifi disconnected"];
+    e->s[label="mobile connected"];
+    e->s[label="mobile disconnected"];
 }

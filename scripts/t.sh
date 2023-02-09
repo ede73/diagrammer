@@ -84,26 +84,20 @@ rm -f "$OUT"
 #EXPORTREMOVE
 echo "test parser $verbose $OUT"
 
-case "$generator" in
-nwdiag | actdiag | blockdiag | plantuml_sequence | mscgen)
-  node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" "$generator" "$verbose" >"$OUT"
-  [ $text -ne 0 ] && cat "$OUT"
-  ;;
-neato | twopi | circo | fdp | sfdp)
-  node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" digraph "$verbose" >"$OUT"
-  [ $text -ne 0 ] && cat "$OUT"
-  ;;
-# Web only renderers....
-ast | dendrogram | sankey | umlclass)
-  node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" "$generator" "$verbose" >"$OUT"
-  [ $text -ne 0 ] && cat "$OUT"
-  ;;
-*)
-  echo "Using default digraph generator as no other(or unknown:$generator) specified"
-  node --max-old-space-size=4096 "$MYPATH/js/parse.js" $verbose "$input" digraph "$verbose" >"$OUT"
-  [ $text -ne 0 ] && cat "$OUT"
-  ;;
-esac
+getgenerator() {
+  case "$1" in
+  neato | twopi | circo | fdp | sfdp | dot)
+    echo digraph
+    ;;
+  *)
+    echo "$1"
+    ;;
+  esac
+}
+
+echo Using generator $(getgenerator $generator)
+node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" "$(getgenerator $generator)" "$verbose" >"$OUT"
+[ $text -ne 0 ] && cat "$OUT"
 
 rc=$?
 # shellcheck disable=SC2181
@@ -128,17 +122,19 @@ nwdiag() {
   nwdiag3 $*
 }
 
+seqdiag() {
+  seqdiag3 $*
+}
+
+
 case "$generator" in
 plantuml_sequence)
   java -Xmx2048m -jar "$PLANTUML_JAR" "$OUT" >"$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-nwdiag | actdiag | blockdiag)
+nwdiag | actdiag | blockdiag | seqdiag)
   "$generator" <"$OUT" -a -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
-mscgen)
-  "$generator" <"$OUT" -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"
-  ;;
-neato | twopi | circo | fdp | sfdp)
+mscgen | neato | twopi | circo | fdp | sfdp | dot)
   "$generator" <"$OUT" -T"${FORMAT}" -o "$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
 *)

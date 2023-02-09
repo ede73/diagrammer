@@ -1,4 +1,3 @@
-// WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 /**
 a>b>c,d
 a>e;edge text
@@ -18,21 +17,25 @@ b -> c[];
 b -> d[];
 a -> e[label="edge text"];
 }
+http://blockdiag.com/en/seqdiag/index.html
+
 node js/parse.js verbose seqdiag.test seqdiag
 @param {GraphCanvas} graphcanvas
 */
 function seqdiag(graphcanvas) {
-    graphcanvas.result("seqdiag {");
-    graphcanvas.result("autonumber = True;");
+    output(graphcanvas, "seqdiag {", true);
+    output(graphcanvas, "autonumber = True;");
     // quite fucked up life line activations and no control over..skip
     // it,shrimpy!
-    graphcanvas.result(" activation = none;");
+    output(graphcanvas, "activation = none;");
+
     // print out all node declarations FIRST (if any)
     for (const i in graphcanvas.OBJECTS) {
         if (!graphcanvas.OBJECTS.hasOwnProperty(i)) continue;
         const obj = graphcanvas.OBJECTS[i];
+
         if (obj instanceof GraphGroup) {
-            graphcanvas.result(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'));
+            output(graphcanvas, ' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'));
             for (const j in obj.OBJECTS) {
                 if (!obj.OBJECTS.hasOwnProperty(j)) continue;
                 const z = obj.OBJECTS[j];
@@ -41,15 +44,16 @@ function seqdiag(graphcanvas) {
                     getAttributeAndFormat(z, 'label', ',label="{0}"');
                 if (styleAndLabel.trim() != "")
                     styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
-                graphcanvas.result(z.getName() + styleAndLabel + ";");
+                    output(graphcanvas, z.getName() + styleAndLabel + ";");
             }
         } else if (obj instanceof GraphVertex) {
             let styleAndLabel = getAttributeAndFormat(obj, 'style', ',style={0}') +
                 getAttributeAndFormat(obj, 'label', ',label="{0}"') +
                 getAttributeAndFormat(obj, 'color', ',color="{0}"');
-            if (styleAndLabel.trim() != "")
+            if (styleAndLabel.trim() != "") {
                 styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
-            graphcanvas.result(obj.getName() + styleAndLabel + ";");
+            }
+            output(graphcanvas, obj.getName() + styleAndLabel + ";");
         }
     }
 
@@ -102,7 +106,7 @@ function seqdiag(graphcanvas) {
             // hm.. solve a<>a is broadcast, where as
             // a<>b (any else than node itself) is autoreturn
             if (rhs == lhs) {
-                graphcanvas.result(getAttributeAndFormat(edge, 'label', '===BROADCAST:{0}==='));
+                output(graphcanvas, getAttributeAndFormat(edge, 'label', '===BROADCAST:{0}==='));
                 return;
             }
             edgeType = '=>';
@@ -123,18 +127,23 @@ function seqdiag(graphcanvas) {
                 edgeType = "->";
         } else if (dot) {
             // dotted
-            graphcanvas.result(getAttributeAndFormat(edge, 'label', '...{0}...'));
+            output(graphcanvas, getAttributeAndFormat(edge, 'label', '...{0}...'));
             return;
         } else if (dash) {
             // dashed
-            graphcanvas.result(getAttributeAndFormat(edge, 'label', '==={0}==='));
+            output(graphcanvas, getAttributeAndFormat(edge, 'label', '==={0}==='));
             return;
         } else {
-            graphcanvas.result("ERROR: SHOULD NOT HAPPEN");
+            output(graphcanvas, "ERROR: SHOULD NOT HAPPEN");
         }
         // MUST HAVE whitespace at both sides of the "arrow"
-        graphcanvas.result(lhs.getName() + " " + edgeType + " " + rightName + "[" + attrs.join(",") + "];");
+        if (!attrs || attrs.length==0) {
+            attrs.push("label=\"\"");
+        }
+        output(graphcanvas, lhs.getName() + " " + edgeType + " " + 
+        rightName + "[" + attrs.join(",") + "];");
     });
-    graphcanvas.result("}");
+    output(graphcanvas, false);
+    output(graphcanvas, "}");
 }
 generators.set('seqdiag', seqdiag);

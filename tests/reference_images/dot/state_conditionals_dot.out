@@ -1,38 +1,63 @@
+/* render:digraph*/
 digraph {
-  compound=true;
-  rankdir=TD;
-  q[label="tamakin"];
-  w[label="on"];
-  subgraph cluster_1 {
-        label="if something would happend then"; 
-      a[label="Jotain"];
-      b[label="muuta"];
-  }//end of 1
-  subgraph cluster_2 {
-        label="elseif something probably would not happen then"; 
-      c[label="erikoista"];
-  }//end of 2
-  subgraph cluster_3 {
-        label="elseif or if i see a flying bird then"; 
-      then[label="mita"];
-      elseif[label="lie"];
-      z[label="turhaa"];
-  }//end of 3
-  subgraph cluster_4 {
-        label="else"; 
-      m[label="homppaa"];
-  }//end of 4
-  subgraph cluster_5 {
-        label="endif"; 
-  }//end of 5
-  outside;
-  end;
-//links start
-  q->w;
-  a->b;
-  b->c;
-  elseif->then;
-  c->z;
-  q->m;
-  outside->end;
+    compound=true;
+    rankdir=TD;
+    q[label="tamakin"];
+    w[label="on"];
+    subgraph cluster_1 {
+            label="something would happend"; 
+        a1;
+        b1;
+    }//end of 1 if
+    //COND 1 if
+    endif1[shape=circle,label="",width=0.01,height=0.01];
+    entry1[shape=diamond,fixedsize=true,width=1,height=1,label="something would happend"];
+    w->entry1;
+    entry1->a1[label="YES",color=green,lhead=cluster_1];
+    b1->endif1[label=""];
+    subgraph cluster_2 {
+            label="something probably would not happen"; 
+        a2;
+        b2;
+    }//end of 2 elseif
+    //COND 2 elseif
+    entry2[shape=diamond,fixedsize=true,width=1,height=1,label="something probably would not happen"];
+    entry1->entry2[label="NO",color=red];
+    entry2->a2[label="YES",color=green,lhead=cluster_2];
+    b2->endif1[label=""];
+    subgraph cluster_3 {
+            label="or if i see a flying bird"; 
+        a3;
+        b3;
+    }//end of 3 elseif
+    //COND 3 elseif
+    entry3[shape=diamond,fixedsize=true,width=1,height=1,label="or if i see a flying bird"];
+    entry2->entry3[label="NO",color=red];
+    entry3->a3[label="YES",color=green,lhead=cluster_3];
+    b3->endif1[label=""];
+    subgraph cluster_4 {
+            label="else"; 
+        a4;
+        b4;
+    }//end of 4 else
+    //COND 4 else
+    entry4[shape=diamond,fixedsize=true,width=1,height=1,label="else"];
+    entry3->entry4[label="NO",color=red];
+    entry4->a4[label="YES",color=green,lhead=cluster_4];
+    b4->endif1[label=""];
+    subgraph cluster_5 {
+            label="endif"; 
+    }//end of 5 endif
+    //COND 5 endif
+    entry4->outside[color=red];
+    endif1->outside;
+    outside;
+    end;
+    //links start
+    q->w;
+    a1->b1;
+    a2->b2;
+    a3->b3;
+    a4->b4;
+    outside->end;
 }

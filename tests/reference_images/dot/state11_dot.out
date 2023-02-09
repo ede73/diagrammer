@@ -1,9 +1,10 @@
+/* render:digraph*/
 digraph {
-  compound=true;
-  rankdir=TD;
-  eka[fillcolor="#0000ff",style="filled",label="slim shady and blue"];
-  toinen[fillcolor="#ff0000",style="filled",label="Punainen itseasiassa"];
-//links start
-  eka->toinen[color="#111111",fontcolor="#111111"];
-  eka->toinen[color="#ff0000",fontcolor="#ff0000"];
+    compound=true;
+    rankdir=TD;
+    eka[fillcolor="#0000ff",style="filled",label="slim shady and blue"];
+    toinen[fillcolor="#ff0000",style="filled",label="Punainen itseasiassa"];
+    //links start
+    eka->toinen[color="#111111",fontcolor="#111111"];
+    eka->toinen[color="#ff0000",fontcolor="#ff0000"];
 }

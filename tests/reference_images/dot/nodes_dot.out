@@ -1,33 +1,34 @@
+/* render:digraph*/
 digraph {
-  compound=true;
-  rankdir=TD;
-  plainnode;
-  labelplainnode[label="WithLabel"];
-  ImageNode[image="icons/masa.png"];
-  labelImageNode[image="icons/masa.png",label="WithLabel"];
-  NodeAndRedColor[fillcolor="#ff0000",style="filled"];
-  LabelNodeAndRedColor[fillcolor="#ff0000",style="filled",label="WithLabel"];
-  VNodeAndRedColor[fillcolor="#ff0000",style="filled"];
-  LabelVNodeAndRedColor[fillcolor="#ff0000",style="filled",label="Label"];
-  CircularNode[ shape="circle" ];
-  LabelCircularNode[ shape="circle" ,label="Label"];
-  CircularBlueNode[fillcolor="#0000ff",style="filled", shape="circle" ];
-  labelCircularBlueNode[fillcolor="#0000ff",style="filled", shape="circle" ,label="Label"];
-  VCircularBlueNode[fillcolor="#0000ff",style="filled", shape="circle" ];
-  LabelVCircularBlueNode[fillcolor="#0000ff",style="filled", shape="circle" ,label="Label"];
-  BoldImage[style="bold",image="icons/bold.png"];
-  LabelBoldImage[style="bold",image="icons/bold.png",label="Label"];
-  PlainBoldNode[style="bold"];
-  LabelPlainBoldNode[style="bold",label="Label"];
-  DashedGreenNode[fillcolor="#00ff00",style="filled,dashed"];
-  LabelDashedGreenNode[fillcolor="#00ff00",style="filled,dashed",label="Label"];
-  VDashedGreenNode[fillcolor="#00ff00",style="filled,dashed"];
-  LabelVDashedGreenNode[fillcolor="#00ff00",style="filled,dashed",label="Label"];
-  DottedBoxNode[style="dotted", shape="box" ];
-  LabelDottedBoxNode[style="dotted", shape="box" ,label="Label"];
-  DottedRedBoxNode[fillcolor="#ff0000",style="filled,dotted", shape="box" ];
-  LabelDottedRedBoxNode[fillcolor="#ff0000",style="filled,dotted", shape="box" ,label="Label"];
-  VDottedRedBoxNode[fillcolor="#ff0000",style="filled,dotted", shape="box" ];
-  LabelVDottedRedBoxNode[fillcolor="#ff0000",style="filled,dotted", shape="box" ,label="Label"];
-//links start
+    compound=true;
+    rankdir=TD;
+    plainnode;
+    labelplainnode[label="WithLabel"];
+    ImageNode[image="icons/cpu.png"];
+    labelImageNode[image="icons/laptop.png",label="WithLabel"];
+    NodeAndRedColor[fillcolor="#ff0000",style="filled"];
+    LabelNodeAndRedColor[fillcolor="#ff0000",style="filled",label="WithLabel"];
+    VNodeAndRedColor[fillcolor="#ff0000",style="filled"];
+    LabelVNodeAndRedColor[fillcolor="#ff0000",style="filled",label="Label"];
+    CircularNode[shape="circle"];
+    LabelCircularNode[shape="circle",label="Label"];
+    CircularBlueNode[fillcolor="#0000ff",style="filled",shape="circle"];
+    labelCircularBlueNode[fillcolor="#0000ff",style="filled",shape="circle",label="Label"];
+    VCircularBlueNode[fillcolor="#0000ff",style="filled",shape="circle"];
+    LabelVCircularBlueNode[fillcolor="#0000ff",style="filled",shape="circle",label="Label"];
+    BoldImage[style="bold",image="icons/actor1.png"];
+    LabelBoldImage[style="bold",image="icons/actor2.png",label="Label"];
+    PlainBoldNode[style="bold"];
+    LabelPlainBoldNode[style="bold",label="Label"];
+    DashedGreenNode[fillcolor="#00ff00",style="filled,dashed"];
+    LabelDashedGreenNode[fillcolor="#00ff00",style="filled,dashed",label="Label"];
+    VDashedGreenNode[fillcolor="#00ff00",style="filled,dashed"];
+    LabelVDashedGreenNode[fillcolor="#00ff00",style="filled,dashed",label="Label"];
+    DottedBoxNode[style="dotted",shape="box"];
+    LabelDottedBoxNode[style="dotted",shape="box",label="Label"];
+    DottedRedBoxNode[fillcolor="#ff0000",style="filled,dotted",shape="box"];
+    LabelDottedRedBoxNode[fillcolor="#ff0000",style="filled,dotted",shape="box",label="Label"];
+    VDottedRedBoxNode[fillcolor="#ff0000",style="filled,dotted",shape="box"];
+    LabelVDottedRedBoxNode[fillcolor="#ff0000",style="filled,dotted",shape="box",label="Label"];
+    //links start
 }

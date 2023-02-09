@@ -1,13 +1,11 @@
-/* render:digraph*/
-digraph {
-    compound=true;
-    rankdir=TD;
-    a;
-    b;
-    c;
-    d;
-    //links start
-    a->b;
-    b->c;
-    c->d;
+seqdiag {
+autonumber = True;
+ activation = none;
+a;
+b;
+c;
+d;
+a -> b[];
+b -> c[];
+c -> d[];
 }

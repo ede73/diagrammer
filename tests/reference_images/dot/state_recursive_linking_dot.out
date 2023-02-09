@@ -1,20 +1,34 @@
+/* render:digraph*/
 digraph {
-  compound=true;
-  rankdir=TD;
-  a;
-  b;
-  c;
-  d;
-  e;
-  f;
-  g;
-  h;
-//links start
-  a->b;
-  b->c;
-  c->d;
-  d->e;
-  d->f;
-  f->g;
-  g->h;
+    compound=true;
+    rankdir=TD;
+    a;
+    b;
+    subgraph cluster_1 {
+        graph[style=invis];
+        c;
+        d;
+        e;
+        f;
+        g;
+        h;
+    }//end of 1 undefined
+    subgraph cluster_2 {
+        graph[style=invis];
+        s;
+        k;
+    }//end of 2 undefined
+    //links start
+    a->b;
+    b->c;
+    b->d;
+    b->f;
+    b->h;
+    d->e;
+    f->g;
+    c->s;
+    e->s;
+    g->s;
+    h->s;
+    s->k;
 }

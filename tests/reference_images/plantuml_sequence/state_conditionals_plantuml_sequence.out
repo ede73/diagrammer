@@ -1,26 +1,27 @@
+/* render: plantuml_sequence */
 @startuml
 autonumber
-participant  "tamakin" as  q
-participant  "on" as  w
-participant  outside
-participant  end
-q->w
-alt if something would happend then
-  participant  "Jotain" as  a
-  participant  "muuta" as  b
-  a->b
-else elseif something probably would not happen then
-  participant  "erikoista" as  c
-  b->c
-else elseif or if i see a flying bird then
-  participant  "mita" as  then
-  participant  "lie" as  elseif
-  participant  "turhaa" as  z
-  elseif->then
-  c->z
-else else
-  participant  "homppaa" as  m
-  q->m
-end endif
-outside->end
+    participant  "tamakin" as  q 
+    participant  "on" as  w 
+    participant  outside 
+    participant  end 
+    q->w
+    alt something would happend
+    participant  a1 
+    participant  b1 
+    a1->b1
+    else something probably would not happen
+    participant  a2 
+    participant  b2 
+    a2->b2
+    else or if i see a flying bird
+    participant  a3 
+    participant  b3 
+    a3->b3
+    else else
+    participant  a4 
+    participant  b4 
+    a4->b4
+    end endif
+    outside->end
 @enduml

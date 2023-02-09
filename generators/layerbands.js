@@ -1,4 +1,8 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
+import { generators } from '../model/graphcanvas.js';
+import { traverseEdges, traverseVertices } from '../model/model.js';
+import { GraphGroup } from '../model/graphgroup.js';
+import { output } from '../model/support.js';
 // requires export (Typescript, not ES6 compatible not does node.js support it..)
 //import {GraphCanvas} from '../model/graphcanvas.js';
 /**
@@ -31,7 +35,7 @@ Only one root supported?
 	  node js/diagrammer.js verbose manual_test_diagrams/layerbands.d layerbands
 @param {GraphCanvas} graphcanvas
 */
-function generateLayerBands(graphcanvas) {
+export function layerbands(graphcanvas) {
 	//debug(graphcanvas)
 	const groups = {
 		key: "_BANDS",
@@ -52,10 +56,10 @@ function generateLayerBands(graphcanvas) {
 		if (!edge.left) {
 			// probably our root
 			//linkedVertexs.push({key: l.right.name});
-		}else{
-			linkedVertices.push({key: edge.right.name , parent: edge.left.name});
+		} else {
+			linkedVertices.push({ key: edge.right.name, parent: edge.left.name });
 		}
 	});
 	output(graphcanvas, JSON.stringify(linkedVertices));
 }
-generators.set('layerbands', generateLayerBands);
+generators.set('layerbands', layerbands);

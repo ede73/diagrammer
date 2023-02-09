@@ -1,4 +1,9 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
+import { generators, visualizations } from '../model/graphcanvas.js';
+import { debug, output } from '../model/support.js';
+import { GraphVertex } from '../model/graphvertex.js';
+import { traverseEdges } from '../model/model.js';
+import { TreeVertex, findVertex, traverseTree } from '../model/tree.js';
 /**
 a>b>c,d
 a>e;edge text
@@ -22,7 +27,7 @@ to
 node js/diagrammer.js verbose dendrogram.test dendrogram
 @param {GraphCanvas} graphcanvas
 */
-function dendrogram(graphcanvas) {
+export function dendrogram(graphcanvas) {
 	let tree;
 	/**
 	 * @param {GraphObject} lhs

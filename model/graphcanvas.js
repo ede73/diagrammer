@@ -1,7 +1,10 @@
 // @ts-check 
-import {GraphObject} from '../model/graphobject.js';
-import {GraphEdge} from '../model/graphedge.js';
-import {setAttr, getAttribute, debug} from '../model/support.js';
+import { GraphObject } from '../model/graphobject.js';
+import { GraphEdge } from '../model/graphedge.js';
+import { setAttr, getAttribute } from '../model/support.js';
+
+export const generators = new Map();
+export const visualizations = new Map();
 
 /**
  * Represents the graph canvas. 
@@ -36,7 +39,11 @@ export class GraphCanvas extends GraphObject {
         this.OBJECTS = [];
         /** @type {GraphEdge[]} */
         this.EDGES = [];
-        /** @type {GraphObject[]} */
+        /**
+         * Never an GraphEdge though!
+         * TODO: Better abstraction, Canvas should be a container, like the group (and inner), but NOT extend to Vertex or Edge
+         * @type {GraphObject[]}
+         */
         this.ROOTVERTICES = [];
         /** @type {string} */
         this.generator = undefined;

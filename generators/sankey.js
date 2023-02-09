@@ -1,4 +1,10 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
+import { generators } from '../model/graphcanvas.js';
+import { traverseEdges } from '../model/model.js';
+import { TreeVertex, findVertex, traverseTree } from '../model/tree.js';
+import { GraphVertex } from '../model/graphvertex.js';
+import { debug, output } from '../model/support.js';
+
 /**
 a>b>c,d
 a>e;edge text
@@ -22,7 +28,7 @@ to
 node js/diagrammer.js verbose sankey.test sankey
 @param {GraphCanvas} graphcanvas
 */
-function sankey(graphcanvas) {
+export function sankey(graphcanvas) {
 	let tree;
 	function addVertex(left, right) {
 		if (!tree) {

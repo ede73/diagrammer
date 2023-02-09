@@ -1,3 +1,8 @@
+import { generators } from '../model/graphcanvas.js';
+import { traverseVertices, traverseEdges } from '../model/model.js';
+import { GraphGroup } from "../model/graphgroup.js";
+import { output, debug, getAttributeAndFormat } from '../model/support.js';
+
 const ActDiagShapeMap =
 {
     default: "box",
@@ -56,7 +61,7 @@ http://blockdiag.com/en/actdiag/
 
 @param {GraphCanvas} graphcanvas
 */
-function actdiag(graphcanvas) {
+export function actdiag(graphcanvas) {
     output(graphcanvas, "actdiag {", true);
     output(graphcanvas, "default_fontsize = 14");
     /**

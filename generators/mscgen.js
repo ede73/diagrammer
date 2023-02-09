@@ -1,3 +1,8 @@
+import { generators } from '../model/graphcanvas.js';
+import { output, getAttributeAndFormat } from '../model/support.js';
+import { traverseVertices, traverseEdges } from '../model/model.js';
+import { GraphGroup } from '../model/graphgroup.js';
+import { GraphVertex } from '../model/graphvertex.js';
 /**
 a>b>c,d
 a>e;edge text
@@ -19,7 +24,7 @@ msc {
 node js/diagrammer.js verbose mscgen.test mscgen
 @param {GraphCanvas} graphcanvas
 */
-function mscgen(graphcanvas) {
+export function mscgen(graphcanvas) {
     output(graphcanvas, "msc {", true);
     let comma = false;
     // print out all node declarations FIRST (if any)

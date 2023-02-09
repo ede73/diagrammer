@@ -1,3 +1,9 @@
+import { generators } from '../model/graphcanvas.js';
+import { debug, output, outputFormattedText, getAttributeAndFormat } from '../model/support.js';
+import { GraphGroup } from '../model/graphgroup.js';
+import { GraphVertex } from '../model/graphvertex.js';
+import { iterateEdges } from '../model/support.js';
+
 const PlantUMLShapeMap = {
     default: "box",
     invis: "invis",
@@ -52,7 +58,7 @@ a->e:edge text
 node js/diagrammer.js verbose plantuml_sequence.test plantuml_sequence
 @param {GraphCanvas} graphcanvas
 */
-function plantuml_sequence(graphcanvas) {
+export function plantuml_sequence(graphcanvas) {
     const processAVertex = function (obj, sbgraph) {
         const nattrs = [];
         const styles = [];

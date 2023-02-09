@@ -1,3 +1,9 @@
+import { generators } from '../model/graphcanvas.js';
+import { output, getAttributeAndFormat } from '../model/support.js';
+import { traverseEdges } from '../model/model.js';
+import { GraphGroup } from '../model/graphgroup.js';
+import { GraphVertex } from '../model/graphvertex.js';
+
 /**
 a>b>c,d
 a>e;edge text
@@ -22,7 +28,7 @@ http://blockdiag.com/en/seqdiag/index.html
 node js/diagrammer.js verbose seqdiag.test seqdiag
 @param {GraphCanvas} graphcanvas
 */
-function seqdiag(graphcanvas) {
+export function seqdiag(graphcanvas) {
     output(graphcanvas, "seqdiag {", true);
     output(graphcanvas, "autonumber = True;");
     // quite fucked up life line activations and no control over..skip
@@ -44,7 +50,7 @@ function seqdiag(graphcanvas) {
                     getAttributeAndFormat(z, 'label', ',label="{0}"');
                 if (styleAndLabel.trim() != "")
                     styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
-                    output(graphcanvas, z.getName() + styleAndLabel + ";");
+                output(graphcanvas, z.getName() + styleAndLabel + ";");
             }
         } else if (obj instanceof GraphVertex) {
             let styleAndLabel = getAttributeAndFormat(obj, 'style', ',style={0}') +
@@ -137,11 +143,11 @@ function seqdiag(graphcanvas) {
             output(graphcanvas, "ERROR: SHOULD NOT HAPPEN");
         }
         // MUST HAVE whitespace at both sides of the "arrow"
-        if (!attrs || attrs.length==0) {
+        if (!attrs || attrs.length == 0) {
             attrs.push("label=\"\"");
         }
-        output(graphcanvas, lhs.getName() + " " + edgeType + " " + 
-        rightName + "[" + attrs.join(",") + "];");
+        output(graphcanvas, lhs.getName() + " " + edgeType + " " +
+            rightName + "[" + attrs.join(",") + "];");
     });
     output(graphcanvas, false);
     output(graphcanvas, "}");

@@ -1,4 +1,9 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
+import { generators } from '../model/graphcanvas.js';
+import { traverseVertices, traverseEdges } from '../model/model.js';
+import { GraphGroup } from '../model/graphgroup.js';
+import { debug, output } from '../model/support.js';
+
 /**
 
 	  // setup a few example class vertices and relationships
@@ -26,11 +31,11 @@
 	  node js/diagrammer.js verbose uml.test umlclass
 @param {GraphCanvas} graphcanvas
 */
-function generateUmlClass(graphcanvas) {
+export function umlclass(graphcanvas) {
 	//debug(graphcanvas)
 	const groups = [];
 	const edges = [];
-	
+
 	const nameAndLabel = ln => {
 		// name;name():?? -> name():??
 		// name;:?? -> name():??
@@ -146,4 +151,4 @@ function generateUmlClass(graphcanvas) {
 	});
 	output(graphcanvas, JSON.stringify([groups, edges]));
 }
-generators.set("umlclass", generateUmlClass);
+generators.set("umlclass", umlclass);

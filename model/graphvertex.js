@@ -1,5 +1,5 @@
 //@ts-check
-import {GraphObject} from '../model/graphobject.js';
+import { GraphObject } from '../model/graphobject.js';
 
 /**
  * Represents a Vertex in a visualization
@@ -22,6 +22,8 @@ export class GraphVertex extends GraphObject {
         // UH... this is used in grammar parser to TEMPORARILY store edge object
         /** @type {string} */
         this.edgelabel = undefined;
+        /** @type {boolean} */
+        this.noedges = undefined;
     }
 
     /**

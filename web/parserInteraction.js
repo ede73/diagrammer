@@ -1,4 +1,4 @@
-import {diagrammer_parser} from '../build/diagrammer_parser.js';
+import { diagrammer_parser } from '../build/diagrammer_parser.js';
 
 /**
  * @type {boolean}
@@ -78,7 +78,7 @@ export function parse(data, generator, visualizer, reloadImg) {
      * const tc=textArea.textContent; diagrammer_parser.parse(tc+"\n"); highlight(tc);
      */
     //cancelVTimer();
-    const vdelay  = 1000;
+    const vdelay = 1000;
     const vtimer = window.setTimeout(function () {
         //vtimer = null;
         console.log("Visualize now using " + diagrammer_parser.yy.USE_VISUALIZER);

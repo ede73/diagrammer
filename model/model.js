@@ -1,6 +1,15 @@
+// @ts-check 
 // =====================================
 // ONLY used in grammar/diagrammer.grammar
 // =====================================
+import { debug } from "../model/support.js";
+import { GraphCanvas } from "../model/graphcanvas.js";
+import { GraphGroup } from "../model/graphgroup.js";
+import { GraphVertex } from "../model/graphvertex.js";
+import { GraphInner } from "../model/graphinner.js";
+import { GraphObject } from "../model/graphobject.js";
+import { GraphEdge } from "../model/graphedge.js";
+import { getAttribute } from "../model/support.js";
 
 /**
  *
@@ -16,7 +25,7 @@
  * @param {string} variable ${XXX:yyy} assignment or ${XXX} query
  * @return {string} Value of the variable
  */
-function processVariable(yy, variable) {
+export function processVariable(yy, variable) {
     // ASSIGN VARIABLE
     // $(NAME:CONTENT...)
     // or
@@ -45,12 +54,12 @@ function processVariable(yy, variable) {
  * Usage: grammar/diagrammer.grammar
  *
  * @param yy Lexer yy
- * @param {GraphObject} lhs left hand side of the list
+ * @param {(GraphObject|GraphObject[])} lhs left hand side of the list
  * @param {GraphObject} rhs right hand side of the list
  * @param {string} rhsEdgeLabel optional RHS label
  * @return {Array}
  */
-function getList(yy, lhs, rhs, rhsEdgeLabel) {
+export function getList(yy, lhs, rhs, rhsEdgeLabel) {
     if (lhs instanceof GraphVertex) {
         debug("getList(vertex:" + lhs + ",rhs:[" + rhs + "])", true);
         const lst = [];
@@ -59,8 +68,7 @@ function getList(yy, lhs, rhs, rhsEdgeLabel) {
         lst.push(getVertex(yy, rhs).setEdgeLabel(rhsEdgeLabel));
         debug("return vertex:" + lst, false);
         return lst;
-    }
-    if (lhs instanceof GraphGroup) {
+    } else if (lhs instanceof GraphGroup) {
         debug("getList(group:[" + lhs + "],rhs:" + rhs + ")", true);
         const lst = [];
         lst.push(lhs);
@@ -68,6 +76,9 @@ function getList(yy, lhs, rhs, rhsEdgeLabel) {
         lst.push(getGroup(yy, rhs).setEdgeLabel(rhsEdgeLabel));
         debug("return group:" + lst, false);
         return lst;
+    }
+    if (!(lhs instanceof Array)) {
+        throw new Error("getList requires LHS to be Vertex, Group or Array");
     }
     debug("getList(lhs:[" + lhs + "],rhs:" + rhs, true);
     // LHS not a vertex..
@@ -93,9 +104,9 @@ function getList(yy, lhs, rhs, rhsEdgeLabel) {
  * @param yy Lexer yy
  * @param {(string|GraphObject|Array)} name Reference, Vertex/Array/Group
  * @param {string} [style] OPTIONAL if style given, update (only if name refers to vertex)
- * @return {GraphObject}
+ * @return {(GraphVertex|GraphGroup)} Comment claims to return Array, but quick run didn't reveal Array ever returned..
  */
-function getVertex(yy, name, style) {
+export function getVertex(yy, name, style) {
     debug("getVertex (name:" + name + ",style:" + style + ")", true);
     function findVertex(yy, name, style) {
         if (name instanceof GraphVertex) {
@@ -103,10 +114,12 @@ function getVertex(yy, name, style) {
             return name;
         }
         if (name instanceof Array) {
+            // TODO: Get rid of this block, makes no sense...?? ANymore??
+            throw new Error("Should never happen");
             return name;
         }
 
-        const search = function s(container, /** @type {string} */ name) {
+        const search = function s(/** @type {(GraphCanvas|GraphGroup)} */container, /** @type {string} */ name) {
             if (container.getName() == name) return container;
             for (const i in container.OBJECTS) {
                 if (!container.OBJECTS.hasOwnProperty(i)) continue;
@@ -162,9 +175,9 @@ function getVertex(yy, name, style) {
  *
  * Get current container
  * @param yy Lexer
- * @return {(GraphCanvas|GraphGroup|SubGroup)}
+ * @return {(GraphCanvas|GraphGroup|GraphInner)}
  */
-function getCurrentContainer(yy) {
+export function getCurrentContainer(yy) {
     // no need for value, but runs init if missing
     getGraphCanvas(yy);
     return yy.CURRENTCONTAINER[yy.CURRENTCONTAINER.length - 1];
@@ -176,10 +189,10 @@ function getCurrentContainer(yy) {
  * Usage: grammar/diagrammer.grammar
  *
  * @param yy lexer
- * @param {(GraphCanvas|GraphGroup|SubGroup)} container Set this container as current container
- * @return {(GraphCanvas|GraphGroup|SubGroup)}
+ * @param {(GraphCanvas|GraphGroup|GraphInner)} container Set this container as current container
+ * @return {(GraphCanvas|GraphGroup|GraphInner)}
  */
-function enterContainer(yy, container) {
+export function enterContainer(yy, container) {
     yy.CURRENTCONTAINER.push(container);
     // yy.GRAPHVANVAS.setCurrentContainer(yy.GRAPHVANVAS);
     return container;
@@ -195,7 +208,7 @@ function enterContainer(yy, container) {
  *
  * @param yy lexer
  */
-function exitContainer(yy) {
+export function exitContainer(yy) {
     if (yy.CURRENTCONTAINER.length <= 1)
         throw new Error("INTERNAL ERROR:Trying to exit ROOT container");
     const currentContainer = yy.CURRENTCONTAINER.pop();
@@ -212,26 +225,38 @@ function exitContainer(yy) {
  *
  * Usage: grammar/diagrammer.grammar
  */
-function enterSubGraph(yy) {
+export function enterSubGraph(yy) {
     return enterContainer(yy, _getSubGraph(yy));
 }
 
 /*
  * Usage: grammar/diagrammer.grammar
  */
-function exitSubGraph(yy) {
+export function exitSubGraph(yy) {
     //Now should edit the ENTRANCE EDGE to point to a>b, a>d, a>e
-    const currentSubGraph = getCurrentContainer(yy);
+    const currentSubGraph_TypeCheckerFix = getCurrentContainer(yy);
+    if (currentSubGraph_TypeCheckerFix instanceof GraphCanvas) {
+        throw new Error("Subgraph cannot be canvas");
+    }
+    if (!(currentSubGraph_TypeCheckerFix instanceof GraphInner)) {
+        throw new Error("Subgraph cannot be any other than GraphInner:" + typeof (currentSubGraph_TypeCheckerFix));
+    }
+    /** @type {(GraphInner)} */
+    const currentSubGraph = currentSubGraph_TypeCheckerFix;
+
     debug('Exit subgraph ' + currentSubGraph);
     let edge = null;
 
+    let edgeIndex = undefined;
+
     //fix entrance
-    for (var i in yy.EDGES) {
-        if (!yy.EDGES.hasOwnProperty(i)) continue;
-        edge = yy.EDGES[i];
+    for (const idx in yy.EDGES) {
+        if (!yy.EDGES.hasOwnProperty(idx)) continue;
+        edge = yy.EDGES[idx];
         if (edge.right.name == currentSubGraph.name && edge.left.name == currentSubGraph.entrance.name) {
             //remove this edge!
-            yy.EDGES.splice(i, 1);
+            edgeIndex = Number(idx);
+            yy.EDGES.splice(edgeIndex, 1);
             //and then relink it to containers vertices that have no LEFT edges
             break;
         }
@@ -244,28 +269,36 @@ function exitSubGraph(yy) {
         for (var n in currentSubGraph.ROOTVERTICES) {
             if (!currentSubGraph.ROOTVERTICES.hasOwnProperty(n)) continue;
             const vertex = currentSubGraph.ROOTVERTICES[n];
-            currentSubGraph.entrance.noedges = undefined;
+            if (currentSubGraph.entrance) {
+                currentSubGraph.entrance.noedges = undefined;
+            }
             vertex.noedges = undefined;
             const newEdge = getEdge(yy, edge.edgeType, currentSubGraph.entrance, vertex, edge.label,
                 undefined, undefined, undefined, undefined, true);
             newEdge.container = currentSubGraph;
-            yy.EDGES.splice(i++, 0, newEdge);
+            yy.EDGES.splice(edgeIndex++, 0, newEdge);
         }
     }
+
+    /** @type {GraphObject} */
+    let lastVertex;
 
     //fix exits
     //{"link":{"edgeType":">","left":1,"right":"z","label":"from e and h"}}
     const exits = [];
-    for (var vertex in currentSubGraph.OBJECTS) {
-        if (!currentSubGraph.OBJECTS.hasOwnProperty(vertex)) continue;
-        vertex = currentSubGraph.OBJECTS[vertex];
+    for (const idx in currentSubGraph.OBJECTS) {
+        if (!currentSubGraph.OBJECTS.hasOwnProperty(idx)) continue;
+        const vertex = currentSubGraph.OBJECTS[idx];
+        lastVertex = vertex;
         if (!hasOutwardEdge(yy, vertex)) {
             exits.push(vertex);
         }
     }
 
     debug('exits ' + exits);
-    currentSubGraph.setExit(vertex);
+    if (lastVertex) {
+        currentSubGraph.setExit(lastVertex);
+    }
     return exitContainer(yy);
 }
 
@@ -281,12 +314,12 @@ function exitSubGraph(yy) {
  * @param ref Type of reference, if group, return it
  * @return ref if ref instance of group, else the newly created group
  */
-function getGroup(yy, ref) {
+export function getGroup(yy, ref) {
     if (ref instanceof GraphGroup) return ref;
     debug("getGroup() NEW GROUP:" + yy + "/" + ref, true);
     // TODO: MOVING TO GraphCanvas
     if (!yy.GROUPIDS) yy.GROUPIDS = 1;
-    const newGroup = new GraphGroup(yy.GROUPIDS++);
+    const newGroup = new GraphGroup(String(yy.GROUPIDS++));
     debug("push group " + newGroup + " to " + yy);
     _pushObject(yy, newGroup);
 
@@ -319,12 +352,12 @@ function getGroup(yy, ref) {
  * @param {string} [edgeColor] Optional color for the edge
  * @param {string} [lcompass] Left hand side compass value
  * @param {string} [rcompass] Reft hand side compass value
+ * @param {boolean} [dontadd] Reft hand side compass value
  * @return {GraphEdge} the edge that got added
  */
-function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass, dontadd) {
+export function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass, dontadd) {
     let lastEdge;
     const current_container = getCurrentContainer(yy);
-
     debug(true);
     if (rhs instanceof GraphInner && !rhs.getEntrance()) {
         rhs.setEntrance(lhs);
@@ -378,7 +411,7 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
             fmt += "rcompass: " + rcompass;
         debug("getEdge type:" + edgeType + " l:" + lhs + " r:" + rhs + fmt);
     }
-    if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) & !(lhs instanceof GraphInner)) {
+    if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) && !(lhs instanceof GraphInner)) {
         throw new Error("LHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
     if (!(rhs instanceof GraphVertex) && !(rhs instanceof GraphGroup) && !(rhs instanceof GraphInner)) {
@@ -437,7 +470,7 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
  * Usage: grammar/diagrammer.grammar, generators
  * @return {GraphCanvas}
  */
-function getGraphCanvas(yy) {
+export function getGraphCanvas(yy) {
     // debug(" getGraphCanvas "+yy);
     if (!yy.GRAPHVANVAS) {
         //debug("no graphcanvas,init - in getGraphCanvas",true);
@@ -446,11 +479,11 @@ function getGraphCanvas(yy) {
         }
         debug("...Initialize emptyroot " + yy);
         // TODO: DOESN'T WORK as type hint! Modularize to own obj..
-        /** @type  {(GraphCanvas|GraphGroup|SubGroup)} */
+        /** @type  {(GraphCanvas|GraphGroup|GraphInner)} */
         yy.CURRENTCONTAINER = [];
         /** @type {GraphEdge[]} */
         yy.EDGES = [];
-        /** @type {int} */
+        /** @type {number} */
         yy.CONTAINER_EXIT = 1;
         /** @type  {GraphCanvas} */
         yy.GRAPHVANVAS = new GraphCanvas();
@@ -464,7 +497,7 @@ function getGraphCanvas(yy) {
  * Usage: grammar/diagrammer.grammar, generators/digraph.js
  * @param {GraphObject} vertex
  */
-function hasOutwardEdge(yy, vertex) {
+export function hasOutwardEdge(yy, vertex) {
     for (const i in yy.EDGES) {
         if (!yy.EDGES.hasOwnProperty(i)) continue;
         const edge = yy.EDGES[i];
@@ -519,9 +552,9 @@ function containsObject(container, obj) {
 /** 
  * Usage: generators
  * @param {GraphCanvas} graphcanvas
- * @param {function(GraphEdge)} callback
+ * @param {function(GraphEdge):void} callback
  */
-function traverseEdges(graphcanvas, callback) {
+export function traverseEdges(graphcanvas, callback) {
     for (const i in graphcanvas.EDGES) {
         if (!graphcanvas.EDGES.hasOwnProperty(i)) continue;
         callback(graphcanvas.EDGES[i]);
@@ -530,13 +563,19 @@ function traverseEdges(graphcanvas, callback) {
 
 /**
  * Usage: generators
- * @param {GraphObject} container
- * @param {function((GraphVertex|GraphGroup)):void} callback
+ * @param {(GraphCanvas|GraphGroup)} container
+ * @param {function((GraphVertex|GraphGroup|GraphInner)):void} callback
  */
-function traverseVertices(container, callback) {
+export function traverseVertices(container, callback) {
     for (const i in container.OBJECTS) {
         if (!container.OBJECTS.hasOwnProperty(i)) continue;
-        callback(container.OBJECTS[i]);
+        // this can only be GraphVertex|GraphGroup|GraphInner
+        // didn't figure out how to keep typechecker happy now (TODO:)
+        const obj = container.OBJECTS[i];
+        // just to keep linter happy... Also Inner is always Group, so not necessary
+        if (obj instanceof GraphVertex || obj instanceof GraphGroup || obj instanceof GraphInner) {
+            callback(obj);
+        }
     }
 }
 
@@ -600,7 +639,7 @@ function _getSubGraph(yy, ref) {
     if (ref instanceof GraphInner) return ref;
     //debug("_getSubGraph() NEW SubGraph:" + yy + "/" + ref,true);
     if (!yy.SUBGRAPHS) yy.SUBGRAPHS = 1;
-    const newSubGraph = new GraphInner(yy.SUBGRAPHS++);
+    const newSubGraph = new GraphInner(String(yy.SUBGRAPHS++));
     //debug("push SubGraph " + newSubGraph + " to " + yy);
     _pushObject(yy, newSubGraph);
     //debug(false);

@@ -1,3 +1,4 @@
+import { generators } from '../model/graphcanvas.js';
 /**
 a>b>c,d
 a>e;link text
@@ -19,7 +20,7 @@ to
 node js/diagrammer.js verbose ast.test ast
 @param {GraphCanvas} graphcanvas
 */
-function ast(graphcanvas) {
+export function ast(graphcanvas) {
     debug(graphcanvas)
     const processAVertex = o => {
     };

@@ -1,7 +1,7 @@
 // @ts-check
-import {GraphObject} from '../model/graphobject.js';
-import {GraphVertex} from '../model/graphvertex.js';
-import {setAttr, getAttribute, debug} from '../model/support.js';
+import { GraphObject } from '../model/graphobject.js';
+import { GraphVertex } from '../model/graphvertex.js';
+import { setAttr, getAttribute, debug } from '../model/support.js';
 
 /**
  * Represents a container
@@ -14,7 +14,10 @@ export class GraphGroup extends GraphObject {
         this.name = name;
         /** @type {GraphObject[]} */
         this.OBJECTS = [];
-        /** @type {GraphObject[]} */
+        /**
+         * Never an GraphEdge though
+         * @type {GraphObject[]}
+         */
         this.ROOTVERTICES = [];
         /** @type {GraphVertex[]} */
         this.equal = undefined;
@@ -24,6 +27,8 @@ export class GraphGroup extends GraphObject {
         this.exitvertex = undefined;
         /** @type {string} */
         this.entryedge = undefined;
+        /** @type {GraphObject} */ // TODO: never used here really
+        this.entrance = undefined;
     }
 
     /**

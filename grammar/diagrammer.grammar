@@ -2,8 +2,8 @@
 %start S
 %ebnf
 %{
-	generators = new Map();
-	visualizations = new Map();
+	//generators = new Map();
+	//visualizations = new Map();
 %}
 %%
 S

@@ -10,7 +10,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as lexer from '../build/diagrammer_lexer.js';
-import {diagrammer_parser} from '../build/diagrammer_parser.js';
+import { diagrammer_parser } from '../build/diagrammer_parser.js';
 
 let myArgs = process.argv.slice(2);
 

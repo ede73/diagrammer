@@ -94,7 +94,7 @@ for test in $tests; do
   echo "Test suite $test" >&2
   testbin=$test
   runtest ast.txt
-  [ "$test" != "actdiag" && "$test" != "blockdiag" ] && {
+  [ "$test" != "actdiag" ] && [ "$test" != "blockdiag" ] && {
     runtest state_nodelinktests.txt
     runtest url.txt
     runtest state.txt

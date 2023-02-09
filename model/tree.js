@@ -1,3 +1,4 @@
+import { debug } from "../model/support.js";
 /**
  * Tree representration
  */
@@ -54,7 +55,7 @@ export function findVertex(tree, findData) {
  * @param {boolean} hasSibling Just used internally, omit
  * @param {TreeVertex} parent Just used internally, omit
  */
-export function traverseTree(root, callback, enter, exit, level=undefined, hasSibling=undefined, parent=undefined) {
+export function traverseTree(root, callback, enter, exit, level = undefined, hasSibling = undefined, parent = undefined) {
 	//debug('process vertex '+root.data.name + ' childmount'+siblingAmount);
 	if (!level) level = 0;
 	if (!hasSibling) hasSibling = false;

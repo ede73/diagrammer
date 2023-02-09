@@ -1,3 +1,8 @@
+import { generators } from '../model/graphcanvas.js';
+import { getAttributeAndFormat } from '../model/support.js';
+import { traverseEdges } from '../model/model.js';
+import { GraphGroup } from '../model/graphgroup.js';
+
 const NetworkDiagShapeMap =
 {
     default: "box",
@@ -57,7 +62,7 @@ http://blockdiag.com/en/nwdiag/
 node js/diagrammer.js verbose nwdiag.test nwdiag
 @param {GraphCanvas} graphcanvas
 */
-function nwdiag(graphcanvas) {
+export function nwdiag(graphcanvas) {
     graphcanvas.result("nwdiag{\n default_fontsize = 16\n");
     for (const i in graphcanvas.OBJECTS) {
         if (!graphcanvas.OBJECTS.hasOwnProperty(i)) continue;
@@ -99,7 +104,7 @@ function nwdiag(graphcanvas) {
             if (obj.shape && !NetworkDiagShapeMap[obj.shape]) {
                 throw new Error("Missing shape mapping");
             }
-            const mappedShape = NetworkDiagShapeMap[obj.shape] ? NetworkDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
+            const mappedShape = NetworkDiagShapeMap[obj.shape] ? NetworkDiagShapeMap[obj.shape] : NetworkDiagShapeMap['default'];
             // ICON does not work, using background
             let tmp = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
                 getAttributeAndFormat(obj, 'image', ',background="icons{0}"') + ',shape="{0}"'.format(mappedShape) +

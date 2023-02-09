@@ -1,3 +1,8 @@
+import { generators } from '../model/graphcanvas.js';
+import { output, getAttributeAndFormat } from '../model/support.js';
+import { traverseVertices, traverseEdges } from '../model/model.js';
+import { GraphGroup } from '../model/graphgroup.js';
+
 const BlockDiagShapeMap = {
     default: "box",
     invis: "invis",
@@ -64,8 +69,8 @@ http://blockdiag.com/en/blockdiag/
 node js/diagrammer.js verbose blockdiag.test blockdiag
 @param {GraphCanvas} graphcanvas
 */
-function blockdiag(graphcanvas) {
-    output(graphcanvas, "blockdiag {",true);
+export function blockdiag(graphcanvas) {
+    output(graphcanvas, "blockdiag {", true);
     output(graphcanvas, "default_fontsize = 14");
     if (graphcanvas.getDirection() === "portrait") {
         output(graphcanvas, "orientation=portrait");
@@ -86,13 +91,13 @@ function blockdiag(graphcanvas) {
             output(graphcanvas, getAttributeAndFormat(obj, 'color', '   color="{0}"'));
             output(graphcanvas, getAttributeAndFormat(obj, 'label', '   label="{0}"'));
             if (lastNode && lastNode.trim() != "") {
-                 lastNode = "[" + lastNode.trim().substring(1) + "]";
-             }
-            traverseVertices(obj,  obj => {
+                lastNode = "[" + lastNode.trim().substring(1) + "]";
+            }
+            traverseVertices(obj, obj => {
                 if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
                     throw new Error("Missing shape mapping");
                 }
-                const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : ActDiagShapeMap['default'];
+                const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : BlockDiagShapeMap['default'];
                 let tmp = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
                     ',shape={0}'.format(mappedShape) +
                     getAttributeAndFormat(obj, 'label', ',label="{0}"');

@@ -5,6 +5,7 @@
 #And DIRNAMES=a/:c/
 # $@ = name of the target being generated
 # @^ list of dependencies on the target
+# @^ first dependency on the list
 
 GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.grammar
 MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js
@@ -22,30 +23,41 @@ build/diagrammer_lexer.js: grammar/diagrammer.lex
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
 
-build/diagrammer.all: $(GRAMMAR_FILES) model/model.js generators/*.js
+build/diagrammer.all: $(GRAMMAR_FILES) # model/model.js # generators/*.js
 	@mkdir -p build
 	@echo Compile build/diagrammer.all
 	@cat $^ >$@
+
+whatever: generators/*.js
+	for generator in $^; do \
+	  genfunc="$$(basename $$generator | cut -d. -f1)"; \
+	  echo "import {$$genfunc} from '../$$generator';" \
+	;done
 
 build/diagrammer_parser.js: build/diagrammer.all Makefile
 	@mkdir -p build
 	@echo make parser
 	@jison $< -o $@
 	sed -i "1 i\\\\" $@
-	sed -i "1 i\var collectNextVertex;" $@
-	sed -i "1 i\var visualizations;" $@
-	sed -i "1 i\var generators;" $@
-	sed -i "1 i\\\\" $@
-	sed -i "1 i\import * as model from '../model/model.js';" $@
+	for generator in generators/*.js; do \
+	  genfunc="$$(basename $$generator | cut -d. -f1)"; \
+	  sed -i "1 i\import {$$genfunc} from '../$$generator';" $@ \
+	;done
+	#sed -i "1 i\import * as model from '../model/model.js';" $@
+	sed -i "1 i\import {enterSubGraph, exitSubGraph, getList, getEdge, getCurrentContainer, getVertex, getGroup, exitContainer, enterContainer, processVariable, getGraphCanvas} from '../model/model.js';" $@
 	sed -i "1 i\import {traverseTree, findVertex, TreeVertex} from '../model/tree.js';" $@
 	sed -i "1 i\import {Shapes} from '../model/shapes.js';" $@
 	sed -i "1 i\import {iterateEdges, outputFormattedText, getAttributeAndFormat, output, getAttribute, setAttr, debug} from '../model/support.js';" $@
 	sed -i "1 i\import {GraphInner} from '../model/graphinner.js';" $@
 	sed -i "1 i\import {GraphEdge} from '../model/graphedge.js';" $@
-	sed -i "1 i\import {GraphCanvas} from '../model/graphcanvas.js';" $@
+	sed -i "1 i\import {generators, visualizations, GraphCanvas} from '../model/graphcanvas.js';" $@
 	sed -i "1 i\import {GraphGroup} from '../model/graphgroup.js';" $@
 	sed -i "1 i\import {GraphVertex} from '../model/graphvertex.js';" $@
 	sed -i "1 i\import {GraphObject} from '../model/graphobject.js';" $@
+	sed -i "1 i\\\\" $@
+	sed -i "1 i\var collectNextVertex;" $@
+	#sed -i "1 i\var visualizations;" $@
+	#sed -i "1 i\var generators=new Map();" $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 	echo '{"type":"module"}' > build/package.json
 	sed -i 's/^var diagrammer_parser/export var diagrammer_parser/g' $@

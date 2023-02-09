@@ -1,3 +1,10 @@
+import { generators, visualizations } from '../model/graphcanvas.js';
+import { output, debug, getAttributeAndFormat } from '../model/support.js';
+import { GraphGroup } from "../model/graphgroup.js";
+import { GraphInner } from "../model/graphinner.js";
+import { GraphVertex } from '../model/graphvertex.js';
+import { traverseEdges, getVertex, hasOutwardEdge } from '../model/model.js';
+
 const DigraphShapeMap = {
     default: "box",
     invis: "invis",
@@ -54,7 +61,7 @@ node js/diagrammer.js verbose digraph.test digraph
 
 @param {GraphCanvas} graphcanvas
 */
-function digraph(graphcanvas) {
+export function digraph(graphcanvas) {
     // TODO: See splines control
     // http://www.graphviz.org/doc/info/attrs.html#d:splines
     // TODO: Start note fdp/neato

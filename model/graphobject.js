@@ -15,6 +15,12 @@ export class GraphObject {
         this.textcolor = undefined;
         /** @type {string} */
         this.url = undefined;
+        /**
+         * Internal flag for no edge objects. Applies to all but Edges
+         * (We'd need another abstraction between GraphObject and Inner/Vertex/Group (and Edges))
+         * @type {boolean}
+         */
+        this.noedges = undefined;
     }
 
     /**

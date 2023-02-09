@@ -1,7 +1,7 @@
 //@ts-check
-import {GraphObject} from '../model/graphobject.js';
-import {GraphGroup} from '../model/graphgroup.js';
-import {setAttr, getAttribute, debug} from '../model/support.js';
+import { GraphObject } from '../model/graphobject.js';
+import { GraphGroup } from '../model/graphgroup.js';
+import { debug } from '../model/support.js';
 
 /**
  * An inner graph, where outside is linked to all the Vertices in side, like
@@ -17,13 +17,16 @@ export class GraphInner extends GraphGroup {
         this.name = name;
         /** @type {GraphObject[]} */
         this.OBJECTS = [];
-        /** @type {GraphObject[]} */
+        /**
+         * Never an GraphEdge though
+         * @type {GraphObject[]}
+         */
         this.ROOTVERTICES = [];
         /** @type {boolean} */
         this.isInnerGraph = true;
-        /** @type {string} */
+        /** @type {GraphObject} */ // TODO: Definitely not a string
         this.entrance = undefined;
-        /** @type {string} */
+        /** @type {GraphObject} */
         this.exit = undefined;
     }
 
@@ -45,6 +48,7 @@ export class GraphInner extends GraphGroup {
     }
 
     /**
+     * @param {GraphObject} entrance
      * @return {*}
      */
     setEntrance(entrance) {
@@ -61,7 +65,7 @@ export class GraphInner extends GraphGroup {
     }
 
     /**
-     * @param {string} exit Exit vertex name
+     * @param {GraphObject} exit Exit vertex name
      * @return {GraphInner}
      */
     setExit(exit) {

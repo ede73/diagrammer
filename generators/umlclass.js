@@ -1,3 +1,4 @@
+// WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 /**
 
 	  // setup a few example class vertices and relationships

@@ -139,24 +139,8 @@ runtest plantuml_context2.txt
 
 # Web visualizers, so test only generator
 webvisualizer=1
-#testbin=ast
-#runtest uml.txt
-
-testbin=dendrogram
-runtest dendrogram.txt
-
-testbin=layerbands
-runtest layerbands.txt
-
-testbin=parsetree
-runtest parsetree.txt
-
-#testbin=sankey
-#runtest sankey.txt
-
-testbin=seqdiag
-runtest seqdiag.txt
-
-testbin=umlclass
-runtest uml.txt
+for web_generators_only in $(grep -l 'WEB VISUALIZER ONLY' generators/*.js|tr . /|cut -d/ -f2); do
+  testbin=$web_generators_only
+  runtest ${web_generators_only}.txt
+done
 exit 0

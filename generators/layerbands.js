@@ -1,3 +1,4 @@
+// WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 // requires export (Typescript, not ES6 compatible not does node.js support it..)
 //import {GraphCanvas} from '../model/graphcanvas.js';
 /**

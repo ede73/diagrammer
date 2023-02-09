@@ -1,13 +1,13 @@
-var fs = require('fs');
-var path = require('path');
-var myArgs = process.argv.slice(2);
+const fs = require('fs');
+const path = require('path');
+const myArgs = process.argv.slice(2);
 
-var raw = fs.readFileSync(path.normalize("./" + myArgs[0]), 'utf8');
-var s = require("../build/lexer.js");
-//console.log(s)
-var st = s.lexer
+const raw = fs.readFileSync(path.normalize("./" + myArgs[0]), 'utf8');
+const lexer = require("../build/diagrammer_lexer.js");
+console.log(lexer);
+const st = lexer.diagrammer_lexer;
 st.setInput(raw);
-var h
+let h
 while (h != "EOF" && h != 1) {
   h = st.lex()
   console.log("State:" + h + "(" + st.yytext + ")")

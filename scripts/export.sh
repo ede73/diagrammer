@@ -1,9 +1,9 @@
 #!/bin/sh
 OUT="export"
 
-for m in js/diagrammer.js build/diagrammer_parser.js build/lexer.js; do
+for m in js/diagrammer.js build/diagrammer_parser.js build/diagrammer_lexer.js; do
   uglifyjs $m -o $OUT/$(basename $m) -c -m
-  sed -i -e 's,build/lexer.js,lexer.js,g' -e 's,build/diagrammer_parser.js,diagrammer_parser.js,g' $OUT/$(basename $m) 
+  sed -i -e 's,build/diagrammer_lexer.js,diagrammer_lexer.js,g' -e 's,build/diagrammer_parser.js,diagrammer_parser.js,g' $OUT/$(basename $m) 
 done
 
 cp scripts/display_image.sh "$OUT"

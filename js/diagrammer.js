@@ -15,9 +15,9 @@ if (myArgs[0] === "verbose") {
 const raw = fs.readFileSync(path.normalize("./" + myArgs[0]), 'utf8');
 
 if (myArgs[1] === "lex") {
-    const lexer = require("../build/lexer.js");
+    const lexer = require("../build/diagrammer_lexer.js");
     //LEX
-    const st = lexer.lexer
+    const st = lexer.diagrammer_lexer
     st.setInput(raw);
     let h;
     while (h != "EOF" && h != 1) {

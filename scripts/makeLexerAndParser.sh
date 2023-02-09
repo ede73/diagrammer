@@ -1,7 +1,7 @@
 #!/bin/sh
 echo Make lexer
-jison-lex grammar/diagrammer.lex -o build/lexer.js >/dev/null
-cat >>build/lexer.js <<EOF
+jison-lex grammar/diagrammer.lex -o build/diagrammer_lexer.js >/dev/null
+cat >>build/diagrammer_lexer.js <<EOF
 exports.lexer=lexer;
 EOF
 

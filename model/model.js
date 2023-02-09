@@ -48,7 +48,7 @@ function processVariable(yy, variable) {
  * @param {GraphObject} lhs left hand side of the list
  * @param {GraphObject} rhs right hand side of the list
  * @param {string} rhsEdgeLabel optional RHS label
- * @return {Array[any]}
+ * @return {Array}
  */
 function getList(yy, lhs, rhs, rhsEdgeLabel) {
     if (lhs instanceof GraphVertex) {
@@ -319,7 +319,7 @@ function getGroup(yy, ref) {
  * @param {string} [edgeColor] Optional color for the edge
  * @param {string} [lcompass] Left hand side compass value
  * @param {string} [rcompass] Reft hand side compass value
- * @return {Edge} the edge that got added
+ * @return {GraphEdge} the edge that got added
  */
 function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass, dontadd) {
     let lastEdge;
@@ -384,7 +384,7 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
     if (!(rhs instanceof GraphVertex) && !(rhs instanceof Group) && !(rhs instanceof SubGraph)) {
         throw new Error("RHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
-    const edge = new Edge(edgeType, lhs, rhs);
+    const edge = new GraphEdge(edgeType, lhs, rhs);
 
     if (lcompass) edge.lcompass = lcompass;
     else if (getAttribute(lhs, 'compass')) edge.lcompass = getAttribute(lhs, 'compass');
@@ -452,7 +452,7 @@ function getGraphRoot(yy) {
         // TODO: DOESN'T WORK as type hint! Modularize to own obj..
         /** @type  {(GraphRoot|Group|SubGroup)} */
         yy.CURRENTCONTAINER = [];
-        /** @type {Array[Edge]} */
+        /** @type {GraphEdge[]} */
         yy.EDGES = [];
         /** @type {int} */
         yy.CONTAINER_EXIT = 1;
@@ -524,7 +524,7 @@ function containsObject(container, obj) {
 /** 
  * Usage: generators
  * @param {GraphMeta} graphmeta
- * @param {function(Edge)} callback
+ * @param {function(GraphEdge)} callback
  */
 function traverseEdges(graphmeta, callback) {
     for (const i in graphmeta.EDGES) {
@@ -615,8 +615,8 @@ function _getSubGraph(yy, ref) {
 /**
  * Add edge to the list of edges, return the Edge
  * @param yy lexer
- * @param {(Edge[]|Edge)} edge Edge (Edge or Edge[])
- * @return {(Edge[]|Edge)} Return What ever passed in
+ * @param {(GraphEdge[]|GraphEdge)} edge Edge (Edge or Edge[])
+ * @return {(GraphEdge[]|GraphEdge)} Return What ever passed in
  */
 function _addEdge(yy, edge) {
     if (edge instanceof Array) {

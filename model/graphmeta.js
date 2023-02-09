@@ -29,7 +29,7 @@ class GraphMeta {
     GRAPHROOT=new GraphRoot();
 
     /**
-     * @type {Edge[]}
+     * @type {GraphEdge[]}
      */
     EDGES=[];
 

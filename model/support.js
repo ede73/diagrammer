@@ -86,7 +86,7 @@ function getAttribute(cl, attr) {
  * @param {GraphObject} cl Object to scan thru
  * @param {(string|Array)} attr Name of the attribute to return
  * @param {string} fmt Format string to apply to returned variable (optional), example: fillcolor="{0}"
- * @param {Array[any]} [resultarray] If given, in addition for returning, will PUSH the result to this array
+ * @param {Array} [resultarray] If given, in addition for returning, will PUSH the result to this array
  * @returns {string} (possibly formatted) value of the attribute or "" if attribute not found
  */
 function getAttributeAndFormat(cl, attr, fmt, resultarray) {
@@ -139,7 +139,7 @@ function output(graphmeta, txt, indentOrDedent = undefined) {
  * Send the text to the output, or format the array
  * @param {GraphMeta} graphmeta 
  * @param {string} txt 
- * @param {Array[any]} [array] Optional array format
+ * @param {Array} [array] Optional array format
  */
 function outputFormattedText(graphmeta, txt, array) {
     if (!array) {
@@ -157,7 +157,7 @@ function outputFormattedText(graphmeta, txt, array) {
 function* iterateEdges(graphmeta) {
     for (const i in graphmeta.EDGES) {
         if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
-        /** @type {Edge} */
+        /** @type {GraphEdge} */
         let foolTypeChecker = graphmeta.EDGES[i];
         yield foolTypeChecker;
     }

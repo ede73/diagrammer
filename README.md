@@ -283,7 +283,7 @@ Briefly as:
 SHAPE RECORD
 graphobject;GraphObject | {name | color | textcolor | url | label }
 avertex;GraphVertex | { shape | image | style}
-alink;Edge | { edgetype | left | right}
+alink;GraphEdge | { edgetype | left | right}
 agroup;Group | { name | OBJECTS[] | ROOTVERTICES[] | edgelabel | "defaults"}
 asubgraph;SubGraph | { name | OBJECTS[] | ROOTVERTICES[] | edgelabel | entrance | exit | "defaults"}
 

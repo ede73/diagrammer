@@ -2,7 +2,7 @@
 /**
  * Represents an edge(link) between objects (vertices,groups,lists)
  */
-class Edge extends GraphObject {
+class GraphEdge extends GraphObject {
 	/**
 	 * 
  	 * @param {string} edgeType Type of the edge(grammar!)

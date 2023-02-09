@@ -134,7 +134,7 @@ function generateUmlClass(graphcanvas) {
 	debug(groupNameIdMap);
 
 	traverseEdges(graphcanvas, l => {
-		relationship = 'generalization';
+		let relationship = 'generalization';
 		if (l.edgeType != '>') {
 			relationship = 'aggregation';
 		}

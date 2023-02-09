@@ -1,5 +1,9 @@
 // @ts-check
 import { getHTMLElement } from "../uiComponentAccess.js";
+// had to download locally...
+import * as go from '../../js/go-module.js';
+// Use in editor.. gets go.d.ts
+//import * as go from '../../js/go';
 
 // use ../manual_test_diagrams/parsetree.d
 export function visualizeParseTree(jsonData) {
@@ -69,11 +73,16 @@ function FlatTreeLayout() {
 }
 go.Diagram.inherit(FlatTreeLayout, go.TreeLayout);
 
+
 // This assumes the TreeLayout.angle is 90 -- growing downward
 FlatTreeLayout.prototype.commitLayout = function () {
     go.TreeLayout.prototype.commitLayout.call(this);  // call base method first
     // find maximum Y position of all Nodes
     let y = -Infinity;
+    // network is definitely 
+    console.log(typeof (this));
+    console.log(this);
+    console.log(typeof (this));
     this.network.vertexes.each(function (v) {
         y = Math.max(y, v.node.position.y);
     });

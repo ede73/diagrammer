@@ -1,40 +1,52 @@
 // @ts-check
 import { getHTMLElement } from "../uiComponentAccess.js";
+// had to download locally... https://gojs.net/latest/download.html
+import * as go from '../../js/go-debug-module.js';
+// Use in editor.. gets go.d.ts
+//import * as go from '../../js/go';
 
 // use ../manual_test_diagrams/layerbands.d
 export function visualizeLayerBands(jsonData) {
     const HORIZONTAL = true;
     // Perform a TreeLayout where commitLayers is overridden to modify the background Part whose key is "_BANDS".
-    function BandedTreeLayout() {
-        go.TreeLayout.call(this);
-        this.layerStyle = go.TreeLayout.LayerUniform;  // needed for straight layers
-    }
-    go.Diagram.inherit(BandedTreeLayout, go.TreeLayout);
-    BandedTreeLayout.prototype.commitLayers = function (layerRects, offset) {
-        // update the background object holding the visual "bands"
-        const bands = this.diagram.findPartForKey("_BANDS");
-        if (!bands) {
-            return;
+    class BandedTreeLayout extends go.TreeLayout {
+        constructor() {
+            super();
+            this.layerStyle = go.TreeLayout.LayerUniform;  // needed for straight layers
         }
-        const model = this.diagram.model;
-        bands.location = this.arrangementOrigin.copy().add(offset);
+        /**
+         * @param {go.Rect[]} layerRects an Array of Rects with the bounds of each of the "layers"
+         * @param {go.Point} offset the position of the top-left corner of the banded area relative to the coordinates given by the layerRects
+        */
+        commitLayers(layerRects, offset) {
+            // update the background object holding the visual "bands"
+            const bands = this.diagram.findPartForKey("_BANDS");
+            if (!bands) {
+                return;
+            }
+            const model = this.diagram.model;
+            bands.location = this.arrangementOrigin.copy().add(offset);
 
-        // make each band visible or not, depending on whether there is a layer for it
-        for (var it = bands.elements; it.next();) {
-            const idx = it.key;
-            const elt = it.value;  // the item panel representing a band
-            elt.visible = idx < layerRects.length;
-        }
+            // make each band visible or not, depending on whether there is a layer for it
+            for (var it = bands.elements; it.next();) {
+                const idx = it.key;
+                const elt = it.value;  // the item panel representing a band
+                elt.visible = idx < layerRects.length;
+            }
 
-        // set the bounds of each band via data binding of the "bounds" property
-        const arr = bands.data.itemArray;
-        for (var i = 0; i < layerRects.length; i++) {
-            const itemdata = arr[i];
-            if (itemdata) {
-                model.setDataProperty(itemdata, "bounds", layerRects[i]);
+            // set the bounds of each band via data binding of the "bounds" property
+            const arr = bands.data.itemArray;
+            for (var i = 0; i < layerRects.length; i++) {
+                const itemdata = arr[i];
+                if (itemdata) {
+                    model.setDataProperty(itemdata, "bounds", layerRects[i]);
+                }
             }
         }
     };
+
+    // go.TreeLayout.call(this);
+    // this.layerStyle = go.TreeLayout.LayerUniform;  // needed for straight layers
 
     function init() {
         var $ = go.GraphObject.make;
@@ -135,7 +147,8 @@ export function visualizeLayerBands(jsonData) {
 
         myDiagram.model = new go.TreeModel(nodearray);
 
-        const x = 0; const y = 0; const printSize = 300;
+        const x = 0; const y = 0;
+        const printSize = new go.Size(300, 300);
         const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
 
         const svgimg = getHTMLElement('D3JSIMAGES');

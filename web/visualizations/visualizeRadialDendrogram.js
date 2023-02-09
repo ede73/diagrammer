@@ -23,8 +23,6 @@ https://formidable.com/blog/2022/victory-esm/ ??
 // https://medium.com/analytics-vidhya/creating-a-radial-tree-using-d3-js-for-javascript-be943e23b74e
 export function visualizeRadialDendrogram(jsonData) {
     const radius = 450;
-    const margin = 120;
-    const angle = 360;
     const width = 400,
         height = 400;
 

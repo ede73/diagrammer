@@ -1,4 +1,6 @@
 // @ts-check
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
 // https://observablehq.com/@d3/circle-packing
 export function visualizeCirclePacked(jsonData) {
     const width = 400, height = 400;

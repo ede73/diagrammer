@@ -49,9 +49,9 @@ function ast(graphmeta) {
             equal: r.getEqual()
         }));
 
-    const objectHandler = /** @type {function((Group|GraphVertex))}*/obj => {
+    const objectHandler = /** @type {function((GraphGroup|GraphVertex))}*/obj => {
         output(true);
-        if (obj instanceof Group) {
+        if (obj instanceof GraphGroup) {
             const processAGroup = (o => {
                 const n = JSON.parse(JSON.stringify(o, skipEntrances));
                 n.OBJECTS = undefined;

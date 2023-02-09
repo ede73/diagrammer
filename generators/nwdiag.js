@@ -60,7 +60,7 @@ function nwdiag(graphmeta) {
     for (const i in r.OBJECTS) {
         if (!r.OBJECTS.hasOwnProperty(i)) continue;
         const obj = r.OBJECTS[i];
-        if (obj instanceof Group) {
+        if (obj instanceof GraphGroup) {
             // split the label to two, NAME and address
             graphmeta.result('  network ' + obj.getName() + '{');
             if (obj.getLabel() != "")
@@ -109,7 +109,7 @@ function nwdiag(graphmeta) {
     }
 
     traverseEdges(graphmeta, edge => {
-        if (!(edge.left instanceof Group || edge.right instanceof Group)) {
+        if (!(edge.left instanceof GraphGroup || edge.right instanceof GraphGroup)) {
             graphmeta.result(edge.left.getName() + " -- " + edge.right.getName() + ";");
         }
     });

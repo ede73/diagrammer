@@ -61,9 +61,9 @@ function actdiag(graphmeta) {
      * (r.getDirection()==="portrait"){ output(graphmeta," orientation=portrait");
      * }else{ //DEFAULT output(graphmeta," orientation=landscape"); }
      */
-    const parseObjects = (/** @type {function((Group|GraphVertex))}*/obj) => {
+    const parseObjects = (/** @type {function((GraphGroup|GraphVertex))}*/obj) => {
         output(true);
-        if (obj instanceof Group) {
+        if (obj instanceof GraphGroup) {
             output(graphmeta, 'lane "' + obj.getName() + '"{', true);
             traverseVertices(obj, (obj) => {
                 if (obj.shape && !ActDiagShapeMap[obj.shape]) {

@@ -3,7 +3,7 @@
 /**
  * Represents a container
  */
-class Group extends GraphObject {
+class GraphGroup extends GraphObject {
     /** @param {string} name */
     constructor(name) {
         super(undefined); // TODO:
@@ -26,7 +26,7 @@ class Group extends GraphObject {
     /**
      * Save EQUAL vertex ranking
      * @param {GraphVertex[]} value
-     * @return {Group}
+     * @return {GraphGroup}
      */
     setEqual(value) {
         this.equal = value;
@@ -43,7 +43,7 @@ class Group extends GraphObject {
     /**
      * Temporary for RHS list array!!
      * @param {string} value
-     * @return {Group}
+     * @return {GraphGroup}
      */
     setEdgeLabel(value) {
         this.edgelabel = value;
@@ -59,7 +59,7 @@ class Group extends GraphObject {
      * currentContainer first
      * @param {string} key
      * @param {any} value
-     * @return {Group}
+     * @return {GraphGroup}
      */
     setDefault(key, value) {
         debug("group:Set group " + key + " to " + value);

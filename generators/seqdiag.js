@@ -31,7 +31,7 @@ function seqdiag(graphmeta) {
     for (const i in root.OBJECTS) {
         if (!root.OBJECTS.hasOwnProperty(i)) continue;
         const obj = root.OBJECTS[i];
-        if (obj instanceof Group) {
+        if (obj instanceof GraphGroup) {
             graphmeta.result(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'));
             for (const j in obj.OBJECTS) {
                 if (!obj.OBJECTS.hasOwnProperty(j)) continue;
@@ -73,7 +73,7 @@ function seqdiag(graphmeta) {
                 attrs.push('label="' + label.trim() + '"');
             }
         }
-        if (rhs instanceof Group) {
+        if (rhs instanceof GraphGroup) {
             // just pick ONE Vertex from group and use lhead
             // TODO: Assuming it is Vertex (if Recursive groups implemented, it
             // could be smthg else)

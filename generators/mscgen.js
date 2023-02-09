@@ -25,7 +25,7 @@ function mscgen(graphmeta) {
     let comma = false;
     // print out all node declarations FIRST (if any)
     traverseVertices(root, obj => {
-        if (obj instanceof Group) {
+        if (obj instanceof GraphGroup) {
             output(graphmeta, ' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/');
             traverseVertices(obj, z => {
                 let tmp = getAttributeAndFormat(z, 'color', ',color="{0}"') +
@@ -54,7 +54,7 @@ function mscgen(graphmeta) {
         let rhs = edge.right;
         let lhs = edge.left;
 
-        if (rhs instanceof Group) {
+        if (rhs instanceof GraphGroup) {
             // just pick ONE Vertex from group and use lhead
             // TODO: Assuming it is Vertex (if Recursive groups implemented, it
             // could be smthg else)

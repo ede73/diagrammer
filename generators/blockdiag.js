@@ -74,11 +74,11 @@ function blockdiag(graphmeta) {
     let tmp = root.getStart();
 
     /**
-     * @param {(GraphVertex|Group)} obj
+     * @param {(GraphVertex|GraphGroup)} obj
      */
-    const parseObjects = /** @type {function((Group|GraphVertex))}*/obj => {
+    const parseObjects = /** @type {function((GraphGroup|GraphVertex))}*/obj => {
         output(true);
-        if (obj instanceof Group) {
+        if (obj instanceof GraphGroup) {
             output(graphmeta, ' group "' + obj.getLabel() + '"{', true);
             output(graphmeta, getAttributeAndFormat(obj, 'color', '   color="{0}"'));
             output(graphmeta, getAttributeAndFormat(obj, 'label', '   label="{0}"'));

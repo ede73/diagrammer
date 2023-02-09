@@ -112,7 +112,7 @@ function plantuml_sequence(graphmeta) {
      * for this container, break out immediately
      * this is to emulate ORDERED nodes of plantuml
      * (node=edge,node,edge.group...all in order for this fucker)
-     * @param {GraphRoot|Group} container 
+     * @param {GraphRoot|GraphGroup} container 
      * @param {boolean} sbgraph 
      */
     const printEdges = (container, sbgraph) => {
@@ -140,7 +140,7 @@ function plantuml_sequence(graphmeta) {
             let lhs = edge.left;
 
             // output(graphmeta, indent("//"+lr));
-            if (rhs instanceof Group) {
+            if (rhs instanceof GraphGroup) {
                 // just pick ONE Vertex from group and use lhead
                 // TODO: Assuming it is Vertex (if Recursive groups implemented,
                 // it could be smthg else)
@@ -153,7 +153,7 @@ function plantuml_sequence(graphmeta) {
                     // But should add already at TOP
                 }
             }
-            if (lhs instanceof Group) {
+            if (lhs instanceof GraphGroup) {
                 // attrs.push(" ltail=cluster_" + ll.getName());
                 // TODO:
                 lhs = lhs.OBJECTS[0];
@@ -242,7 +242,7 @@ function plantuml_sequence(graphmeta) {
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
             const obj = root.OBJECTS[i];
-            if (obj instanceof Group) {
+            if (obj instanceof GraphGroup) {
                 // TODO:
                 // Group name,OBJECTS,get/setEqual,toString
                 const processAGroup = function (o) {

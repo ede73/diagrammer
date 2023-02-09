@@ -43,7 +43,7 @@ function generateLayerBands(graphmeta) {
 	const root = graphmeta.GRAPHROOT;
 
 	traverseVertices(root, obj => {
-		if (obj instanceof Group) {
+		if (obj instanceof GraphGroup) {
 			groups.itemArray.push({ text: obj.name });
 		}
 	});

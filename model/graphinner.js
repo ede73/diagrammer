@@ -5,7 +5,7 @@
  * @param name Name of the container
  * @constructor
  */
-class GraphInner extends Group {
+class GraphInner extends GraphGroup {
     /** @param {string} name */
     constructor(name) {
         super(undefined); // TODO:

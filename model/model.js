@@ -60,7 +60,7 @@ function getList(yy, lhs, rhs, rhsEdgeLabel) {
         debug("return vertex:" + lst, false);
         return lst;
     }
-    if (lhs instanceof Group) {
+    if (lhs instanceof GraphGroup) {
         debug("getList(group:[" + lhs + "],rhs:" + rhs + ")", true);
         const lst = [];
         lst.push(lhs);
@@ -115,7 +115,7 @@ function getVertex(yy, name, style) {
                     if (style) o.setStyle(style);
                     return o;
                 }
-                if (o instanceof Group) {
+                if (o instanceof GraphGroup) {
                     const found = s(o, name);
                     if (found) return found;
                 }
@@ -162,7 +162,7 @@ function getVertex(yy, name, style) {
  *
  * Get current container
  * @param yy Lexer
- * @return {(GraphRoot|Group|SubGroup)}
+ * @return {(GraphRoot|GraphGroup|SubGroup)}
  */
 function getCurrentContainer(yy) {
     // no need for value, but runs init if missing
@@ -176,8 +176,8 @@ function getCurrentContainer(yy) {
  * Usage: grammar/state.grammar
  *
  * @param yy lexer
- * @param {(GraphRoot|Group|SubGroup)} container Set this container as current container
- * @return {(GraphRoot|Group|SubGroup)}
+ * @param {(GraphRoot|GraphGroup|SubGroup)} container Set this container as current container
+ * @return {(GraphRoot|GraphGroup|SubGroup)}
  */
 function enterContainer(yy, container) {
     yy.CURRENTCONTAINER.push(container);
@@ -282,11 +282,11 @@ function exitSubGraph(yy) {
  * @return ref if ref instance of group, else the newly created group
  */
 function getGroup(yy, ref) {
-    if (ref instanceof Group) return ref;
+    if (ref instanceof GraphGroup) return ref;
     debug("getGroup() NEW GROUP:" + yy + "/" + ref, true);
     // TODO: MOVING TO GraphMeta
     if (!yy.GROUPIDS) yy.GROUPIDS = 1;
-    const newGroup = new Group(yy.GROUPIDS++);
+    const newGroup = new GraphGroup(yy.GROUPIDS++);
     debug("push group " + newGroup + " to " + yy);
     _pushObject(yy, newGroup);
 
@@ -378,10 +378,10 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
             fmt += "rcompass: " + rcompass;
         debug("getEdge type:" + edgeType + " l:" + lhs + " r:" + rhs + fmt);
     }
-    if (!(lhs instanceof GraphVertex) && !(lhs instanceof Group) & !(lhs instanceof GraphInner)) {
+    if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) & !(lhs instanceof GraphInner)) {
         throw new Error("LHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
-    if (!(rhs instanceof GraphVertex) && !(rhs instanceof Group) && !(rhs instanceof GraphInner)) {
+    if (!(rhs instanceof GraphVertex) && !(rhs instanceof GraphGroup) && !(rhs instanceof GraphInner)) {
         throw new Error("RHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
     const edge = new GraphEdge(edgeType, lhs, rhs);
@@ -450,7 +450,7 @@ function getGraphRoot(yy) {
         }
         debug("...Initialize emptyroot " + yy);
         // TODO: DOESN'T WORK as type hint! Modularize to own obj..
-        /** @type  {(GraphRoot|Group|SubGroup)} */
+        /** @type  {(GraphRoot|GraphGroup|SubGroup)} */
         yy.CURRENTCONTAINER = [];
         /** @type {GraphEdge[]} */
         yy.EDGES = [];
@@ -502,7 +502,7 @@ function hasInwardEdge(yy, vertex, verticesContainer) {
 
 /**
  * test if container has the object
- * @param {Group} container
+ * @param {GraphGroup} container
  * @param {GraphObject} obj
  */
 function containsObject(container, obj) {
@@ -512,7 +512,7 @@ function containsObject(container, obj) {
         if (c == obj) {
             return true;
         }
-        if (c instanceof Group) {
+        if (c instanceof GraphGroup) {
             if (containsObject(c, obj)) {
                 return true;
             }
@@ -536,7 +536,7 @@ function traverseEdges(graphmeta, callback) {
 /**
  * Usage: generators
  * @param {GraphObject} container
- * @param {function((GraphVertex|Group)):void} callback
+ * @param {function((GraphVertex|GraphGroup)):void} callback
  */
 function traverseVertices(container, callback) {
     for (const i in container.OBJECTS) {

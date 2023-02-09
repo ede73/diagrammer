@@ -156,7 +156,7 @@ function digraph(graphmeta) {
         for (const i in c.OBJECTS) {
             if (!c.OBJECTS.hasOwnProperty(i)) continue;
             const o = c.OBJECTS[i];
-            if (o instanceof Group) {
+            if (o instanceof GraphGroup) {
                 if (o.OBJECTS.length == 0) {
                     o.OBJECTS.push(new GraphVertex("invis_" + o.getName())
                         .setStyle("invis"));
@@ -206,11 +206,11 @@ function digraph(graphmeta) {
 
     let lastexit = undefined;
     let lastendif = undefined;
-    const traverseVertices = /** @type {function((Group|GraphVertex))}*/root => {
+    const traverseVertices = /** @type {function((GraphGroup|GraphVertex))}*/root => {
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
             const obj = root.OBJECTS[i];
-            if (obj instanceof Group) {
+            if (obj instanceof GraphGroup) {
                 const cond = obj.conditional;
                 //	if (cond=="endif")continue;
                 // Group name,OBJECTS,get/setEqual,toString
@@ -303,7 +303,7 @@ function digraph(graphmeta) {
         let lhs = edge.left;
 
         debug("// link from " + lhs + " to " + rhs);
-        if (rhs instanceof Group) {
+        if (rhs instanceof GraphGroup) {
             //debug('huuhuu');
             // just pick ONE Vertex from group and use lhead
             // TODO: Assuming it is Vertex (if Recursive groups implemented, it
@@ -315,7 +315,7 @@ function digraph(graphmeta) {
                 rhs = rhs.OBJECTS[0];
             }
         }
-        if (lhs instanceof Group) {
+        if (lhs instanceof GraphGroup) {
             if (!lhs.isInnerGraph)
                 attrs.push(" ltail=cluster_" + lhs.getName());
             if (lhs instanceof GraphInner && lhs.getExit()) {

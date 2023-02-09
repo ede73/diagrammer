@@ -284,7 +284,7 @@ SHAPE RECORD
 graphobject;GraphObject | {name | color | textcolor | url | label }
 avertex;GraphVertex | { shape | image | style}
 alink;GraphEdge | { edgetype | left | right}
-agroup;Group | { name | OBJECTS[] | ROOTVERTICES[] | edgelabel | "defaults"}
+agroup;GraphGroup | { name | OBJECTS[] | ROOTVERTICES[] | edgelabel | "defaults"}
 asubgraph;GraphInner | { name | OBJECTS[] | ROOTVERTICES[] | edgelabel | entrance | exit | "defaults"}
 
 avertex>"inherit"graphobject
@@ -315,7 +315,7 @@ What's the current default shape - only used during parsing the diagrammer langu
 AST/Model note. Edges are not stored in GraphRoot, but separately! Why? It's easier to handle them in the generators and vertices and edges are output separately to separate sections anyway.
 
 GraphRoot:
-- OBJECTS[GraphVertex(a), GraphInner(GraphVertex(b), GraphVertex(c), GraphVertex(d), Group(GraphVertex(f), GraphVertex(g)))]
+- OBJECTS[GraphVertex(a), GraphInner(GraphVertex(b), GraphVertex(c), GraphVertex(d), GraphGroup(GraphVertex(f), GraphVertex(g)))]
 - ROOTVERTICES[GraphVertex, GraphInner] # this graph has two root vertices
 - generator digraph
 - visualizer circo
@@ -328,7 +328,7 @@ GraphRoot:
 ## GraphObject
 Represents all the objects in the diagram.
 
-## Edge (link)
+## GraphEdge (link)
 Represents edge between two objects(vertices or groups) and all related visualization properties associated with the edge.
 
 Own properties are edgetype, left- and righthand sides (+GraphObject properties)
@@ -339,7 +339,7 @@ Edges are stored separately and available for the generator in yy.EDGES
 
 Own properties are name, shape, image - if specified, style - if specified (+GraphObject properties)
 
-## Group
+## GraphGroup
 
 Own properties are name, edgelabel, defaults and list of OBJECTS and ROOTVERTICES.
 

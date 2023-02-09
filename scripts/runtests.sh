@@ -28,23 +28,44 @@ setError() {
 test() {
   checkError
   [ $verbose -ne 0 ] && echo "    test($*) using $testbin"
-  ./scripts/t.sh skipparsermake silent tests "tests/test_inputs/$1" "$testbin" >/dev/null
+  no_visual=''
+  [ $webvisualizer -ne 0 ] && no_visual="dont_run_visualizer"
+  ./scripts/t.sh skipparsermake silent tests $no_visual "tests/test_inputs/$1" "$testbin" >/dev/null
   rc=$?
   [ $rc -ne 0 ] && setError "$rc" "$1"
-  png="${1%.*}_${testbin}.png"
   out="${1%.*}_${testbin}.out"
-  if [ -f "tests/test_outputs/$png" ]; then
-    [ ! -f "tests/reference_images/$testbin/$png" ] && cp "tests/test_outputs/$png" "tests/reference_images/$testbin/$png"
-    [ ! -f "tests/reference_images/$testbin/$out" ] && cp "tests/test_outputs/$out" "tests/reference_images/$testbin/$out"
-    if ! diff "tests/test_outputs/$png" "tests/reference_images/$testbin/$png"; then
-      echo "    ERROR: at $1, image tests/test_outputs/$png tests/reference_images/$testbin/$png differ" >&2
-      diff -u "tests/test_outputs/$out" "tests/reference_images/$testbin/$out"
-      display_image "tests/test_outputs/$png" "tests/reference_images/$testbin/$png"
+  textoutput="tests/test_outputs/$out"
+  textreference="tests/reference_images/$testbin/$out"
+  if [ ! -f "$textoutput" ]; then
+      echo "    ERROR: at $1, generator failed, missing $textoutput" >&2
+      setError 11 "$1"
+      return
+  fi
+  [ $webvisualizer -ne 0 ] && {
+    # Web Visualizers cannot be (currently) ran in CLI
+    # So only thing we could do is test the final output
+    if ! diff "$textoutput" "$textreference"; then
+      echo "    ERROR: at $1, $textoutput $textreference differ" >&2
+      diff -u "$textoutput" "$textreference"
+      setError 11 "$1"
+    fi
+    return
+  }
+  png="${1%.*}_${testbin}.png"
+  renderoutput="tests/test_outputs/$png"
+  renderreference="tests/reference_images/$testbin/$png"
+  if [ -f "$renderoutput" ]; then
+    [ ! -f "$renderreference" ] && cp "$renderoutput" "$renderreference"
+    [ ! -f "$textoutput" ] && cp "tests/test_outputs/$out" "$textreference"
+    if ! diff "$renderoutput" "$renderreference"; then
+      echo "    ERROR: at $1, image $renderoutput $renderreference differ" >&2
+      diff -u "$textoutput" "$textreference"
+      display_image "$renderoutput" "$renderreference"
       setError 11 "$1"
     fi
   else
-    echo "ERROR: Could not produce output tests/test_outputs/$png" >&2
-    ls -l "tests/test_outputs/$png"
+    echo "ERROR: Could not produce output $renderoutput" >&2
+    ls -l "$renderoutput"
     setError 12 "$1"
   fi
 }
@@ -60,6 +81,7 @@ runtest() {
   [ $verbose -ne 0 ] && echo "      test #$i ok"
 }
 
+webvisualizer=0
 #EDE:New act dag is fucked..instead of Lane1 it prints out random number as lane title, groups work though
 tests="${1:-dot }" #actdiag } #blockdiag}
 for test in $tests; do
@@ -115,4 +137,26 @@ testbin=plantuml_sequence
 runtest plantuml_context.txt
 runtest plantuml_context2.txt
 
+# Web visualizers, so test only generator
+webvisualizer=1
+#testbin=ast
+#runtest uml.txt
+
+testbin=dendrogram
+runtest dendrogram.txt
+
+testbin=layerbands
+runtest layerbands.txt
+
+testbin=parsetree
+runtest parsetree.txt
+
+#testbin=sankey
+#runtest sankey.txt
+
+testbin=seqdiag
+runtest seqdiag.txt
+
+testbin=umlclass
+runtest uml.txt
 exit 0

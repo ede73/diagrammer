@@ -1,5 +1,5 @@
 // requires export (Typescript, not ES6 compatible not does node.js support it..)
-//import {GraphMeta} from '../model/graphmeta.js';
+//import {GraphCanvas} from '../model/graphcanvas.js';
 /**
 
 Only one root supported?
@@ -28,10 +28,10 @@ Only one root supported?
 		{ key: "twoD", parent: "root" }
 	  ];
 	  node js/parse.js verbose manual_test_diagrams/layerbands.d layerbands
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function generateLayerBands(graphmeta) {
-	//debug(graphmeta)
+function generateLayerBands(graphcanvas) {
+	//debug(graphcanvas)
 	const groups = {
 		key: "_BANDS",
 		category: "Bands",
@@ -40,15 +40,14 @@ function generateLayerBands(graphmeta) {
 	const linkedVertices = [
 		groups,
 	]
-	const root = graphmeta.GRAPHROOT;
 
-	traverseVertices(root, obj => {
+	traverseVertices(graphcanvas, obj => {
 		if (obj instanceof GraphGroup) {
 			groups.itemArray.push({ text: obj.name });
 		}
 	});
 
-	traverseEdges(graphmeta, edge => {
+	traverseEdges(graphcanvas, edge => {
 		if (!edge.left) {
 			// probably our root
 			//linkedVertexs.push({key: l.right.name});
@@ -56,6 +55,6 @@ function generateLayerBands(graphmeta) {
 			linkedVertices.push({key: edge.right.name , parent: edge.left.name});
 		}
 	});
-	output(graphmeta, JSON.stringify(linkedVertices));
+	output(graphcanvas, JSON.stringify(linkedVertices));
 }
 generators.set('layerbands', generateLayerBands);

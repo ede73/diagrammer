@@ -28,38 +28,35 @@ S
 				- Caller can then (willingly) check for LANGUAGE given visualizer(or generator) and
 				  override those or obey to those. Those would be suggested tools to use...
 			*/
-			const graphmeta = getGraphMeta(yy);
-			const generator = (() => {
-				if (yy.USE_GENERATOR) {
-			      return yy.USE_GENERATOR;
-				} else {
-				  return getGraphRoot(yy).getGenerator();
-				}
-			})();
 
-			graphmeta.USE_GENERATOR=generator;
-
-			if (!yy.USE_VISUALIZER) {
-			  graphmeta.USE_VISUALIZER=getGraphRoot(yy).getVisualizer();
+			// Generator can be defined by the caller(user) or suggested by the graph
+			const graphcanvas = getGraphRoot(yy);
+			if (yy.USE_GENERATOR) {
+			  graphcanvas.setGenerator(yy.USE_GENERATOR);
 			}
-			if (!yy.USE_VISUALIZER) {
-			  if( generator == "digraph") {
-			    graphmeta.USE_VISUALIZER="dot";
+
+			// Visualizer can be defined by the caller(user) or suggested by the graph
+			if (yy.USE_VISUALIZER) {
+			  graphcanvas.setVisualizer(yy.USE_VISUALIZER);
+			} else if (!graphcanvas.getVisualizer()) {
+		      const visualizer = graphcanvas.getVisualizer();
+			  if (visualizer == "digraph") {
+			    graphcanvas.setVisualizer("dot");
 		  	  } else {
-			    graphmeta.USE_VISUALIZER=generator;
+			    graphcanvas.setVisualizer(graphcanvas.getGenerator());
 			  }
 			}
-			graphmeta.GRAPHROOT = yy.GRAPHROOT;
-			graphmeta.EDGES = yy.EDGES;
-			graphmeta.parseError = yy.parseError;
-			graphmeta.result = yy.result;
-
-			const usegen = generators.get(generator);
+			graphcanvas.EDGES = yy.EDGES;
+			graphcanvas.parseError = yy.parseError;
+			graphcanvas.result = yy.result;
+			graphcanvas.yy = yy;
+			
+            // Locate the generator, else just use digraph
+			const usegen = generators.get(graphcanvas.getGenerator());
 			if (usegen) {
-				usegen(graphmeta);
+				usegen(graphcanvas);
 			} else {
-				//rankdir available ONLY IN dot
-				digraph(graphmeta);
+				throw new Error("Unknown generator "+usegen);
 			}
 			return $1;
 		}
@@ -154,8 +151,8 @@ graphContent
 		}
 	| ENDIF	 { 
 		exitContainer(yy);
-		//TODO: is ENDIF container necessary?YES, it could be invisible vertex! Could link to that instead of endif kludge in digraph
-        // TODO: MOVING TO GraphMeta??
+		// TODO: is ENDIF container necessary?YES, it could be invisible vertex! Could link to that instead of endif kludge in digraph
+        // TODO: MOVING TO GraphCanvas??
 		yy.collectNextVertex=setAttr(enterContainer(yy,getGroup(yy).setLabel($ENDIF)),'conditional','endif')
 		debug("XXXXXXXXXXXXXXXXXXXXX collectNextVertex"+yy.collectNextVertex);
 		$$=exitContainer(yy)

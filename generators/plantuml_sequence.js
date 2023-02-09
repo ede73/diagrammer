@@ -50,9 +50,9 @@ a->e:edge text
 @enduml
 
 node js/parse.js verbose plantuml_sequence.test plantuml_sequence
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function plantuml_sequence(graphmeta) {
+function plantuml_sequence(graphcanvas) {
     const processAVertex = function (obj, sbgraph) {
         const nattrs = [];
         const styles = [];
@@ -84,27 +84,26 @@ function plantuml_sequence(graphmeta) {
         let t = "";
         if (nattrs.length > 0)
             t = "[" + nattrs.join(",") + "]";
-        //graphmeta.result(indent("participant " + getAttributeAndFormat(o, 'label', '"{0}" as') + " " + o.getName() + t));
-        output(graphmeta, "participant {0} {1} {2}".format(
+        //graphcanvas.result(indent("participant " + getAttributeAndFormat(o, 'label', '"{0}" as') + " " + o.getName() + t));
+        output(graphcanvas, "participant {0} {1} {2}".format(
             getAttributeAndFormat(obj, 'label', '"{0}" as'),
             obj.getName(),
             t));
     };
 
-    const root = graphmeta.GRAPHROOT;
-    if (root.getVisualizer()) {
-        outputFormattedText(graphmeta, "/* render: {0} */", [root.getVisualizer()])
+    if (graphcanvas.getVisualizer()) {
+        outputFormattedText(graphcanvas, "/* render: {0} */", [graphcanvas.getVisualizer()])
     }
-    output(graphmeta, "@startuml");
-    output(graphmeta, "autonumber", true);
+    output(graphcanvas, "@startuml");
+    output(graphcanvas, "autonumber", true);
     /*
-     * if (r.getDirection() === "portrait") { output(graphmeta, indent("rankdir=LR;")); }
-     * else { output(graphmeta, indent("rankdir=TD;")); }
+     * if (r.getDirection() === "portrait") { output(graphcanvas, indent("rankdir=LR;")); }
+     * else { output(graphcanvas, indent("rankdir=TD;")); }
      */
     // This may FORWARD DECLARE a node...which creates problems with coloring
-    const s = root.getStart();
+    const s = graphcanvas.getStart();
     if (s) {
-        const fwd = getVertex(graphmeta.yy, s);
+        const fwd = getVertex(graphcanvas.yy, s);
         processAVertex(fwd, false);
     }
     /**
@@ -116,7 +115,7 @@ function plantuml_sequence(graphmeta) {
      * @param {boolean} sbgraph 
      */
     const printEdges = (container, sbgraph) => {
-        for (const edge of iterateEdges(graphmeta)) {
+        for (const edge of iterateEdges(graphcanvas)) {
             if (edge.printed)
                 continue;
             // if container given, print ONLY THOSE edges that match this
@@ -139,7 +138,7 @@ function plantuml_sequence(graphmeta) {
             let rhs = edge.right;
             let lhs = edge.left;
 
-            // output(graphmeta, indent("//"+lr));
+            // output(graphcanvas, indent("//"+lr));
             if (rhs instanceof GraphGroup) {
                 // just pick ONE Vertex from group and use lhead
                 // TODO: Assuming it is Vertex (if Recursive groups implemented,
@@ -185,11 +184,11 @@ function plantuml_sequence(graphmeta) {
                 lt = (dot ? "-" : "") + "-" + color + ">";
             } else if (dot) {
                 // dotted
-                output(graphmeta, getAttributeAndFormat(edge, 'label', '...{0}...'));
+                output(graphcanvas, getAttributeAndFormat(edge, 'label', '...{0}...'));
                 continue;
             } else if (dash) {
                 // dashed
-                output(graphmeta, getAttributeAndFormat(edge, 'label', '=={0}=='));
+                output(graphcanvas, getAttributeAndFormat(edge, 'label', '=={0}=='));
                 continue;
             } else {
                 // is dotted or dashed no direction
@@ -203,29 +202,29 @@ function plantuml_sequence(graphmeta) {
                 label = ":" + label;
             else
                 label = "";
-            output(graphmeta, lhs.getName() + lt + rhs.getName() + t + label);
+            output(graphcanvas, lhs.getName() + lt + rhs.getName() + t + label);
             if (swap)
-                output(graphmeta, rhs.getName() + lt + lhs.getName() + t + label);
+                output(graphcanvas, rhs.getName() + lt + lhs.getName() + t + label);
             if (sbgraph) {
                 if (!rhs.active) {
-                    output(graphmeta, "activate " + rhs.getName(), true);
+                    output(graphcanvas, "activate " + rhs.getName(), true);
                     rhs.active = true;
                 } else {
                     lhs.active = false;
                     output(false);
-                    output(graphmeta, "deactivate " + lhs.getName());
+                    output(graphcanvas, "deactivate " + lhs.getName());
                 }
             } else {
                 if (lhs.active) {
                     lhs.active = false;
                     output(false);
-                    output(graphmeta, "deactivate " + lhs.getName());
+                    output(graphcanvas, "deactivate " + lhs.getName());
                 }
             }
             if (note != "") {
-                output(graphmeta, "note over " + rhs.getName());
-                outputFormattedText(graphmeta, note.replace(/\\n/g, "\n"));
-                output(graphmeta, "end note");
+                output(graphcanvas, "note over " + rhs.getName());
+                outputFormattedText(graphcanvas, note.replace(/\\n/g, "\n"));
+                output(graphcanvas, "end note");
             }
         }
     };
@@ -257,28 +256,28 @@ function plantuml_sequence(graphmeta) {
                             cond = "else";
                         else if (cond == "endif")
                             cond = "end";
-                        output(graphmeta, cond + ' ' + o.getLabel());
+                        output(graphcanvas, cond + ' ' + o.getLabel());
                     } else {
                         cond = "";//cond = "ref";
                     }
                     const nodeIsSubGraph = o.isInnerGraph;
                     if (o.getColor()) {
-                        output(graphmeta, "style=filled;");
-                        output(graphmeta, getAttributeAndFormat(o, 'color',
+                        output(graphcanvas, "style=filled;");
+                        output(graphcanvas, getAttributeAndFormat(o, 'color',
                             '   color="{0}";\n'));
                     }
                     traverseVertices(o, nodeIsSubGraph);
                     printEdges(o);
-                    // output(graphmeta, indent("}//end of " + o.getName()));
+                    // output(graphcanvas, indent("}//end of " + o.getName()));
                 }(obj);
             } else if (!obj instanceof GraphVertex) {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
         }
     };
-    traverseVertices(root, false);
-    printEdges(root);
+    traverseVertices(graphcanvas, false);
+    printEdges(graphcanvas);
     output(false);
-    output(graphmeta, "@enduml");
+    output(graphcanvas, "@enduml");
 }
 generators.set('plantuml_sequence', plantuml_sequence);

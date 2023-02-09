@@ -1,5 +1,19 @@
+/**
+ * @type {boolean}
+ */
+var parsingStarted;
 
-// TODO: MOVING TO GraphMeta
+/**
+ * @type {HTMLElement}
+ */
+var result;
+
+/**
+ * 
+ * @param {string} str 
+ * @param {string} hash 
+ */
+// TODO: MOVING TO GraphCanvas
 parser.yy.parseError = function (str, hash) {
     const pe = "Parsing error:\n" + str + "\n" + hash;
     console.log("pe");
@@ -7,8 +21,13 @@ parser.yy.parseError = function (str, hash) {
     cancelVTimer();
     throw new Error(str);
 };
+
+/**
+ * 
+ * @param {string} line 
+ */
 // called line by line...
-// TODO: MOVING TO GraphMeta
+// TODO: MOVING TO GraphCanvas
 parser.yy.result = function (line) {
     if (parsingStarted) {
         console.log("Parsing results coming in for " + parser.yy.USE_GENERATOR + " / " + parser.yy.VISUALIZER);
@@ -18,12 +37,26 @@ parser.yy.result = function (line) {
     result.value = result.value + line + "\n";
 }
 
-// TODO: MOVING TO GraphMeta
+/**
+ * @param {string} x 
+ */
+// TODO: MOVING TO GraphCanvas
 parser.trace = function (x) {
     console.log("TRACE:" + x);
 }
 
+/**
+ * 
+ * @param {string} generator 
+ * @param {string} visualizer 
+ */
 function parse(generator, visualizer) {
+    if (!generator) {
+        throw new Error("Generator not defined");
+    }
+    if (!visualizer) {
+        throw new Error("Visualizer not defined");
+    }
     const data = getText() + "\n";
     console.log("parse generator=" + generator + ", visualizer=" + visualizer);
     document.getElementById("error").innerText = "";
@@ -31,9 +64,9 @@ function parse(generator, visualizer) {
     delete (parser.yy.GRAPHROOT);
     delete (parser.yy.EDGES);
     delete (parser.yy.OBJECTS);
-    // TODO: MOVING TO GraphMeta
+    // TODO: MOVING TO GraphCanvas
     parser.yy.USE_GENERATOR = generator;
-    // TODO: MOVING TO GraphMeta
+    // TODO: MOVING TO GraphCanvas
     parser.yy.USE_VISUALIZER = visualizer;
     console.log("Parse, set generator to " + parser.yy.USE_GENERATOR + " visualizer to " + parser.yy.USE_VISUALIZER);
     parser.parse(data);

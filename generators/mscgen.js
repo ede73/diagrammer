@@ -17,23 +17,22 @@ msc {
     a=>e[label="edge text",id="4"];
 }
 node js/parse.js verbose mscgen.test mscgen
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function mscgen(graphmeta) {
-    output(graphmeta, "msc {", true);
-    const root = graphmeta.GRAPHROOT;
+function mscgen(graphcanvas) {
+    output(graphcanvas, "msc {", true);
     let comma = false;
     // print out all node declarations FIRST (if any)
-    traverseVertices(root, obj => {
+    traverseVertices(graphcanvas, obj => {
         if (obj instanceof GraphGroup) {
-            output(graphmeta, ' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/');
+            output(graphcanvas, ' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/');
             traverseVertices(obj, z => {
                 let tmp = getAttributeAndFormat(z, 'color', ',color="{0}"') +
                     getAttributeAndFormat(z, 'style', ',style={0}') +
                     getAttributeAndFormat(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
-                output(graphmeta, (comma ? "," : "") + "    " + z.getName() + tmp);
+                output(graphcanvas, (comma ? "," : "") + "    " + z.getName() + tmp);
                 comma = true;
             });
         } else if (obj instanceof GraphVertex) {
@@ -42,14 +41,14 @@ function mscgen(graphmeta) {
                 getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
-            output(graphmeta, (comma ? "," : "") + "  " + obj.getName() + tmp);
+            output(graphcanvas, (comma ? "," : "") + "  " + obj.getName() + tmp);
             comma = true;
         }
     });
 
-    output(graphmeta, ";");
+    output(graphcanvas, ";");
     let id = 1;
-    traverseEdges(graphmeta, edge => {
+    traverseEdges(graphcanvas, edge => {
         let edgeType = "";
         let rhs = edge.right;
         let lhs = edge.left;
@@ -134,28 +133,28 @@ function mscgen(graphmeta) {
             if (color) {
                 attrs.push('textcolor="' + color + '"');
             }
-            output(graphmeta, "...[" + attrs.join(",") + "];");
+            output(graphcanvas, "...[" + attrs.join(",") + "];");
             return;
         } else if (dash) {
             // dashed
             if (color) {
                 attrs.push('textcolor="' + color + '"');
             }
-            output(graphmeta, "---[" + attrs.join(",") + "];");
+            output(graphcanvas, "---[" + attrs.join(",") + "];");
             return;
         } else {
-            output(graphmeta, "ERROR: SHOULD NOT HAPPEN");
+            output(graphcanvas, "ERROR: SHOULD NOT HAPPEN");
         }
 
-        output(graphmeta, lhs.getName() + edgeType + rightName + "[" + attrs.join(",") + "];");
+        output(graphcanvas, lhs.getName() + edgeType + rightName + "[" + attrs.join(",") + "];");
         if (note != "")
             // output(grpahmeta,ll.getName() +' abox '
             // +lr.getName()+'[label="'+note+'"];');
-            output(graphmeta, rhs.getName() + ' abox ' + rhs.getName() + '[label="' + note + '"];');
+            output(graphcanvas, rhs.getName() + ' abox ' + rhs.getName() + '[label="' + note + '"];');
         // if (swap)
-        // output(graphmeta,lr.getName() + lt + ll.getName() + t + ";");
+        // output(graphcanvas,lr.getName() + lt + ll.getName() + t + ";");
     });
     output(false);
-    output(graphmeta, "}");
+    output(graphcanvas, "}");
 }
 generators.set('mscgen', mscgen);

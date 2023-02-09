@@ -19,9 +19,9 @@ to
 }
 
 node js/parse.js verbose dendrogram.test dendrogram
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function dendrogram(graphmeta) {
+function dendrogram(graphcanvas) {
 	let tree;
 	/**
 	 * @param {GraphObject} lhs
@@ -42,36 +42,36 @@ function dendrogram(graphmeta) {
 		}
 	}
 
-	//debug(JSON.stringify(graphmeta.EDGES));
+	//debug(JSON.stringify(graphcanvas.EDGES));
 	/**
 	 * For a dendrogram we're not interested in vertices
 	 * just edges(for now!)
 	 */
-	traverseEdges(graphmeta, edge => {
+	traverseEdges(graphcanvas, edge => {
 		//debug('edge '+l.left.name+' to '+l.right.name);
 		addVertex(edge.left, edge.right);
 	});
 
-	//output(graphmeta,'{',true);
+	//output(graphcanvas,'{',true);
 	traverseTree(tree, (t, isLeaf, hasSibling) => {
 		if (isLeaf) {
 			comma = '';
 			if (hasSibling)
 				comma = ',';
-			output(graphmeta, '{"name": "' + t.data.name + '", "size": 1}' + comma);
+			output(graphcanvas, '{"name": "' + t.data.name + '", "size": 1}' + comma);
 		} else {
-			output(graphmeta, '{', true);
-			output(graphmeta, '"name": "' + t.data.name + '",');
+			output(graphcanvas, '{', true);
+			output(graphcanvas, '"name": "' + t.data.name + '",');
 		}
 	}, (t) => {
-		output(graphmeta, '"children": [', true);
+		output(graphcanvas, '"children": [', true);
 	}, (t, hasNextSibling) => {
 		output(false);
-		output(graphmeta, ']', false);
+		output(graphcanvas, ']', false);
 		if (hasNextSibling) {
-			output(graphmeta, '},');
+			output(graphcanvas, '},');
 		} else {
-			output(graphmeta, '}');
+			output(graphcanvas, '}');
 		}
 	});
 	output(false);

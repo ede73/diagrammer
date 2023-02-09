@@ -142,13 +142,13 @@ function getVertex(yy, name, style) {
 
     const vertex = findVertex(yy, name, style);
     debug("  in getVertex gotVertex " + vertex);
-    // TODO: MOVING TO GraphMeta
+    // TODO: MOVING TO GraphCanvas
     yy.lastSeenVertex = vertex;
     if (yy.collectNextVertex) {
         debug("Collect next vertex");
-        // TODO: MOVING TO GraphMeta
+        // TODO: MOVING TO GraphCanvas
         yy.collectNextVertex.exitedge = name;
-        // TODO: MOVING TO GraphMeta
+        // TODO: MOVING TO GraphCanvas
         yy.collectNextVertex = undefined;
     }
     debug(false);
@@ -284,7 +284,7 @@ function exitSubGraph(yy) {
 function getGroup(yy, ref) {
     if (ref instanceof GraphGroup) return ref;
     debug("getGroup() NEW GROUP:" + yy + "/" + ref, true);
-    // TODO: MOVING TO GraphMeta
+    // TODO: MOVING TO GraphCanvas
     if (!yy.GROUPIDS) yy.GROUPIDS = 1;
     const newGroup = new GraphGroup(yy.GROUPIDS++);
     debug("push group " + newGroup + " to " + yy);
@@ -430,10 +430,6 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
 // exposed to generators also
 // =====================================
 
-function getGraphMeta(yy) {
-    return new GraphMeta(yy);
-}
-
 /**
  * Get current singleton graphroot or create new one
  * External utility support for generator
@@ -522,13 +518,13 @@ function containsObject(container, obj) {
 
 /** 
  * Usage: generators
- * @param {GraphMeta} graphmeta
+ * @param {GraphCanvas} graphcanvas
  * @param {function(GraphEdge)} callback
  */
-function traverseEdges(graphmeta, callback) {
-    for (const i in graphmeta.EDGES) {
-        if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
-        callback(graphmeta.EDGES[i]);
+function traverseEdges(graphcanvas, callback) {
+    for (const i in graphcanvas.EDGES) {
+        if (!graphcanvas.EDGES.hasOwnProperty(i)) continue;
+        callback(graphcanvas.EDGES[i]);
     }
 }
 
@@ -553,7 +549,7 @@ function traverseVertices(container, callback) {
  */
 function _getVariables(yy) {
     if (!yy.VARIABLES) {
-        // TODO: MOVING TO GraphMeta
+        // TODO: MOVING TO GraphCanvas
         yy.VARIABLES = {}
     }
     return yy.VARIABLES;

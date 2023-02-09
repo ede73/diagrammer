@@ -14,7 +14,7 @@ build/state.js: grammar/state.lex
 	@echo "exports.state=state;" >> $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
-build/state.all: grammar/state.lex grammar/lexmarker.txt grammar/state.grammar model/support.js model/model.js model/graphmeta.js model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/shapes.js model/graphinner.js model/tree.js generators/*.js
+build/state.all: grammar/state.lex grammar/lexmarker.txt grammar/state.grammar model/support.js model/model.js model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/shapes.js model/graphinner.js model/tree.js generators/*.js
 	@mkdir -p build
 	@echo Compile build/state.all
 	@cat $^ >$@

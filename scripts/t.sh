@@ -49,6 +49,12 @@ text=0
   text=1
 }
 
+dont_run_visualizer=0
+[ "$1" = "dont_run_visualizer" ] && {
+  shift
+  dont_run_visualizer=1
+}
+
 FORMAT=png
 [ "$1" = "svg" ] && {
   shift
@@ -57,6 +63,7 @@ FORMAT=png
 
 input=${1:-tests/test_inputs/state2.txt}
 generator=${2:-dot}
+echo $generator
 
 #EXPORTREMOVE
 echo "testing lexing"
@@ -86,11 +93,13 @@ neato | twopi | circo | fdp | sfdp)
   node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" digraph "$verbose" >"$OUT"
   [ $text -ne 0 ] && cat "$OUT"
   ;;
-ast | dendrogram | sankey)
-  node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" "$generator" "$verbose"
-  exit 0
+# Web only renderers....
+ast | dendrogram | sankey | umlclass)
+  node --max-old-space-size=4096 "$MYPATH/js/parse.js" "$input" "$generator" "$verbose" >"$OUT"
+  [ $text -ne 0 ] && cat "$OUT"
   ;;
 *)
+  echo "Using default digraph generator as no other(or unknown:$generator) specified"
   node --max-old-space-size=4096 "$MYPATH/js/parse.js" $verbose "$input" digraph "$verbose" >"$OUT"
   [ $text -ne 0 ] && cat "$OUT"
   ;;
@@ -109,7 +118,9 @@ rc=$?
   exit 10
 }
 
-echo "Generate sequence $generator"
+[ $dont_run_visualizer -eq 1 ] && exit 0
+
+echo "Visualize $generator generated output"
 
 . ./scripts/display_image.sh
 

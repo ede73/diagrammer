@@ -13,34 +13,41 @@
  * Even if the TREE has multiple root vertices (or basically multiple trees)
  * the graph will only EVER have one GraphCanvas
  * 
- * TODO: Merge to GraphMeta
  */
 class GraphCanvas extends GraphObject {
+    /**
+     * @type {function(string,string):void}
+     */
+    parseError = undefined;
+
+    /**
+     * Output the generated result
+     * @type {function(string):void}
+     */
+    result = undefined;
+
     constructor() {
         super(undefined); // TODO:
         /** @type {GraphObject[]} */
         this.OBJECTS = [];
+        /** @type {GraphEdge[]} */
+        this.EDGES = [];
         /** @type {GraphObject[]} */
         this.ROOTVERTICES = [];
-        // TODO: MOVING TO GraphMeta
         /** @type {string} */
         this.generator = undefined;
-        // TODO: MOVING TO GraphMeta
         /** @type {string} */
         this.visualizer = undefined;
         /** @type {string} */
         this.shape = undefined;
-        // TODO: MOVING TO GraphMeta
         /** @type {string} */
         this.direction = undefined;
-        // TODO: MOVING TO GraphMeta
         /** @type {string} */
         this.start = undefined;
         /** @type {string[]} */
         this.equal = [];
     }
 
-    // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
      * @return {GraphCanvas}
@@ -50,12 +57,10 @@ class GraphCanvas extends GraphObject {
         return this;
     }
 
-    // TODO: MOVING TO GraphMeta
     getGenerator() {
         return this.generator;
     }
 
-    // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
      * @return {GraphCanvas}
@@ -65,8 +70,6 @@ class GraphCanvas extends GraphObject {
         return this;
     }
 
-    // TODO: MOVING TO GraphMeta
-    /* TODO: make meta.getVisualizer() */
     getVisualizer() {
         return this.visualizer;
     }
@@ -87,7 +90,6 @@ class GraphCanvas extends GraphObject {
         return this.shape;
     }
 
-    // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
      * @return {GraphCanvas}
@@ -97,13 +99,10 @@ class GraphCanvas extends GraphObject {
         return this;
     }
 
-    // TODO: MOVING TO GraphMeta
-    /* TODO: make meta.getDirection() */
     getDirection() {
         return this.direction;
     }
 
-    // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
      * @return {GraphCanvas}
@@ -113,14 +112,12 @@ class GraphCanvas extends GraphObject {
         return this;
     }
 
-    // TODO: MOVING TO GraphMeta
-    /* TODO: make meta.getStart() */
     getStart() {
         return this.start;
     }
 
-    // Save EQUAL vertex ranking
     /**
+     * Save EQUAL vertex ranking
      * @param {string[]} value
      * @return {GraphCanvas}
      */
@@ -129,7 +126,6 @@ class GraphCanvas extends GraphObject {
         return this;
     }
 
-    /* TODO: make meta.getEqual() */
     /**
      * @return {string[]}
      */

@@ -17,36 +17,35 @@ to
 }
 
 node js/parse.js verbose ast.test ast
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function ast(graphmeta) {
-    debug(graphmeta)
+function ast(graphcanvas) {
+    debug(graphcanvas)
     const processAVertex = o => {
     };
 
-    output(graphmeta, "[");
+    output(graphcanvas, "[");
     const skipEntrances = (key, value) => {
         if (key === 'entrance' || key === 'exit') {
             return value;
         }
         return value;
     };
-    const r = graphmeta.GRAPHROOT;
-    if (r.getVisualizer())
-        output(graphmeta, JSON.stringify({
-            visualizer: r.getVisualizer()
+    if (graphcanvas.getVisualizer())
+        output(graphcanvas, JSON.stringify({
+            visualizer: graphcanvas.getVisualizer()
         }));
-    if (r.getDirection())
-        output(graphmeta, JSON.stringify({
-            direction: r.getDirection()
+    if (graphcanvas.getDirection())
+        output(graphcanvas, JSON.stringify({
+            direction: graphcanvas.getDirection()
         }));
-    if (r.getStart())
-        output(graphmeta, JSON.stringify({
-            start: r.getStart()
+    if (graphcanvas.getStart())
+        output(graphcanvas, JSON.stringify({
+            start: graphcanvas.getStart()
         }));
-    if (r.getEqual())
-        output(graphmeta, JSON.stringify({
-            equal: r.getEqual()
+    if (graphcanvas.getEqual())
+        output(graphcanvas, JSON.stringify({
+            equal: graphcanvas.getEqual()
         }));
 
     const objectHandler = /** @type {function((GraphGroup|GraphVertex))}*/obj => {
@@ -55,26 +54,26 @@ function ast(graphmeta) {
             const processAGroup = (o => {
                 const n = JSON.parse(JSON.stringify(o, skipEntrances));
                 n.OBJECTS = undefined;
-                output(graphmeta, JSON.stringify({
+                output(graphcanvas, JSON.stringify({
                     group: n
                 }) + ",");
-                output(graphmeta, '[');
+                output(graphcanvas, '[');
                 traverseVertices(o, objectHandler);
-                output(graphmeta, ']');
+                output(graphcanvas, ']');
             })(obj);
         } else if (obj instanceof GraphInner) {
             const processASubGraph = (o => {
                 const n = JSON.parse(JSON.stringify(o, skipEntrances));
                 n.OBJECTS = undefined;
-                output(graphmeta, JSON.stringify({
+                output(graphcanvas, JSON.stringify({
                     subgraph: n
                 }) + ",");
-                output(graphmeta, '[');
+                output(graphcanvas, '[');
                 traverseVertices(o, objectHandler);
-                output(graphmeta, ']');
+                output(graphcanvas, ']');
             })(obj);
         } else if (obj instanceof GraphVertex) {
-            output(graphmeta, JSON.stringify({
+            output(graphcanvas, JSON.stringify({
                 node: obj
             }) + ",");
         } else {
@@ -82,10 +81,10 @@ function ast(graphmeta) {
         }
         output(false);
     };
-    traverseVertices(r, objectHandler);
+    traverseVertices(graphcanvas.OBJECTS, objectHandler);
 
     output(true);
-    traverseEdges(graphmeta, edge => {
+    traverseEdges(graphcanvas, edge => {
         const n = JSON.parse(JSON.stringify(edge, skipEntrances));
         n.left = n.left.name;
         n.right = n.right.name;
@@ -96,9 +95,9 @@ function ast(graphmeta) {
         n.container.exitvertex = n.container.exitvertex ? n.container.exitvertex.name : undefined;
         n.container.conditional = undefined;
         n.container = n.container.name;
-        output(graphmeta, JSON.stringify({ edge: n }) + ",");
+        output(graphcanvas, JSON.stringify({ edge: n }) + ",");
     });
     output(false);
-    output(graphmeta, "]", false);
+    output(graphcanvas, "]", false);
 }
 generators.set('ast', ast);

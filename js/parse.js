@@ -27,24 +27,24 @@ if (myArgs[1] === "lex") {
     }
 } else {
     const parser = require("../build/parser.js");
-    // TODO: MOVING TO GraphMeta
+    // TODO: MOVING TO GraphCanvas
     parser.parser.yy.USE_GENERATOR = myArgs[1];
-    // TODO: MOVING TO GraphMeta
+    // TODO: MOVING TO GraphCanvas
     parser.parser.trace = function (x) {
         console.log("TRACE:" + x);
     }
-    // TODO: MOVING TO GraphMeta
+    // TODO: MOVING TO GraphCanvas
     parser.parser.debug = function (x) {
         console.log("DEBUG:" + x);
     }
-    // TODO: MOVING TO GraphMeta
+    // TODO: MOVING TO GraphCanvas
     parser.parser.yy.result = function (result) {
         console.log(result);
     }
 
     //this.parseError(errStr, 
     //{text: this.lexer.match, token: this.terminals_[symbol] || symbol, line: this.lexer.yylineno, loc: yyloc, expected: expected});
-    // TODO: MOVING TO GraphMeta
+    // TODO: MOVING TO GraphCanvas
     parser.parser.yy.parseError = function (str, hash) {
         console.log("Parsing error found:");
         console.log(str);

@@ -19,9 +19,9 @@ to
 }
 
 node js/parse.js verbose sankey.test sankey
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function sankey(graphmeta) {
+function sankey(graphcanvas) {
 	let tree;
 	function addVertex(left, right) {
 		if (!tree) {
@@ -43,31 +43,31 @@ function sankey(graphmeta) {
 	 * For a dendrogram we're not interested in vertices
 	 * just edges(for now!)
 	 */
-	traverseEdges(graphmeta, function (edge) {
+	traverseEdges(graphcanvas, function (edge) {
 		//debug('edge '+l.left.name+' to '+l.right.name);
 		addVertex(edge.left, edge.right);
 	});
 
-	//output(graphmeta,'{',true);
+	//output(graphcanvas,'{',true);
 	traverseTree(tree, function (t, isLeaf, hasSibling) {
 		if (isLeaf) {
 			comma = '';
 			if (hasSibling)
 				comma = ',';
-			output(graphmeta, '{"name": "' + t.data.name + '", "size": 1}' + comma);
+			output(graphcanvas, '{"name": "' + t.data.name + '", "size": 1}' + comma);
 		} else {
-			output(graphmeta, '{', true);
-			output(graphmeta, '"name": "' + t.data.name + '",');
+			output(graphcanvas, '{', true);
+			output(graphcanvas, '"name": "' + t.data.name + '",');
 		}
 	}, function (t) {
-		output(graphmeta, '"children": [', true);
+		output(graphcanvas, '"children": [', true);
 	}, function (t, hasNextSibling) {
 		output(false);
-		output(graphmeta, ']', false);
+		output(graphcanvas, ']', false);
 		if (hasNextSibling) {
-			output(graphmeta, '},');
+			output(graphcanvas, '},');
 		} else {
-			output(graphmeta, '}');
+			output(graphcanvas, '}');
 		}
 	});
 	output(false);

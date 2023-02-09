@@ -1,3 +1,13 @@
+/**
+ * @type {HTMLElement}
+ */
+var result;
+
+/**
+ * @type {Editor}
+ */
+var editor;
+
 //afterbody
 getSavedFiles();
 result = document.getElementById("result");
@@ -65,6 +75,11 @@ function appendLine(data, comp) {
     }
 }
 
+/**
+ * 
+ * @param {(string|number)} i 
+ * @returns 
+ */
 function addLine(i) {
     if (typeof i == "string") {
         appendLine(i + "\n");
@@ -178,7 +193,7 @@ function savedChanged() {
         setText(data[doc]);
         filename.value = doc;
         console.log("savedChanged..parse");
-        parse();
+        parse(getGenerator(), getVisualizer());
     }
 }
 
@@ -192,7 +207,7 @@ function exampleChanged() {
     }).done(function (data) {
         setText(data);
         console.log("exampleChanged..parse");
-        parse();
+        parse(getGenerator(), getVisualizer());
     });
 }
 

@@ -60,16 +60,16 @@ e;
   a -> e[label = "edge text"];
 }
 node js/parse.js verbose blockdiag.test blockdiag
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function blockdiag(graphmeta) {
-    output(graphmeta, "blockdiag{\n default_fontsize = 14");
-    const root = graphmeta.GRAPHROOT;
+function blockdiag(graphcanvas) {
+    output(graphcanvas, "blockdiag{\n default_fontsize = 14");
+    const root = graphcanvas.GRAPHROOT;
     if (root.getDirection() === "portrait") {
-        output(graphmeta, "  orientation=portrait");
+        output(graphcanvas, "  orientation=portrait");
     } else {
         // DEFAULT
-        output(graphmeta, "  orientation=landscape");
+        output(graphcanvas, "  orientation=landscape");
     }
     let tmp = root.getStart();
 
@@ -79,9 +79,9 @@ function blockdiag(graphmeta) {
     const parseObjects = /** @type {function((GraphGroup|GraphVertex))}*/obj => {
         output(true);
         if (obj instanceof GraphGroup) {
-            output(graphmeta, ' group "' + obj.getLabel() + '"{', true);
-            output(graphmeta, getAttributeAndFormat(obj, 'color', '   color="{0}"'));
-            output(graphmeta, getAttributeAndFormat(obj, 'label', '   label="{0}"'));
+            output(graphcanvas, ' group "' + obj.getLabel() + '"{', true);
+            output(graphcanvas, getAttributeAndFormat(obj, 'color', '   color="{0}"'));
+            output(graphcanvas, getAttributeAndFormat(obj, 'label', '   label="{0}"'));
             if (tmp && tmp.trim() != "") {
                 tmp = "[" + tmp.trim().substring(1) + "]";
             }
@@ -95,10 +95,10 @@ function blockdiag(graphmeta) {
                     getAttributeAndFormat(obj, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
-                output(graphmeta, obj.getName() + tmp + ';');
+                output(graphcanvas, obj.getName() + tmp + ';');
             });
             output(false);
-            output(graphmeta, "}");
+            output(graphcanvas, "}");
         } else {
             // dotted,dashed,solid
             // NOT invis,bold,rounded,diagonals
@@ -120,14 +120,14 @@ function blockdiag(graphmeta) {
                 getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (colorIconShapeLabel.trim() != "")
                 colorIconShapeLabel = "[" + colorIconShapeLabel.trim().substring(1) + "]";
-            output(graphmeta, obj.getName() + colorIconShapeLabel + ';');
+            output(graphcanvas, obj.getName() + colorIconShapeLabel + ';');
         }
         output(false);
     };
 
     traverseVertices(root, parseObjects);
 
-    traverseEdges(graphmeta, edge => {
+    traverseEdges(graphcanvas, edge => {
         let t = "";
         if (edge.isDotted()) {
             t += ',style="dotted" ';
@@ -143,8 +143,8 @@ function blockdiag(graphmeta) {
             t = t.substring(1).trim();
         if (t != "")
             t = "[" + t + "]";
-        output(graphmeta, "  " + edge.left.getName() + " -> " + edge.right.getName() + t + ";");
+        output(graphcanvas, "  " + edge.left.getName() + " -> " + edge.right.getName() + t + ";");
     });
-    output(graphmeta, "}");
+    output(graphcanvas, "}");
 }
 generators.set('blockdiag', blockdiag);

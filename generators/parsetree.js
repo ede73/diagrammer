@@ -39,9 +39,9 @@ Only one root supported?
     { key: 35, text: ".", fill: "#ccc", stroke: "#4d90fe", parent: 1 },
     { key: 36, text: ".", fill: "#f8f8f8", stroke: "#4d90fe", parent: 35 }
 ]
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function parsetree(graphmeta) {
+function parsetree(graphcanvas) {
 	const nodeList = [];
 	function addEdgeedVertex(left, right) {
 		if (!(left instanceof GraphVertex)) return;
@@ -52,10 +52,10 @@ function parsetree(graphmeta) {
 		nodeList.push({key: key, text: text, fill: "#f8f8f8", stroke: "#4d90fe", parent: parent});
 	}
 
-	//debug(JSON.stringify(graphmeta.EDGES));
+	//debug(JSON.stringify(graphcanvas.EDGES));
 
-	const root = graphmeta.GRAPHROOT.ROOTVERTICES;
-	if (root.length > 1) {
+    const root = graphcanvas.ROOTVERTICES;
+    if (root.length > 1) {
 		throw new Error('Only one root node supported');
 	}
 
@@ -64,19 +64,19 @@ function parsetree(graphmeta) {
 		const text=(!root[0].label) ? root[0].name : root[0].label;
 		nodeList.push({key: root[0].id, text: text, fill: "#f8f8f8", stroke: "#4d90fe"});
 		let keyId = 2;
-		graphmeta.GRAPHROOT.OBJECTS.forEach((node) => {
+		graphcanvas.OBJECTS.forEach((node) => {
 			if (!node.id) {
 				node.id = keyId++;
 			}
 		});
 	})();
 
-	traverseEdges(graphmeta, edge => {
+	traverseEdges(graphcanvas, edge => {
 		debug('edge '+edge.left.name+' to '+edge.right.name);
 		addEdgeedVertex(edge.left, edge.right);
 	});
 	//debug(JSON.stringify(nodeList));
-	output(graphmeta, JSON.stringify(nodeList));
+	output(graphcanvas, JSON.stringify(nodeList));
 	output(false);
 }
 generators.set('parsetree', parsetree);

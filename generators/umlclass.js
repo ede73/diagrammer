@@ -23,14 +23,13 @@
 
 
 	  node js/parse.js verbose uml.test umlclass
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function generateUmlClass(graphmeta) {
-	//debug(graphmeta)
+function generateUmlClass(graphcanvas) {
+	//debug(graphcanvas)
 	const groups = [];
 	const edges = [];
-	const root = graphmeta.GRAPHROOT;
-
+	
 	const nameAndLabel = ln => {
 		// name;name():?? -> name():??
 		// name;:?? -> name():??
@@ -119,7 +118,7 @@ function generateUmlClass(graphmeta) {
 	};
 	let id = 1;
 	const groupNameIdMap = new Map();
-	traverseVertices(root, o => {
+	traverseVertices(graphcanvas, o => {
 		if (o instanceof GraphGroup) {
 			const key = id++;
 			groupNameIdMap.set(o.name, key);
@@ -133,7 +132,7 @@ function generateUmlClass(graphmeta) {
 	});
 	debug(groupNameIdMap);
 
-	traverseEdges(graphmeta, l => {
+	traverseEdges(graphcanvas, l => {
 		relationship = 'generalization';
 		if (l.edgeType != '>') {
 			relationship = 'aggregation';
@@ -144,6 +143,6 @@ function generateUmlClass(graphmeta) {
 			relationship: relationship
 		});
 	});
-	output(graphmeta, JSON.stringify([groups, edges]));
+	output(graphcanvas, JSON.stringify([groups, edges]));
 }
 generators.set("umlclass", generateUmlClass);

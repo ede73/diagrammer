@@ -52,9 +52,9 @@ digraph {
 }
 node js/parse.js verbose digraph.test digraph
 
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function digraph(graphmeta) {
+function digraph(graphcanvas) {
     // TODO: See splines control
     // http://www.graphviz.org/doc/info/attrs.html#d:splines
     // TODO: Start note fdp/neato
@@ -115,42 +115,38 @@ function digraph(graphmeta) {
         if (nattrs.length > 0) {
             t = "[" + nattrs.join(",") + "]";
         }
-        output(graphmeta, obj.getName() + t + ';');
+        output(graphcanvas, obj.getName() + t + ';');
     };
 
-    const r = graphmeta.GRAPHROOT;
-    if (r.getVisualizer()) {
-        output(graphmeta, "/* render:" + r.getVisualizer() + "*/")
+    if (graphcanvas.getVisualizer()) {
+        output(graphcanvas, "/* render:" + graphcanvas.getVisualizer() + "*/")
     }
-    output(graphmeta, "digraph {", true);
-    //output(graphmeta,"edge[weight=1]")
-    //output(graphmeta,"ranksep=0.75")
-    //output(graphmeta,"nodesep=0.75")
+    output(graphcanvas, "digraph {", true);
 
-    output(graphmeta, "compound=true;");
-    if (r.getDirection() === "portrait") {
-        output(graphmeta, "rankdir=LR;");
+    output(graphcanvas, "compound=true;");
+    if (graphcanvas.getDirection() === "portrait") {
+        output(graphcanvas, "rankdir=LR;");
     } else {
-        output(graphmeta, "rankdir=TD;");
+        output(graphcanvas, "rankdir=TD;");
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
-    const start = r.getStart();
+    const start = graphcanvas.getStart();
     if (start) {
-        const fwd = getVertex(graphmeta.yy, start);
+        const fwd = getVertex(graphcanvas.yy, start);
         processAVertex(fwd);
         // {$$=" {rank = same;null}\n {rank = same; "+$2+"}\n null
         // [shape=plaintext,
         // label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-        output(graphmeta, "//startnode setup\n  {rank = same;null} {rank = same; " +
+        output(graphcanvas, "//startnode setup\n  {rank = same;null} {rank = same; " +
             start + "}\n  null [shape=plaintext, label=\"\"];\n  " + start + "[shape=doublecircle];\n  null->" + start + ";\n");
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
-    if (r.getEqual() && r.getEqual().length > 0) {
-        output(graphmeta, "{rank=same;", true);
-        for (let x = 0; x < r.getEqual().length; x++) {
-            output(graphmeta, r.getEqual()[x].getName() + ";");
+    if (graphcanvas.getEqual() && graphcanvas.getEqual().length > 0) {
+        output(graphcanvas, "{rank=same;", true);
+        for (let x = 0; x < graphcanvas.getEqual().length; x++) {
+            output(graphcanvas, graphcanvas.getEqual()[x].getName() + ";");
         }
-        output(graphmeta, "}", false);
+        output(graphcanvas, "}", false);
     }
     const fixgroup = (c => {
         for (const i in c.OBJECTS) {
@@ -166,18 +162,18 @@ function digraph(graphmeta) {
                 }
             }
         }
-    })(r.OBJECTS);
+    })(graphcanvas.OBJECTS);
 
     function getFirstEdgeOfTheGroup(grp) {
-        //output(graphmeta,"FIRST VERTEX"+JSON.stringify(grp));
-        for (const i in graphmeta.EDGES) {
-            if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
-            const l = graphmeta.EDGES[i];
+        //output(graphcanvas,"FIRST VERTEX"+JSON.stringify(grp));
+        for (const i in graphcanvas.EDGES) {
+            if (!graphcanvas.EDGES.hasOwnProperty(i)) continue;
+            const l = graphcanvas.EDGES[i];
             for (const j in grp.OBJECTS) {
                 if (!grp.OBJECTS.hasOwnProperty(j)) continue;
                 const n = grp.OBJECTS[j];
                 if (n == l.left) {
-                    // output(graphmeta,"ReturnF "+n);
+                    // output(graphcanvas,"ReturnF "+n);
                     return n;
                 }
             }
@@ -187,10 +183,10 @@ function digraph(graphmeta) {
 
     function getLastEdgeInGroup(grp) {
         let nod = undefined;
-        // output(graphmeta,"LAST VERTEX"+JSON.stringify(grp));
-        for (const i in graphmeta.EDGES) {
-            if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
-            const l = graphmeta.EDGES[i];
+        // output(graphcanvas,"LAST VERTEX"+JSON.stringify(grp));
+        for (const i in graphcanvas.EDGES) {
+            if (!graphcanvas.EDGES.hasOwnProperty(i)) continue;
+            const l = graphcanvas.EDGES[i];
             for (const j in grp.OBJECTS) {
                 if (!grp.OBJECTS.hasOwnProperty(j)) continue;
                 const n = grp.OBJECTS[j];
@@ -200,7 +196,7 @@ function digraph(graphmeta) {
                     nod = n;
             }
         }
-        // output(graphmeta,"ReturnL "+nod);
+        // output(graphcanvas,"ReturnL "+nod);
         return nod;
     }
 
@@ -216,41 +212,41 @@ function digraph(graphmeta) {
                 // Group name,OBJECTS,get/setEqual,toString
                 const processAGroup = (grp => {
                     debug(JSON.stringify(grp, skipEntrances));
-                    output(graphmeta, 'subgraph cluster_' + grp.getName() + ' {', true);
+                    output(graphcanvas, 'subgraph cluster_' + grp.getName() + ' {', true);
                     if (grp.isInnerGraph) {
-                        output(graphmeta, 'graph[style=invis];');
+                        output(graphcanvas, 'graph[style=invis];');
                     }
                     if (grp.getLabel())
-                        output(graphmeta, getAttributeAndFormat(grp, 'label',
+                        output(graphcanvas, getAttributeAndFormat(grp, 'label',
                             '   label="{0}";'));
                     if (grp.getColor()) {
-                        output(graphmeta, "style=filled;");
-                        output(graphmeta, getAttributeAndFormat(grp, 'color',
+                        output(graphcanvas, "style=filled;");
+                        output(graphcanvas, getAttributeAndFormat(grp, 'color',
                             '   color="{0}";\n'));
                     }
                     traverseVertices(grp);
                     output(false);
-                    output(graphmeta, "}//end of " + grp.getName() + " " + cond);
+                    output(graphcanvas, "}//end of " + grp.getName() + " " + cond);
                     if (cond) {
-                        output(graphmeta, "//COND " + grp.getName() + " " + cond);
+                        output(graphcanvas, "//COND " + grp.getName() + " " + cond);
                         if (cond == "endif") {
                             //never reached
                             const exitedge = grp.exitedge;
                             if (exitedge) {
-                                output(graphmeta, lastexit + "->" + exitedge + "[color=red];");
-                                output(graphmeta, lastendif + "->" + exitedge + ";");
+                                output(graphcanvas, lastexit + "->" + exitedge + "[color=red];");
+                                output(graphcanvas, lastendif + "->" + exitedge + ";");
                             }
                         } else {
                             const sn = "entry" + grp.exitvertex;
                             if (!lastendif) {
                                 lastendif = "endif" + grp.exitvertex;
-                                output(graphmeta, lastendif + "[shape=circle,label=\"\",width=0.01,height=0.01];");
+                                output(graphcanvas, lastendif + "[shape=circle,label=\"\",width=0.01,height=0.01];");
                             }
                             //TODO:else does not need diamond
-                            output(graphmeta, sn + "[shape=diamond,fixedsize=true,width=1,height=1,label=\"" + grp.getLabel() + "\"];");
+                            output(graphcanvas, sn + "[shape=diamond,fixedsize=true,width=1,height=1,label=\"" + grp.getLabel() + "\"];");
                             if (cond == "if") {
                                 //entryedge!
-                                output(graphmeta, grp.entryedge.getName() + "->" + sn + ";");
+                                output(graphcanvas, grp.entryedge.getName() + "->" + sn + ";");
                             }
                             // FIRST node of group and LAST node in group..
                             const lastEdge = getFirstEdgeOfTheGroup(grp);
@@ -259,13 +255,13 @@ function digraph(graphmeta) {
                             //const en = "exit" + o.exitvertex
 
                             if (lastexit) {
-                                output(graphmeta, lastexit + "->" + sn + "[label=\"NO\",color=red];");
+                                output(graphcanvas, lastexit + "->" + sn + "[label=\"NO\",color=red];");
                                 //lastexit = undefined;
                             }
                             // YES LINK to first node of the group
-                            output(graphmeta, sn + "->" + lastEdge.getName() + "[label=\"YES\",color=green,lhead=cluster_" +
+                            output(graphcanvas, sn + "->" + lastEdge.getName() + "[label=\"YES\",color=green,lhead=cluster_" +
                                 grp.getName() + "];");
-                            output(graphmeta, ln.getName() + "->" + lastendif + "[label=\"\"];");
+                            output(graphcanvas, ln.getName() + "->" + lastendif + "[label=\"\"];");
                             lastexit = sn;
                         }
                     }
@@ -277,10 +273,10 @@ function digraph(graphmeta) {
             }
         }
     };
-    traverseVertices(r);
+    traverseVertices(graphcanvas);
 
-    output(graphmeta, "//links start");
-    traverseEdges(graphmeta, edge => {
+    output(graphcanvas, "//links start");
+    traverseEdges(graphcanvas, edge => {
         const attrs = [];
         let label = edge.label;
         if (label) {
@@ -325,7 +321,7 @@ function digraph(graphmeta) {
                 for (const i in lhs.OBJECTS) {
                     if (!lhs.OBJECTS.hasOwnProperty(i)) continue;
                     const go = lhs.OBJECTS[i];
-                    if (!hasOutwardEdge(graphmeta.yy, go)) {
+                    if (!hasOutwardEdge(graphcanvas.yy, go)) {
                         //debug('test node '+go);
                         exits.push(go);
                     }
@@ -376,18 +372,18 @@ function digraph(graphmeta) {
         debug('print rhs ' + rhs);
         if (lhs instanceof Array) {
             lhs.forEach((element, index, array) => {
-                output(graphmeta, element.getName() +
+                output(graphcanvas, element.getName() +
                     getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() +
                     getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ";");
             });
         } else {
-            output(graphmeta, lhs.getName() +
+            output(graphcanvas, lhs.getName() +
                 getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() +
                 getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ";");
         }
     });
     output(false);
-    output(graphmeta, "}");
+    output(graphcanvas, "}");
 }
 generators.set('digraph', digraph);
 visualizations.set('digraph', ['dot', 'circo', 'twopi', 'neato', 'fdp', 'sfpd']);

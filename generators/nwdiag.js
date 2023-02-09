@@ -52,19 +52,18 @@ b -- d;
 a -- e;
 }
 node js/parse.js verbose nwdiag.test nwdiag
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function nwdiag(graphmeta) {
-    graphmeta.result("nwdiag{\n default_fontsize = 16\n");
-    const r = graphmeta.GRAPHROOT;
-    for (const i in r.OBJECTS) {
-        if (!r.OBJECTS.hasOwnProperty(i)) continue;
-        const obj = r.OBJECTS[i];
+function nwdiag(graphcanvas) {
+    graphcanvas.result("nwdiag{\n default_fontsize = 16\n");
+    for (const i in graphcanvas.OBJECTS) {
+        if (!graphcanvas.OBJECTS.hasOwnProperty(i)) continue;
+        const obj = graphcanvas.OBJECTS[i];
         if (obj instanceof GraphGroup) {
             // split the label to two, NAME and address
-            graphmeta.result('  network ' + obj.getName() + '{');
+            graphcanvas.result('  network ' + obj.getName() + '{');
             if (obj.getLabel() != "")
-                graphmeta.result('    address="' + obj.getLabel() + '"');
+                graphcanvas.result('    address="' + obj.getLabel() + '"');
             for (const j in obj.OBJECTS) {
                 if (!obj.OBJECTS.hasOwnProperty(j)) continue;
                 const z = obj.OBJECTS[j];
@@ -78,21 +77,21 @@ function nwdiag(graphmeta) {
                     getAttributeAndFormat(z, 'label', ',address="{0}"');
                 if (tmp.trim() != "")
                     tmp = "[" + tmp.trim().substring(1) + "]";
-                graphmeta.result("    " + z.getName() + tmp + ';');
+                graphcanvas.result("    " + z.getName() + tmp + ';');
             }
             // find if there are ANY edges that have this GROUP as participant!
-            for (const il in graphmeta.EDGES) {
-                if (!graphmeta.EDGES.hasOwnProperty(il)) continue;
-                const edge = graphmeta.EDGES[il];
+            for (const il in graphcanvas.EDGES) {
+                if (!graphcanvas.EDGES.hasOwnProperty(il)) continue;
+                const edge = graphcanvas.EDGES[il];
                 tmp = getAttributeAndFormat(edge, 'label', '[address="{0}"]');
                 if (edge.left == obj) {
-                    graphmeta.result("  " + edge.right.getName() + tmp + ";");
+                    graphcanvas.result("  " + edge.right.getName() + tmp + ";");
                 }
                 if (edge.right == obj) {
-                    graphmeta.result("  " + edge.left.getName() + tmp + ";");
+                    graphcanvas.result("  " + edge.left.getName() + tmp + ";");
                 }
             }
-            graphmeta.result("  }");
+            graphcanvas.result("  }");
         } else {
             if (obj.shape && !NetworkDiagShapeMap[obj.shape]) {
                 throw new Error("Missing shape mapping");
@@ -104,15 +103,15 @@ function nwdiag(graphmeta) {
                 getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
                 tmp = "[" + tmp.trim().substring(1) + "]";
-            graphmeta.result("    " + obj.getName() + tmp + ';');
+            graphcanvas.result("    " + obj.getName() + tmp + ';');
         }
     }
 
-    traverseEdges(graphmeta, edge => {
+    traverseEdges(graphcanvas, edge => {
         if (!(edge.left instanceof GraphGroup || edge.right instanceof GraphGroup)) {
-            graphmeta.result(edge.left.getName() + " -- " + edge.right.getName() + ";");
+            graphcanvas.result(edge.left.getName() + " -- " + edge.right.getName() + ";");
         }
     });
-    graphmeta.result("}");
+    graphcanvas.result("}");
 }
 generators.set('nwdiag', nwdiag);

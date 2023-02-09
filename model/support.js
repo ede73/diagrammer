@@ -116,49 +116,49 @@ var indentLevel = 0;
 
 /**
  * Output given string, potentially indenting or dedenting
- * @param {(boolean|GraphMeta)} graphmeta 
+ * @param {(boolean|GraphCanvas)} graphcanvas 
  * @param {(string|boolean)} txt Text to output
  * @param {boolean} [indentOrDedent] whether to indent to dedent, OPTIONAL
  */
-function output(graphmeta, txt, indentOrDedent = undefined) {
+function output(graphcanvas, txt, indentOrDedent = undefined) {
     let prefix = "";
-    if (txt !== true && txt !== false && graphmeta !== true && graphmeta !== false) {
+    if (txt !== true && txt !== false && graphcanvas !== true && graphcanvas !== false) {
         for (let i = 0; i < indentLevel; i++) {
             prefix += "    ";
         }
-        graphmeta.result(prefix + txt);
+        graphcanvas.result(prefix + txt);
     }
-    if (indentOrDedent === true || graphmeta === true || txt === true) {
+    if (indentOrDedent === true || graphcanvas === true || txt === true) {
         indentLevel++;
-    } else if (indentOrDedent === false || graphmeta === false || txt === false) {
+    } else if (indentOrDedent === false || graphcanvas === false || txt === false) {
         indentLevel--;
     }
 }
 
 /**
  * Send the text to the output, or format the array
- * @param {GraphMeta} graphmeta 
+ * @param {GraphCanvas} graphcanvas 
  * @param {string} txt 
  * @param {Array} [array] Optional array format
  */
-function outputFormattedText(graphmeta, txt, array) {
+function outputFormattedText(graphcanvas, txt, array) {
     if (!array) {
-        graphmeta.result(txt);
+        graphcanvas.result(txt);
     } else {
         // @ts-ignore
-        graphmeta.result(txt.formatArray(array));
+        graphcanvas.result(txt.formatArray(array));
     }
 }
 
 /**
  * Iterate edges
- * @param {GraphMeta} graphmeta 
+ * @param {GraphCanvas} graphcanvas 
  */
-function* iterateEdges(graphmeta) {
-    for (const i in graphmeta.EDGES) {
-        if (!graphmeta.EDGES.hasOwnProperty(i)) continue;
+function* iterateEdges(graphcanvas) {
+    for (const i in graphcanvas.EDGES) {
+        if (!graphcanvas.EDGES.hasOwnProperty(i)) continue;
         /** @type {GraphEdge} */
-        let foolTypeChecker = graphmeta.EDGES[i];
+        let foolTypeChecker = graphcanvas.EDGES[i];
         yield foolTypeChecker;
     }
 }

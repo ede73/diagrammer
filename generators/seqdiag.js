@@ -18,21 +18,20 @@ b -> d[];
 a -> e[label="edge text"];
 }
 node js/parse.js verbose seqdiag.test seqdiag
-@param {GraphMeta} graphmeta
+@param {GraphCanvas} graphcanvas
 */
-function seqdiag(graphmeta) {
-    graphmeta.result("seqdiag {");
-    graphmeta.result("autonumber = True;");
+function seqdiag(graphcanvas) {
+    graphcanvas.result("seqdiag {");
+    graphcanvas.result("autonumber = True;");
     // quite fucked up life line activations and no control over..skip
     // it,shrimpy!
-    graphmeta.result(" activation = none;");
-    const root = graphmeta.GRAPHROOT;
+    graphcanvas.result(" activation = none;");
     // print out all node declarations FIRST (if any)
-    for (const i in root.OBJECTS) {
-        if (!root.OBJECTS.hasOwnProperty(i)) continue;
-        const obj = root.OBJECTS[i];
+    for (const i in graphcanvas.OBJECTS) {
+        if (!graphcanvas.OBJECTS.hasOwnProperty(i)) continue;
+        const obj = graphcanvas.OBJECTS[i];
         if (obj instanceof GraphGroup) {
-            graphmeta.result(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'));
+            graphcanvas.result(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'));
             for (const j in obj.OBJECTS) {
                 if (!obj.OBJECTS.hasOwnProperty(j)) continue;
                 const z = obj.OBJECTS[j];
@@ -41,7 +40,7 @@ function seqdiag(graphmeta) {
                     getAttributeAndFormat(z, 'label', ',label="{0}"');
                 if (styleAndLabel.trim() != "")
                     styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
-                graphmeta.result(z.getName() + styleAndLabel + ";");
+                graphcanvas.result(z.getName() + styleAndLabel + ";");
             }
         } else if (obj instanceof GraphVertex) {
             let styleAndLabel = getAttributeAndFormat(obj, 'style', ',style={0}') +
@@ -49,11 +48,11 @@ function seqdiag(graphmeta) {
                 getAttributeAndFormat(obj, 'color', ',color="{0}"');
             if (styleAndLabel.trim() != "")
                 styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
-            graphmeta.result(obj.getName() + styleAndLabel + ";");
+            graphcanvas.result(obj.getName() + styleAndLabel + ";");
         }
     }
 
-    traverseEdges(graphmeta, edge => {
+    traverseEdges(graphcanvas, edge => {
         const attrs = [];
         let edgeType = "";
         let rhs = edge.right;
@@ -102,7 +101,7 @@ function seqdiag(graphmeta) {
             // hm.. solve a<>a is broadcast, where as
             // a<>b (any else than node itself) is autoreturn
             if (rhs == lhs) {
-                graphmeta.result(getAttributeAndFormat(edge, 'label', '===BROADCAST:{0}==='));
+                graphcanvas.result(getAttributeAndFormat(edge, 'label', '===BROADCAST:{0}==='));
                 return;
             }
             edgeType = '=>';
@@ -123,18 +122,18 @@ function seqdiag(graphmeta) {
                 edgeType = "->";
         } else if (dot) {
             // dotted
-            graphmeta.result(getAttributeAndFormat(edge, 'label', '...{0}...'));
+            graphcanvas.result(getAttributeAndFormat(edge, 'label', '...{0}...'));
             return;
         } else if (dash) {
             // dashed
-            graphmeta.result(getAttributeAndFormat(edge, 'label', '==={0}==='));
+            graphcanvas.result(getAttributeAndFormat(edge, 'label', '==={0}==='));
             return;
         } else {
-            graphmeta.result("ERROR: SHOULD NOT HAPPEN");
+            graphcanvas.result("ERROR: SHOULD NOT HAPPEN");
         }
         // MUST HAVE whitespace at both sides of the "arrow"
-        graphmeta.result(lhs.getName() + " " + edgeType + " " + rightName + "[" + attrs.join(",") + "];");
+        graphcanvas.result(lhs.getName() + " " + edgeType + " " + rightName + "[" + attrs.join(",") + "];");
     });
-    graphmeta.result("}");
+    graphcanvas.result("}");
 }
 generators.set('seqdiag', seqdiag);

@@ -292,14 +292,14 @@ alink>"inherit"graphobject
 agroup>"inherit"graphobject
 asubgraph>"inherit"graphobject
 
-graphroot;GraphRoot | {OBJECTS[] | ROOTVERTICES[] | generator | visualizer | (current)shape | direction | start | equal | "defaults"}
+graphroot;GraphCanvas | {OBJECTS[] | ROOTVERTICES[] | generator | visualizer | (current)shape | direction | start | equal | "defaults"}
 
 graphobject->"many:1"graphroot
 ```
 
 <img width=30% src="https://user-images.githubusercontent.com/1845554/217098499-26c7b5ce-8f97-4b5e-b2a3-175cb35697d8.png">
 
-## GraphRoot
+## GraphCanvas
 Represents the diagram/graph and necessary properties excluding Edges (stored separately)
 
 Holds all the objects and rootvertices. The diagram may have more than one root vertex, not all visualizers support these though!
@@ -312,9 +312,9 @@ Which direction the graph is to be drawn - if specified.
 
 What's the current default shape - only used during parsing the diagrammer languge while generating vertices.
 
-AST/Model note. Edges are not stored in GraphRoot, but separately! Why? It's easier to handle them in the generators and vertices and edges are output separately to separate sections anyway.
+AST/Model note. Edges are not stored in GraphCanvas, but separately! Why? It's easier to handle them in the generators and vertices and edges are output separately to separate sections anyway.
 
-GraphRoot:
+GraphCanvas:
 - OBJECTS[GraphVertex(a), GraphInner(GraphVertex(b), GraphVertex(c), GraphVertex(d), GraphGroup(GraphVertex(f), GraphVertex(g)))]
 - ROOTVERTICES[GraphVertex, GraphInner] # this graph has two root vertices
 - generator digraph
@@ -353,7 +353,7 @@ Ie. a graph where output vertex is connected to all the inner vertices.
 
 That constructs
 
-GraphRoot:
+GraphCanvas:
 - OBJECTS[GraphVertex(a), GraphInner(GraphVertex(b), GraphVertex(c), GraphVertex(d), GraphInner(GraphVertex(f), GraphVertex(g)))]
 - ROOTVERTICES[same as objects]
 - generator
@@ -398,7 +398,7 @@ traverseTree(root, (vertex, isLeaf, hasSiblings) => {
 - js - The diagrammer parser (also transpiled mscgen, graphviz)
   - mscgen / graphviz visualize the graphs in the Web UI in realtime without any backend support, but not required. I was hoping to build backendless visualization, all in browser. And that's what it does, but had I wanted to go all the way..PlantUML, python3 nwdiag/actdiag..etc. uh. 
 - manual_test_diagrams - some diagrammer tests during development, not tied to tests
-- model - Diagrammer parser converts diagrammer language to this AST model comprising of GraphVertex, GraphEdge, shapes, GraphInner (, graphobject, graphroot, tree, support)
+- model - Diagrammer parser converts diagrammer language to this AST model comprising of GraphVertex, GraphEdge, shapes, GraphInner (, graphobject, graphcanvas, tree, support)
 - scripts - Some utility scripts for building, testing, exporting
 - setup - setup related
 - tests - All the test files, diagrammer language inputs, reference renderings, transpiled outputs. 

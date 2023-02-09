@@ -1,13 +1,21 @@
 // @ts-check 
 /**
- * Create a new graph root.
+ * Represents the graph canvas. 
+ * 
+ * Some graphs may have a root code, but the whole graph canves is free to have as many as required
+ * 
+ * Single root graph:
+ * a>b>c>d
+ * 
+ * A graph with four roots
+ * a b c d
  * 
  * Even if the TREE has multiple root vertices (or basically multiple trees)
- * the graph will only EVER have one GraphRoot
+ * the graph will only EVER have one GraphCanvas
  * 
  * TODO: Merge to GraphMeta
  */
-class GraphRoot extends GraphObject {
+class GraphCanvas extends GraphObject {
     constructor() {
         super(undefined); // TODO:
         /** @type {GraphObject[]} */
@@ -35,7 +43,7 @@ class GraphRoot extends GraphObject {
     // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
-     * @return {GraphRoot}
+     * @return {GraphCanvas}
      */
     setGenerator(value) {
         this.generator = value.toLowerCase();
@@ -50,7 +58,7 @@ class GraphRoot extends GraphObject {
     // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
-     * @return {GraphRoot}
+     * @return {GraphCanvas}
      */
     setVisualizer(value) {
         this.visualizer = value.toLowerCase();
@@ -65,7 +73,7 @@ class GraphRoot extends GraphObject {
 
     /**
      * @param {string} value
-     * @return {GraphRoot}
+     * @return {GraphCanvas}
      */
     setCurrentShape(value) {
         // value?.toLowerCase() not yet in node 12.29 (default in ubuntu)
@@ -82,7 +90,7 @@ class GraphRoot extends GraphObject {
     // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
-     * @return {GraphRoot}
+     * @return {GraphCanvas}
      */
     setDirection(value) {
         this.direction = value;
@@ -98,7 +106,7 @@ class GraphRoot extends GraphObject {
     // TODO: MOVING TO GraphMeta
     /**
      * @param {string} value
-     * @return {GraphRoot}
+     * @return {GraphCanvas}
      */
     setStart(value) {
         this.start = value;
@@ -114,7 +122,7 @@ class GraphRoot extends GraphObject {
     // Save EQUAL vertex ranking
     /**
      * @param {string[]} value
-     * @return {GraphRoot}
+     * @return {GraphCanvas}
      */
     setEqual(value) {
         this.equal = value;
@@ -134,7 +142,7 @@ class GraphRoot extends GraphObject {
      * currentContainer first
      * @param {string} key
      * @param {any} value
-     * @return {GraphRoot}
+     * @return {GraphCanvas}
      */
     setDefault(key, value) {
         //debug("graphroot:Set ROOT " + key + " to " + value);
@@ -151,6 +159,6 @@ class GraphRoot extends GraphObject {
     }
 
     toString() {
-        return "GraphRoot";
+        return "GraphCanvas";
     }
 };

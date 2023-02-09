@@ -26,7 +26,7 @@ class GraphMeta {
      */
     start=undefined;
 
-    GRAPHROOT=new GraphRoot();
+    GRAPHROOT=new GraphCanvas();
 
     /**
      * @type {GraphEdge[]}
@@ -60,7 +60,7 @@ class GraphMeta {
      * yy.CURRENTCONTAINER = [];
      * yy.EDGES = []; (!)
      * yy.CONTAINER_EXIT = 1;
-     * yy.GRAPHROOT = new GraphRoot(); (!)
+     * yy.GRAPHROOT = new GraphCanvas(); (!)
      *
      * at _getVariables()
      * yy.VARIABLES = {};

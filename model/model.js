@@ -162,7 +162,7 @@ function getVertex(yy, name, style) {
  *
  * Get current container
  * @param yy Lexer
- * @return {(GraphRoot|GraphGroup|SubGroup)}
+ * @return {(GraphCanvas|GraphGroup|SubGroup)}
  */
 function getCurrentContainer(yy) {
     // no need for value, but runs init if missing
@@ -176,8 +176,8 @@ function getCurrentContainer(yy) {
  * Usage: grammar/state.grammar
  *
  * @param yy lexer
- * @param {(GraphRoot|GraphGroup|SubGroup)} container Set this container as current container
- * @return {(GraphRoot|GraphGroup|SubGroup)}
+ * @param {(GraphCanvas|GraphGroup|SubGroup)} container Set this container as current container
+ * @return {(GraphCanvas|GraphGroup|SubGroup)}
  */
 function enterContainer(yy, container) {
     yy.CURRENTCONTAINER.push(container);
@@ -439,7 +439,7 @@ function getGraphMeta(yy) {
  * External utility support for generator
  *
  * Usage: grammar/state.grammar, generators
- * @return {GraphRoot}
+ * @return {GraphCanvas}
  */
 function getGraphRoot(yy) {
     // debug(" getGraphRoot "+yy);
@@ -450,15 +450,14 @@ function getGraphRoot(yy) {
         }
         debug("...Initialize emptyroot " + yy);
         // TODO: DOESN'T WORK as type hint! Modularize to own obj..
-        /** @type  {(GraphRoot|GraphGroup|SubGroup)} */
+        /** @type  {(GraphCanvas|GraphGroup|SubGroup)} */
         yy.CURRENTCONTAINER = [];
         /** @type {GraphEdge[]} */
         yy.EDGES = [];
         /** @type {int} */
         yy.CONTAINER_EXIT = 1;
-        /** @type  {GraphRoot} */
-        yy.GRAPHROOT = new GraphRoot();
-        // yy.GRAPHROOT.setCurrentContainer(yy.GRAPHROOT);
+        /** @type  {GraphCanvas} */
+        yy.GRAPHROOT = new GraphCanvas();
         enterContainer(yy, yy.GRAPHROOT);
         //debug(false);
     }

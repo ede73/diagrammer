@@ -112,7 +112,7 @@ function plantuml_sequence(graphmeta) {
      * for this container, break out immediately
      * this is to emulate ORDERED nodes of plantuml
      * (node=edge,node,edge.group...all in order for this fucker)
-     * @param {GraphRoot|GraphGroup} container 
+     * @param {GraphCanvas|GraphGroup} container 
      * @param {boolean} sbgraph 
      */
     const printEdges = (container, sbgraph) => {
@@ -230,7 +230,7 @@ function plantuml_sequence(graphmeta) {
         }
     };
 
-    const traverseVertices = (/** @type {GraphRoot}*/root, /** @type {boolean}*/isInnerGraph) => {
+    const traverseVertices = (/** @type {GraphCanvas}*/root, /** @type {boolean}*/isInnerGraph) => {
         // Dump this groups participants first...
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;

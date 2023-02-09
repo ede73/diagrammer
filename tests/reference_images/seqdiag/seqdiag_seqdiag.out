@@ -1,0 +1,13 @@
+/* render:digraph*/
+digraph {
+    compound=true;
+    rankdir=TD;
+    a;
+    b;
+    c;
+    d;
+    //links start
+    a->b;
+    b->c;
+    c->d;
+}

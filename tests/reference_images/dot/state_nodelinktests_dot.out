@@ -1,0 +1,23 @@
+digraph {
+    compound=true;
+    rankdir=TD;
+    a;
+    b;
+    c;
+    r;
+    q;
+    w;
+    e;
+    m1;
+    m2;
+    m3;
+    //links start
+    a->b[label="A2B"];
+    a->c[label="A2C"];
+    r->c[label="R2C"];
+    q->w[label="Q2WER"];
+    q->e[label="Q2WER"];
+    q->r[label="Q2WER"];
+    m1->m2[label="M1toM2"];
+    m1->m3[label="M1toM3"];
+}

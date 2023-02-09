@@ -1,0 +1,26 @@
+/* render:digraph*/
+digraph {
+    compound=true;
+    rankdir=TD;
+    subgraph cluster_xxx {
+            label="xxx"; 
+        a;
+    }//end of xxx undefined
+    subgraph cluster_yyy {
+            label="yyy"; 
+        b;
+        c;
+    }//end of yyy undefined
+    subgraph cluster_zzz {
+            label="zzz"; 
+        x;
+        y;
+        z;
+    }//end of zzz undefined
+    //links start
+    a->b;
+    a->c;
+    b->x;
+    c->y;
+    c->z;
+}

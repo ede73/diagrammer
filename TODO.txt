@@ -125,7 +125,7 @@ shoulg have
    if/else/elseif is just a grouping construct
   With contract of saying the first preceding vertex and first seen vertex after endif gets 'linked' in graphs
   For sequences those are not handled allows the if/Else/elseif construct to work on both graph types!
-  This got implemented as collectNextVertex in grammar/state.grammar and then used in model/getVertex
+  This got implemented as collectNextVertex in grammar/diagrammer.grammar and then used in model/getVertex
   if/elseif/else/endif are all GROUPS now, each have special attributes
 	conditional	if/elseif/else/endif
 	exitvertex	a UNIQUE exitvertex within the graph.

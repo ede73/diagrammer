@@ -1,5 +1,5 @@
 // =====================================
-// ONLY used in grammar/state.grammar
+// ONLY used in grammar/diagrammer.grammar
 // =====================================
 
 /**
@@ -10,7 +10,7 @@
  * If this is assignment, rewrite the variable, else assign new
  * Always return the current value
  *
- * Usage: grammar/state.grammar
+ * Usage: grammar/diagrammer.grammar
  *
  * @param yy Lexer yy
  * @param {string} variable ${XXX:yyy} assignment or ${XXX} query
@@ -42,7 +42,7 @@ function processVariable(yy, variable) {
  * Create an array, push LHS,RHS vertices there and return the array as long as
  * processing the list vertices added to array..
  *
- * Usage: grammar/state.grammar
+ * Usage: grammar/diagrammer.grammar
  *
  * @param yy Lexer yy
  * @param {GraphObject} lhs left hand side of the list
@@ -88,7 +88,7 @@ function getList(yy, lhs, rhs, rhsEdgeLabel) {
  *
  * vertex a1 will be dotted instead of being dashed
  *
- * Usage: grammar/state.grammar
+ * Usage: grammar/diagrammer.grammar
  *
  * @param yy Lexer yy
  * @param {(string|GraphObject|Array)} name Reference, Vertex/Array/Group
@@ -158,7 +158,7 @@ function getVertex(yy, name, style) {
 /**
  * TODO: DUAL DECLARATION
  *
- * Usage: grammar/state.grammar
+ * Usage: grammar/diagrammer.grammar
  *
  * Get current container
  * @param yy Lexer
@@ -173,7 +173,7 @@ function getCurrentContainer(yy) {
 /**
  * Enter into a new container, set it as current container
  *
- * Usage: grammar/state.grammar
+ * Usage: grammar/diagrammer.grammar
  *
  * @param yy lexer
  * @param {(GraphCanvas|GraphGroup|SubGroup)} container Set this container as current container
@@ -191,7 +191,7 @@ function enterContainer(yy, container) {
  * Return the previous one
  * Previous one also set as current container
  *
- * Usage: grammar/state.grammar
+ * Usage: grammar/diagrammer.grammar
  *
  * @param yy lexer
  */
@@ -210,14 +210,14 @@ function exitContainer(yy) {
  * Edit grammar so it edges a>b and c,d,e to h
  * Ie exit vertex(s) and entrance vertex(s) linked properly
  *
- * Usage: grammar/state.grammar
+ * Usage: grammar/diagrammer.grammar
  */
 function enterSubGraph(yy) {
     return enterContainer(yy, _getSubGraph(yy));
 }
 
 /*
- * Usage: grammar/state.grammar
+ * Usage: grammar/diagrammer.grammar
  */
 function exitSubGraph(yy) {
     //Now should edit the ENTRANCE EDGE to point to a>b, a>d, a>e
@@ -275,7 +275,7 @@ function exitSubGraph(yy) {
  * new anonymous group getGroup(yy,GroupRef) => create a new group if GroupRef
  * is not a Group or return GroupRef if it is...1
  *
- * Usage: grammar/state.grammar
+ * Usage: grammar/diagrammer.grammar
  *
  * @param yy lexer
  * @param ref Type of reference, if group, return it
@@ -308,7 +308,7 @@ function getGroup(yy, ref) {
  * if there is a list a>b,c,x,d;X then X is gonna be edge label for EVERYONE
  * but for a>"1"b,"2"c edge label is gonna be individual!
  *
- * Usage: grammar/state.grammar
+ * Usage: grammar/diagrammer.grammar
  *
  * @param yy lexer
  * @param {string} edgeType Type of the edge(grammar)
@@ -434,7 +434,7 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
  * Get current singleton graphcanvas or create new one
  * External utility support for generator
  *
- * Usage: grammar/state.grammar, generators
+ * Usage: grammar/diagrammer.grammar, generators
  * @return {GraphCanvas}
  */
 function getGraphCanvas(yy) {
@@ -461,7 +461,7 @@ function getGraphCanvas(yy) {
 }
 
 /** 
- * Usage: grammar/state.grammar, generators/digraph.js
+ * Usage: grammar/diagrammer.grammar, generators/digraph.js
  * @param {GraphObject} vertex
  */
 function hasOutwardEdge(yy, vertex) {

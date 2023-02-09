@@ -7,14 +7,14 @@ all: build/state.js build/state.all build/parser.js Makefile
 	@echo Make ALL
 	@echo done
 
-build/state.js: grammar/state.lex
+build/state.js: grammar/diagrammer.lex
 	@mkdir -p build
 	@echo Make build/state.js from LEX
 	@jison-lex $< -o $@
 	@echo "exports.state=state;" >> $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
-build/state.all: grammar/state.lex grammar/lexmarker.txt grammar/state.grammar model/support.js model/model.js model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/shapes.js model/graphinner.js model/tree.js generators/*.js
+build/state.all: grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.grammar model/support.js model/model.js model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/shapes.js model/graphinner.js model/tree.js generators/*.js
 	@mkdir -p build
 	@echo Compile build/state.all
 	@cat $^ >$@

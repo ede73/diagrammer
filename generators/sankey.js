@@ -7,32 +7,26 @@ import { debug, output } from '../model/support.js';
 import { GraphConnectable } from '../model/graphconnectable.js';
 
 /**
-a>b>c,d
-a>e;edge text
-a;node text
+autovero>"10 taalaa"budjetti
+tupakkavero>"8 taalaa"budjetti
+kakkavero>"3 taalaa"budjetti
+budjetti>"18 taalaa"sotaan
+sossuun<"1 taala"budjetti
 
 to
-{
-"name": "a",
-"children": [
-	{
-		"name": "b",
-		"children": [
-			{"name": "c", "size": 1},
-			{"name": "d", "size": 1}
-		]
-	},
-	{"name": "e", "size": 1}
+[
+	{"autovero","budjetti",10},
+	{"tupakkavero","budjetti",8},
+	{"kakkavero","budjetti",3},
+	{"budjetti","sotaan",18},
+	{"budjetti","sossuun",1}
 ]
-}
 
 node js/diagrammer.js verbose sankey.test sankey
 @param {GraphCanvas} graphcanvas
 */
 export function sankey(graphcanvas) {
-	let tree;
 	/**
-	 * 
 	 * @param {string} str 
 	 * @returns {number}
 	 */
@@ -44,7 +38,6 @@ export function sankey(graphcanvas) {
 		return 0;
 	}
 	/**
-	 * 
 	 * @param {GraphVertex} vertex 
 	 * @param {number} size 
 	 */
@@ -55,78 +48,25 @@ export function sankey(graphcanvas) {
 			vertex.size = size;
 		}
 	}
-	/**
-	 * 
-	 * @param {GraphVertex} left 
-	 * @param {GraphVertex} right 
-	 * @returns 
-	 */
-	function addVertex(left, right) {
-		if (!tree) {
-			tree = new TreeVertex(left);
-		}
-		if (!(left instanceof GraphVertex)) return;
-		const cl = findVertex(tree, left);
-		if (!cl) {
-			const cl = findVertex(tree, right);
-			if (!cl) {
-				throw new Error(`Left node (${left.name}) nor right (${right.name}) not found from tree`);
-			}
-			cl.CHILDREN.push(new TreeVertex(left));
-		}
-		if (!findVertex(tree, right) && (right instanceof GraphVertex)) {
-			debug(`Add ${right.name} as child of ${cl.data.name} co ${right.container}`);
-			cl.CHILDREN.push(new TreeVertex(right));
-		}
-	}
 
+	output(graphcanvas, '[', true);
+
+	let comma = '';
 	/**
 	 * For a dendrogram we're not interested in vertices
 	 * just edges(for now!)
 	 */
 	traverseEdges(graphcanvas, function (edge) {
-		//debug(`edge ${edge.left.name} to ${edge.right.name}`);
-		if (edge.isLeftPointingEdge) {
-			const amount = getNumber(edge.getLabel())
-			//addSize(edge.left, amount);
-			//addSize(edge.right, -amount);
+		const amount = getNumber(edge.getLabel())
+		if (edge.isRightPointingEdge()) {
+			output(graphcanvas, `${comma}["${edge.left.name}","${edge.right.name}",${amount}]`);
+		} else {
+			output(graphcanvas, `${comma}["${edge.right.name}","${edge.left.name}",${amount}]`);
 		}
-		if (edge.isRightPointingEdge) {
-			const amount = getNumber(edge.getLabel())
-			addSize(edge.left, amount);
-			//addSize(edge.right, amount);
-		}
-		addVertex(edge.left, edge.right, edge.getLabel());
+		comma = ',';
 	});
 
-	//output(graphcanvas,'{',true);
-	traverseTree(tree, function (t, isLeaf, hasSibling) {
-		let size = 0;
-		if (t.data.size) {
-			//console.log(t.data);
-			//console.log(t.data.name);
-			size = t.data.size;
-		}
-		if (isLeaf) {
-			let comma = '';
-			if (hasSibling)
-				comma = ',';
-			output(graphcanvas, `{"name": "${t.data.name}", "size": ${size}}` + comma);
-		} else {
-			output(graphcanvas, '{', true);
-			output(graphcanvas, `"name": "${t.data.name}", "size":${size},`);
-		}
-	}, function (t) {
-		output(graphcanvas, '"children": [', true);
-	}, function (t, hasNextSibling) {
-		output(false);
-		output(graphcanvas, ']', false);
-		if (hasNextSibling) {
-			output(graphcanvas, '},');
-		} else {
-			output(graphcanvas, '}');
-		}
-	});
 	output(false);
+	output(graphcanvas, ']');
 }
 generators.set('sankey', sankey);

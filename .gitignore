@@ -1,3 +1,5 @@
+*.png
+*.out
 web/post.txt
 web/result.txt
 web/result.png

@@ -1,3 +1,4 @@
+// ignore for now ts-check
 import { diagrammer_parser } from '../build/diagrammer_parser.js';
 
 /**
@@ -6,9 +7,22 @@ import { diagrammer_parser } from '../build/diagrammer_parser.js';
 var parsingStarted;
 
 /**
- * @type {HTMLElement}
+ * @type {HTMLInputElement}
  */
-//var result;
+var result = getResultElement();
+
+/**
+ * 
+ * @returns {HTMLInputElement}
+ */
+function getResultElement() {
+    // @ts-ignore
+    return document.getElementById("result");
+}
+
+function ParseResult(err) {
+    alert(err);
+}
 
 /**
  * 
@@ -87,11 +101,12 @@ export function parse(data, generator, visualizer, reloadImg) {
 }
 
 export function visualize(visualizer, reloadImg) {
-    const statelang = document.getElementById("result").value;
+    const statelang = getResultElement().value;
     if (!visualizer) {
         throw new Error("Visualizer not defined");
     }
     const visualizeUrl = "web/visualize.php?visualizer=" + visualizer;
+    // @ts-ignore
     $.ajax({
         type: "POST",
         async: true,

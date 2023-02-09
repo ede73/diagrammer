@@ -1,6 +1,8 @@
 //@ts-check
 import { GraphObject } from '../model/graphobject.js';
 import { GraphGroup } from '../model/graphgroup.js';
+import { GraphVertex } from '../model/graphvertex.js';
+import { GraphContainer } from '../model/graphcontainer.js';
 import { debug } from '../model/support.js';
 
 /**
@@ -15,40 +17,16 @@ export class GraphInner extends GraphGroup {
         super(undefined); // TODO:
         /** @type {string} */
         this.name = name;
-        /** @type {GraphObject[]} */
-        this.OBJECTS = [];
-        /**
-         * Never an GraphEdge though
-         * @type {GraphObject[]}
-         */
-        this.ROOTVERTICES = [];
         /** @type {boolean} */
         this.isInnerGraph = true;
-        /** @type {GraphObject} */ // TODO: Definitely not a string
+        /** @type {(GraphVertex|GraphContainer|(GraphContainer|GraphVertex)[])} */ // TODO: Definitely not a string
         this.entrance = undefined;
         /** @type {GraphObject} */
         this.exit = undefined;
     }
 
     /**
-     * temporary for RHS list array!!
-     * @param {string} value
-     * @return {GraphInner}
-     */
-    setEdgeLabel(value) {
-        this.edgelabel = value;
-        return this;
-    }
-
-    /**
-     * @return {string}
-     */
-    getEdgeLabel() {
-        return this.edgelabel;
-    }
-
-    /**
-     * @param {GraphObject} entrance
+     * @param {(GraphVertex|GraphContainer|(GraphContainer|GraphVertex)[])} entrance
      * @return {*}
      */
     setEntrance(entrance) {

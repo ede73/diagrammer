@@ -10,6 +10,7 @@ import { GraphInner } from "../model/graphinner.js";
 import { GraphObject } from "../model/graphobject.js";
 import { GraphEdge } from "../model/graphedge.js";
 import { getAttribute } from "../model/support.js";
+import { GraphContainer } from "../model/graphcontainer.js";
 
 /**
  *
@@ -119,7 +120,7 @@ export function getVertex(yy, name, style) {
             return name;
         }
 
-        const search = function s(/** @type {(GraphCanvas|GraphGroup)} */container, /** @type {string} */ name) {
+        const search = function s(/** @type {(GraphContainer)} */container, /** @type {string} */ name) {
             if (container.getName() == name) return container;
             for (const i in container.OBJECTS) {
                 if (!container.OBJECTS.hasOwnProperty(i)) continue;
@@ -175,7 +176,7 @@ export function getVertex(yy, name, style) {
  *
  * Get current container
  * @param yy Lexer
- * @return {(GraphCanvas|GraphGroup|GraphInner)}
+ * @return {GraphContainer}
  */
 export function getCurrentContainer(yy) {
     // no need for value, but runs init if missing
@@ -189,8 +190,8 @@ export function getCurrentContainer(yy) {
  * Usage: grammar/diagrammer.grammar
  *
  * @param yy lexer
- * @param {(GraphCanvas|GraphGroup|GraphInner)} container Set this container as current container
- * @return {(GraphCanvas|GraphGroup|GraphInner)}
+ * @param {GraphContainer} container Set this container as current container
+ * @return {GraphContainer}
  */
 export function enterContainer(yy, container) {
     yy.CURRENTCONTAINER.push(container);
@@ -269,7 +270,8 @@ export function exitSubGraph(yy) {
         for (var n in currentSubGraph.ROOTVERTICES) {
             if (!currentSubGraph.ROOTVERTICES.hasOwnProperty(n)) continue;
             const vertex = currentSubGraph.ROOTVERTICES[n];
-            if (currentSubGraph.entrance) {
+            if (currentSubGraph.entrance && currentSubGraph.entrance instanceof GraphVertex) {
+                // TODOL: Assumes entrance is GraphVertex, but it looks it can be other things
                 currentSubGraph.entrance.noedges = undefined;
             }
             vertex.noedges = undefined;
@@ -332,7 +334,6 @@ export function getGroup(yy, ref) {
 
 // Get an edge such that l links to r, return the added Edge or EDGES
 
-//noinspection JSUnusedGlobalSymbols
 /**
  * edgeType >,<,.>,<.,->,<-,<> l = left side, Vertex(xxx) or Group(yyy), or
  * Array(smthg) r = right side, Vertex(xxx) or Group(yyy), or Array(smthg) label =
@@ -345,8 +346,8 @@ export function getGroup(yy, ref) {
  *
  * @param yy lexer
  * @param {string} edgeType Type of the edge(grammar)
- * @param {GraphObject} lhs Left hand side (must be Array,Vertex,Group)
- * @param {GraphObject} rhs Right hand side (must be Array,Vertex,Group)
+ * @param {(GraphVertex|GraphContainer|(GraphContainer|GraphVertex)[])} lhs Left hand side (must be Array,Vertex,Group)
+ * @param {(GraphVertex|GraphContainer|(GraphContainer|GraphVertex)[])} rhs Right hand side (must be Array,Vertex,Group)
  * @param {string} [inlineEdgeLabel] Optional label for the edge
  * @param {string} [commonEdgeLabel] Optional label for the edge
  * @param {string} [edgeColor] Optional color for the edge
@@ -362,16 +363,21 @@ export function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel
     if (rhs instanceof GraphInner && !rhs.getEntrance()) {
         rhs.setEntrance(lhs);
     }
-    if (rhs.noedges && current_container) {
-        debug('REMOVE ' + rhs + ' from root vertices of the container ' + current_container);
-        const idx = current_container.ROOTVERTICES.indexOf(rhs);
-        if (idx >= 0) {
-            current_container.ROOTVERTICES.splice(idx, 1);
+    if (rhs instanceof GraphVertex) {
+        if (rhs.noedges && current_container) {
+            debug('REMOVE ' + rhs + ' from root vertices of the container ' + current_container);
+            const idx = current_container.ROOTVERTICES.indexOf(rhs);
+            if (idx >= 0) {
+                current_container.ROOTVERTICES.splice(idx, 1);
+            }
         }
+        // TODO: Should noedges be set to GraphObject (except Edge..)
+        // TODO: Also if this is an array, this assignment makes no sense
+        if (lhs instanceof GraphVertex) {
+            lhs.noedges = undefined;
+        }
+        rhs.noedges = undefined;
     }
-    lhs.noedges = undefined;
-    rhs.noedges = undefined;
-
     if (current_container instanceof GraphInner &&
         !current_container.getEntrance() &&
         lhs instanceof GraphVertex &&
@@ -479,7 +485,7 @@ export function getGraphCanvas(yy) {
         }
         debug("...Initialize emptyroot " + yy);
         // TODO: DOESN'T WORK as type hint! Modularize to own obj..
-        /** @type  {(GraphCanvas|GraphGroup|GraphInner)} */
+        /** @type  {GraphContainer} */
         yy.CURRENTCONTAINER = [];
         /** @type {GraphEdge[]} */
         yy.EDGES = [];
@@ -530,7 +536,7 @@ function hasInwardEdge(yy, vertex, verticesContainer) {
 
 /**
  * test if container has the object
- * @param {GraphGroup} container
+ * @param {GraphContainer} container
  * @param {GraphObject} obj
  */
 function containsObject(container, obj) {
@@ -563,8 +569,8 @@ export function traverseEdges(graphcanvas, callback) {
 
 /**
  * Usage: generators
- * @param {(GraphCanvas|GraphGroup)} container
- * @param {function((GraphVertex|GraphGroup|GraphInner)):void} callback
+ * @param {GraphContainer} container
+ * @param {function(GraphContainer|GraphVertex):void} callback
  */
 export function traverseVertices(container, callback) {
     for (const i in container.OBJECTS) {
@@ -573,7 +579,7 @@ export function traverseVertices(container, callback) {
         // didn't figure out how to keep typechecker happy now (TODO:)
         const obj = container.OBJECTS[i];
         // just to keep linter happy... Also Inner is always Group, so not necessary
-        if (obj instanceof GraphVertex || obj instanceof GraphGroup || obj instanceof GraphInner) {
+        if (obj instanceof GraphContainer || obj instanceof GraphVertex) {
             callback(obj);
         }
     }
@@ -666,7 +672,7 @@ function _addEdge(yy, edge) {
 
 /**
  * Push given object into a current container
- * @param {GraphObject} o
+ * @param {(GraphVertex|GraphContainer)} o
  */
 function _pushObject(yy, o) {
     const cnt = getCurrentContainer(yy)

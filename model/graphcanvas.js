@@ -2,6 +2,7 @@
 import { GraphObject } from '../model/graphobject.js';
 import { GraphEdge } from '../model/graphedge.js';
 import { setAttr, getAttribute } from '../model/support.js';
+import { GraphContainer } from './graphcontainer.js';
 
 export const generators = new Map();
 export const visualizations = new Map();
@@ -21,7 +22,7 @@ export const visualizations = new Map();
  * the graph will only EVER have one GraphCanvas
  * 
  */
-export class GraphCanvas extends GraphObject {
+export class GraphCanvas extends GraphContainer {
     /**
      * @type {function(string,string):void}
      */
@@ -35,16 +36,8 @@ export class GraphCanvas extends GraphObject {
 
     constructor() {
         super(undefined); // TODO:
-        /** @type {GraphObject[]} */
-        this.OBJECTS = [];
         /** @type {GraphEdge[]} */
         this.EDGES = [];
-        /**
-         * Never an GraphEdge though!
-         * TODO: Better abstraction, Canvas should be a container, like the group (and inner), but NOT extend to Vertex or Edge
-         * @type {GraphObject[]}
-         */
-        this.ROOTVERTICES = [];
         /** @type {string} */
         this.generator = undefined;
         /** @type {string} */

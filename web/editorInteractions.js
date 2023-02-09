@@ -1,5 +1,7 @@
+//@ts-check
 import { visualize, parse } from './parserInteraction.js';
 import { getSavedFiles, getSavedGraph } from './localStorage.js';
+//import { Editor } from '../ace/src-noconflict/ace.js';
 
 /**
  * @type {HTMLElement}

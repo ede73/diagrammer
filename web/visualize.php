@@ -47,7 +47,6 @@ switch ($_REQUEST["visualizer"]) {
     $r = visualize("nwdiag3", "-a");
     break;
   case "seqdiag":
-    // TODO: I think this is deprecated
     $r = visualize("seqdiag3", "-a");
     break;
   case "dot":

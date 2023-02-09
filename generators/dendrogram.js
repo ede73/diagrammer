@@ -31,12 +31,12 @@ function dendrogram(graphmeta) {
 		if (!tree) {
 			tree = new TreeVertex(lhs);
 		}
-		if (!(lhs instanceof Vertex)) return;
+		if (!(lhs instanceof GraphVertex)) return;
 		const cl = findVertex(tree, lhs);
 		if (!cl) {
 			throw new Error('Left node (' + lhs.name + ') not found from tree');
 		}
-		if (!findVertex(tree, rhs) && (rhs instanceof Vertex)) {
+		if (!findVertex(tree, rhs) && (rhs instanceof GraphVertex)) {
 			debug('Add ' + rhs.name + ' as child of ' + cl.data.name + " co " + rhs.container);
 			cl.CHILDREN.push(new TreeVertex(rhs));
 		}

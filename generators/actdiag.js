@@ -61,7 +61,7 @@ function actdiag(graphmeta) {
      * (r.getDirection()==="portrait"){ output(graphmeta," orientation=portrait");
      * }else{ //DEFAULT output(graphmeta," orientation=landscape"); }
      */
-    const parseObjects = (/** @type {function((Group|Vertex))}*/obj) => {
+    const parseObjects = (/** @type {function((Group|GraphVertex))}*/obj) => {
         output(true);
         if (obj instanceof Group) {
             output(graphmeta, 'lane "' + obj.getName() + '"{', true);

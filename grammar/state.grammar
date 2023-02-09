@@ -87,11 +87,11 @@ shapeOrVariable
 /* read vertice's attributes basically like: [STYLES] [SHAPES] NAME [IMAGE|COLOR]*/
 readVertexAttrs
     /*  1      2       3       4        5            6          7*/
-	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> getVertex(yy,$NAME,$1).setColor($5);if ($$ instanceof Vertex) setAttr($$.setShape($2).setImage($6),'compass',$4)
+	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> getVertex(yy,$NAME,$1).setColor($5);if ($$ instanceof GraphVertex) setAttr($$.setShape($2).setImage($6),'compass',$4)
 	;
 
 /*
-NOT BEST...return Vertex or Group, but some commands allow only Vertex and some just Group...
+NOT BEST...return GraphVertex or Group, but some commands allow only GraphVertex and some just Group...
 But it gets thing done..for now!
 TODO: Fix it
 
@@ -104,7 +104,7 @@ See Cris Dodds good explanation of right recursion
 http://stackoverflow.com/questions/12715961/grammar-spec-resolving-shift-reduce-conflicts
 And even better thorough explanation from IBM
 http://publib.boulder.ibm.com/infocenter/zvm/v5r4/index.jsp?topic=/com.ibm.zvm.v54.dmsp4/hcsp4b10120.htm
-vertexGroupListOrAttrs cumulates an array of vertices, RHS is the latest vertex
+vertexGroupListOrAttrs cumulates an array of vertices, RHS is the latest GraphVertex
 */
 vertexGroupListOrAttrs
 	: OPAREN -> enterSubGraph(yy)
@@ -130,7 +130,7 @@ graphContent
 		}
 	| EQUAL vertexGroupListOrAttrs
 		{
-			getCurrentContainer(yy).setEqual($2 instanceof Vertex?new Array($2):$2);
+			getCurrentContainer(yy).setEqual($2 instanceof GraphVertex?new Array($2):$2);
 		}
 	| SHAPE NAME {throw new Error("Expecting one of the shapes, got ("+$2+")");}
 	| LANDSCAPE 		-> getGraphRoot(yy).setDirection("landscape")

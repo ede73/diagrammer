@@ -13,7 +13,7 @@ class Group extends GraphObject {
         this.OBJECTS = [];
         /** @type {GraphObject[]} */
         this.ROOTVERTICES = [];
-        /** @type {Vertex[]} */
+        /** @type {GraphVertex[]} */
         this.equal = undefined;
         /** @type {string} */
         this.edgelabel = undefined;
@@ -25,7 +25,7 @@ class Group extends GraphObject {
 
     /**
      * Save EQUAL vertex ranking
-     * @param {Vertex[]} value
+     * @param {GraphVertex[]} value
      * @return {Group}
      */
     setEqual(value) {
@@ -34,7 +34,7 @@ class Group extends GraphObject {
     }
 
     /**
-     * @return {Vertex[]}
+     * @return {GraphVertex[]}
      */
     getEqual() {
         return this.equal;

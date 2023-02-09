@@ -30,7 +30,7 @@ a > b > c < d
 ```
 
 Also lot of other interesting things popped up and was available 2013 :)
-LLVM! Anything to anything transpiler (well kinda). Vertex, javascript on server side. JISON! Lexer/Grammar for JS!
+LLVM! Anything to anything transpiler (well kinda). Node.js, javascript on server side. JISON! Lexer/Grammar for JS!
 
 That's so cool! I could have graphviz run in browser! And I could use the SAME rendering engine from command line.
 
@@ -76,7 +76,7 @@ And if you don't remember how exactly in diagrammer language something was done,
 
 I wanted the diagrammer be super easy to use and get going, but with ability for expressivity and visual help (colors, texts, notes).
 
-## Vertexs and edges(links)
+## Vertices and edges(links)
 
 In diagrammer you write the graph as
 ```
@@ -143,7 +143,7 @@ There's two syntaxes (old and new :) )
 ```
 group color #7722ee
 group NAME1;Label the group1
-//Vertexs
+//Vertices
   group InnerGroup1#00ff00;Inner group1
   xy1
   group end
@@ -152,7 +152,7 @@ group end
 or
 ```
 { NAME2#ff0000;Label the group2
-//Vertexs
+//Vertices
   {InnerGroup2#5555ff;Inner group2
   xy2
   }
@@ -282,7 +282,7 @@ Briefly as:
 ```
 SHAPE RECORD
 graphobject;GraphObject | {name | color | textcolor | url | label }
-avertex;Vertex | { shape | image | style}
+avertex;GraphVertex | { shape | image | style}
 alink;Edge | { edgetype | left | right}
 agroup;Group | { name | OBJECTS[] | ROOTVERTICES[] | edgelabel | "defaults"}
 asubgraph;SubGraph | { name | OBJECTS[] | ROOTVERTICES[] | edgelabel | entrance | exit | "defaults"}
@@ -310,13 +310,13 @@ It has list of vertices marked equal - if any.
 
 Which direction the graph is to be drawn - if specified.
 
-What's the current default shape - only used during parsing the diagrammer languge while generating Vertexs.
+What's the current default shape - only used during parsing the diagrammer languge while generating vertices.
 
 AST/Model note. Edges are not stored in GraphRoot, but separately! Why? It's easier to handle them in the generators and vertices and edges are output separately to separate sections anyway.
 
 GraphRoot:
-- OBJECTS[Vertex(a), SubGraph(Vertex(b), Vertex(c), Vertex(d), Group(Vertex(f), Vertex(g)))]
-- ROOTVERTICES[Vertex, SubGraph] # this graph has two root vertices
+- OBJECTS[GraphVertex(a), SubGraph(GraphVertex(b), GraphVertex(c), GraphVertex(d), Group(GraphVertex(f), GraphVertex(g)))]
+- ROOTVERTICES[GraphVertex, SubGraph] # this graph has two root vertices
 - generator digraph
 - visualizer circo
 - shape ..
@@ -335,7 +335,7 @@ Own properties are edgetype, left- and righthand sides (+GraphObject properties)
 
 Edges are stored separately and available for the generator in yy.EDGES
 
-## Vertex
+## GraphVertex
 
 Own properties are name, shape, image - if specified, style - if specified (+GraphObject properties)
 
@@ -354,7 +354,7 @@ Ie. a graph where output vertex is connected to all the inner vertices.
 That constructs
 
 GraphRoot:
-- OBJECTS[Vertex(a), SubGraph(Vertex(b), Vertex(c), Vertex(d), SubGraph(Vertex(f), Vertex(g)))]
+- OBJECTS[GraphVertex(a), SubGraph(GraphVertex(b), GraphVertex(c), GraphVertex(d), SubGraph(GraphVertex(f), GraphVertex(g)))]
 - ROOTVERTICES[same as objects]
 - generator
 - visualizer

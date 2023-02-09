@@ -74,9 +74,9 @@ function blockdiag(graphmeta) {
     let tmp = root.getStart();
 
     /**
-     * @param {(Vertex|Group)} obj
+     * @param {(GraphVertex|Group)} obj
      */
-    const parseObjects = /** @type {function((Group|Vertex))}*/obj => {
+    const parseObjects = /** @type {function((Group|GraphVertex))}*/obj => {
         output(true);
         if (obj instanceof Group) {
             output(graphmeta, ' group "' + obj.getLabel() + '"{', true);

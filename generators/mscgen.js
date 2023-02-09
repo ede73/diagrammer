@@ -36,7 +36,7 @@ function mscgen(graphmeta) {
                 output(graphmeta, (comma ? "," : "") + "    " + z.getName() + tmp);
                 comma = true;
             });
-        } else if (obj instanceof Vertex) {
+        } else if (obj instanceof GraphVertex) {
             let tmp = getAttributeAndFormat(obj, 'color', ',textbgcolor="{0}"') +
                 getAttributeAndFormat(obj, 'style', ',style={0}') +
                 getAttributeAndFormat(obj, 'label', ',label="{0}"');

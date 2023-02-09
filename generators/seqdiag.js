@@ -43,7 +43,7 @@ function seqdiag(graphmeta) {
                     styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
                 graphmeta.result(z.getName() + styleAndLabel + ";");
             }
-        } else if (obj instanceof Vertex) {
+        } else if (obj instanceof GraphVertex) {
             let styleAndLabel = getAttributeAndFormat(obj, 'style', ',style={0}') +
                 getAttributeAndFormat(obj, 'label', ',label="{0}"') +
                 getAttributeAndFormat(obj, 'color', ',color="{0}"');

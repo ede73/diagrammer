@@ -6,7 +6,7 @@
  * @param [shape] Optional shape for the vertex, if not give, will default to what ever default is being used at the moment
  * @constructor
  */
-class Vertex extends GraphObject {
+class GraphVertex extends GraphObject {
     constructor(name, shape) {
         super(undefined); // TODO:
         /** @type {string} */
@@ -24,7 +24,7 @@ class Vertex extends GraphObject {
 
     /**
      * @param {string} value 
-     * @returns {Vertex}
+     * @returns {GraphVertex}
      */
     setShape(value) {
         if (value) {
@@ -40,7 +40,7 @@ class Vertex extends GraphObject {
     /**
      * Temporary for RHS list array!!
      * @param {string} value 
-     * @returns {Vertex}
+     * @returns {GraphVertex}
      */
     setEdgeLabel(value) {
         this.edgelabel = value;
@@ -64,7 +64,7 @@ class Vertex extends GraphObject {
 
     /**
      * @param {string} value 
-     * @returns {Vertex}
+     * @returns {GraphVertex}
      */
     setStyle(value) {
         if (value) {
@@ -79,7 +79,7 @@ class Vertex extends GraphObject {
 
     /**
      * @param {string} value 
-     * @returns {Vertex}
+     * @returns {GraphVertex}
      */
     setImage(value) {
         if (value) {

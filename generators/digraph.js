@@ -158,7 +158,7 @@ function digraph(graphmeta) {
             const o = c.OBJECTS[i];
             if (o instanceof Group) {
                 if (o.OBJECTS.length == 0) {
-                    o.OBJECTS.push(new Vertex("invis_" + o.getName())
+                    o.OBJECTS.push(new GraphVertex("invis_" + o.getName())
                         .setStyle("invis"));
                 } else {
                     // A group...non empty...parse inside
@@ -206,7 +206,7 @@ function digraph(graphmeta) {
 
     let lastexit = undefined;
     let lastendif = undefined;
-    const traverseVertices = /** @type {function((Group|Vertex))}*/root => {
+    const traverseVertices = /** @type {function((Group|GraphVertex))}*/root => {
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
             const obj = root.OBJECTS[i];
@@ -270,7 +270,7 @@ function digraph(graphmeta) {
                         }
                     }
                 })(obj);
-            } else if (obj instanceof Vertex) {
+            } else if (obj instanceof GraphVertex) {
                 processAVertex(obj);
             } else {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");

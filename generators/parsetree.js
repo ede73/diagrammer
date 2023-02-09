@@ -44,8 +44,8 @@ Only one root supported?
 function parsetree(graphmeta) {
 	const nodeList = [];
 	function addEdgeedVertex(left, right) {
-		if (!(left instanceof Vertex)) return;
-		if (!(right instanceof Vertex)) return;
+		if (!(left instanceof GraphVertex)) return;
+		if (!(right instanceof GraphVertex)) return;
 		const key=right.id;
 		const parent=left.id;
 		const text=(!right.label) ? right.name : right.label;

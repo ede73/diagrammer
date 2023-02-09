@@ -235,7 +235,7 @@ function plantuml_sequence(graphmeta) {
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;
             const obj = root.OBJECTS[i];
-            if (obj instanceof Vertex)
+            if (obj instanceof GraphVertex)
                 processAVertex(obj, isSubGraph);
         }
         printEdges(root, isSubGraph);
@@ -271,7 +271,7 @@ function plantuml_sequence(graphmeta) {
                     printEdges(o);
                     // output(graphmeta, indent("}//end of " + o.getName()));
                 }(obj);
-            } else if (!obj instanceof Vertex) {
+            } else if (!obj instanceof GraphVertex) {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");
             }
         }

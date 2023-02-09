@@ -49,7 +49,7 @@ function ast(graphmeta) {
             equal: r.getEqual()
         }));
 
-    const objectHandler = /** @type {function((Group|Vertex))}*/obj => {
+    const objectHandler = /** @type {function((Group|GraphVertex))}*/obj => {
         output(true);
         if (obj instanceof Group) {
             const processAGroup = (o => {
@@ -73,7 +73,7 @@ function ast(graphmeta) {
                 traverseVertices(o, objectHandler);
                 output(graphmeta, ']');
             })(obj);
-        } else if (obj instanceof Vertex) {
+        } else if (obj instanceof GraphVertex) {
             output(graphmeta, JSON.stringify({
                 node: obj
             }) + ",");

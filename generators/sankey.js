@@ -27,12 +27,12 @@ function sankey(graphmeta) {
 		if (!tree) {
 			tree = new TreeVertex(left);
 		}
-		if (!(left instanceof Vertex)) return;
+		if (!(left instanceof GraphVertex)) return;
 		const cl = findVertex(tree, left);
 		if (!cl) {
 			throw new Error('Left node (' + left.name + ') not found from tree');
 		}
-		if (!findVertex(tree, right) && (right instanceof Vertex)) {
+		if (!findVertex(tree, right) && (right instanceof GraphVertex)) {
 			debug('Add ' + right.name + ' as child of ' + cl.data.name + " co " + right.container);
 			cl.CHILDREN.push(new TreeVertex(right));
 		}

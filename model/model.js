@@ -51,7 +51,7 @@ function processVariable(yy, variable) {
  * @return {Array[any]}
  */
 function getList(yy, lhs, rhs, rhsEdgeLabel) {
-    if (lhs instanceof Vertex) {
+    if (lhs instanceof GraphVertex) {
         debug("getList(vertex:" + lhs + ",rhs:[" + rhs + "])", true);
         const lst = [];
         lst.push(lhs);
@@ -98,7 +98,7 @@ function getList(yy, lhs, rhs, rhsEdgeLabel) {
 function getVertex(yy, name, style) {
     debug("getVertex (name:" + name + ",style:" + style + ")", true);
     function findVertex(yy, name, style) {
-        if (name instanceof Vertex) {
+        if (name instanceof GraphVertex) {
             if (style) name.setStyle(style);
             return name;
         }
@@ -111,7 +111,7 @@ function getVertex(yy, name, style) {
             for (const i in container.OBJECTS) {
                 if (!container.OBJECTS.hasOwnProperty(i)) continue;
                 const o = container.OBJECTS[i];
-                if (o instanceof Vertex && o.getName() == name) {
+                if (o instanceof GraphVertex && o.getName() == name) {
                     if (style) o.setStyle(style);
                     return o;
                 }
@@ -126,7 +126,7 @@ function getVertex(yy, name, style) {
             return search;
         }
         debug("Create new vertex name=" + name, true);
-        const vertex = new Vertex(name, getGraphRoot(yy).getCurrentShape());
+        const vertex = new GraphVertex(name, getGraphRoot(yy).getCurrentShape());
         if (style) vertex.setStyle(style);
         vertex.noedges = true;
 
@@ -341,7 +341,7 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
 
     if (current_container instanceof SubGraph &&
         !current_container.getEntrance() &&
-        lhs instanceof Vertex &&
+        lhs instanceof GraphVertex &&
         !(rhs instanceof SubGraph)) {
         current_container.setEntrance(lhs);
     }
@@ -378,10 +378,10 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
             fmt += "rcompass: " + rcompass;
         debug("getEdge type:" + edgeType + " l:" + lhs + " r:" + rhs + fmt);
     }
-    if (!(lhs instanceof Vertex) && !(lhs instanceof Group) & !(lhs instanceof SubGraph)) {
+    if (!(lhs instanceof GraphVertex) && !(lhs instanceof Group) & !(lhs instanceof SubGraph)) {
         throw new Error("LHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
-    if (!(rhs instanceof Vertex) && !(rhs instanceof Group) && !(rhs instanceof SubGraph)) {
+    if (!(rhs instanceof GraphVertex) && !(rhs instanceof Group) && !(rhs instanceof SubGraph)) {
         throw new Error("RHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
     }
     const edge = new Edge(edgeType, lhs, rhs);
@@ -406,11 +406,11 @@ function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeC
         edge.setLabel(inlineEdgeLabel);
         debug("  set inlineEdgeLabel " + inlineEdgeLabel);
     }
-    else if (rhs instanceof Vertex && commonEdgeLabel) {
+    else if (rhs instanceof GraphVertex && commonEdgeLabel) {
         edge.setLabel(commonEdgeLabel);
         debug('  set commonEdgeLabel ' + commonEdgeLabel);
     }
-    if (rhs instanceof Vertex) {
+    if (rhs instanceof GraphVertex) {
         const tmp = rhs.getEdgeLabel();
         if (tmp) {
             edge.setLabel(tmp);
@@ -536,7 +536,7 @@ function traverseEdges(graphmeta, callback) {
 /**
  * Usage: generators
  * @param {GraphObject} container
- * @param {function((Vertex|Group)):void} callback
+ * @param {function((GraphVertex|Group)):void} callback
  */
 function traverseVertices(container, callback) {
     for (const i in container.OBJECTS) {

@@ -1,7 +1,17 @@
-[
-    ["autovero","budjetti",10]
-    ,["tupakkavero","budjetti",8]
-    ,["kakkavero","budjetti",3]
-    ,["budjetti","sotaan",18]
-    ,["budjetti","sossuun",1]
-]
+{
+    "nodes":[
+        {"name":"autovero"}
+        ,{"name":"budjetti"}
+        ,{"name":"tupakkavero"}
+        ,{"name":"kakkavero"}
+        ,{"name":"sotaan"}
+        ,{"name":"sossuun"}
+        ],
+    "links":[
+        {"source":0,"target":1,"value":10}
+        ,{"source":2,"target":1,"value":8}
+        ,{"source":3,"target":1,"value":3}
+        ,{"source":1,"target":4,"value":18}
+        ,{"source":1,"target":5,"value":1}
+    ]
+}

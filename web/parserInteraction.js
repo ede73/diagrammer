@@ -7,6 +7,7 @@ import { visualizeParseTree } from './visualizations/visualizeParseTree.js';
 import { visualizeRadialDendrogram } from './visualizations/visualizeRadialDendrogram.js';
 import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilford.js';
 import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
+import { visualizeSankey } from './visualizations/visualizeSankey.js';
 
 /**
  * @type {boolean}
@@ -137,25 +138,22 @@ export function visualize(visualizer) {
         // }catch(err){
         // console.log(err);
         // }
+        // TODO: Use visualizations/generators maps
     } else if (visualizer == "radialdendrogram") {
-        console.log("Visualize using visualizeRadialDendrogram");
         visualizeRadialDendrogram(JSON.parse(result.value));
     } else if (visualizer == "circlepacked") {
-        console.log("Visualize using visualizeCirclePacked");
         alert("TBD");
         visualizeCirclePacked(JSON.parse(result.value));
     } else if (visualizer == "reingoldtilford") {
-        console.log("Visualize using visualizeReingoldTilford");
         visualizeReingoldTilford(JSON.parse(result.value));
     } else if (visualizer == "parsetree") {
-        console.log("Visualize using visualizeParseTree");
         visualizeParseTree(JSON.parse(result.value));
     } else if (visualizer == "layerbands") {
-        console.log("Visualize using visualizeLayerBands");
         visualizeLayerBands(JSON.parse(result.value));
     } else if (visualizer == "umlclass") {
-        console.log("Visualize using visualizeUmlClass");
         visualizeUmlClass(JSON.parse(result.value));
+    } else if (visualizer == "sankey") {
+        visualizeSankey(JSON.parse(result.value));
     } else {
         console.log("Unkknown WEB UI visualizer " + visualizer);
         getHTMLElement('svg').innerHTML = "only for dotty";

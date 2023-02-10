@@ -14,6 +14,7 @@
 <script type="module" src="web/visualizations/visualizeUmlClass.js"></script>
 <script type="module" src="web/visualizations/visualizeLayerBands.js"></script>
 <script type="module" src="web/visualizations/visualizeParseTree.js"></script>
+<script type="module" src="web/visualizations/visualizeSankey.js"></script>
 <script type="text/javascript" src="web/d3support.js"></script>
 <!--<script type="text/javascript" src="web/parserInteraction.js"></script>-->
 <script type="module" src="web/uiComponentAccess.js"></script>
@@ -33,6 +34,9 @@
 -->
 <!-- <script type="text/javascript" src="js/d3.min.js"></script> -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<!-- <script type="module" src="js/d3-sankey.js"></script> -->
+<script type="module" src="https://unpkg.com/d3-sankey@0"></script>
+
 <!-- canviz support end-->
 
 <body>
@@ -360,9 +364,9 @@
 			</tr>
 		</table>
 
+		<svg id='chart' xmlns="http://www.w3.org/2000/svg"></svg>
 		<!-- resulting data of grammar parser/ast generator -->
 		<textarea id="result" rows="40" cols="10"></textarea>
-
 		<p>Javascript generated(dot only)</p>
 		<div id="svg" style="border-width: 2px; border-style: dotted;" align="top"></div>
 

@@ -1,3 +1,5 @@
+generator parsetree
+
 Sentence>NP1,VP1
 Sentence;Sentence
 Sentence>dot1

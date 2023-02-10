@@ -29,11 +29,13 @@ function getGenerator() {
  * it was just parsed AND it had a 'generator' directive
  * @param {string} generator 
  */
-export function setGenerator(generator) {
+export function setGenerator(generator, visualizer = undefined) {
     const e = getSelectElement("generator");
-    console.log("Set generator " + generator);
-    //$(`#generator option[value^='"${generator}"']`).attr("selected", "true");
-    $(`#generator option[value^='umlclass']`).attr("selected", "true");
+    console.log(`Set generator ${generator}:${visualizer}`);
+    const genViz = generator + (visualizer ? ":" + visualizer : "");
+    console.log(genViz);
+    console.log(genViz);
+    $(`#generator option[value^='${genViz}']`).attr("selected", "true");
     console.log("Generator is now " + getGenerator());
 }
 

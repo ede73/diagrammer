@@ -1,3 +1,5 @@
+generator nwdiag
+
 group color #33FF33
 vertex color #ffff00
 { Sample_front;192.168.10.0/24

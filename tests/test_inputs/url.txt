@@ -1,3 +1,6 @@
+generator digraph
+visualizer dot
+
 node1;#ff0000This Is Label::And This Is NOT XLabel, click on node for google[http://www.google.com/]
 node2;#ccffccTHis node leads to mtv3[http://www.mtv3.fi/]
 

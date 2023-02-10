@@ -51,7 +51,7 @@ S
 			    }
 			  }
 			  if (parsedVisualizer) {
-			    const useVisualizerFunc = visualizer.get(parsedVisualizer);
+			    const useVisualizerFunc = visualizations.get(parsedVisualizer);
 			    if (useVisualizerFunc) {
 			      // Found visualizer and recognized it
 			      // TODO: NO support for this yet...

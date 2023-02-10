@@ -1,3 +1,6 @@
+generator digraph
+visualizer dot
+
 node color #eeeeee
 shape box
 a>b>c>d>e>f>g>h>i>j>k;

@@ -1,3 +1,5 @@
+generator plantuml_sequence
+
 //Prerequisite is obviously node parsing PASSED
 //Simple event
 aLINE>bLINE

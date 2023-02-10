@@ -1,3 +1,6 @@
+generator digraph
+visualizer dot
+
 plainnode
 labelplainnode;WithLabel
 ImageNode/cpu.png

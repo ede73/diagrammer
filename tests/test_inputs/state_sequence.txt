@@ -1,4 +1,5 @@
 generator plantuml_sequence
+
 //unconventional
 a<>a;A initiated broadcast
 b<>b;B initiated broadcast

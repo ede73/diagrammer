@@ -1,3 +1,6 @@
+generator digraph
+visualizer dot
+
 hominoidea>hominidae,hylobatidae
 	hylobatidae>hylobates
 hominidae>ponginae,homininae

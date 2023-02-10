@@ -1,3 +1,6 @@
+generator digraph
+visualizer dot
+
 // predeclare vertices
 solid a;dotted
 solid b;dashed

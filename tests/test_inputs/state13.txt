@@ -1,3 +1,5 @@
+generator nwdiag
+
 { dmz;210.x.x.x/24
 }
 { internal;172.x.x.x/24

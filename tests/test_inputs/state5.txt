@@ -1,3 +1,6 @@
+generator digraph
+visualizer dot
+
 SHAPE RECORD
 a1;<f0> foo | x | <f1> bar
 b1;a | { <f0> foo | x | <f1> bar } | b

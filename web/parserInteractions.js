@@ -40,7 +40,7 @@ diagrammer_parser.yy.parseError = function (str, hash) {
 diagrammer_parser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, preferParsed) => {
     console.log(`  ..script suggests using generator ${generator} and visualizer ${visualizer} and prefer ${preferParsed}`);
     if (preferParsed && generator) {
-        setGenerator(generator);
+        setGenerator(generator, visualizer == "undefined" ? undefined : visualizer);
     }
 };
 

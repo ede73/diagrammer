@@ -1,3 +1,6 @@
+generator digraph
+visualizer dot
+
 q;tamakin
 w;on
 

@@ -1,3 +1,5 @@
+generator sankey
+
 autovero>"10 taalaa"budjetti
 tupakkavero>"8 taalaa"budjetti
 kakkavero>"3 taalaa"budjetti

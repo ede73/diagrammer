@@ -1,3 +1,5 @@
+generator layerbands
+
 {xxx;xxx
   a
 }

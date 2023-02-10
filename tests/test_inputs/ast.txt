@@ -1,3 +1,5 @@
+generator ast
+
 vertical
 $(gen:#ccffcc)
 $(par:#ccccff)

@@ -1,2 +1,4 @@
+generator seqdiag
+
 a>b>c>d
 

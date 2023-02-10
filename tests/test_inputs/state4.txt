@@ -1,3 +1,6 @@
+generator digraph
+visualizer dot
+
 START LR_0
 LANDSCAPE
 VERTEX TEXTCOLOR#00aa00

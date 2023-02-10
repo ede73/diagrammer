@@ -1,3 +1,6 @@
+generator digraph
+visualizer dot
+
 $(r:#ff0000)
 
 edge color #0000ff

@@ -1,1 +1,3 @@
+generator plantuml_sequence
+
 User>"1DoWork"(A>"createRequest"B>"back call"A>"response"B>"2DoWork"C>"WorkDone"B>"RequestCreated"A)>"Done"User

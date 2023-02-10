@@ -1,12 +1,14 @@
 //@ts-check
 import { getSavedGraph } from './localStorage.js';
+// Tried npm i --save-dev @types/jquery, worked
+// Fails in browser, but works while editing!
+//import $ from "jquery";
 
 function ParseResult(err) {
     alert(err);
 }
 
 export function exportGraphs() {
-    //@ts-ignore JQuery
     $.ajax({
         type: "POST",
         async: true,
@@ -30,7 +32,6 @@ export function exportGraphs() {
 }
 
 export function importGraphs() {
-    //@ts-ignore JQuery
     $.ajax({
         type: "GET",
         async: true,

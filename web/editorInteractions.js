@@ -4,6 +4,10 @@ import { getSavedFilesAsOptionList, getSavedGraph } from './localStorage.js';
 //import { Editor } from '../ace/src-noconflict/ace.js';
 import { getInputElement, getSelectElement } from './uiComponentAccess.js';
 
+// Tried npm i --save-dev @types/jquery, worked
+// Fails in browser, but works while editing!
+//import $ from "jquery";
+
 /**
  * @type {HTMLElement}
  */
@@ -49,8 +53,12 @@ export function setGraphText(data) {
     }
 }
 
-//Add text to top of document
-//try to maintain cursor position(TODO:fucked up)
+/**
+ * Add text to top of document 
+ * try to maintain cursor position(TODO:fucked up)
+ * 
+ * @param {string} data 
+ */
 function prependLine(data) {
     if (acemode) {
         //using ace
@@ -66,8 +74,12 @@ function prependLine(data) {
     }
 }
 
-//add text to current cursor position(on a new line how ever)
-function appendLine(data, comp) {
+/**
+ * add text to current cursor position(on a new line how ever)
+ * 
+ * @param {string} data 
+ */
+function appendLine(data) {
     if (acemode) {
         //using ace insert text into wherever the cursor is pointing.
         editor.navigateLineEnd();
@@ -136,6 +148,16 @@ function getGenerator() {
     return gen;
 }
 
+/**
+ * Set a generator, only if loaded new content (storage, example)
+ * it was just parsed AND it had a 'generator' directive
+ * @param {string} generator 
+ */
+export function setGenerator(generator) {
+    const e = getSelectElement("generator");
+    $(`#generator option[value^='"${generator}"']`).attr("selected", "true");
+}
+
 export function getVisualizer() {
     const e = getSelectElement("generator");
     const gen = e.options[e.selectedIndex].value;
@@ -146,6 +168,7 @@ export function getVisualizer() {
     console.log("Return visualizer " + gen);
     return gen;
 }
+
 
 function cancelVTimer() {
     if (vtimer) {
@@ -181,7 +204,6 @@ export function exampleChanged() {
     // read the example...place to textArea(overwrite)
     const e = getSelectElement("example");
     const doc = e.options[e.selectedIndex].value;
-    // @ts-ignore
     $.ajax({
         url: "tests/" + doc,
         cache: false
@@ -208,7 +230,6 @@ function textAreaOnChange(delay) {
             parseAndRegenerate();
         }, delay);
     };
-    //obj = null;
 }
 
 function visualizeOnNewParseResults(visualizeCallback, delay) {
@@ -224,7 +245,6 @@ function visualizeOnNewParseResults(visualizeCallback, delay) {
             visualizeCallback(getVisualizer());
         }, delay);
     };
-    //obj = null;
 }
 
 textAreaOnChange(150);

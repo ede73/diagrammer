@@ -16,9 +16,8 @@
 <script type="module" src="web/visualizations/visualizeParseTree.js"></script>
 <script type="module" src="web/visualizations/visualizeSankey.js"></script>
 <script type="text/javascript" src="web/d3support.js"></script>
-<!--<script type="text/javascript" src="web/parserInteraction.js"></script>-->
 <script type="module" src="web/uiComponentAccess.js"></script>
-<script type="module" src="web/backendInteraction.js"></script>
+<script type="module" src="web/backendInteractions.js"></script>
 <script type="module" src="web/localStorage.js"></script>
 <!--<script type="text/javascript" src="js/mscgen.js"></script>-->
 
@@ -377,7 +376,7 @@
 </body>
 <script src="js/viz.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script type="module" src="web/parserInteraction.js"></script>
+<script type="module" src="web/parserInteractions.js"></script>
 <script type="module" src="web/editorInteractions.js"></script>
 <script src="ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script type="module">
@@ -404,11 +403,11 @@
 	window.saveCurrentGraph = saveCurrentGraph;
 	window.loadGraph = loadGraph;
 
-	import { importGraphs, exportGraphs } from "./web/backendInteraction.js";
+	import { importGraphs, exportGraphs } from "./web/backendInteractions.js";
 	window.importGraphs = importGraphs;
 	window.exportGraphs = exportGraphs;
 
-	import { visualize } from "./web/parserInteraction.js";
+	import { visualize } from "./web/parserInteractions.js";
 	window.visualize = visualize;
 </script>
 <script type="text/javascript">

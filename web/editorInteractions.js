@@ -1,5 +1,5 @@
 //@ts-check
-import { visualize, parse } from './parserInteraction.js';
+import { visualize, parse } from './parserInteractions.js';
 import { getSavedFilesAsOptionList, getSavedGraph } from './localStorage.js';
 //import { Editor } from '../ace/src-noconflict/ace.js';
 import { getInputElement, getSelectElement } from './uiComponentAccess.js';

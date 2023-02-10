@@ -1,3 +1,5 @@
+generator umlclass
+
 {Person;Person
 name;+String
 birth;#Date

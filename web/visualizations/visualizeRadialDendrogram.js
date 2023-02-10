@@ -12,6 +12,7 @@
 //import * as d3 from "https://cdn.skypack.dev/d3@7.8.2";
 //import * as d3 from "https://cdn.observableusercontent.com/npm/d3@7.8.2/dist/d3.min.js";
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+import { make_svg, removeOldVisualizations } from "../d3support";
 
 //<script src="https://d3js.org/d3.v7.min.js"></script>
 
@@ -36,10 +37,11 @@ export function visualizeRadialDendrogram(jsonData) {
     let nodes = treeData.descendants();
     let links = treeData.links();
 
-    const svg = make_svg(width, height)
+    removeOldVisualizations();
+    const svgimg = make_svg(width, height)
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-    const link = svg.selectAll(".link")
+    const link = svgimg.selectAll(".link")
         .data(links)
         .join("path")
         .attr("class", "link")
@@ -47,7 +49,7 @@ export function visualizeRadialDendrogram(jsonData) {
             .angle(d => d.x)
             .radius(d => d.y));
 
-    const node = svg.selectAll(".node")
+    const node = svgimg.selectAll(".node")
         .data(nodes)
         .enter().append("g")
         .attr("class", "node")
@@ -61,6 +63,4 @@ export function visualizeRadialDendrogram(jsonData) {
         .attr("text-anchor", function (d) { return d.x < 180 ? "start" : "end"; })
         .attr("transform", function (d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
         .text(function (d) { return d.data.name; });
-
-    console.log("Done visualizing RadialDendrogram");
 }

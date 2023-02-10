@@ -280,15 +280,11 @@
 				</td>
 				<td>
 					<div style="float:right;">
-						<table>
+						<table style="border: 2px;border-style: solid;">
 							<tr>
 								<td>
-									<div id='D3JSIMAGES' />
-								</td>
-								<td>
 									<!-- result.png -->
-									<img align="bottom" id="image" width="30%" src="web/result.png"
-										onclick="javascript:openImage('web/result.png');" />
+									<div id='graphVisualizationHere' />
 								</td>
 							</tr>
 						</table>
@@ -297,7 +293,7 @@
 			</tr>
 		</table>
 
-		<svg id='chart' xmlns="http://www.w3.org/2000/svg"></svg>
+		<!-- <svg id='chart' xmlns="http://www.w3.org/2000/svg"></svg> -->
 		<!-- resulting data of grammar parser/ast generator -->
 		<textarea id="result" rows="40" cols="10"></textarea>
 		<p>Javascript generated(dot only)</p>

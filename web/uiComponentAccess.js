@@ -102,6 +102,10 @@ export function reloadImg(id) {
  * @param {string} imageSource URI
  */
 export function updateImage(imageSource) {
+    if (!document.getElementById("image")) {
+        console.log("OH NO...image component not found");
+        return;
+    }
     document.getElementById("image").setAttribute("src", imageSource);
     reloadImg('image');
 }

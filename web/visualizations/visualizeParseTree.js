@@ -1,5 +1,7 @@
 // @ts-check
 import { getHTMLElement } from "../uiComponentAccess.js";
+import { removeOldVisualizations, make_svg } from "../d3support.js";
+
 // had to download locally...
 import * as go from '../../js/go-module.js';
 // Use in editor.. gets go.d.ts
@@ -9,11 +11,8 @@ import * as go from '../../js/go-module.js';
 export function visualizeParseTree(jsonData) {
     const $ = go.GraphObject.make;  // for conciseness in defining templates
 
-    const element = getHTMLElement("D3JSIMAGES");
-    removeAllChildNodes(element);
-    const newDiv = document.createElement("div");
-    newDiv.setAttribute("id", "PARSETREENODE");
-    element.appendChild(newDiv);
+    const svgimg = removeOldVisualizations("PARSETREENODE");
+    //const svgimg = make_svg();
 
     const myDiagram =
         $(go.Diagram, "PARSETREENODE",
@@ -60,9 +59,6 @@ export function visualizeParseTree(jsonData) {
             { nodeDataArray: nodeDataArray });
     const x = 0; const y = 0; const printSize = 300;
     const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
-
-    const svgimg = getHTMLElement('D3JSIMAGES');
-    removeAllChildNodes(svgimg);
     svgimg.appendChild(svg);
     console.log("Done visualizing ParseTree");
 }

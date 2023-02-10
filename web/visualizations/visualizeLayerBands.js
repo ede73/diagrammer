@@ -1,5 +1,5 @@
 // @ts-check
-import { getHTMLElement } from "../uiComponentAccess.js";
+import { removeOldVisualizations, make_svg } from "../d3support.js";
 // had to download locally... https://gojs.net/latest/download.html
 import * as go from '../../js/go-debug-module.js';
 // Use in editor.. gets go.d.ts
@@ -51,11 +51,8 @@ export function visualizeLayerBands(jsonData) {
     function init() {
         var $ = go.GraphObject.make;
 
-        const element = getHTMLElement("D3JSIMAGES");
-        removeAllChildNodes(element);
-        const newDiv = document.createElement("div");
-        newDiv.setAttribute("id", "LAYEREDBANDNODE");
-        element.appendChild(newDiv);
+        const svgimg = removeOldVisualizations("LAYEREDBANDNODE");
+        //const svgimg = make_svg();
 
         const myDiagram = $(go.Diagram, "LAYEREDBANDNODE",
             {
@@ -150,12 +147,8 @@ export function visualizeLayerBands(jsonData) {
         const x = 0; const y = 0;
         const printSize = new go.Size(300, 300);
         const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
-
-        const svgimg = getHTMLElement('D3JSIMAGES');
-        removeAllChildNodes(svgimg);
         svgimg.appendChild(svg);
     }
     init();
-    console.log("Done visualizing LayerBands");
 }
 

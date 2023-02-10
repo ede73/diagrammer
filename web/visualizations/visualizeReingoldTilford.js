@@ -2,6 +2,7 @@
 ///import * as d3 from "https://cdn.skypack.dev/d3@7.8.2";
 //import * as d3 from 'd3';
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+import { make_svg, removeOldVisualizations } from "../d3support";
 
 export function visualizeReingoldTilford(jsonData) {
     const width = 400,
@@ -18,11 +19,12 @@ export function visualizeReingoldTilford(jsonData) {
     const data = d3.hierarchy(jsonData);
     const root = tree(data);
 
-    const svg = make_svg(width, height)
+    removeOldVisualizations();
+    const svgimg = make_svg(width, height)
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
     const links = root.links();
-    const link = svg.selectAll("path.link")
+    const link = svgimg.selectAll("path.link")
         .data(links)
         .enter().append("path")
         .attr("class", "link")
@@ -31,7 +33,7 @@ export function visualizeReingoldTilford(jsonData) {
             .radius(d => d.y));
 
     const nodes = root.descendants();
-    const node = svg.selectAll("g.node")
+    const node = svgimg.selectAll("g.node")
         .data(nodes)
         .enter().append("g")
         .attr("class", "node")

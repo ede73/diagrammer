@@ -8,6 +8,7 @@ import { visualizeRadialDendrogram } from './visualizations/visualizeRadialDendr
 import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilford.js';
 import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
 import { visualizeSankey } from './visualizations/visualizeSankey.js';
+import { removeOldVisualizations } from './d3support.js';
 
 /**
  * @type {boolean}
@@ -108,12 +109,30 @@ export function parse(data, generator, visualizer, preferScriptSpecifiedGenerato
     }, vdelay);
 }
 
+function makeNewImageHolder() {
+    const element = removeOldVisualizations();
+    const imgdiv = getHTMLElement("graphVisualizationHere");
+    var img = document.createElement('img');
+    img.align = "bottom";
+    // using % here fails (even if it works directly in HTML)
+    img.width = "400";
+    img.height = "400";
+    img.id = "image";
+    // auto adjusts
+    img.style.height = 'auto';
+    img.src = "web/result.png";
+    img.onclick = "javascript:openImage('web/result.png');";
+    imgdiv.appendChild(img);
+}
+
 export function visualize(visualizer) {
     const statelang = result.value;
     if (!visualizer) {
         throw new Error("Visualizer not defined");
     }
     const visualizeUrl = "web/visualize.php?visualizer=" + visualizer;
+    // TODO: loads uselessly if web visualizer used
+    makeNewImageHolder();
     // @ts-ignore
     $.ajax({
         type: "POST",
@@ -138,6 +157,11 @@ export function visualize(visualizer) {
             }
         }
     });
+    /*
+        <img align="bottom" id="image" width="30%" src="web/result.png"
+            onclick="javascript:openImage('web/result.png');" />
+    */
+
     if (visualizer == "dot") {
         try {
             getHTMLElement('svg').innerHTML = Viz(statelang, 'svg');

@@ -4,6 +4,7 @@ import { getHTMLElement } from "../uiComponentAccess.js";
 //import * as go from 'https://gojs.net/latest/release/go-module.js';
 // had to download locally...
 import * as go from '../../js/go-module.js';
+import { make_svg, removeOldVisualizations } from "../d3support.js";
 // Use in editor.. gets go.d.ts
 //import * as go from '../../js/go';
 
@@ -11,11 +12,7 @@ import * as go from '../../js/go-module.js';
 export function visualizeUmlClass(jsonData) {
     var $ = go.GraphObject.make;
 
-    const element = getHTMLElement("D3JSIMAGES");
-    removeAllChildNodes(element);
-    const newDiv = document.createElement("div");
-    newDiv.setAttribute("id", "UMLCLASS");
-    element.appendChild(newDiv);
+    removeOldVisualizations("UMLCLASS");
 
     const myDiagram =
         $(go.Diagram, "UMLCLASS",
@@ -194,9 +191,5 @@ export function visualizeUmlClass(jsonData) {
         });
     const x = 0; const y = 0; const printSize = 300;
     const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize });
-
-    const svgimg = getHTMLElement('D3JSIMAGES');
-    removeAllChildNodes(svgimg);
-    svgimg.appendChild(svg);
-    console.log("Done visualizing UmlClass");
+    removeOldVisualizations().appendChild(svg);
 }

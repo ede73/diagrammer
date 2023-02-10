@@ -1,7 +1,7 @@
 //@ts-check
 //import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 //import * as sankey from 'https://unpkg.com/d3-sankey@0';
-
+import { make_svg, removeOldVisualizations } from "../d3support";
 // https://github.com/ricklupton/d3-sankey-diagram or
 // https://github.com/d3/d3-sankey/blob/master/README.md
 
@@ -28,10 +28,12 @@ export function visualizeSankey(jsonData) {
     //const color = name => _color(name.replace(/ .*/, ""));
     const color = name => _color("red");
 
-    const svg = d3.select('#chart')
-        .attr("viewBox", `0 0 ${width} ${height}`)
-        .style("width", "100%")
-        .style("height", "auto");
+    // const svg = d3.select('#graphVisualizationHere')
+    //     .attr("viewBox", `0 0 ${width} ${height}`)
+    //     .style("width", "100%")
+    //     .style("height", "auto");
+    removeOldVisualizations();
+    const svgimg = make_svg(width, height);
 
     //        d3.json("https://gist.githubusercontent.com/mbostock/ca9a0bb7ba204d12974bca90acc507c0/raw/398136b7db83d7d7fd89181b080924eb76041692/energy.json").then(data => {
     // d3.json("https://gist.githubusercontent.com/mbostock/ca9a0bb7ba204d12974bca90acc507c0/raw/398136b7db83d7d7fd89181b080924eb76041692/energy.json").then(data => {
@@ -41,7 +43,7 @@ export function visualizeSankey(jsonData) {
         console.log(nodes);
         console.log(links);
 
-        svg.append("g")
+        svgimg.append("g")
             .attr("stroke", "#000")
             .selectAll("rect")
             .data(nodes)
@@ -54,7 +56,7 @@ export function visualizeSankey(jsonData) {
             .append("title")
             .text(d => `${d.name}\n${format(d.value)}`);
 
-        const link = svg.append("g")
+        const link = svgimg.append("g")
             .attr("fill", "none")
             .attr("stroke-opacity", 0.5)
             .selectAll("g")
@@ -103,7 +105,7 @@ export function visualizeSankey(jsonData) {
         link.append("title")
             .text(d => `${d.source.name} → ${d.target.name}\n${format(d.value)}`);
 
-        svg.append("g")
+        svgimg.append("g")
             .style("font", "10px sans-serif")
             .selectAll("text")
             .data(nodes)

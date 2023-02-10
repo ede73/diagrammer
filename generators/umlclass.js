@@ -29,10 +29,15 @@ import { debug, output } from '../model/support.js';
 
 
 	  node js/diagrammer.js verbose uml.test umlclass
+
+	  Couple problems:
+	  - If groups (classes) have same named methods/members it'll clash with
+	  diagrammer ideal, node names ones is create, 2nd time met -> referred
+	  Also reserved words cannot be used
+		- mitigation: trailing or leading underscores can be used to mangle names, both filtered out from output
 @param {GraphCanvas} graphcanvas
 */
 export function umlclass(graphcanvas) {
-	//debug(graphcanvas)
 	const groups = [];
 	const edges = [];
 
@@ -46,13 +51,22 @@ export function umlclass(graphcanvas) {
 		return ln.name + "" + label;
 	}
 
+	const mangleName = name => {
+		return name.replace(/_+$/, "").replace(/^_+/, "");
+	}
+
 	const getProperties = vertices => {
 		// instead of array of names...{name:???,type=???,visibility=???,default=??}
-		// name;[+-#][name:]String[=xx]
+		// Example:
+		// NAME;LABEL
+		// name;[+-#][name:]String[=defaultValue]
 		return [...vertices].filter(node => !nameAndLabel(node).includes(")")).map(p => {
 			const ret = {
 			};
-			ret['name'] = p.name;
+			// By default, name=name
+			ret['name'] = mangleName(p.name);
+
+			// If there's a label attached, parse that
 			if (p.label) {
 				const regex = /^([+#-]|)([^:]+:|)([^=]+)(=.+|)/;
 				const all = p.label.match(regex);
@@ -68,7 +82,7 @@ export function umlclass(graphcanvas) {
 						break;
 				}
 				if (all[2]) {
-					ret['name'] = all[2];
+					ret['name'] = all[2]; // specific label name, NO MANGLING
 				}
 				if (all[3]) {
 					ret['type'] = all[3];
@@ -80,16 +94,21 @@ export function umlclass(graphcanvas) {
 			}
 		});
 	};
+
 	const getMethods = vertices => {
 		// instead of array of names...{name:???,parameters:[{name:???,type:???}],visiblity:???}
 		//+public,-private,#protected
+		// Example:
+		// name;label
+		// where name and/or label includes "("
+		// name()
+		// name;[+-#][name(...):]RETURNTYPE
 		return [...vertices].filter(node => nameAndLabel(node).includes("(")).map(m => {
 			const ret = {
 			};
-			debug(m.label);
-			ret['name'] = m.name;
+			ret['name'] = mangleName(m.name);
 			if (m.label) {
-				const regex = /^([+#-]|)([^:]+:|)([^=]+)(=.+|)/;
+				const regex = /^([+#-]|)([^)]+\)|)(.+)/;
 				const all = m.label.match(regex);
 				switch (all[1]) {
 					case "+":
@@ -104,10 +123,10 @@ export function umlclass(graphcanvas) {
 				}
 				if (all[2]) {
 					if (all[2].startsWith("(")) {
-						ret['name'] = m.name + all[2];
+						ret['name'] = mangleName(m.name) + "==" + all[2];
 					} else {
 						// TODO: separate name and parameters..
-						ret['name'] = all[2];
+						ret['name'] = mangleName(all[2]);
 					}
 				}
 				// TODO:
@@ -122,6 +141,7 @@ export function umlclass(graphcanvas) {
 			}
 		});
 	};
+
 	let id = 1;
 	const groupNameIdMap = new Map();
 	traverseVertices(graphcanvas, o => {

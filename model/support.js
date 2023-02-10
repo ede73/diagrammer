@@ -17,7 +17,7 @@ export function debug(msg, indentOrDedent = undefined) {
     if (VERBOSE == true && msg !== false && msg !== true) {
         var d = "";
         for (var i = 0; i < debugIndent; i++) d += "    ";
-        console.log(d + msg);
+        console.log(d + msg+"//");
     }
     if (indentOrDedent === true || msg === true) {
         debugIndent++;

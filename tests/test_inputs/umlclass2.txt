@@ -3,51 +3,67 @@ generator umlclass
 {GraphObject;GraphObject
   label;+string
   name;+string
-  _color;+string
-  _textcolor;+string
+  color_;+string
+  textcolor;+string
   url;+string
 }
 
-{GraphConnectable
-  classes;_List<Class>
+{GraphConnectable;GraphConnectable
   noedges;+boolean
   edgelabel;+string
 }
 
-{GraphContainer
+{GraphContainer;GraphContainer
   OBJECTS;+List<GraphConnectable>
   ROOTVERTICES;+List<GraphConnectable>
   equal_;+List<GraphConnectable>
 }
 
-{GraphGroup
+{GraphGroup;GraphGroup
+  name_;+string
   exitvertex;+string
   entryedge;+string
   entrance;+GraphConnectable|GraphConnectable[]
-  setDefault;+(key:string,value:string)
+  setDefault;+setDefault(key:string,value:string):return
 }
 
-{GraphInner
+{GraphInner;GraphInner
+  name__;+string
   isInnerGraph;+boolean=true
+  entrance_;+GraphConnectable|GraphConnectable[]
   exit;+GraphConnectable
 }
 
-{GraphEdge
-  xowner;+String
-  wbalance;+Currency=0
-  gdeposit;+(amount: Currency)
-  kwithdraw;+(amount: Currency)
+{GraphEdge;GraphEdge
+  edgeType;+string
+  left;+GraphConnectable
+  rigth;+GraphConnectable
+  lcompass;+string
+  rcompass;+string
+  edgetextcolor;+string
+  edgecolor;+string
+  container;+GraphConnectable
+  isDotted;+()
+  isDashed;+()
+  isBroken;+()
+  isBidirectional;+()
+  isUndirected;+()
+  isLeftPointingEdge;+()
+  isRightPointingEdge;+()
 }
 
-{GraphVertex
+{GraphVertex;GraphVertex
+  name___;+string
   shape_;+string
   image;+string
   style;+string
 }
-{GraphCanvas
+
+{GraphCanvas;GraphCanvas
   EDGES;+List<GraphEdge>
   generator_;+string
   visualizer_;+string
+  shape__;+string
   direction;+string
   start_;+string
   parseError;+(str:string,hash:string)

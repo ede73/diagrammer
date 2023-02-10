@@ -39,9 +39,9 @@ test() {
   textoutput="tests/test_outputs/$out"
   textreference="tests/reference_images/$testbin/$out"
   if [ ! -f "$textoutput" ]; then
-      echo "    ERROR: at $1, generator failed, missing $textoutput" >&2
-      setError 11 "$1"
-      return
+    echo "    ERROR: at $1, generator failed, missing $textoutput" >&2
+    setError 11 "$1"
+    return
   fi
 
   # Verify that the generated output matches what it used to
@@ -147,8 +147,9 @@ runtest plantuml_context2.txt
 
 # Web visualizers, so test only generator
 webvisualizer=1
-for web_generators_only in $(grep -l 'WEB VISUALIZER ONLY' generators/*.js|tr . /|cut -d/ -f2); do
+for web_generators_only in $(grep -l 'WEB VISUALIZER ONLY' generators/*.js | tr . / | cut -d/ -f2); do
   testbin=$web_generators_only
   runtest ${web_generators_only}.txt
+  [ "$testbin" = "umlclass" ] && runtest umlclass2.txt
 done
 exit 0

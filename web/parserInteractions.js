@@ -1,6 +1,6 @@
 // ignore for now ts-check
 import { diagrammer_parser } from '../build/diagrammer_parser.js';
-import { getHTMLElement, getInputElement, setError, updateImage } from './uiComponentAccess.js';
+import { getHTMLElement, getInputElement, setError, setGenerator, updateImage } from './uiComponentAccess.js';
 import { visualizeCirclePacked } from './visualizations/visualizeCirclePacked.js';
 import { visualizeLayerBands } from './visualizations/visualizeLayerBands.js';
 import { visualizeParseTree } from './visualizations/visualizeParseTree.js';
@@ -37,6 +37,13 @@ diagrammer_parser.yy.parseError = function (str, hash) {
     throw new Error(str);
 };
 
+diagrammer_parser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, preferParsed) => {
+    console.log(`  ..script suggests using generator ${generator} and visualizer ${visualizer} and prefer ${preferParsed}`);
+    if (preferParsed && generator) {
+        setGenerator(generator);
+    }
+};
+
 /**
  * 
  * @param {string} line 
@@ -45,7 +52,7 @@ diagrammer_parser.yy.parseError = function (str, hash) {
 // TODO: MOVING TO GraphCanvas
 diagrammer_parser.yy.result = function (line) {
     if (parsingStarted) {
-        console.log("Parsing results coming in for " + diagrammer_parser.yy.USE_GENERATOR + " / " + diagrammer_parser.yy.VISUALIZER);
+        console.log("  ...parsing results start coming in...");
         parsingStarted = false;
         result.value = "";
     }
@@ -65,7 +72,8 @@ diagrammer_parser.trace = function (x) {
  * @param {string} generator this generator
  * @param {string} visualizer and possibly this visualizer
  */
-export function parse(data, generator, visualizer) {
+export function parse(data, generator, visualizer, preferScriptSpecifiedGeneratorAndVisualizer = false) {
+    console.log(`parse ${generator} ${visualizer} ${preferScriptSpecifiedGeneratorAndVisualizer}`);
     if (!generator) {
         throw new Error("Generator not defined");
     }
@@ -82,8 +90,12 @@ export function parse(data, generator, visualizer) {
     diagrammer_parser.yy.USE_GENERATOR = generator;
     // TODO: MOVING TO GraphCanvas
     diagrammer_parser.yy.USE_VISUALIZER = visualizer;
+    // If true, actually prefer generator/visualizer from loaded script IF specified
+    // used while loading new examples...  
+    diagrammer_parser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer;
     console.log("Parse, set generator to " + diagrammer_parser.yy.USE_GENERATOR + " visualizer to " + diagrammer_parser.yy.USE_VISUALIZER);
     diagrammer_parser.parse(data);
+    console.log('  ..parsed');
     /*
      * const tc=textArea.textContent; diagrammer_parser.parse(tc+"\n"); highlight(tc);
      */

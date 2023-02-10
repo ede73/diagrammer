@@ -1,0 +1,60 @@
+generator umlclass
+
+{GraphObject;GraphObject
+  label;+string
+  name;+string
+  _color;+string
+  _textcolor;+string
+  url;+string
+}
+
+{GraphConnectable
+  classes;_List<Class>
+  noedges;+boolean
+  edgelabel;+string
+}
+
+{GraphContainer
+  OBJECTS;+List<GraphConnectable>
+  ROOTVERTICES;+List<GraphConnectable>
+  equal_;+List<GraphConnectable>
+}
+
+{GraphGroup
+  exitvertex;+string
+  entryedge;+string
+  entrance;+GraphConnectable|GraphConnectable[]
+  setDefault;+(key:string,value:string)
+}
+
+{GraphInner
+  isInnerGraph;+boolean=true
+  exit;+GraphConnectable
+}
+
+{GraphEdge
+  xowner;+String
+  wbalance;+Currency=0
+  gdeposit;+(amount: Currency)
+  kwithdraw;+(amount: Currency)
+}
+
+{GraphVertex
+  shape_;+string
+  image;+string
+  style;+string
+}
+{GraphCanvas
+  EDGES;+List<GraphEdge>
+  generator_;+string
+  visualizer_;+string
+  direction;+string
+  start_;+string
+  parseError;+(str:string,hash:string)
+  result;+(data:string)
+}
+
+GraphInner>GraphGroup>GraphContainer>GraphConnectable>GraphObject
+GraphCanvas>GraphContainer
+GraphVertex>GraphConnectable
+GraphEdge>GraphObject

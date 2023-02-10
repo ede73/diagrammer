@@ -148,24 +148,12 @@ function getGenerator() {
     return gen;
 }
 
-/**
- * Set a generator, only if loaded new content (storage, example)
- * it was just parsed AND it had a 'generator' directive
- * @param {string} generator 
- */
-export function setGenerator(generator) {
-    const e = getSelectElement("generator");
-    $(`#generator option[value^='"${generator}"']`).attr("selected", "true");
-}
-
 export function getVisualizer() {
     const e = getSelectElement("generator");
     const gen = e.options[e.selectedIndex].value;
     if (gen.indexOf(":") > -1) {
-        console.log("Return visualizer " + gen.split(":")[1]);
         return gen.split(":")[1];
     }
-    console.log("Return visualizer " + gen);
     return gen;
 }
 
@@ -181,9 +169,10 @@ export function generatorChanged() {
     parseAndRegenerate();
 }
 
-function parseAndRegenerate() {
+function parseAndRegenerate(preferScriptSpecifiedGeneratorAndVisualizer = false) {
     const data = getGraphText() + "\n";
-    parse(data, getGenerator(), getVisualizer());
+    console.log("==parseAndRegenerate");
+    parse(data, getGenerator(), getVisualizer(), preferScriptSpecifiedGeneratorAndVisualizer);
 }
 
 export function savedChanged() {
@@ -201,6 +190,7 @@ export function savedChanged() {
 }
 
 export function exampleChanged() {
+    console.log("==Example changed");
     // read the example...place to textArea(overwrite)
     const e = getSelectElement("example");
     const doc = e.options[e.selectedIndex].value;
@@ -208,9 +198,11 @@ export function exampleChanged() {
         url: "tests/" + doc,
         cache: false
     }).done(function (data) {
+        console.log("==Example changed - set graph text");
         setGraphText(data);
         console.log("exampleChanged..parse");
-        parseAndRegenerate();
+        console.log("==Example changed - parse and regerante");
+        parseAndRegenerate(true);
     });
 }
 

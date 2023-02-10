@@ -1,5 +1,8 @@
 //@ts-check
 
+// Tried npm i --save-dev @types/jquery, worked
+// Fails in browser, but works while editing!
+//import $ from "jquery";
 // Various modules operate on UI
 // Provide type safe access here
 
@@ -10,6 +13,28 @@ export function getHTMLElement(name) {
         console.log(`Trying to load HTML Element named ${name} but one isn't found!`);
     }
     return element;
+}
+
+function getGenerator() {
+    const e = getSelectElement("generator");
+    const gen = e.options[e.selectedIndex].value;
+    if (gen.indexOf(":") > -1) {
+        return gen.split(":")[0];
+    }
+    return gen;
+}
+
+/**
+ * Set a generator, only if loaded new content (storage, example)
+ * it was just parsed AND it had a 'generator' directive
+ * @param {string} generator 
+ */
+export function setGenerator(generator) {
+    const e = getSelectElement("generator");
+    console.log("Set generator " + generator);
+    //$(`#generator option[value^='"${generator}"']`).attr("selected", "true");
+    $(`#generator option[value^='umlclass']`).attr("selected", "true");
+    console.log("Generator is now " + getGenerator());
 }
 
 /**

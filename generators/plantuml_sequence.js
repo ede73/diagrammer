@@ -97,9 +97,6 @@ export function plantuml_sequence(graphcanvas) {
             t));
     };
 
-    if (graphcanvas.getVisualizer()) {
-        outputFormattedText(graphcanvas, "/* render: {0} */", [graphcanvas.getVisualizer()])
-    }
     output(graphcanvas, "@startuml");
     output(graphcanvas, "autonumber", true);
     /*

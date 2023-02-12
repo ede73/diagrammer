@@ -125,9 +125,6 @@ export function digraph(graphcanvas) {
         output(graphcanvas, obj.getName() + t + ';');
     };
 
-    if (graphcanvas.getVisualizer()) {
-        output(graphcanvas, "/* render:" + graphcanvas.getVisualizer() + "*/")
-    }
     output(graphcanvas, "digraph {", true);
 
     output(graphcanvas, "compound=true;");

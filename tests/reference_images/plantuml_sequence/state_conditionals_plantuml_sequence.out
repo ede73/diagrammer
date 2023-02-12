@@ -1,4 +1,3 @@
-/* render: plantuml_sequence */
 @startuml
 autonumber
     participant  "tamakin" as  q 

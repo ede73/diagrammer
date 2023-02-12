@@ -37,33 +37,15 @@ const PlantUMLShapeMap = {
     loopend: "invhouse",
 };
 /**
-a>b>c,d
-a>e;edge text
-a;node text
-
-to
-@startuml
-autonumber
-participant  "node text" as  a
-participant  b
-participant  c
-participant  d
-participant  e
-a->b
-b->c
-b->d
-a->e:edge text
-@enduml
-
-node js/diagrammer.js verbose plantuml_sequence.test plantuml_sequence
-@param {GraphCanvas} graphcanvas
+ *
+ * node js/diagrammer.js verbose tests/test_inputs/events.txt plantuml_sequence | java -Xmx2048m -jar ext/plantuml.jar -tpng -pipe > output.png && open output.png
+ * @param {GraphCanvas} graphcanvas
 */
 export function plantuml_sequence(graphcanvas) {
     const processAVertex = function (obj, sbgraph) {
         const nattrs = [];
         const styles = [];
-        // getAttributeAndFormat(o, 'color', 'fillcolor="{0}"',nattrs);
-        // getAttributeAndFormat(o,'color','filled',styles);
+
         getAttributeAndFormat(obj, 'style', '{0}', styles);
         if (styles.length > 0) {
             if (styles.join("").indexOf('singularity') !== -1) {
@@ -74,7 +56,7 @@ export function plantuml_sequence(graphcanvas) {
                 nattrs.push("width=0.01");
                 nattrs.push("weight=0.01");
             } else {
-                nattrs.push('style="' + styles.join(",") + '"');
+                nattrs.push(`style="${styles.join(",")}"`);
             }
         }
         getAttributeAndFormat(obj, 'image', 'image="icons{0}"', nattrs);
@@ -89,8 +71,7 @@ export function plantuml_sequence(graphcanvas) {
         }
         let t = "";
         if (nattrs.length > 0)
-            t = "[" + nattrs.join(",") + "]";
-        //graphcanvas.result(indent("participant " + getAttributeAndFormat(o, 'label', '"{0}" as') + " " + o.getName() + t));
+            t = `[${nattrs.join(",")}]`;
         output(graphcanvas, "participant {0} {1} {2}".format(
             getAttributeAndFormat(obj, 'label', '"{0}" as'),
             obj.getName(),
@@ -114,7 +95,7 @@ export function plantuml_sequence(graphcanvas) {
      * for this container, break out immediately
      * this is to emulate ORDERED nodes of plantuml
      * (node=edge,node,edge.group...all in order for this fucker)
-     * @param {GraphCanvas|GraphGroup} container 
+     * @param {(GraphCanvas|GraphGroup)} container 
      * @param {boolean} sbgraph 
      */
     const printEdges = (container, sbgraph) => {
@@ -136,7 +117,6 @@ export function plantuml_sequence(graphcanvas) {
                 }
             }
             const color = getAttributeAndFormat(edge, 'color', '[{0}]').trim();
-            // getAttributeAndFormat(l, ['textcolor','color'] ,'fontcolor="{0}"',attrs);
             let lt;
             let rhs = edge.right;
             let lhs = edge.left;
@@ -195,14 +175,11 @@ export function plantuml_sequence(graphcanvas) {
                 continue;
             } else {
                 // is dotted or dashed no direction
-                lt = "-" + color + ">";
-                // attrs.push("dir=none");
+                lt = `-${color}>`;
             }
             let t = "";
-            // if (attrs.length>0)
-            // t = "[" + attrs.join(",") + "]";
             if (label)
-                label = ":" + label;
+                label = `:${label}`;
             else
                 label = "";
             output(graphcanvas, lhs.getName() + lt + rhs.getName() + t + label);
@@ -210,22 +187,22 @@ export function plantuml_sequence(graphcanvas) {
                 output(graphcanvas, rhs.getName() + lt + lhs.getName() + t + label);
             if (sbgraph) {
                 if (!rhs.active) {
-                    output(graphcanvas, "activate " + rhs.getName(), true);
+                    output(graphcanvas, `activate ${rhs.getName()}`, true);
                     rhs.active = true;
                 } else {
                     lhs.active = false;
                     output(false);
-                    output(graphcanvas, "deactivate " + lhs.getName());
+                    output(graphcanvas, `deactivate ${lhs.getName()}`);
                 }
             } else {
                 if (lhs.active) {
                     lhs.active = false;
                     output(false);
-                    output(graphcanvas, "deactivate " + lhs.getName());
+                    output(graphcanvas, `deactivate ${lhs.getName()}`);
                 }
             }
             if (note != "") {
-                output(graphcanvas, "note over " + rhs.getName());
+                output(graphcanvas, `note over ${rhs.getName()}`);
                 outputFormattedText(graphcanvas, note.replace(/\\n/g, "\n"));
                 output(graphcanvas, "end note");
             }
@@ -271,7 +248,6 @@ export function plantuml_sequence(graphcanvas) {
                     }
                     traverseVertices(o, nodeIsSubGraph);
                     printEdges(o);
-                    // output(graphcanvas, indent("}//end of " + o.getName()));
                 }(obj);
             } else if (!obj instanceof GraphVertex) {
                 throw new Error("Not a node nor a group, NOT SUPPORTED");

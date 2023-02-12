@@ -82,7 +82,6 @@ export class GraphObject {
     setLabel(value) {
         if (value) {
             value = value.trim().replace(/"/gi, "");
-            //debug("graphobject:TEST value(" + value + ") for color");
             //Take out COLOR if preset
             let m = value.match(/^(#[A-Fa-f0-9]{6,6})(.*)$/);
             // debug(m);

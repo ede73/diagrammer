@@ -3,27 +3,11 @@ import { output, getAttributeAndFormat } from '../model/support.js';
 import { traverseVertices, traverseEdges } from '../model/model.js';
 import { GraphGroup } from '../model/graphgroup.js';
 import { GraphVertex } from '../model/graphvertex.js';
-/**
-a>b>c,d
-a>e;edge text
-a;node text
 
-to
-msc {
-      a[label="node text"]
-    ,  b
-    ,  c
-    ,  d
-    ,  e
-    ;
-    a=>b[id="1"];
-    b=>c[id="2"];
-    b=>d[id="3"];
-    a=>e[label="edge text",id="4"];
-}
-node js/diagrammer.js verbose mscgen.test mscgen
-@param {GraphCanvas} graphcanvas
-*/
+/**
+ * To test: node js/diagrammer.js verbose tests/test_inputs/state_sequence.txt mscgen
+ * @param {GraphCanvas} graphcanvas
+ */
 export function mscgen(graphcanvas) {
     output(graphcanvas, "msc {", true);
     let comma = false;
@@ -36,7 +20,7 @@ export function mscgen(graphcanvas) {
                     getAttributeAndFormat(z, 'style', ',style={0}') +
                     getAttributeAndFormat(z, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
-                    tmp = "[" + tmp.trim().substring(1) + "]";
+                    tmp = `[${tmp.trim().substring(1)}]`;
                 output(graphcanvas, (comma ? "," : "") + "    " + z.getName() + tmp);
                 comma = true;
             });
@@ -45,7 +29,7 @@ export function mscgen(graphcanvas) {
                 getAttributeAndFormat(obj, 'style', ',style={0}') +
                 getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
-                tmp = "[" + tmp.trim().substring(1) + "]";
+                tmp = `[${tmp.trim().substring(1)}]`;
             output(graphcanvas, (comma ? "," : "") + "  " + obj.getName() + tmp);
             comma = true;
         }
@@ -62,7 +46,7 @@ export function mscgen(graphcanvas) {
             // just pick ONE Vertex from group and use lhead
             // TODO: Assuming it is Vertex (if Recursive groups implemented, it
             // could be smthg else)
-            edgeType += " lhead=cluster_" + rhs.getName();
+            edgeType += ` lhead=cluster_${rhs.getName()}`;
             rhs = rhs.OBJECTS[0];
             if (!rhs) {
                 // TODO:Bad thing, EMPTY group..add one invisible node there...
@@ -85,21 +69,21 @@ export function mscgen(graphcanvas) {
         const url = edge.url;
         let note = "";
         if (url) {
-            attrs.push('URL="' + url + '"');
+            attrs.push(`URL="${url}"`);
         }
         if (color) {
-            attrs.push('linecolor="' + color + '"');
+            attrs.push(`linecolor="${color}"`);
         }
         if (label) {
             if (label.indexOf("::") !== -1) {
                 label = label.split("::");
                 note = label[1].trim();
-                attrs.push('label="' + label[0].trim() + '"');
+                attrs.push(`label="${label[0].trim()}"`);
             } else {
-                attrs.push('label="' + label.trim() + '"');
+                attrs.push(`label="${label.trim()}"`);
             }
         }
-        attrs.push('id="' + id++ + '"');
+        attrs.push(`id="${id++}"`);
         if (edge.isBidirectional()) {
             // Broadcast type (<>)
             // hmh..since seqdiag uses a<>a as broadcast and
@@ -136,28 +120,24 @@ export function mscgen(graphcanvas) {
         } else if (dot) {
             // dotted
             if (color) {
-                attrs.push('textcolor="' + color + '"');
+                attrs.push(`textcolor="${color}"`);
             }
-            output(graphcanvas, "...[" + attrs.join(",") + "];");
+            output(graphcanvas, `...[${attrs.join(",")}];`);
             return;
         } else if (dash) {
             // dashed
             if (color) {
-                attrs.push('textcolor="' + color + '"');
+                attrs.push(`textcolor="${color}"`);
             }
-            output(graphcanvas, "---[" + attrs.join(",") + "];");
+            output(graphcanvas, `---[${attrs.join(",")}];`);
             return;
         } else {
             output(graphcanvas, "ERROR: SHOULD NOT HAPPEN");
         }
 
-        output(graphcanvas, lhs.getName() + edgeType + rightName + "[" + attrs.join(",") + "];");
+        output(graphcanvas, `${lhs.getName()}${edgeType}${rightName}[${attrs.join(",")}];`);
         if (note != "")
-            // output(grpahmeta,ll.getName() +' abox '
-            // +lr.getName()+'[label="'+note+'"];');
-            output(graphcanvas, rhs.getName() + ' abox ' + rhs.getName() + '[label="' + note + '"];');
-        // if (swap)
-        // output(graphcanvas,lr.getName() + lt + ll.getName() + t + ";");
+            output(graphcanvas, `${rhs.getName()} abox ${rhs.getName()}[label="${note}"];`);
     });
     output(false);
     output(graphcanvas, "}");

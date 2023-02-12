@@ -5,38 +5,10 @@ import { GraphGroup } from '../model/graphgroup.js';
 import { debug, output } from '../model/support.js';
 
 /**
-
-	  // setup a few example class vertices and relationships
-	  const nodedata = [
-		{
-		  key: 1,
-		  name: "BankAccount",
-		  properties: [
-			{ name: "owner", type: "String", visibility: "public" },
-			{ name: "balance", type: "Currency", visibility: "public", default: "0" }
-		  ],
-		  methods: [
-			{ name: "deposit", parameters: [{ name: "amount", type: "Currency" }], visibility: "public" },
-			{ name: "withdraw", parameters: [{ name: "amount", type: "Currency" }], visibility: "public" }
-		  ]
-		},
-
-	  const linkdata = [
-		{ from: 12, to: 11, relationship: "generalization" },
-		{ from: 13, to: 11, relationship: "generalization" },
-		{ from: 14, to: 13, relationship: "aggregation" }
-	  ];
-
-
-	  node js/diagrammer.js verbose uml.test umlclass
-
-	  Couple problems:
-	  - If groups (classes) have same named methods/members it'll clash with
-	  diagrammer ideal, node names ones is create, 2nd time met -> referred
-	  Also reserved words cannot be used
-		- mitigation: trailing or leading underscores can be used to mangle names, both filtered out from output
-@param {GraphCanvas} graphcanvas
-*/
+ * Test: node js/diagrammer.js tests/test_inputs/umlclass2.txt umlclass
+ *
+ * @param {GraphCanvas} graphcanvas
+ */
 export function umlclass(graphcanvas) {
 	const groups = [];
 	const edges = [];
@@ -48,7 +20,7 @@ export function umlclass(graphcanvas) {
 		if (label.startsWith(ln.name)) {
 			return label;
 		}
-		return ln.name + "" + label;
+		return `${ln.name}${label}`;
 	}
 
 	const mangleName = name => {

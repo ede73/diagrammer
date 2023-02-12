@@ -5,28 +5,10 @@ import { GraphVertex } from '../model/graphvertex.js';
 import { traverseEdges } from '../model/model.js';
 import { TreeVertex, findVertex, traverseTree } from '../model/tree.js';
 import { GraphConnectable } from '../model/graphconnectable.js';
+
 /**
-a>b>c,d
-a>e;edge text
-a;node text
-
-to
-{
-	"name": "a",
-	"children": [
-		{
-			"name": "b",
-			"children": [
-				{"name": "c", "size": 1},
-				{"name": "d", "size": 1}
-			]
-		},
-		{"name": "e", "size": 1}
-	]
-}
-
-node js/diagrammer.js verbose dendrogram.test dendrogram
-@param {GraphCanvas} graphcanvas
+ * To test: node js/diagrammer.js verbose tests/test_inputs/dendrogram.txt dendrogram
+ * @param {GraphCanvas} graphcanvas
 */
 export function dendrogram(graphcanvas) {
 	let tree;
@@ -41,34 +23,31 @@ export function dendrogram(graphcanvas) {
 		if (!(lhs instanceof GraphVertex)) return;
 		const cl = findVertex(tree, lhs);
 		if (!cl) {
-			throw new Error('Left node (' + lhs.name + ') not found from tree');
+			throw new Error(`Left node (${lhs.name}) not found from tree`);
 		}
 		if (!findVertex(tree, rhs) && (rhs instanceof GraphVertex)) {
-			debug('Add ' + rhs.name + ' as child of ' + cl.data.name + " co " + rhs.container);
+			debug(`Add ${rhs.name} as child of ${cl.data.name} co ${rhs.container}`);
 			cl.CHILDREN.push(new TreeVertex(rhs));
 		}
 	}
 
-	//debug(JSON.stringify(graphcanvas.EDGES));
 	/**
 	 * For a dendrogram we're not interested in vertices
 	 * just edges(for now!)
 	 */
 	traverseEdges(graphcanvas, edge => {
-		//debug('edge '+l.left.name+' to '+l.right.name);
 		addVertex(edge.left, edge.right);
 	});
 
-	//output(graphcanvas,'{',true);
 	traverseTree(tree, (t, isLeaf, hasSibling) => {
 		if (isLeaf) {
 			let comma = '';
 			if (hasSibling)
 				comma = ',';
-			output(graphcanvas, '{"name": "' + t.data.name + '", "size": 1}' + comma);
+			output(graphcanvas, `{"name": "${t.data.name}", "size": 1}${comma}`);
 		} else {
 			output(graphcanvas, '{', true);
-			output(graphcanvas, '"name": "' + t.data.name + '",');
+			output(graphcanvas, `"name": "${t.data.name}",`);
 		}
 	}, (t) => {
 		output(graphcanvas, '"children": [', true);

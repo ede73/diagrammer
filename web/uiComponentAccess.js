@@ -74,7 +74,7 @@ export function setError(text) {
 }
 
 export function openImage(imageUrl) {
-    window.open(imageUrl + '?x=' + new Date().getTime());
+    window.open(`${imageUrl}?x=${new Date().getTime()}`);
 }
 
 let win;

@@ -76,8 +76,6 @@ export: build/diagrammer_lexer.js build/diagrammer_parser.js js/diagrammer.js
 test: all
 	@mkdir -p tests/test_outputs
 	./scripts/runtests.sh
-	#Shortcut without need to define every occurance of test files
-	@echo matches are "$(MATCHES)" dirnames are "$(DIRNAMES)"
 
 clean:
 	rm -f build/*

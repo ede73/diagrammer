@@ -8,11 +8,7 @@ export class TreeVertex {
 		this.data = data;
 	}
 	toString() {
-		return "tree(" +
-			data +
-			",children=[" +
-			JSON.stringify(this.data) +
-			"])";
+		return `tree(${data},children=[${JSON.stringify(this.data)}])`;
 	}
 };
 
@@ -56,7 +52,6 @@ export function findVertex(tree, findData) {
  * @param {TreeVertex} parent Just used internally, omit
  */
 export function traverseTree(root, callback, enter, exit, level = undefined, hasSibling = undefined, parent = undefined) {
-	//debug('process vertex '+root.data.name + ' childmount'+siblingAmount);
 	if (!level) level = 0;
 	if (!hasSibling) hasSibling = false;
 	if (level === 0) {
@@ -70,7 +65,7 @@ export function traverseTree(root, callback, enter, exit, level = undefined, has
 		const tn = root.CHILDREN[i];
 		const isLeaf = tn.CHILDREN.length === 0;
 		const hasVertexSiblings = (parseInt(i) + 1) !== root.CHILDREN.length;
-		debug('vertex ' + tn.data.name + ' is leaf?' + isLeaf + " hasSiblings" + hasVertexSiblings + " i=" + (parseInt(i) + 1) + "/");
+		debug(`vertex ${tn.data.name} is leaf?${isLeaf} hasSiblings${hasVertexSiblings} i=${parseInt(i) + 1}/`);
 		callback(tn, isLeaf, hasVertexSiblings);
 		if (tn.CHILDREN.length > 0) {
 			traverseTree(tn,
@@ -81,7 +76,7 @@ export function traverseTree(root, callback, enter, exit, level = undefined, has
 		}
 	}
 	if (root.CHILDREN.length > 0) {
-		debug(root.data.name += "has sibling");
+		debug(`${root.data.name}has sibling`);
 		exit(root, hasSibling);
 	}
 }

@@ -1,7 +1,7 @@
 //@ts-check
-import {GraphObject} from '../model/graphobject.js';
-import {GraphCanvas} from '../model/graphcanvas.js';
-import {GraphEdge} from '../model/graphedge.js';
+import { GraphObject } from '../model/graphobject.js';
+import { GraphCanvas } from '../model/graphcanvas.js';
+import { GraphEdge } from '../model/graphedge.js';
 
 /** @type {number} */
 var debugIndent = 0;
@@ -17,7 +17,7 @@ export function debug(msg, indentOrDedent = undefined) {
     if (VERBOSE == true && msg !== false && msg !== true) {
         var d = "";
         for (var i = 0; i < debugIndent; i++) d += "    ";
-        console.log(d + msg+"//");
+        console.log(d + msg + "//");
     }
     if (indentOrDedent === true || msg === true) {
         debugIndent++;
@@ -48,7 +48,7 @@ export function setAttr(cl, attr, value) {
 String.prototype.format = function () {
     var formatted = this;
     for (const arg in arguments) {
-        formatted = formatted.replace("{" + arg + "}", arguments[arg]);
+        formatted = formatted.replace(`{${arg}}`, arguments[arg]);
     }
     // @ts-ignore
     return formatted;
@@ -65,7 +65,7 @@ String.prototype.format = function () {
 String.prototype.formatArray = function (array) {
     let formatted = this;
     for (let i = 0; i < array.length; i++) {
-        formatted = formatted.replace("{" + i + "}", array[i]);
+        formatted = formatted.replace(`{${i}}`, array[i]);
     }
     // @ts-ignore
     return formatted;
@@ -97,10 +97,9 @@ export function getAttributeAndFormat(cl, attr, fmt, resultarray) {
     if (attr instanceof Array) {
         for (const i in attr) {
             if (!attr.hasOwnProperty(i)) continue;
-            // debug("Get FMT attr "+attr[i]+" from "+cl);
             const tmp = getAttributeAndFormat(cl, attr[i], fmt, resultarray);
             if (tmp !== "") {
-                debug("Return " + tmp);
+                debug(`Return ${tmp}`);
                 return tmp;
             }
         }
@@ -113,7 +112,7 @@ export function getAttributeAndFormat(cl, attr, fmt, resultarray) {
     const tmp = fmt.format(cl[attr]);
     if (resultarray)
         resultarray.push(tmp);
-    return " " + tmp + " ";
+    return ` ${tmp} `;
 }
 
 var indentLevel = 0;

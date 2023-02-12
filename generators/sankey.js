@@ -7,28 +7,9 @@ import { debug, output } from '../model/support.js';
 import { GraphConnectable } from '../model/graphconnectable.js';
 
 /**
-autovero>"10 taalaa"budjetti
-tupakkavero>"8 taalaa"budjetti
-kakkavero>"3 taalaa"budjetti
-budjetti>"18 taalaa"sotaan
-sossuun<"1 taala"budjetti
-
-to
-{
-	"nodes":[{"name":"xxx"},{}...],
-	"links":[{"source":0,"target":1,"value":123},{}]
-}
-[
-	{"autovero","budjetti",10},
-	{"tupakkavero","budjetti",8},
-	{"kakkavero","budjetti",3},
-	{"budjetti","sotaan",18},
-	{"budjetti","sossuun",1}
-]
-
-node js/diagrammer.js verbose sankey.test sankey
-@param {GraphCanvas} graphcanvas
-*/
+ * To test: node js/diagrammer.js verbose tests/test_inputs/sankey.txt sankey
+ * @param {GraphCanvas} graphcanvas
+ */
 export function sankey(graphcanvas) {
 	/**
 	 * @param {string} str 

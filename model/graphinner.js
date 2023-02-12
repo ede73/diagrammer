@@ -31,7 +31,7 @@ export class GraphInner extends GraphGroup {
      * @return {*}
      */
     setEntrance(entrance) {
-        debug("subgraph:Set entrance to " + entrance);
+        debug(`subgraph:Set entrance to ${entrance}`);
         this.entrance = entrance;
         return this;
     }
@@ -45,7 +45,7 @@ export class GraphInner extends GraphGroup {
      * @return {GraphInner}
      */
     setExit(exit) {
-        debug("subgraph:Set exit to " + exit);
+        debug(`subgraph:Set exit to ${exit}`);
         this.exit = exit;
         return this;
     }
@@ -90,14 +90,14 @@ export class GraphInner extends GraphGroup {
     toString() {
         let fmt = "";
         if (this.edgelabel)
-            fmt += ",edgelabel:" + this.edgelabel;
+            fmt += `,edgelabel:${this.edgelabel}`;
         if (this.entrance)
-            fmt += ",entrance:" + this.entrance;
+            fmt += `,entrance:${this.entrance}`;
 
         if (this.exit)
-            fmt += ",exit:" + this.exit;
+            fmt += `,exit:${this.exit}`;
         if (this.ROOTVERTICES)
-            fmt += ",rootvertices:" + this.ROOTVERTICES;
-        return "SubGraph(name:" + this.name + fmt + ")";
+            fmt += `,rootvertices:${this.ROOTVERTICES}`;
+        return `SubGraph(name:${this.name}${fmt})`;
     };
 };

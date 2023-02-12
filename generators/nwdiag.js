@@ -36,32 +36,12 @@ const NetworkDiagShapeMap =
     loopout: "flowchart.loopout",
     loopend: "flowchart.loopout",
 };
-//node js/diagrammer.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
+
 /**
-a>b>c,d
-a>e;edge text
-a;node text
-
-to
-nwdiag{
- default_fontsize = 16
-
-    a[label="node text"];
-    b;
-    c;
-    d;
-    e;
-a -- b;
-b -- c;
-b -- d;
-a -- e;
-}
-
-http://blockdiag.com/en/nwdiag/
-
-node js/diagrammer.js verbose nwdiag.test nwdiag
-@param {GraphCanvas} graphcanvas
-*/
+ * http://blockdiag.com/en/nwdiag/
+ * To test: node js/diagrammer.js tests/test_inputs/state13.txt nwdiag |nwdiag3 -Tpng -o a.png - && open a.png 
+ * @param {GraphCanvas} graphcanvas
+ */
 export function nwdiag(graphcanvas) {
     graphcanvas.result("nwdiag{\n default_fontsize = 16\n");
     for (const i in graphcanvas.OBJECTS) {
@@ -69,9 +49,9 @@ export function nwdiag(graphcanvas) {
         const obj = graphcanvas.OBJECTS[i];
         if (obj instanceof GraphGroup) {
             // split the label to two, NAME and address
-            graphcanvas.result('  network ' + obj.getName() + '{');
+            graphcanvas.result(`  network ${obj.getName()}{`);
             if (obj.getLabel() != "")
-                graphcanvas.result('    address="' + obj.getLabel() + '"');
+                graphcanvas.result(`    address="${obj.getLabel()}"`);
             for (const j in obj.OBJECTS) {
                 if (!obj.OBJECTS.hasOwnProperty(j)) continue;
                 const z = obj.OBJECTS[j];
@@ -84,8 +64,8 @@ export function nwdiag(graphcanvas) {
                 let tmp = getAttributeAndFormat(z, 'color', ',color="{0}"') + ',shape="{0}"'.format(mappedShape) +
                     getAttributeAndFormat(z, 'label', ',address="{0}"');
                 if (tmp.trim() != "")
-                    tmp = "[" + tmp.trim().substring(1) + "]";
-                graphcanvas.result("    " + z.getName() + tmp + ';');
+                    tmp = `[${tmp.trim().substring(1)}]`;
+                graphcanvas.result(`    ${z.getName()}${tmp};`);
             }
             // find if there are ANY edges that have this GROUP as participant!
             for (const il in graphcanvas.EDGES) {
@@ -93,10 +73,10 @@ export function nwdiag(graphcanvas) {
                 const edge = graphcanvas.EDGES[il];
                 let tmp = getAttributeAndFormat(edge, 'label', '[address="{0}"]');
                 if (edge.left == obj) {
-                    graphcanvas.result("  " + edge.right.getName() + tmp + ";");
+                    graphcanvas.result(`  ${edge.right.getName()}${tmp};`);
                 }
                 if (edge.right == obj) {
-                    graphcanvas.result("  " + edge.left.getName() + tmp + ";");
+                    graphcanvas.result(`  ${edge.left.getName()}${tmp};`);
                 }
             }
             graphcanvas.result("  }");
@@ -110,14 +90,14 @@ export function nwdiag(graphcanvas) {
                 getAttributeAndFormat(obj, 'image', ',background="icons{0}"') + ',shape="{0}"'.format(mappedShape) +
                 getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (tmp.trim() != "")
-                tmp = "[" + tmp.trim().substring(1) + "]";
-            graphcanvas.result("    " + obj.getName() + tmp + ';');
+                tmp = `[${tmp.trim().substring(1)}]`;
+            graphcanvas.result(`    ${obj.getName()}${tmp};`);
         }
     }
 
     traverseEdges(graphcanvas, edge => {
         if (!(edge.left instanceof GraphGroup || edge.right instanceof GraphGroup)) {
-            graphcanvas.result(edge.left.getName() + " -- " + edge.right.getName() + ";");
+            graphcanvas.result(`${edge.left.getName()} -- ${edge.right.getName()};`);
         }
     });
     graphcanvas.result("}");

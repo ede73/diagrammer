@@ -37,30 +37,13 @@ const ActDiagShapeMap =
     loopend: "flowchart.loopout",
 };
 
-//node js/diagrammer.js state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
 /**
-a>b>c,d
-a>e;edge text
-a;node text
-
-to
-actdiag{
-  default_fontsize = 14
-a[label="node text"];
-b;
-c;
-d;
-e;
-  a -> b;
-  b -> c;
-  b -> d;
-  a -> e[label = "edge text"];
-}
-
-http://blockdiag.com/en/actdiag/
-
-@param {GraphCanvas} graphcanvas
-*/
+ *
+ * To test: node js/diagrammer.js tests/test_inputs/state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
+ * http://blockdiag.com/en/actdiag/
+ *
+ * @param {GraphCanvas} graphcanvas
+ */
 export function actdiag(graphcanvas) {
     output(graphcanvas, "actdiag {", true);
     output(graphcanvas, "default_fontsize = 14");
@@ -72,7 +55,7 @@ export function actdiag(graphcanvas) {
     const parseObjects = (/** @type {function((GraphGroup|GraphVertex))}*/obj) => {
         output(true);
         if (obj instanceof GraphGroup) {
-            output(graphcanvas, 'lane "' + obj.getName() + '"{', true);
+            output(graphcanvas, `lane "${obj.getName()}"{`, true);
             traverseVertices(obj, (obj) => {
                 if (obj.shape && !ActDiagShapeMap[obj.shape]) {
                     throw new Error("Missing shape mapping");
@@ -83,9 +66,9 @@ export function actdiag(graphcanvas) {
                     ',shape={0}'.format(mappedShape) +
                     getAttributeAndFormat(obj, 'label', ',label="{0}"');
                 if (colorShapeLabel.trim() != "") {
-                    colorShapeLabel = "[" + colorShapeLabel.trim().substring(1) + "]";
+                    colorShapeLabel = `[${colorShapeLabel.trim().substring(1)}]`;
                 }
-                output(graphcanvas, obj.getName() + colorShapeLabel + ';');
+                output(graphcanvas, `${obj.getName()}${colorShapeLabel};`);
             });
             output(false);
             output(graphcanvas, "}");
@@ -110,8 +93,8 @@ export function actdiag(graphcanvas) {
                 ',shape={0}'.format(mappedShape) +
                 getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (colorIconShapeLabel.trim() != "")
-                colorIconShapeLabel = "[" + colorIconShapeLabel.trim().substring(1) + "]";
-            output(graphcanvas, obj.getName() + colorIconShapeLabel + ';');
+                colorIconShapeLabel = `[${colorIconShapeLabel.trim().substring(1)}]`;
+            output(graphcanvas, `${obj.getName()}${colorIconShapeLabel};`);
         }
         output(false);
     };
@@ -132,8 +115,8 @@ export function actdiag(graphcanvas) {
         if (t.substring(0, 1) == ",")
             t = t.substring(1).trim();
         if (t != "")
-            t = "[" + t + "]";
-        output(graphcanvas, "  " + edge.left.getName() + " -> " + edge.right.getName() + t + ";");
+            t = `[${t}]`;
+        output(graphcanvas, `  ${edge.left.getName()} -> ${edge.right.getName()}${t};`);
     });
     output(graphcanvas, "}");
 }

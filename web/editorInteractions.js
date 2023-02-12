@@ -195,7 +195,7 @@ export function exampleChanged() {
     const e = getSelectElement("example");
     const doc = e.options[e.selectedIndex].value;
     $.ajax({
-        url: "tests/" + doc,
+        url: `tests/${doc}`,
         cache: false
     }).done(function (data) {
         console.log("==Example changed - set graph text");

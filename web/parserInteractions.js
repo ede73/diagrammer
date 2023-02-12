@@ -31,7 +31,7 @@ function ParseResult(err) {
  */
 // TODO: MOVING TO GraphCanvas
 diagrammer_parser.yy.parseError = function (str, hash) {
-    const pe = "Parsing error:\n" + str + "\n" + hash;
+    const pe = `Parsing error:\n${str}\n${hash}`;
     console.log("pe");
     setError(pe);
     //cancelVTimer();
@@ -57,7 +57,7 @@ diagrammer_parser.yy.result = function (line) {
         parsingStarted = false;
         result.value = "";
     }
-    result.value = result.value + line + "\n";
+    result.value = `${result.value + line}\n`;
 }
 
 /**
@@ -65,7 +65,7 @@ diagrammer_parser.yy.result = function (line) {
  */
 // TODO: MOVING TO GraphCanvas
 diagrammer_parser.trace = function (x) {
-    console.log("TRACE:" + x);
+    console.log(`TRACE:${x}`);
 }
 
 /**
@@ -81,7 +81,7 @@ export function parse(data, generator, visualizer, preferScriptSpecifiedGenerato
     if (!visualizer) {
         throw new Error("Visualizer not defined");
     }
-    console.log("parse generator=" + generator + ", visualizer=" + visualizer);
+    console.log(`parse generator=${generator}, visualizer=${visualizer}`);
     setError("");
     parsingStarted = true;
     delete (diagrammer_parser.yy.GRAPHVANVAS);
@@ -94,7 +94,7 @@ export function parse(data, generator, visualizer, preferScriptSpecifiedGenerato
     // If true, actually prefer generator/visualizer from loaded script IF specified
     // used while loading new examples...  
     diagrammer_parser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer;
-    console.log("Parse, set generator to " + diagrammer_parser.yy.USE_GENERATOR + " visualizer to " + diagrammer_parser.yy.USE_VISUALIZER);
+    console.log(`Parse, set generator to ${diagrammer_parser.yy.USE_GENERATOR} visualizer to ${diagrammer_parser.yy.USE_VISUALIZER}`);
     diagrammer_parser.parse(data);
     console.log('  ..parsed');
     /*
@@ -104,7 +104,7 @@ export function parse(data, generator, visualizer, preferScriptSpecifiedGenerato
     const vdelay = 1000;
     const vtimer = window.setTimeout(function () {
         //vtimer = null;
-        console.log("Visualize now using " + diagrammer_parser.yy.USE_VISUALIZER);
+        console.log(`Visualize now using ${diagrammer_parser.yy.USE_VISUALIZER}`);
         visualize(diagrammer_parser.yy.USE_VISUALIZER);
     }, vdelay);
 }
@@ -130,7 +130,7 @@ export function visualize(visualizer) {
     if (!visualizer) {
         throw new Error("Visualizer not defined");
     }
-    const visualizeUrl = "web/visualize.php?visualizer=" + visualizer;
+    const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`;
     // TODO: loads uselessly if web visualizer used
     makeNewImageHolder();
     // @ts-ignore
@@ -149,11 +149,11 @@ export function visualize(visualizer) {
             updateImage(msg);
         },
         error: function (err) {
-            alert("ERROR: " + JSON.stringify(err));
+            alert(`ERROR: ${JSON.stringify(err)}`);
             if (err.status == 200) {
                 ParseResult(err);
             } else {
-                alert('Error:' + err.responseText + '  Status: ' + err.status);
+                alert(`Error:${err.responseText}  Status: ${err.status}`);
             }
         }
     });
@@ -191,7 +191,7 @@ export function visualize(visualizer) {
     } else if (visualizer == "sankey") {
         visualizeSankey(JSON.parse(result.value));
     } else {
-        console.log("Unkknown WEB UI visualizer " + visualizer);
+        console.log(`Unknown WEB UI visualizer ${visualizer}`);
         getHTMLElement('svg').innerHTML = "only for dotty";
     }
 }

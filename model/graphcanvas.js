@@ -125,9 +125,8 @@ export class GraphCanvas extends GraphContainer {
      */
     setDefault(key, value) {
         if (this.ALLOWED_DEFAULTS.indexOf(key.toLowerCase()) == -1) {
-            throw new Error("Trying to set unknown default " + key);
+            throw new Error(`Trying to set unknown default ${key}`);
         }
-        //debug("graphcanvas:Set ROOT " + key + " to " + value);
         // @ts-ignore
         return setAttr(this, key, value);
     }
@@ -136,7 +135,6 @@ export class GraphCanvas extends GraphContainer {
      *  @param {string} key
      */
     getDefault(key) {
-        // debug("graphcanvas:Get ROOT "+key);
         return getAttribute(this, key);
     }
 

@@ -3,40 +3,12 @@ import { generators } from '../model/graphcanvas.js';
 import { traverseEdges, traverseVertices } from '../model/model.js';
 import { GraphGroup } from '../model/graphgroup.js';
 import { output } from '../model/support.js';
-// requires export (Typescript, not ES6 compatible not does node.js support it..)
-//import {GraphCanvas} from '../model/graphcanvas.js';
-/**
 
-Only one root supported?
-{ // this is the information needed for the headers of the bands
-		  key: "_BANDS",
-		  category: "Bands",
-		  itemArray: [
-			{ text: "Zero" },
-			{ text: "One" },
-			{ text: "Two" },
-			{ text: "Three" },
-			{ text: "Four" },
-			{ text: "Five" }
-		  ]
-		},
-		// these are the regular nodes in the TreeModel
-		{ key: "root" },
-		{ key: "oneB", parent: "root" },
-		{ key: "twoA", parent: "oneB" },
-		{ key: "twoC", parent: "root" },
-		{ key: "threeC", parent: "twoC" },
-		{ key: "threeD", parent: "twoC" },
-		{ key: "fourB", parent: "threeD" },
-		{ key: "fourC", parent: "twoC" },
-		{ key: "fourD", parent: "fourB" },
-		{ key: "twoD", parent: "root" }
-	  ];
-	  node js/diagrammer.js verbose manual_test_diagrams/layerbands.d layerbands
-@param {GraphCanvas} graphcanvas
+/**
+ * To test: node js/diagrammer.js verbose tests/test_inputs/layerbands.txt layerbands
+ * @param {GraphCanvas} graphcanvas
 */
 export function layerbands(graphcanvas) {
-	//debug(graphcanvas)
 	const groups = {
 		key: "_BANDS",
 		category: "Bands",

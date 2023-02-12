@@ -30,7 +30,7 @@ export class GraphGroup extends GraphContainer {
      */
     setDefault(key, value) {
         if (this.ALLOWED_DEFAULTS.indexOf(key.toLowerCase()) == -1) {
-            throw new Error("Trying to set unknown default " + key);
+            throw new Error(`Trying to set unknown default ${key}`);
         }
         // @ts-ignore
         return setAttr(this, key, value);
@@ -40,11 +40,11 @@ export class GraphGroup extends GraphContainer {
      * @param {string} key
      */
     getDefault(key) {
-        debug("group:Get group " + key);
+        debug(`group:Get group ${key}`);
         return getAttribute(this, key);
     }
 
     toString() {
-        return "group:Group(" + this.name + ")";
+        return `group:Group(${this.name})`;
     }
 };

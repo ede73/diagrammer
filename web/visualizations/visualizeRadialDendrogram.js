@@ -39,7 +39,7 @@ export function visualizeRadialDendrogram(jsonData) {
 
     removeOldVisualizations();
     const svgimg = make_svg(width, height)
-        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+        .attr("transform", `translate(${width / 2},${height / 2})`);
 
     const link = svgimg.selectAll(".link")
         .data(links)
@@ -53,7 +53,7 @@ export function visualizeRadialDendrogram(jsonData) {
         .data(nodes)
         .enter().append("g")
         .attr("class", "node")
-        .attr("transform", function (d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; });
+        .attr("transform", function (d) { return `rotate(${d.x - 90})translate(${d.y})`; });
 
     node.append("circle")
         .attr("r", 4.5);

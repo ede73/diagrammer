@@ -21,11 +21,11 @@ export function exportGraphs() {
             alert("Exported");
         },
         error: function (err) {
-            alert("ERROR: " + JSON.stringify(err));
+            alert(`ERROR: ${JSON.stringify(err)}`);
             if (err.status == 200) {
                 ParseResult(err);
             } else {
-                alert('Error:' + err.responseText + '  Status: ' + err.status);
+                alert(`Error:${err.responseText}  Status: ${err.status}`);
             }
         }
     });
@@ -45,11 +45,11 @@ export function importGraphs() {
             alert("Imported, reload the page!");
         },
         error: function (err) {
-            alert("ERROR: " + JSON.stringify(err));
+            alert(`ERROR: ${JSON.stringify(err)}`);
             if (err.status == 200) {
                 ParseResult(err);
             } else {
-                alert('Error:' + err.responseText + '  Status: ' + err.status);
+                alert(`Error:${err.responseText}  Status: ${err.status}`);
             }
         }
     });

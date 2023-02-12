@@ -15,7 +15,7 @@ export function getSavedGraph() {
 export function getSavedFilesAsOptionList() {
     let t = "";
     for (const k in getSavedGraph()) {
-        console.log("Stored file:" + k);
+        console.log(`Stored file:${k}`);
         t += '<option value="' + k + '">' + k + '</option>';
     }
     return t;

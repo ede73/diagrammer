@@ -36,13 +36,13 @@ export function processVariable(yy, variable) {
     if (vari.indexOf(":") !== -1) {
         // Assignment
         const tmp = vari.split(":");
-        debug("GOT assignment " + tmp[0] + "=" + tmp[1]);
+        debug(`GOT assignment ${tmp[0]}=${tmp[1]}`);
         _getVariables(yy)[tmp[0]] = tmp[1];
         return tmp[1];
     } else {
         // referral
         if (!_getVariables(yy)[vari]) {
-            throw new Error("Variable " + vari + " not defined");
+            throw new Error(`Variable ${vari} not defined`);
         }
         return _getVariables(yy)[vari];
     }
@@ -62,7 +62,7 @@ export function processVariable(yy, variable) {
  */
 export function getList(yy, lhs, rhs, rhsEdgeLabel) {
     if (lhs instanceof GraphVertex) {
-        debug("getList(vertex:" + lhs + ",rhs:[" + rhs + "])", true);
+        debug(`getList(vertex:${lhs},rhs:[${rhs}])`, true);
         /** @type {(GraphConnectable|GraphConnectable[])} */
         const lst = [];
         lst.push(lhs);
@@ -73,21 +73,21 @@ export function getList(yy, lhs, rhs, rhsEdgeLabel) {
         }
         // @ts-ignore
         lst.push(rhsFound);
-        debug("return vertex:" + lst, false);
+        debug(`return vertex:${lst}`, false);
         return lst;
     } else if (lhs instanceof GraphGroup) {
-        debug("getList(group:[" + lhs + "],rhs:" + rhs + ")", true);
+        debug(`getList(group:[${lhs}],rhs:${rhs})`, true);
         const lst = [];
         lst.push(lhs);
         //TODO assuming RHS is Group
         lst.push(getGroup(yy, rhs).setEdgeLabel(rhsEdgeLabel));
-        debug("return group:" + lst, false);
+        debug(`return group:${lst}`, false);
         return lst;
     }
     if (!(lhs instanceof Array)) {
         throw new Error("getList requires LHS to be Vertex, Group or Array");
     }
-    debug("getList(lhs:[" + lhs + "],rhs:" + rhs, true);
+    debug(`getList(lhs:[${lhs}],rhs:${rhs}`, true);
     // LHS not a vertex..
     const rhsFound = getVertex(yy, rhs);
     if (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex) {
@@ -95,7 +95,7 @@ export function getList(yy, lhs, rhs, rhsEdgeLabel) {
     }
     // @ts-ignore
     lhs.push(rhsFound);
-    debug("return [" + lhs + "]", false);
+    debug(`return [${lhs}]`, false);
     return lhs;
 }
 
@@ -119,7 +119,7 @@ export function getList(yy, lhs, rhs, rhsEdgeLabel) {
  * @return {GraphConnectable} Comment claims to return Array, but quick run didn't reveal Array ever returned..
  */
 export function getVertex(yy, objOrName, style) {
-    debug("getVertex (name:" + objOrName + ",style:" + style + ")", true);
+    debug(`getVertex (name:${objOrName},style:${style})`, true);
 
     function findVertex(yy, /** @type {(string|GraphConnectable)}*/obj, style) {
         if (obj instanceof GraphVertex) {
@@ -152,7 +152,7 @@ export function getVertex(yy, objOrName, style) {
         if (search) {
             return search;
         }
-        debug("Create new vertex name=" + obj, true);
+        debug(`Create new vertex name=${obj}`, true);
         const vertex = new GraphVertex(obj, getGraphCanvas(yy).getCurrentShape());
         if (style) vertex.setStyle(style);
         vertex.noedges = true;
@@ -168,7 +168,7 @@ export function getVertex(yy, objOrName, style) {
     }
 
     const vertex = findVertex(yy, objOrName, style);
-    debug("  in getVertex gotVertex " + vertex);
+    debug(`  in getVertex gotVertex ${vertex}`);
     // TODO: MOVING TO GraphCanvas
     yy.lastSeenVertex = vertex;
     if (yy.collectNextVertex) {
@@ -251,12 +251,12 @@ export function exitSubGraph(yy) {
         throw new Error("Subgraph cannot be canvas");
     }
     if (!(currentSubGraph_TypeCheckerFix instanceof GraphInner)) {
-        throw new Error("Subgraph cannot be any other than GraphInner:" + typeof (currentSubGraph_TypeCheckerFix));
+        throw new Error(`Subgraph cannot be any other than GraphInner:${typeof (currentSubGraph_TypeCheckerFix)}`);
     }
     /** @type {(GraphInner)} */
     const currentSubGraph = currentSubGraph_TypeCheckerFix;
 
-    debug('Exit subgraph ' + currentSubGraph);
+    debug(`Exit subgraph ${currentSubGraph}`);
     /** @type {GraphEdge} */
     let edge = null;
 
@@ -310,7 +310,7 @@ export function exitSubGraph(yy) {
         }
     }
 
-    debug('exits ' + exits);
+    debug(`exits ${exits}`);
     if (lastVertex) {
         currentSubGraph.setExit(lastVertex);
     }
@@ -330,11 +330,11 @@ export function exitSubGraph(yy) {
  */
 export function getGroup(yy, ref) {
     if (ref instanceof GraphGroup) return ref;
-    debug("getGroup() NEW GROUP:" + yy + "/" + ref, true);
+    debug(`getGroup() NEW GROUP:${yy}/${ref}`, true);
     // TODO: MOVING TO GraphCanvas
     if (!yy.GROUPIDS) yy.GROUPIDS = 1;
     const newGroup = new GraphGroup(String(yy.GROUPIDS++));
-    debug("push group " + newGroup + " to " + yy);
+    debug(`push group ${newGroup} to ${yy}`);
     _pushObject(yy, newGroup);
 
     _getDefaultAttribute(yy, 'groupcolor', function (color) {
@@ -377,7 +377,7 @@ export function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel
     }
     if (rhs instanceof GraphVertex) {
         if (rhs.noedges && current_container) {
-            debug('REMOVE ' + rhs + ' from root vertices of the container ' + current_container);
+            debug(`REMOVE ${rhs} from root vertices of the container ${current_container}`);
             const idx = current_container.ROOTVERTICES.indexOf(rhs);
             if (idx >= 0) {
                 current_container.ROOTVERTICES.splice(idx, 1);
@@ -398,18 +398,18 @@ export function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel
     }
 
     if (lhs instanceof Array) {
-        debug("getEdge LHS array, type:" + edgeType + " l:[" + lhs + "] r:" + rhs + " inlineEdgeLabel:" + inlineEdgeLabel + " commonEdgeLabel: " + commonEdgeLabel + " edgeColor:" + edgeColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
+        debug(`getEdge LHS array, type:${edgeType} l:[${lhs}] r:${rhs} inlineEdgeLabel:${inlineEdgeLabel} commonEdgeLabel: ${commonEdgeLabel} edgeColor:${edgeColor} lcompass:${lcompass} rcompass:${rcompass}`);
         for (let i = 0; i < lhs.length; i++) {
-            debug("    1Get edge " + lhs[i]);
+            debug(`    1Get edge ${lhs[i]}`);
             lastEdge = getEdge(yy, edgeType, lhs[i], rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass);
         }
         debug(false);
         return lastEdge;
     }
     if (rhs instanceof Array) {
-        debug("getEdge RHS array, type:" + edgeType + " l:" + lhs + " r:[" + rhs + "] inlineEdgeLabel:" + inlineEdgeLabel + " commonEdgeLabel: " + commonEdgeLabel + " edgeColor:" + edgeColor + " lcompass:" + lcompass + " rcompass:" + rcompass);
+        debug(`getEdge RHS array, type:${edgeType} l:${lhs} r:[${rhs}] inlineEdgeLabel:${inlineEdgeLabel} commonEdgeLabel: ${commonEdgeLabel} edgeColor:${edgeColor} lcompass:${lcompass} rcompass:${rcompass}`);
         for (let i = 0; i < rhs.length; i++) {
-            debug("    2Get edge " + rhs[i]);
+            debug(`    2Get edge ${rhs[i]}`);
             lastEdge = getEdge(yy, edgeType, lhs, rhs[i], inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass);
         }
         debug(false);
@@ -418,22 +418,22 @@ export function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel
     {
         let fmt = "";
         if (inlineEdgeLabel)
-            fmt += "inlineEdgeLabel: " + inlineEdgeLabel;
+            fmt += `inlineEdgeLabel: ${inlineEdgeLabel}`;
         if (commonEdgeLabel)
-            fmt += "commonEdgeLabel: " + commonEdgeLabel;
+            fmt += `commonEdgeLabel: ${commonEdgeLabel}`;
         if (edgeColor)
-            fmt += "edgeColor: " + edgeColor;
+            fmt += `edgeColor: ${edgeColor}`;
         if (lcompass)
-            fmt += "lcompass: " + lcompass;
+            fmt += `lcompass: ${lcompass}`;
         if (rcompass)
-            fmt += "rcompass: " + rcompass;
-        debug("getEdge type:" + edgeType + " l:" + lhs + " r:" + rhs + fmt);
+            fmt += `rcompass: ${rcompass}`;
+        debug(`getEdge type:${edgeType} l:${lhs} r:${rhs}${fmt}`);
     }
     if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) && !(lhs instanceof GraphInner)) {
-        throw new Error("LHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
+        throw new Error(`LHS not a Vertex,Group nor a SubGraph(LHS=${lhs}) RHS=(${rhs})`);
     }
     if (!(rhs instanceof GraphVertex) && !(rhs instanceof GraphGroup) && !(rhs instanceof GraphInner)) {
-        throw new Error("RHS not a Vertex,Group nor a SubGraph(LHS=" + lhs + ") RHS=(" + rhs + ")");
+        throw new Error(`RHS not a Vertex,Group nor a SubGraph(LHS=${lhs}) RHS=(${rhs})`);
     }
     const edge = new GraphEdge(edgeType, lhs, rhs);
 
@@ -451,21 +451,21 @@ export function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel
     });
     if (commonEdgeLabel) {
         edge.setLabel(commonEdgeLabel);
-        debug("  set commonEdgeLabel " + commonEdgeLabel);
+        debug(`  set commonEdgeLabel ${commonEdgeLabel}`);
     }
     if (inlineEdgeLabel) {
         edge.setLabel(inlineEdgeLabel);
-        debug("  set inlineEdgeLabel " + inlineEdgeLabel);
+        debug(`  set inlineEdgeLabel ${inlineEdgeLabel}`);
     }
     else if (rhs instanceof GraphVertex && commonEdgeLabel) {
         edge.setLabel(commonEdgeLabel);
-        debug('  set commonEdgeLabel ' + commonEdgeLabel);
+        debug(`  set commonEdgeLabel ${commonEdgeLabel}`);
     }
     if (rhs instanceof GraphVertex) {
         const tmp = rhs.getEdgeLabel();
         if (tmp) {
             edge.setLabel(tmp);
-            debug('  reset edge label to ' + tmp);
+            debug(`  reset edge label to ${tmp}`);
         }
     }
     if (edgeColor) edge.setColor(edgeColor);
@@ -489,13 +489,11 @@ export function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel
  * @return {GraphCanvas}
  */
 export function getGraphCanvas(yy) {
-    // debug(" getGraphCanvas "+yy);
     if (!yy.GRAPHVANVAS) {
-        //debug("no graphcanvas,init - in getGraphCanvas",true);
         if (!yy.result) {
             throw new Error("Initialization has failed!");
         }
-        debug("...Initialize emptyroot " + yy);
+        debug(`...Initialize emptyroot ${yy}`);
         // TODO: DOESN'T WORK as type hint! Modularize to own obj..
         /** @type  {GraphContainer} */
         yy.CURRENTCONTAINER = [];
@@ -506,7 +504,6 @@ export function getGraphCanvas(yy) {
         /** @type  {GraphCanvas} */
         yy.GRAPHVANVAS = new GraphCanvas();
         enterContainer(yy, yy.GRAPHVANVAS);
-        //debug(false);
     }
     return yy.GRAPHVANVAS;
 }
@@ -624,15 +621,11 @@ function _getVariables(yy) {
 function _getDefaultAttribute(yy, attrname, callback) {
     // no need for the value, but runs init if missing
     getGraphCanvas(yy);
-    // debug("_getDefaultAttribute "+attrname);
     for (const i in yy.CURRENTCONTAINER) {
         if (!yy.CURRENTCONTAINER.hasOwnProperty(i)) continue;
         const ctr = yy.CURRENTCONTAINER[i];
         const defaultAttribute = ctr.getDefault(attrname);
-        // debug(" traverse _getDefaultAttribute "+attrname+" from "+ctr+" as
-        // "+a);
         if (defaultAttribute) {
-            // debug("_getDefaultAttribute "+attrname+" from "+ctr+"=("+a+")");
             if (callback)
                 callback(defaultAttribute);
             return defaultAttribute;
@@ -645,7 +638,6 @@ function _getDefaultAttribute(yy, attrname, callback) {
             callback(defaultAttribute);
         return defaultAttribute;
     }
-    // debug("_getDefaultAttribute FAILED");
     return undefined;
 }
 
@@ -655,12 +647,9 @@ function _getDefaultAttribute(yy, attrname, callback) {
  */
 function _getSubGraph(yy, ref) {
     if (ref instanceof GraphInner) return ref;
-    //debug("_getSubGraph() NEW SubGraph:" + yy + "/" + ref,true);
     if (!yy.SUBGRAPHS) yy.SUBGRAPHS = 1;
     const newSubGraph = new GraphInner(String(yy.SUBGRAPHS++));
-    //debug("push SubGraph " + newSubGraph + " to " + yy);
     _pushObject(yy, newSubGraph);
-    //debug(false);
     return newSubGraph;
 }
 
@@ -672,9 +661,9 @@ function _getSubGraph(yy, ref) {
  */
 function _addEdge(yy, edge) {
     if (edge instanceof Array) {
-        debug("PUSH EDGE ARRAY:" + edge, true);
+        debug(`PUSH EDGE ARRAY:${edge}`, true);
     } else {
-        debug("PUSH EDGE:" + edge, true);
+        debug(`PUSH EDGE:${edge}`, true);
         edge.container = getCurrentContainer(yy);
     }
     yy.EDGES.push(edge);
@@ -688,7 +677,7 @@ function _addEdge(yy, edge) {
  */
 function _pushObject(yy, o) {
     const cnt = getCurrentContainer(yy)
-    debug("_pushObject " + o + "to " + cnt, true);
+    debug(`_pushObject ${o}to ${cnt}`, true);
     cnt.OBJECTS.push(o);
     cnt.ROOTVERTICES.push(o);
     debug(false);

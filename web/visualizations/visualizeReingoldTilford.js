@@ -21,7 +21,7 @@ export function visualizeReingoldTilford(jsonData) {
 
     removeOldVisualizations();
     const svgimg = make_svg(width, height)
-        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+        .attr("transform", `translate(${width / 2},${height / 2})`);
 
     const links = root.links();
     const link = svgimg.selectAll("path.link")

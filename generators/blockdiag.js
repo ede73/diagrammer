@@ -36,39 +36,11 @@ const BlockDiagShapeMap = {
     loopend: "flowchart.loopout",
 };
 
-//node js/diagrammer.js state2.txt blockdiag |blockdiag -Tpng -o a.png - && open a.png
-//available shapes
-//box,square,roundedbox,dots
-//circle,ellipse,diamond,minidiamond
-//note,mail,cloud,actor
-//flowchart.beginpoint,flowchart.endpoint
-//flowchart.condition,flowchart.database,flowchart.terminator,flowchart.input
-//flowchart.loopin,flowchart.loopout
 /**
-a>b>c,d
-a>e;edge text
-a;node text
-
-to
-blockdiag{
- default_fontsize = 14
-  orientation=landscape
-a[label="node text"];
-b;
-c;
-d;
-e;
-  a -> b;
-  b -> c;
-  b -> d;
-  a -> e[label = "edge text"];
-}
-
-http://blockdiag.com/en/blockdiag/
-
-node js/diagrammer.js verbose blockdiag.test blockdiag
-@param {GraphCanvas} graphcanvas
-*/
+ * http://blockdiag.com/en/blockdiag/
+ * To test: node js/diagrammer.js tests/test_inputs/state2.txt blockdiag |blockdiag3 -Tpng -o a.png - && open a.png
+ * @param {GraphCanvas} graphcanvas
+ */
 export function blockdiag(graphcanvas) {
     output(graphcanvas, "blockdiag {", true);
     output(graphcanvas, "default_fontsize = 14");
@@ -87,11 +59,11 @@ export function blockdiag(graphcanvas) {
     const parseObjects = /** @type {function((GraphGroup|GraphVertex))}*/obj => {
         output(true);
         if (obj instanceof GraphGroup) {
-            output(graphcanvas, ' group "' + obj.getLabel() + '"{', true);
+            output(graphcanvas, ` group "${obj.getLabel()}"{`, true);
             output(graphcanvas, getAttributeAndFormat(obj, 'color', '   color="{0}"'));
             output(graphcanvas, getAttributeAndFormat(obj, 'label', '   label="{0}"'));
             if (lastNode && lastNode.trim() != "") {
-                lastNode = "[" + lastNode.trim().substring(1) + "]";
+                lastNode = `[${lastNode.trim().substring(1)}]`;
             }
             traverseVertices(obj, obj => {
                 if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
@@ -102,8 +74,8 @@ export function blockdiag(graphcanvas) {
                     ',shape={0}'.format(mappedShape) +
                     getAttributeAndFormat(obj, 'label', ',label="{0}"');
                 if (tmp.trim() != "")
-                    tmp = "[" + tmp.trim().substring(1) + "]";
-                output(graphcanvas, obj.getName() + tmp + ';');
+                    tmp = `[${tmp.trim().substring(1)}]`;
+                output(graphcanvas, `${obj.getName()}${tmp};`);
             });
             output(false);
             output(graphcanvas, "}");
@@ -127,8 +99,8 @@ export function blockdiag(graphcanvas) {
                 ',shape="{0}"'.format(mappedShape) +
                 getAttributeAndFormat(obj, 'label', ',label="{0}"');
             if (colorIconShapeLabel.trim() != "")
-                colorIconShapeLabel = "[" + colorIconShapeLabel.trim().substring(1) + "]";
-            output(graphcanvas, obj.getName() + colorIconShapeLabel + ';');
+                colorIconShapeLabel = `[${colorIconShapeLabel.trim().substring(1)}]`;
+            output(graphcanvas, `${obj.getName()}${colorIconShapeLabel};`);
         }
         output(false);
     };
@@ -150,8 +122,8 @@ export function blockdiag(graphcanvas) {
         if (t.substring(0, 1) == ",")
             t = t.substring(1).trim();
         if (t != "")
-            t = "[" + t + "]";
-        output(graphcanvas, "  " + edge.left.getName() + " -> " + edge.right.getName() + t + ";");
+            t = `[${t}]`;
+        output(graphcanvas, `  ${edge.left.getName()} -> ${edge.right.getName()}${t};`);
     });
     output(graphcanvas, "}");
 }

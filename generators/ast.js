@@ -6,25 +6,8 @@ import { GraphInner } from '../model/graphinner.js';
 import { GraphVertex } from '../model/graphvertex.js';
 
 /**
-a>b>c,d
-a>e;link text
-a;node text
-
-to
-{
-    {"node":{"name":"a","label":"node text"}},
-    {"node":{"name":"b"}},
-    {"node":{"name":"c"}},
-    {"node":{"name":"d"}},
-    {"node":{"name":"e"}},
-    {"link":{"edgeType":">","left":"a","right":"b"}},
-    {"link":{"edgeType":">","left":"b","right":"c"}},
-    {"link":{"edgeType":">","left":"b","right":"d"}},
-    {"link":{"edgeType":">","left":"a","right":"e","label":"link text"}},
-}
-
-node js/diagrammer.js verbose ast.test ast
-@param {GraphCanvas} graphcanvas
+ * TO test: node js/diagrammer.js verbose tests/test_inputs/ast.test ast
+ * @param {GraphCanvas} graphcanvas
 */
 export function ast(graphcanvas) {
     debug(graphcanvas)

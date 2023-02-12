@@ -84,7 +84,7 @@ export function visualizeUmlClass(jsonData) {
                     for (var i = 0; i < parr.length; i++) {
                         const param = parr[i];
                         if (i > 0) s += ", ";
-                        s += param.name + ": " + param.type;
+                        s += `${param.name}: ${param.type}`;
                     }
                     return s + ")";
                 })),

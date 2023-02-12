@@ -37,30 +37,12 @@ const DigraphShapeMap = {
     loopout: "invhouse",
     loopend: "invhouse",
 };
+
 /**
-a>b>c,d
-a>e;edhe text
-a;node text
-
-to
-digraph {
-    compound=true;
-    rankdir=TD;
-    a[label="node text"];
-    b;
-    c;
-    d;
-    e;
-    //edhes start
-    a->b;
-    b->c;
-    b->d;
-    a->e[label="edhe text"];
-}
-node js/diagrammer.js verbose digraph.test digraph
-
-@param {GraphCanvas} graphcanvas
-*/
+ * To test: node js/diagrammer.js verbose tests/test_inputs/state1.txt digraph
+ *
+ * @param {GraphCanvas} graphcanvas
+ */
 export function digraph(graphcanvas) {
     // TODO: See splines control
     // http://www.graphviz.org/doc/info/attrs.html#d:splines
@@ -88,12 +70,10 @@ export function digraph(graphcanvas) {
         getAttributeAndFormat(obj, 'color', 'fillcolor="{0}"', nattrs);
         getAttributeAndFormat(obj, 'color', 'filled', styles);
         getAttributeAndFormat(obj, 'style', '{0}', styles);
-        // if (getAttribute(o,'free')===true){
-        // nattrs.push("constraint=false");
-        // }
+
         const url = obj.url;
         if (url) {
-            nattrs.push('URL="' + url.trim() + '"');
+            nattrs.push(`URL="${url.trim()}"`);
         }
         if (styles.length > 0) {
             if (styles.join("").indexOf('singularity') !== -1) {
@@ -104,7 +84,7 @@ export function digraph(graphcanvas) {
                 nattrs.push("width=0.01");
                 nattrs.push("weight=0.01");
             } else {
-                nattrs.push('style="' + styles.join(",") + '"');
+                nattrs.push(`style="${styles.join(",")}"`);
             }
         }
         getAttributeAndFormat(obj, 'image', 'image="icons{0}"', nattrs);
@@ -120,9 +100,9 @@ export function digraph(graphcanvas) {
         getAttributeAndFormat(obj, 'label', 'label="{0}"', nattrs);
         let t = "";
         if (nattrs.length > 0) {
-            t = "[" + nattrs.join(",") + "]";
+            t = `[${nattrs.join(",")}]`;
         }
-        output(graphcanvas, obj.getName() + t + ';');
+        output(graphcanvas, `${obj.getName()}${t};`);
     };
 
     output(graphcanvas, "digraph {", true);
@@ -138,11 +118,7 @@ export function digraph(graphcanvas) {
     if (start) {
         const fwd = getVertex(graphcanvas.yy, start);
         processAVertex(fwd);
-        // {$$=" {rank = same;null}\n {rank = same; "+$2+"}\n null
-        // [shape=plaintext,
-        // label=\"\"];\n"+$2+"[shape=doublecircle];\nnull->"+$2+";\n";}
-        output(graphcanvas, "//startnode setup\n  {rank = same;null} {rank = same; " +
-            start + "}\n  null [shape=plaintext, label=\"\"];\n  " + start + "[shape=doublecircle];\n  null->" + start + ";\n");
+        output(graphcanvas, `//startnode setup\n  {rank = same;null} {rank = same; ${start}}\n  null [shape=plaintext, label=\"\"];\n  ${start}[shape=doublecircle];\n  null->${start};\n`);
     }
     // This may FORWARD DECLARE a node...which creates problems with coloring
     if (graphcanvas.getEqual() && graphcanvas.getEqual().length > 0) {
@@ -158,7 +134,7 @@ export function digraph(graphcanvas) {
             const o = c.OBJECTS[i];
             if (o instanceof GraphGroup) {
                 if (o.OBJECTS.length == 0) {
-                    o.OBJECTS.push(new GraphVertex("invis_" + o.getName())
+                    o.OBJECTS.push(new GraphVertex(`invis_${o.getName()}`)
                         .setStyle("invis"));
                 } else {
                     // A group...non empty...parse inside
@@ -169,7 +145,6 @@ export function digraph(graphcanvas) {
     })(graphcanvas.OBJECTS);
 
     function getFirstEdgeOfTheGroup(grp) {
-        //output(graphcanvas,"FIRST VERTEX"+JSON.stringify(grp));
         for (const i in graphcanvas.EDGES) {
             if (!graphcanvas.EDGES.hasOwnProperty(i)) continue;
             const l = graphcanvas.EDGES[i];
@@ -177,7 +152,6 @@ export function digraph(graphcanvas) {
                 if (!grp.OBJECTS.hasOwnProperty(j)) continue;
                 const n = grp.OBJECTS[j];
                 if (n == l.left) {
-                    // output(graphcanvas,"ReturnF "+n);
                     return n;
                 }
             }
@@ -187,7 +161,6 @@ export function digraph(graphcanvas) {
 
     function getLastEdgeInGroup(grp) {
         let nod = undefined;
-        // output(graphcanvas,"LAST VERTEX"+JSON.stringify(grp));
         for (const i in graphcanvas.EDGES) {
             if (!graphcanvas.EDGES.hasOwnProperty(i)) continue;
             const l = graphcanvas.EDGES[i];
@@ -200,7 +173,6 @@ export function digraph(graphcanvas) {
                     nod = n;
             }
         }
-        // output(graphcanvas,"ReturnL "+nod);
         return nod;
     }
 
@@ -216,7 +188,7 @@ export function digraph(graphcanvas) {
                 // Group name,OBJECTS,get/setEqual,toString
                 const processAGroup = (grp => {
                     debug(JSON.stringify(grp, skipEntrances));
-                    output(graphcanvas, 'subgraph cluster_' + grp.getName() + ' {', true);
+                    output(graphcanvas, `subgraph cluster_${grp.getName()} {`, true);
                     if (grp.isInnerGraph) {
                         output(graphcanvas, 'graph[style=invis];');
                     }
@@ -230,27 +202,27 @@ export function digraph(graphcanvas) {
                     }
                     traverseVertices(grp);
                     output(false);
-                    output(graphcanvas, "}//end of " + grp.getName() + " " + cond);
+                    output(graphcanvas, `}//end of ${grp.getName()} ${cond}`);
                     if (cond) {
-                        output(graphcanvas, "//COND " + grp.getName() + " " + cond);
+                        output(graphcanvas, `//COND ${grp.getName()} ${cond}`);
                         if (cond == "endif") {
                             //never reached
                             const exitedge = grp.exitedge;
                             if (exitedge) {
-                                output(graphcanvas, lastexit + "->" + exitedge + "[color=red];");
-                                output(graphcanvas, lastendif + "->" + exitedge + ";");
+                                output(graphcanvas, `${lastexit}->${exitedge}[color=red];`);
+                                output(graphcanvas, `${lastendif}->${exitedge};`);
                             }
                         } else {
-                            const sn = "entry" + grp.exitvertex;
+                            const sn = `entry${grp.exitvertex}`;
                             if (!lastendif) {
-                                lastendif = "endif" + grp.exitvertex;
+                                lastendif = `endif${grp.exitvertex}`;
                                 output(graphcanvas, lastendif + "[shape=circle,label=\"\",width=0.01,height=0.01];");
                             }
                             //TODO:else does not need diamond
-                            output(graphcanvas, sn + "[shape=diamond,fixedsize=true,width=1,height=1,label=\"" + grp.getLabel() + "\"];");
+                            output(graphcanvas, `${sn}[shape=diamond,fixedsize=true,width=1,height=1,label=\"${grp.getLabel()}\"];`);
                             if (cond == "if") {
                                 //entryedge!
-                                output(graphcanvas, grp.entryedge.getName() + "->" + sn + ";");
+                                output(graphcanvas, `${grp.entryedge.getName()}->${sn};`);
                             }
                             // FIRST node of group and LAST node in group..
                             const lastEdge = getFirstEdgeOfTheGroup(grp);
@@ -259,13 +231,12 @@ export function digraph(graphcanvas) {
                             //const en = "exit" + o.exitvertex
 
                             if (lastexit) {
-                                output(graphcanvas, lastexit + "->" + sn + "[label=\"NO\",color=red];");
+                                output(graphcanvas, `${lastexit}->${sn}[label=\"NO\",color=red];`);
                                 //lastexit = undefined;
                             }
                             // YES LINK to first node of the group
-                            output(graphcanvas, sn + "->" + lastEdge.getName() + "[label=\"YES\",color=green,lhead=cluster_" +
-                                grp.getName() + "];");
-                            output(graphcanvas, ln.getName() + "->" + lastendif + "[label=\"\"];");
+                            output(graphcanvas, `${sn}->${lastEdge.getName()}[label=\"YES\",color=green,lhead=cluster_${grp.getName()}];`);
+                            output(graphcanvas, `${ln.getName()}->${lastendif}[label=\"\"];`);
                             lastexit = sn;
                         }
                     }
@@ -286,15 +257,15 @@ export function digraph(graphcanvas) {
         if (label) {
             if (label.indexOf("::") !== -1) {
                 label = label.split("::");
-                attrs.push('label="' + label[0].trim() + '"');
-                attrs.push('xlabel="' + label[1].trim() + '"');
+                attrs.push(`label="${label[0].trim()}"`);
+                attrs.push(`xlabel="${label[1].trim()}"`);
             } else {
-                attrs.push('label="' + label.trim() + '"');
+                attrs.push(`label="${label.trim()}"`);
             }
         }
         const url = edge.url;
         if (url) {
-            attrs.push('URL="' + url.trim() + '"');
+            attrs.push(`URL="${url.trim()}"`);
         }
         getAttributeAndFormat(edge, 'color', 'color="{0}"', attrs);
         getAttributeAndFormat(edge, ['textcolor', 'color'], 'fontcolor="{0}"', attrs);
@@ -302,14 +273,13 @@ export function digraph(graphcanvas) {
         let rhs = edge.right;
         let lhs = edge.left;
 
-        debug("// link from " + lhs + " to " + rhs);
+        debug(`// link from ${lhs} to ${rhs}`);
         if (rhs instanceof GraphGroup) {
-            //debug('huuhuu');
             // just pick ONE Vertex from group and use lhead
             // TODO: Assuming it is Vertex (if Recursive groups implemented, it
             // could be smthg else)
             if (!rhs.isInnerGraph) {
-                attrs.push(" lhead=cluster_" + rhs.getName());
+                attrs.push(` lhead=cluster_${rhs.getName()}`);
             }
             if (rhs.OBJECTS[0]) {
                 rhs = rhs.OBJECTS[0];
@@ -317,7 +287,7 @@ export function digraph(graphcanvas) {
         }
         if (lhs instanceof GraphGroup) {
             if (!lhs.isInnerGraph)
-                attrs.push(" ltail=cluster_" + lhs.getName());
+                attrs.push(` ltail=cluster_${lhs.getName()}`);
             if (lhs instanceof GraphInner && lhs.getExit()) {
                 //get containers all vertices that have no outward links...(TODO:should be in model actually!)
                 //perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
@@ -326,17 +296,13 @@ export function digraph(graphcanvas) {
                     if (!lhs.OBJECTS.hasOwnProperty(i)) continue;
                     const go = lhs.OBJECTS[i];
                     if (!hasOutwardEdge(graphcanvas.yy, go)) {
-                        //debug('test node '+go);
                         exits.push(go);
                     }
                 }
                 lhs = exits;
-                //debug('got '+exits);
             } else {
                 lhs = lhs.OBJECTS[0];
             }
-            //debug('ll is.. '+ll);
-            //debug('lr is '+lr);
             if (!lhs) {
                 // Same as above
             }
@@ -371,9 +337,9 @@ export function digraph(graphcanvas) {
         }
         let t = "";
         if (attrs.length > 0)
-            t = "[" + attrs.join(",") + "]";
-        debug('print lhs ' + lhs);
-        debug('print rhs ' + rhs);
+            t = `[${attrs.join(",")}]`;
+        debug(`print lhs ${lhs}`);
+        debug(`print rhs ${rhs}`);
         if (lhs instanceof Array) {
             lhs.forEach((element, index, array) => {
                 output(graphcanvas, element.getName() +

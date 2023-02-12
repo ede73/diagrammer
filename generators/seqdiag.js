@@ -5,29 +5,10 @@ import { GraphGroup } from '../model/graphgroup.js';
 import { GraphVertex } from '../model/graphvertex.js';
 
 /**
-a>b>c,d
-a>e;edge text
-a;node text
-
-to
-seqdiag {
-autonumber = True;
- activation = none;
-a[label="node text"];
-b;
-c;
-d;
-e;
-a -> b[];
-b -> c[];
-b -> d[];
-a -> e[label="edge text"];
-}
-http://blockdiag.com/en/seqdiag/index.html
-
-node js/diagrammer.js verbose seqdiag.test seqdiag
-@param {GraphCanvas} graphcanvas
-*/
+ * http://blockdiag.com/en/seqdiag/index.html
+ * To test: node js/diagrammer.js tests/test_inputs/state13.txt seqdiag |seqdiag3 -Tpng -o a.png - && open a.png 
+ * @param {GraphCanvas} graphcanvas
+ */
 export function seqdiag(graphcanvas) {
     output(graphcanvas, "seqdiag {", true);
     output(graphcanvas, "autonumber = True;");
@@ -49,17 +30,17 @@ export function seqdiag(graphcanvas) {
                 let styleAndLabel = getAttributeAndFormat(z, 'style', ',style={0}') +
                     getAttributeAndFormat(z, 'label', ',label="{0}"');
                 if (styleAndLabel.trim() != "")
-                    styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
-                output(graphcanvas, z.getName() + styleAndLabel + ";");
+                    styleAndLabel = `[${styleAndLabel.trim().substring(1)}]`;
+                output(graphcanvas, `${z.getName()}${styleAndLabel};`);
             }
         } else if (obj instanceof GraphVertex) {
             let styleAndLabel = getAttributeAndFormat(obj, 'style', ',style={0}') +
                 getAttributeAndFormat(obj, 'label', ',label="{0}"') +
                 getAttributeAndFormat(obj, 'color', ',color="{0}"');
             if (styleAndLabel.trim() != "") {
-                styleAndLabel = "[" + styleAndLabel.trim().substring(1) + "]";
+                styleAndLabel = `[${styleAndLabel.trim().substring(1)}]`;
             }
-            output(graphcanvas, obj.getName() + styleAndLabel + ";");
+            output(graphcanvas, `${obj.getName()}${styleAndLabel};`);
         }
     }
 
@@ -71,23 +52,23 @@ export function seqdiag(graphcanvas) {
 
         const color = edge.color;
         if (color) {
-            attrs.push('color="' + color + '"');
+            attrs.push(`color="${color}"`);
         }
         let label = edge.label;
         if (label) {
             if (label.indexOf("::") !== -1) {
                 label = label.split("::");
-                attrs.push('note="' + label[1].trim() + '"');
-                attrs.push('label="' + label[0].trim() + '"');
+                attrs.push(`note="${label[1].trim()}"`);
+                attrs.push(`label="${label[0].trim()}"`);
             } else {
-                attrs.push('label="' + label.trim() + '"');
+                attrs.push(`label="${label.trim()}"`);
             }
         }
         if (rhs instanceof GraphGroup) {
             // just pick ONE Vertex from group and use lhead
             // TODO: Assuming it is Vertex (if Recursive groups implemented, it
             // could be smthg else)
-            edgeType += " lhead=cluster_" + rhs.getName();
+            edgeType += ` lhead=cluster_${rhs.getName()}`;
             rhs = rhs.OBJECTS[0];
             if (!rhs) {
                 // TODO:Bad thing, EMPTY group..add one invisible node there...
@@ -146,8 +127,7 @@ export function seqdiag(graphcanvas) {
         if (!attrs || attrs.length == 0) {
             attrs.push("label=\"\"");
         }
-        output(graphcanvas, lhs.getName() + " " + edgeType + " " +
-            rightName + "[" + attrs.join(",") + "];");
+        output(graphcanvas, `${lhs.getName()} ${edgeType} ${rightName}[${attrs.join(",")}];`);
     });
     output(graphcanvas, false);
     output(graphcanvas, "}");

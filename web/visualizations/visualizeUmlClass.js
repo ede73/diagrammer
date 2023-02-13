@@ -77,7 +77,7 @@ export function visualizeUmlClass(jsonData) {
                 new go.Binding("text", "name").makeTwoWay(),
                 new go.Binding("isUnderline", "scope", function (s) { return s[0] === 'c' })),
             // method parameters
-            $(go.TextBlock, "()",
+            $(go.TextBlock, "",
                 // this does not permit adding/editing/removing of parameters via inplace edits
                 new go.Binding("text", "parameters", function (parr) {
                     let s = "(";

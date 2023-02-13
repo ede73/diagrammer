@@ -11,27 +11,31 @@ generator umlclass
 {GraphConnectable;GraphConnectable
   noedges;+boolean
   edgelabel;+string
+  getEdgeLabel;+():string
+  setEdgeLabel;+(edgeLabel:string)
 }
 
 {GraphContainer;GraphContainer
   OBJECTS;+List<GraphConnectable>
   ROOTVERTICES;+List<GraphConnectable>
   equal_;+List<GraphConnectable>
+  getEqual;+():List<GraphConnectable>
+  setEqual;+(List<GraphConnectable>)
 }
 
 {GraphGroup;GraphGroup
-  name_;+string
   exitvertex;+string
   entryedge;+string
   entrance;+GraphConnectable|GraphConnectable[]
-  setDefault;+setDefault(key:string,value:string):return
+  setDefault;+setDefault(key:string, value:string)
+  getDefault;+(key:string):string
 }
 
 {GraphInner;GraphInner
-  name__;+string
   isInnerGraph;+boolean=true
-  entrance_;+GraphConnectable|GraphConnectable[]
   exit;+GraphConnectable
+  getEntrance;+():GraphConnectable|List<GraphConnectable>
+  setEntrance;+(GraphConnectable|List<GraphConnectable>)
 }
 
 {GraphEdge;GraphEdge
@@ -53,10 +57,12 @@ generator umlclass
 }
 
 {GraphVertex;GraphVertex
-  name___;+string
   shape_;+string
   image;+string
   style;+string
+  setStyle;+()
+  setShape;+()
+  setImage;+()
 }
 
 {GraphCanvas;GraphCanvas

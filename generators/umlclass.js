@@ -40,9 +40,9 @@ export function umlclass(graphcanvas) {
 
 			// If there's a label attached, parse that
 			if (p.label) {
-				const regex = /^([+#-]|)([^:]+:|)([^=]+)(=.+|)/;
+				const regex = /^(?<visibility>[+#-]|)(?<name>[^:]+:|)(?<type>[^=]+)(?<default>=.+|)/;
 				const all = p.label.match(regex);
-				switch (all[1]) {
+				switch (all.groups.visibility) {
 					case "+":
 						ret['visibility'] = 'public';
 						break;
@@ -53,14 +53,14 @@ export function umlclass(graphcanvas) {
 						ret['visibility'] = 'protected';
 						break;
 				}
-				if (all[2]) {
-					ret['name'] = all[2]; // specific label name, NO MANGLING
+				if (all.groups.name) {
+					ret['name'] = all.groups.name; // specific label name, NO MANGLING
 				}
-				if (all[3]) {
-					ret['type'] = all[3];
+				if (all.groups.type) {
+					ret['type'] = all.groups.type;
 				}
-				if (all[4]) {
-					ret['default'] = all[4];
+				if (all.groups.default) {
+					ret['default'] = all.groups.default;
 				}
 				return ret;
 			}
@@ -80,9 +80,10 @@ export function umlclass(graphcanvas) {
 			};
 			ret['name'] = mangleName(m.name);
 			if (m.label) {
-				const regex = /^([+#-]|)([^)]+\)|)(.+)/;
+				const regex = /^(?<visibility>[+#-]|)(?<parameters>[^)]+\)|)[:]{0,1}(?<return>.+|)/;
 				const all = m.label.match(regex);
-				switch (all[1]) {
+
+				switch (all.groups.visibility) {
 					case "+":
 						ret['visibility'] = 'public';
 						break;
@@ -93,13 +94,11 @@ export function umlclass(graphcanvas) {
 						ret['visibility'] = 'protected';
 						break;
 				}
-				if (all[2]) {
-					if (all[2].startsWith("(")) {
-						ret['name'] = mangleName(m.name) + "==" + all[2];
-					} else {
-						// TODO: separate name and parameters..
-						ret['name'] = mangleName(all[2]);
-					}
+				if (all.groups.parameters) {
+					ret['name'] = mangleName(m.name) + all.groups.parameters;
+				}
+				if (all.groups.return) {
+					ret['type'] = all.groups.return;
 				}
 				// TODO:
 				// ret["parameters"] = [{name:???,type:???}];

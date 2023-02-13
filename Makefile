@@ -75,6 +75,7 @@ export: build/diagrammer_lexer.js build/diagrammer_parser.js js/diagrammer.js
 .PHONY: test
 test: all
 	@mkdir -p tests/test_outputs
+	npm test
 	./scripts/runtests.sh
 
 clean:

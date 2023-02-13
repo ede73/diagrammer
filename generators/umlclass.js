@@ -4,6 +4,18 @@ import { traverseVertices, traverseEdges } from '../model/model.js';
 import { GraphGroup } from '../model/graphgroup.js';
 import { debug, output } from '../model/support.js';
 
+// Basically [+-#] [name:] [String] [=defaultValue]
+export function umlclassParseMember(member) {
+	const regex = /^(?<visibility>[+#-]|)(?<name>[^:]+(?=:)|)[:]{0,1}(?<type>[^=]+)[=]{0,1}(?<default>.+|)/;
+	return member.match(regex);
+}
+
+// Basically [+-#] [name] [(parameters)] [:[RETURNTYPE]]
+export function umlclassParseMethod(method) {
+	const regex = /^(?<visibility>[+#-]|)(?<name>[^(]+|)(?<parameters>[^)]+\)|)[:]{0,1}(?<return>.+|)/;
+	return method.match(regex);
+}
+
 /**
  * Test: node js/diagrammer.js tests/test_inputs/umlclass2.txt umlclass
  *
@@ -40,8 +52,7 @@ export function umlclass(graphcanvas) {
 
 			// If there's a label attached, parse that
 			if (p.label) {
-				const regex = /^(?<visibility>[+#-]|)(?<name>[^:]+:|)(?<type>[^=]+)(?<default>=.+|)/;
-				const all = p.label.match(regex);
+				const all = umlclassParseMember(p.label);
 				switch (all.groups.visibility) {
 					case "+":
 						ret['visibility'] = 'public';
@@ -80,9 +91,7 @@ export function umlclass(graphcanvas) {
 			};
 			ret['name'] = mangleName(m.name);
 			if (m.label) {
-				const regex = /^(?<visibility>[+#-]|)(?<parameters>[^)]+\)|)[:]{0,1}(?<return>.+|)/;
-				const all = m.label.match(regex);
-
+				const all = umlclassParseMethod(m.label);
 				switch (all.groups.visibility) {
 					case "+":
 						ret['visibility'] = 'public';

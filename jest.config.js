@@ -1,1 +1,1 @@
-export default { transform: {} }
+export default { transform: {},"preset":"jest-puppeteer" }

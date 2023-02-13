@@ -69,3 +69,21 @@ export async function writeToElement(elementId, text) {
     await assertElementExists(elementId);
     await page.$eval(elementId, (el, text) => el.value = text, text);
 }
+
+/**
+ * Setup capture trap for all browser 'chatter' and dump on console
+ * Usefull while debugging tests - since browser runs headless..
+ * 
+ * @param {Page} page 
+ * @return {Promsise<void>}
+ */
+export async function captureBrowserLogs(page) {
+    page
+        .on('console', message =>
+            console.log(`${message.type().substr(0, 3).toUpperCase()} ${message.text()}`))
+        .on('pageerror', ({ message }) => console.log(message))
+        .on('response', response =>
+            console.log(`${response.status()} ${response.url()}`))
+        .on('requestfailed', request =>
+            console.log(`${request.failure().errorText} ${request.url()}`))
+}

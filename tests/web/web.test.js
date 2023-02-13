@@ -1,4 +1,4 @@
-import { dumpWholePage, dumpWholePage2, sleepABit, getElementText, writeToElement } from './jest_puppeteer_support.js';
+import { dumpWholePage, dumpWholePage2, sleepABit, getElementText, writeToElement, captureBrowserLogs } from './jest_puppeteer_support.js';
 import { clearGeneratorResults, getDiagrammerCode, selectExampleCode, waitUntilGraphDrawn, setDiagrammerCode, waitForGeneratorResults, clearParsingErrors, getParsingError, getGeneratorResult } from './diagrammer_support.js';
 
 // graphVisualizationHere all the graphcics sit here..
@@ -10,6 +10,7 @@ describe('Diagrammer', () => {
   beforeAll(async () => {
     await page.goto('http://localhost/~ede/diagrammer/');
     await page.setViewport({ width: 1800, height: 1800 });
+    await captureBrowserLogs(page);
   });
 
   it('Take a screenshot of the diagrammer"', async () => {

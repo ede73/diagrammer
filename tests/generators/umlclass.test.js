@@ -52,7 +52,6 @@ test('Parse member: +boolean', () => {
 test('Parse member: #boolean=false', () => {
     const member = "#boolean=false";
     const parseResults = umlclassParseMember(member);
-    console.log(parseResults.groups);
     expect(parseResults.groups.visibility).toBe("#");
     expect(parseResults.groups.name).toBe("");
     expect(parseResults.groups.type).toBe("boolean");
@@ -62,7 +61,6 @@ test('Parse member: #boolean=false', () => {
 test('Parse member: public justname:List<string>', () => {
     const member = "+justname:List<string>";
     const parseResults = umlclassParseMember(member);
-    console.log(parseResults.groups);
     expect(parseResults.groups.visibility).toBe("+");
     expect(parseResults.groups.name).toBe("justname");
     expect(parseResults.groups.type).toBe("List<string>");

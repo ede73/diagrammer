@@ -5,6 +5,7 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 import { make_svg, removeOldVisualizations } from "../d3support";
 
 export function visualizeReingoldTilford(jsonData) {
+    console.trace("Start reingold");
     const width = 400,
         height = 400;
 

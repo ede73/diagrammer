@@ -70,6 +70,9 @@ export async function writeToElement(elementId, text) {
     await page.$eval(elementId, (el, text) => el.value = text, text);
 }
 
+function consoleLogWithTime(msg) {
+    console.log(`${new Date().toISOString()}: ${msg} `);
+}
 /**
  * Setup capture trap for all browser 'chatter' and dump on console
  * Usefull while debugging tests - since browser runs headless..
@@ -80,10 +83,10 @@ export async function writeToElement(elementId, text) {
 export async function captureBrowserLogs(page) {
     page
         .on('console', message =>
-            console.log(`${message.type().substr(0, 3).toUpperCase()} ${message.text()}`))
-        .on('pageerror', ({ message }) => console.log(message))
+            consoleLogWithTime(`${message.type().substr(0, 3).toUpperCase()} ${message.text()} `))
+        .on('pageerror', ({ message }) => consoleLogWithTime(message))
         .on('response', response =>
-            console.log(`${response.status()} ${response.url()}`))
+            consoleLogWithTime(`${response.status()} ${response.url()} `))
         .on('requestfailed', request =>
-            console.log(`${request.failure().errorText} ${request.url()}`))
+            consoleLogWithTime(`${request.failure().errorText} ${request.url()} `))
 }

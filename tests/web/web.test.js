@@ -10,7 +10,7 @@ describe('Diagrammer', () => {
   beforeAll(async () => {
     await page.goto('http://localhost/~ede/diagrammer/');
     await page.setViewport({ width: 1800, height: 1800 });
-    await captureBrowserLogs(page);
+    // await captureBrowserLogs(page);
   });
 
   it('Take a screenshot of the diagrammer"', async () => {
@@ -45,6 +45,7 @@ describe('Diagrammer', () => {
   });
 
   it('should be able to select dendrogram', async () => {
+    await captureBrowserLogs(page);
     await clearGeneratorResults(page);
     await selectExampleCode(page, 'test_inputs/dendrogram.txt');
     await waitForGeneratorResults(page);
@@ -53,5 +54,7 @@ describe('Diagrammer', () => {
     await expect(graphText).toMatch(/^generator dendrogram/);
 
     await waitForGeneratorResults(page);
+    await waitUntilGraphDrawn(page);
+    console.log("Waited enyuf...");
   }, 20000);
 });

@@ -9,9 +9,10 @@ import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilf
 import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
 import { visualizeSankey } from './visualizations/visualizeSankey.js';
 import { removeOldVisualizations } from './d3support.js';
+import { getVisualizer } from './editorInteractions.js';
 
 /**
- * @type {boolean}
+ * @type {int}
  */
 var parsingStarted;
 
@@ -41,7 +42,9 @@ diagrammer_parser.yy.parseError = function (str, hash) {
 diagrammer_parser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, preferParsed) => {
     console.log(`  ..script suggests using generator ${generator} and visualizer ${visualizer} and prefer ${preferParsed}`);
     if (preferParsed && generator) {
-        setGenerator(generator, visualizer == "undefined" ? undefined : visualizer);
+        const useVisualizer = visualizer == "undefined" ? undefined : visualizer
+        console.log(`  .. changed generartor to ${generator} and visualizer ${useVisualizer}`);
+        setGenerator(generator, useVisualizer);
     }
 };
 
@@ -52,11 +55,11 @@ diagrammer_parser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, pref
 // called line by line...
 // TODO: MOVING TO GraphCanvas
 diagrammer_parser.yy.result = function (line) {
-    if (parsingStarted) {
+    if (parsingStarted == 1) {
         console.log("  ...parsing results start coming in...");
-        parsingStarted = false;
         result.value = "";
     }
+    parsingStarted++;
     result.value = `${result.value + line}\n`;
 }
 
@@ -74,39 +77,45 @@ diagrammer_parser.trace = function (x) {
  * @param {string} visualizer and possibly this visualizer
  */
 export function parse(data, generator, visualizer, preferScriptSpecifiedGeneratorAndVisualizer = false) {
-    console.log(`parse ${generator} ${visualizer} ${preferScriptSpecifiedGeneratorAndVisualizer}`);
+    console.log(`parse(${generator} ${visualizer} ${preferScriptSpecifiedGeneratorAndVisualizer})`);
     if (!generator) {
         throw new Error("Generator not defined");
     }
     if (!visualizer) {
         throw new Error("Visualizer not defined");
     }
-    console.log(`parse generator=${generator}, visualizer=${visualizer}`);
+    if (parsingStarted >= 1) {
+        console.log("We already have a parsing underway, bail out!");
+    }
     setError("");
-    parsingStarted = true;
-    delete (diagrammer_parser.yy.GRAPHVANVAS);
-    delete (diagrammer_parser.yy.EDGES);
-    delete (diagrammer_parser.yy.OBJECTS);
-    // TODO: MOVING TO GraphCanvas
-    diagrammer_parser.yy.USE_GENERATOR = generator;
-    // TODO: MOVING TO GraphCanvas
-    diagrammer_parser.yy.USE_VISUALIZER = visualizer;
-    // If true, actually prefer generator/visualizer from loaded script IF specified
-    // used while loading new examples...  
-    diagrammer_parser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer;
-    console.log(`Parse, set generator to ${diagrammer_parser.yy.USE_GENERATOR} visualizer to ${diagrammer_parser.yy.USE_VISUALIZER}`);
-    diagrammer_parser.parse(data);
-    console.log('  ..parsed');
-    /*
-     * const tc=textArea.textContent; diagrammer_parser.parse(tc+"\n"); highlight(tc);
-     */
-    //cancelVTimer();
-    const vdelay = 1000;
-    const vtimer = window.setTimeout(function () {
-        //vtimer = null;
-        console.log(`Visualize now using ${diagrammer_parser.yy.USE_VISUALIZER}`);
-        visualize(diagrammer_parser.yy.USE_VISUALIZER);
-    }, vdelay);
+    parsingStarted = 1;
+    try {
+        delete (diagrammer_parser.yy.GRAPHVANVAS);
+        delete (diagrammer_parser.yy.EDGES);
+        delete (diagrammer_parser.yy.OBJECTS);
+        // TODO: MOVING TO GraphCanvas
+        diagrammer_parser.yy.USE_GENERATOR = generator;
+        // TODO: MOVING TO GraphCanvas
+        diagrammer_parser.yy.USE_VISUALIZER = visualizer;
+        // If true, actually prefer generator/visualizer from loaded script IF specified
+        // used while loading new examples...  
+        diagrammer_parser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer;
+        diagrammer_parser.parse(data);
+        console.log('  ..parsed');
+        /*
+         * const tc=textArea.textContent; diagrammer_parser.parse(tc+"\n"); highlight(tc);
+         */
+        //cancelVTimer();
+        const vdelay = 1000;
+        console.log("Set up parser timed visualization");
+        // const vtimer = window.setTimeout(function () {
+        //     //vtimer = null;
+        //     console.log(`parse() timed...Visualize now using ${getVisualizer()}`);
+        visualize(getVisualizer());
+        //}, vdelay);
+    } finally {
+        parsingStarted = 0;
+    }
 }
 
 function makeNewImageHolder() {

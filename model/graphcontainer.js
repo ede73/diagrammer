@@ -8,7 +8,7 @@ export class GraphContainer extends GraphConnectable {
 
     /** @param {string} name */
     constructor(name) {
-        super(undefined); // TODO:
+        super(name); // TODO:
 
         /**
          * GraphContainer | GraphVertex

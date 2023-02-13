@@ -5,8 +5,11 @@ import { GraphObject } from "../model/graphobject.js";
  * (ie. Vertex, Group, InnerGroup)
  */
 export class GraphConnectable extends GraphObject {
-    constructor(name, shape) {
-        super(undefined); // TODO:
+    /**
+     * @param {string} name 
+     */
+    constructor(name) {
+        super(name); // TODO:
         /**
          * Internal flag for no edge objects.
          * @type {boolean}
@@ -19,10 +22,10 @@ export class GraphConnectable extends GraphObject {
 
     /**
      * Temporary for RHS list array!!
-     * @param {string} value 
+     * @param {string} edgeLabel 
      */
-    setEdgeLabel(value) {
-        this.edgelabel = value;
+    setEdgeLabel(edgeLabel) {
+        this.edgelabel = edgeLabel;
         return this;
     }
 

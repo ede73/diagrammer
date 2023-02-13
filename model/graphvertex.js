@@ -1,5 +1,6 @@
 //@ts-check
 import { GraphConnectable } from './graphconnectable.js';
+import { Shapes } from './shapes.js';
 
 /**
  * Represents a Vertex in a visualization
@@ -9,10 +10,16 @@ import { GraphConnectable } from './graphconnectable.js';
  * @constructor
  */
 export class GraphVertex extends GraphConnectable {
+    /**
+     * 
+     * @param {string} name 
+     * @param {string} shape 
+     */
     constructor(name, shape) {
-        super(undefined); // TODO:
-        /** @type {string} */
-        this.name = name;
+        super(name);
+        if (shape) {
+            this._assertRegonizedShape(shape);
+        }
         /** @type {string} */
         this.shape = shape;
         /** @type {string} */
@@ -21,13 +28,20 @@ export class GraphVertex extends GraphConnectable {
         this.style = undefined;
     }
 
+    _assertRegonizedShape(shape) {
+        if (!Shapes.hasOwnProperty(shape.toLowerCase())) {
+            throw new Error("Trying to set unrecognized shape ${shape}");
+        }
+    }
+
     /**
-     * @param {string} value 
+     * @param {string} shape 
      * @returns {GraphVertex}
      */
-    setShape(value) {
-        if (value) {
-            this.shape = value.toLowerCase();
+    setShape(shape) {
+        if (shape) {
+            this._assertRegonizedShape(shape);
+            this.shape = shape.toLowerCase();
         }
         return this;
     }
@@ -37,12 +51,12 @@ export class GraphVertex extends GraphConnectable {
     }
 
     /**
-     * @param {string} value 
+     * @param {string} style  // TODO: Restrict
      * @returns {GraphVertex}
      */
-    setStyle(value) {
-        if (value) {
-            this.style = value.toLowerCase();
+    setStyle(style) {
+        if (style) {
+            this.style = style.toLowerCase();
         }
         return this;
     }
@@ -52,12 +66,12 @@ export class GraphVertex extends GraphConnectable {
     }
 
     /**
-     * @param {string} value 
+     * @param {string} image 
      * @returns {GraphVertex}
      */
-    setImage(value) {
-        if (value) {
-            this.image = value;
+    setImage(image) {
+        if (image) {
+            this.image = image;
         }
         return this;
     }

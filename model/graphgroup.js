@@ -11,9 +11,7 @@ import { GraphConnectable } from './graphconnectable.js';
 export class GraphGroup extends GraphContainer {
     /** @param {string} name */
     constructor(name) {
-        super(undefined); // TODO:
-        /** @type {string} */
-        this.name = name;
+        super(name);
         /** @type {string} */
         this.exitvertex = undefined;
         /** @type {string} */

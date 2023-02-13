@@ -3,28 +3,49 @@
  * GraphObject: Anything that is represented in a graph (diagram/visualization)
  */
 export class GraphObject {
-    /** @param {string} label */
-    constructor(label) {
-        /** @type {string} */
-        this.label = label;
-        /** @type {string} */
-        this.name = undefined;
-        /** @type {string} */
+    /**
+     * Name of the object. Exception being edges, they don't have names
+     * 
+     * @param {string} name
+     */
+    constructor(name) {
+        /**
+         * Every object in a graph have a name
+         * That's how it can get linked.
+         * "name" for display purposes may be a label instead
+         * @type {string}
+         */
+        this.name = name;
+        /**
+         * If provided, this will be used as visual name
+         * @type {string}
+         */
+        this.label = undefined;
+        /**
+         * Main color for this object
+         * @type {string}
+         */
         this.color = undefined;
-        /** @type {string} */
+        /**
+         * Color for any text rendered for this object
+         * @type {string}
+         */
         this.textcolor = undefined;
-        /** @type {string} */
+        /**
+         * External link (only works for dynamic visualizations like SVG)
+         * @type {string}
+         */
         this.url = undefined;
     }
 
     /**
-     * Set name
-     * @param {string} value 
+     * Set the name for the object
+     * @param {string} name 
      */
-    setName(value) {
+    setName(name) {
         // TODO: Something odd in the parser
-        if (value) {
-            this.name = value;
+        if (name) {
+            this.name = name;
         }
         return this;
     }
@@ -35,12 +56,12 @@ export class GraphObject {
 
     /**
      * Set color
-     * @param {string} value 
+     * @param {string} color 
      */
-    setColor(value) {
+    setColor(color) {
         // TODO: Something odd in the parser
-        if (value) {
-            this.color = value;
+        if (color) {
+            this.color = color;
         }
         return this;
     }
@@ -51,10 +72,10 @@ export class GraphObject {
 
     /**
      * Set text color
-     * @param {string} value 
+     * @param {string} textColor 
      */
-    setTextColor(value) {
-        this.textcolor = value;
+    setTextColor(textColor) {
+        this.textcolor = textColor;
         return this;
     }
 
@@ -64,10 +85,10 @@ export class GraphObject {
 
     /**
      * Set URL
-     * @param {string} value 
+     * @param {string} url 
      */
-    setUrl(value) {
-        this.url = value;
+    setUrl(url) {
+        this.url = url;
         return this;
     }
 
@@ -76,26 +97,27 @@ export class GraphObject {
     }
 
     /**
-     * Set label
-     * @param {string} value 
+     * Set label. Label is a complex object that will be parsed and parts of it
+     * extracted to textColor and potentially URL
+     * @param {string} label 
      */
-    setLabel(value) {
-        if (value) {
-            value = value.trim().replace(/"/gi, "");
+    setLabel(label) {
+        if (label) {
+            label = label.trim().replace(/"/gi, "");
             //Take out COLOR if preset
-            let m = value.match(/^(#[A-Fa-f0-9]{6,6})(.*)$/);
+            let m = label.match(/^(#[A-Fa-f0-9]{6,6})(.*)$/);
             // debug(m);
             if (m !== null && m.length == 3) {
                 this.setTextColor(m[1]);
-                value = m[2].trim();
+                label = m[2].trim();
             }
-            m = value.match(/\[([^\]]+)\](.*)$/);
+            m = label.match(/\[([^\]]+)\](.*)$/);
             if (m !== null && m.length >= 3) {
                 this.setUrl(m[1]);
-                value = m[2].trim();
+                label = m[2].trim();
             }
         }
-        this.label = value;
+        this.label = label;
         return this;
     }
 

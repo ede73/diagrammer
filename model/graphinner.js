@@ -15,13 +15,9 @@ import { GraphConnectable } from './graphconnectable.js';
 export class GraphInner extends GraphGroup {
     /** @param {string} name */
     constructor(name) {
-        super(undefined); // TODO:
-        /** @type {string} */
-        this.name = name;
+        super(name);
         /** @type {boolean} */
         this.isInnerGraph = true;
-        /** @type {(GraphConnectable|GraphConnectable[])} */ // TODO: Point of GraphConnectable[]
-        this.entrance = undefined;
         /** @type {GraphConnectable} */
         this.exit = undefined;
     }

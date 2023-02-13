@@ -1,6 +1,6 @@
 // ignore for now ts-check
 import { diagrammer_parser } from '../build/diagrammer_parser.js';
-import { getHTMLElement, getInputElement, setError, setGenerator, updateImage } from './uiComponentAccess.js';
+import { getHTMLElement, getInputElement, getError, setError, setGenerator, updateImage, getGenerator, getVisualizer } from './uiComponentAccess.js';
 import { visualizeCirclePacked } from './visualizations/visualizeCirclePacked.js';
 import { visualizeLayerBands } from './visualizations/visualizeLayerBands.js';
 import { visualizeParseTree } from './visualizations/visualizeParseTree.js';
@@ -9,7 +9,6 @@ import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilf
 import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
 import { visualizeSankey } from './visualizations/visualizeSankey.js';
 import { removeOldVisualizations } from './d3support.js';
-import { getVisualizer } from './editorInteractions.js';
 
 /**
  * @type {int}
@@ -35,7 +34,6 @@ diagrammer_parser.yy.parseError = function (str, hash) {
     const pe = `Parsing error:\n${str}\n${hash}`;
     console.log("pe");
     setError(pe);
-    //cancelVTimer();
     throw new Error(str);
 };
 
@@ -72,11 +70,14 @@ diagrammer_parser.trace = function (x) {
 }
 
 /**
- * @param {string} data Diagrammer graph to parse using
- * @param {string} generator this generator
- * @param {string} visualizer and possibly this visualizer
+ * @param {string} diagrammerCode Diagrammer graph to parse using
+ * @param {function(string, string)} successCallback Passing final generator, visualizer
+ * @param {function(string, Exception)} failureCallback passing error as string, exception as Exception
  */
-export function parse(data, generator, visualizer, preferScriptSpecifiedGeneratorAndVisualizer = false) {
+export function parse(diagrammerCode, successCallback, failureCallback, preferScriptSpecifiedGeneratorAndVisualizer = false) {
+    const generator = getGenerator();
+    const visualizer = getVisualizer();
+
     console.log(`parse(${generator} ${visualizer} ${preferScriptSpecifiedGeneratorAndVisualizer})`);
     if (!generator) {
         throw new Error("Generator not defined");
@@ -84,11 +85,12 @@ export function parse(data, generator, visualizer, preferScriptSpecifiedGenerato
     if (!visualizer) {
         throw new Error("Visualizer not defined");
     }
+    // not atomic, but good enuf for UI
     if (parsingStarted >= 1) {
         console.log("We already have a parsing underway, bail out!");
     }
-    setError("");
     parsingStarted = 1;
+    setError("");
     try {
         delete (diagrammer_parser.yy.GRAPHVANVAS);
         delete (diagrammer_parser.yy.EDGES);
@@ -100,20 +102,14 @@ export function parse(data, generator, visualizer, preferScriptSpecifiedGenerato
         // If true, actually prefer generator/visualizer from loaded script IF specified
         // used while loading new examples...  
         diagrammer_parser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer;
-        diagrammer_parser.parse(data);
-        console.log('  ..parsed');
-        /*
-         * const tc=textArea.textContent; diagrammer_parser.parse(tc+"\n"); highlight(tc);
-         */
-        //cancelVTimer();
-        const vdelay = 1000;
-        console.log("Set up parser timed visualization");
-        // const vtimer = window.setTimeout(function () {
-        //     //vtimer = null;
-        //     console.log(`parse() timed...Visualize now using ${getVisualizer()}`);
-        visualize(getVisualizer());
-        //}, vdelay);
-    } finally {
+        diagrammer_parser.parse(diagrammerCode);
+        console.log(`  ..parsed, calling it a success with ${getGenerator()} and ${getVisualizer()}`);
+        successCallback(getGenerator(), getVisualizer());
+    } catch (ex) {
+        console.log(`  ..parsed, and failed ${getError()} and ${ex}`);
+        failureCallback(getError(), ex);
+    }
+    finally {
         parsingStarted = 0;
     }
 }
@@ -133,6 +129,7 @@ function makeNewImageHolder() {
     img.onclick = "javascript:openImage('web/result.png');";
     imgdiv.appendChild(img);
 }
+
 
 export function visualize(visualizer) {
     const statelang = result.value;

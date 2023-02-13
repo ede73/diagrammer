@@ -2,7 +2,7 @@
 import { visualize, parse } from './parserInteractions.js';
 import { getSavedFilesAsOptionList, getSavedGraph } from './localStorage.js';
 //import { Editor } from '../ace/src-noconflict/ace.js';
-import { getInputElement, getSelectElement } from './uiComponentAccess.js';
+import { getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js';
 
 // Tried npm i --save-dev @types/jquery, worked
 // Fails in browser, but works while editing!
@@ -138,41 +138,19 @@ export function addLine(i) {
     return false;
 }
 
-// Get currently selected generator
-function getGenerator() {
-    const e = getSelectElement("generator");
-    const gen = e.options[e.selectedIndex].value;
-    if (gen.indexOf(":") > -1) {
-        return gen.split(":")[0];
-    }
-    return gen;
-}
-
-export function getVisualizer() {
-    const e = getSelectElement("generator");
-    const gen = e.options[e.selectedIndex].value;
-    if (gen.indexOf(":") > -1) {
-        return gen.split(":")[1];
-    }
-    return gen;
-}
-
-
-function cancelVTimer() {
-    if (vtimer) {
-        window.clearTimeout(vtimer);
-    }
-}
-
 export function generatorChanged() {
     console.log("generatorChanged..parse");
     parseAndRegenerate();
 }
 
 function parseAndRegenerate(preferScriptSpecifiedGeneratorAndVisualizer = false) {
-    const data = getGraphText() + "\n";
+    const code = getGraphText() + "\n";
     console.log("==parseAndRegenerate");
-    parse(data, getGenerator(), getVisualizer(), preferScriptSpecifiedGeneratorAndVisualizer);
+    parse(code, (finalGenerator, finalVisualizer) => {
+        visualize(finalVisualizer);
+    }, (error, ex) => {
+        console.log("Parsing failed :(");
+    }, preferScriptSpecifiedGeneratorAndVisualizer);
 }
 
 export function savedChanged() {
@@ -207,40 +185,42 @@ export function exampleChanged() {
 }
 
 /**
- * 
- * @param {number} delay 
+ * Hookup code editor, so that on every key(de)press a parsing starts after configurable delay UNLESS another keypress arrives.
+ * Hence while typing, we don't constanly parse, but on a minute pause, we do and user get's feedback (ok/error)
  */
-function textAreaOnChange(delay) {
-    let timer = null;
+function hookupToListenToManualCodeChanges(parseChangesAfterMillis) {
+    let parsingTimerID;
     getInputElement("editable").onkeyup = function () { // onchange does not work on
-        // chrome/mac(elsewhere?)
-        if (timer) {
-            window.clearTimeout(timer);
+        if (parsingTimerID) {
+            clearTimeout(parsingTimerID);
+            parsingTimerID = undefined;
         }
-        timer = window.setTimeout(function () {
-            timer = null;
+        parsingTimerID = setTimeout(() => {
             parseAndRegenerate();
-        }, delay);
+        }, parseChangesAfterMillis);
     };
 }
 
-function visualizeOnNewParseResults(visualizeCallback, delay) {
-    let timer = null;
-    const tt = getInputElement("result");
-    tt.onkeyup = function () { // onchange does not work on
-        // chrome/mac(elsewhere?)
-        if (timer) {
-            window.clearTimeout(timer);
+/**
+ * As above, but for parsed/generated text box. Usually parasing also visualizes, but
+ * while developing, it's nice to be able to quickly edit the generated code as well in
+ * order to debug/experiment with actual visualizations!
+ */
+function hookupToListenToManualGeneratorChanges(visualizeChangesAfterMillis) {
+    let visualizationTimerID;
+    getInputElement("result").onkeyup = function () { // onchange does not work on
+        if (!visualizationTimerID) {
+            clearTimeout(visualizationTimerID);
+            visualizationTimerID = undefined;
         }
-        timer = window.setTimeout(function () {
-            timer = null;
-            visualizeCallback(getVisualizer());
-        }, delay);
+        visualizationTimerID = setTimeout(() => {
+            visualizationTimerID = visualize(getVisualizer());
+        }, visualizeChangesAfterMillis);
     };
 }
 
-textAreaOnChange(150);
-visualizeOnNewParseResults(visualize, 550);
+hookupToListenToManualCodeChanges(500);
+hookupToListenToManualGeneratorChanges(500);
 
 if (acemode) {
     let timer2 = null;
@@ -248,14 +228,7 @@ if (acemode) {
     if (typeof editor != 'undefined') {
         editor.getSession().on('change', function () {
             // chrome/mac(elsewhere?)
-            if (timer2) {
-                window.clearTimeout(timer2);
-            }
-            const delay = 5000;
-            const timer = window.setTimeout(function () {
-                timer2 = null;
-                parseAndRegenerate();
-            }, delay);
+            // Looks like code/result hooks above are enough
         });
     }
 }

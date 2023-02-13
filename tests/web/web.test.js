@@ -1,5 +1,5 @@
 import { dumpWholePage, dumpWholePage2, sleepABit, getElementText, writeToElement, captureBrowserLogs } from './jest_puppeteer_support.js';
-import { clearGeneratorResults, getDiagrammerCode, selectExampleCode, waitUntilGraphDrawn, setDiagrammerCode, waitForGeneratorResults, clearParsingErrors, getParsingError, getGeneratorResult } from './diagrammer_support.js';
+import { clearGeneratorResults, getDiagrammerCode, selectExampleCode, waitUntilGraphDrawn, setDiagrammerCode, waitForGeneratorResults, clearParsingErrors, getParsingError, getGeneratorResult, clearGraph } from './diagrammer_support.js';
 
 // graphVisualizationHere all the graphcics sit here..
 // result transpiled results come here (diagrammer -> generator)
@@ -45,8 +45,13 @@ describe('Diagrammer', () => {
   });
 
   it('should be able to select dendrogram', async () => {
-    await captureBrowserLogs(page);
+    //await captureBrowserLogs(page);
     await clearGeneratorResults(page);
+    await clearGraph(page);
+    // had an image here...
+    //<div id="default_"></div><img align="bottom" width="400" height="400" id="image" src="http://localhost/~ede/diagrammer/web/result.png?v=1676328865406" style="height: auto;">
+    //console.log(await page.evaluate(() => document.querySelector('#graphVisualizationHere').innerHTML));
+
     await selectExampleCode(page, 'test_inputs/dendrogram.txt');
     await waitForGeneratorResults(page);
 
@@ -54,7 +59,9 @@ describe('Diagrammer', () => {
     await expect(graphText).toMatch(/^generator dendrogram/);
 
     await waitForGeneratorResults(page);
+    // <div id="default_"></div><svg id="the_SVG_ID" w..
     await waitUntilGraphDrawn(page);
-    console.log("Waited enyuf...");
-  }, 20000);
+    //await page.screenshot({ path: 'screenshot1.png' });
+    // TODO: inspect the graph!
+  }, 100 /* it takes sometimes about 40ms to parse/generate the graph on my laptop (linux running in WSL2)*/);
 });

@@ -314,7 +314,7 @@
 	//editor.setTheme("ace/theme/kr");
 	editor.getSession().setMode("ace/mode/state");
 
-	import { addLine, generatorChanged, exampleChanged, savedChanged, getVisualizer, getGraphText, setGraphText } from "./web/editorInteractions.js";
+	import { addLine, generatorChanged, exampleChanged, savedChanged, getGraphText, setGraphText } from "./web/editorInteractions.js";
 	window.exampleChanged = exampleChanged;
 	window.generatorChanged = generatorChanged;
 	window.addLine = addLine;
@@ -323,7 +323,7 @@
 	window.getGraphText = getGraphText;
 	window.setGraphText = setGraphText;
 
-	import { getCurrentFilename, openImage, openPicWindow, reloadImg } from './web/uiComponentAccess.js';
+	import { getCurrentFilename, openImage, openPicWindow, reloadImg, getVisualizer } from './web/uiComponentAccess.js';
 	window.getCurrentFilename = getCurrentFilename;
 	window.openImage = openImage;
 	window.reloadImg = reloadImg;

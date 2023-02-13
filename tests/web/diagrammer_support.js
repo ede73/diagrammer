@@ -98,6 +98,16 @@ export async function selectExampleCode(page, testname) {
 }
 
 /**
+ * Clear the graph, so we can quickly wait for it to appear..
+ * @param {Page} page 
+ */
+export async function clearGraph(page) {
+    await page.evaluate(() =>
+        document.querySelector('#graphVisualizationHere').innerHTML = ''
+    );
+}
+
+/**
  * Wait until a NEW graph has been drawn
  * @param {Page} page 
  * @return {Promise<void>}
@@ -105,5 +115,7 @@ export async function selectExampleCode(page, testname) {
 export async function waitUntilGraphDrawn(page) {
     // Uhh...UI side is so slow to pick up changes..
     // around 5s image is still old, after 6 we see the radial dendrogram!
-    await sleepABit(6000);
+    await page.waitForSelector('#graphVisualizationHere:not(:empty)');
+    //console.log(await page.evaluate(() => document.querySelector('#graphVisualizationHere').innerHTML));
+    //await sleepABit(200);
 }

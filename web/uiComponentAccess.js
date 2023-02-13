@@ -15,15 +15,6 @@ export function getHTMLElement(name) {
     return element;
 }
 
-function getGenerator() {
-    const e = getSelectElement("generator");
-    const gen = e.options[e.selectedIndex].value;
-    if (gen.indexOf(":") > -1) {
-        return gen.split(":")[0];
-    }
-    return gen;
-}
-
 /**
  * Set a generator, only if loaded new content (storage, example)
  * it was just parsed AND it had a 'generator' directive
@@ -73,6 +64,13 @@ export function setError(text) {
     document.getElementById("error").innerText = text;
 }
 
+/**
+ * @returns {string} Return parse error(if any)
+ */
+export function getError() {
+    return document.getElementById("error").innerText;
+}
+
 export function openImage(imageUrl) {
     window.open(`${imageUrl}?x=${new Date().getTime()}`);
 }
@@ -108,4 +106,23 @@ export function updateImage(imageSource) {
     }
     document.getElementById("image").setAttribute("src", imageSource);
     reloadImg('image');
+}
+
+// Get currently selected generator
+export function getGenerator() {
+    const e = getSelectElement("generator");
+    const gen = e.options[e.selectedIndex].value;
+    if (gen.indexOf(":") > -1) {
+        return gen.split(":")[0];
+    }
+    return gen;
+}
+
+export function getVisualizer() {
+    const e = getSelectElement("generator");
+    const gen = e.options[e.selectedIndex].value;
+    if (gen.indexOf(":") > -1) {
+        return gen.split(":")[1];
+    }
+    return gen;
 }

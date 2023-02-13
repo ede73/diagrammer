@@ -8,8 +8,8 @@
 
 function getExe($name)
 {
-  $x = array("/usr/bin/", "/usr/local/bin/", "/opt/homebrew/bin/");
-  foreach ($x as $path) {
+  $paths = array("/usr/bin/", "/usr/local/bin/", "/opt/homebrew/bin/");
+  foreach ($paths as $path) {
     $file = $path . $name;
     error_log("test $file");
     if (file_exists($file)) {

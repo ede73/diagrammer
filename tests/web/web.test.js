@@ -1,10 +1,22 @@
 import { dumpWholePage, dumpWholePage2, sleepABit, getElementText, writeToElement, captureBrowserLogs } from './jest_puppeteer_support.js';
 import { clearGeneratorResults, getDiagrammerCode, selectExampleCode, waitUntilGraphDrawn, setDiagrammerCode, waitForGeneratorResults, clearParsingErrors, getParsingError, getGeneratorResult, clearGraph } from './diagrammer_support.js';
+import { toMatchImageSnapshot } from 'jest-image-snapshot';
 
 // graphVisualizationHere all the graphcics sit here..
 // result transpiled results come here (diagrammer -> generator)
 // graph_container CanVIZ
 // debug_output
+
+// jest-image-snapshot custom configuration in order to save screenshots and compare the with the baseline
+export function setConfig(filename, threshold = 0.0001) {
+  return {
+    failureThreshold: threshold,
+    failureThresholdType: 'percent',
+    customSnapshotsDir: 'tests/web/snapshots/',
+    customSnapshotIdentifier: filename,
+    noColors: true
+  }
+}
 
 describe('Diagrammer', () => {
   beforeAll(async () => {
@@ -14,8 +26,12 @@ describe('Diagrammer', () => {
   });
 
   it('Take a screenshot of the diagrammer"', async () => {
+    expect.extend({
+      toMatchImageSnapshot,
+    });
     //await page.screenshot({ path: 'screenshot1.png' });
-    // TODO: Visual regression test
+    const image = await page.screenshot({ fullPage: true });
+    expect(image).toMatchImageSnapshot(setConfig('main_screen_just_loaded', 0.0001));
   });
 
   it('test writing to ace editor', async () => {

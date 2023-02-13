@@ -1,5 +1,5 @@
 import { dumpWholePage, dumpWholePage2, sleepABit, getElementText, writeToElement } from './jest_puppeteer_support.js';
-import { clearGeneratorResults, getDiagrammerCode, selectExampleCode, waitUntilGraphDrawn, setDiagrammerCode, waitForGeneratorResults } from './diagrammer_support.js';
+import { clearGeneratorResults, getDiagrammerCode, selectExampleCode, waitUntilGraphDrawn, setDiagrammerCode, waitForGeneratorResults, clearParsingErrors, getParsingError, getGeneratorResult } from './diagrammer_support.js';
 
 // graphVisualizationHere all the graphcics sit here..
 // result transpiled results come here (diagrammer -> generator)
@@ -21,6 +21,26 @@ describe('Diagrammer', () => {
     await clearGeneratorResults(page);
     await setDiagrammerCode(page, 'a>b>c');
     await waitForGeneratorResults(page);
+    const graphText = await getDiagrammerCode(page);
+    await expect(graphText).toMatch("a>b>c");
+  });
+
+  it('test language parser error handling', async () => {
+    await clearGeneratorResults(page);
+    // of course there isn't any pre-existing errors, but safer this way
+    await clearParsingErrors(page);
+    try {
+      await setDiagrammerCode(page, 'a>');
+      expect(false);
+    } catch {
+      // Parsing must fail!
+    }
+
+    const graphText = await getDiagrammerCode(page);
+    await expect(graphText).toMatch("a>");
+
+    const errorText = await getParsingError(page);
+    await expect(errorText).toMatch(/^Parsing error:.+Parse error on line 1.+a&gt;/);
   });
 
   it('should be able to select dendrogram', async () => {

@@ -14,7 +14,18 @@ import { Page, Browser } from 'puppeteer';
  */
 export async function clearGeneratorResults(page) {
     await page.evaluate(function () {
-        document.querySelector('textarea#result').value = ''
+        document.querySelector('#result').value = '';
+    });
+}
+
+/**
+ * Return parsed generated result
+ * @param {Page} page 
+ * @return {Promise<string>}
+ */
+export async function getGeneratorResult(page) {
+    await page.evaluate(function () {
+        return document.querySelector('#result').value;
     });
 }
 
@@ -34,10 +45,10 @@ export async function waitForGeneratorResults(page) {
  * @return {Promise<void>}
  */
 export async function setDiagrammerCode(page, code) {
-    await page.evaluate(() => {
-        setGraphText('a>b>c');
+    await page.evaluate((code) => {
+        setGraphText(code);
         generatorChanged();
-    });
+    }, code);
 }
 
 /**
@@ -48,6 +59,28 @@ export async function setDiagrammerCode(page, code) {
 export async function getDiagrammerCode(page) {
     return await page.evaluate(() => {
         return getGraphText();
+    });
+}
+
+/**
+ * Clear parsing errors
+ * @param {Page} page 
+ * @return {Promise<void}>
+ */
+export async function clearParsingErrors(page) {
+    return await page.evaluate(() => {
+        return document.querySelector('div#error').value = '';
+    });
+}
+
+/**
+ * Return what ever parsing error
+ * @param {Page} page 
+ * @return {Promise<string}>
+ */
+export async function getParsingError(page) {
+    return await page.evaluate(() => {
+        return document.querySelector('div#error').innerHTML;
     });
 }
 

@@ -22,6 +22,7 @@ export class GraphContainer extends GraphConnectable {
          * 
          * Some graphs are happy with it, some may be limited to single root node
          * 
+         * One could also imagine this being list of sub trees in a way
          * GraphContainer | GraphVertex
          * @type {GraphConnectable[]}
          */

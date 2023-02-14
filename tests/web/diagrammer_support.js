@@ -98,6 +98,17 @@ export async function selectExampleCode(page, testname) {
 }
 
 /**
+ * 
+ * @param {Page} page 
+ * @param {string} genViz eg. dendrogram:radialdendrogram
+ */
+export async function selectGeneratorVisualizer(page, genViz) {
+    // assert such a test exists in index.html example dropdown, will throw if doesn't
+    await page.$(`select#generator>option[value="${genViz}"]`);
+    await page.select('#generator', genViz);
+}
+
+/**
  * Clear the graph, so we can quickly wait for it to appear..
  * @param {Page} page 
  */

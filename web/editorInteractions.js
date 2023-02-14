@@ -2,7 +2,7 @@
 import { visualize, parse } from './parserInteractions.js';
 import { getSavedFilesAsOptionList, getSavedGraph } from './localStorage.js';
 //import { Editor } from '../ace/src-noconflict/ace.js';
-import { getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js';
+import { getGenerator, getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js';
 
 // Tried npm i --save-dev @types/jquery, worked
 // Fails in browser, but works while editing!
@@ -139,17 +139,18 @@ export function addLine(i) {
 }
 
 export function generatorChanged() {
-    console.log("generatorChanged..parse");
+    console.log("generatorChanged() - parseAndRegenerate");
     parseAndRegenerate();
 }
 
 function parseAndRegenerate(preferScriptSpecifiedGeneratorAndVisualizer = false) {
+    console.log("parseAndRegenerate()");
     const code = getGraphText() + "\n";
-    console.log("==parseAndRegenerate");
     parse(code, (finalGenerator, finalVisualizer) => {
+        console.log(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`);
         visualize(finalVisualizer);
     }, (error, ex) => {
-        console.log("Parsing failed :(");
+        console.log("  parseAndRegenerate() - Parsing failed :(");
     }, preferScriptSpecifiedGeneratorAndVisualizer);
 }
 
@@ -168,18 +169,17 @@ export function savedChanged() {
 }
 
 export function exampleChanged() {
-    console.log("==Example changed");
     // read the example...place to textArea(overwrite)
     const e = getSelectElement("example");
     const doc = e.options[e.selectedIndex].value;
+    console.log(`exampleChanged(${doc})`);
     $.ajax({
         url: `tests/${doc}`,
         cache: false
     }).done(function (data) {
-        console.log("==Example changed - set graph text");
+        console.log(`  exampleChanged(${doc}) - set graph text`);
         setGraphText(data);
-        console.log("exampleChanged..parse");
-        console.log("==Example changed - parse and regerante");
+        console.log(`  exampleChanged(${doc}) - parse and regenerate, from UI ${getGenerator()} / ${getVisualizer()}`);
         parseAndRegenerate(true);
     });
 }

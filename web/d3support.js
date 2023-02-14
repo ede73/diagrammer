@@ -16,6 +16,7 @@ export function make_svg(width, height) {
 
 }
 
+// TODO: Discrepancy between d3.js and GoJS, former results in #graphVisualizationHere/(div#default_,svg) latter #graphVisualizerionHere/div#default_/svg
 export function removeOldVisualizations(idName) {
     const element = getHTMLElement("graphVisualizationHere");
     removeAllChildNodes(element);

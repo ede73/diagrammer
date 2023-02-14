@@ -1,5 +1,5 @@
 import { dumpWholePage, dumpWholePage2, sleepABit, getElementText, writeToElement, captureBrowserLogs } from './jest_puppeteer_support.js';
-import { clearGeneratorResults, getDiagrammerCode, selectExampleCode, waitUntilGraphDrawn, setDiagrammerCode, waitForGeneratorResults, clearParsingErrors, getParsingError, getGeneratorResult, clearGraph } from './diagrammer_support.js';
+import { clearGeneratorResults, getDiagrammerCode, selectExampleCode, waitUntilGraphDrawn, setDiagrammerCode, waitForGeneratorResults, clearParsingErrors, getParsingError, getGeneratorResult, clearGraph, selectGeneratorVisualizer } from './diagrammer_support.js';
 import * as jis from 'jest-image-snapshot';
 import { singleElementScreenSnapshot } from './snapshot_single_element.js';
 import { Page } from 'puppeteer';
@@ -95,42 +95,58 @@ describe('Diagrammer', () => {
    * @param {Page} page 
    * @param {string} example File in tests/test_inputs/*.txt
    */
-  async function testDynamicRendering(page, example) {
+  async function testDynamicRendering(page, example, overrideGeneratorVisualizer) {
     await clearGeneratorResults(page);
     await clearGraph(page);
     await selectExampleCode(page, example);
-    // <div id="default_"></div><svg id="the_SVG_ID" w..
+
+    if (overrideGeneratorVisualizer) {
+      // example code will run what ever generator it hat selected
+      await waitUntilGraphDrawn(page);
+      await clearGeneratorResults(page);
+      await selectGeneratorVisualizer(page, overrideGeneratorVisualizer);
+    }
     await waitUntilGraphDrawn(page);
-    const svg = await page.evaluate(() => document.querySelector('#graphVisualizationHere>svg').outerHTML);
-    const elementHandle = await page.$('#graphVisualizationHere>svg');
+
+    // TODO: D3.js ends up with div#graph../[div#default_,svg] GoJs div#graph../div#default_/svg
+    const selector = (await page.$('#graphVisualizationHere>svg') != null) ? '#graphVisualizationHere>svg' : '#graphVisualizationHere>div>svg';
+    const svg = await page.evaluate((selector) => document.querySelector(selector).outerHTML, selector);
+    const elementHandle = await page.$(selector);
     const bbox = await elementHandle.boundingBox();
-    const filename = example.match(/.+\/([^\.]+)/)[1];
+    const filename = example.match(/.+\/([^\.]+)/)[1] + (overrideGeneratorVisualizer ? "_" + overrideGeneratorVisualizer.replace(':', '_') : '');
     const snapshotConfig = setConfig(filename, 0.0001)
     const buffer = await singleElementScreenSnapshot(snapshotConfig, svg, bbox.width, bbox.height);
     expect.extend({
       toMatchImageSnapshot,
     });
     expect(buffer).toMatchImageSnapshot(snapshotConfig);
-
   };
 
-  it('asserts dendrogram visualization works', async () => {
+  it('asserts reingold-tilford(dendrogram)(d3.js) visualization works', async () => {
     await testDynamicRendering(page, 'test_inputs/dendrogram.txt');
   }, 1000);
 
-  it('asserts sankey visualization works', async () => {
+  it('asserts radial dendrogram(d3.js) visualization works', async () => {
+    await testDynamicRendering(page, 'test_inputs/dendrogram.txt', 'dendrogram:radialdendrogram');
+  }, 1000);
+
+  it('asserts sankey(d3.js) visualization works', async () => {
     await testDynamicRendering(page, 'test_inputs/sankey.txt');
   }, 1000);
 
-  // it('asserts umlclass2(GoJS) visualization works', async () => {
-  //   await testDynamicRendering(page, 'test_inputs/umlclass2.txt');
-  // }, 1000);
+  it('asserts circlepackage(d3.js) visualization works', async () => {
+    //TODO:
+  }, 1000);
 
-  // it('asserts layerbands(GoJS) visualization works', async () => {
-  //   await testDynamicRendering(page, 'test_inputs/layerbands.txt');
-  // }, 1000);
+  it('asserts umlclass2(GoJS) visualization works', async () => {
+    await testDynamicRendering(page, 'test_inputs/umlclass2.txt');
+  }, 1000);
 
-  // it('asserts parsetree(GoJS) visualization works', async () => {
-  //   await testDynamicRendering(page, 'test_inputs/parsetree.txt');
-  // }, 1000);
+  it('asserts layerbands(GoJS) visualization works', async () => {
+    await testDynamicRendering(page, 'test_inputs/layerbands.txt');
+  }, 1000);
+
+  it('asserts parsetree(GoJS) visualization works', async () => {
+    await testDynamicRendering(page, 'test_inputs/parsetree.txt');
+  }, 1000);
 });

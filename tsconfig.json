@@ -1,0 +1,14 @@
+{
+  "exclude": [
+    "XXtests/*"
+  ],
+  "typeAcquisition": {
+    "enable":true,
+    "include": [
+      "model",
+      "node",
+      "vscode",
+      "jest"
+    ]
+  }
+}

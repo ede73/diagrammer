@@ -1,2 +1,2 @@
-//@ts-check
-const VERBOSE = false;
+// @ts-check
+const VERBOSE = false

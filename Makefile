@@ -13,7 +13,6 @@ MODEL_REST = model/shapes.js model/tree.js
 
 all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST)
 	@echo Make ALL
-	@echo done
 
 build/diagrammer_lexer.js: grammar/diagrammer.lex
 	@mkdir -p build
@@ -22,19 +21,12 @@ build/diagrammer_lexer.js: grammar/diagrammer.lex
 	@echo "exports.diagrammer_lexer=diagrammer_lexer;" >> $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
-
-build/diagrammer.all: $(GRAMMAR_FILES) # model/model.js # generators/*.js
+build/diagrammer.all: $(GRAMMAR_FILES)
 	@mkdir -p build
 	@echo Compile build/diagrammer.all
 	@cat $^ >$@
 
-whatever: generators/*.js
-	for generator in $^; do \
-	  genfunc="$$(basename $$generator | cut -d. -f1)"; \
-	  echo "import {$$genfunc} from '../$$generator';" \
-	;done
-
-build/diagrammer_parser.js: build/diagrammer.all Makefile
+build/diagrammer_parser.js: build/diagrammer.all Makefile generators/* model/* js/*
 	@mkdir -p build
 	@echo make parser
 	@node_modules/.bin/jison $< -o $@

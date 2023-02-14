@@ -84,7 +84,11 @@ S
 			if (usegen) {
 				usegen(graphcanvas);
 			} else {
-				throw new Error("Unknown generator "+usegen);
+				console.log("Available generators:");
+				for (const key of generators.keys()) {
+  					console.log(key);
+				}
+				throw new Error(`Unknown generator ${graphcanvas.getGenerator()}`);
 			}
 			return $1;
 		}

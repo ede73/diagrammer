@@ -28,7 +28,7 @@ if (myArgs[1] === 'lex') {
   const st = lexer.diagrammer_lexer
   st.setInput(raw)
   let h
-  while (h != 'EOF' && h != 1) {
+  while (h !== 'EOF' && h !== 1) {
     h = st.lex()
     console.log('State:' + h + '(' + st.yytext + ')')
   }
@@ -60,7 +60,7 @@ if (myArgs[1] === 'lex') {
     throw new Error(str)
   }
   diagrammer_parser.parse(raw)
-  if (errors == 1) {
+  if (errors === 1) {
     console.log('Errors....')
     process.exit(9)
   }

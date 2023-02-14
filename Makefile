@@ -18,7 +18,7 @@ all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js M
 build/diagrammer_lexer.js: grammar/diagrammer.lex
 	@mkdir -p build
 	@echo Make build/diagrammer_lexer.js from LEX
-	@jison-lex $< -o $@
+	@node_modules/.bin/jison-lex $< -o $@
 	@echo "exports.diagrammer_lexer=diagrammer_lexer;" >> $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
@@ -37,7 +37,7 @@ whatever: generators/*.js
 build/diagrammer_parser.js: build/diagrammer.all Makefile
 	@mkdir -p build
 	@echo make parser
-	@jison $< -o $@
+	@node_modules/.bin/jison $< -o $@
 	sed -i "1 i\\\\" $@
 	for generator in generators/*.js; do \
 	  genfunc="$$(basename $$generator | cut -d. -f1)"; \

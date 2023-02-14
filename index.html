@@ -127,10 +127,11 @@
 		</select>
 		<label for="filename">Filename</label>
 		<input type="text" id="filename" name="filename" value="output" />
-		<button onclick="saveCurrentGraph(getCurrentFilename(), getGraphText());return false;">Save</button>
-		<button onclick="setGraphText(loadGraph(getCurrentFilename()));return false;">Load</button>
-		<button onclick="importGraphs();return false;">Import</button>
-		<button onclick="exportGraphs();return false;">Export</button>
+		<button id="savefile"
+			onclick="saveCurrentGraph(getCurrentFilename(), getGraphText());return false;">Save</button>
+		<button id="loadfile" onclick="setGraphText(loadGraph(getCurrentFilename()));return false;">Load</button>
+		<button id="import" onclick="importGraphs();return false;">Import</button>
+		<button id="export" onclick="exportGraphs();return false;">Export</button>
 		<!-- saved combobox and handlers -->
 		<label for="saved">Saved graphs</label> <select id="saved" name="saved" onChange="savedChanged()"></select>
 		<button onclick="visualize(getVisualizer());return false;">Visualize</button>

@@ -65,8 +65,8 @@ export async function getElementText(page, elementId) {
  * @param {string} text
  * @return {Promise<void>}
  */
-export async function writeToElement(elementId, text) {
-    await assertElementExists(elementId);
+export async function writeToElement(page, elementId, text) {
+    await assertElementExists(page, elementId);
     await page.$eval(elementId, (el, text) => el.value = text, text);
 }
 

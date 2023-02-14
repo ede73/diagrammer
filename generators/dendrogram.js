@@ -5,6 +5,10 @@ import { traverseEdges } from '../model/model.js'
 import { debug, output } from '../model/support.js'
 import { findVertex, traverseTree, TreeVertex } from '../model/tree.js'
 
+// ADD TO INDEX.HTML AS: <option value="dendrogram:radialdendrogram">Radial Dendrogram</option>
+// ADD TO INDEX.HTML AS: <option value="dendrogram:reingoldtilford">Reingold-Tilford</option>
+// ADD TO INDEX.HTML AS: <option value="dendrogram:circlepacked">Circle packed(TBD)</option>
+
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/dendrogram.txt dendrogram
  * @param {GraphCanvas} graphcanvas

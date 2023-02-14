@@ -3,6 +3,8 @@ import { generators } from '../model/graphcanvas.js'
 import { traverseEdges, traverseVertices } from '../model/model.js'
 import { output } from '../model/support.js'
 
+// ADD TO INDEX.HTML AS: <option value="sankey">Sankey</option>
+
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/sankey.txt sankey
  * @param {GraphCanvas} graphcanvas

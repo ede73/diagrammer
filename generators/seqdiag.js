@@ -4,6 +4,8 @@ import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges } from '../model/model.js'
 import { getAttributeAndFormat, output } from '../model/support.js'
 
+// ADD TO INDEX.HTML AS: <option value="seqdiag">Sequence Diagram(cli)</option>
+
 /**
  * http://blockdiag.com/en/seqdiag/index.html
  * To test: node js/diagrammer.js tests/test_inputs/state13.txt seqdiag |seqdiag3 -Tpng -o a.png - && open a.png

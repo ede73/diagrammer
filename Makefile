@@ -15,7 +15,7 @@ all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js M
 	@echo Make ALL
 
 index.html : index_template.html Makefile
-	 awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs | sort" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations | sort" | getline var) printf("<script type=\"module\" src=\"web/visualizations/%s\"></script>\n",var);next}{print $0}' $< >$@
+	awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs | sort" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations | sort" | getline var) printf("<script type=\"module\" src=\"web/visualizations/%s\"></script>\n",var);next}/{REPLACE_WITH_GENERATORS}/{ while ("grep \"ADD TO INDEX.HTML AS:\" generators/*|cut -d: -f3-|sort" | getline var) printf("%s\n",var,var);next}{print $0}' $< >$@
 
 build/diagrammer_lexer.js: grammar/diagrammer.lex
 	@mkdir -p build

@@ -4,6 +4,8 @@ import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges, traverseVertices } from '../model/model.js'
 import { getAttributeAndFormat, output } from '../model/support.js'
 
+// ADD TO INDEX.HTML AS: <option value="mscgen">MSCGEN(cli)</option>
+
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/state_sequence.txt mscgen
  * @param {GraphCanvas} graphcanvas

@@ -3,6 +3,8 @@ import { GraphGroup } from '../model/graphgroup.js'
 import { traverseEdges } from '../model/model.js'
 import { getAttributeAndFormat } from '../model/support.js'
 
+// ADD TO INDEX.HTML AS: <option value="nwdiag">Network Diagram(cli)</option>
+
 const NetworkDiagShapeMap =
 {
   default: 'box',

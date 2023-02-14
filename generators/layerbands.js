@@ -4,6 +4,8 @@ import { GraphGroup } from '../model/graphgroup.js'
 import { traverseEdges, traverseVertices } from '../model/model.js'
 import { output } from '../model/support.js'
 
+// ADD TO INDEX.HTML AS: <option value="layerbands">LayerBands(GoJS)</option>
+
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/layerbands.txt layerbands
  * @param {GraphCanvas} graphcanvas

@@ -4,6 +4,8 @@ import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges } from '../model/model.js'
 import { debug, output } from '../model/support.js'
 
+// ADD TO INDEX.HTML AS: <option value="parsetree">ParseTree(GoJS)</option>
+
 /**
  * Only one root supported!
  * To test: node js/diagrammer.js tests/test_inputs/parsetree.txt parsetree

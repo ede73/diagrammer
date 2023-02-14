@@ -4,6 +4,8 @@ import { GraphGroup } from '../model/graphgroup.js'
 import { traverseEdges, traverseVertices } from '../model/model.js'
 import { debug, output } from '../model/support.js'
 
+// ADD TO INDEX.HTML AS: <option value="umlclass">UMLClass(GoJS)</option>
+
 // Basically [+-#] [name:] [String] [=defaultValue]
 export function umlclassParseMember (member) {
   const regex = /^(?<visibility>[+#-]|)(?<name>[^:]+(?=:)|)[:]{0,1}(?<type>[^=]+)[=]{0,1}(?<default>.+|)/

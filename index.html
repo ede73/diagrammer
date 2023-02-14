@@ -8,6 +8,14 @@
 <!-- <script type="module" src="https://gojs.net/latest/release/go-module.js"></script> -->
 <script type="module" src="js/go-module.js"></script>
 <script type="module" src="web/index.js"></script>
+<script type="module" src="web/visualizations/package.json"></script>
+<script type="module" src="web/visualizations/visualizeCirclePacked.js"></script>
+<script type="module" src="web/visualizations/visualizeLayerBands.js"></script>
+<script type="module" src="web/visualizations/visualizeParseTree.js"></script>
+<script type="module" src="web/visualizations/visualizeRadialDendrogram.js"></script>
+<script type="module" src="web/visualizations/visualizeReingoldTilford.js"></script>
+<script type="module" src="web/visualizations/visualizeSankey.js"></script>
+<script type="module" src="web/visualizations/visualizeUmlClass.js"></script>
 <script type="module" src="web/visualizations/visualizeCirclePacked.js"></script>
 <script type="module" src="web/visualizations/visualizeReingoldTilford.js"></script>
 <script type="module" src="web/visualizations/visualizeRadialDendrogram.js"></script>
@@ -43,30 +51,26 @@
 	<form name="contact" action="">
 		<label for="generator">Generator</label>
 		<select id="generator" name="generator" onChange="generatorChanged()">
-			<!-- TODO: Load from generators/visualizations map -->
-			<option value="digraph:dot">Graphviz - dot(cli/www)</option>
-			<option value="digraph:circo">Graphviz - circo(cli)</option>
-			<option value="digraph:twopi">Graphviz - twopi(cli)</option>
-			<option value="digraph:neato">Graphviz - neato(cli)</option>
-			<option value="digraph:fdp">Graphviz - fdp(cli)</option>
-			<option value="digraph:sfdp">Graphviz - sfdp(cli)</option>
-			<option value="actdiag">Activity Diagram(cli)</option>
-			<option value="blockdiag">Block diagram(cli)</option>
-			<option value="nwdiag">Network diagram(cli)</option>
-			<option value="seqdiag">Sequence diagram(cli)</option>
-			<option value="mscgen">MSCGEN(cli)</option>
-			<option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
-			<option value="sankey">Sankey</option>
-			<option value="dendrogram:radialdendrogram">Radial Dendrogram</option>
-			<option value="dendrogram:reingoldtilford">Reingold-Tilford</option>
-			<option value="dendrogram:circlepacked">Circle packed(TBD)</option>
-			<option value="ast">AST</option>
-			<!-- https://gojs.net/latest/samples/parseTree.html -->
-			<option value="parsetree">ParseTree(GoJS)</option>
-			<!-- https://gojs.net/latest/samples/swimBands.html -->
-			<option value="layerbands">LayerBands(GoJS)</option>
-			<!--  https://gojs.net/latest/samples/umlClass.html -->
-			<option value="umlclass">UMLClass(GoJS)</option>
+ <option value="actdiag">Activity Diagram(cli)</option>
+ <option value="ast">Abstract Syntax Tree</option>
+ <option value="blckdiag">Block Diagram(cli)</option>
+ <option value="dendrogram:circlepacked">Circle packed(TBD)</option>
+ <option value="dendrogram:radialdendrogram">Radial Dendrogram</option>
+ <option value="dendrogram:reingoldtilford">Reingold-Tilford</option>
+ <option value="digraph:circo">Graphviz - circo(cli)</option>
+ <option value="digraph:dot">Graphviz - dot(cli/www)</option>
+ <option value="digraph:fdp">Graphviz - fdp(cli)</option>
+ <option value="digraph:neato">Graphviz - neato(cli)</option>
+ <option value="digraph:sfdp">Graphviz - sfdp(cli)</option>
+ <option value="digraph:twopi">Graphviz - twopi(cli)</option>
+ <option value="layerbands">LayerBands(GoJS)</option>
+ <option value="mscgen">MSCGEN(cli)</option>
+ <option value="nwdiag">Network Diagram(cli)</option>
+ <option value="parsetree">ParseTree(GoJS)</option>
+ <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
+ <option value="sankey">Sankey</option>
+ <option value="seqdiag">Sequence Diagram(cli)</option>
+ <option value="umlclass">UMLClass(GoJS)</option>
 			<!-- https://gojs.net/latest/samples/familytree.html -->
 			<option value="familytree">FamilyTree(GoJS)</option>
 			<!--  https://gojs.net/latest/samples/genogram.html -->

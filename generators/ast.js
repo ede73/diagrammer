@@ -5,6 +5,8 @@ import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges, traverseVertices } from '../model/model.js'
 import { debug, output } from '../model/support.js'
 
+// ADD TO INDEX.HTML AS: <option value="ast">Abstract Syntax Tree</option>
+
 /**
  * TO test: node js/diagrammer.js verbose tests/test_inputs/ast.test ast
  * @param {GraphCanvas} graphcanvas

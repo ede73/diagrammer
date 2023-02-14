@@ -3,6 +3,8 @@ import { GraphGroup } from '../model/graphgroup.js'
 import { traverseEdges, traverseVertices } from '../model/model.js'
 import { getAttributeAndFormat, output } from '../model/support.js'
 
+// ADD TO INDEX.HTML AS: <option value="actdiag">Activity Diagram(cli)</option>
+
 const ActDiagShapeMap =
 {
   default: 'box',

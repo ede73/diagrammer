@@ -15,5 +15,6 @@ export async function singleElementScreenSnapshot(snapshotConfig, elementHtml, w
   await page2.setViewport({ width: width, height: height });
   await page2.setContent(elementHtml);
   const filePath = `${snapshotConfig.customSnapshotsDir}${snapshotConfig.customSnapshotIdentifier}.png`;
-  return await page2.screenshot({ path: filePath });
+  //return await page2.screenshot({ path: filePath });
+  return await page2.screenshot({ fullPage: true });
 }

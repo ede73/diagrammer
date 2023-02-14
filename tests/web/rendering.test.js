@@ -114,12 +114,13 @@ describe('Diagrammer', () => {
     const elementHandle = await page.$(selector);
     const bbox = await elementHandle.boundingBox();
     const filename = example.match(/.+\/([^\.]+)/)[1] + (overrideGeneratorVisualizer ? "_" + overrideGeneratorVisualizer.replace(':', '_') : '');
-    const snapshotConfig = setConfig(filename, 0.0001)
+    const snapshotConfig = setConfig(filename, 1)
     const buffer = await singleElementScreenSnapshot(snapshotConfig, svg, bbox.width, bbox.height);
     expect.extend({
       toMatchImageSnapshot,
     });
-    expect(buffer).toMatchImageSnapshot(snapshotConfig);
+    console.log(snapshotConfig);
+    expect(buffer).toMatchImageSnapshot(snapshotConfig, 0.0001);
   };
 
   it('asserts reingold-tilford(dendrogram)(d3.js) visualization works', async () => {

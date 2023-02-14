@@ -4,6 +4,7 @@ import { traverseVertices, traverseEdges } from '../model/model.js';
 import { GraphGroup } from '../model/graphgroup.js';
 import { GraphInner } from '../model/graphinner.js';
 import { GraphVertex } from '../model/graphvertex.js';
+import { GraphConnectable } from '../model/graphconnectable.js';
 
 /**
  * TO test: node js/diagrammer.js verbose tests/test_inputs/ast.test ast
@@ -38,7 +39,7 @@ export function ast(graphcanvas) {
             equal: graphcanvas.getEqual()
         }));
 
-    const objectHandler = /** @type {function((GraphGroup|GraphVertex))}*/obj => {
+    const objectHandler = /** @type {function((GraphConnectable))}*/obj => {
         output(true);
         if (obj instanceof GraphGroup) {
             const processAGroup = (o => {

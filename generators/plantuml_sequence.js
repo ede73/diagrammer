@@ -3,6 +3,7 @@ import { debug, output, outputFormattedText, getAttributeAndFormat } from '../mo
 import { GraphGroup } from '../model/graphgroup.js';
 import { GraphVertex } from '../model/graphvertex.js';
 import { iterateEdges } from '../model/support.js';
+import { GraphConnectable } from '../model/graphconnectable.js';
 
 const PlantUMLShapeMap = {
     default: "box",
@@ -95,7 +96,7 @@ export function plantuml_sequence(graphcanvas) {
      * for this container, break out immediately
      * this is to emulate ORDERED nodes of plantuml
      * (node=edge,node,edge.group...all in order for this fucker)
-     * @param {(GraphCanvas|GraphGroup)} container 
+     * @param {GraphConnectable} container 
      * @param {boolean} sbgraph 
      */
     const printEdges = (container, sbgraph) => {
@@ -209,7 +210,7 @@ export function plantuml_sequence(graphcanvas) {
         }
     };
 
-    const traverseVertices = (/** @type {GraphCanvas}*/root, /** @type {boolean}*/isInnerGraph) => {
+    const traverseVertices = (/** @type {GraphConnectable}*/root, /** @type {boolean}*/isInnerGraph) => {
         // Dump this groups participants first...
         for (const i in root.OBJECTS) {
             if (!root.OBJECTS.hasOwnProperty(i)) continue;

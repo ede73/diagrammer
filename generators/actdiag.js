@@ -2,6 +2,7 @@ import { generators } from '../model/graphcanvas.js';
 import { traverseVertices, traverseEdges } from '../model/model.js';
 import { GraphGroup } from "../model/graphgroup.js";
 import { output, debug, getAttributeAndFormat } from '../model/support.js';
+import { GraphConnectable } from '../model/graphconnectable.js';
 
 const ActDiagShapeMap =
 {
@@ -52,7 +53,7 @@ export function actdiag(graphcanvas) {
      * (r.getDirection()==="portrait"){ output(graphcanvas," orientation=portrait");
      * }else{ //DEFAULT output(graphcanvas," orientation=landscape"); }
      */
-    const parseObjects = (/** @type {function((GraphGroup|GraphVertex))}*/obj) => {
+    const parseObjects = (/** @type {function(GraphConnectable)}*/obj) => {
         output(true);
         if (obj instanceof GraphGroup) {
             output(graphcanvas, `lane "${obj.getName()}"{`, true);

@@ -56,7 +56,7 @@ export function blockdiag(graphcanvas) {
     /**
      * @param {(GraphVertex|GraphGroup)} obj
      */
-    const parseObjects = /** @type {function((GraphGroup|GraphVertex))}*/obj => {
+    const parseObjects = /** @type {function(GraphConnectable)}*/obj => {
         output(true);
         if (obj instanceof GraphGroup) {
             output(graphcanvas, ` group "${obj.getLabel()}"{`, true);

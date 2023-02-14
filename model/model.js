@@ -593,7 +593,7 @@ export function traverseEdges(graphcanvas, callback) {
 /**
  * Usage: generators
  * @param {GraphContainer} container
- * @param {function(GraphContainer|GraphVertex):void} callback
+ * @param {function(GraphConnectable):void} callback
  */
 export function traverseVertices(container, callback) {
     for (const i in container.OBJECTS) {

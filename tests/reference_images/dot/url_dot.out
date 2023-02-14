@@ -1,8 +1,8 @@
 digraph {
     compound=true;
     rankdir=TD;
-    node1[URL="http://www.google.com/",fontcolor="#ff0000"];
-    node2[URL="http://www.mtv3.fi/",fontcolor="#ccffcc"];
+    node1[URL="http://www.google.com/",fontcolor="#ff0000",label="This Is Label::And This Is NOT XLabel, click on node for google"];
+    node2[URL="http://www.mtv3.fi/",fontcolor="#ccffcc",label="THis node leads to mtv3"];
     //links start
-    node1->node2[URL="http://www.nelonen.fi/",style="dashed",dir=none];
+    node1->node2[label="THis is edge label",xlabel="and edge XLabel, this edge leads to nelonen",URL="http://www.nelonen.fi/",style="dashed",dir=none];
 }

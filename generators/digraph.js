@@ -73,7 +73,7 @@ export function digraph(graphcanvas) {
 
         const url = obj.url;
         if (url) {
-            nattrs.push(`URL="${url.trim()}"`);
+            nattrs.push(`URL="${url}"`);
         }
         if (styles.length > 0) {
             if (styles.join("").indexOf('singularity') !== -1) {

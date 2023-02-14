@@ -45,7 +45,7 @@ export class GraphObject {
     setName(name) {
         // TODO: Something odd in the parser
         if (name) {
-            this.name = name;
+            this.name = name.trim();
         }
         return this;
     }
@@ -61,7 +61,7 @@ export class GraphObject {
     setColor(color) {
         // TODO: Something odd in the parser
         if (color) {
-            this.color = color;
+            this.color = color.trim();
         }
         return this;
     }
@@ -75,7 +75,7 @@ export class GraphObject {
      * @param {string} textColor 
      */
     setTextColor(textColor) {
-        this.textcolor = textColor;
+        this.textcolor = textColor.trim();
         return this;
     }
 
@@ -88,7 +88,7 @@ export class GraphObject {
      * @param {string} url 
      */
     setUrl(url) {
-        this.url = url;
+        this.url = url.trim();
         return this;
     }
 
@@ -104,20 +104,26 @@ export class GraphObject {
     setLabel(label) {
         if (label) {
             label = label.trim().replace(/"/gi, "");
-            //Take out COLOR if preset
+            //Take out COLOR if present
             let m = label.match(/^(#[A-Fa-f0-9]{6,6})(.*)$/);
-            // debug(m);
-            if (m !== null && m.length == 3) {
-                this.setTextColor(m[1]);
-                label = m[2].trim();
-            }
-            m = label.match(/\[([^\]]+)\](.*)$/);
             if (m !== null && m.length >= 3) {
-                this.setUrl(m[1]);
-                label = m[2].trim();
+                this.setTextColor(m[1]);
+                if (m.length >= 2) {
+                    label = m[2].trim();
+                }
             }
+            // if label has an URL, remove that
+            m = label.match(/^(.*)(?<url>\[[^\]]+\])(.*)$/);
+            if (m !== null && m.length >= 3) {
+                m[0] = '';
+                this.setUrl(m[2].replace('[', '').replace(']', '').trim());
+                label = m[1].trim();
+                if (m.length > 3) {
+                    label += " " + m[3].trim();
+                }
+            }
+            this.label = label.trim();
         }
-        this.label = label;
         return this;
     }
 

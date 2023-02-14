@@ -47,7 +47,7 @@ test() {
   # Verify that the generated output matches what it used to
   if ! diff "$textoutput" "$textreference"; then
     echo "    ERROR: at $1, $textoutput $textreference differ for $testbin" >&2
-    diff -u "$textoutput" "$textreference"
+    diff -u "$textreference" "$textoutput"
     setError 11 "$1"
   fi
 
@@ -65,7 +65,7 @@ test() {
     [ ! -f "$textoutput" ] && cp "$textoutput" "$textreference"
     if ! diff "$renderoutput" "$renderreference"; then
       echo "    ERROR: at $1, image $renderoutput $renderreference differ" >&2
-      diff -u "$textoutput" "$textreference"
+      diff -u "$textreference" "$textoutput"
       display_image "$renderoutput" "$renderreference"
       setError 11 "$1"
     fi

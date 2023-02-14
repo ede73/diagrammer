@@ -4,15 +4,18 @@
 #Also you get MATCHES=a/b/c.file:c/b/d.file
 #And DIRNAMES=a/:c/
 # $@ = name of the target being generated
-# @^ list of dependencies on the target
-# @^ first dependency on the list
+# $^ list of dependencies on the target
+# $< first dependency on the list
 
 GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.grammar
 MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js model/graphcontainer.js model/graphconnectable.js
 MODEL_REST = model/shapes.js model/tree.js
 
-all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST)
+all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST)
 	@echo Make ALL
+
+index.html : index_template.html Makefile
+	 awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs | sort" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations | sort" | getline var) printf("<script type=\"module\" src=\"web/visualizations/%s\"></script>\n",var);next}{print $0}' $< >$@
 
 build/diagrammer_lexer.js: grammar/diagrammer.lex
 	@mkdir -p build

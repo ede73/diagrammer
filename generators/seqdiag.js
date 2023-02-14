@@ -1,8 +1,8 @@
 import { generators } from '../model/graphcanvas.js';
-import { output, getAttributeAndFormat } from '../model/support.js';
-import { traverseEdges } from '../model/model.js';
 import { GraphGroup } from '../model/graphgroup.js';
 import { GraphVertex } from '../model/graphvertex.js';
+import { traverseEdges } from '../model/model.js';
+import { getAttributeAndFormat, output } from '../model/support.js';
 
 /**
  * http://blockdiag.com/en/seqdiag/index.html

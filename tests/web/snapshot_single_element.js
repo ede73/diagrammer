@@ -1,6 +1,5 @@
-import * as puppeteer from 'puppeteer';
-import { Page } from 'puppeteer';
 import * as jis from 'jest-image-snapshot';
+import { Page } from 'puppeteer';
 
 /**
  * @param {jis.MatchImageSnapshotOptions} snapshotConfig jest-image-snapshot config

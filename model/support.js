@@ -1,7 +1,7 @@
 //@ts-check
-import { GraphObject } from '../model/graphobject.js';
 import { GraphCanvas } from '../model/graphcanvas.js';
 import { GraphEdge } from '../model/graphedge.js';
+import { GraphObject } from '../model/graphobject.js';
 
 /** @type {number} */
 var debugIndent = 0;

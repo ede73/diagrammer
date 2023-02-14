@@ -1,6 +1,6 @@
 //@ts-check
-import { visualize, parse } from './parserInteractions.js';
 import { getSavedFilesAsOptionList, getSavedGraph } from './localStorage.js';
+import { parse, visualize } from './parserInteractions.js';
 //import { Editor } from '../ace/src-noconflict/ace.js';
 import { getGenerator, getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js';
 

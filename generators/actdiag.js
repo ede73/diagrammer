@@ -1,8 +1,8 @@
 import { generators } from '../model/graphcanvas.js';
-import { traverseVertices, traverseEdges } from '../model/model.js';
-import { GraphGroup } from "../model/graphgroup.js";
-import { output, debug, getAttributeAndFormat } from '../model/support.js';
 import { GraphConnectable } from '../model/graphconnectable.js';
+import { GraphGroup } from "../model/graphgroup.js";
+import { traverseEdges, traverseVertices } from '../model/model.js';
+import { getAttributeAndFormat, output } from '../model/support.js';
 
 const ActDiagShapeMap =
 {

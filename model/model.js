@@ -2,14 +2,13 @@
 // =====================================
 // ONLY used in grammar/diagrammer.grammar
 // =====================================
-import { debug } from "../model/support.js";
 import { GraphCanvas } from "../model/graphcanvas.js";
-import { GraphGroup } from "../model/graphgroup.js";
-import { GraphVertex } from "../model/graphvertex.js";
-import { GraphInner } from "../model/graphinner.js";
-import { GraphEdge } from "../model/graphedge.js";
-import { getAttribute } from "../model/support.js";
 import { GraphContainer } from "../model/graphcontainer.js";
+import { GraphEdge } from "../model/graphedge.js";
+import { GraphGroup } from "../model/graphgroup.js";
+import { GraphInner } from "../model/graphinner.js";
+import { GraphVertex } from "../model/graphvertex.js";
+import { debug, getAttribute } from "../model/support.js";
 import { GraphConnectable } from "./graphconnectable.js";
 
 /**

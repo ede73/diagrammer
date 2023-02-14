@@ -1,9 +1,9 @@
 import { generators, visualizations } from '../model/graphcanvas.js';
-import { output, debug, getAttributeAndFormat } from '../model/support.js';
 import { GraphGroup } from "../model/graphgroup.js";
 import { GraphInner } from "../model/graphinner.js";
 import { GraphVertex } from '../model/graphvertex.js';
-import { traverseEdges, getVertex, hasOutwardEdge } from '../model/model.js';
+import { getVertex, hasOutwardEdge, traverseEdges } from '../model/model.js';
+import { debug, getAttributeAndFormat, output } from '../model/support.js';
 
 const DigraphShapeMap = {
     default: "box",

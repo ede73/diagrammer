@@ -1,10 +1,10 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators, visualizations } from '../model/graphcanvas.js';
-import { debug, output } from '../model/support.js';
+import { GraphConnectable } from '../model/graphconnectable.js';
 import { GraphVertex } from '../model/graphvertex.js';
 import { traverseEdges } from '../model/model.js';
-import { TreeVertex, findVertex, traverseTree } from '../model/tree.js';
-import { GraphConnectable } from '../model/graphconnectable.js';
+import { debug, output } from '../model/support.js';
+import { findVertex, traverseTree, TreeVertex } from '../model/tree.js';
 
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/dendrogram.txt dendrogram

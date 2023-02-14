@@ -1,7 +1,6 @@
 // @ts-check 
 import { GraphEdge } from '../model/graphedge.js';
-import { setAttr, getAttribute } from '../model/support.js';
-import { GraphConnectable } from './graphconnectable.js';
+import { getAttribute, setAttr } from '../model/support.js';
 import { GraphContainer } from './graphcontainer.js';
 
 export const generators = new Map();

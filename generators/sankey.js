@@ -1,10 +1,8 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators } from '../model/graphcanvas.js';
-import { traverseEdges, traverseVertices } from '../model/model.js';
-import { TreeVertex, findVertex, traverseTree } from '../model/tree.js';
 import { GraphVertex } from '../model/graphvertex.js';
-import { debug, output } from '../model/support.js';
-import { GraphConnectable } from '../model/graphconnectable.js';
+import { traverseEdges, traverseVertices } from '../model/model.js';
+import { output } from '../model/support.js';
 
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/sankey.txt sankey

@@ -1,8 +1,8 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators } from '../model/graphcanvas.js';
+import { GraphVertex } from '../model/graphvertex.js';
 import { traverseEdges } from '../model/model.js';
 import { debug, output } from '../model/support.js';
-import { GraphVertex } from '../model/graphvertex.js';
 
 /**
  * Only one root supported!

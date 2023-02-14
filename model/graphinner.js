@@ -1,8 +1,5 @@
 //@ts-check
-import { GraphObject } from '../model/graphobject.js';
 import { GraphGroup } from '../model/graphgroup.js';
-import { GraphVertex } from '../model/graphvertex.js';
-import { GraphContainer } from '../model/graphcontainer.js';
 import { debug } from '../model/support.js';
 import { GraphConnectable } from './graphconnectable.js';
 

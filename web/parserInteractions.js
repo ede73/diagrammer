@@ -1,14 +1,14 @@
 // ignore for now ts-check
 import { diagrammer_parser } from '../build/diagrammer_parser.js';
-import { getHTMLElement, getInputElement, getError, setError, setGenerator, updateImage, getGenerator, getVisualizer } from './uiComponentAccess.js';
+import { removeOldVisualizations } from './d3support.js';
+import { getError, getGenerator, getHTMLElement, getInputElement, getVisualizer, setError, setGenerator, updateImage } from './uiComponentAccess.js';
 import { visualizeCirclePacked } from './visualizations/visualizeCirclePacked.js';
 import { visualizeLayerBands } from './visualizations/visualizeLayerBands.js';
 import { visualizeParseTree } from './visualizations/visualizeParseTree.js';
 import { visualizeRadialDendrogram } from './visualizations/visualizeRadialDendrogram.js';
 import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilford.js';
-import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
 import { visualizeSankey } from './visualizations/visualizeSankey.js';
-import { removeOldVisualizations } from './d3support.js';
+import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
 
 /**
  * @type {int}

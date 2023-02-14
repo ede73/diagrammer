@@ -1,7 +1,7 @@
 import { generators } from '../model/graphcanvas.js';
-import { getAttributeAndFormat } from '../model/support.js';
-import { traverseEdges } from '../model/model.js';
 import { GraphGroup } from '../model/graphgroup.js';
+import { traverseEdges } from '../model/model.js';
+import { getAttributeAndFormat } from '../model/support.js';
 
 const NetworkDiagShapeMap =
 {

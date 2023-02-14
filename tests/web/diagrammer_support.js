@@ -1,5 +1,4 @@
-import { Page, Browser } from 'puppeteer';
-import { sleepABit } from './jest_puppeteer_support';
+import { Page } from 'puppeteer';
 
 // npm install @types/jest --save-dev 
 // fixed it

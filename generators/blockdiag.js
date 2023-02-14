@@ -1,7 +1,7 @@
 import { generators } from '../model/graphcanvas.js';
-import { output, getAttributeAndFormat } from '../model/support.js';
-import { traverseVertices, traverseEdges } from '../model/model.js';
 import { GraphGroup } from '../model/graphgroup.js';
+import { traverseEdges, traverseVertices } from '../model/model.js';
+import { getAttributeAndFormat, output } from '../model/support.js';
 
 const BlockDiagShapeMap = {
     default: "box",

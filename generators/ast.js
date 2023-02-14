@@ -1,10 +1,10 @@
 import { generators } from '../model/graphcanvas.js';
-import { debug, output } from '../model/support.js';
-import { traverseVertices, traverseEdges } from '../model/model.js';
+import { GraphConnectable } from '../model/graphconnectable.js';
 import { GraphGroup } from '../model/graphgroup.js';
 import { GraphInner } from '../model/graphinner.js';
 import { GraphVertex } from '../model/graphvertex.js';
-import { GraphConnectable } from '../model/graphconnectable.js';
+import { traverseEdges, traverseVertices } from '../model/model.js';
+import { debug, output } from '../model/support.js';
 
 /**
  * TO test: node js/diagrammer.js verbose tests/test_inputs/ast.test ast

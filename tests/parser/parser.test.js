@@ -1,9 +1,7 @@
-import { GraphEdge } from '../../model/graphedge.js';
-import { GraphObject } from '../../model/graphobject.js';
+import { diagrammer_parser } from '../../build/diagrammer_parser.js';
+import { generators, GraphCanvas } from '../../model/graphcanvas.js';
 import { GraphGroup } from '../../model/graphgroup.js';
 import { GraphVertex } from '../../model/graphvertex.js';
-import { diagrammer_parser } from '../../build/diagrammer_parser.js';
-import { GraphCanvas, generators } from '../../model/graphcanvas.js';
 
 describe('Parser/grammar rule tests', () => {
     var errors;

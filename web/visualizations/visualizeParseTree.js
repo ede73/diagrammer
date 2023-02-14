@@ -1,6 +1,5 @@
 // @ts-check
-import { getHTMLElement } from "../uiComponentAccess.js";
-import { removeOldVisualizations, make_svg } from "../d3support.js";
+import { removeOldVisualizations } from "../d3support.js";
 
 // had to download locally...
 import * as go from '../../js/go-module.js';

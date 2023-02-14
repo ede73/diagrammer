@@ -1,4 +1,3 @@
-import { GraphObject } from '../model/graphobject.js';
 import { GraphConnectable } from './graphconnectable.js';
 import { GraphVertex } from './graphvertex.js';
 

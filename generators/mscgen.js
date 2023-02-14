@@ -1,8 +1,8 @@
 import { generators } from '../model/graphcanvas.js';
-import { output, getAttributeAndFormat } from '../model/support.js';
-import { traverseVertices, traverseEdges } from '../model/model.js';
 import { GraphGroup } from '../model/graphgroup.js';
 import { GraphVertex } from '../model/graphvertex.js';
+import { traverseEdges, traverseVertices } from '../model/model.js';
+import { getAttributeAndFormat, output } from '../model/support.js';
 
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/state_sequence.txt mscgen

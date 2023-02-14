@@ -1,5 +1,5 @@
 // @ts-check
-import { removeOldVisualizations, make_svg } from "../d3support.js";
+import { removeOldVisualizations } from "../d3support.js";
 // had to download locally... https://gojs.net/latest/download.html
 import * as go from '../../js/go-debug-module.js';
 // Use in editor.. gets go.d.ts

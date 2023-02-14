@@ -90,22 +90,47 @@ describe('Diagrammer', () => {
     await waitUntilGraphDrawn(p);
   }, 200 /* it takes sometimes about 40ms to parse/generate the graph on my laptop (linux running in WSL2)*/);
 
-  it('asserts dendrogram visualization works', async () => {
-    /** @type {Page} */
-    const p = page;
-    await clearGeneratorResults(p);
-    await clearGraph(p);
-    await selectExampleCode(p, 'test_inputs/dendrogram.txt');
+  /**
+   * 
+   * @param {Page} page 
+   * @param {string} example File in tests/test_inputs/*.txt
+   */
+  async function testDynamicRendering(page, example) {
+    await clearGeneratorResults(page);
+    await clearGraph(page);
+    await selectExampleCode(page, example);
     // <div id="default_"></div><svg id="the_SVG_ID" w..
-    await waitUntilGraphDrawn(p);
-    const svg = await p.evaluate(() => document.querySelector('#graphVisualizationHere>svg').outerHTML);
-    const elementHandle = await p.$('#graphVisualizationHere>svg');
+    await waitUntilGraphDrawn(page);
+    const svg = await page.evaluate(() => document.querySelector('#graphVisualizationHere>svg').outerHTML);
+    const elementHandle = await page.$('#graphVisualizationHere>svg');
     const bbox = await elementHandle.boundingBox();
-    const snapshotConfig = setConfig('radial_dendrogram', 0.0001)
+    const filename = example.match(/.+\/([^\.]+)/)[1];
+    const snapshotConfig = setConfig(filename, 0.0001)
     const buffer = await singleElementScreenSnapshot(snapshotConfig, svg, bbox.width, bbox.height);
     expect.extend({
       toMatchImageSnapshot,
     });
     expect(buffer).toMatchImageSnapshot(snapshotConfig);
+
+  };
+
+  it('asserts dendrogram visualization works', async () => {
+    await testDynamicRendering(page, 'test_inputs/dendrogram.txt');
   }, 1000);
+
+  it('asserts sankey visualization works', async () => {
+    await testDynamicRendering(page, 'test_inputs/sankey.txt');
+  }, 1000);
+
+  // it('asserts umlclass2(GoJS) visualization works', async () => {
+  //   await testDynamicRendering(page, 'test_inputs/umlclass2.txt');
+  // }, 1000);
+
+  // it('asserts layerbands(GoJS) visualization works', async () => {
+  //   await testDynamicRendering(page, 'test_inputs/layerbands.txt');
+  // }, 1000);
+
+  // it('asserts parsetree(GoJS) visualization works', async () => {
+  //   await testDynamicRendering(page, 'test_inputs/parsetree.txt');
+  // }, 1000);
 });

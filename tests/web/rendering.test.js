@@ -11,9 +11,9 @@ import { toMatchImageSnapshot } from 'jest-image-snapshot';
 // debug_output
 
 /**
- * 
- * @param {string} filename 
- * @param {float} threshold 
+ *
+ * @param {string} filename
+ * @param {float} threshold
  * @returns {jis.toMatchImageSnapshot}
  */
 export function setConfig(filename, threshold = 0.0001) {
@@ -91,8 +91,8 @@ describe('Diagrammer', () => {
   }, 200 /* it takes sometimes about 40ms to parse/generate the graph on my laptop (linux running in WSL2)*/);
 
   /**
-   * 
-   * @param {Page} page 
+   *
+   * @param {Page} page
    * @param {string} example File in tests/test_inputs/*.txt
    */
   async function testDynamicRendering(page, example, overrideGeneratorVisualizer) {
@@ -119,7 +119,6 @@ describe('Diagrammer', () => {
     expect.extend({
       toMatchImageSnapshot,
     });
-    console.log(snapshotConfig);
     expect(buffer).toMatchImageSnapshot(snapshotConfig, 0.0001);
   };
 

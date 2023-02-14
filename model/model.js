@@ -247,14 +247,12 @@ export function enterSubGraph(yy) {
 }
 
 /*
+ * ie. o>(s1,s2,s3) nodes s1-s3 form a GraphInner (a subgraph)
  * Usage: grammar/diagrammer.grammar
  */
 export function exitSubGraph(yy) {
     //Now should edit the ENTRANCE EDGE to point to a>b, a>d, a>e
     const currentSubGraph_TypeCheckerFix = getCurrentContainer(yy);
-    if (currentSubGraph_TypeCheckerFix instanceof GraphCanvas) {
-        throw new Error("Subgraph cannot be canvas");
-    }
     if (!(currentSubGraph_TypeCheckerFix instanceof GraphInner)) {
         throw new Error(`Subgraph cannot be any other than GraphInner:${typeof (currentSubGraph_TypeCheckerFix)}`);
     }
@@ -267,7 +265,12 @@ export function exitSubGraph(yy) {
 
     let edgeIndex = undefined;
 
-    //fix entrance
+    // If there's an edge that (RHS) points to current inner sub graph AND the graph has 
+    // entrance connectable and this edge (LHS) points to entrance node, then relink
+    // this edge:
+    // a>b>(c d>e f>g h)>(s>k)
+    // activates for instance to 2nd edge (ie. one pointing from b to all of (c d>e..))
+    // and also on 5th edge ie ..h)>(s..
     for (const idx in yy.EDGES) {
         if (!yy.EDGES.hasOwnProperty(idx)) continue;
         edge = yy.EDGES[idx];
@@ -393,6 +396,8 @@ export function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel
         }
         // TODO: Should noedges be set to GraphConnectable (except Edge..)
         // TODO: Also if this is an array, this assignment makes no sense
+        // oddly this seems wrong, but removing breaks plantuml_context and plantuml_context2
+        // And for plantuml context this is spot on..
         if (lhs instanceof GraphVertex) {
             lhs.noedges = undefined;
         }

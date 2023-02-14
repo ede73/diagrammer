@@ -253,6 +253,6 @@ exit;exit node is also required
         // q has subs w,e which have c,a,b
         // model how ever misproduces the situations and incorrectly has q,w AND e in the ROOTVERTICES list
         expect(graphcanvas.ROOTVERTICES.length).toBe(1);
-        expect(graphcanvas.ROOTVERTICES[0].getName()).toBe('w');
+        expect(graphcanvas.ROOTVERTICES[0].getName()).toBe('q');
     });
 });

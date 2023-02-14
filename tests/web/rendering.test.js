@@ -1,5 +1,8 @@
 import { dumpWholePage, dumpWholePage2, sleepABit, getElementText, writeToElement, captureBrowserLogs } from './jest_puppeteer_support.js';
 import { clearGeneratorResults, getDiagrammerCode, selectExampleCode, waitUntilGraphDrawn, setDiagrammerCode, waitForGeneratorResults, clearParsingErrors, getParsingError, getGeneratorResult, clearGraph } from './diagrammer_support.js';
+import * as jis from 'jest-image-snapshot';
+import { singleElementScreenSnapshot } from './snapshot_single_element.js';
+import { Page } from 'puppeteer';
 import { toMatchImageSnapshot } from 'jest-image-snapshot';
 
 // graphVisualizationHere all the graphcics sit here..
@@ -7,7 +10,12 @@ import { toMatchImageSnapshot } from 'jest-image-snapshot';
 // graph_container CanVIZ
 // debug_output
 
-// jest-image-snapshot custom configuration in order to save screenshots and compare the with the baseline
+/**
+ * 
+ * @param {string} filename 
+ * @param {float} threshold 
+ * @returns {jis.toMatchImageSnapshot}
+ */
 export function setConfig(filename, threshold = 0.0001) {
   return {
     failureThreshold: threshold,
@@ -20,64 +28,84 @@ export function setConfig(filename, threshold = 0.0001) {
 
 describe('Diagrammer', () => {
   beforeAll(async () => {
-    await page.goto('http://localhost/~ede/diagrammer/');
-    await page.setViewport({ width: 1800, height: 1800 });
+    /** @type {Page} */
+    const p = page;
+    await p.goto('http://localhost/~ede/diagrammer/');
+    await p.setViewport({ width: 1800, height: 1800 });
     // await captureBrowserLogs(page);
   });
 
-  it('Take a screenshot of the diagrammer"', async () => {
+  it('asserts against diagrammer main page regressions', async () => {
+    /** @type {Page} */
+    const p = page;
     expect.extend({
       toMatchImageSnapshot,
     });
-    //await page.screenshot({ path: 'screenshot1.png' });
-    const image = await page.screenshot({ fullPage: true });
+    const image = await p.screenshot({ fullPage: true });
     expect(image).toMatchImageSnapshot(setConfig('main_screen_just_loaded', 0.0001));
   });
 
-  it('test writing to ace editor', async () => {
-    await clearGeneratorResults(page);
-    await setDiagrammerCode(page, 'a>b>c');
-    await waitForGeneratorResults(page);
-    const graphText = await getDiagrammerCode(page);
+  it('ensures that writing diagrammer code is shown in ace editor', async () => {
+    /** @type {Page} */
+    const p = page;
+    await clearGeneratorResults(p);
+    await setDiagrammerCode(p, 'a>b>c');
+    await waitForGeneratorResults(p);
+    const graphText = await getDiagrammerCode(p);
     await expect(graphText).toMatch("a>b>c");
   });
 
-  it('test language parser error handling', async () => {
-    await clearGeneratorResults(page);
+  it('ensures that parsing error is displayed correctly', async () => {
+    /** @type {Page} */
+    const p = page;
+    await clearGeneratorResults(p);
     // of course there isn't any pre-existing errors, but safer this way
-    await clearParsingErrors(page);
+    await clearParsingErrors(p);
     try {
-      await setDiagrammerCode(page, 'a>');
+      await setDiagrammerCode(p, 'a>');
       expect(false);
     } catch {
       // Parsing must fail!
     }
 
-    const graphText = await getDiagrammerCode(page);
+    const graphText = await getDiagrammerCode(p);
     await expect(graphText).toMatch("a>");
 
-    const errorText = await getParsingError(page);
+    const errorText = await getParsingError(p);
     await expect(errorText).toMatch(/^Parsing error:.+Parse error on line 1.+a&gt;/);
   });
 
-  it('should be able to select dendrogram', async () => {
-    //await captureBrowserLogs(page);
-    await clearGeneratorResults(page);
-    await clearGraph(page);
-    // had an image here...
-    //<div id="default_"></div><img align="bottom" width="400" height="400" id="image" src="http://localhost/~ede/diagrammer/web/result.png?v=1676328865406" style="height: auto;">
-    //console.log(await page.evaluate(() => document.querySelector('#graphVisualizationHere').innerHTML));
+  it('selects dendrogram example, verifies parsing succeeds and correct graph is visualized', async () => {
+    /** @type {Page} */
+    const p = page;
+    await clearGeneratorResults(p);
+    await clearGraph(p);
 
-    await selectExampleCode(page, 'test_inputs/dendrogram.txt');
-    await waitForGeneratorResults(page);
+    await selectExampleCode(p, 'test_inputs/dendrogram.txt');
+    await waitForGeneratorResults(p);
 
-    const graphText = await getDiagrammerCode(page);
+    const graphText = await getDiagrammerCode(p);
     await expect(graphText).toMatch(/^generator dendrogram/);
 
-    await waitForGeneratorResults(page);
+    await waitUntilGraphDrawn(p);
+  }, 200 /* it takes sometimes about 40ms to parse/generate the graph on my laptop (linux running in WSL2)*/);
+
+  it('asserts dendrogram visualization works', async () => {
+    /** @type {Page} */
+    const p = page;
+    await clearGeneratorResults(p);
+    await clearGraph(p);
+    await selectExampleCode(p, 'test_inputs/dendrogram.txt');
     // <div id="default_"></div><svg id="the_SVG_ID" w..
-    await waitUntilGraphDrawn(page);
-    //await page.screenshot({ path: 'screenshot1.png' });
-    // TODO: inspect the graph!
-  }, 100 /* it takes sometimes about 40ms to parse/generate the graph on my laptop (linux running in WSL2)*/);
+    await waitUntilGraphDrawn(p);
+    const svg = await p.evaluate(() => document.querySelector('#graphVisualizationHere>svg').outerHTML);
+    const elementHandle = await p.$('#graphVisualizationHere>svg');
+    const bbox = await elementHandle.boundingBox();
+    const snapshotConfig = setConfig('radial_dendrogram', 0.0001)
+    const buffer = await singleElementScreenSnapshot(snapshotConfig, svg, bbox.width, bbox.height);
+    expect.extend({
+      toMatchImageSnapshot,
+    });
+    expect(buffer).toMatchImageSnapshot(snapshotConfig);
+  }, 1000);
 });

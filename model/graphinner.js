@@ -16,10 +16,15 @@ export class GraphInner extends GraphGroup {
     /** @param {string} name */
     constructor(name) {
         super(name);
+
         /** @type {boolean} */
         this.isInnerGraph = true;
+
         /** @type {GraphConnectable} */
         this.exit = undefined;
+
+        /** @type {(GraphConnectable|GraphConnectable[])} */
+        this.entrance = undefined;
     }
 
     /**

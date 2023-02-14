@@ -114,7 +114,7 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
 }
 
 function makeNewImageHolder () {
-  const element = removeOldVisualizations()
+  removeOldVisualizations()
   const imgdiv = getHTMLElement('graphVisualizationHere')
   const img = document.createElement('img')
   img.align = 'bottom'
@@ -154,7 +154,7 @@ export function visualize (visualizer) {
     },
     error: function (err) {
       alert(`ERROR: ${JSON.stringify(err)}`)
-      if (err.status == 200) {
+      if (err.status === 200) {
         ParseResult(err)
       } else {
         alert(`Error:${err.responseText}  Status: ${err.status}`)
@@ -166,7 +166,7 @@ export function visualize (visualizer) {
             onclick="javascript:openImage('web/result.png');" />
     */
 
-  if (visualizer == 'dot') {
+  if (visualizer === 'dot') {
     try {
       getHTMLElement('svg').innerHTML = Viz(statelang, 'svg')
     } catch (err) {
@@ -179,20 +179,20 @@ export function visualize (visualizer) {
     // console.log(err);
     // }
     // TODO: Use visualizations/generators maps
-  } else if (visualizer == 'radialdendrogram') {
+  } else if (visualizer === 'radialdendrogram') {
     visualizeRadialDendrogram(JSON.parse(result.value))
-  } else if (visualizer == 'circlepacked') {
+  } else if (visualizer === 'circlepacked') {
     alert('TBD')
     visualizeCirclePacked(JSON.parse(result.value))
-  } else if (visualizer == 'reingoldtilford') {
+  } else if (visualizer === 'reingoldtilford') {
     visualizeReingoldTilford(JSON.parse(result.value))
-  } else if (visualizer == 'parsetree') {
+  } else if (visualizer === 'parsetree') {
     visualizeParseTree(JSON.parse(result.value))
-  } else if (visualizer == 'layerbands') {
+  } else if (visualizer === 'layerbands') {
     visualizeLayerBands(JSON.parse(result.value))
-  } else if (visualizer == 'umlclass') {
+  } else if (visualizer === 'umlclass') {
     visualizeUmlClass(JSON.parse(result.value))
-  } else if (visualizer == 'sankey') {
+  } else if (visualizer === 'sankey') {
     visualizeSankey(JSON.parse(result.value))
   } else {
     console.log(`Unknown WEB UI visualizer ${visualizer}`)

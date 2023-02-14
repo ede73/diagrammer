@@ -12,10 +12,23 @@ export class GraphGroup extends GraphContainer {
     /** @param {string} name */
     constructor(name) {
         super(name);
-        /** @type {string} */
+        /** @type {number} */
         this.exitvertex = undefined;
-        /** @type {string} */
+        /**
+         * Only defined in case of start conditional (if clause)
+         * Most usually GraphVertex
+         * Set directly in diagrammer.grammar
+         * @type {GraphConnectable}
+         */
         this.entryedge = undefined;
+        /**
+         * Only defined in case of end conditional (else clause)
+         * TODO: Inconsistent: not a GraphConnectable
+         * 
+         * Set to yy.collectNextVertex
+         * @type {GraphConnectable}
+         */
+        this.exitedge = undefined;
         /** @type {(GraphConnectable|GraphConnectable[])} */ // TODO: never used here really
         this.entrance = undefined;
     }

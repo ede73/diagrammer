@@ -11,7 +11,8 @@ export class GraphConnectable extends GraphObject {
     constructor(name) {
         super(name); // TODO:
         /**
-         * Internal flag for no edge objects.
+         * TODO: Internal flag for no edge objects. Looks like originally used only for Vertices and
+         * also ONLY set for Vertices (even if reset for all Connectables).
          * @type {boolean}
          */
         this.noedges = undefined;

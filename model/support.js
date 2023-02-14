@@ -5,7 +5,10 @@ import { GraphEdge } from '../model/graphedge.js';
 
 /** @type {number} */
 var debugIndent = 0;
-/** @type {boolean} */
+/**
+ * DEBUG: Set to true to see debug messages
+ *  @type {boolean}
+ */
 var VERBOSE;
 
 /**

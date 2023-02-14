@@ -152,6 +152,10 @@ export function getVertex(yy, objOrName, style) {
         if (search) {
             return search;
         }
+        // if obj was GraphConnectable?
+        if (obj instanceof GraphConnectable) {
+            throw new Error("Expecting string");
+        }
         debug(`Create new vertex name=${obj}`, true);
         const vertex = new GraphVertex(obj, getGraphCanvas(yy).getCurrentShape());
         if (style) vertex.setStyle(style);
@@ -173,8 +177,9 @@ export function getVertex(yy, objOrName, style) {
     yy.lastSeenVertex = vertex;
     if (yy.collectNextVertex) {
         debug("Collect next vertex");
+        // TODO: make vertex? Do we know that it is vertex(yet?)
         // TODO: MOVING TO GraphCanvas
-        yy.collectNextVertex.exitedge = objOrName;
+        yy.collectNextVertex.exitedge = vertex;
         // TODO: MOVING TO GraphCanvas
         yy.collectNextVertex = undefined;
     }
@@ -266,7 +271,8 @@ export function exitSubGraph(yy) {
     for (const idx in yy.EDGES) {
         if (!yy.EDGES.hasOwnProperty(idx)) continue;
         edge = yy.EDGES[idx];
-        if (edge.right.name == currentSubGraph.name && currentSubGraph.entrance instanceof GraphConnectable &&
+        if (edge.right.name == currentSubGraph.name &&
+            currentSubGraph.entrance instanceof GraphConnectable &&
             edge.left.name == currentSubGraph.entrance.name) {
             //remove this edge!
             edgeIndex = Number(idx);
@@ -284,7 +290,7 @@ export function exitSubGraph(yy) {
             if (!currentSubGraph.ROOTVERTICES.hasOwnProperty(n)) continue;
             const vertex = currentSubGraph.ROOTVERTICES[n];
             if (currentSubGraph.entrance && currentSubGraph.entrance instanceof GraphVertex) {
-                // TODOL: Assumes entrance is GraphVertex, but it looks it can be other things
+                // TODO: Assumes entrance is GraphVertex, but it looks it can be other things
                 currentSubGraph.entrance.noedges = undefined;
             }
             vertex.noedges = undefined;
@@ -376,11 +382,13 @@ export function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel
         rhs.setEntrance(lhs);
     }
     if (rhs instanceof GraphVertex) {
+        // if RHS has no edges (and is contained in a container) AND found from ROOTVERTICES, remove it from ROOTVERTICES
         if (rhs.noedges && current_container) {
             debug(`REMOVE ${rhs} from root vertices of the container ${current_container}`);
             const idx = current_container.ROOTVERTICES.indexOf(rhs);
             if (idx >= 0) {
-                current_container.ROOTVERTICES.splice(idx, 1);
+                const removed = current_container.ROOTVERTICES.splice(idx, 1);
+                debug(`REMOVE ${removed} from ROOTVERTICES`);
             }
         }
         // TODO: Should noedges be set to GraphConnectable (except Edge..)
@@ -489,7 +497,7 @@ export function getEdge(yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel
  * @return {GraphCanvas}
  */
 export function getGraphCanvas(yy) {
-    if (!yy.GRAPHVANVAS) {
+    if (!yy.GRAPHCANVAS) {
         if (!yy.result) {
             throw new Error("Initialization has failed!");
         }
@@ -502,10 +510,10 @@ export function getGraphCanvas(yy) {
         /** @type {number} */
         yy.CONTAINER_EXIT = 1;
         /** @type  {GraphCanvas} */
-        yy.GRAPHVANVAS = new GraphCanvas();
-        enterContainer(yy, yy.GRAPHVANVAS);
+        yy.GRAPHCANVAS = new GraphCanvas();
+        enterContainer(yy, yy.GRAPHCANVAS);
     }
-    return yy.GRAPHVANVAS;
+    return yy.GRAPHCANVAS;
 }
 
 /** 
@@ -570,6 +578,7 @@ function containsObject(container, obj) {
  * @param {function(GraphEdge):void} callback
  */
 export function traverseEdges(graphcanvas, callback) {
+    debug(`${graphcanvas.ROOTVERTICES}`);
     for (const i in graphcanvas.EDGES) {
         if (!graphcanvas.EDGES.hasOwnProperty(i)) continue;
         callback(graphcanvas.EDGES[i]);
@@ -679,6 +688,7 @@ function _pushObject(yy, o) {
     const cnt = getCurrentContainer(yy)
     debug(`_pushObject ${o}to ${cnt}`, true);
     cnt.OBJECTS.push(o);
+    debug(`PUSHING OBJECT ${o} to ROOTVERTICES`);
     cnt.ROOTVERTICES.push(o);
     debug(false);
     return o;

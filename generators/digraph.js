@@ -209,8 +209,8 @@ export function digraph(graphcanvas) {
                             //never reached
                             const exitedge = grp.exitedge;
                             if (exitedge) {
-                                output(graphcanvas, `${lastexit}->${exitedge}[color=red];`);
-                                output(graphcanvas, `${lastendif}->${exitedge};`);
+                                output(graphcanvas, `${lastexit}->${exitedge.getName()}[color=red];`);
+                                output(graphcanvas, `${lastendif}->${exitedge.getName()};`);
                             }
                         } else {
                             const sn = `entry${grp.exitvertex}`;

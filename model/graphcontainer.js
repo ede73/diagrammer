@@ -16,6 +16,12 @@ export class GraphContainer extends GraphConnectable {
          */
         this.OBJECTS = [];
         /**
+         * This holds vertices that have no incoming edges (no edge has this vertex as right hand side)
+         * 
+         * In theory, these nodes should be ROOT nodes in the tree!
+         * 
+         * Some graphs are happy with it, some may be limited to single root node
+         * 
          * GraphContainer | GraphVertex
          * @type {GraphConnectable[]}
          */

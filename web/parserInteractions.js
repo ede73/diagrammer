@@ -92,7 +92,7 @@ export function parse(diagrammerCode, successCallback, failureCallback, preferSc
     parsingStarted = 1;
     setError("");
     try {
-        delete (diagrammer_parser.yy.GRAPHVANVAS);
+        delete (diagrammer_parser.yy.GRAPHCANVAS);
         delete (diagrammer_parser.yy.EDGES);
         delete (diagrammer_parser.yy.OBJECTS);
         // TODO: MOVING TO GraphCanvas

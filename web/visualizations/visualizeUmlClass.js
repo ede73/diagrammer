@@ -1,12 +1,7 @@
 // @ts-check
-// import * as go from "https://cdn.jsdelivr.net/npm/gojs@2.0/release/go.js";
-// import * as go from 'https://gojs.net/latest/release/go-module.js';
-// had to download locally...
-import * as go from '../../js/go-module.js'
+import go from 'go'
 import { removeOldVisualizations } from '../d3support.js'
 import { visualizations } from '../globals.js'
-// Use in editor.. gets go.d.ts
-// import * as go from '../../js/go';
 
 visualizations.set('umlclass', visualizeUmlClass)
 

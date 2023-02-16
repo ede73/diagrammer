@@ -1,29 +1,10 @@
 // @ts-check
-// Started working ONLY after
-// apt install npm
-// # btw. which also failed, had to apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update
-// # something to do with WSL2 and time, maybe apt install ntp helps (some said)
-// # clock and TZ were spot on though!
-// npm i --save-dev @types/d3
-
-// I did also add dependencies to package.json
-// while this work on VSCode, it doesn't run on browser currently, TODO
-// import * as d3 from 'd3';
-// import * as d3 from "https://cdn.skypack.dev/d3@7.8.2";
-// import * as d3 from "https://cdn.observableusercontent.com/npm/d3@7.8.2/dist/d3.min.js";
-import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm'
+import * as d3 from 'd3'
 import { makeSVG, removeOldVisualizations } from '../d3support'
 import { visualizations } from '../globals.js'
 
 visualizations.set('radialdendrogram', visualizeRadialDendrogram)
 
-// <script src="https://d3js.org/d3.v7.min.js"></script>
-
-/*
-https://github.com/d3/d3/issues/3469
-https://www.npmjs.com/package/@types/d3
-https://formidable.com/blog/2022/victory-esm/ ??
- */
 // https://medium.com/analytics-vidhya/creating-a-radial-tree-using-d3-js-for-javascript-be943e23b74e
 export function visualizeRadialDendrogram (generatorResult) {
   const jsonData = JSON.parse(generatorResult)

@@ -1,7 +1,5 @@
 // @ts-check
-/// import * as d3 from "https://cdn.skypack.dev/d3@7.8.2";
-// import * as d3 from 'd3';
-import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm'
+import * as d3 from 'd3'
 import { makeSVG, removeOldVisualizations } from '../d3support'
 import { visualizations } from '../globals.js'
 

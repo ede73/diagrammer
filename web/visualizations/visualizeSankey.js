@@ -1,6 +1,4 @@
 // @ts-check
-// import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-// import * as sankey from 'https://unpkg.com/d3-sankey@0';
 import { makeSVG, removeOldVisualizations } from '../d3support'
 import { visualizations } from '../globals.js'
 

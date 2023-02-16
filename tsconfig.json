@@ -8,7 +8,17 @@
       "model",
       "node",
       "vscode",
-      "jest"
+      "jest",
+      "d3",
+      "jquery",
+      "go"
     ]
-  }
+  },
+  "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "https://cdn.jsdelivr.net/npm/d3@7/+esm": ["./node_modules/@types/d3"],
+            "//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js": ["./node_modules/@types/jquery"]
+        }
+    }
 }

@@ -1,10 +1,6 @@
 // @ts-check
+import go from 'go'
 import { removeOldVisualizations } from '../d3support.js'
-// had to download locally...
-import * as go from '../../js/go-module.js'
-// Use in editor.. gets go.d.ts
-// import * as go from '../../js/go';
-
 import { visualizations } from '../globals.js'
 
 visualizations.set('parsetree', visualizeParseTree)

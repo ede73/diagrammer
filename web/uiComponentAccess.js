@@ -1,8 +1,5 @@
 // @ts-check
 
-// Tried npm i --save-dev @types/jquery, worked
-// Fails in browser, but works while editing!
-// import $ from "jquery";
 // Various modules operate on UI
 // Provide type safe access here
 

@@ -1,11 +1,12 @@
-// ignore for now ts-check
+// @ts-check
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { removeOldVisualizations } from './d3support.js'
 import { getError, getGenerator, getHTMLElement, getInputElement, getVisualizer, setError, setGenerator, updateImage } from './uiComponentAccess.js'
 import { visualizations } from './globals.js'
+import 'jquery'
 
 /**
- * @type {int}
+ * @type {number}
  */
 let parsingStarted
 
@@ -65,8 +66,8 @@ diagrammerParser.trace = function (x) {
 
 /**
  * @param {string} diagrammerCode Diagrammer graph to parse using
- * @param {function(string, string)} successCallback Passing final generator, visualizer
- * @param {function(string, Exception)} failureCallback passing error as string, exception as Exception
+ * @param {function(string, string):void} successCallback Passing final generator, visualizer
+ * @param {function(string, DOMException):void} failureCallback passing error as string, exception as Exception
  */
 export function parse (diagrammerCode, successCallback, failureCallback, preferScriptSpecifiedGeneratorAndVisualizer = false) {
   const generator = getGenerator()
@@ -96,6 +97,7 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
     // If true, actually prefer generator/visualizer from loaded script IF specified
     // used while loading new examples...
     diagrammerParser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer
+    // @ts-ignore
     diagrammerParser.parse(diagrammerCode)
     console.log(`  ..parsed, calling it a success with ${getGenerator()} and ${getVisualizer()}`)
     successCallback(getGenerator(), getVisualizer())
@@ -113,8 +115,8 @@ function makeNewImageHolder () {
   const img = document.createElement('img')
   img.align = 'bottom'
   // using % here fails (even if it works directly in HTML)
-  img.width = '400'
-  img.height = '400'
+  img.width = 400
+  img.height = 400
   img.id = 'image'
   // auto adjusts
   img.style.height = 'auto'
@@ -131,7 +133,7 @@ export function visualize (visualizer) {
   const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
   // TODO: loads uselessly if web visualizer used
   makeNewImageHolder()
-  // @ts-ignore
+  // eslint-disable-next-line no-undef
   $.ajax({
     type: 'POST',
     async: true,

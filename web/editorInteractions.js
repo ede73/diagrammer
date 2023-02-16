@@ -4,9 +4,7 @@ import { parse, visualize } from './parserInteractions.js'
 // import { Editor } from '../ace/src-noconflict/ace.js';
 import { getGenerator, getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js'
 
-// Tried npm i --save-dev @types/jquery, worked
-// Fails in browser, but works while editing!
-// import $ from "jquery";
+import 'jquery'
 
 /**
  * @type {HTMLElement}
@@ -149,6 +147,7 @@ function parseAndRegenerate (preferScriptSpecifiedGeneratorAndVisualizer = false
   parse(code, (finalGenerator, finalVisualizer) => {
     console.log(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`)
     visualize(finalVisualizer)
+  // eslint-disable-next-line n/handle-callback-err
   }, (error, ex) => {
     console.log('  parseAndRegenerate() - Parsing failed :(')
   }, preferScriptSpecifiedGeneratorAndVisualizer)
@@ -173,6 +172,7 @@ export function exampleChanged () {
   const e = getSelectElement('example')
   const doc = e.options[e.selectedIndex].value
   console.log(`exampleChanged(${doc})`)
+  // eslint-disable-next-line no-undef
   $.ajax({
     url: `tests/${doc}`,
     cache: false
@@ -223,7 +223,6 @@ hookupToListenToManualCodeChanges(500)
 hookupToListenToManualGeneratorChanges(500)
 
 if (acemode) {
-  const timer2 = null
   // some init race condition, editor null on page load
   if (typeof editor !== 'undefined') {
     editor.getSession().on('change', function () {

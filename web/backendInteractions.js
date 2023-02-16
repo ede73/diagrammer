@@ -1,14 +1,13 @@
 // @ts-check
 import { getSavedGraph } from './localStorage.js'
-// Tried npm i --save-dev @types/jquery, worked
-// Fails in browser, but works while editing!
-// import $ from "jquery";
+import 'jquery'
 
 function ParseResult (err) {
   alert(err)
 }
 
 export function exportGraphs () {
+  // eslint-disable-next-line no-undef
   $.ajax({
     type: 'POST',
     async: true,

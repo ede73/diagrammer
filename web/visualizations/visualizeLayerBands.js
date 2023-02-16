@@ -122,31 +122,7 @@ export function visualizeLayerBands (generatorResult) {
               $(go.Shape)) // simple black line, no arrowhead needed
 
     // define the tree node data
-    const nodearray = [
-      { // this is the information needed for the headers of the bands
-        key: '_BANDS',
-        category: 'Bands',
-        itemArray: [
-          { text: 'Zero' },
-          { text: 'One' },
-          { text: 'Two' },
-          { text: 'Three' },
-          { text: 'Four' },
-          { text: 'Five' }
-        ]
-      },
-      // these are the regular nodes in the TreeModel
-      { key: 'root' },
-      { key: 'oneB', parent: 'root' },
-      { key: 'twoA', parent: 'oneB' },
-      { key: 'twoC', parent: 'root' },
-      { key: 'threeC', parent: 'twoC' },
-      { key: 'threeD', parent: 'twoC' },
-      { key: 'fourB', parent: 'threeD' },
-      { key: 'fourC', parent: 'twoC' },
-      { key: 'fourD', parent: 'fourB' },
-      { key: 'twoD', parent: 'root' }
-    ]
+    const nodearray = jsonData
 
     myDiagram.model = new go.TreeModel(nodearray)
 

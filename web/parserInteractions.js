@@ -1,5 +1,5 @@
 // ignore for now ts-check
-import { diagrammer_parser } from '../build/diagrammer_parser.js'
+import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { removeOldVisualizations } from './d3support.js'
 import { getError, getGenerator, getHTMLElement, getInputElement, getVisualizer, setError, setGenerator, updateImage } from './uiComponentAccess.js'
 import { visualizations } from './globals.js'
@@ -24,14 +24,14 @@ function ParseResult (err) {
  * @param {string} hash
  */
 // TODO: MOVING TO GraphCanvas
-diagrammer_parser.yy.parseError = function (str, hash) {
+diagrammerParser.yy.parseError = function (str, hash) {
   const pe = `Parsing error:\n${str}\n${hash}`
   console.log('pe')
   setError(pe)
   throw new Error(str)
 }
 
-diagrammer_parser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, preferParsed) => {
+diagrammerParser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, preferParsed) => {
   console.log(`  ..script suggests using generator ${generator} and visualizer ${visualizer} and prefer ${preferParsed}`)
   if (preferParsed && generator) {
     const useVisualizer = visualizer === 'undefined' ? undefined : visualizer
@@ -46,7 +46,7 @@ diagrammer_parser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, pref
  */
 // called line by line...
 // TODO: MOVING TO GraphCanvas
-diagrammer_parser.yy.result = function (line) {
+diagrammerParser.yy.result = function (line) {
   if (parsingStarted === 1) {
     console.log('  ...parsing results start coming in...')
     result.value = ''
@@ -59,7 +59,7 @@ diagrammer_parser.yy.result = function (line) {
  * @param {string} x
  */
 // TODO: MOVING TO GraphCanvas
-diagrammer_parser.trace = function (x) {
+diagrammerParser.trace = function (x) {
   console.log(`TRACE:${x}`)
 }
 
@@ -86,17 +86,17 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
   parsingStarted = 1
   setError('')
   try {
-    delete (diagrammer_parser.yy.GRAPHCANVAS)
-    delete (diagrammer_parser.yy.EDGES)
-    delete (diagrammer_parser.yy.OBJECTS)
+    delete (diagrammerParser.yy.GRAPHCANVAS)
+    delete (diagrammerParser.yy.EDGES)
+    delete (diagrammerParser.yy.OBJECTS)
     // TODO: MOVING TO GraphCanvas
-    diagrammer_parser.yy.USE_GENERATOR = generator
+    diagrammerParser.yy.USE_GENERATOR = generator
     // TODO: MOVING TO GraphCanvas
-    diagrammer_parser.yy.USE_VISUALIZER = visualizer
+    diagrammerParser.yy.USE_VISUALIZER = visualizer
     // If true, actually prefer generator/visualizer from loaded script IF specified
     // used while loading new examples...
-    diagrammer_parser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer
-    diagrammer_parser.parse(diagrammerCode)
+    diagrammerParser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer
+    diagrammerParser.parse(diagrammerCode)
     console.log(`  ..parsed, calling it a success with ${getGenerator()} and ${getVisualizer()}`)
     successCallback(getGenerator(), getVisualizer())
   } catch (ex) {

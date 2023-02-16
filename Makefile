@@ -21,7 +21,7 @@ build/diagrammer_lexer.js: grammar/diagrammer.lex
 	@mkdir -p build
 	@echo Make build/diagrammer_lexer.js from LEX
 	@node_modules/.bin/jison-lex $< -o $@
-	@echo "exports.diagrammer_lexer=diagrammer_lexer;" >> $@
+	@echo "exports.diagrammerLexer=diagrammerLexer;" >> $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 
 build/diagrammer.all: $(GRAMMAR_FILES)
@@ -57,9 +57,9 @@ build/diagrammer_parser.js: build/diagrammer.all Makefile generators/* model/* j
 	#sed -i "1 i\var generators=new Map();" $@
 	#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 	echo '{"type":"module"}' > build/package.json
-	sed -i 's/^var diagrammer_parser/export var diagrammer_parser/g' $@
-	sed -i 's/exports.diagrammer_lexer=diagrammer_lexer;//g' build/diagrammer_lexer.js
-	sed -i 's/^var diagrammer_lexer/export var diagrammer_lexer/g' build/diagrammer_lexer.js
+	sed -i 's/^var diagrammer_parser/export var diagrammerParser/g' $@
+	sed -i 's/exports.diagrammerLexer=diagrammerLexer;//g' build/diagrammer_lexer.js
+	sed -i 's/^var diagrammer_lexer/export var diagrammerLexer/g' build/diagrammer_lexer.js
 	sed -i "1 i\var collectNextVertex;" build/diagrammer_lexer.js
 
 .PHONY: export

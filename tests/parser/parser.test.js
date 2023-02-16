@@ -1,4 +1,4 @@
-import { diagrammer_parser } from '../../build/diagrammer_parser.js'
+import { diagrammerParser } from '../../build/diagrammer_parser.js'
 import { generators } from '../../model/graphcanvas.js'
 import { GraphGroup } from '../../model/graphgroup.js'
 import { GraphVertex } from '../../model/graphvertex.js'
@@ -13,11 +13,11 @@ describe('Parser/grammar rule tests', () => {
     generators.set('abba', (gv) => {
       graphcanvas = gv
     })
-    diagrammer_parser.yy.result = function (result) {
+    diagrammerParser.yy.result = function (result) {
       throw new Error('Setup failure')
     }
-    diagrammer_parser.yy.USE_GENERATOR = 'abba'
-    diagrammer_parser.yy.parseError = function (str, hash) {
+    diagrammerParser.yy.USE_GENERATOR = 'abba'
+    diagrammerParser.yy.parseError = function (str, hash) {
       console.log('Parsing error found:')
       console.log(str)
       console.log(hash)
@@ -33,7 +33,7 @@ describe('Parser/grammar rule tests', () => {
   }
 
   it('graphContent/VARIABLE/state 16', async () => {
-    diagrammer_parser.parse('$(variable:value) $(toinen:kolmas)')
+    diagrammerParser.parse('$(variable:value) $(toinen:kolmas)')
     /** @type Map<string, string> */
     const variables = new Map(Object.entries(Array(graphcanvas.yy.VARIABLES)[0]))
     expect(variables.has('variable')).toBeTruthy()
@@ -43,35 +43,35 @@ describe('Parser/grammar rule tests', () => {
   })
 
   it('graphContent/SHAPE/state 17', async () => {
-    diagrammer_parser.parse('shape ellipse')
+    diagrammerParser.parse('shape ellipse')
     expect(graphcanvas.getCurrentShape()).toMatch('ellipse')
   })
 
   it('graphContent/EQUAL/state 18', async () => {
-    diagrammer_parser.parse('equal a,b\n')
+    diagrammerParser.parse('equal a,b\n')
     const equals = graphcanvas.getEqual()
     expect(equals[0].getName()).toMatch('a')
     expect(equals[1].getName()).toMatch('b')
   })
 
   it('graphContent/LANDSCAPE/state 20', async () => {
-    diagrammer_parser.parse('landscape\n')
+    diagrammerParser.parse('landscape\n')
     expect(graphcanvas.getDirection()).toMatch('landscape')
   })
 
   // Can't test since we've FORCED a generator..
   // it(`graphContent/generator/state 21`, async () => {
-  //     diagrammer_parser.parse("generator xx\n");
+  //     diagrammerParser.parse("generator xx\n");
   //     expect(graphcanvas.getGenerator()).toMatch('xx');
   // });
 
   it('graphContent/visualizer/state 22', async () => {
-    diagrammer_parser.parse('visualizer xx\n')
+    diagrammerParser.parse('visualizer xx\n')
     expect(graphcanvas.getVisualizer()).toMatch('xx')
   })
 
   it('graphContent/PORTRAIT/state 23', async () => {
-    diagrammer_parser.parse('portrait\n')
+    diagrammerParser.parse('portrait\n')
     expect(graphcanvas.getDirection()).toMatch('portrait')
   })
 
@@ -81,36 +81,36 @@ describe('Parser/grammar rule tests', () => {
 
   it('graphContent/VERTEX_COLOR/state 25', async () => {
     const color = makeRandomRGB()
-    diagrammer_parser.parse(`vertex color ${color}`)
+    diagrammerParser.parse(`vertex color ${color}`)
     expect(graphcanvas.getDefault('vertexcolor')).toMatch(color)
   })
 
   it('graphContent/VERTEXTEXT_COLOR/state 26', async () => {
     const color = makeRandomRGB()
-    diagrammer_parser.parse(`vertex text color ${color}`)
+    diagrammerParser.parse(`vertex text color ${color}`)
     expect(graphcanvas.getDefault('vertextextcolor')).toMatch(color)
   })
 
   it('graphContent/EDGE_COLOR/state 27', async () => {
     const color = makeRandomRGB()
-    diagrammer_parser.parse(`edge color ${color}`)
+    diagrammerParser.parse(`edge color ${color}`)
     expect(graphcanvas.getDefault('edgecolor')).toMatch(color)
   })
 
   it('graphContent/EDGETEXT_COLOR/state 28', async () => {
     const color = makeRandomRGB()
-    diagrammer_parser.parse(`edge text color ${color}`)
+    diagrammerParser.parse(`edge text color ${color}`)
     expect(graphcanvas.getDefault('edgetextcolor')).toMatch(color)
   })
 
   it('graphContent/GROUP_COLOR/state 29', async () => {
     const color = makeRandomRGB()
-    diagrammer_parser.parse(`group color ${color}`)
+    diagrammerParser.parse(`group color ${color}`)
     expect(graphcanvas.getDefault('groupcolor')).toMatch(color)
   })
 
   it('graphContent/[ IF/state 30 ELSEIF/state 31 ELSE/state 32 ENDIF/state 33]', async () => {
-    diagrammer_parser.parse(`
+    diagrammerParser.parse(`
 entry;is required with conditional
 if a then
 elseif b then
@@ -168,7 +168,7 @@ exit;exit node is also required
 
   it('graphContent/GROUP/state 34', async () => {
     const color = makeRandomRGB()
-    diagrammer_parser.parse(`group name ${color};label\ngroup end\n`)
+    diagrammerParser.parse(`group name ${color};label\ngroup end\n`)
     /** @type {GraphGroup} */
     const group = graphcanvas.OBJECTS[0]
     expect(graphcanvas.OBJECTS.length).toBe(1)
@@ -179,7 +179,7 @@ exit;exit node is also required
 
   it('graphContent/GROUP(brief)/state 34', async () => {
     const color = makeRandomRGB()
-    diagrammer_parser.parse(`{name${color};label\n}\n`)
+    diagrammerParser.parse(`{name${color};label\n}\n`)
     /** @type {GraphGroup} */
     const group = graphcanvas.OBJECTS[0]
     expect(graphcanvas.OBJECTS.length).toBe(1)
@@ -190,7 +190,7 @@ exit;exit node is also required
 
   it('graphContent/START/state 35', async () => {
     // this is just a reference to a vertex, not a vertex(probably should be though :) )
-    diagrammer_parser.parse('start a\n')
+    diagrammerParser.parse('start a\n')
     expect(graphcanvas.getStart()).toBe('a')
   })
 
@@ -200,7 +200,7 @@ exit;exit node is also required
     // root vertices a
     // 3 edges, between a (at NW corner) q,w,e to (at SE corner) edge text is edgelabel
     // readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> getEdge(yy,$EVENT,$readEvents,$vertexGroupListOrAttrs,$6,$8?$8.substring(1):$8,$5,$2,$4).right
-    diagrammer_parser.parse(`a:nw ->:se ${color} "edgelabel" q,w,e;label\n`)
+    diagrammerParser.parse(`a:nw ->:se ${color} "edgelabel" q,w,e;label\n`)
     expect(graphcanvas.OBJECTS.length).toBe(4)
     expect(graphcanvas.ROOTVERTICES.length).toBe(1)
     expect(graphcanvas.EDGES.length).toBe(3)
@@ -232,7 +232,7 @@ exit;exit node is also required
 
   // TODO: fix this
   it.skip('Root vertices test', async () => {
-    diagrammer_parser.parse(`
+    diagrammerParser.parse(`
             a b c
             q>a w>b e>c
             w>a

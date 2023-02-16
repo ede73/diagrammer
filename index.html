@@ -8,7 +8,6 @@
 <!-- <script type="module" src="https://gojs.net/latest/release/go-module.js"></script> -->
 <script type="module" src="js/go-module.js"></script>
 <script type="module" src="web/index.js"></script>
-<script type="module" src="web/visualizations/package.json"></script>
 <script type="module" src="web/visualizations/visualizations.js"></script>
 <script type="module" src="web/visualizations/visualizeCirclePacked.js"></script>
 <script type="module" src="web/visualizations/visualizeLayerBands.js"></script>
@@ -78,54 +77,54 @@
 		<label for="example">Examples:</label>
 		<select id="example" name="example" onChange="exampleChanged()">
 			<!--ls tests/test_inputs/*txt|awk -F/ '{print "<option value=\""$2"\">"$2"</option>"}'-->
-<option value="test_inputs/ast.txt">ast.txt</option>
-<option value="test_inputs/compass.txt">compass.txt</option>
-<option value="test_inputs/dendrogram.txt">dendrogram.txt</option>
-<option value="test_inputs/dendrogram_spec.txt">dendrogram_spec.txt</option>
-<option value="test_inputs/events.txt">events.txt</option>
-<option value="test_inputs/fulltest.txt">fulltest.txt</option>
-<option value="test_inputs/group_group_link.txt">group_group_link.txt</option>
-<option value="test_inputs/layerbands.txt">layerbands.txt</option>
-<option value="test_inputs/nodes.txt">nodes.txt</option>
-<option value="test_inputs/parsetree.txt">parsetree.txt</option>
-<option value="test_inputs/plantuml_context.txt">plantuml_context.txt</option>
-<option value="test_inputs/plantuml_context2.txt">plantuml_context2.txt</option>
-<option value="test_inputs/sankey.txt">sankey.txt</option>
-<option value="test_inputs/seqdiag.txt">seqdiag.txt</option>
-<option value="test_inputs/state.txt">state.txt</option>
-<option value="test_inputs/state10.txt">state10.txt</option>
-<option value="test_inputs/state11.txt">state11.txt</option>
-<option value="test_inputs/state12.txt">state12.txt</option>
-<option value="test_inputs/state13.txt">state13.txt</option>
-<option value="test_inputs/state14.txt">state14.txt</option>
-<option value="test_inputs/state15.txt">state15.txt</option>
-<option value="test_inputs/state16.txt">state16.txt</option>
-<option value="test_inputs/state2.txt">state2.txt</option>
-<option value="test_inputs/state3.txt">state3.txt</option>
-<option value="test_inputs/state4.txt">state4.txt</option>
-<option value="test_inputs/state5.txt">state5.txt</option>
-<option value="test_inputs/state6.txt">state6.txt</option>
-<option value="test_inputs/state7.txt">state7.txt</option>
-<option value="test_inputs/state8.txt">state8.txt</option>
-<option value="test_inputs/state9.txt">state9.txt</option>
-<option value="test_inputs/state_ancestry.txt">state_ancestry.txt</option>
-<option value="test_inputs/state_android.txt">state_android.txt</option>
-<option value="test_inputs/state_cluster_edge.txt">state_cluster_edge.txt</option>
-<option value="test_inputs/state_conditionals.txt">state_conditionals.txt</option>
-<option value="test_inputs/state_dual_node.txt">state_dual_node.txt</option>
-<option value="test_inputs/state_group.txt">state_group.txt</option>
-<option value="test_inputs/state_images.txt">state_images.txt</option>
-<option value="test_inputs/state_innergroups.txt">state_innergroups.txt</option>
-<option value="test_inputs/state_nodelinktests.txt">state_nodelinktests.txt</option>
-<option value="test_inputs/state_recursive_linking.txt">state_recursive_linking.txt</option>
-<option value="test_inputs/state_sequence.txt">state_sequence.txt</option>
-<option value="test_inputs/state_sequence2.txt">state_sequence2.txt</option>
-<option value="test_inputs/state_sip_sequence.txt">state_sip_sequence.txt</option>
-<option value="test_inputs/state_tcp.txt">state_tcp.txt</option>
-<option value="test_inputs/state_y_edge.txt">state_y_edge.txt</option>
-<option value="test_inputs/umlclass.txt">umlclass.txt</option>
-<option value="test_inputs/umlclass2.txt">umlclass2.txt</option>
-<option value="test_inputs/url.txt">url.txt</option>
+<option value="test_inputs/ast.txt">test_inputs/ast.txt</option>
+<option value="test_inputs/compass.txt">test_inputs/compass.txt</option>
+<option value="test_inputs/dendrogram.txt">test_inputs/dendrogram.txt</option>
+<option value="test_inputs/dendrogram_spec.txt">test_inputs/dendrogram_spec.txt</option>
+<option value="test_inputs/events.txt">test_inputs/events.txt</option>
+<option value="test_inputs/fulltest.txt">test_inputs/fulltest.txt</option>
+<option value="test_inputs/group_group_link.txt">test_inputs/group_group_link.txt</option>
+<option value="test_inputs/layerbands.txt">test_inputs/layerbands.txt</option>
+<option value="test_inputs/nodes.txt">test_inputs/nodes.txt</option>
+<option value="test_inputs/parsetree.txt">test_inputs/parsetree.txt</option>
+<option value="test_inputs/plantuml_context.txt">test_inputs/plantuml_context.txt</option>
+<option value="test_inputs/plantuml_context2.txt">test_inputs/plantuml_context2.txt</option>
+<option value="test_inputs/sankey.txt">test_inputs/sankey.txt</option>
+<option value="test_inputs/seqdiag.txt">test_inputs/seqdiag.txt</option>
+<option value="test_inputs/state.txt">test_inputs/state.txt</option>
+<option value="test_inputs/state10.txt">test_inputs/state10.txt</option>
+<option value="test_inputs/state11.txt">test_inputs/state11.txt</option>
+<option value="test_inputs/state12.txt">test_inputs/state12.txt</option>
+<option value="test_inputs/state13.txt">test_inputs/state13.txt</option>
+<option value="test_inputs/state14.txt">test_inputs/state14.txt</option>
+<option value="test_inputs/state15.txt">test_inputs/state15.txt</option>
+<option value="test_inputs/state16.txt">test_inputs/state16.txt</option>
+<option value="test_inputs/state2.txt">test_inputs/state2.txt</option>
+<option value="test_inputs/state3.txt">test_inputs/state3.txt</option>
+<option value="test_inputs/state4.txt">test_inputs/state4.txt</option>
+<option value="test_inputs/state5.txt">test_inputs/state5.txt</option>
+<option value="test_inputs/state6.txt">test_inputs/state6.txt</option>
+<option value="test_inputs/state7.txt">test_inputs/state7.txt</option>
+<option value="test_inputs/state8.txt">test_inputs/state8.txt</option>
+<option value="test_inputs/state9.txt">test_inputs/state9.txt</option>
+<option value="test_inputs/state_ancestry.txt">test_inputs/state_ancestry.txt</option>
+<option value="test_inputs/state_android.txt">test_inputs/state_android.txt</option>
+<option value="test_inputs/state_cluster_edge.txt">test_inputs/state_cluster_edge.txt</option>
+<option value="test_inputs/state_conditionals.txt">test_inputs/state_conditionals.txt</option>
+<option value="test_inputs/state_dual_node.txt">test_inputs/state_dual_node.txt</option>
+<option value="test_inputs/state_group.txt">test_inputs/state_group.txt</option>
+<option value="test_inputs/state_images.txt">test_inputs/state_images.txt</option>
+<option value="test_inputs/state_innergroups.txt">test_inputs/state_innergroups.txt</option>
+<option value="test_inputs/state_nodelinktests.txt">test_inputs/state_nodelinktests.txt</option>
+<option value="test_inputs/state_recursive_linking.txt">test_inputs/state_recursive_linking.txt</option>
+<option value="test_inputs/state_sequence.txt">test_inputs/state_sequence.txt</option>
+<option value="test_inputs/state_sequence2.txt">test_inputs/state_sequence2.txt</option>
+<option value="test_inputs/state_sip_sequence.txt">test_inputs/state_sip_sequence.txt</option>
+<option value="test_inputs/state_tcp.txt">test_inputs/state_tcp.txt</option>
+<option value="test_inputs/state_y_edge.txt">test_inputs/state_y_edge.txt</option>
+<option value="test_inputs/umlclass.txt">test_inputs/umlclass.txt</option>
+<option value="test_inputs/umlclass2.txt">test_inputs/umlclass2.txt</option>
+<option value="test_inputs/url.txt">test_inputs/url.txt</option>
 		</select>
 		<label for="filename">Filename</label>
 		<input type="text" id="filename" name="filename" value="output" />

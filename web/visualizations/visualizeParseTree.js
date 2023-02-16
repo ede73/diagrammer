@@ -77,9 +77,6 @@ FlatTreeLayout.prototype.commitLayout = function () {
   // find maximum Y position of all Nodes
   let y = -Infinity
   // network is definitely
-  console.log(typeof (this))
-  console.log(this)
-  console.log(typeof (this))
   this.network.vertexes.each(function (v) {
     y = Math.max(y, v.node.position.y)
   })

@@ -58,7 +58,7 @@ export function visualizeLayerBands (generatorResult) {
     const $ = go.GraphObject.make
 
     const svgimg = removeOldVisualizations('LAYEREDBANDNODE')
-    // const svgimg = make_svg();
+    // const svgimg = makeSVG();
 
     const myDiagram = $(go.Diagram, 'LAYEREDBANDNODE',
       {

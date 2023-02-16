@@ -15,7 +15,7 @@ export function visualizeParseTree (generatorResult) {
   const $ = go.GraphObject.make // for conciseness in defining templates
 
   const svgimg = removeOldVisualizations('PARSETREENODE')
-  // const svgimg = make_svg();
+  // const svgimg = makeSVG();
 
   const myDiagram =
         $(go.Diagram, 'PARSETREENODE',

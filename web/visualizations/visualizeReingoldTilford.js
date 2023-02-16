@@ -2,7 +2,7 @@
 /// import * as d3 from "https://cdn.skypack.dev/d3@7.8.2";
 // import * as d3 from 'd3';
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm'
-import { make_svg, removeOldVisualizations } from '../d3support'
+import { makeSVG, removeOldVisualizations } from '../d3support'
 import { visualizations } from '../globals.js'
 
 visualizations.set('reingoldtilford', visualizeReingoldTilford)
@@ -24,7 +24,7 @@ export function visualizeReingoldTilford (generatorResult) {
   const root = tree(data)
 
   removeOldVisualizations()
-  const svgimg = make_svg(width, height)
+  const svgimg = makeSVG(width, height)
     .attr('transform', `translate(${width / 2},${height / 2})`)
 
   const links = root.links()

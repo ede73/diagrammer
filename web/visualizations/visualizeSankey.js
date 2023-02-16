@@ -1,7 +1,7 @@
 // @ts-check
 // import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 // import * as sankey from 'https://unpkg.com/d3-sankey@0';
-import { make_svg, removeOldVisualizations } from '../d3support'
+import { makeSVG, removeOldVisualizations } from '../d3support'
 import { visualizations } from '../globals.js'
 
 visualizations.set('sankey', visualizeSankey)
@@ -36,7 +36,7 @@ export function visualizeSankey (generatorResult) {
   //     .style("width", "100%")
   //     .style("height", "auto");
   removeOldVisualizations()
-  const svgimg = make_svg(width, height)
+  const svgimg = makeSVG(width, height)
 
   //        d3.json("https://gist.githubusercontent.com/mbostock/ca9a0bb7ba204d12974bca90acc507c0/raw/398136b7db83d7d7fd89181b080924eb76041692/energy.json").then(data => {
   // d3.json("https://gist.githubusercontent.com/mbostock/ca9a0bb7ba204d12974bca90acc507c0/raw/398136b7db83d7d7fd89181b080924eb76041692/energy.json").then(data => {

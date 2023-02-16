@@ -1,6 +1,6 @@
 import { getHTMLElement } from './uiComponentAccess.js'
 
-export function make_svg (width, height) {
+export function makeSVG (width, height) {
   if (!width) {
     width = 300
   }

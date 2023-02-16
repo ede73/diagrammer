@@ -21,13 +21,21 @@ export function getHTMLElement (name) {
  * @param {string} generator
  */
 export function setGenerator (generator, visualizer = undefined) {
-  const e = getSelectElement('generator')
-  console.log(`Set generator ${generator}:${visualizer}`)
   const genViz = generator + (visualizer ? ':' + visualizer : '')
-  console.log(genViz)
-  console.log(genViz)
-  $(`#generator option[value^='${genViz}']`).attr('selected', 'true')
-  console.log('Generator is now ' + getGenerator())
+  console.log(`setGenerator(${generator}:${visualizer}) ie. '${genViz}'`)
+  // Change the generator via UI
+  /** @type {HTMLInputElement} */
+  const select = document.querySelector('#generator')
+  select.value = genViz
+  if (getGenerator() !== generator) {
+    console.error(`Somewhy generator change did not go thru, we wanted ${generator} and have ${getGenerator()}`)
+  }
+  if (visualizer) {
+    if (getVisualizer() !== visualizer) {
+      console.error(`Somewhy visualizer change did not go thru, we wanted ${visualizer} and have ${getVisualizer()}`)
+    }
+  }
+  console.log(` final result is generator=${getGenerator()} visualizer=${getVisualizer()}`)
 }
 
 /**

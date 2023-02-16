@@ -34,9 +34,9 @@ diagrammer_parser.yy.parseError = function (str, hash) {
 diagrammer_parser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, preferParsed) => {
   console.log(`  ..script suggests using generator ${generator} and visualizer ${visualizer} and prefer ${preferParsed}`)
   if (preferParsed && generator) {
-    const useVisualizer = visualizer == 'undefined' ? undefined : visualizer
-    console.log(`  .. changed generartor to ${generator} and visualizer ${useVisualizer}`)
+    const useVisualizer = visualizer === 'undefined' ? undefined : visualizer
     setGenerator(generator, useVisualizer)
+    console.log(`  .. changed generator to ${generator} and visualizer ${useVisualizer}`)
   }
 }
 
@@ -47,7 +47,7 @@ diagrammer_parser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, pref
 // called line by line...
 // TODO: MOVING TO GraphCanvas
 diagrammer_parser.yy.result = function (line) {
-  if (parsingStarted == 1) {
+  if (parsingStarted === 1) {
     console.log('  ...parsing results start coming in...')
     result.value = ''
   }

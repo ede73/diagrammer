@@ -2,10 +2,14 @@
 // import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 // import * as sankey from 'https://unpkg.com/d3-sankey@0';
 import { make_svg, removeOldVisualizations } from '../d3support'
+import { visualizations } from '../globals.js'
+
+visualizations.set('sankey', visualizeSankey)
+
 // https://github.com/ricklupton/d3-sankey-diagram or
 // https://github.com/d3/d3-sankey/blob/master/README.md
-
-export function visualizeSankey (jsonData) {
+export function visualizeSankey (generatorResult) {
+  const jsonData = JSON.parse(generatorResult)
   const width = 964
   const height = 600
 
@@ -39,8 +43,6 @@ export function visualizeSankey (jsonData) {
   {
     const data = jsonData
     const { nodes, links } = sankey(data)
-    console.log(nodes)
-    console.log(links)
 
     svgimg.append('g')
       .attr('stroke', '#000')

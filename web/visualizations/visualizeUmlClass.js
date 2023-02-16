@@ -4,11 +4,15 @@
 // had to download locally...
 import * as go from '../../js/go-module.js'
 import { removeOldVisualizations } from '../d3support.js'
+import { visualizations } from '../globals.js'
 // Use in editor.. gets go.d.ts
 // import * as go from '../../js/go';
 
+visualizations.set('umlclass', visualizeUmlClass)
+
 // use ../manual_test_diagrams/uml.d
-export function visualizeUmlClass (jsonData) {
+export function visualizeUmlClass (generatorResult) {
+  const jsonData = JSON.parse(generatorResult)
   const $ = go.GraphObject.make
 
   removeOldVisualizations('UMLCLASS')

@@ -2,13 +2,7 @@
 import { diagrammer_parser } from '../build/diagrammer_parser.js'
 import { removeOldVisualizations } from './d3support.js'
 import { getError, getGenerator, getHTMLElement, getInputElement, getVisualizer, setError, setGenerator, updateImage } from './uiComponentAccess.js'
-import { visualizeCirclePacked } from './visualizations/visualizeCirclePacked.js'
-import { visualizeLayerBands } from './visualizations/visualizeLayerBands.js'
-import { visualizeParseTree } from './visualizations/visualizeParseTree.js'
-import { visualizeRadialDendrogram } from './visualizations/visualizeRadialDendrogram.js'
-import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilford.js'
-import { visualizeSankey } from './visualizations/visualizeSankey.js'
-import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js'
+import { visualizations } from './globals.js'
 
 /**
  * @type {int}
@@ -166,7 +160,13 @@ export function visualize (visualizer) {
             onclick="javascript:openImage('web/result.png');" />
     */
 
-  if (visualizer === 'dot') {
+  if (visualizations.has(visualizer)) {
+    // this is web only visualization
+    console.log(`Visualize using ${visualizer}`)
+    visualizations.get(visualizer)(result.value)
+    console.log(`Finished visualizing ${visualizer}`)
+  } else if (visualizer === 'dot') {
+    // hack to get Viz display graphviz as comparison..
     try {
       getHTMLElement('svg').innerHTML = Viz(statelang, 'svg')
     } catch (err) {
@@ -179,23 +179,5 @@ export function visualize (visualizer) {
     // console.log(err);
     // }
     // TODO: Use visualizations/generators maps
-  } else if (visualizer === 'radialdendrogram') {
-    visualizeRadialDendrogram(JSON.parse(result.value))
-  } else if (visualizer === 'circlepacked') {
-    alert('TBD')
-    visualizeCirclePacked(JSON.parse(result.value))
-  } else if (visualizer === 'reingoldtilford') {
-    visualizeReingoldTilford(JSON.parse(result.value))
-  } else if (visualizer === 'parsetree') {
-    visualizeParseTree(JSON.parse(result.value))
-  } else if (visualizer === 'layerbands') {
-    visualizeLayerBands(JSON.parse(result.value))
-  } else if (visualizer === 'umlclass') {
-    visualizeUmlClass(JSON.parse(result.value))
-  } else if (visualizer === 'sankey') {
-    visualizeSankey(JSON.parse(result.value))
-  } else {
-    console.log(`Unknown WEB UI visualizer ${visualizer}`)
-    getHTMLElement('svg').innerHTML = 'only for dotty'
   }
 }

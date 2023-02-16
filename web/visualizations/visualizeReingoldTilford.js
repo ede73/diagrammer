@@ -3,9 +3,12 @@
 // import * as d3 from 'd3';
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm'
 import { make_svg, removeOldVisualizations } from '../d3support'
+import { visualizations } from '../globals.js'
 
-export function visualizeReingoldTilford (jsonData) {
-  console.trace('Start reingold')
+visualizations.set('reingoldtilford', visualizeReingoldTilford)
+
+export function visualizeReingoldTilford (generatorResult) {
+  const jsonData = JSON.parse(generatorResult)
   const width = 400
   const height = 400
 
@@ -14,7 +17,7 @@ export function visualizeReingoldTilford (jsonData) {
   const tree = d3.tree()
     .size([2 * Math.PI, radius])
     .separation(function (a, b) {
-      return (a.parent == b.parent ? 1 : 2) / a.depth
+      return (a.parent === b.parent ? 1 : 2) / a.depth
     })
 
   const data = d3.hierarchy(jsonData)
@@ -53,5 +56,4 @@ export function visualizeReingoldTilford (jsonData) {
     .text(function (d) { return d.data.name })
 
   d3.select(self.frameElement).style('height', height + 'px')
-  console.log('Done visualizing ReingoldTilford')
 }

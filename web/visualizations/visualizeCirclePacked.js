@@ -1,8 +1,13 @@
 // @ts-check
 
+import { visualizations } from '../globals.js'
+
+visualizations.set('circlepacked', visualizeCirclePacked)
+
 // https://observablehq.com/@d3/circle-packing
-export function visualizeCirclePacked (jsonData) {
-  const width = 400; const height = 400
+export function visualizeCirclePacked (generatorResult) {
+  // const jsonData = JSON.parse(generatorResult)
+  // const width = 400; const height = 400
   // pack = data => d3.pack()
   //    .size([width, height])
   //    .padding(3)

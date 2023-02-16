@@ -1,13 +1,17 @@
 // @ts-check
 import { removeOldVisualizations } from '../d3support.js'
-
 // had to download locally...
 import * as go from '../../js/go-module.js'
 // Use in editor.. gets go.d.ts
 // import * as go from '../../js/go';
 
+import { visualizations } from '../globals.js'
+
+visualizations.set('parsetree', visualizeParseTree)
+
 // use ../manual_test_diagrams/parsetree.d
-export function visualizeParseTree (jsonData) {
+export function visualizeParseTree (generatorResult) {
+  const jsonData = JSON.parse(generatorResult)
   const $ = go.GraphObject.make // for conciseness in defining templates
 
   const svgimg = removeOldVisualizations('PARSETREENODE')
@@ -59,7 +63,6 @@ export function visualizeParseTree (jsonData) {
   const x = 0; const y = 0; const printSize = 300
   const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize })
   svgimg.appendChild(svg)
-  console.log('Done visualizing ParseTree')
 }
 
 // Customize the TreeLayout to position all of the leaf nodes at the same vertical Y position.

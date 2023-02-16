@@ -5,8 +5,13 @@ import * as go from '../../js/go-debug-module.js'
 // Use in editor.. gets go.d.ts
 // import * as go from '../../js/go';
 
+import { visualizations } from '../globals.js'
+
+visualizations.set('layerbands', visualizeLayerBands)
+
 // use ../manual_test_diagrams/layerbands.d
-export function visualizeLayerBands (jsonData) {
+export function visualizeLayerBands (generatorResult) {
+  const jsonData = JSON.parse(generatorResult)
   const HORIZONTAL = true
   // Perform a TreeLayout where commitLayers is overridden to modify the background Part whose key is "_BANDS".
   class BandedTreeLayout extends go.TreeLayout {
@@ -103,11 +108,11 @@ export function visualizeLayerBands (jsonData) {
                             // always bind "width" because the angle does the rotation
                             new go.Binding('width', 'bounds', function (r) { return HORIZONTAL ? r.width : r.height })
                           ),
-                          // option 1: rectangular bands:
+                          // option 1: rectangular bands
                           $(go.Shape,
                             { stroke: null, strokeWidth: 0 },
                             new go.Binding('desiredSize', 'bounds', function (r) { return r.size }),
-                            new go.Binding('fill', 'itemIndex', function (i) { return i % 2 == 0 ? 'whitesmoke' : go.Brush.darken('whitesmoke') }).ofObject())
+                            new go.Binding('fill', 'itemIndex', function (i) { return i % 2 === 0 ? 'whitesmoke' : go.Brush.darken('whitesmoke') }).ofObject())
                         )
         }
       ))

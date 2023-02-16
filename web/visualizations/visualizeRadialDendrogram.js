@@ -13,6 +13,9 @@
 // import * as d3 from "https://cdn.observableusercontent.com/npm/d3@7.8.2/dist/d3.min.js";
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm'
 import { make_svg, removeOldVisualizations } from '../d3support'
+import { visualizations } from '../globals.js'
+
+visualizations.set('radialdendrogram', visualizeRadialDendrogram)
 
 // <script src="https://d3js.org/d3.v7.min.js"></script>
 
@@ -22,7 +25,8 @@ https://www.npmjs.com/package/@types/d3
 https://formidable.com/blog/2022/victory-esm/ ??
  */
 // https://medium.com/analytics-vidhya/creating-a-radial-tree-using-d3-js-for-javascript-be943e23b74e
-export function visualizeRadialDendrogram (jsonData) {
+export function visualizeRadialDendrogram (generatorResult) {
+  const jsonData = JSON.parse(generatorResult)
   const radius = 250
   const width = 400
   const height = 400
@@ -30,7 +34,7 @@ export function visualizeRadialDendrogram (jsonData) {
   const tree = d3.tree()
     .size([2 * Math.PI, radius])
     .separation(function (a, b) {
-      return (a.parent == b.parent ? 1 : 2) / a.depth
+      return (a.parent === b.parent ? 1 : 2) / a.depth
     })
   const data = d3.hierarchy(jsonData)
   const treeData = tree(data)

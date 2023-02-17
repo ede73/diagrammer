@@ -73,7 +73,7 @@ describe('Diagrammer', () => {
       }
     })
 
-    await p.click('form[name="contact"]>button#import')
+    await p.click('form[name="contact"]>button#diagrammer-import')
 
     // Import is asynchronous, it'll take a moment for results to arrive
     await sleepABit(100)

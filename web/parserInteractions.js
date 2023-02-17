@@ -3,16 +3,12 @@ import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { removeOldVisualizations } from './d3support.js'
 import { getError, getGenerator, getHTMLElement, getInputElement, getVisualizer, openImage, setError, setGenerator, updateImage } from './uiComponentAccess.js'
 import { visualizations } from './globals.js'
-import 'jquery'
+import { makeHTTPPost } from './ajax.js'
 
 /**
  * @type {number}
  */
 let parsingStarted
-
-function ParseResult (err) {
-  alert(err)
-}
 
 /**
  *
@@ -138,30 +134,12 @@ export function visualize (visualizer) {
   const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
   // TODO: loads uselessly if web visualizer used
   makeNewImageHolder()
-  // eslint-disable-next-line no-undef
-  $.ajax({
-    type: 'POST',
-    async: true,
-    cache: false,
-    url: visualizeUrl,
-    data: statelang,
-    // data: {body:statelang},
-    // contentType: "application/json; charset=utf-8",
-    // dataType: "json",
-    success: function (msg) {
-      // UseReturnedData(msg.d);
-      // alert(msg);
-      updateImage(msg)
-    },
-    error: function (err) {
-      alert(`ERROR: ${JSON.stringify(err)}`)
-      if (err.status === 200) {
-        ParseResult(err)
-      } else {
-        alert(`Error:${err.responseText}  Status: ${err.status}`)
-      }
-    }
-  })
+  makeHTTPPost(visualizeUrl, statelang,
+    updateImage,
+    (statusCode, statusText, responseText) => {
+      alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
+    })
+
   /*
         <img align="bottom" id="image" width="30%" src="web/result.png"
             onclick="javascript:openImage('web/result.png');" />

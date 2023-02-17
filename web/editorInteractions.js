@@ -1,12 +1,9 @@
 // @ts-check
 import { getSavedGraph } from './localStorage.js'
 import { parse, visualize } from './parserInteractions.js'
-// import { Editor } from '../ace/src-noconflict/ace.js';
 import { getGenerator, getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js'
-
-import 'jquery'
-
-// afterbody
+import { makeHTTPGet } from './ajax.js'
+// import { Editor } from '../ace/src-noconflict/ace.js';
 
 // Set to 0 to fall back to textarea(enable textarea in index.html)
 const acemode = 1
@@ -168,16 +165,15 @@ export function exampleChanged () {
   const e = getSelectElement('example')
   const doc = e.options[e.selectedIndex].value
   console.log(`exampleChanged(${doc})`)
-  // eslint-disable-next-line no-undef
-  $.ajax({
-    url: `tests/${doc}`,
-    cache: false
-  }).done(function (data) {
-    console.log(`  exampleChanged(${doc}) - set graph text`)
-    setGraphText(data)
-    console.log(`  exampleChanged(${doc}) - parse and regenerate, from UI ${getGenerator()} / ${getVisualizer()}`)
-    parseAndRegenerate(true)
-  })
+  makeHTTPGet(`tests/${doc}`,
+    (msg) => {
+      setGraphText(String(msg))
+      console.log(`  exampleChanged(${doc}) - parse and regenerate, from UI ${getGenerator()} / ${getVisualizer()}`)
+      parseAndRegenerate(true)
+    },
+    (stateCode, statusText, responseText) => {
+      alert(`Failed fetching example tests/${doc} ${statusText} ${responseText}`)
+    })
 }
 
 /**

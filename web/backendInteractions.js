@@ -1,56 +1,31 @@
 // @ts-check
 import { getSavedGraph } from './localStorage.js'
-import 'jquery'
-
-function ParseResult (err) {
-  alert(err)
-}
+import { makeHTTPGet, makeHTTPPost } from './ajax.js'
+import { setError } from './uiComponentAccess.js'
 
 export function exportGraphs () {
-  // eslint-disable-next-line no-undef
-  $.ajax({
-    type: 'POST',
-    async: true,
-    cache: false,
-    url: 'web/saveExport.php',
-    data: JSON.stringify(getSavedGraph()),
-    contentType: 'application/json; charset=utf-8',
-    // dataType: "json",
-    success: function (msg) {
+  makeHTTPPost('web/saveExport.php',
+    JSON.stringify(getSavedGraph),
+    (msg) => {
       alert('Exported')
     },
-    error: function (err) {
-      alert(`ERROR: ${JSON.stringify(err)}`)
-      if (err.status === 200) {
-        ParseResult(err)
-      } else {
-        alert(`Error:${err.responseText}  Status: ${err.status}`)
-      }
-    }
-  })
+    (statusCode, statusText, responseText) => {
+      const error = `Failed exporting, error:${responseText} Status: ${statusText}`
+      setError(error)
+      alert(error)
+    })
 }
 
 export function importGraphs () {
   // eslint-disable-next-line no-undef
-  $.ajax({
-    type: 'GET',
-    async: true,
-    cache: false,
-    // url: "web/localstorage.json",
-    url: 'web/loadExport.php',
-    contentType: 'application/json; charset=utf-8',
-    dataType: 'json',
-    success: function (msg) {
+  makeHTTPGet('web/loadExport.php',
+    (msg) => {
       localStorage.setItem('graphs', JSON.stringify(msg))
       alert('Imported, reload the page!')
     },
-    error: function (err) {
-      alert(`ERROR: ${JSON.stringify(err)}`)
-      if (err.status === 200) {
-        ParseResult(err)
-      } else {
-        alert(`Error:${err.responseText}  Status: ${err.status}`)
-      }
-    }
-  })
+    (statusCode, statusText, responseText) => {
+      const error = `Error:${responseText}  Status: ${statusText}`
+      setError(error)
+      alert(error)
+    }, 'application/json; charset=utf-8', 'json')
 }

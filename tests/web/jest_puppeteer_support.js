@@ -36,7 +36,7 @@ export async function dumpWholePage2 (page) {
  * @return {Promise<void>}
  */
 async function assertElementExists (page, elementId) {
-  if (await page.$(elementId) == null) {
+  if (await page.$(elementId) === null) {
     throw new Error(`Element ${elementId} does not exist`)
   }
 }
@@ -56,8 +56,34 @@ export async function sleepABit (milliSeconds) {
  * @returns {Promise<string>} Return element text(value)
  */
 export async function getElementText (page, elementId) {
-  await assertElementExists(elementId)
-  return await page.$eval(elementId, element => element.value)
+  await assertElementExists(page, elementId)
+  return await page.$eval(elementId, element => {
+    return element.value
+  })
+}
+
+/**
+ * @param {Page} page
+ * @param {string} elementId #IdHere, input[name=xx]
+ * @returns {Promise<string>} Return element innerHTML(value)
+ */
+export async function getElementInnerHtml (page, elementId) {
+  await assertElementExists(page, elementId)
+  return await page.$eval(elementId, element => {
+    return element.innerHTML
+  })
+}
+
+/**
+ * @param {Page} page
+ * @param {string} elementId #IdHere, input[name=xx]
+ * @param {string} value
+ */
+export async function setElementInnerHtml (page, elementId, value) {
+  await assertElementExists(page, elementId)
+  return await page.$eval(elementId, (element, value) => {
+    element.innerHTML = value
+  }, value)
 }
 
 /**
@@ -68,7 +94,9 @@ export async function getElementText (page, elementId) {
  */
 export async function writeToElement (page, elementId, text) {
   await assertElementExists(page, elementId)
-  await page.$eval(elementId, (el, text) => { el.value = text }, text)
+  await page.$eval(elementId, (el, text) => {
+    el.value = text
+  }, text)
 }
 
 function consoleLogWithTime (msg) {

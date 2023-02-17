@@ -75,7 +75,7 @@ export async function clearParsingErrors (page) {
 /**
  * Return what ever parsing error
  * @param {Page} page
- * @return {Promise<string}>
+ * @return {Promise<string>}
  */
 export async function getParsingError (page) {
   return await page.evaluate(() => {

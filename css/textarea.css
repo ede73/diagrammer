@@ -9,7 +9,7 @@
 #group{
 	color:blue;
 }
-textarea,#editable
+textarea,#diagrammer-code
     {
         border: 1px solid #EEEEEE;
         box-shadow: 1px 1px 0 #DDDDDD;

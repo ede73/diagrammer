@@ -22,9 +22,9 @@ export function getSavedFilesAsOptionList () {
   return t
 }
 
-export function saveCurrentGraph (filename, editable) {
+export function saveCurrentGraph (filename, diagrammerCode) {
   const data = getSavedGraph()
-  data[filename] = editable
+  data[filename] = diagrammerCode
   const jd = JSON.stringify(data)
   localStorage.setItem('graphs', jd)
   // clipboardData.setData("text",jd);

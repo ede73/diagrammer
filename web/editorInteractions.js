@@ -13,7 +13,7 @@ function getAceEditor () {
   /** type {Editor} */
   // @ts-ignore
   // eslint-disable-next-line no-undef
-  const editor = ace.edit('editable')
+  const editor = ace.edit('diagrammer-code')
   return editor
 }
 
@@ -22,7 +22,7 @@ export function getGraphText () {
   if (acemode) {
     return getAceEditor().getSession().getValue()
   } else {
-    return getInputElement('editable').value
+    return getInputElement('diagrammer-code').value
   }
 }
 
@@ -35,7 +35,7 @@ export function setGraphText (data) {
     editor.selectAll()
     editor.insert(data)
   } else {
-    getInputElement('editable').value = data
+    getInputElement('diagrammer-code').value = data
   }
 }
 
@@ -57,7 +57,7 @@ function prependLine (data) {
     editor.getSession().getSelection().selectionLead.setPosition(cursor.column, cursor.row - data.split('\n').length + 1)
   } else {
     // using textarea
-    const comp = getInputElement('editable')
+    const comp = getInputElement('diagrammer-code')
     comp.value = data + comp.value
   }
 }
@@ -80,7 +80,7 @@ function appendLine (data) {
     editor.insert(data.trim())
   } else {
     // using textarea
-    const comp = getInputElement('editable')
+    const comp = getInputElement('diagrammer-code')
     comp.value = comp.value + data
   }
 }
@@ -182,7 +182,7 @@ export function exampleChanged () {
  */
 function hookupToListenToManualCodeChanges (parseChangesAfterMillis) {
   let parsingTimerID
-  getInputElement('editable').onkeyup = function () { // onchange does not work on
+  getInputElement('diagrammer-code').onkeyup = function () { // onchange does not work on
     if (parsingTimerID) {
       clearTimeout(parsingTimerID)
       parsingTimerID = undefined

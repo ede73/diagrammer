@@ -143,11 +143,6 @@
 		<button onclick="visualize(getVisualizer());return false;">Visualize</button>
 		<br />
 
-		<!-- one could have EDITABLE content here...parsed using lexer-->
-		<!--<section id="editable" contenteditable="true">
-			a <text style="color:red">&gt;</text> b,c,d
-			f &lt; g
-			</section>-->
 		<div id="error"></div>
 		<link rel="stylesheet" href="web/index.css">
 
@@ -297,7 +292,7 @@
 										<li class="tab"><label for="tab2">Generated result</label></li>
 									</ul>
 									<div class="tab-content">
-										<pre id="editable" align="top" style="margin:0;left:0;height:600px;float:left"></pre>
+										<pre id="diagrammer-code" align="top" style="margin:0;left:0;height:600px;float:left"></pre>
 									</div>
 									<div class="tab-content">
 										<textarea id="diagrammer-result" rows="40" cols="10"></textarea>
@@ -328,7 +323,7 @@
 <script type="module" src="web/editorInteractions.js"></script>
 <script src="ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script type="module">
-	const editor = ace.edit("editable");
+	const editor = ace.edit("diagrammer-code");
 	//editor.setTheme("ace/theme/kr");
 	editor.getSession().setMode("ace/mode/state");
 

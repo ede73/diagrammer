@@ -136,9 +136,9 @@ function beautify (generatedCode) {
   }
   // Get DOM-element for inserting json-tree
   const wrapper = document.getElementById('diagrammer-beautified')
+  // @ts-ignore
+  // eslint-disable-next-line no-undef, no-unused-vars
   const tree = jsonTree.create(data, wrapper)
-  console.log('BEAURIFIED')
-  console.log(document.getElementById('diagrammer-beautified').innerHTML)
 }
 
 function clearBeautified () {

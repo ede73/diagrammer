@@ -17,7 +17,7 @@ describe('Diagrammer', () => {
       localStorage.clear(localStorageKey)
     }, localStorageKey)
     p.on('dialog', async dialog => {
-      console.log(`Alert dialog displayed(${dialog.message()}), dismiss it`)
+      // console.log(`Alert dialog displayed(${dialog.message()}), dismiss it`)
       await dialog.dismiss()
     })
     // await captureBrowserLogs(page);

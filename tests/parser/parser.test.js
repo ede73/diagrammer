@@ -120,7 +120,7 @@ else c then
 endif
 exit;exit node is also required
         `)
-    console.log(graphcanvas)
+    // console.log(graphcanvas)
     expect(graphcanvas.OBJECTS.length).toBe(5)
     expect(graphcanvas.ROOTVERTICES.length).toBe(5)
     // in this case only all the objects and root vertices do match

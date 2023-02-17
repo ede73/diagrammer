@@ -1,15 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import { Page } from 'puppeteer'
-// TODO:
-// makes jest fail loading jquery
-// import { setGraphText, generatorChanged, getGraphText } from '../../web/editorInteractions.js'
-
-// npm install @types/jest --save-dev
-// fixed it
-// puppeteer import above works, but it give
-// puppeteer.page and puppeteer.browser
-// https://pptr.dev/api/puppeteer.page
-// https://pptr.dev/api/puppeteer.browser
+import { setGraphText, generatorChanged, getGraphText } from '../../web/editorInteractions.js'
 
 /**
  * Clear the generator results (in order to be able to wait for the results)

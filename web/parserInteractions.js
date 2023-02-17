@@ -10,11 +10,6 @@ import 'jquery'
  */
 let parsingStarted
 
-/**
- * @type {HTMLInputElement}
- */
-const result = getInputElement('result')
-
 function ParseResult (err) {
   alert(err)
 }
@@ -48,6 +43,9 @@ diagrammerParser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, prefe
 // called line by line...
 // TODO: MOVING TO GraphCanvas
 diagrammerParser.yy.result = function (line) {
+  /** @type {HTMLInputElement} */
+  const result = getInputElement('result')
+
   if (parsingStarted === 1) {
     console.log('  ...parsing results start coming in...')
     result.value = ''
@@ -101,9 +99,13 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
     // @ts-ignore
     diagrammerParser.parse(diagrammerCode)
     console.log(`  ..parsed, calling it a success with ${getGenerator()} and ${getVisualizer()}`)
-    successCallback(getGenerator(), getVisualizer())
+    try {
+      successCallback(getGenerator(), getVisualizer())
+    } catch (ex) {
+      setError(`Parsing went ok, but visualization failed: ${getError()} and ${ex}`)
+    }
   } catch (ex) {
-    console.log(`  ..parsed, and failed ${getError()} and ${ex}`)
+    console.error(`  ..parsed, and failed ${getError()} and ${ex}`)
     failureCallback(getError(), ex)
   } finally {
     parsingStarted = 0
@@ -127,6 +129,8 @@ function makeNewImageHolder () {
 }
 
 export function visualize (visualizer) {
+  /** @type {HTMLInputElement} */
+  const result = getInputElement('result')
   const statelang = result.value
   if (!visualizer) {
     throw new Error('Visualizer not defined')
@@ -171,9 +175,12 @@ export function visualize (visualizer) {
   } else if (visualizer === 'dot') {
     // hack to get Viz display graphviz as comparison..
     try {
+      // TODO: Bring back viz/canviz
+      // @ts-ignore
+      // eslint-disable-next-line no-undef
       getHTMLElement('svg').innerHTML = Viz(statelang, 'svg')
     } catch (err) {
-      console.log(err)
+      console.error(err)
     }
     // try{
     // const canviz = new Canviz('graph_container');

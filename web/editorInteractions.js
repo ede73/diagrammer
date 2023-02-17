@@ -1,39 +1,29 @@
 // @ts-check
-import { getSavedFilesAsOptionList, getSavedGraph } from './localStorage.js'
+import { getSavedGraph } from './localStorage.js'
 import { parse, visualize } from './parserInteractions.js'
 // import { Editor } from '../ace/src-noconflict/ace.js';
 import { getGenerator, getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js'
 
 import 'jquery'
 
-/**
- * @type {HTMLElement}
- */
-let result
-
-/**
- * type {Editor}
- */
-// var editor;
-// @ts-ignore
-// eslint-disable-next-line no-undef
-const editor = ace.edit('editable')
-
 // afterbody
-
-const e = getInputElement('saved') // TODO: move up
-e.innerHTML = getSavedFilesAsOptionList()
-
-// eslint-disable-next-line no-unused-vars, prefer-const
-result = getInputElement('result')
 
 // Set to 0 to fall back to textarea(enable textarea in index.html)
 const acemode = 1
 
+function getAceEditor () {
+  // TODO: fix type acq..
+  /** type {Editor} */
+  // @ts-ignore
+  // eslint-disable-next-line no-undef
+  const editor = ace.edit('editable')
+  return editor
+}
+
 // get all
 export function getGraphText () {
   if (acemode) {
-    return editor.getSession().getValue()
+    return getAceEditor().getSession().getValue()
   } else {
     return getInputElement('editable').value
   }
@@ -42,6 +32,7 @@ export function getGraphText () {
 // replace all
 export function setGraphText (data) {
   if (acemode) {
+    const editor = getAceEditor()
     // EDE:editor.destroy does not work reliably
     // editor.destroy();
     editor.selectAll()
@@ -59,6 +50,8 @@ export function setGraphText (data) {
  */
 function prependLine (data) {
   if (acemode) {
+    /** type {Editor} */
+    const editor = getAceEditor()
     // using ace
     const cursor = editor.getCursorPosition()
     editor.navigateFileStart()
@@ -79,6 +72,9 @@ function prependLine (data) {
  */
 function appendLine (data) {
   if (acemode) {
+    /** type {Editor} */
+    const editor = getAceEditor()
+
     // using ace insert text into wherever the cursor is pointing.
     editor.navigateLineEnd()
     // TODO: If this is empty line, no need for linefeed
@@ -219,11 +215,17 @@ function hookupToListenToManualGeneratorChanges (visualizeChangesAfterMillis) {
   }
 }
 
-hookupToListenToManualCodeChanges(500)
-hookupToListenToManualGeneratorChanges(500)
+// skip over so jest can load us
+try {
+  hookupToListenToManualCodeChanges(500)
+  hookupToListenToManualGeneratorChanges(500)
+} catch (ex) { }
 
-if (acemode) {
+// @ts-ignore
+if (acemode && typeof ace !== 'undefined') {
   // some init race condition, editor null on page load
+  /** type {Editor} */
+  const editor = getAceEditor()
   if (typeof editor !== 'undefined') {
     editor.getSession().on('change', function () {
       // chrome/mac(elsewhere?)

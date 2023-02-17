@@ -119,7 +119,7 @@ describe('Diagrammer', () => {
     const svg = await page.evaluate((selector) => document.querySelector(selector).outerHTML, selector)
     const elementHandle = await page.$(selector)
     const bbox = await elementHandle.boundingBox()
-    const filename = example.match(/.+\/([^\.]+)/)[1] + (overrideGeneratorVisualizer ? '_' + overrideGeneratorVisualizer.replace(':', '_') : '')
+    const filename = example.match(/.+\/([^.]+)/)[1] + (overrideGeneratorVisualizer ? '_' + overrideGeneratorVisualizer.replace(':', '_') : '')
     const snapshotConfig = setConfig(filename, 1)
     const buffer = await singleElementScreenSnapshot(svg, bbox.width, bbox.height)
     expect.extend({

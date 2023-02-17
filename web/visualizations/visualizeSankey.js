@@ -1,6 +1,10 @@
 // @ts-check
 import { makeSVG, removeOldVisualizations } from '../d3support'
 import { visualizations } from '../globals.js'
+// d3 is loaded directly in index.html as well as d3-sankey
+// this local (typed) import does not have d3-sankey
+// so..import typed d3 as d4 for now, d3 is loaded in index.html
+import * as d4 from 'd3'
 
 visualizations.set('sankey', visualizeSankey)
 
@@ -13,31 +17,27 @@ export function visualizeSankey (generatorResult) {
 
   const edgeColor = 'path'
 
+  // @ts-ignore
+  // eslint-disable-next-line no-undef
   const _sankey = d3.sankey()
     .nodeWidth(15)
     .nodePadding(10)
     .extent([[1, 1], [width - 1, height - 5]])
+  console.log(_sankey)
   const sankey = ({ nodes, links }) => _sankey({
     nodes: nodes.map(d => Object.assign({}, d)),
     links: links.map(d => Object.assign({}, d))
   })
 
-  const f = d3.format(',.0f')
+  const f = d4.format(',.0f')
   const format = d => `${f(d)} TWh`
 
-  const _color = d3.scaleOrdinal(d3.schemeCategory10)
-  // const color = name => _color(name.replace(/ .*/, ""));
+  const _color = d4.scaleOrdinal(d4.schemeCategory10)
   const color = name => _color('red')
 
-  // const svg = d3.select('#graphVisualizationHere')
-  //     .attr("viewBox", `0 0 ${width} ${height}`)
-  //     .style("width", "100%")
-  //     .style("height", "auto");
   removeOldVisualizations()
   const svgimg = makeSVG(width, height)
 
-  //        d3.json("https://gist.githubusercontent.com/mbostock/ca9a0bb7ba204d12974bca90acc507c0/raw/398136b7db83d7d7fd89181b080924eb76041692/energy.json").then(data => {
-  // d3.json("https://gist.githubusercontent.com/mbostock/ca9a0bb7ba204d12974bca90acc507c0/raw/398136b7db83d7d7fd89181b080924eb76041692/energy.json").then(data => {
   {
     const data = jsonData
     const { nodes, links } = sankey(data)
@@ -63,6 +63,7 @@ export function visualizeSankey (generatorResult) {
       .join('g')
       .style('mix-blend-mode', 'multiply')
 
+    // eslint-disable-next-line no-unused-vars
     const select = document.querySelector('#colorSelect')
     // select.onchange = () => {
     //     edgeColor = select.value;
@@ -92,6 +93,8 @@ export function visualizeSankey (generatorResult) {
       }
 
       link.append('path')
+        // @ts-ignore
+        // eslint-disable-next-line no-undef
         .attr('d', d3.sankeyLinkHorizontal())
         .attr('stroke', d => edgeColor === 'path'
           ? d.uid

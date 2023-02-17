@@ -43,7 +43,7 @@ describe('Diagrammer', () => {
     await writeToElement(p, filenameSelector, localStorageFilename)
 
     // CSS selector for puppeteer
-    await p.click('form[name="contact"]>button#savefile')
+    await p.click('form[name="contact"]>button#diagrammer-savefile')
     const storedGraphs = await p.evaluate((localStorageKey) => {
       return localStorage.getItem(localStorageKey)
     }, localStorageKey)

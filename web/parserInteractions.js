@@ -1,6 +1,6 @@
 // @ts-check
 import { diagrammerParser } from '../build/diagrammer_parser.js'
-import { removeOldVisualizations } from './d3support.js'
+import { removeAllChildNodes, removeOldVisualizations } from './d3support.js'
 import { getError, getGenerator, getHTMLElement, getInputElement, getVisualizer, openImage, setError, setGenerator, updateImage } from './uiComponentAccess.js'
 import { visualizations } from './globals.js'
 import { makeHTTPPost } from './ajax.js'
@@ -143,7 +143,7 @@ function beautify (generatedCode) {
 
 function clearBeautified () {
   const result = getInputElement('diagrammer-beautified')
-  result.value = ''
+  removeAllChildNodes(result)
 }
 
 // TODO: move to editor (or elsewhere, but this really isn't parser thingy anymore)

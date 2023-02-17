@@ -3,7 +3,7 @@ import { GraphGroup } from '../model/graphgroup.js'
 import { traverseEdges, traverseVertices } from '../model/model.js'
 import { getAttributeAndFormat, output } from '../model/support.js'
 
-// ADD TO INDEX.HTML AS: <option value="blckdiag">Block Diagram(cli)</option>
+// ADD TO INDEX.HTML AS: <option value="blockdiag">Block Diagram(cli)</option>
 
 const BlockDiagShapeMap = {
   default: 'box',

@@ -11,7 +11,7 @@ import { setGraphText, generatorChanged, getGraphText } from '../../web/editorIn
 export async function clearGeneratorResults (page) {
   await page.evaluate(function () {
     // @ts-ignore
-    document.querySelector('#result').value = ''
+    document.querySelector('#diagrammer-result').value = ''
   })
 }
 
@@ -23,7 +23,7 @@ export async function clearGeneratorResults (page) {
 export async function getGeneratorResult (page) {
   return await page.evaluate(() => {
     // @ts-ignore
-    return document.querySelector('#result').value
+    return document.querySelector('#diagrammer-result').value
   })
 }
 
@@ -33,7 +33,7 @@ export async function getGeneratorResult (page) {
  * @return {Promise<void>}
  */
 export async function waitForGeneratorResults (page) {
-  await page.waitForSelector('#result:not([value=""])')
+  await page.waitForSelector('#diagrammer-result:not([value=""])')
 }
 
 /**

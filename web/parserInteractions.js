@@ -40,7 +40,7 @@ diagrammerParser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, prefe
 // TODO: MOVING TO GraphCanvas
 diagrammerParser.yy.result = function (line) {
   /** @type {HTMLInputElement} */
-  const result = getInputElement('result')
+  const result = getInputElement('diagrammer-result')
 
   if (parsingStarted === 1) {
     console.log('  ...parsing results start coming in...')
@@ -126,7 +126,7 @@ function makeNewImageHolder () {
 
 export function visualize (visualizer) {
   /** @type {HTMLInputElement} */
-  const result = getInputElement('result')
+  const result = getInputElement('diagrammer-result')
   const statelang = result.value
   if (!visualizer) {
     throw new Error('Visualizer not defined')

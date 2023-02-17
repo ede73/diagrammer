@@ -200,7 +200,7 @@ function hookupToListenToManualCodeChanges (parseChangesAfterMillis) {
  */
 function hookupToListenToManualGeneratorChanges (visualizeChangesAfterMillis) {
   let visualizationTimerID
-  getInputElement('result').onkeyup = function () { // onchange does not work on
+  getInputElement('diagrammer-result').onkeyup = function () { // onchange does not work on
     if (!visualizationTimerID) {
       clearTimeout(visualizationTimerID)
       visualizationTimerID = undefined

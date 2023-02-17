@@ -148,7 +148,7 @@ function parseAndRegenerate (preferScriptSpecifiedGeneratorAndVisualizer = false
 
 export function savedChanged () {
   // read the example...place to textArea(overwrite)
-  const e = getSelectElement('saved')
+  const e = getSelectElement('diagrammer-saved')
   const doc = e.options[e.selectedIndex].value
   const filename = getInputElement('diagrammer-filename')
   const data = getSavedGraph()

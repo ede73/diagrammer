@@ -66,7 +66,7 @@
 		<button id="diagrammer-import" onclick="importGraphs();return false;">Import</button>
 		<button id="diagrammer-export" onclick="exportGraphs();return false;">Export</button>
 		<!-- saved combobox and handlers -->
-		<label for="saved">Saved graphs</label> <select id="saved" name="saved" onChange="savedChanged()"></select>
+		<label for="saved">Saved graphs</label> <select id="diagrammer-saved" name="saved" onChange="savedChanged()"></select>
 		<button onclick="visualize(getVisualizer());return false;">Visualize</button>
 		<br />
 
@@ -280,10 +280,9 @@
 	import { visualize } from "./web/parserInteractions.js";
 	window.visualize = visualize;
 
-	const e = getInputElement('saved') // TODO: move up
+	const e = getInputElement('diagrammer-saved') // TODO: move up
 	e.innerHTML = getSavedFilesAsOptionList()
 	// select ast.txt example
-	console.log('sel')
 	document.querySelector('select#example>option[value="test_inputs/ast.txt"').selected=true
 	exampleChanged()
 </script>

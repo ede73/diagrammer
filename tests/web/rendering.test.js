@@ -51,6 +51,8 @@ describe('Diagrammer', () => {
     expect.extend({
       toMatchImageSnapshot
     })
+    // TODO: Should delete web/result.png from messing up.. last graph render may linger there and come to haunt
+    // User-Agent trick? some test-header?
     const image = await p.screenshot({ fullPage: true })
     expect(image).toMatchImageSnapshot(setConfig('main_screen_just_loaded', 0.0001))
   })

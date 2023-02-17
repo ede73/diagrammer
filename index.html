@@ -282,11 +282,20 @@
 		<!-- ACE editor + resulting graphs (server/dynamic)-->
 		<table>
 			<tr>
-				<td>
-					<a href="#editable" data-tab="orange" class="diagrammer-nav-tab active">Code</a>
-					<a href="#result" data-tab="green" class="diagrammer-nav-tab">Generated output</a>
-					<pre id="editable" class="diagrammer-tab active" align="top" style="margin:0;left:0;height:600px;float:left"></pre>
-					<textarea id="result" class="diagrammer-tab" rows="40" cols="10"></textarea>
+				<td class="tabbed">
+						<input type="radio" id="tab1" name="css-tabs" checked>
+						<input type="radio" id="tab2" name="css-tabs">
+						
+						<ul class="tabs">
+							<li class="tab"><label for="tab1">Code</label></li>
+							<li class="tab"><label for="tab2">Generated result</label></li>
+						</ul>
+						<div class="tab-content">
+							<pre id="editable" align="top" style="margin:0;left:0;height:600px;float:left"></pre>
+						</div>
+						<div class="tab-content">
+							<textarea id="result" rows="40" cols="10"></textarea>
+						</div>		
 				</td>
 				<td>
 					<div style="float:right;">
@@ -306,7 +315,7 @@
 		<!-- <svg id='chart' xmlns="http://www.w3.org/2000/svg"></svg> -->
 		<!-- resulting data of grammar parser/ast generator -->
 		<p>Javascript generated(dot only)</p>
-		<div id="svg" style="border-width: 2px; border-style: dotted;" align="top"></div>
+		<div id="viz_container" style="border-width: 2px; border-style: dotted;" align="top"></div>
 
 		<p>CanViZ</p>
 		<div id="canviz_container"></div>

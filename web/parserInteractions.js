@@ -156,7 +156,7 @@ export function visualize (visualizer) {
       // TODO: Bring back viz/canviz
       // @ts-ignore
       // eslint-disable-next-line no-undef
-      getHTMLElement('svg').innerHTML = Viz(statelang, 'svg')
+      getHTMLElement('viz_container').innerHTML = Viz(statelang, 'vin_container')
     } catch (err) {
       console.error(err)
     }

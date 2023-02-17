@@ -101,7 +101,7 @@ describe('Diagrammer', () => {
       }
     })
 
-    await p.click('form[name="contact"]>button#export')
+    await p.click('form[name="contact"]>button#diagrammer-export')
     // Export is asynchronous, it'll take a moment for results to arrive
     await sleepABit(100)
     const error = await getParsingError(p)

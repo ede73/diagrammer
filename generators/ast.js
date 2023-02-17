@@ -8,90 +8,71 @@ import { debug, output } from '../model/support.js'
 // ADD TO INDEX.HTML AS: <option value="ast">Abstract Syntax Tree</option>
 
 /**
- * TO test: node js/diagrammer.js verbose tests/test_inputs/ast.test ast
+ * TO test: node js/diagrammer.js verbose tests/test_inputs/ast.txt ast
  * @param {GraphCanvas} graphcanvas
 */
 export function ast (graphcanvas) {
-  debug(graphcanvas)
+  // debug(graphcanvas)
 
-  output(graphcanvas, '[')
-  const skipEntrances = (key, value) => {
-    if (key === 'entrance' || key === 'exit') {
-      return value
+  const o = (msg, indent = undefined) => {
+    output(graphcanvas, msg, indent)
+  }
+
+  const rvalue = (rvalue) => {
+    if (typeof (rvalue) === 'number' || typeof (rvalue) === 'boolean') {
+      return `${rvalue}`
     }
-    return value
-  }
-  if (graphcanvas.getVisualizer()) {
-    output(graphcanvas, JSON.stringify({
-      visualizer: graphcanvas.getVisualizer()
-    }))
-  }
-  if (graphcanvas.getDirection()) {
-    output(graphcanvas, JSON.stringify({
-      direction: graphcanvas.getDirection()
-    }))
-  }
-  if (graphcanvas.getStart()) {
-    output(graphcanvas, JSON.stringify({
-      start: graphcanvas.getStart()
-    }))
-  }
-  if (graphcanvas.getEqual()) {
-    output(graphcanvas, JSON.stringify({
-      equal: graphcanvas.getEqual()
-    }))
+    return rvalue === undefined ? 'null' : `"${rvalue}"`
   }
 
-  const objectHandler = /** @type {function((GraphConnectable))} */obj => {
-    output(true)
-    if (obj instanceof GraphGroup) {
-      (o => {
-        const n = JSON.parse(JSON.stringify(o, skipEntrances))
-        n.OBJECTS = undefined
-        output(graphcanvas, JSON.stringify({
-          group: n
-        }) + ',')
-        output(graphcanvas, '[')
-        traverseVertices(o, objectHandler)
-        output(graphcanvas, ']')
-      })(obj)
-    } else if (obj instanceof GraphInner) {
-      (o => {
-        const n = JSON.parse(JSON.stringify(o, skipEntrances))
-        n.OBJECTS = undefined
-        output(graphcanvas, JSON.stringify({
-          subgraph: n
-        }) + ',')
-        output(graphcanvas, '[')
-        traverseVertices(o, objectHandler)
-        output(graphcanvas, ']')
-      })(obj)
-    } else if (obj instanceof GraphVertex) {
-      output(graphcanvas, JSON.stringify({
-        node: obj
-      }) + ',')
+  const dumpObject = (obj, level = 0) => {
+    // if (level > 3) {
+    //   return
+    // }
+    // const t = typeof (obj)
+    // const a = Array.isArray(obj)
+    // const c = (obj && typeof (obj.constructor) !== 'undefined') ? obj.constructor.name : ''
+    // o(`type=${t} array?=${a} cons=${c}`)
+    if (typeof (obj) === 'function') {
+      return ''
+    }
+    if (typeof (obj) !== 'object' && !Array.isArray(obj)) {
+      return `${rvalue(obj)}`
+    }
+
+    if (Array.isArray(obj)) {
+      // EDGES, OBJECTS, ROOTVERTICES are true ARRAYS (vs.named)
+      const items = []
+      obj.forEach((item) => {
+        const collect = dumpObject(item, level)
+        // const collect = dumpObject(obj[arrayKey], level + 1)
+        // items.push(`"${arrayKey}": ${collect}`)
+        items.push(`${collect}`)
+      })
+      return `[${items.join(',')}]\n`
     } else {
-      throw new Error('Not a node nor a group, NOT SUPPORTED')
+      const items = []
+      Object.keys(obj).forEach((propname) => {
+        const value = obj[propname]
+        if (
+          propname === 'left' ||
+          propname === 'right' ||
+          propname === 'container') {
+          // special case for GraphEdges..don't traverse into these!
+          items.push(`\n"${propname}": ${rvalue(value.getName())}`)
+        } else if (propname === 'yy' ||
+          propname === 'ALLOWED_DEFAULTS' ||
+          typeof (value) === 'function') {
+          // nothing, ignore
+        } else {
+          const collect = dumpObject(value, level + 1)
+          items.push(`\n"${propname}": ${collect}`)
+        }
+      })
+      return `{"${obj.constructor.name}" : {\n${items.join(',')}\n}}\n`
     }
-    output(false)
   }
-  traverseVertices(graphcanvas, objectHandler)
 
-  output(true)
-  traverseEdges(graphcanvas, edge => {
-    const n = JSON.parse(JSON.stringify(edge, skipEntrances))
-    n.left = n.left.name
-    n.right = n.right.name
-    n.container.OBJECTS = undefined
-    n.container.label = undefined
-    n.container.isInnerGraph = undefined
-    n.container.entrance = n.container.entrance ? n.container.entrance.name : undefined
-    n.container.exitvertex = n.container.exitvertex ? n.container.exitvertex.name : undefined
-    n.container.conditional = undefined
-    n.container = n.container.name
-    output(graphcanvas, JSON.stringify({ edge: n }) + ',')
-  })
-  output(false)
-  output(graphcanvas, ']', false)
+  o(JSON.stringify(JSON.parse(`${dumpObject(graphcanvas)}\n`), null, 3))
 }
 generators.set('ast', ast)

@@ -9,7 +9,7 @@ import { Page, HTTPRequest } from 'puppeteer'
 // test saving, loading from local storage
 describe('Diagrammer', () => {
   const localStorageFilename = 'localstorage1'
-  const filenameSelector = 'input#filename'
+  const filenameSelector = 'input#diagrammer-filename'
   const localStorageKey = 'graphs'
 
   beforeAll(async () => {

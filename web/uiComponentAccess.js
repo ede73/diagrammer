@@ -58,7 +58,7 @@ export function getSelectElement (name) {
 }
 
 export function getCurrentFilename () {
-  return getInputElement('filename').value
+  return getInputElement('diagrammer-filename').value
 }
 
 /**

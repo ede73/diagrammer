@@ -150,7 +150,7 @@ export function savedChanged () {
   // read the example...place to textArea(overwrite)
   const e = getSelectElement('saved')
   const doc = e.options[e.selectedIndex].value
-  const filename = getInputElement('filename')
+  const filename = getInputElement('diagrammer-filename')
   const data = getSavedGraph()
   if (data[doc]) {
     setGraphText(data[doc])

@@ -5,7 +5,7 @@ import { setError } from './uiComponentAccess.js'
 
 export function exportGraphs () {
   makeHTTPPost('web/saveExport.php',
-    JSON.stringify(getSavedGraph),
+    JSON.stringify(getSavedGraph()),
     (msg) => {
       alert('Exported')
     },

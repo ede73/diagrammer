@@ -210,7 +210,10 @@
 		<table>
 			<tr>
 				<td>
-					<pre id="editable" align="top" style="margin:0;left:0;height:600px;float:left"></pre>
+					<a href="#editable" data-tab="orange" class="diagrammer-nav-tab active">Code</a>
+					<a href="#result" data-tab="green" class="diagrammer-nav-tab">Generated output</a>
+					<pre id="editable" class="diagrammer-tab active" align="top" style="margin:0;left:0;height:600px;float:left"></pre>
+					<textarea id="result" class="diagrammer-tab" rows="40" cols="10"></textarea>
 				</td>
 				<td>
 					<div style="float:right;">
@@ -229,7 +232,6 @@
 
 		<!-- <svg id='chart' xmlns="http://www.w3.org/2000/svg"></svg> -->
 		<!-- resulting data of grammar parser/ast generator -->
-		<textarea id="result" rows="40" cols="10"></textarea>
 		<p>Javascript generated(dot only)</p>
 		<div id="svg" style="border-width: 2px; border-style: dotted;" align="top"></div>
 

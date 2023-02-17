@@ -275,7 +275,10 @@
 
 	const e = getInputElement('saved') // TODO: move up
 	e.innerHTML = getSavedFilesAsOptionList()
-
+	// select ast.txt example
+	console.log('sel')
+	document.querySelector('select#example>option[value="test_inputs/ast.txt"').selected=true
+	exampleChanged()
 </script>
 <script type="text/javascript">
 	//_MscParse("a>b");

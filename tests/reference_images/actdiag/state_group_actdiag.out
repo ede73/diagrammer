@@ -1,5 +1,6 @@
 actdiag {
     default_fontsize = 14
+    orientation=landscape
         lane "1"{
             notgroupA1[shape=box];
             notgroupB1[shape=box];

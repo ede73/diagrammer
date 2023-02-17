@@ -1,5 +1,6 @@
 actdiag {
     default_fontsize = 14
+    orientation=landscape
         lane "z"{
             x[shape=box];
         }

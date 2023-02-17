@@ -1,5 +1,6 @@
 actdiag {
     default_fontsize = 14
+    orientation=landscape
         closed[color="#ff0000" ,shape=box ,label="CLOSED"];
         closed_end[color="#ff0000" ,shape=box ,label="closed\nBack to start"];
         listen[color="#ffff00" ,shape=box ,label="LISTEN"];

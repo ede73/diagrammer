@@ -1,5 +1,6 @@
 actdiag {
     default_fontsize = 14
+    orientation=portrait
         lane "GraphObject"{
             name[color="#ccccff" ,shape=box];
             color[color="#ccccff" ,shape=box];

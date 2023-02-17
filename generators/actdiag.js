@@ -53,6 +53,12 @@ const ActDiagShapeMap =
 export function actdiag (graphcanvas) {
   output(graphcanvas, 'actdiag {', true)
   output(graphcanvas, 'default_fontsize = 14')
+  if (graphcanvas.getDirection() === 'portrait') {
+    output(graphcanvas, 'orientation=portrait')
+  } else {
+    // DEFAULT
+    output(graphcanvas, 'orientation=landscape')
+  }
   /**
      * does not really work..but portrait mode if
      * (r.getDirection()==="portrait"){ output(graphcanvas," orientation=portrait");

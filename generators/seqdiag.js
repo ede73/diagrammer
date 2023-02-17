@@ -8,6 +8,10 @@ import { getAttributeAndFormat, output } from '../model/support.js'
 
 /**
  * http://blockdiag.com/en/seqdiag/index.html
+ *
+ * Actual grammar unknown (check actdiag, blockdiag)
+ * http://blockdiag.com/en/seqdiag/examples.html#diagram-attributes
+ *
  * To test: node js/diagrammer.js tests/test_inputs/state13.txt seqdiag |seqdiag3 -Tpng -o a.png - && open a.png
  * @param {GraphCanvas} graphcanvas
  */

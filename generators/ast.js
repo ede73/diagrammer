@@ -1,9 +1,5 @@
 import { generators } from '../model/graphcanvas.js'
-import { GraphGroup } from '../model/graphgroup.js'
-import { GraphInner } from '../model/graphinner.js'
-import { GraphVertex } from '../model/graphvertex.js'
-import { traverseEdges, traverseVertices } from '../model/model.js'
-import { debug, output } from '../model/support.js'
+import { output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="ast">Abstract Syntax Tree</option>
 
@@ -55,6 +51,7 @@ export function ast (graphcanvas) {
       Object.keys(obj).forEach((propname) => {
         const value = obj[propname]
         if (
+          // TODO only apply to GraphEdges
           propname === 'left' ||
           propname === 'right' ||
           propname === 'container') {

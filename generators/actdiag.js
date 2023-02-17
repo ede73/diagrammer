@@ -44,6 +44,10 @@ const ActDiagShapeMap =
  * To test: node js/diagrammer.js tests/test_inputs/state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
  * http://blockdiag.com/en/actdiag/
  *
+ * Actual grammar is vague (probably as with blockdiag, check there):
+ * Example1: actdiag { A->B->C->D; lane foo{label="notFoo" A;B;} lane bar {C[label="Not C"];D;}}
+ *
+ * http://blockdiag.com/en/blockdiag/
  * @param {GraphCanvas} graphcanvas
  */
 export function actdiag (graphcanvas) {

@@ -40,6 +40,49 @@ const BlockDiagShapeMap = {
 
 /**
  * http://blockdiag.com/en/blockdiag/
+ *
+ * Grammar: blockdiag {
+ *   node_width=128
+ *   node_height=40
+ *   span_width=64
+ *   span_height=40
+ *   default_fontsize=??
+ *   default_shape=xxx
+ *   orientation=landscape
+ *   default_node_color=[#RRGGBB|ColorName]
+ *   default_group_color=[#RRGGBB|ColorName]
+ *   default_linecolor=[#RRGGBB|ColorName]
+ *   default_textcolor=[#RRGGBB|ColorName]
+ *   edge_layout=[normal|flowchart]
+ * }
+ *
+ * A Node: node[params] where params:
+ *   label=""
+ *   style=dotted|dashed|number
+ *   color=[#RRGGBB|ColorName]
+ *   numbered=set a number to the node
+ *   shape=box
+ *   background=filepath or URL
+ *   stacked=
+ *   description=""
+ *   icon=filepath or URL
+ *   textcolor=[#RRGGBB|ColorName]
+ *   width=128
+ *   height=40
+ *   fontsize=11
+ *   rotate=0
+ *
+ * An Edge: node1->node2->node3 [edgeparams]
+ *   label=""
+ *   style=dotted|dashed|none|number
+ *   hstyle=generalization|composition|aggregation
+ *   color=[#RRGGBB|ColorName]
+ *   dir=none|forward|back|both
+ *   folded
+ *   textcolor=[#RRGGBB|ColorName]
+ *   thick
+ *   fontsize=11
+ *
  * To test: node js/diagrammer.js tests/test_inputs/state2.txt blockdiag |blockdiag3 -Tpng -o a.png - && open a.png
  * @param {GraphCanvas} graphcanvas
  */

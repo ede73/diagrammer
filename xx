@@ -1,0 +1,100 @@
+"GraphCanvas" : {
+"name": null,"label": null,"color": null,"textcolor": null,"url": null,"noedges": null,"edgelabel": null,"ALLOWED_DEFAULTS": ["edgecolor": null,"groupcolor": null,"vertexcolor": null,"vertextextcolor": null,"edgetextcolor": null]
+,"OBJECTS": ["group:Group(GraphObject)": null,"group:Group(GraphRoot)": null,"group:Group(xGroup)": null,"group:Group(Node)": null,"group:Group(Link)": null]
+,"ROOTVERTICES": ["group:Group(GraphObject)": null,"group:Group(GraphRoot)": null,"group:Group(xGroup)": null,"group:Group(Node)": null,"group:Group(Link)": null]
+,"equal": []
+,"parseError": ,"result": ,"EDGES": ["Edge(type:.> as L:group:Group(GraphObject), R:group:Group(GraphRoot),label=extends(GraphObject->GraphRoot))": null,"Edge(type:.> as L:group:Group(GraphObject), R:group:Group(Node),label=extends(GraphObject->Node))": null,"Edge(type:.> as L:group:Group(GraphObject), R:group:Group(xGroup),label=extends(GraphObject->xGroup))": null,"Edge(type:.> as L:group:Group(GraphObject), R:group:Group(Link),label=extends::extends(GraphObject->Link))": null,"Edge(type:<-> as L:Vertex(name:left), R:group:Group(Node),label=links)": null,"Edge(type:<-> as L:Vertex(name:left), R:group:Group(xGroup),label=links)": null,"Edge(type:<-> as L:Vertex(name:right), R:group:Group(xGroup),label=links)": null,"Edge(type:<-> as L:Vertex(name:right), R:group:Group(Node),label=links)": null,"Edge(type:> as L:Vertex(name:OBJECTS1,label: OBJECTS), R:group:Group(Node),label=contains)": null,"Edge(type:> as L:Vertex(name:OBJECTS1,label: OBJECTS), R:group:Group(xGroup),label=contains)": null,"Edge(type:> as L:Vertex(name:OBJECTS2,label: OBJECTS), R:group:Group(Node),label=contains)": null,"Edge(type:> as L:Vertex(name:OBJECTS2,label: OBJECTS), R:group:Group(xGroup),label=contains)": null]
+,"generator": "ast","visualizer": "ast","shape": null,"direction": "portrait","start": null,"edgecolor": "#ff0000","yy": "Object" : {
+"USE_GENERATOR": "ast","result": ,"parseError": ,"lexer": "Object" : {
+"yy": "Object" : {
+"USE_GENERATOR": undefined,"result": undefined,"parseError": undefined,"lexer": undefined,"parser": undefined,"CURRENTCONTAINER": undefined,"EDGES": undefined,"CONTAINER_EXIT": undefined,"GRAPHCANVAS": undefined,"VARIABLES": undefined,"GROUPIDS": undefined,"lastSeenVertex": undefined}
+,"_input": "","done": "true","_backtrack": "false","_more": "false","yyleng": "0","yylineno": "59","match": "","matched": "generator ast
+
+vertical
+$(gen:#ccffcc)
+$(par:#ccccff)
+
+{ GraphObject;GraphObject
+  name$(par)
+  color$(par)
+  textColor$(par)
+  label$(par);#ff0000label\nspecial syntax with :: for links\n(label::xlabel)
+}
+
+{ GraphRoot;GraphRoot:GraphObject
+  database OBJECTS1;OBJECTS
+  xGenerator$(gen);generator
+  xVisualizer$(gen);visualizer
+  direction$(gen)
+  xStart$(gen);start
+  xEqual$(gen);equal
+  currentShape
+  default2;default\nnodecolor\ngroupcolor\nlinkcolor
+}
+{ xGroup;Group:GraphObject
+  name
+  equal2;equal
+  database OBJECTS2;OBJECTS
+}
+
+{ Node;Node:GraphObject
+  xShape;shape
+  image
+  style
+  color
+}
+
+{ Link;Link:GraphObject
+  linkType
+  left
+  right
+}
+
+edge color #0000ff
+GraphObject.>GraphRoot;extends(GraphObject->GraphRoot)
+GraphObject.>Node;extends(GraphObject->Node)
+GraphObject.>xGroup;extends(GraphObject->xGroup)
+GraphObject.>Link;extends::extends(GraphObject->Link)
+
+edge color #00ff00
+left<->"links"Node
+left<->"links"xGroup
+right<->"links"xGroup
+right<->"links"Node
+
+edge color #ff0000
+OBJECTS1>"contains"Node
+OBJECTS1>"contains"xGroup
+OBJECTS2>"contains"Node
+OBJECTS2>"contains"xGroup
+","yytext": "","conditionStack": ["INITIAL": undefined,"GROUP": undefined,"INITIAL": undefined,"GROUP": undefined,"INITIAL": undefined,"GROUP": undefined,"INITIAL": undefined,"GROUP": undefined,"INITIAL": undefined,"GROUP": undefined,"INITIAL": undefined]
+,"yylloc": "Object" : {
+"first_line": undefined,"last_line": undefined,"first_column": undefined,"last_column": undefined}
+,"offset": "0","matches": ["": undefined]
+}
+,"parser": "Object" : {
+"yy": "Object" : {
+"USE_GENERATOR": undefined,"result": undefined,"parseError": undefined}
+,"trace": ,"debug": ,"parseError": }
+,"CURRENTCONTAINER": ["GraphCanvas": null]
+,"EDGES": ["Edge(type:.> as L:group:Group(GraphObject), R:group:Group(GraphRoot),label=extends(GraphObject->GraphRoot))": null,"Edge(type:.> as L:group:Group(GraphObject), R:group:Group(Node),label=extends(GraphObject->Node))": null,"Edge(type:.> as L:group:Group(GraphObject), R:group:Group(xGroup),label=extends(GraphObject->xGroup))": null,"Edge(type:.> as L:group:Group(GraphObject), R:group:Group(Link),label=extends::extends(GraphObject->Link))": null,"Edge(type:<-> as L:Vertex(name:left), R:group:Group(Node),label=links)": null,"Edge(type:<-> as L:Vertex(name:left), R:group:Group(xGroup),label=links)": null,"Edge(type:<-> as L:Vertex(name:right), R:group:Group(xGroup),label=links)": null,"Edge(type:<-> as L:Vertex(name:right), R:group:Group(Node),label=links)": null,"Edge(type:> as L:Vertex(name:OBJECTS1,label: OBJECTS), R:group:Group(Node),label=contains)": null,"Edge(type:> as L:Vertex(name:OBJECTS1,label: OBJECTS), R:group:Group(xGroup),label=contains)": null,"Edge(type:> as L:Vertex(name:OBJECTS2,label: OBJECTS), R:group:Group(Node),label=contains)": null,"Edge(type:> as L:Vertex(name:OBJECTS2,label: OBJECTS), R:group:Group(xGroup),label=contains)": null]
+,"CONTAINER_EXIT": "6","GRAPHCANVAS": "GraphCanvas" : {
+"name": null,"label": null,"color": null,"textcolor": null,"url": null,"noedges": null,"edgelabel": null,"ALLOWED_DEFAULTS": ["edgecolor": undefined,"groupcolor": undefined,"vertexcolor": undefined,"vertextextcolor": undefined,"edgetextcolor": undefined]
+,"OBJECTS": ["group:Group(GraphObject)": undefined,"group:Group(GraphRoot)": undefined,"group:Group(xGroup)": undefined,"group:Group(Node)": undefined,"group:Group(Link)": undefined]
+,"ROOTVERTICES": ["group:Group(GraphObject)": undefined,"group:Group(GraphRoot)": undefined,"group:Group(xGroup)": undefined,"group:Group(Node)": undefined,"group:Group(Link)": undefined]
+,"equal": []
+,"parseError": ,"result": ,"EDGES": ["Edge(type:.> as L:group:Group(GraphObject), R:group:Group(GraphRoot),label=extends(GraphObject->GraphRoot))": undefined,"Edge(type:.> as L:group:Group(GraphObject), R:group:Group(Node),label=extends(GraphObject->Node))": undefined,"Edge(type:.> as L:group:Group(GraphObject), R:group:Group(xGroup),label=extends(GraphObject->xGroup))": undefined,"Edge(type:.> as L:group:Group(GraphObject), R:group:Group(Link),label=extends::extends(GraphObject->Link))": undefined,"Edge(type:<-> as L:Vertex(name:left), R:group:Group(Node),label=links)": undefined,"Edge(type:<-> as L:Vertex(name:left), R:group:Group(xGroup),label=links)": undefined,"Edge(type:<-> as L:Vertex(name:right), R:group:Group(xGroup),label=links)": undefined,"Edge(type:<-> as L:Vertex(name:right), R:group:Group(Node),label=links)": undefined,"Edge(type:> as L:Vertex(name:OBJECTS1,label: OBJECTS), R:group:Group(Node),label=contains)": undefined,"Edge(type:> as L:Vertex(name:OBJECTS1,label: OBJECTS), R:group:Group(xGroup),label=contains)": undefined,"Edge(type:> as L:Vertex(name:OBJECTS2,label: OBJECTS), R:group:Group(Node),label=contains)": undefined,"Edge(type:> as L:Vertex(name:OBJECTS2,label: OBJECTS), R:group:Group(xGroup),label=contains)": undefined]
+,"generator": "ast","visualizer": "ast","shape": null,"direction": "portrait","start": null,"edgecolor": "#ff0000","yy": "Object" : {
+"USE_GENERATOR": undefined,"result": undefined,"parseError": undefined,"lexer": undefined,"parser": undefined,"CURRENTCONTAINER": undefined,"EDGES": undefined,"CONTAINER_EXIT": undefined,"GRAPHCANVAS": undefined,"VARIABLES": undefined,"GROUPIDS": undefined,"lastSeenVertex": undefined}
+}
+,"VARIABLES": "Object" : {
+"gen": "#ccffcc","par": "#ccccff"}
+,"GROUPIDS": "6","lastSeenVertex": "GraphGroup" : {
+"name": "xGroup","label": "Group:GraphObject","color": null,"textcolor": null,"url": null,"noedges": null,"edgelabel": null,"ALLOWED_DEFAULTS": ["edgecolor": undefined,"groupcolor": undefined,"vertexcolor": undefined,"vertextextcolor": undefined,"edgetextcolor": undefined]
+,"OBJECTS": ["Vertex(name:equal2,label: equal)": undefined,"Vertex(name:OBJECTS2,label: OBJECTS)": undefined]
+,"ROOTVERTICES": ["Vertex(name:equal2,label: equal)": undefined,"Vertex(name:OBJECTS2,label: OBJECTS)": undefined]
+,"equal": []
+,"exitvertex": "3","entryedge": null,"exitedge": null,"conditional": null}
+}
+}
+

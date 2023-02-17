@@ -22,7 +22,7 @@ export function setGenerator (generator, visualizer = undefined) {
   console.log(`setGenerator(${generator}:${visualizer}) ie. '${genViz}'`)
   // Change the generator via UI
   /** @type {HTMLInputElement} */
-  const select = document.querySelector('#generator')
+  const select = document.querySelector('#diagrammer-generator')
   select.value = genViz
   if (getGenerator() !== generator) {
     console.error(`Somewhy generator change did not go thru, we wanted ${generator} and have ${getGenerator()}`)
@@ -114,7 +114,7 @@ export function updateImage (imageSource) {
 
 // Get currently selected generator
 export function getGenerator () {
-  const e = getSelectElement('generator')
+  const e = getSelectElement('diagrammer-generator')
   const gen = e.options[e.selectedIndex].value
   if (gen.indexOf(':') > -1) {
     return gen.split(':')[0]
@@ -123,7 +123,7 @@ export function getGenerator () {
 }
 
 export function getVisualizer () {
-  const e = getSelectElement('generator')
+  const e = getSelectElement('diagrammer-generator')
   const gen = e.options[e.selectedIndex].value
   if (gen.indexOf(':') > -1) {
     return gen.split(':')[1]

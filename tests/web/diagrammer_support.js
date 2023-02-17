@@ -103,8 +103,8 @@ export async function selectExampleCode (page, testname) {
  */
 export async function selectGeneratorVisualizer (page, genViz) {
   // assert such a test exists in index.html example dropdown, will throw if doesn't
-  await page.$(`select#generator>option[value="${genViz}"]`)
-  await page.select('#generator', genViz)
+  await page.$(`select#diagrammer-generator>option[value="${genViz}"]`)
+  await page.select('#diagrammer-generator', genViz)
 }
 
 /**

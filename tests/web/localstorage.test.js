@@ -55,7 +55,7 @@ describe('Diagrammer', () => {
     await writeToElement(p, filenameSelector, localStorageFilename)
 
     // CSS selector for puppeteer
-    await p.click('form[name="contact"]>button#loadfile')
+    await p.click('form[name="contact"]>button#diagrammer-loadfile')
     expect(getDiagrammerCode(p)).resolves.toMatch('this>is>localstorage>test')
     await clearParsingErrors(p)
   })

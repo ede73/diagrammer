@@ -161,7 +161,7 @@ export function visualize (visualizer) {
       console.error(err)
     }
     // try{
-    // const canviz = new Canviz('graph_container');
+    // const canviz = new Canviz('canviz_container');
     // canviz.load("http://192.168.11.215/~ede/state/post.txt");
     // }catch(err){
     // console.log(err);

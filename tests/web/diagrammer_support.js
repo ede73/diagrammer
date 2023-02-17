@@ -68,7 +68,7 @@ export async function getDiagrammerCode (page) {
 export async function clearParsingErrors (page) {
   return await page.evaluate(() => {
     // @ts-ignore
-    document.querySelector('div#error').innerHTML = ''
+    document.querySelector('div#diagrammer-error').innerHTML = ''
   })
 }
 
@@ -80,7 +80,7 @@ export async function clearParsingErrors (page) {
 export async function getParsingError (page) {
   return await page.evaluate(() => {
     // @ts-ignore
-    return document.querySelector('div#error').innerHTML
+    return document.querySelector('div#diagrammer-error').innerHTML
   })
 }
 

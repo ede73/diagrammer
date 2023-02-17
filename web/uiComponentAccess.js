@@ -66,14 +66,14 @@ export function getCurrentFilename () {
  * @param {string} text
  */
 export function setError (text) {
-  document.getElementById('error').innerText = text
+  document.getElementById('diagrammer-error').innerText = text
 }
 
 /**
  * @returns {string} Return parse error(if any)
  */
 export function getError () {
-  return document.getElementById('error').innerText
+  return document.getElementById('diagrammer-error').innerText
 }
 
 export function openImage (imageUrl) {

@@ -213,10 +213,12 @@
 							<td class="tabbed">
 									<input type="radio" id="tab1" name="css-tabs" checked>
 									<input type="radio" id="tab2" name="css-tabs">
+									<input type="radio" id="tab3" name="css-tabs">
 									
 									<ul class="tabs">
 										<li class="tab"><label for="tab1">Code</label></li>
 										<li class="tab"><label for="tab2">Generated result</label></li>
+										<li class="tab"><label for="tab3">Generated result (beautified)</label></li>
 									</ul>
 									<div class="tab-content">
 										<pre id="diagrammer-code" align="top" style="margin:0;left:0;height:600px;float:left"></pre>
@@ -224,6 +226,8 @@
 									<div class="tab-content">
 										<textarea id="diagrammer-result" rows="40" cols="10"></textarea>
 									</div>		
+									<div class="tab-content" id="diagrammer-beautified">
+									</div>
 							</td>
 							<td>
 								<!-- result.png -->
@@ -234,6 +238,9 @@
 				</td>
 			</tr>
 		</table>
+
+		<link href="js/jsonTree/jsonTree.css" rel="stylesheet" />
+		<script src="js/jsonTree/jsonTree.js"></script>
 
 		<!-- <svg id='chart' xmlns="http://www.w3.org/2000/svg"></svg> -->
 		<!-- resulting data of grammar parser/ast generator -->

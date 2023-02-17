@@ -95,6 +95,7 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
     // @ts-ignore
     diagrammerParser.parse(diagrammerCode)
     console.log(`  ..parsed, calling it a success with ${getGenerator()} and ${getVisualizer()}`)
+
     try {
       successCallback(getGenerator(), getVisualizer())
     } catch (ex) {
@@ -102,6 +103,7 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
     }
   } catch (ex) {
     console.error(`  ..parsed, and failed ${getError()} and ${ex}`)
+    clearBeautified()
     failureCallback(getError(), ex)
   } finally {
     parsingStarted = 0
@@ -124,17 +126,41 @@ function makeNewImageHolder () {
   imgdiv.appendChild(img)
 }
 
+function beautify (generatedCode) {
+  let data
+  try {
+    data = JSON.parse(generatedCode)
+  } catch (ex) {
+    setError('Failed parsing generated code, perhaps not JSON?')
+    return
+  }
+  // Get DOM-element for inserting json-tree
+  const wrapper = document.getElementById('diagrammer-beautified')
+  const tree = jsonTree.create(data, wrapper)
+  console.log('BEAURIFIED')
+  console.log(document.getElementById('diagrammer-beautified').innerHTML)
+}
+
+function clearBeautified () {
+  const result = getInputElement('diagrammer-beautified')
+  result.value = ''
+}
+
+// TODO: move to editor (or elsewhere, but this really isn't parser thingy anymore)
 export function visualize (visualizer) {
   /** @type {HTMLInputElement} */
   const result = getInputElement('diagrammer-result')
-  const statelang = result.value
+  const generatedResult = result.value
+
+  beautify(generatedResult)
+
   if (!visualizer) {
     throw new Error('Visualizer not defined')
   }
   const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
   // TODO: loads uselessly if web visualizer used
   makeNewImageHolder()
-  makeHTTPPost(visualizeUrl, statelang,
+  makeHTTPPost(visualizeUrl, generatedResult,
     updateImage,
     (statusCode, statusText, responseText) => {
       alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
@@ -156,7 +182,7 @@ export function visualize (visualizer) {
       // TODO: Bring back viz/canviz
       // @ts-ignore
       // eslint-disable-next-line no-undef
-      getHTMLElement('viz_container').innerHTML = Viz(statelang, 'vin_container')
+      getHTMLElement('viz_container').innerHTML = Viz(generatedResult, 'vin_container')
     } catch (err) {
       console.error(err)
     }

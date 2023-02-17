@@ -1,4 +1,8 @@
+// eslint-disable-next-line no-unused-vars
 import { Page } from 'puppeteer'
+// TODO:
+// makes jest fail loading jquery
+// import { setGraphText, generatorChanged, getGraphText } from '../../web/editorInteractions.js'
 
 // npm install @types/jest --save-dev
 // fixed it
@@ -69,7 +73,7 @@ export async function getDiagrammerCode (page) {
  */
 export async function clearParsingErrors (page) {
   return await page.evaluate(() => {
-    return document.querySelector('div#error').value = ''
+    document.querySelector('div#error').value = ''
   })
 }
 
@@ -112,8 +116,9 @@ export async function selectGeneratorVisualizer (page, genViz) {
  * @param {Page} page
  */
 export async function clearGraph (page) {
-  await page.evaluate(() =>
+  await page.evaluate(() => {
     document.querySelector('#graphVisualizationHere').innerHTML = ''
+  }
   )
 }
 

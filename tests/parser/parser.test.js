@@ -4,7 +4,9 @@ import { GraphGroup } from '../../model/graphgroup.js'
 import { GraphVertex } from '../../model/graphvertex.js'
 
 describe('Parser/grammar rule tests', () => {
-  let errors
+  // linter failure, it's used in beforeAll error handler
+  // eslint-disable-next-line no-unused-vars
+  let errors = 0
   /** @type {GraphCanvas} */
   let graphcanvas
 
@@ -133,16 +135,16 @@ exit;exit node is also required
         // how ever 'then'/'else' is intepretex as one
         // expect(obj.OBJECTS.length).toBe(1);
         conditionalGroups.delete(obj.getName())
-        if (obj.getName() == '1') {
+        if (obj.getName() === '1') {
           expect(obj.getLabel()).toBe('a')
           expect(obj.exitvertex).toBe(1)
           expect(obj.conditional).toBe('if')
           expect(obj.entryedge.getName()).toBe('entry')
-        } else if (obj.getName() == '2') {
+        } else if (obj.getName() === '2') {
           expect(obj.getLabel()).toBe('b')
           expect(obj.exitvertex).toBe(2)
           expect(obj.conditional).toBe('elseif')
-        } else if (obj.getName() == '3') {
+        } else if (obj.getName() === '3') {
           expect(obj.getLabel()).toBe('endif')
           expect(obj.exitvertex).toBe(3)
           expect(obj.conditional).toBe('endif')
@@ -150,10 +152,10 @@ exit;exit node is also required
         }
       } else if (obj instanceof GraphVertex) {
         verticeNames.delete(obj.getName())
-        if (obj.getName() == 'entry') {
+        if (obj.getName() === 'entry') {
           expect(obj.getLabel()).toBe('is required with conditional')
           expect(obj.noedges).toBeTruthy()
-        } else if (obj.getName() == '2') {
+        } else if (obj.getName() === '2') {
           expect(obj.getLabel()).toBe('exit node is also required')
           expect(obj.noedges).toBeTruthy()
         }

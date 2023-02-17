@@ -1,7 +1,7 @@
 // @ts-check
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { removeOldVisualizations } from './d3support.js'
-import { getError, getGenerator, getHTMLElement, getInputElement, getVisualizer, setError, setGenerator, updateImage } from './uiComponentAccess.js'
+import { getError, getGenerator, getHTMLElement, getInputElement, getVisualizer, openImage, setError, setGenerator, updateImage } from './uiComponentAccess.js'
 import { visualizations } from './globals.js'
 import 'jquery'
 
@@ -60,6 +60,7 @@ diagrammerParser.yy.result = function (line) {
  * @param {string} x
  */
 // TODO: MOVING TO GraphCanvas
+// @ts-ignore
 diagrammerParser.trace = function (x) {
   console.log(`TRACE:${x}`)
 }
@@ -121,7 +122,7 @@ function makeNewImageHolder () {
   // auto adjusts
   img.style.height = 'auto'
   img.src = 'web/result.png'
-  img.onclick = "javascript:openImage('web/result.png');"
+  img.onclick = () => openImage('web/result.png')
   imgdiv.appendChild(img)
 }
 

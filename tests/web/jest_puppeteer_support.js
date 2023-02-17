@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import { Page, Puppeteer } from 'puppeteer'
 
 /**
@@ -67,7 +68,7 @@ export async function getElementText (page, elementId) {
  */
 export async function writeToElement (page, elementId, text) {
   await assertElementExists(page, elementId)
-  await page.$eval(elementId, (el, text) => el.value = text, text)
+  await page.$eval(elementId, (el, text) => { el.value = text }, text)
 }
 
 function consoleLogWithTime (msg) {

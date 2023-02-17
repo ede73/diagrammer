@@ -9,7 +9,7 @@ export class TreeVertex {
   }
 
   toString () {
-    return `tree(${data},children=[${JSON.stringify(this.data)}])`
+    return `tree(${this.data},children=[${JSON.stringify(this.data)}])`
   }
 };
 
@@ -26,7 +26,7 @@ export function findVertex (tree, findData) {
     return tree
   }
   for (const i in tree.CHILDREN) {
-    if (!tree.CHILDREN.hasOwnProperty(i)) continue
+    if (!Object.prototype.hasOwnProperty.call(tree.CHILDREN, i)) continue
     const tn = tree.CHILDREN[i]
     if (tn.data === findData) {
       return tn
@@ -62,7 +62,7 @@ export function traverseTree (root, callback, enter, exit, level = undefined, ha
     enter(root)
   }
   for (const i in root.CHILDREN) {
-    if (!root.CHILDREN.hasOwnProperty(i)) continue
+    if (!Object.prototype.hasOwnProperty.call(root.CHILDREN, i)) continue
     const tn = root.CHILDREN[i]
     const isLeaf = tn.CHILDREN.length === 0
     const hasVertexSiblings = (parseInt(i) + 1) !== root.CHILDREN.length

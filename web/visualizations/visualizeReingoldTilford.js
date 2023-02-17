@@ -26,12 +26,16 @@ export function visualizeReingoldTilford (generatorResult) {
     .attr('transform', `translate(${width / 2},${height / 2})`)
 
   const links = root.links()
+  // eslint-disable-next-line no-unused-vars
   const link = svgimg.selectAll('path.link')
     .data(links)
     .enter().append('path')
     .attr('class', 'link')
+    // @ts-ignore
     .attr('d', d3.linkRadial()
+      // @ts-ignore
       .angle(d => d.x)
+      // @ts-ignore
       .radius(d => d.y))
 
   const nodes = root.descendants()

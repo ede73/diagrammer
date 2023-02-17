@@ -101,6 +101,7 @@ export function visualizeLayerBands (generatorResult) {
                               textAlign: 'center',
                               wrap: go.TextBlock.None,
                               font: 'bold 11pt sans-serif',
+                              // @ts-ignore
                               background: $(go.Brush, 'Linear', { 0: 'aqua', 1: go.Brush.darken('aqua') })
                             },
                             new go.Binding('text'),
@@ -111,6 +112,7 @@ export function visualizeLayerBands (generatorResult) {
                           $(go.Shape,
                             { stroke: null, strokeWidth: 0 },
                             new go.Binding('desiredSize', 'bounds', function (r) { return r.size }),
+                            // @ts-ignore
                             new go.Binding('fill', 'itemIndex', function (i) { return i % 2 === 0 ? 'whitesmoke' : go.Brush.darken('whitesmoke') }).ofObject())
                         )
         }

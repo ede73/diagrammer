@@ -21,7 +21,7 @@ export function exportGraphs () {
     },
     error: function (err) {
       alert(`ERROR: ${JSON.stringify(err)}`)
-      if (err.status == 200) {
+      if (err.status === 200) {
         ParseResult(err)
       } else {
         alert(`Error:${err.responseText}  Status: ${err.status}`)
@@ -31,6 +31,7 @@ export function exportGraphs () {
 }
 
 export function importGraphs () {
+  // eslint-disable-next-line no-undef
   $.ajax({
     type: 'GET',
     async: true,
@@ -45,7 +46,7 @@ export function importGraphs () {
     },
     error: function (err) {
       alert(`ERROR: ${JSON.stringify(err)}`)
-      if (err.status == 200) {
+      if (err.status === 200) {
         ParseResult(err)
       } else {
         alert(`Error:${err.responseText}  Status: ${err.status}`)

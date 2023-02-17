@@ -221,11 +221,19 @@ export function plantuml_sequence (graphcanvas) {
       if (obj instanceof GraphGroup) {
         // TODO:
         // Group name,OBJECTS,get/setEqual,toString
-        const processAGroup = (function (o) {
+        ((o) => {
           debug('processAGroup:' + JSON.stringify(o))
           let cond = o.conditional
           if (cond) {
-            if (cond === 'if') { cond = 'alt' } else if (cond === 'elseif') { cond = 'else' } else if (cond == 'else') { cond = 'else' } else if (cond == 'endif') { cond = 'end' }
+            if (cond === 'if') {
+              cond = 'alt'
+            } else if (cond === 'elseif') {
+              cond = 'else'
+            } else if (cond === 'else') {
+              cond = 'else'
+            } else if (cond === 'endif') {
+              cond = 'end'
+            }
             output(graphcanvas, cond + ' ' + o.getLabel())
           } else {
             cond = ''// cond = "ref";
@@ -238,7 +246,7 @@ export function plantuml_sequence (graphcanvas) {
           }
           traverseVertices(o, nodeIsSubGraph)
           printEdges(o)
-        }(obj))
+        })(obj)
       } else if (!(obj instanceof GraphVertex)) {
         throw new Error('Not a node nor a group, NOT SUPPORTED')
       }

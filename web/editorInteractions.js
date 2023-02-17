@@ -16,6 +16,7 @@ let result
  */
 // var editor;
 // @ts-ignore
+// eslint-disable-next-line no-undef
 const editor = ace.edit('editable')
 
 // afterbody
@@ -23,9 +24,8 @@ const editor = ace.edit('editable')
 const e = getInputElement('saved') // TODO: move up
 e.innerHTML = getSavedFilesAsOptionList()
 
+// eslint-disable-next-line no-unused-vars, prefer-const
 result = getInputElement('result')
-const vtimer = null
-const vdelay = 1000
 
 // Set to 0 to fall back to textarea(enable textarea in index.html)
 const acemode = 1

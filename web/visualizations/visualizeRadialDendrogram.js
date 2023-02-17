@@ -26,12 +26,16 @@ export function visualizeRadialDendrogram (generatorResult) {
   const svgimg = makeSVG(width, height)
     .attr('transform', `translate(${width / 2},${height / 2})`)
 
+  // eslint-disable-next-line no-unused-vars
   const link = svgimg.selectAll('.link')
     .data(links)
     .join('path')
     .attr('class', 'link')
+    // @ts-ignore
     .attr('d', d3.linkRadial()
+      // @ts-ignore
       .angle(d => d.x)
+      // @ts-ignore
       .radius(d => d.y))
 
   const node = svgimg.selectAll('.node')

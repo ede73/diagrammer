@@ -73,10 +73,12 @@ FlatTreeLayout.prototype.commitLayout = function () {
   // find maximum Y position of all Nodes
   let y = -Infinity
   // network is definitely
+  // @ts-ignore
   this.network.vertexes.each(function (v) {
     y = Math.max(y, v.node.position.y)
   })
   // move down all leaf nodes to that Y position, but keeping their X position
+  // @ts-ignore
   this.network.vertexes.each(function (v) {
     if (v.destinationEdges.count === 0) {
       // shift the node down to Y

@@ -8,6 +8,7 @@ export function getSavedGraph () {
   }
   const graph = localStorage.getItem('graphs')
   // console.log("Have graph"+graph);
+  // eslint-disable-next-line no-eval
   data = eval('(' + graph + ')')
   return data
 }

@@ -36,6 +36,12 @@ export class GraphGroup extends GraphContainer {
          * @type {GraphConnectable}
          */
     this.exitedge = undefined
+
+    /**
+     * Only used if this group(set) was created due if then/elseif/else construct
+     * @type {string} conditional used
+     */
+    this.conditional = undefined
   }
 
   /**

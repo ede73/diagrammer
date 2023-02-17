@@ -10,8 +10,8 @@ import { GraphConnectable } from './graphconnectable.js'
 export class GraphEdge extends GraphObject {
   /**
    * @param {string} edgeType Type of the edge(grammar!)
-   * @param {GraphConnectable} lhs Left hand side of the edge
-   * @param {GraphConnectable} rhs Right hand side of the edge
+   * @param {GraphConnectable|undefined} lhs Left hand side of the edge
+   * @param {GraphConnectable|undefined} rhs Right hand side of the edge
    * @constuctor
    */
   constructor (edgeType, lhs, rhs) {

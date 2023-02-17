@@ -1,3 +1,7 @@
+// @ts-check
+// eslint-disable-next-line no-unused-vars
+import { assert } from 'console'
+// type checking
 // eslint-disable-next-line no-unused-vars
 import * as jis from 'jest-image-snapshot'
 import { toMatchImageSnapshot } from 'jest-image-snapshot'
@@ -6,16 +10,11 @@ import { Page } from 'puppeteer'
 import { clearGeneratorResults, clearGraph, clearParsingErrors, getDiagrammerCode, getParsingError, selectExampleCode, selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn } from './diagrammer_support.js'
 import { singleElementScreenSnapshot } from './snapshot_single_element.js'
 
-// graphVisualizationHere all the graphcics sit here..
-// result transpiled results come here (diagrammer -> generator)
-// graph_container CanVIZ
-// debug_output
-
 /**
  *
  * @param {string} filename
- * @param {float} threshold
- * @returns {jis.toMatchImageSnapshot}
+ * @param {number} threshold
+ * @returns {jis.MatchImageSnapshotOptions}
  */
 export function setConfig (filename, threshold = 0.0001) {
   return {
@@ -30,6 +29,7 @@ export function setConfig (filename, threshold = 0.0001) {
 describe('Diagrammer', () => {
   beforeAll(async () => {
     /** @type {Page} */
+    // @ts-ignore
     // eslint-disable-next-line no-undef
     const p = page
     await p.goto('http://localhost/~ede/diagrammer/')
@@ -37,10 +37,17 @@ describe('Diagrammer', () => {
     // await captureBrowserLogs(page);
   })
 
-  it('asserts against diagrammer main page regressions', async () => {
+  // Jest/Puppeteer annoyance, using globals
+  /** @type {Page} */
+  let p
+  beforeEach(async () => {
     /** @type {Page} */
+    // @ts-ignore
     // eslint-disable-next-line no-undef
-    const p = page
+    p = page
+  })
+
+  it('asserts against diagrammer main page regressions', async () => {
     expect.extend({
       toMatchImageSnapshot
     })
@@ -49,9 +56,6 @@ describe('Diagrammer', () => {
   })
 
   it('ensures that writing diagrammer code is shown in ace editor', async () => {
-    /** @type {Page} */
-    // eslint-disable-next-line no-undef
-    const p = page
     await clearGeneratorResults(p)
     await setDiagrammerCode(p, 'a>b>c')
     await waitForGeneratorResults(p)
@@ -60,9 +64,6 @@ describe('Diagrammer', () => {
   })
 
   it('ensures that parsing error is displayed correctly', async () => {
-    /** @type {Page} */
-    // eslint-disable-next-line no-undef
-    const p = page
     await clearGeneratorResults(p)
     // of course there isn't any pre-existing errors, but safer this way
     await clearParsingErrors(p)
@@ -81,9 +82,6 @@ describe('Diagrammer', () => {
   })
 
   it('selects dendrogram example, verifies parsing succeeds and correct graph is visualized', async () => {
-    /** @type {Page} */
-    // eslint-disable-next-line no-undef
-    const p = page
     await clearGeneratorResults(p)
     await clearGraph(p)
 
@@ -100,8 +98,9 @@ describe('Diagrammer', () => {
    *
    * @param {Page} page
    * @param {string} example File in tests/test_inputs/*.txt
+   * @param {string|undefined} overrideGeneratorVisualizer
    */
-  async function testDynamicRendering (page, example, overrideGeneratorVisualizer) {
+  async function testDynamicRendering (page, example, overrideGeneratorVisualizer = undefined) {
     await clearGeneratorResults(page)
     await clearGraph(page)
     await selectExampleCode(page, example)
@@ -116,31 +115,33 @@ describe('Diagrammer', () => {
 
     // TODO: D3.js ends up with div#graph../[div#default_,svg] GoJs div#graph../div#default_/svg
     const selector = (await page.$('#graphVisualizationHere>svg') != null) ? '#graphVisualizationHere>svg' : '#graphVisualizationHere>div>svg'
+
+    // @ts-ignore alas there's no way to satisfy VSCode strict null check, doesn't understand any asserts or not even if(x===null)throw... ie. no way null after that
     const svg = await page.evaluate((selector) => document.querySelector(selector).outerHTML, selector)
     const elementHandle = await page.$(selector)
+    // @ts-ignore alas there's no way to satisfy VSCode strict null check, doesn't understand any asserts or not even if(x===null)throw... ie. no way null after that
     const bbox = await elementHandle.boundingBox()
+    // @ts-ignore alas there's no way to satisfy VSCode strict null check, doesn't understand any asserts or not even if(x===null)throw... ie. no way null after that
     const filename = example.match(/.+\/([^.]+)/)[1] + (overrideGeneratorVisualizer ? '_' + overrideGeneratorVisualizer.replace(':', '_') : '')
     const snapshotConfig = setConfig(filename, 1)
+    // @ts-ignore alas there's no way to satisfy VSCode strict null check, doesn't understand any asserts or not even if(x===null)throw... ie. no way null after that
     const buffer = await singleElementScreenSnapshot(svg, bbox.width, bbox.height)
     expect.extend({
       toMatchImageSnapshot
     })
-    expect(buffer).toMatchImageSnapshot(snapshotConfig, 0.0001)
+    expect(buffer).toMatchImageSnapshot(snapshotConfig)
   };
 
   it('asserts reingold-tilford(dendrogram)(d3.js) visualization works', async () => {
-    // eslint-disable-next-line no-undef
-    await testDynamicRendering(page, 'test_inputs/dendrogram.txt')
+    await testDynamicRendering(p, 'test_inputs/dendrogram.txt')
   }, 1000)
 
   it('asserts radial dendrogram(d3.js) visualization works', async () => {
-    // eslint-disable-next-line no-undef
-    await testDynamicRendering(page, 'test_inputs/dendrogram.txt', 'dendrogram:radialdendrogram')
+    await testDynamicRendering(p, 'test_inputs/dendrogram.txt', 'dendrogram:radialdendrogram')
   }, 1000)
 
   it('asserts sankey(d3.js) visualization works', async () => {
-    // eslint-disable-next-line no-undef
-    await testDynamicRendering(page, 'test_inputs/sankey.txt')
+    await testDynamicRendering(p, 'test_inputs/sankey.txt')
   }, 1000)
 
   it('asserts circlepackage(d3.js) visualization works', async () => {
@@ -148,17 +149,14 @@ describe('Diagrammer', () => {
   }, 1000)
 
   it('asserts umlclass2(GoJS) visualization works', async () => {
-    // eslint-disable-next-line no-undef
-    await testDynamicRendering(page, 'test_inputs/umlclass2.txt')
+    await testDynamicRendering(p, 'test_inputs/umlclass2.txt')
   }, 1000)
 
   it('asserts layerbands(GoJS) visualization works', async () => {
-    // eslint-disable-next-line no-undef
-    await testDynamicRendering(page, 'test_inputs/layerbands.txt')
+    await testDynamicRendering(p, 'test_inputs/layerbands.txt')
   }, 1000)
 
   it('asserts parsetree(GoJS) visualization works', async () => {
-    // eslint-disable-next-line no-undef
-    await testDynamicRendering(page, 'test_inputs/parsetree.txt')
+    await testDynamicRendering(p, 'test_inputs/parsetree.txt')
   }, 1000)
 })

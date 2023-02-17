@@ -1,3 +1,4 @@
+// @ts-check
 import { GraphObject } from '../../model/graphobject.js'
 
 describe('GraphObject tests', () => {

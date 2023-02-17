@@ -1,10 +1,9 @@
 // @ts-check
-import { captureBrowserLogs, sleepABit, writeToElement, getElementInnerHtml, setElementInnerHtml } from './jest_puppeteer_support.js'
-import { getDiagrammerCode, setDiagrammerCode } from './diagrammer_support.js'
+import { sleepABit, writeToElement } from './jest_puppeteer_support.js'
+import { getDiagrammerCode, setDiagrammerCode, getParsingError, clearParsingErrors } from './diagrammer_support.js'
 // used as type
 // eslint-disable-next-line no-unused-vars
 import { Page, HTTPRequest } from 'puppeteer'
-import { write } from 'fs'
 // import { jest } from '@jest/globals'
 
 // test saving, loading from local storage
@@ -15,6 +14,7 @@ describe('Diagrammer', () => {
 
   beforeAll(async () => {
     /** @type {Page} */
+    // @ts-ignore
     // eslint-disable-next-line no-undef
     const p = page
     await p.goto('http://localhost/~ede/diagrammer/')
@@ -28,10 +28,17 @@ describe('Diagrammer', () => {
     })
   })
 
-  it('Edit code, save it to local storage', async () => {
+  // Jest/Puppeteer annoyance, using globals
+  /** @type {Page} */
+  let p
+  beforeEach(async () => {
     /** @type {Page} */
+    // @ts-ignore
     // eslint-disable-next-line no-undef
-    const p = page
+    p = page
+  })
+
+  it('Edit code, save it to local storage', async () => {
     await setDiagrammerCode(p, 'this>is>localstorage>test')
     await writeToElement(p, filenameSelector, localStorageFilename)
 
@@ -44,24 +51,17 @@ describe('Diagrammer', () => {
   })
 
   it('Load code from local storage', async () => {
-    /** @type {Page} */
-    // eslint-disable-next-line no-undef
-    const p = page
     await setDiagrammerCode(p, '')
     await writeToElement(p, filenameSelector, localStorageFilename)
 
     // CSS selector for puppeteer
     await p.click('form[name="contact"]>button#loadfile')
     expect(getDiagrammerCode(p)).resolves.toMatch('this>is>localstorage>test')
-    setElementInnerHtml(p, '#error', '')
+    await clearParsingErrors(p)
   })
 
   // Initially wanted these to be in separare file, but tests executed in paraller, so messing up local storage (between these two tests)
   it('Import from external storage (mocked)', async () => {
-    /** @type {Page} */
-    // eslint-disable-next-line no-undef
-    const p = page
-
     // mock the import
     await p.setRequestInterception(true)
     p.on('request', request => {
@@ -88,10 +88,8 @@ describe('Diagrammer', () => {
   // This basically tests backend integration which is bad
   // Would be enough to test button to export route
   it('Export to external storage (mocked)', async () => {
-    /** @type {Page} */
-    // eslint-disable-next-line no-undef
-    const p = page
     // mock the import
+    await clearParsingErrors(p)
     await p.setRequestInterception(true)
     p.on('request', /** @type {HTTPRequest} */interceptedRequest => {
       if (interceptedRequest.url().includes('/web/saveExport.php')) {
@@ -106,7 +104,7 @@ describe('Diagrammer', () => {
     await p.click('form[name="contact"]>button#export')
     // Export is asynchronous, it'll take a moment for results to arrive
     await sleepABit(100)
-    const error = await getElementInnerHtml(p, '#error')
+    const error = await getParsingError(p)
     expect(error).toBeFalsy()
   })
 })

@@ -1,3 +1,4 @@
+// @ts-check
 import { GraphEdge } from '../../model/graphedge.js'
 
 describe('GraphEdge tests', () => {
@@ -43,7 +44,7 @@ describe('GraphEdge tests', () => {
     ]
   }
   Object.entries(edgeTypes).forEach(([edgeType, verifications]) => {
-    const edge = new GraphEdge(edgeType)
+    const edge = new GraphEdge(edgeType, undefined, undefined)
     expect(edge.edgeType).toMatch(edgeType)
     verifications.forEach(verification => {
       it(`Test that for edgetype (${edgeType}) ${verification}() is true`, async () => {

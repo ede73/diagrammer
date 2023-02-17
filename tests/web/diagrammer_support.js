@@ -1,3 +1,4 @@
+// @ts-check
 // eslint-disable-next-line no-unused-vars
 import { Page } from 'puppeteer'
 import { setGraphText, generatorChanged, getGraphText } from '../../web/editorInteractions.js'
@@ -9,6 +10,7 @@ import { setGraphText, generatorChanged, getGraphText } from '../../web/editorIn
  */
 export async function clearGeneratorResults (page) {
   await page.evaluate(function () {
+    // @ts-ignore
     document.querySelector('#result').value = ''
   })
 }
@@ -19,7 +21,8 @@ export async function clearGeneratorResults (page) {
  * @return {Promise<string>}
  */
 export async function getGeneratorResult (page) {
-  await page.evaluate(function () {
+  return await page.evaluate(() => {
+    // @ts-ignore
     return document.querySelector('#result').value
   })
 }
@@ -49,7 +52,7 @@ export async function setDiagrammerCode (page, code) {
 /**
  * Return what ever is in the diagrammer text editor
  * @param {Page} page
- * @return {Promise<string}>
+ * @return {Promise<string>}
  */
 export async function getDiagrammerCode (page) {
   return await page.evaluate(() => {
@@ -60,11 +63,12 @@ export async function getDiagrammerCode (page) {
 /**
  * Clear parsing errors
  * @param {Page} page
- * @return {Promise<void}>
+ * @return {Promise<void>}>
  */
 export async function clearParsingErrors (page) {
   return await page.evaluate(() => {
-    document.querySelector('div#error').value = ''
+    // @ts-ignore
+    document.querySelector('div#error').innerHTML = ''
   })
 }
 
@@ -75,6 +79,7 @@ export async function clearParsingErrors (page) {
  */
 export async function getParsingError (page) {
   return await page.evaluate(() => {
+    // @ts-ignore
     return document.querySelector('div#error').innerHTML
   })
 }
@@ -108,9 +113,9 @@ export async function selectGeneratorVisualizer (page, genViz) {
  */
 export async function clearGraph (page) {
   await page.evaluate(() => {
+    // @ts-ignore
     document.querySelector('#graphVisualizationHere').innerHTML = ''
-  }
-  )
+  })
 }
 
 /**

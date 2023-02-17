@@ -1,3 +1,4 @@
+// @ts-check
 // eslint-disable-next-line no-unused-vars
 import { Page, Puppeteer } from 'puppeteer'
 
@@ -58,6 +59,7 @@ export async function sleepABit (milliSeconds) {
 export async function getElementText (page, elementId) {
   await assertElementExists(page, elementId)
   return await page.$eval(elementId, element => {
+    // @ts-ignore
     return element.value
   })
 }
@@ -95,6 +97,7 @@ export async function setElementInnerHtml (page, elementId, value) {
 export async function writeToElement (page, elementId, text) {
   await assertElementExists(page, elementId)
   await page.$eval(elementId, (el, text) => {
+    // @ts-ignore
     el.value = text
   }, text)
 }
@@ -107,7 +110,7 @@ function consoleLogWithTime (msg) {
  * Usefull while debugging tests - since browser runs headless..
  *
  * @param {Page} page
- * @return {Promsise<void>}
+ * @return {Promise<void>}
  */
 export async function captureBrowserLogs (page) {
   page

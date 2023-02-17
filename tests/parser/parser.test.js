@@ -1,5 +1,10 @@
+// @ts-check
+
 import { diagrammerParser } from '../../build/diagrammer_parser.js'
-import { generators } from '../../model/graphcanvas.js'
+// eslint-disable-next-line no-unused-vars
+import { generators, GraphCanvas } from '../../model/graphcanvas.js'
+// eslint-disable-next-line no-unused-vars
+import { GraphConnectable } from '../../model/graphconnectable.js'
 import { GraphGroup } from '../../model/graphgroup.js'
 import { GraphVertex } from '../../model/graphvertex.js'
 
@@ -28,6 +33,15 @@ describe('Parser/grammar rule tests', () => {
     }
   })
 
+  /**
+   *
+   * @param {string} code
+   */
+  function parseCode (code) {
+    // @ts-ignore
+    diagrammerParser.parse(code)
+  }
+
   function makeRandomRGB () {
     const randomBetween = (min, max) => min + Math.floor(Math.random() * (max - min + 1))
     const rgb = randomBetween(0, 16777215)
@@ -35,8 +49,9 @@ describe('Parser/grammar rule tests', () => {
   }
 
   it('graphContent/VARIABLE/state 16', async () => {
-    diagrammerParser.parse('$(variable:value) $(toinen:kolmas)')
+    parseCode('$(variable:value) $(toinen:kolmas)')
     /** @type Map<string, string> */
+    // @ts-ignore
     const variables = new Map(Object.entries(Array(graphcanvas.yy.VARIABLES)[0]))
     expect(variables.has('variable')).toBeTruthy()
     expect(variables.has('toinen')).toBeTruthy()
@@ -45,35 +60,35 @@ describe('Parser/grammar rule tests', () => {
   })
 
   it('graphContent/SHAPE/state 17', async () => {
-    diagrammerParser.parse('shape ellipse')
+    parseCode('shape ellipse')
     expect(graphcanvas.getCurrentShape()).toMatch('ellipse')
   })
 
   it('graphContent/EQUAL/state 18', async () => {
-    diagrammerParser.parse('equal a,b\n')
+    parseCode('equal a,b\n')
     const equals = graphcanvas.getEqual()
     expect(equals[0].getName()).toMatch('a')
     expect(equals[1].getName()).toMatch('b')
   })
 
   it('graphContent/LANDSCAPE/state 20', async () => {
-    diagrammerParser.parse('landscape\n')
+    parseCode('landscape\n')
     expect(graphcanvas.getDirection()).toMatch('landscape')
   })
 
   // Can't test since we've FORCED a generator..
   // it(`graphContent/generator/state 21`, async () => {
-  //     diagrammerParser.parse("generator xx\n");
+  //     parseCode("generator xx\n");
   //     expect(graphcanvas.getGenerator()).toMatch('xx');
   // });
 
   it('graphContent/visualizer/state 22', async () => {
-    diagrammerParser.parse('visualizer xx\n')
+    parseCode('visualizer xx\n')
     expect(graphcanvas.getVisualizer()).toMatch('xx')
   })
 
   it('graphContent/PORTRAIT/state 23', async () => {
-    diagrammerParser.parse('portrait\n')
+    parseCode('portrait\n')
     expect(graphcanvas.getDirection()).toMatch('portrait')
   })
 
@@ -83,36 +98,36 @@ describe('Parser/grammar rule tests', () => {
 
   it('graphContent/VERTEX_COLOR/state 25', async () => {
     const color = makeRandomRGB()
-    diagrammerParser.parse(`vertex color ${color}`)
+    parseCode(`vertex color ${color}`)
     expect(graphcanvas.getDefault('vertexcolor')).toMatch(color)
   })
 
   it('graphContent/VERTEXTEXT_COLOR/state 26', async () => {
     const color = makeRandomRGB()
-    diagrammerParser.parse(`vertex text color ${color}`)
+    parseCode(`vertex text color ${color}`)
     expect(graphcanvas.getDefault('vertextextcolor')).toMatch(color)
   })
 
   it('graphContent/EDGE_COLOR/state 27', async () => {
     const color = makeRandomRGB()
-    diagrammerParser.parse(`edge color ${color}`)
+    parseCode(`edge color ${color}`)
     expect(graphcanvas.getDefault('edgecolor')).toMatch(color)
   })
 
   it('graphContent/EDGETEXT_COLOR/state 28', async () => {
     const color = makeRandomRGB()
-    diagrammerParser.parse(`edge text color ${color}`)
+    parseCode(`edge text color ${color}`)
     expect(graphcanvas.getDefault('edgetextcolor')).toMatch(color)
   })
 
   it('graphContent/GROUP_COLOR/state 29', async () => {
     const color = makeRandomRGB()
-    diagrammerParser.parse(`group color ${color}`)
+    parseCode(`group color ${color}`)
     expect(graphcanvas.getDefault('groupcolor')).toMatch(color)
   })
 
   it('graphContent/[ IF/state 30 ELSEIF/state 31 ELSE/state 32 ENDIF/state 33]', async () => {
-    diagrammerParser.parse(`
+    parseCode(`
 entry;is required with conditional
 if a then
 elseif b then
@@ -126,7 +141,7 @@ exit;exit node is also required
     // in this case only all the objects and root vertices do match
     expect(graphcanvas.OBJECTS).toMatchObject(graphcanvas.ROOTVERTICES)
 
-    const conditionalGroups = new Set('1', '2', '3')
+    const conditionalGroups = new Set(['1', '2', '3'])
     const verticeNames = new Set(['entry', 'exit'])
 
     graphcanvas.OBJECTS.forEach(obj => {
@@ -170,9 +185,12 @@ exit;exit node is also required
 
   it('graphContent/GROUP/state 34', async () => {
     const color = makeRandomRGB()
-    diagrammerParser.parse(`group name ${color};label\ngroup end\n`)
+    parseCode(`group name ${color};label\ngroup end\n`)
+    const connectable = graphcanvas.OBJECTS[0]
+    expect(connectable).toBeInstanceOf(GraphGroup)
     /** @type {GraphGroup} */
-    const group = graphcanvas.OBJECTS[0]
+    // @ts-ignore
+    const group = connectable
     expect(graphcanvas.OBJECTS.length).toBe(1)
     expect(group.getName()).toBe('name')
     expect(group.getColor()).toBe(color)
@@ -181,9 +199,12 @@ exit;exit node is also required
 
   it('graphContent/GROUP(brief)/state 34', async () => {
     const color = makeRandomRGB()
-    diagrammerParser.parse(`{name${color};label\n}\n`)
+    parseCode(`{name${color};label\n}\n`)
+    const connectable = graphcanvas.OBJECTS[0]
+    expect(connectable).toBeInstanceOf(GraphGroup)
     /** @type {GraphGroup} */
-    const group = graphcanvas.OBJECTS[0]
+    // @ts-ignore
+    const group = connectable
     expect(graphcanvas.OBJECTS.length).toBe(1)
     expect(group.getName()).toBe('name')
     expect(group.getColor()).toBe(color)
@@ -192,7 +213,7 @@ exit;exit node is also required
 
   it('graphContent/START/state 35', async () => {
     // this is just a reference to a vertex, not a vertex(probably should be though :) )
-    diagrammerParser.parse('start a\n')
+    parseCode('start a\n')
     expect(graphcanvas.getStart()).toBe('a')
   })
 
@@ -202,21 +223,22 @@ exit;exit node is also required
     // root vertices a
     // 3 edges, between a (at NW corner) q,w,e to (at SE corner) edge text is edgelabel
     // readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> getEdge(yy,$EVENT,$readEvents,$vertexGroupListOrAttrs,$6,$8?$8.substring(1):$8,$5,$2,$4).right
-    diagrammerParser.parse(`a:nw ->:se ${color} "edgelabel" q,w,e;label\n`)
+    parseCode(`a:nw ->:se ${color} "edgelabel" q,w,e;label\n`)
     expect(graphcanvas.OBJECTS.length).toBe(4)
     expect(graphcanvas.ROOTVERTICES.length).toBe(1)
     expect(graphcanvas.EDGES.length).toBe(3)
 
     // verify all objects accounted for
-    const vertices = new Set('a', 'q', 'w', 'e')
+    const vertices = new Set(['a', 'q', 'w', 'e'])
     graphcanvas.OBJECTS.forEach(vertex => {
       vertices.delete(vertex.getName())
     })
     expect(vertices.size).toBe(0)
 
+    // @ts-ignore
     expect(graphcanvas.yy.lastSeenVertex.getName()).toBe('e')
 
-    const edges = new Set('q', 'w', 'e')
+    const edges = new Set(['q', 'w', 'e'])
     graphcanvas.EDGES.forEach((edge, idx) => {
       expect(edge.getColor()).toBe(color)
       expect(edge.getName()).toBe(undefined)
@@ -234,7 +256,7 @@ exit;exit node is also required
 
   // TODO: fix this
   it.skip('Root vertices test', async () => {
-    diagrammerParser.parse(`
+    parseCode(`
             a b c
             q>a w>b e>c
             w>a

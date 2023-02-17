@@ -9,16 +9,16 @@ export function makeSVG (width, height) {
     height = 300
   }
   d3.select('#the_SVG_ID').remove()
-  return d3.select('#graphVisualizationHere').append('svg')
+  return d3.select('#diagrammer-graph').append('svg')
     .attr('id', 'the_SVG_ID')
     .attr('width', width)
     .attr('height', height)
     .append('g')
 }
 
-// TODO: Discrepancy between d3.js and GoJS, former results in #graphVisualizationHere/(div#default_,svg) latter #graphVisualizerionHere/div#default_/svg
+// TODO: Discrepancy between d3.js and GoJS, former results in #diagrammer-graph/(div#default_,svg) latter #graphVisualizerionHere/div#default_/svg
 export function removeOldVisualizations (idName) {
-  const element = getHTMLElement('graphVisualizationHere')
+  const element = getHTMLElement('diagrammer-graph')
   removeAllChildNodes(element)
   const newDiv = document.createElement('div')
   newDiv.setAttribute('id', idName || 'default_')

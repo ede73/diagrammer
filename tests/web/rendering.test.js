@@ -114,7 +114,7 @@ describe('Diagrammer', () => {
     await waitUntilGraphDrawn(page)
 
     // TODO: D3.js ends up with div#graph../[div#default_,svg] GoJs div#graph../div#default_/svg
-    const selector = (await page.$('#graphVisualizationHere>svg') != null) ? '#graphVisualizationHere>svg' : '#graphVisualizationHere>div>svg'
+    const selector = (await page.$('#diagrammer-graph>svg') != null) ? '#diagrammer-graph>svg' : '#diagrammer-graph>div>svg'
 
     // @ts-ignore alas there's no way to satisfy VSCode strict null check, doesn't understand any asserts or not even if(x===null)throw... ie. no way null after that
     const svg = await page.evaluate((selector) => document.querySelector(selector).outerHTML, selector)

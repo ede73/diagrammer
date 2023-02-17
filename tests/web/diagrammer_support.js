@@ -114,7 +114,7 @@ export async function selectGeneratorVisualizer (page, genViz) {
 export async function clearGraph (page) {
   await page.evaluate(() => {
     // @ts-ignore
-    document.querySelector('#graphVisualizationHere').innerHTML = ''
+    document.querySelector('#diagrammer-graph').innerHTML = ''
   })
 }
 
@@ -126,7 +126,7 @@ export async function clearGraph (page) {
 export async function waitUntilGraphDrawn (page) {
   // Uhh...UI side is so slow to pick up changes..
   // around 5s image is still old, after 6 we see the radial dendrogram!
-  await page.waitForSelector('#graphVisualizationHere:not(:empty)')
-  // console.log(await page.evaluate(() => document.querySelector('#graphVisualizationHere').innerHTML));
+  await page.waitForSelector('#diagrammer-graph:not(:empty)')
+  // console.log(await page.evaluate(() => document.querySelector('#diagrammer-graph').innerHTML));
   // await sleepABit(200);
 }

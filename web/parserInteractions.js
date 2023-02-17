@@ -110,7 +110,7 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
 
 function makeNewImageHolder () {
   removeOldVisualizations()
-  const imgdiv = getHTMLElement('graphVisualizationHere')
+  const imgdiv = getHTMLElement('diagrammer-graph')
   const img = document.createElement('img')
   img.align = 'bottom'
   // using % here fails (even if it works directly in HTML)

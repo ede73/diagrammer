@@ -162,7 +162,7 @@ export function savedChanged () {
 
 export function exampleChanged () {
   // read the example...place to textArea(overwrite)
-  const e = getSelectElement('example')
+  const e = getSelectElement('diagrammer-example')
   const doc = e.options[e.selectedIndex].value
   console.log(`exampleChanged(${doc})`)
   makeHTTPGet(`tests/${doc}`,

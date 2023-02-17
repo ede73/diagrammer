@@ -92,8 +92,8 @@ export async function getParsingError (page) {
  */
 export async function selectExampleCode (page, testname) {
   // assert such a test exists in index.html example dropdown, will throw if doesn't
-  await page.$(`select#example>option[value="${testname}"]`)
-  await page.select('#example', testname)
+  await page.$(`select#diagrammer-example>option[value="${testname}"]`)
+  await page.select('#diagrammer-example', testname)
 }
 
 /**

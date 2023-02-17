@@ -80,7 +80,7 @@
 		</select>
 		<!-- handling examples -->
 		<label for="example">Examples:</label>
-		<select id="example" name="example" onChange="exampleChanged()">
+		<select id="diagrammer-example" name="example" onChange="exampleChanged()">
 			<!--ls tests/test_inputs/*txt|awk -F/ '{print "<option value=\""$2"\">"$2"</option>"}'-->
 <option value="test_inputs/ast.txt">ast.txt</option>
 <option value="test_inputs/compass.txt">compass.txt</option>
@@ -356,7 +356,7 @@
 	const e = getInputElement('diagrammer-saved') // TODO: move up
 	e.innerHTML = getSavedFilesAsOptionList()
 	// select ast.txt example
-	document.querySelector('select#example>option[value="test_inputs/ast.txt"').selected=true
+	document.querySelector('select#diagrammer-example>option[value="test_inputs/ast.txt"').selected=true
 	exampleChanged()
 </script>
 <script type="text/javascript">

@@ -6,6 +6,8 @@
 #<!-- Prevents caching at the Proxy Server -->
 #<meta http-equiv="Expires" content="0"/>
 
+$outputFile="web/result.png";
+
 function getExe($name)
 {
   $paths = array("/usr/bin/", "/usr/local/bin/", "/opt/homebrew/bin/");
@@ -27,6 +29,8 @@ if (FALSE === file_put_contents("./post.txt", $postText)) {
   http_response_code(500);
   return;
 }
+
+unlink($outputFile);
 
 function visualize(string $executable, string $extra_param = "", string $extra_image_format = "-Tpng"): string
 {
@@ -76,4 +80,4 @@ switch ($_REQUEST["visualizer"]) {
     break;
 }
 file_put_contents("./error.txt", $r);
-echo "web/result.png";
+echo $outputFile;

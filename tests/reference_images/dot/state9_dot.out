@@ -5,7 +5,7 @@ digraph {
         q1;
         w1;
         w3;
-        }
+    }
     z1[fillcolor="#ff0000",style="filled"];
     z2[fillcolor="#00ff00",style="filled"];
     z3;

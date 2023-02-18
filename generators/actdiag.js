@@ -82,8 +82,7 @@ export function actdiag (graphcanvas) {
         }
         output(graphcanvas, `${obj.getName()}${colorShapeLabel};`)
       })
-      output(false)
-      output(graphcanvas, '}')
+      output(graphcanvas, '}', false)
     } else {
       // dotted,dashed,solid
       // NOT invis,bold,rounded,diagonals

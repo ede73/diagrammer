@@ -1,4 +1,4 @@
-nwdiag{
+nwdiag {
     default_fontsize = 16
     network dmz {
         address="210.x.x.x/24"

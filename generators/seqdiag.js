@@ -124,7 +124,6 @@ export function seqdiag (graphcanvas) {
     }
     output(graphcanvas, `${lhs.getName()} ${edgeType} ${rightName}[${attrs.join(',')}];`)
   })
-  output(graphcanvas, false)
-  output(graphcanvas, '}')
+  output(graphcanvas, '}', false)
 }
 generators.set('seqdiag', seqdiag)

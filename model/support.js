@@ -128,10 +128,16 @@ let indentLevel = 0
  * Output given string, potentially indenting or dedenting
  * @param {(boolean|GraphCanvas)} graphcanvas
  * @param {(string|boolean)} txt Text to output
- * @param {boolean} [indentOrDedent] whether to indent to dedent, OPTIONAL. TODO: true is latent, make false be early. Ie hence it's easy to control {,true and },false
+ * @param {boolean} [indentOrDedent] whether to indent to dedent, OPTIONAL. true will LATENTLY increase the indent, flase will do that BEFORE the output is processed
  */
 export function output (graphcanvas, txt, indentOrDedent = undefined) {
   let prefix = ''
+  if (indentOrDedent === false || graphcanvas === false || txt === false) {
+    if (indentLevel === 0) {
+      throw new Error('Dedenting beyond 0, check your intendation')
+    }
+    indentLevel--
+  }
   if (txt !== true && txt !== false && graphcanvas !== true && graphcanvas !== false) {
     for (let i = 0; i < indentLevel; i++) {
       prefix += '    '
@@ -140,8 +146,6 @@ export function output (graphcanvas, txt, indentOrDedent = undefined) {
   }
   if (indentOrDedent === true || graphcanvas === true || txt === true) {
     indentLevel++
-  } else if (indentOrDedent === false || graphcanvas === false || txt === false) {
-    indentLevel--
   }
 }
 

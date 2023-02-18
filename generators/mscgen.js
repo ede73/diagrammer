@@ -120,9 +120,10 @@ export function mscgen (graphcanvas) {
     }
 
     output(graphcanvas, `${lhs.getName()}${edgeType}${rightName}[${attrs.join(',')}];`)
-    if (note !== '') { output(graphcanvas, `${rhs.getName()} abox ${rhs.getName()}[label="${note}"];`) }
+    if (note !== '') {
+      output(graphcanvas, `${rhs.getName()} abox ${rhs.getName()}[label="${note}"];`)
+    }
   })
-  output(false)
-  output(graphcanvas, '}')
+  output(graphcanvas, '}', false)
 }
 generators.set('mscgen', mscgen)

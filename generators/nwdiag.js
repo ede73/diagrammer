@@ -45,7 +45,7 @@ const NetworkDiagShapeMap =
  * @param {GraphCanvas} graphcanvas
  */
 export function nwdiag (graphcanvas) {
-  output(graphcanvas, 'nwdiag{', true)
+  output(graphcanvas, 'nwdiag {', true)
   output(graphcanvas, 'default_fontsize = 16')
 
   for (const i in graphcanvas.OBJECTS) {
@@ -85,8 +85,7 @@ export function nwdiag (graphcanvas) {
           output(graphcanvas, `  ${edge.left.getName()}${tmp};`)
         }
       }
-      output(false)
-      output(graphcanvas, '}')
+      output(graphcanvas, '}', false)
     } else {
       if (obj.shape && !NetworkDiagShapeMap[obj.shape]) {
         throw new Error('Missing shape mapping')
@@ -108,7 +107,6 @@ export function nwdiag (graphcanvas) {
       output(graphcanvas, `${edge.left.getName()} -- ${edge.right.getName()};`)
     }
   })
-  output(false)
-  output(graphcanvas, '}')
+  output(graphcanvas, '}', false)
 }
 generators.set('nwdiag', nwdiag)

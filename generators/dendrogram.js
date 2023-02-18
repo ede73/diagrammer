@@ -54,15 +54,13 @@ export function dendrogram (graphcanvas) {
   }, (t) => {
     output(graphcanvas, '"children": [', true)
   }, (t, hasNextSibling) => {
-    output(false)
     output(graphcanvas, ']', false)
     if (hasNextSibling) {
-      output(graphcanvas, '},')
+      output(graphcanvas, '},', false)
     } else {
-      output(graphcanvas, '}')
+      output(graphcanvas, '}', false)
     }
   })
-  output(false)
 }
 generators.set('dendrogram', dendrogram)
 visualizations.set('dendrogram', ['radialdendrogram', 'circlepacked', 'reingoldtilford'])

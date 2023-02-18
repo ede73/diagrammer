@@ -66,9 +66,7 @@ export function sankey (graphcanvas) {
     }
     comma = ','
   })
-  output(false)
-  output(graphcanvas, ']')
-  output(false)
-  output(graphcanvas, '}')
+  output(graphcanvas, ']', false)
+  output(graphcanvas, '}', false)
 }
 generators.set('sankey', sankey)

@@ -45,9 +45,11 @@ test() {
   fi
 
   # Verify that the generated output matches what it used to
-  if ! diff "$textoutput" "$textreference"; then
-    echo "    ERROR: at $1, $textoutput $textreference differ for $testbin" >&2
+  if ! diff -q "$textoutput" "$textreference" >/dev/null; then
+    echo -n "\nERROR: at $1, $textoutput $textreference differ for $testbin" >&2
     diff -u "$textreference" "$textoutput"
+    echo "\t# You can run this test also with:"
+    echo "\tnode js/diagrammer.js tests/test_inputs/$1 $testbin"
     setError 11 "$1"
   fi
 
@@ -63,7 +65,7 @@ test() {
   if [ -f "$renderoutput" ]; then
     [ ! -f "$renderreference" ] && cp "$renderoutput" "$renderreference"
     [ ! -f "$textoutput" ] && cp "$textoutput" "$textreference"
-    if ! diff "$renderoutput" "$renderreference"; then
+    if ! diff -q "$renderoutput" "$renderreference" >/dev/null; then
       echo "    ERROR: at $1, image $renderoutput $renderreference differ" >&2
       diff -u "$textreference" "$textoutput"
       display_image "$renderoutput" "$renderreference"

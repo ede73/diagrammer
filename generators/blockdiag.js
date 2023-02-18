@@ -121,8 +121,7 @@ export function blockdiag (graphcanvas) {
         if (tmp.trim() !== '') { tmp = `[${tmp.trim().substring(1)}]` }
         output(graphcanvas, `${obj.getName()}${tmp};`)
       })
-      output(false)
-      output(graphcanvas, '}')
+      output(graphcanvas, '}', false)
     } else {
       // dotted,dashed,solid
       // NOT invis,bold,rounded,diagonals

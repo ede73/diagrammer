@@ -1,4 +1,4 @@
-nwdiag{
+nwdiag {
     default_fontsize = 16
     network Sample_front {
         address="192.168.10.0/24"

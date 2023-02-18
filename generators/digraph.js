@@ -125,7 +125,12 @@ export function digraph (graphcanvas) {
   if (start) {
     const fwd = getVertex(graphcanvas.yy, start)
     processAVertex(fwd)
-    output(graphcanvas, `//startnode setup\n  {rank = same;null} {rank = same; ${start}}\n  null [shape=plaintext, label=""];\n  ${start}[shape=doublecircle];\n  null->${start};\n`)
+    output(graphcanvas, '//startnode setup')
+    output(graphcanvas, `{rank = same;null} {rank = same; ${start}}`, true)
+    output(graphcanvas, 'null [shape=plaintext, label=""];')
+    output(graphcanvas, `${start}[shape=doublecircle];`)
+    output(graphcanvas, `null->${start};\n`)
+    output(graphcanvas, false)
   }
   // This may FORWARD DECLARE a node...which creates problems with coloring
   if (graphcanvas.getEqual() && graphcanvas.getEqual().length > 0) {
@@ -207,8 +212,7 @@ export function digraph (graphcanvas) {
               '   color="{0}";\n'))
           }
           traverseVertices(grp)
-          output(false)
-          output(graphcanvas, `}//end of ${grp.getName()} ${cond}`)
+          output(graphcanvas, `}//end of ${grp.getName()} ${cond}`, false)
           if (cond) {
             output(graphcanvas, `//COND ${grp.getName()} ${cond}`)
             if (cond === 'endif') {
@@ -356,8 +360,7 @@ export function digraph (graphcanvas) {
                 getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')
     }
   })
-  output(false)
-  output(graphcanvas, '}')
+  output(graphcanvas, '}', false)
 }
 generators.set('digraph', digraph)
 visualizations.set('digraph', ['dot', 'circo', 'twopi', 'neato', 'fdp', 'sfpd'])

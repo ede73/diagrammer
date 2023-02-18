@@ -3,10 +3,10 @@ digraph {
     rankdir=TD;
     LR_0[fontcolor="#00aa00",shape="doublecircle"];
     //startnode setup
-  {rank = same;null} {rank = same; LR_0}
-  null [shape=plaintext, label=""];
-  LR_0[shape=doublecircle];
-  null->LR_0;
+    {rank = same;null} {rank = same; LR_0}
+        null [shape=plaintext, label=""];
+        LR_0[shape=doublecircle];
+        null->LR_0;
 
     LR_0[fontcolor="#00aa00",shape="doublecircle"];
     LR_3[fontcolor="#00aa00",shape="doublecircle"];

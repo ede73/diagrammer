@@ -46,8 +46,6 @@ export function parsetree (graphcanvas) {
     debug('edge ' + edge.left.name + ' to ' + edge.right.name)
     addEdgeedVertex(edge.left, edge.right)
   })
-  // debug(JSON.stringify(nodeList));
-  output(graphcanvas, JSON.stringify(nodeList))
-  output(false)
+  output(graphcanvas, JSON.stringify(nodeList, null, 3))
 }
 generators.set('parsetree', parsetree)

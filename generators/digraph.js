@@ -2,7 +2,7 @@ import { generators, visualizations } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphInner } from '../model/graphinner.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { getVertex, hasOutwardEdge, traverseEdges } from '../model/model.js'
+import { getVertex, hasOutwardEdge, traverseEdges, traverseVertices } from '../model/model.js'
 import { debug, getAttributeAndFormat, output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(cli/www)</option>
@@ -143,21 +143,20 @@ export function digraph (graphcanvas) {
     }
     lout('}', false)
   }
-  const fixgroup = (c => {
-    for (const i in c.OBJECTS) {
-      if (!Object.prototype.hasOwnProperty.call(c.OBJECTS, i)) continue
-      const o = c.OBJECTS[i]
-      if (o instanceof GraphGroup) {
-        if (o.OBJECTS.length === 0) {
-          o.OBJECTS.push(new GraphVertex(`invis_${o.getName()}`)
-            .setStyle('invis'))
-        } else {
-          // A group...non empty...parse inside
-          fixgroup(o)
-        }
-      }
+
+  // Fix groups that have no nodes by adding invisible node there
+  const fixgroup = (o) => {
+    if (!(output instanceof GraphGroup)) {
+      return
     }
-  })(graphcanvas.OBJECTS)
+    if (o.OBJECTS.length === 0) {
+      o.OBJECTS.push(new GraphVertex(`invis_${o.getName()}`)
+        .setStyle('invis'))
+      return
+    }
+    traverseVertices(o, fixgroup)
+  }
+  traverseVertices(graphcanvas, fixgroup)
 
   function getFirstEdgeOfTheGroup (grp) {
     for (const i in graphcanvas.EDGES) {
@@ -191,7 +190,7 @@ export function digraph (graphcanvas) {
 
   let lastexit
   let lastendif
-  const traverseVertices = /** @type {function((GraphGroup|GraphVertex))} */root => {
+  const ltraverseVertices = /** @type {function((GraphGroup|GraphVertex))} */root => {
     for (const i in root.OBJECTS) {
       if (!Object.prototype.hasOwnProperty.call(root.OBJECTS, i)) continue
       const obj = root.OBJECTS[i]
@@ -214,7 +213,7 @@ export function digraph (graphcanvas) {
             lout(getAttributeAndFormat(grp, 'color',
               'color="{0}";'))
           }
-          traverseVertices(grp)
+          ltraverseVertices(grp)
           lout(`}//end of ${grp.getName()} ${cond}`, false)
           if (cond) {
             lout(`//COND ${grp.getName()} ${cond}`)
@@ -261,7 +260,7 @@ export function digraph (graphcanvas) {
       }
     }
   }
-  traverseVertices(graphcanvas)
+  ltraverseVertices(graphcanvas)
 
   lout('//links start')
   traverseEdges(graphcanvas, edge => {

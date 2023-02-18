@@ -1,7 +1,7 @@
 msc {
-    b[  label="browser" ]
-    ,d[  label="database" ]
-    ,w[  label="webserver" ]
+    b[ label="browser" ]
+    ,d[ label="database" ]
+    ,w[ label="webserver" ]
     ;
     b=>w[label="GET /index.html", id="1"];
     w>>b[id="2"];

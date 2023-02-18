@@ -2,7 +2,7 @@ import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges, traverseVertices } from '../model/model.js'
-import { getAttributeAndFormat, output } from '../model/support.js'
+import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="mscgen">MSCGEN(cli)</option>
 
@@ -22,18 +22,20 @@ export function mscgen (graphcanvas) {
     if (obj instanceof GraphGroup) {
       lout(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/')
       traverseVertices(obj, z => {
-        let tmp = getAttributeAndFormat(z, 'color', ', color="{0}"') +
-                    getAttributeAndFormat(z, 'style', ', style={0}') +
-                    getAttributeAndFormat(z, 'label', ', label="{0}"')
-        if (tmp.trim() !== '') { tmp = `[ ${tmp.trim().substring(1)} ]` }
+        const tmp = multiAttrFmt(z, {
+          color: 'color="{0}"',
+          style: 'style={0}',
+          label: 'label="{0}"'
+        })
         lout((comma ? ',' : '') + z.getName() + tmp)
         comma = true
       })
     } else if (obj instanceof GraphVertex) {
-      let tmp = getAttributeAndFormat(obj, 'color', ', textbgcolor="{0}"') +
-                getAttributeAndFormat(obj, 'style', ', style={0}') +
-                getAttributeAndFormat(obj, 'label', ', label="{0}"')
-      if (tmp.trim() !== '') { tmp = `[ ${tmp.trim().substring(1)} ]` }
+      const tmp = multiAttrFmt(obj, {
+        color: 'textbgcolor="{0}"',
+        style: 'style={0}',
+        label: 'label="{0}"'
+      })
       lout((comma ? ',' : '') + obj.getName() + tmp)
       comma = true
     }

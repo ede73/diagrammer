@@ -1,4 +1,10 @@
 import { generators, visualizations } from '../model/graphcanvas.js'
+// used in typing
+// eslint-disable-next-line no-unused-vars
+import { GraphConnectable } from '../model/graphconnectable.js'
+// used in typing
+// eslint-disable-next-line no-unused-vars
+import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphInner } from '../model/graphinner.js'
 import { GraphVertex } from '../model/graphvertex.js'
@@ -72,7 +78,7 @@ export function digraph (graphcanvas) {
   }
 
   /**
-     * @param {GraphConnectable} obj
+     * @param {GraphVertex} obj
      */
   const processAVertex = obj => {
     const nattrs = []
@@ -158,31 +164,33 @@ export function digraph (graphcanvas) {
   }
   traverseVertices(graphcanvas, fixgroup)
 
-  function getFirstEdgeOfTheGroup (grp) {
+  // pick node from group that is FIRST pointed by edges left hand side
+  function getFirstLHSReferredNodeFromGroup (/** @type {GraphContainer} */grp) {
     for (const i in graphcanvas.EDGES) {
       if (!Object.prototype.hasOwnProperty.call(graphcanvas.EDGES, i)) continue
-      const l = graphcanvas.EDGES[i]
+      const allEdges = graphcanvas.EDGES[i]
       for (const j in grp.OBJECTS) {
         if (!Object.prototype.hasOwnProperty.call(grp.OBJECTS, j)) continue
-        const n = grp.OBJECTS[j]
-        if (n === l.left) {
-          return n
+        const objectInGroup = grp.OBJECTS[j]
+        if (objectInGroup === allEdges.left) {
+          return objectInGroup
         }
       }
     }
     return undefined
   }
 
-  function getLastEdgeInGroup (grp) {
+  function getLastLHSOrRHSReferredNodeInGroup (/** @type {GraphContainer} */grp) {
+    /** @type {(GraphConnectable|undefined)} */
     let nod
     for (const i in graphcanvas.EDGES) {
       if (!Object.prototype.hasOwnProperty.call(graphcanvas.EDGES, i)) continue
-      const l = graphcanvas.EDGES[i]
+      const allEdges = graphcanvas.EDGES[i]
       for (const j in grp.OBJECTS) {
         if (!Object.prototype.hasOwnProperty.call(grp.OBJECTS, j)) continue
-        const n = grp.OBJECTS[j]
-        if (n === l.left) { nod = n }
-        if (n === l.right) { nod = n }
+        const node = grp.OBJECTS[j]
+        if (node === allEdges.left) { nod = node }
+        if (node === allEdges.right) { nod = node }
       }
     }
     return nod
@@ -190,77 +198,79 @@ export function digraph (graphcanvas) {
 
   let lastexit
   let lastendif
-  const ltraverseVertices = /** @type {function((GraphGroup|GraphVertex))} */root => {
-    for (const i in root.OBJECTS) {
-      if (!Object.prototype.hasOwnProperty.call(root.OBJECTS, i)) continue
-      const obj = root.OBJECTS[i]
-      if (obj instanceof GraphGroup) {
-        const cond = obj.conditional;
-        // if (cond=="endif")continue;
-        // Group name,OBJECTS,get/setEqual,toString
-        ((grp) => {
-          debug(JSON.stringify(grp, skipEntrances))
-          lout(`subgraph cluster_${grp.getName()} {`, true)
-          if (grp.isInnerGraph) {
-            lout('graph[ style=invis ];')
-          }
-          if (grp.getLabel()) {
-            lout(getAttributeAndFormat(grp, 'label',
-              'label="{0}";'))
-          }
-          if (grp.getColor()) {
-            lout('style=filled;')
-            lout(getAttributeAndFormat(grp, 'color',
-              'color="{0}";'))
-          }
-          ltraverseVertices(grp)
-          lout(`}//end of ${grp.getName()} ${cond}`, false)
-          if (cond) {
-            lout(`//COND ${grp.getName()} ${cond}`)
-            if (cond === 'endif') {
-              // never reached
-              const exitedge = grp.exitedge
-              if (exitedge) {
-                lout(`${lastexit}->${exitedge.getName()}[ color=red ];`)
-                lout(`${lastendif}->${exitedge.getName()};`)
-              }
-            } else {
-              const sn = `entry${grp.exitvertex}`
-              if (!lastendif) {
-                lastendif = `endif${grp.exitvertex}`
-                lout(lastendif + '[ shape=circle, label="", width=0.01, height=0.01 ];')
-              }
-              // TODO:else does not need diamond
-              lout(`${sn}[ shape=diamond, fixedsize=true, width=1, height=1, label="${grp.getLabel()}" ];`)
-              if (cond === 'if') {
-                // entryedge!
-                lout(`${grp.entryedge.getName()}->${sn};`)
-              }
-              // FIRST node of group and LAST node in group..
-              const lastEdge = getFirstEdgeOfTheGroup(grp)
-              const ln = getLastEdgeInGroup(grp)
-              // decision node
-              // const en = "exit" + o.exitvertex
-
-              if (lastexit) {
-                lout(`${lastexit}->${sn}[ label="NO", color=red ];`)
-                // lastexit = undefined;
-              }
-              // YES LINK to first node of the group
-              lout(`${sn}->${lastEdge.getName()}[ label="YES", color=green, lhead=cluster_${grp.getName()} ];`)
-              lout(`${ln.getName()}->${lastendif}[ label="" ];`)
-              lastexit = sn
-            }
-          }
-        })(obj)
-      } else if (obj instanceof GraphVertex) {
-        processAVertex(obj)
+  /**
+    * @param {GraphGroup} grp
+    */
+  const processAGroup = grp => {
+    debug(JSON.stringify(grp, skipEntrances))
+    lout(`subgraph cluster_${grp.getName()} {`, true)
+    const cond = grp.conditional
+    // if (cond=="endif")continue;
+    // Group name,OBJECTS,get/setEqual,toString
+    if (grp.isInnerGraph) {
+      lout('graph[ style=invis ];')
+    }
+    if (grp.getLabel()) {
+      lout(getAttributeAndFormat(grp, 'label',
+        'label="{0}";'))
+    }
+    if (grp.getColor()) {
+      lout('style=filled;')
+      lout(getAttributeAndFormat(grp, 'color',
+        'color="{0}";'))
+    }
+    traverseVertices(grp, ltraverseVertices)
+    lout(`}//end of ${grp.getName()} ${cond}`, false)
+    if (cond) {
+      // IF.elseif..else construct...
+      lout(`//COND ${grp.getName()} ${cond}`)
+      if (cond === 'endif') {
+        // never reached
+        const exitedge = grp.exitedge
+        if (exitedge) {
+          lout(`${lastexit}->${exitedge.getName()}[ color=red ];`)
+          lout(`${lastendif}->${exitedge.getName()};`)
+        }
       } else {
-        throw new Error('Not a node nor a group, NOT SUPPORTED')
+        const exitVertexInConditional = `entry${grp.exitvertex}`
+        if (!lastendif) {
+          lastendif = `endif${grp.exitvertex}`
+          lout(lastendif + '[ shape=circle, label="", width=0.01, height=0.01 ];')
+        }
+        // TODO:else does not need diamond
+        lout(`${exitVertexInConditional}[ shape=diamond, fixedsize=true, width=1, height=1, label="${grp.getLabel()}" ];`)
+        if (cond === 'if') {
+          // entryedge!
+          lout(`${grp.entryedge.getName()}->${exitVertexInConditional};`)
+        }
+        // FIRST node of group and LAST node(GraphConnectable) in group..
+        const firstReferredNode = getFirstLHSReferredNodeFromGroup(grp)
+        const lastReferredNode = getLastLHSOrRHSReferredNodeInGroup(grp)
+        // decision node
+        // const en = "exit" + o.exitvertex
+
+        if (lastexit) {
+          lout(`${lastexit}->${exitVertexInConditional}[ label="NO", color=red ];`)
+          // lastexit = undefined;
+        }
+        // YES LINK to first node of the group
+        lout(`${exitVertexInConditional}->${firstReferredNode.getName()}[ label="YES", color=green, lhead=cluster_${grp.getName()} ];`)
+        lout(`${lastReferredNode.getName()}->${lastendif}[ label="" ];`)
+        lastexit = exitVertexInConditional
       }
     }
   }
-  ltraverseVertices(graphcanvas)
+
+  const ltraverseVertices = /** @type {function(GraphConnectable)} */obj => {
+    if (obj instanceof GraphVertex) {
+      processAVertex(obj)
+    } else if (obj instanceof GraphGroup) {
+      processAGroup(obj)
+    } else {
+      throw new Error('Not a node nor a group, NOT SUPPORTED')
+    }
+  }
+  traverseVertices(graphcanvas, ltraverseVertices)
 
   lout('//links start')
   traverseEdges(graphcanvas, edge => {

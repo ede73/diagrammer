@@ -87,13 +87,16 @@ const BlockDiagShapeMap = {
  * @param {GraphCanvas} graphcanvas
  */
 export function blockdiag (graphcanvas) {
-  output(graphcanvas, 'blockdiag {', true)
-  output(graphcanvas, 'default_fontsize = 14')
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
+  lout('blockdiag {', true)
+  lout('default_fontsize = 14')
   if (graphcanvas.getDirection() === 'portrait') {
-    output(graphcanvas, 'orientation=portrait')
+    lout('orientation=portrait')
   } else {
     // DEFAULT
-    output(graphcanvas, 'orientation=landscape')
+    lout('orientation=landscape')
   }
 
   let lastNode = graphcanvas.getStart()
@@ -103,9 +106,9 @@ export function blockdiag (graphcanvas) {
      */
   const parseObjects = /** @type {function(GraphConnectable)} */obj => {
     if (obj instanceof GraphGroup) {
-      output(graphcanvas, `group "${obj.getLabel()}"{`, true)
-      output(graphcanvas, getAttributeAndFormat(obj, 'color', 'color="{0}"'))
-      output(graphcanvas, getAttributeAndFormat(obj, 'label', 'label="{0}"'))
+      lout(`group "${obj.getLabel()}"{`, true)
+      lout(getAttributeAndFormat(obj, 'color', 'color="{0}"'))
+      lout(getAttributeAndFormat(obj, 'label', 'label="{0}"'))
       if (lastNode && lastNode.trim() !== '') {
         lastNode = `[${lastNode.trim().substring(1)}]`
       }
@@ -118,9 +121,9 @@ export function blockdiag (graphcanvas) {
                     ',shape={0}'.format(mappedShape) +
                     getAttributeAndFormat(obj, 'label', ', label="{0}"')
         if (tmp.trim() !== '') { tmp = `[ ${tmp.trim().substring(1)} ]` }
-        output(graphcanvas, `${obj.getName()}${tmp};`)
+        lout(`${obj.getName()}${tmp};`)
       })
-      output(graphcanvas, '}', false)
+      lout('}', false)
     } else {
       // dotted,dashed,solid
       // NOT invis,bold,rounded,diagonals
@@ -141,7 +144,7 @@ export function blockdiag (graphcanvas) {
                 ',shape="{0}"'.format(mappedShape) +
                 getAttributeAndFormat(obj, 'label', ', label="{0}"')
       if (colorIconShapeLabel.trim() !== '') { colorIconShapeLabel = `[ ${colorIconShapeLabel.trim().substring(1)} ]` }
-      output(graphcanvas, `${obj.getName()}${colorIconShapeLabel};`)
+      lout(`${obj.getName()}${colorIconShapeLabel};`)
     }
   }
 
@@ -161,8 +164,8 @@ export function blockdiag (graphcanvas) {
     t = t.trim()
     if (t.substring(0, 1) === ',') { t = t.substring(1).trim() }
     if (t !== '') { t = `[ ${t} ]` }
-    output(graphcanvas, `${edge.left.getName()} -> ${edge.right.getName()}${t};`)
+    lout(`${edge.left.getName()} -> ${edge.right.getName()}${t};`)
   })
-  output(graphcanvas, '}', false)
+  lout('}', false)
 }
 generators.set('blockdiag', blockdiag)

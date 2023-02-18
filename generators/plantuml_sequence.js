@@ -47,6 +47,10 @@ const PlantUMLShapeMap = {
 */
 // eslint-disable-next-line camelcase
 export function plantuml_sequence (graphcanvas) {
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
+
   const processAVertex = function (obj, sbgraph) {
     const nattrs = []
     const styles = []
@@ -76,17 +80,17 @@ export function plantuml_sequence (graphcanvas) {
     }
     let t = ''
     if (nattrs.length > 0) { t = `[${nattrs.join(',')}]` }
-    output(graphcanvas, 'participant {0} {1} {2}'.format(
+    lout('participant {0} {1} {2}'.format(
       getAttributeAndFormat(obj, 'label', '"{0}" as'),
       obj.getName(),
       t))
   }
 
-  output(graphcanvas, '@startuml')
-  output(graphcanvas, 'autonumber', true)
+  lout('@startuml')
+  lout('autonumber', true)
   /*
-     * if (r.getDirection() === "portrait") { output(graphcanvas, indent("rankdir=LR;")); }
-     * else { output(graphcanvas, indent("rankdir=TD;")); }
+     * if (r.getDirection() === "portrait") { lout( indent("rankdir=LR;")); }
+     * else { lout( indent("rankdir=TD;")); }
      */
   // This may FORWARD DECLARE a node...which creates problems with coloring
   const s = graphcanvas.getStart()
@@ -123,7 +127,7 @@ export function plantuml_sequence (graphcanvas) {
       let rhs = edge.right
       let lhs = edge.left
 
-      // output(graphcanvas, indent("//"+lr));
+      // lout( indent("//"+lr));
       if (rhs instanceof GraphGroup) {
         // just pick ONE Vertex from group and use lhead
         // TODO: Assuming it is Vertex (if Recursive groups implemented,
@@ -169,11 +173,11 @@ export function plantuml_sequence (graphcanvas) {
         lt = (dot ? '-' : '') + '-' + color + '>'
       } else if (dot) {
         // dotted
-        output(graphcanvas, getAttributeAndFormat(edge, 'label', '...{0}...'))
+        lout(getAttributeAndFormat(edge, 'label', '...{0}...'))
         continue
       } else if (dash) {
         // dashed
-        output(graphcanvas, getAttributeAndFormat(edge, 'label', '=={0}=='))
+        lout(getAttributeAndFormat(edge, 'label', '=={0}=='))
         continue
       } else {
         // is dotted or dashed no direction
@@ -181,28 +185,28 @@ export function plantuml_sequence (graphcanvas) {
       }
       const t = ''
       if (label) { label = `:${label}` } else { label = '' }
-      output(graphcanvas, lhs.getName() + lt + rhs.getName() + t + label)
-      if (swap) { output(graphcanvas, rhs.getName() + lt + lhs.getName() + t + label) }
+      lout(lhs.getName() + lt + rhs.getName() + t + label)
+      if (swap) { lout(rhs.getName() + lt + lhs.getName() + t + label) }
       if (sbgraph) {
         if (!rhs.active) {
-          output(graphcanvas, `activate ${rhs.getName()}`, true)
+          lout(`activate ${rhs.getName()}`, true)
           rhs.active = true
         } else {
           lhs.active = false
           output(false)
-          output(graphcanvas, `deactivate ${lhs.getName()}`)
+          lout(`deactivate ${lhs.getName()}`)
         }
       } else {
         if (lhs.active) {
           lhs.active = false
           output(false)
-          output(graphcanvas, `deactivate ${lhs.getName()}`)
+          lout(`deactivate ${lhs.getName()}`)
         }
       }
       if (note !== '') {
-        output(graphcanvas, `note over ${rhs.getName()}`)
+        lout(`note over ${rhs.getName()}`)
         outputFormattedText(graphcanvas, note.replace(/\\n/g, '\n'))
-        output(graphcanvas, 'end note')
+        lout('end note')
       }
     }
   }
@@ -234,14 +238,14 @@ export function plantuml_sequence (graphcanvas) {
             } else if (cond === 'endif') {
               cond = 'end'
             }
-            output(graphcanvas, cond + ' ' + o.getLabel())
+            lout(cond + ' ' + o.getLabel())
           } else {
             cond = ''// cond = "ref";
           }
           const nodeIsSubGraph = o.isInnerGraph
           if (o.getColor()) {
-            output(graphcanvas, 'style=filled;')
-            output(graphcanvas, getAttributeAndFormat(o, 'color',
+            lout('style=filled;')
+            lout(getAttributeAndFormat(o, 'color',
               '   color="{0}";\n'))
           }
           traverseVertices(o, nodeIsSubGraph)
@@ -255,6 +259,6 @@ export function plantuml_sequence (graphcanvas) {
   traverseVertices(graphcanvas, false)
   printEdges(graphcanvas)
   output(false)
-  output(graphcanvas, '@enduml')
+  lout('@enduml')
 }
 generators.set('plantuml_sequence', plantuml_sequence)

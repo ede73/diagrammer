@@ -56,6 +56,9 @@ export function digraph (graphcanvas) {
   // TODO: Start note fdp/neato
   // http://www.graphviz.org/doc/info/attrs.html#d:start
 
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
   /**
      *
      * @param {string} key
@@ -109,36 +112,36 @@ export function digraph (graphcanvas) {
     if (nattrs.length > 0) {
       t = `[ ${nattrs.join(', ')} ]`
     }
-    output(graphcanvas, `${obj.getName()}${t};`)
+    lout(`${obj.getName()}${t};`)
   }
 
-  output(graphcanvas, 'digraph {', true)
+  lout('digraph {', true)
 
-  output(graphcanvas, 'compound=true;')
+  lout('compound=true;')
   if (graphcanvas.getDirection() === 'portrait') {
-    output(graphcanvas, 'rankdir=LR;')
+    lout('rankdir=LR;')
   } else {
-    output(graphcanvas, 'rankdir=TD;')
+    lout('rankdir=TD;')
   }
   // This may FORWARD DECLARE a node...which creates problems with coloring
   const start = graphcanvas.getStart()
   if (start) {
     const fwd = getVertex(graphcanvas.yy, start)
     processAVertex(fwd)
-    output(graphcanvas, '//startnode setup')
-    output(graphcanvas, `{rank = same;null} {rank = same; ${start}}`, true)
-    output(graphcanvas, 'null [shape=plaintext, label=""];')
-    output(graphcanvas, `${start}[shape=doublecircle];`)
-    output(graphcanvas, `null->${start};\n`)
-    output(graphcanvas, false)
+    lout('//startnode setup')
+    lout(`{rank = same;null} {rank = same; ${start}}`, true)
+    lout('null [shape=plaintext, label=""];')
+    lout(`${start}[shape=doublecircle];`)
+    lout(`null->${start};\n`)
+    lout(false)
   }
   // This may FORWARD DECLARE a node...which creates problems with coloring
   if (graphcanvas.getEqual() && graphcanvas.getEqual().length > 0) {
-    output(graphcanvas, '{rank=same;', true)
+    lout('{rank=same;', true)
     for (let x = 0; x < graphcanvas.getEqual().length; x++) {
-      output(graphcanvas, graphcanvas.getEqual()[x].getName() + ';')
+      lout(graphcanvas.getEqual()[x].getName() + ';')
     }
-    output(graphcanvas, '}', false)
+    lout('}', false)
   }
   const fixgroup = (c => {
     for (const i in c.OBJECTS) {
@@ -198,41 +201,41 @@ export function digraph (graphcanvas) {
         // Group name,OBJECTS,get/setEqual,toString
         ((grp) => {
           debug(JSON.stringify(grp, skipEntrances))
-          output(graphcanvas, `subgraph cluster_${grp.getName()} {`, true)
+          lout(`subgraph cluster_${grp.getName()} {`, true)
           if (grp.isInnerGraph) {
-            output(graphcanvas, 'graph[ style=invis ];')
+            lout('graph[ style=invis ];')
           }
           if (grp.getLabel()) {
-            output(graphcanvas, getAttributeAndFormat(grp, 'label',
+            lout(getAttributeAndFormat(grp, 'label',
               'label="{0}";'))
           }
           if (grp.getColor()) {
-            output(graphcanvas, 'style=filled;')
-            output(graphcanvas, getAttributeAndFormat(grp, 'color',
+            lout('style=filled;')
+            lout(getAttributeAndFormat(grp, 'color',
               'color="{0}";'))
           }
           traverseVertices(grp)
-          output(graphcanvas, `}//end of ${grp.getName()} ${cond}`, false)
+          lout(`}//end of ${grp.getName()} ${cond}`, false)
           if (cond) {
-            output(graphcanvas, `//COND ${grp.getName()} ${cond}`)
+            lout(`//COND ${grp.getName()} ${cond}`)
             if (cond === 'endif') {
               // never reached
               const exitedge = grp.exitedge
               if (exitedge) {
-                output(graphcanvas, `${lastexit}->${exitedge.getName()}[ color=red ];`)
-                output(graphcanvas, `${lastendif}->${exitedge.getName()};`)
+                lout(`${lastexit}->${exitedge.getName()}[ color=red ];`)
+                lout(`${lastendif}->${exitedge.getName()};`)
               }
             } else {
               const sn = `entry${grp.exitvertex}`
               if (!lastendif) {
                 lastendif = `endif${grp.exitvertex}`
-                output(graphcanvas, lastendif + '[ shape=circle, label="", width=0.01, height=0.01 ];')
+                lout(lastendif + '[ shape=circle, label="", width=0.01, height=0.01 ];')
               }
               // TODO:else does not need diamond
-              output(graphcanvas, `${sn}[ shape=diamond, fixedsize=true, width=1, height=1, label="${grp.getLabel()}" ];`)
+              lout(`${sn}[ shape=diamond, fixedsize=true, width=1, height=1, label="${grp.getLabel()}" ];`)
               if (cond === 'if') {
                 // entryedge!
-                output(graphcanvas, `${grp.entryedge.getName()}->${sn};`)
+                lout(`${grp.entryedge.getName()}->${sn};`)
               }
               // FIRST node of group and LAST node in group..
               const lastEdge = getFirstEdgeOfTheGroup(grp)
@@ -241,12 +244,12 @@ export function digraph (graphcanvas) {
               // const en = "exit" + o.exitvertex
 
               if (lastexit) {
-                output(graphcanvas, `${lastexit}->${sn}[ label="NO", color=red ];`)
+                lout(`${lastexit}->${sn}[ label="NO", color=red ];`)
                 // lastexit = undefined;
               }
               // YES LINK to first node of the group
-              output(graphcanvas, `${sn}->${lastEdge.getName()}[ label="YES", color=green, lhead=cluster_${grp.getName()} ];`)
-              output(graphcanvas, `${ln.getName()}->${lastendif}[ label="" ];`)
+              lout(`${sn}->${lastEdge.getName()}[ label="YES", color=green, lhead=cluster_${grp.getName()} ];`)
+              lout(`${ln.getName()}->${lastendif}[ label="" ];`)
               lastexit = sn
             }
           }
@@ -260,7 +263,7 @@ export function digraph (graphcanvas) {
   }
   traverseVertices(graphcanvas)
 
-  output(graphcanvas, '//links start')
+  lout('//links start')
   traverseEdges(graphcanvas, edge => {
     const attrs = []
     let label = edge.label
@@ -350,17 +353,17 @@ export function digraph (graphcanvas) {
     debug(`print rhs ${rhs}`)
     if (lhs instanceof Array) {
       lhs.forEach((element, index, array) => {
-        output(graphcanvas, element.getName() +
+        lout(element.getName() +
                     getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() +
                     getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')
       })
     } else {
-      output(graphcanvas, lhs.getName() +
+      lout(lhs.getName() +
                 getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() +
                 getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')
     }
   })
-  output(graphcanvas, '}', false)
+  lout('}', false)
 }
 generators.set('digraph', digraph)
 visualizations.set('digraph', ['dot', 'circo', 'twopi', 'neato', 'fdp', 'sfpd'])

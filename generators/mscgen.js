@@ -11,18 +11,22 @@ import { getAttributeAndFormat, output } from '../model/support.js'
  * @param {GraphCanvas} graphcanvas
  */
 export function mscgen (graphcanvas) {
-  output(graphcanvas, 'msc {', true)
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
+
+  lout('msc {', true)
   let comma = false
   // print out all node declarations FIRST (if any)
   traverseVertices(graphcanvas, obj => {
     if (obj instanceof GraphGroup) {
-      output(graphcanvas, ' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/')
+      lout(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/')
       traverseVertices(obj, z => {
         let tmp = getAttributeAndFormat(z, 'color', ', color="{0}"') +
                     getAttributeAndFormat(z, 'style', ', style={0}') +
                     getAttributeAndFormat(z, 'label', ', label="{0}"')
         if (tmp.trim() !== '') { tmp = `[ ${tmp.trim().substring(1)} ]` }
-        output(graphcanvas, (comma ? ',' : '') + z.getName() + tmp)
+        lout((comma ? ',' : '') + z.getName() + tmp)
         comma = true
       })
     } else if (obj instanceof GraphVertex) {
@@ -30,12 +34,12 @@ export function mscgen (graphcanvas) {
                 getAttributeAndFormat(obj, 'style', ', style={0}') +
                 getAttributeAndFormat(obj, 'label', ', label="{0}"')
       if (tmp.trim() !== '') { tmp = `[ ${tmp.trim().substring(1)} ]` }
-      output(graphcanvas, (comma ? ',' : '') + obj.getName() + tmp)
+      lout((comma ? ',' : '') + obj.getName() + tmp)
       comma = true
     }
   })
 
-  output(graphcanvas, ';')
+  lout(';')
   let id = 1
   traverseEdges(graphcanvas, edge => {
     let edgeType = ''
@@ -106,24 +110,24 @@ export function mscgen (graphcanvas) {
       if (color) {
         attrs.push(`textcolor="${color}"`)
       }
-      output(graphcanvas, `... [ ${attrs.join(',')} ];`)
+      lout(`... [ ${attrs.join(',')} ];`)
       return
     } else if (dash) {
       // dashed
       if (color) {
         attrs.push(`textcolor="${color}"`)
       }
-      output(graphcanvas, `--- [ ${attrs.join(',')} ];`)
+      lout(`--- [ ${attrs.join(',')} ];`)
       return
     } else {
-      output(graphcanvas, 'ERROR: SHOULD NOT HAPPEN')
+      lout('ERROR: SHOULD NOT HAPPEN')
     }
 
-    output(graphcanvas, `${lhs.getName()}${edgeType}${rightName}[${attrs.join(', ')}];`)
+    lout(`${lhs.getName()}${edgeType}${rightName}[${attrs.join(', ')}];`)
     if (note !== '') {
-      output(graphcanvas, `${rhs.getName()} abox ${rhs.getName()}[ label="${note}" ];`)
+      lout(`${rhs.getName()} abox ${rhs.getName()}[ label="${note}" ];`)
     }
   })
-  output(graphcanvas, '}', false)
+  lout('}', false)
 }
 generators.set('mscgen', mscgen)

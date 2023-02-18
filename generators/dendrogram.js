@@ -14,6 +14,9 @@ import { findVertex, traverseTree, TreeVertex } from '../model/tree.js'
  * @param {GraphCanvas} graphcanvas
 */
 export function dendrogram (graphcanvas) {
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
   let tree
   /**
    * @param {GraphConnectable} lhs
@@ -46,19 +49,19 @@ export function dendrogram (graphcanvas) {
     if (isLeaf) {
       let comma = ''
       if (hasSibling) { comma = ',' }
-      output(graphcanvas, `{"name": "${t.data.name}", "size": 1}${comma}`)
+      lout(`{"name": "${t.data.name}", "size": 1}${comma}`)
     } else {
-      output(graphcanvas, '{', true)
-      output(graphcanvas, `"name": "${t.data.name}",`)
+      lout('{', true)
+      lout(`"name": "${t.data.name}",`)
     }
   }, (t) => {
-    output(graphcanvas, '"children": [', true)
+    lout('"children": [', true)
   }, (t, hasNextSibling) => {
-    output(graphcanvas, ']', false)
+    lout(']', false)
     if (hasNextSibling) {
-      output(graphcanvas, '},', false)
+      lout('},', false)
     } else {
-      output(graphcanvas, '}', false)
+      lout('}', false)
     }
   })
 }

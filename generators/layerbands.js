@@ -11,6 +11,9 @@ import { output } from '../model/support.js'
  * @param {GraphCanvas} graphcanvas
 */
 export function layerbands (graphcanvas) {
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
   const groups = {
     key: '_BANDS',
     category: 'Bands',
@@ -34,6 +37,6 @@ export function layerbands (graphcanvas) {
       linkedVertices.push({ key: edge.right.name, parent: edge.left.name })
     }
   })
-  output(graphcanvas, JSON.stringify(linkedVertices))
+  lout(JSON.stringify(linkedVertices))
 }
 generators.set('layerbands', layerbands)

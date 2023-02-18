@@ -13,6 +13,10 @@ import { debug, output } from '../model/support.js'
  * @param {GraphCanvas} graphcanvas
  */
 export function parsetree (graphcanvas) {
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
+
   const nodeList = []
   function addEdgeedVertex (left, right) {
     if (!(left instanceof GraphVertex)) return
@@ -46,6 +50,6 @@ export function parsetree (graphcanvas) {
     debug('edge ' + edge.left.name + ' to ' + edge.right.name)
     addEdgeedVertex(edge.left, edge.right)
   })
-  output(graphcanvas, JSON.stringify(nodeList, null, 3))
+  lout(JSON.stringify(nodeList, null, 3))
 }
 generators.set('parsetree', parsetree)

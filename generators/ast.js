@@ -10,8 +10,11 @@ import { output } from '../model/support.js'
 export function ast (graphcanvas) {
   // debug(graphcanvas)
 
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
   const o = (msg, indent = undefined) => {
-    output(graphcanvas, msg, indent)
+    lout(msg, indent)
   }
 
   const rvalue = (rvalue) => {

@@ -10,6 +10,10 @@ import { output } from '../model/support.js'
  * @param {GraphCanvas} graphcanvas
  */
 export function sankey (graphcanvas) {
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
+
   /**
    * @param {string} str
    * @returns {number}
@@ -34,22 +38,22 @@ export function sankey (graphcanvas) {
   //   }
   // }
 
-  output(graphcanvas, '{', true)
+  lout('{', true)
 
   let comma = ''
 
-  output(graphcanvas, '"nodes":[', true)
+  lout('"nodes":[', true)
   const vertexIndexes = new Map()
   let index = 0
   traverseVertices(graphcanvas, vertex => {
     const name = vertex.getName()
     vertexIndexes.set(name, index++)
-    output(graphcanvas, `${comma}{"name":"${name}"}`)
+    lout(`${comma}{"name":"${name}"}`)
     comma = ','
   })
-  output(graphcanvas, '],', false)
+  lout('],', false)
 
-  output(graphcanvas, '"links":[', true)
+  lout('"links":[', true)
   comma = ''
   /**
    * For a dendrogram we're not interested in vertices
@@ -60,13 +64,13 @@ export function sankey (graphcanvas) {
     const left = vertexIndexes.get(edge.left.name)
     const right = vertexIndexes.get(edge.right.name)
     if (edge.isRightPointingEdge()) {
-      output(graphcanvas, `${comma}{"source":${left},"target":${right},"value":${amount}}`)
+      lout(`${comma}{"source":${left},"target":${right},"value":${amount}}`)
     } else {
-      output(graphcanvas, `${comma}{"source":${right},"target":${left},"value":${amount}}`)
+      lout(`${comma}{"source":${right},"target":${left},"value":${amount}}`)
     }
     comma = ','
   })
-  output(graphcanvas, ']', false)
-  output(graphcanvas, '}', false)
+  lout(']', false)
+  lout('}', false)
 }
 generators.set('sankey', sankey)

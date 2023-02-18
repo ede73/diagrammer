@@ -51,22 +51,25 @@ const ActDiagShapeMap =
  * @param {GraphCanvas} graphcanvas
  */
 export function actdiag (graphcanvas) {
-  output(graphcanvas, 'actdiag {', true)
-  output(graphcanvas, 'default_fontsize = 14')
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
+  lout('actdiag {', true)
+  lout('default_fontsize = 14')
   if (graphcanvas.getDirection() === 'portrait') {
-    output(graphcanvas, 'orientation=portrait')
+    lout('orientation=portrait')
   } else {
     // DEFAULT
-    output(graphcanvas, 'orientation=landscape')
+    lout('orientation=landscape')
   }
   /**
      * does not really work..but portrait mode if
-     * (r.getDirection()==="portrait"){ output(graphcanvas," orientation=portrait");
-     * }else{ //DEFAULT output(graphcanvas," orientation=landscape"); }
+     * (r.getDirection()==="portrait"){ lout(" orientation=portrait");
+     * }else{ //DEFAULT lout(" orientation=landscape"); }
      */
   const parseObjects = (/** @type {function(GraphConnectable)} */obj) => {
     if (obj instanceof GraphGroup) {
-      output(graphcanvas, `lane "${obj.getName()}"{`, true)
+      lout(`lane "${obj.getName()}"{`, true)
       traverseVertices(obj, (obj) => {
         if (obj.shape && !ActDiagShapeMap[obj.shape]) {
           throw new Error('Missing shape mapping')
@@ -79,9 +82,9 @@ export function actdiag (graphcanvas) {
         if (colorShapeLabel.trim() !== '') {
           colorShapeLabel = ` [ ${colorShapeLabel.trim().substring(1)} ]`
         }
-        output(graphcanvas, `${obj.getName()}${colorShapeLabel};`)
+        lout(`${obj.getName()}${colorShapeLabel};`)
       })
-      output(graphcanvas, '}', false)
+      lout('}', false)
     } else {
       // dotted,dashed,solid
       // NOT invis,bold,rounded,diagonals
@@ -103,7 +106,7 @@ export function actdiag (graphcanvas) {
                 ',shape={0}'.format(mappedShape) +
                 getAttributeAndFormat(obj, 'label', ', label="{0}"')
       if (colorIconShapeLabel.trim() !== '') { colorIconShapeLabel = ` [ ${colorIconShapeLabel.trim().substring(1)} ]` }
-      output(graphcanvas, `${obj.getName()}${colorIconShapeLabel};`)
+      lout(`${obj.getName()}${colorIconShapeLabel};`)
     }
   }
   traverseVertices(graphcanvas, parseObjects)
@@ -121,8 +124,8 @@ export function actdiag (graphcanvas) {
     t = t.trim()
     if (t.substring(0, 1) === ',') { t = t.substring(1).trim() }
     if (t !== '') { t = ` [ ${t} ]` }
-    output(graphcanvas, `${edge.left.getName()} -> ${edge.right.getName()}${t};`)
+    lout(`${edge.left.getName()} -> ${edge.right.getName()}${t};`)
   })
-  output(graphcanvas, '}', false)
+  lout('}', false)
 }
 generators.set('actdiag', actdiag)

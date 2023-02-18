@@ -16,11 +16,15 @@ import { getAttributeAndFormat, output } from '../model/support.js'
  * @param {GraphCanvas} graphcanvas
  */
 export function seqdiag (graphcanvas) {
-  output(graphcanvas, 'seqdiag {', true)
-  output(graphcanvas, 'autonumber = True;')
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
+
+  lout('seqdiag {', true)
+  lout('autonumber = True;')
   // quite fucked up life line activations and no control over..skip
   // it,shrimpy!
-  output(graphcanvas, 'activation = none;')
+  lout('activation = none;')
 
   // print out all node declarations FIRST (if any)
   for (const i in graphcanvas.OBJECTS) {
@@ -28,7 +32,7 @@ export function seqdiag (graphcanvas) {
     const obj = graphcanvas.OBJECTS[i]
 
     if (obj instanceof GraphGroup) {
-      output(graphcanvas, '/*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'))
+      lout('/*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'))
       for (const j in obj.OBJECTS) {
         if (!Object.prototype.hasOwnProperty.call(obj.OBJECTS, j)) continue
         const z = obj.OBJECTS[j]
@@ -36,7 +40,7 @@ export function seqdiag (graphcanvas) {
         let styleAndLabel = getAttributeAndFormat(z, 'style', ', style={0}') +
                     getAttributeAndFormat(z, 'label', ', label="{0}"')
         if (styleAndLabel.trim() !== '') { styleAndLabel = `[ ${styleAndLabel.trim().substring(1)} ]` }
-        output(graphcanvas, `${z.getName()}${styleAndLabel};`)
+        lout(`${z.getName()}${styleAndLabel};`)
       }
     } else if (obj instanceof GraphVertex) {
       let styleAndLabel = getAttributeAndFormat(obj, 'style', ', style={0}') +
@@ -45,7 +49,7 @@ export function seqdiag (graphcanvas) {
       if (styleAndLabel.trim() !== '') {
         styleAndLabel = `[${styleAndLabel.trim().substring(1)}]`
       }
-      output(graphcanvas, `${obj.getName()}${styleAndLabel};`)
+      lout(`${obj.getName()}${styleAndLabel};`)
     }
   }
 
@@ -98,7 +102,7 @@ export function seqdiag (graphcanvas) {
       // hm.. solve a<>a is broadcast, where as
       // a<>b (any else than node itself) is autoreturn
       if (rhs === lhs) {
-        output(graphcanvas, getAttributeAndFormat(edge, 'label', '===BROADCAST:{0}==='))
+        lout(getAttributeAndFormat(edge, 'label', '===BROADCAST:{0}==='))
         return
       }
       edgeType = '=>'
@@ -109,21 +113,21 @@ export function seqdiag (graphcanvas) {
       if (dot) { edgeType = '-->' } else if (dash) { edgeType = '-->>' } else { edgeType = '->' }
     } else if (dot) {
       // dotted
-      output(graphcanvas, getAttributeAndFormat(edge, 'label', '...{0}...'))
+      lout(getAttributeAndFormat(edge, 'label', '...{0}...'))
       return
     } else if (dash) {
       // dashed
-      output(graphcanvas, getAttributeAndFormat(edge, 'label', '==={0}==='))
+      lout(getAttributeAndFormat(edge, 'label', '==={0}==='))
       return
     } else {
-      output(graphcanvas, 'ERROR: SHOULD NOT HAPPEN')
+      lout('ERROR: SHOULD NOT HAPPEN')
     }
     // MUST HAVE whitespace at both sides of the "arrow"
     if (!attrs || attrs.length === 0) {
       attrs.push('label=""')
     }
-    output(graphcanvas, `${lhs.getName()} ${edgeType} ${rightName}[ ${attrs.join(', ')} ];`)
+    lout(`${lhs.getName()} ${edgeType} ${rightName}[ ${attrs.join(', ')} ];`)
   })
-  output(graphcanvas, '}', false)
+  lout('}', false)
 }
 generators.set('seqdiag', seqdiag)

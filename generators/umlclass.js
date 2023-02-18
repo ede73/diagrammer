@@ -24,6 +24,10 @@ export function umlclassParseMethod (method) {
  * @param {GraphCanvas} graphcanvas
  */
 export function umlclass (graphcanvas) {
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
+
   const groups = []
   const edges = []
 
@@ -151,6 +155,6 @@ export function umlclass (graphcanvas) {
       relationship
     })
   })
-  output(graphcanvas, JSON.stringify([groups, edges]))
+  lout(JSON.stringify([groups, edges]))
 }
 generators.set('umlclass', umlclass)

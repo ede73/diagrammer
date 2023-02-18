@@ -45,17 +45,21 @@ const NetworkDiagShapeMap =
  * @param {GraphCanvas} graphcanvas
  */
 export function nwdiag (graphcanvas) {
-  output(graphcanvas, 'nwdiag {', true)
-  output(graphcanvas, 'default_fontsize = 16')
+  const lout = (...args) => {
+    output(graphcanvas, ...args)
+  }
+
+  lout('nwdiag {', true)
+  lout('default_fontsize = 16')
 
   for (const i in graphcanvas.OBJECTS) {
     if (!Object.prototype.hasOwnProperty.call(graphcanvas.OBJECTS, i)) continue
     const obj = graphcanvas.OBJECTS[i]
     if (obj instanceof GraphGroup) {
       // split the label to two, NAME and address
-      output(graphcanvas, `network ${obj.getName()} {`, true)
+      lout(`network ${obj.getName()} {`, true)
       if (obj.getLabel() !== '') {
-        output(graphcanvas, `address="${obj.getLabel()}"`)
+        lout(`address="${obj.getLabel()}"`)
       }
       for (const j in obj.OBJECTS) {
         if (!Object.prototype.hasOwnProperty.call(obj.OBJECTS, j)) continue
@@ -71,7 +75,7 @@ export function nwdiag (graphcanvas) {
         if (tmp.trim() !== '') {
           tmp = `[ ${tmp.trim().substring(1)} ]`
         }
-        output(graphcanvas, `${z.getName()}${tmp};`)
+        lout(`${z.getName()}${tmp};`)
       }
       // find if there are ANY edges that have this GROUP as participant!
       for (const il in graphcanvas.EDGES) {
@@ -79,13 +83,13 @@ export function nwdiag (graphcanvas) {
         const edge = graphcanvas.EDGES[il]
         const tmp = getAttributeAndFormat(edge, 'label', '[ address="{0}" ]')
         if (edge.left === obj) {
-          output(graphcanvas, `${edge.right.getName()}${tmp};`)
+          lout(`${edge.right.getName()}${tmp};`)
         }
         if (edge.right === obj) {
-          output(graphcanvas, `${edge.left.getName()}${tmp};`)
+          lout(`${edge.left.getName()}${tmp};`)
         }
       }
-      output(graphcanvas, '}', false)
+      lout('}', false)
     } else {
       if (obj.shape && !NetworkDiagShapeMap[obj.shape]) {
         throw new Error('Missing shape mapping')
@@ -98,15 +102,15 @@ export function nwdiag (graphcanvas) {
       if (tmp.trim() !== '') {
         tmp = `[ ${tmp.trim().substring(1)} ]`
       }
-      output(graphcanvas, `${obj.getName()}${tmp};`)
+      lout(`${obj.getName()}${tmp};`)
     }
   }
 
   traverseEdges(graphcanvas, edge => {
     if (!(edge.left instanceof GraphGroup || edge.right instanceof GraphGroup)) {
-      output(graphcanvas, `${edge.left.getName()} -- ${edge.right.getName()};`)
+      lout(`${edge.left.getName()} -- ${edge.right.getName()};`)
     }
   })
-  output(graphcanvas, '}', false)
+  lout('}', false)
 }
 generators.set('nwdiag', nwdiag)

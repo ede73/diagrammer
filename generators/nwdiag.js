@@ -59,6 +59,7 @@ export function nwdiag (graphcanvas) {
       if (obj.getLabel() !== '') {
         lout(`address="${obj.getLabel()}"`)
       }
+      // TODO: bad, flatmatting the graph
       for (const j in obj.OBJECTS) {
         if (!Object.prototype.hasOwnProperty.call(obj.OBJECTS, j)) continue
         const z = obj.OBJECTS[j]
@@ -76,9 +77,7 @@ export function nwdiag (graphcanvas) {
         lout(`${z.getName()}${tmp};`)
       }
       // find if there are ANY edges that have this GROUP as participant!
-      for (const il in graphcanvas.EDGES) {
-        if (!Object.prototype.hasOwnProperty.call(graphcanvas.EDGES, il)) continue
-        const edge = graphcanvas.EDGES[il]
+      traverseEdges(graphcanvas, edge => {
         const tmp = getAttributeAndFormat(edge, 'label', '[ address="{0}" ]')
         if (edge.left === obj) {
           lout(`${edge.right.getName()}${tmp};`)
@@ -86,7 +85,7 @@ export function nwdiag (graphcanvas) {
         if (edge.right === obj) {
           lout(`${edge.left.getName()}${tmp};`)
         }
-      }
+      })
       lout('}', false)
     } else {
       if (obj.shape && !NetworkDiagShapeMap[obj.shape]) {

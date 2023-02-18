@@ -1,7 +1,7 @@
 import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { traverseEdges } from '../model/model.js'
-import { output, getAttributeAndFormat } from '../model/support.js'
+import { output, getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="nwdiag">Network Diagram(cli)</option>
 
@@ -70,11 +70,11 @@ export function nwdiag (graphcanvas) {
         }
         const mappedShape = NetworkDiagShapeMap[z.shape] ? NetworkDiagShapeMap[z.shape] : NetworkDiagShapeMap.default
 
-        let tmp = getAttributeAndFormat(z, 'color', ', color="{0}"') + ', shape="{0}"'.format(mappedShape) +
-                    getAttributeAndFormat(z, 'label', ', address="{0}"')
-        if (tmp.trim() !== '') {
-          tmp = `[ ${tmp.trim().substring(1)} ]`
-        }
+        const tmp = multiAttrFmt(z, {
+          color: 'color="{0}"',
+          label: 'address="{0}"'
+
+        }, [`shape="${mappedShape}"`])
         lout(`${z.getName()}${tmp};`)
       }
       // find if there are ANY edges that have this GROUP as participant!
@@ -96,12 +96,11 @@ export function nwdiag (graphcanvas) {
       }
       const mappedShape = NetworkDiagShapeMap[obj.shape] ? NetworkDiagShapeMap[obj.shape] : NetworkDiagShapeMap.default
       // ICON does not work, using background
-      let tmp = getAttributeAndFormat(obj, 'color', ', color="{0}"') +
-                getAttributeAndFormat(obj, 'image', ', background="icons{0}"') + ', shape="{0}"'.format(mappedShape) +
-                getAttributeAndFormat(obj, 'label', ', label="{0}"')
-      if (tmp.trim() !== '') {
-        tmp = `[ ${tmp.trim().substring(1)} ]`
-      }
+      const tmp = multiAttrFmt(obj, {
+        color: 'color="{0}"',
+        image: 'background="icons{0}"',
+        label: 'label="{0}"'
+      }, [`shape="${mappedShape}"`])
       lout(`${obj.getName()}${tmp};`)
     }
   }

@@ -7,11 +7,11 @@ nwdiag {
     }
     network internal {
         address="172.x.x.x/24"
-        db01[  shape="box" ];
-        db02[  shape="box" ];
+        db01[ shape="box" ];
+        db02[ shape="box" ];
         web01[ address="172.x.x.1" ];
         web02[ address="172.x.x.2" ];
     }
-    web01[  shape="box" ];
-    web02[  shape="box" ];
+    web01[ shape="box" ];
+    web02[ shape="box" ];
 }

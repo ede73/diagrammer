@@ -128,7 +128,7 @@ let indentLevel = 0
  * Output given string, potentially indenting or dedenting
  * @param {(boolean|GraphCanvas)} graphcanvas
  * @param {(string|boolean)} txt Text to output
- * @param {boolean} [indentOrDedent] whether to indent to dedent, OPTIONAL
+ * @param {boolean} [indentOrDedent] whether to indent to dedent, OPTIONAL. TODO: true is latent, make false be early. Ie hence it's easy to control {,true and },false
  */
 export function output (graphcanvas, txt, indentOrDedent = undefined) {
   let prefix = ''

@@ -1,7 +1,7 @@
 import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { traverseEdges } from '../model/model.js'
-import { getAttributeAndFormat } from '../model/support.js'
+import { output, getAttributeAndFormat } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="nwdiag">Network Diagram(cli)</option>
 
@@ -45,14 +45,18 @@ const NetworkDiagShapeMap =
  * @param {GraphCanvas} graphcanvas
  */
 export function nwdiag (graphcanvas) {
-  graphcanvas.result('nwdiag{\n default_fontsize = 16\n')
+  output(graphcanvas, 'nwdiag{', true)
+  output(graphcanvas, 'default_fontsize = 16')
+
   for (const i in graphcanvas.OBJECTS) {
     if (!Object.prototype.hasOwnProperty.call(graphcanvas.OBJECTS, i)) continue
     const obj = graphcanvas.OBJECTS[i]
     if (obj instanceof GraphGroup) {
       // split the label to two, NAME and address
-      graphcanvas.result(`  network ${obj.getName()}{`)
-      if (obj.getLabel() !== '') { graphcanvas.result(`    address="${obj.getLabel()}"`) }
+      output(graphcanvas, `network ${obj.getName()} {`, true)
+      if (obj.getLabel() !== '') {
+        output(graphcanvas, `address="${obj.getLabel()}"`)
+      }
       for (const j in obj.OBJECTS) {
         if (!Object.prototype.hasOwnProperty.call(obj.OBJECTS, j)) continue
         const z = obj.OBJECTS[j]
@@ -64,8 +68,10 @@ export function nwdiag (graphcanvas) {
 
         let tmp = getAttributeAndFormat(z, 'color', ',color="{0}"') + ',shape="{0}"'.format(mappedShape) +
                     getAttributeAndFormat(z, 'label', ',address="{0}"')
-        if (tmp.trim() !== '') { tmp = `[${tmp.trim().substring(1)}]` }
-        graphcanvas.result(`    ${z.getName()}${tmp};`)
+        if (tmp.trim() !== '') {
+          tmp = `[${tmp.trim().substring(1)}]`
+        }
+        output(graphcanvas, `${z.getName()}${tmp};`)
       }
       // find if there are ANY edges that have this GROUP as participant!
       for (const il in graphcanvas.EDGES) {
@@ -73,13 +79,14 @@ export function nwdiag (graphcanvas) {
         const edge = graphcanvas.EDGES[il]
         const tmp = getAttributeAndFormat(edge, 'label', '[address="{0}"]')
         if (edge.left === obj) {
-          graphcanvas.result(`  ${edge.right.getName()}${tmp};`)
+          output(graphcanvas, `${edge.right.getName()}${tmp};`)
         }
         if (edge.right === obj) {
-          graphcanvas.result(`  ${edge.left.getName()}${tmp};`)
+          output(graphcanvas, `  ${edge.left.getName()}${tmp};`)
         }
       }
-      graphcanvas.result('  }')
+      output(false)
+      output(graphcanvas, '}')
     } else {
       if (obj.shape && !NetworkDiagShapeMap[obj.shape]) {
         throw new Error('Missing shape mapping')
@@ -89,16 +96,19 @@ export function nwdiag (graphcanvas) {
       let tmp = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
                 getAttributeAndFormat(obj, 'image', ',background="icons{0}"') + ',shape="{0}"'.format(mappedShape) +
                 getAttributeAndFormat(obj, 'label', ',label="{0}"')
-      if (tmp.trim() !== '') { tmp = `[${tmp.trim().substring(1)}]` }
-      graphcanvas.result(`    ${obj.getName()}${tmp};`)
+      if (tmp.trim() !== '') {
+        tmp = `[${tmp.trim().substring(1)}]`
+      }
+      output(graphcanvas, `${obj.getName()}${tmp};`)
     }
   }
 
   traverseEdges(graphcanvas, edge => {
     if (!(edge.left instanceof GraphGroup || edge.right instanceof GraphGroup)) {
-      graphcanvas.result(`${edge.left.getName()} -- ${edge.right.getName()};`)
+      output(graphcanvas, `${edge.left.getName()} -- ${edge.right.getName()};`)
     }
   })
-  graphcanvas.result('}')
+  output(false)
+  output(graphcanvas, '}')
 }
 generators.set('nwdiag', nwdiag)

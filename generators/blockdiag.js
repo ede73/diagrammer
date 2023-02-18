@@ -102,11 +102,10 @@ export function blockdiag (graphcanvas) {
      * @param {(GraphVertex|GraphGroup)} obj
      */
   const parseObjects = /** @type {function(GraphConnectable)} */obj => {
-    output(true)
     if (obj instanceof GraphGroup) {
-      output(graphcanvas, ` group "${obj.getLabel()}"{`, true)
-      output(graphcanvas, getAttributeAndFormat(obj, 'color', '   color="{0}"'))
-      output(graphcanvas, getAttributeAndFormat(obj, 'label', '   label="{0}"'))
+      output(graphcanvas, `group "${obj.getLabel()}"{`, true)
+      output(graphcanvas, getAttributeAndFormat(obj, 'color', 'color="{0}"'))
+      output(graphcanvas, getAttributeAndFormat(obj, 'label', 'label="{0}"'))
       if (lastNode && lastNode.trim() !== '') {
         lastNode = `[${lastNode.trim().substring(1)}]`
       }
@@ -115,10 +114,10 @@ export function blockdiag (graphcanvas) {
           throw new Error('Missing shape mapping')
         }
         const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : BlockDiagShapeMap.default
-        let tmp = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
+        let tmp = getAttributeAndFormat(obj, 'color', ', color="{0}"') +
                     ',shape={0}'.format(mappedShape) +
-                    getAttributeAndFormat(obj, 'label', ',label="{0}"')
-        if (tmp.trim() !== '') { tmp = `[${tmp.trim().substring(1)}]` }
+                    getAttributeAndFormat(obj, 'label', ', label="{0}"')
+        if (tmp.trim() !== '') { tmp = `[ ${tmp.trim().substring(1)} ]` }
         output(graphcanvas, `${obj.getName()}${tmp};`)
       })
       output(graphcanvas, '}', false)
@@ -126,7 +125,7 @@ export function blockdiag (graphcanvas) {
       // dotted,dashed,solid
       // NOT invis,bold,rounded,diagonals
       // ICON does not work, using background
-      let style = getAttributeAndFormat(obj, 'style', ',style="{0}"')
+      let style = getAttributeAndFormat(obj, 'style', ', style="{0}"')
       if (style !== '' && style.match(/(dotted|dashed|solid)/) == null) {
         style = ''
       }
@@ -136,15 +135,14 @@ export function blockdiag (graphcanvas) {
       }
       const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : BlockDiagShapeMap.default
 
-      let colorIconShapeLabel = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
-                getAttributeAndFormat(obj, 'image', ',background="icons{0}"') +
+      let colorIconShapeLabel = getAttributeAndFormat(obj, 'color', ', color="{0}"') +
+                getAttributeAndFormat(obj, 'image', ', background="icons{0}"') +
                 style +
                 ',shape="{0}"'.format(mappedShape) +
-                getAttributeAndFormat(obj, 'label', ',label="{0}"')
-      if (colorIconShapeLabel.trim() !== '') { colorIconShapeLabel = `[${colorIconShapeLabel.trim().substring(1)}]` }
+                getAttributeAndFormat(obj, 'label', ', label="{0}"')
+      if (colorIconShapeLabel.trim() !== '') { colorIconShapeLabel = `[ ${colorIconShapeLabel.trim().substring(1)} ]` }
       output(graphcanvas, `${obj.getName()}${colorIconShapeLabel};`)
     }
-    output(false)
   }
 
   traverseVertices(graphcanvas, parseObjects)
@@ -156,15 +154,15 @@ export function blockdiag (graphcanvas) {
     } else if (edge.isDashed()) {
       t += ',style="dashed" '
     }
-    const labelAndItsColor = getAttributeAndFormat(edge, 'label', ',label = "{0}"' +
+    const labelAndItsColor = getAttributeAndFormat(edge, 'label', ', label="{0}"' +
             '' /* getAttributeAndFormat(edge, ['color', 'textcolor'], 'textcolor="{0}"') */)
-    const color = getAttributeAndFormat(edge, 'color', ',color="{0}"')
+    const color = getAttributeAndFormat(edge, 'color', ', color="{0}"')
     t += labelAndItsColor + color
     t = t.trim()
     if (t.substring(0, 1) === ',') { t = t.substring(1).trim() }
-    if (t !== '') { t = `[${t}]` }
-    output(graphcanvas, `  ${edge.left.getName()} -> ${edge.right.getName()}${t};`)
+    if (t !== '') { t = `[ ${t} ]` }
+    output(graphcanvas, `${edge.left.getName()} -> ${edge.right.getName()}${t};`)
   })
-  output(graphcanvas, '}')
+  output(graphcanvas, '}', false)
 }
 generators.set('blockdiag', blockdiag)

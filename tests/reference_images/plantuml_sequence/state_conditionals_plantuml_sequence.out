@@ -1,7 +1,7 @@
 @startuml
 autonumber
-    participant  "tamakin" as  q 
-    participant  "on" as  w 
+    participant "tamakin" as q 
+    participant "on" as w 
     participant  outside 
     participant  end 
     q->w

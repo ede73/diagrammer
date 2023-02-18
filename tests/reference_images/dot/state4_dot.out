@@ -1,35 +1,35 @@
 digraph {
     compound=true;
     rankdir=TD;
-    LR_0[fontcolor="#00aa00",shape="doublecircle"];
+    LR_0[ fontcolor="#00aa00", shape="doublecircle" ];
     //startnode setup
     {rank = same;null} {rank = same; LR_0}
         null [shape=plaintext, label=""];
         LR_0[shape=doublecircle];
         null->LR_0;
 
-    LR_0[fontcolor="#00aa00",shape="doublecircle"];
-    LR_3[fontcolor="#00aa00",shape="doublecircle"];
-    LR_4[fontcolor="#00aa00",shape="doublecircle"];
-    LR_8[fontcolor="#00aa00",shape="doublecircle"];
-    LR_2[fontcolor="#00aa00",shape="circle"];
-    LR_1[fontcolor="#00aa00",shape="circle"];
-    LR_6[fontcolor="#00aa00",shape="circle"];
-    LR_5[fontcolor="#00aa00",shape="circle"];
-    LR_7[fontcolor="#00aa00",shape="circle"];
+    LR_0[ fontcolor="#00aa00", shape="doublecircle" ];
+    LR_3[ fontcolor="#00aa00", shape="doublecircle" ];
+    LR_4[ fontcolor="#00aa00", shape="doublecircle" ];
+    LR_8[ fontcolor="#00aa00", shape="doublecircle" ];
+    LR_2[ fontcolor="#00aa00", shape="circle" ];
+    LR_1[ fontcolor="#00aa00", shape="circle" ];
+    LR_6[ fontcolor="#00aa00", shape="circle" ];
+    LR_5[ fontcolor="#00aa00", shape="circle" ];
+    LR_7[ fontcolor="#00aa00", shape="circle" ];
     //links start
-    LR_0->LR_2[label="SS(B)",color="#555599",fontcolor="#ff0000"];
-    LR_0->LR_1[label="SS(S)",color="#555599",fontcolor="#ff0000"];
-    LR_1->LR_3[label="S($end)",color="#555599",fontcolor="#ff0000"];
-    LR_2->LR_6[label="SS(b)",color="#555599",fontcolor="#ff0000"];
-    LR_2->LR_5[label="SS(a)",color="#555599",fontcolor="#ff0000"];
-    LR_2->LR_4[label="S(A)",color="#555599",fontcolor="#ff0000"];
-    LR_5->LR_7[label="S(b)",color="#555599",fontcolor="#ff0000"];
-    LR_5->LR_5[label="S(a)",color="#555599",fontcolor="#ff0000"];
-    LR_6->LR_6[label="S(b)",color="#555599",fontcolor="#ff0000"];
-    LR_6->LR_5[label="S(a)",color="#555599",fontcolor="#ff0000"];
-    LR_7->LR_8[label="S(b)",color="#555599",fontcolor="#ff0000"];
-    LR_7->LR_5[label="S(a)",color="#555599",fontcolor="#ff0000"];
-    LR_8->LR_6[label="S(b)",color="#555599",fontcolor="#ff0000"];
-    LR_8->LR_5[label="S(a)",color="#555599",fontcolor="#ff0000"];
+    LR_0->LR_2[ label="SS(B)", color="#555599", fontcolor="#ff0000" ];
+    LR_0->LR_1[ label="SS(S)", color="#555599", fontcolor="#ff0000" ];
+    LR_1->LR_3[ label="S($end)", color="#555599", fontcolor="#ff0000" ];
+    LR_2->LR_6[ label="SS(b)", color="#555599", fontcolor="#ff0000" ];
+    LR_2->LR_5[ label="SS(a)", color="#555599", fontcolor="#ff0000" ];
+    LR_2->LR_4[ label="S(A)", color="#555599", fontcolor="#ff0000" ];
+    LR_5->LR_7[ label="S(b)", color="#555599", fontcolor="#ff0000" ];
+    LR_5->LR_5[ label="S(a)", color="#555599", fontcolor="#ff0000" ];
+    LR_6->LR_6[ label="S(b)", color="#555599", fontcolor="#ff0000" ];
+    LR_6->LR_5[ label="S(a)", color="#555599", fontcolor="#ff0000" ];
+    LR_7->LR_8[ label="S(b)", color="#555599", fontcolor="#ff0000" ];
+    LR_7->LR_5[ label="S(a)", color="#555599", fontcolor="#ff0000" ];
+    LR_8->LR_6[ label="S(b)", color="#555599", fontcolor="#ff0000" ];
+    LR_8->LR_5[ label="S(a)", color="#555599", fontcolor="#ff0000" ];
 }

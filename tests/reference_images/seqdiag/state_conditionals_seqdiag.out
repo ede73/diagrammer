@@ -1,27 +1,27 @@
 seqdiag {
     autonumber = True;
     activation = none;
-    q[label="tamakin"];
-    w[label="on"];
-     /*1  something would happend*/ 
+    q[ label="tamakin"];
+    w[ label="on"];
+    /*1 something would happend*/
     a1;
     b1;
-     /*2  something probably would not happen*/ 
+    /*2 something probably would not happen*/
     a2;
     b2;
-     /*3  or if i see a flying bird*/ 
+    /*3 or if i see a flying bird*/
     a3;
     b3;
-     /*4  else*/ 
+    /*4 else*/
     a4;
     b4;
-     /*5  endif*/ 
+    /*5 endif*/
     outside;
     end;
-    q -> w[label=""];
-    a1 -> b1[label=""];
-    a2 -> b2[label=""];
-    a3 -> b3[label=""];
-    a4 -> b4[label=""];
-    outside -> end[label=""];
+    q -> w[ label="" ];
+    a1 -> b1[ label="" ];
+    a2 -> b2[ label="" ];
+    a3 -> b3[ label="" ];
+    a4 -> b4[ label="" ];
+    outside -> end[ label="" ];
 }

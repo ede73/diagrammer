@@ -4,7 +4,7 @@ digraph {
     a;
     b;
     subgraph cluster_1 {
-        graph[style=invis];
+        graph[ style=invis ];
         c;
         d;
         e;
@@ -13,7 +13,7 @@ digraph {
         h;
     }//end of 1 undefined
     subgraph cluster_2 {
-        graph[style=invis];
+        graph[ style=invis ];
         s;
         k;
     }//end of 2 undefined

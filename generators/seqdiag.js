@@ -28,20 +28,20 @@ export function seqdiag (graphcanvas) {
     const obj = graphcanvas.OBJECTS[i]
 
     if (obj instanceof GraphGroup) {
-      output(graphcanvas, ' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'))
+      output(graphcanvas, '/*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'))
       for (const j in obj.OBJECTS) {
         if (!Object.prototype.hasOwnProperty.call(obj.OBJECTS, j)) continue
         const z = obj.OBJECTS[j]
         // no color support either..
-        let styleAndLabel = getAttributeAndFormat(z, 'style', ',style={0}') +
-                    getAttributeAndFormat(z, 'label', ',label="{0}"')
-        if (styleAndLabel.trim() !== '') { styleAndLabel = `[${styleAndLabel.trim().substring(1)}]` }
+        let styleAndLabel = getAttributeAndFormat(z, 'style', ', style={0}') +
+                    getAttributeAndFormat(z, 'label', ', label="{0}"')
+        if (styleAndLabel.trim() !== '') { styleAndLabel = `[ ${styleAndLabel.trim().substring(1)} ]` }
         output(graphcanvas, `${z.getName()}${styleAndLabel};`)
       }
     } else if (obj instanceof GraphVertex) {
-      let styleAndLabel = getAttributeAndFormat(obj, 'style', ',style={0}') +
-                getAttributeAndFormat(obj, 'label', ',label="{0}"') +
-                getAttributeAndFormat(obj, 'color', ',color="{0}"')
+      let styleAndLabel = getAttributeAndFormat(obj, 'style', ', style={0}') +
+                getAttributeAndFormat(obj, 'label', ', label="{0}"') +
+                getAttributeAndFormat(obj, 'color', ', color="{0}"')
       if (styleAndLabel.trim() !== '') {
         styleAndLabel = `[${styleAndLabel.trim().substring(1)}]`
       }
@@ -122,7 +122,7 @@ export function seqdiag (graphcanvas) {
     if (!attrs || attrs.length === 0) {
       attrs.push('label=""')
     }
-    output(graphcanvas, `${lhs.getName()} ${edgeType} ${rightName}[${attrs.join(',')}];`)
+    output(graphcanvas, `${lhs.getName()} ${edgeType} ${rightName}[ ${attrs.join(', ')} ];`)
   })
   output(graphcanvas, '}', false)
 }

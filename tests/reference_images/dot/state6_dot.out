@@ -1,27 +1,25 @@
 digraph {
     compound=true;
     rankdir=TD;
-    xstart[shape="Mdiamond"];
-    end[shape="Msquare"];
+    xstart[ shape="Mdiamond" ];
+    end[ shape="Msquare" ];
     subgraph cluster_1 {
-            label="process #1"; 
+        label="process #1";
         style=filled;
-            color="#ff0000";
- 
-        a0[shape="ellipse"];
-        a1[shape="ellipse"];
-        a2[shape="ellipse"];
-        a3[shape="ellipse"];
+        color="#ff0000";
+        a0[ shape="ellipse" ];
+        a1[ shape="ellipse" ];
+        a2[ shape="ellipse" ];
+        a3[ shape="ellipse" ];
     }//end of 1 undefined
     subgraph cluster_2 {
-            label="process #2"; 
+        label="process #2";
         style=filled;
-            color="#00ff00";
- 
-        b0[shape="ellipse"];
-        b1[shape="ellipse"];
-        b2[shape="ellipse"];
-        b3[shape="ellipse"];
+        color="#00ff00";
+        b0[ shape="ellipse" ];
+        b1[ shape="ellipse" ];
+        b2[ shape="ellipse" ];
+        b3[ shape="ellipse" ];
     }//end of 2 undefined
     //links start
     a0->a1;

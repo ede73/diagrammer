@@ -4,26 +4,26 @@ seqdiag {
     a;
     b;
     c;
-     ===BROADCAST:A initiated broadcast=== 
-     ===BROADCAST:B initiated broadcast=== 
-    a => b[label="Auto return edge"];
-    b => c[label="Auto return edge"];
-     ===jotain kay tassanain=== 
-     ...ja aikaa palaa... 
-    a -> b[label="lost signal",failed];
-    a <- b[label="lost signal",failed];
-    a -> b[note="and a big\nlined\nnote",label="signal"];
-    a -> b[note="and a big\nlined\nnote",label="signal"];
-    a -> b[label="ab()"];
-    b -> c[label="bc(TRUE)"];
-    c -> c[label="process(1)"];
-    c -> c[label="process(2)"];
-    c -> c[color="#0000ff",label="process(n)"];
-    c -> c[label="process(END)"];
-    a <- c[label="callback()"];
-    a -> a[color="#ff0000",label="next()"];
-    a -> a[label="ac1()\nac2()"];
-    b <- c[label="cb(TRUE)"];
-    b -> b[label="stalled(...)"];
-    a <- b[label="ab()=FALSE"];
+    ===BROADCAST:A initiated broadcast===
+    ===BROADCAST:B initiated broadcast===
+    a => b[ label="Auto return edge" ];
+    b => c[ label="Auto return edge" ];
+    ===jotain kay tassanain===
+    ...ja aikaa palaa...
+    a -> b[ label="lost signal", failed ];
+    a <- b[ label="lost signal", failed ];
+    a -> b[ note="and a big\nlined\nnote", label="signal" ];
+    a -> b[ note="and a big\nlined\nnote", label="signal" ];
+    a -> b[ label="ab()" ];
+    b -> c[ label="bc(TRUE)" ];
+    c -> c[ label="process(1)" ];
+    c -> c[ label="process(2)" ];
+    c -> c[ color="#0000ff", label="process(n)" ];
+    c -> c[ label="process(END)" ];
+    a <- c[ label="callback()" ];
+    a -> a[ color="#ff0000", label="next()" ];
+    a -> a[ label="ac1()\nac2()" ];
+    b <- c[ label="cb(TRUE)" ];
+    b -> b[ label="stalled(...)" ];
+    a <- b[ label="ab()=FALSE" ];
 }

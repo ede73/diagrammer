@@ -11,26 +11,24 @@ digraph {
     }//end of groupname2 undefined
     subgraph cluster_groupname3 {
         style=filled;
-            color="#ff0000";
- 
+        color="#ff0000";
         notgroupA3;
         notgroupB3;
     }//end of groupname3 undefined
     subgraph cluster_groupname4 {
-            label="sfvhsihdhfg"; 
+        label="sfvhsihdhfg";
         style=filled;
-            color="#ff0000";
- 
+        color="#ff0000";
         notgroupA4;
         notgroupB4;
     }//end of groupname4 undefined
     subgraph cluster_groupname5 {
-            label="sfvhsihdhfg"; 
+        label="sfvhsihdhfg";
         notgroupA5;
         notgroupB6;
     }//end of groupname5 undefined
     subgraph cluster_6 {
-            label="rgsergset"; 
+        label="rgsergset";
         notgroupA6;
     }//end of 6 undefined
     //links start

@@ -1,7 +1,7 @@
 digraph {
     compound=true;
     rankdir=TD;
-    a[fillcolor="#ff0000",style="filled"];
+    a[ fillcolor="#ff0000", style="filled" ];
     b;
     c;
     d;
@@ -10,22 +10,22 @@ digraph {
     g;
     h;
     i;
-    q[fillcolor="#0000ff",style="filled"];
+    q[ fillcolor="#0000ff", style="filled" ];
     //links start
-    a:se->b:s[color="#0000ff",fontcolor="#0000ff",style="dotted"];
-    a:se->c:se[color="#0000ff",fontcolor="#0000ff",style="dotted"];
-    a:se->d:w[color="#0000ff",fontcolor="#0000ff",style="dotted"];
-    a:se->e:ne[color="#0000ff",fontcolor="#0000ff",style="dotted"];
-    a:se->f:s[color="#0000ff",fontcolor="#0000ff",style="dotted"];
-    a:se->g:nw[color="#0000ff",fontcolor="#0000ff",style="dotted"];
-    a:se->h:e[color="#0000ff",fontcolor="#0000ff",style="dotted"];
-    a:se->i:sw[color="#0000ff",fontcolor="#0000ff",style="dotted"];
-    q:ne->b:n[color="#ff0000",fontcolor="#ff0000"];
-    q:e->c:ne[color="#ff0000",fontcolor="#ff0000"];
-    q:se->d:e[color="#ff0000",fontcolor="#ff0000"];
-    q:s->e:se[color="#ff0000",fontcolor="#ff0000"];
-    q:sw->f:s[color="#ff0000",fontcolor="#ff0000"];
-    q:w->g:sw[color="#ff0000",fontcolor="#ff0000"];
-    q:nw->h:w[color="#ff0000",fontcolor="#ff0000"];
-    q:n->i:nw[color="#ff0000",fontcolor="#ff0000"];
+    a:se->b:s[ color="#0000ff", fontcolor="#0000ff", style="dotted" ];
+    a:se->c:se[ color="#0000ff", fontcolor="#0000ff", style="dotted" ];
+    a:se->d:w[ color="#0000ff", fontcolor="#0000ff", style="dotted" ];
+    a:se->e:ne[ color="#0000ff", fontcolor="#0000ff", style="dotted" ];
+    a:se->f:s[ color="#0000ff", fontcolor="#0000ff", style="dotted" ];
+    a:se->g:nw[ color="#0000ff", fontcolor="#0000ff", style="dotted" ];
+    a:se->h:e[ color="#0000ff", fontcolor="#0000ff", style="dotted" ];
+    a:se->i:sw[ color="#0000ff", fontcolor="#0000ff", style="dotted" ];
+    q:ne->b:n[ color="#ff0000", fontcolor="#ff0000" ];
+    q:e->c:ne[ color="#ff0000", fontcolor="#ff0000" ];
+    q:se->d:e[ color="#ff0000", fontcolor="#ff0000" ];
+    q:s->e:se[ color="#ff0000", fontcolor="#ff0000" ];
+    q:sw->f:s[ color="#ff0000", fontcolor="#ff0000" ];
+    q:w->g:sw[ color="#ff0000", fontcolor="#ff0000" ];
+    q:nw->h:w[ color="#ff0000", fontcolor="#ff0000" ];
+    q:n->i:nw[ color="#ff0000", fontcolor="#ff0000" ];
 }

@@ -6,22 +6,22 @@ digraph {
         w1;
         w3;
     }
-    z1[fillcolor="#ff0000",style="filled"];
-    z2[fillcolor="#00ff00",style="filled"];
+    z1[ fillcolor="#ff0000", style="filled" ];
+    z2[ fillcolor="#00ff00", style="filled" ];
     z3;
-    z4[fillcolor="#0000ff",style="filled"];
-    q1[fillcolor="#ff00ff",style="filled"];
+    z4[ fillcolor="#0000ff", style="filled" ];
+    q1[ fillcolor="#ff00ff", style="filled" ];
     w1;
     w2;
     w3;
     w4;
     //links start
-    z1->q1[label="Multiple LHS lists"];
-    z2->q1[label="Multiple LHS lists"];
-    z3->q1[label="Multiple LHS lists"];
-    z4->q1[label="Multiple LHS lists"];
-    w1->q1[color="#00ffff",fontcolor="#00ffff"];
-    w2->q1[color="#00ffff",fontcolor="#00ffff"];
-    w3->q1[color="#00ffff",fontcolor="#00ffff"];
-    w4->q1[color="#00ffff",fontcolor="#00ffff"];
+    z1->q1[ label="Multiple LHS lists" ];
+    z2->q1[ label="Multiple LHS lists" ];
+    z3->q1[ label="Multiple LHS lists" ];
+    z4->q1[ label="Multiple LHS lists" ];
+    w1->q1[ color="#00ffff", fontcolor="#00ffff" ];
+    w2->q1[ color="#00ffff", fontcolor="#00ffff" ];
+    w3->q1[ color="#00ffff", fontcolor="#00ffff" ];
+    w4->q1[ color="#00ffff", fontcolor="#00ffff" ];
 }

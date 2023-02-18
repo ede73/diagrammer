@@ -2,16 +2,16 @@ nwdiag {
     default_fontsize = 16
     network dmz {
         address="210.x.x.x/24"
-          web01 [address="210.x.x.1,210.x.x.20"] ;
-          web02 [address="210.x.x.2"] ;
+        web01[ address="210.x.x.1,210.x.x.20" ];
+        web02[ address="210.x.x.2" ];
     }
     network internal {
         address="172.x.x.x/24"
-        db01[shape="box"];
-        db02[shape="box"];
-          web01 [address="172.x.x.1"] ;
-          web02 [address="172.x.x.2"] ;
+        db01[  shape="box" ];
+        db02[  shape="box" ];
+        web01[ address="172.x.x.1" ];
+        web02[ address="172.x.x.2" ];
     }
-    web01[shape="box"];
-    web02[shape="box"];
+    web01[  shape="box" ];
+    web02[  shape="box" ];
 }

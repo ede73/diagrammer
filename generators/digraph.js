@@ -107,7 +107,7 @@ export function digraph (graphcanvas) {
     getAttributeAndFormat(obj, 'label', 'label="{0}"', nattrs)
     let t = ''
     if (nattrs.length > 0) {
-      t = `[${nattrs.join(',')}]`
+      t = `[ ${nattrs.join(', ')} ]`
     }
     output(graphcanvas, `${obj.getName()}${t};`)
   }
@@ -200,16 +200,16 @@ export function digraph (graphcanvas) {
           debug(JSON.stringify(grp, skipEntrances))
           output(graphcanvas, `subgraph cluster_${grp.getName()} {`, true)
           if (grp.isInnerGraph) {
-            output(graphcanvas, 'graph[style=invis];')
+            output(graphcanvas, 'graph[ style=invis ];')
           }
           if (grp.getLabel()) {
             output(graphcanvas, getAttributeAndFormat(grp, 'label',
-              '   label="{0}";'))
+              'label="{0}";'))
           }
           if (grp.getColor()) {
             output(graphcanvas, 'style=filled;')
             output(graphcanvas, getAttributeAndFormat(grp, 'color',
-              '   color="{0}";\n'))
+              'color="{0}";'))
           }
           traverseVertices(grp)
           output(graphcanvas, `}//end of ${grp.getName()} ${cond}`, false)
@@ -219,17 +219,17 @@ export function digraph (graphcanvas) {
               // never reached
               const exitedge = grp.exitedge
               if (exitedge) {
-                output(graphcanvas, `${lastexit}->${exitedge.getName()}[color=red];`)
+                output(graphcanvas, `${lastexit}->${exitedge.getName()}[ color=red ];`)
                 output(graphcanvas, `${lastendif}->${exitedge.getName()};`)
               }
             } else {
               const sn = `entry${grp.exitvertex}`
               if (!lastendif) {
                 lastendif = `endif${grp.exitvertex}`
-                output(graphcanvas, lastendif + '[shape=circle,label="",width=0.01,height=0.01];')
+                output(graphcanvas, lastendif + '[ shape=circle, label="", width=0.01, height=0.01 ];')
               }
               // TODO:else does not need diamond
-              output(graphcanvas, `${sn}[shape=diamond,fixedsize=true,width=1,height=1,label="${grp.getLabel()}"];`)
+              output(graphcanvas, `${sn}[ shape=diamond, fixedsize=true, width=1, height=1, label="${grp.getLabel()}" ];`)
               if (cond === 'if') {
                 // entryedge!
                 output(graphcanvas, `${grp.entryedge.getName()}->${sn};`)
@@ -241,12 +241,12 @@ export function digraph (graphcanvas) {
               // const en = "exit" + o.exitvertex
 
               if (lastexit) {
-                output(graphcanvas, `${lastexit}->${sn}[label="NO",color=red];`)
+                output(graphcanvas, `${lastexit}->${sn}[ label="NO", color=red ];`)
                 // lastexit = undefined;
               }
               // YES LINK to first node of the group
-              output(graphcanvas, `${sn}->${lastEdge.getName()}[label="YES",color=green,lhead=cluster_${grp.getName()}];`)
-              output(graphcanvas, `${ln.getName()}->${lastendif}[label=""];`)
+              output(graphcanvas, `${sn}->${lastEdge.getName()}[ label="YES", color=green, lhead=cluster_${grp.getName()} ];`)
+              output(graphcanvas, `${ln.getName()}->${lastendif}[ label="" ];`)
               lastexit = sn
             }
           }
@@ -345,7 +345,7 @@ export function digraph (graphcanvas) {
       attrs.push('dir=none')
     }
     let t = ''
-    if (attrs.length > 0) { t = `[${attrs.join(',')}]` }
+    if (attrs.length > 0) { t = `[ ${attrs.join(', ')} ]` }
     debug(`print lhs ${lhs}`)
     debug(`print rhs ${rhs}`)
     if (lhs instanceof Array) {

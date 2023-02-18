@@ -1,21 +1,21 @@
 blockdiag {
     default_fontsize = 14
     orientation=landscape
-         group "Group1"{
-            
-                label="Group1" 
-            x[shape=box];
-        }
-         group "Group2"{
-            
-                label="Group2" 
-            b[shape=box];
-        }
-         group "Group3"{
-            
-                label="Group3" 
-            d[shape=box];
-        }
-      z -> a[label = "edge1"];
-      z -> c[label = "edge1"];
+    group "Group1"{
+        
+        label="Group1"
+        x[ shape=box ];
     }
+    group "Group2"{
+        
+        label="Group2"
+        b[ shape=box ];
+    }
+    group "Group3"{
+        
+        label="Group3"
+        d[ shape=box ];
+    }
+    z -> a[ label="edge1" ];
+    z -> c[ label="edge1" ];
+}

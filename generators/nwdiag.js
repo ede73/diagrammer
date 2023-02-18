@@ -66,10 +66,10 @@ export function nwdiag (graphcanvas) {
         }
         const mappedShape = NetworkDiagShapeMap[z.shape] ? NetworkDiagShapeMap[z.shape] : NetworkDiagShapeMap.default
 
-        let tmp = getAttributeAndFormat(z, 'color', ',color="{0}"') + ',shape="{0}"'.format(mappedShape) +
-                    getAttributeAndFormat(z, 'label', ',address="{0}"')
+        let tmp = getAttributeAndFormat(z, 'color', ', color="{0}"') + ', shape="{0}"'.format(mappedShape) +
+                    getAttributeAndFormat(z, 'label', ', address="{0}"')
         if (tmp.trim() !== '') {
-          tmp = `[${tmp.trim().substring(1)}]`
+          tmp = `[ ${tmp.trim().substring(1)} ]`
         }
         output(graphcanvas, `${z.getName()}${tmp};`)
       }
@@ -77,12 +77,12 @@ export function nwdiag (graphcanvas) {
       for (const il in graphcanvas.EDGES) {
         if (!Object.prototype.hasOwnProperty.call(graphcanvas.EDGES, il)) continue
         const edge = graphcanvas.EDGES[il]
-        const tmp = getAttributeAndFormat(edge, 'label', '[address="{0}"]')
+        const tmp = getAttributeAndFormat(edge, 'label', '[ address="{0}" ]')
         if (edge.left === obj) {
           output(graphcanvas, `${edge.right.getName()}${tmp};`)
         }
         if (edge.right === obj) {
-          output(graphcanvas, `  ${edge.left.getName()}${tmp};`)
+          output(graphcanvas, `${edge.left.getName()}${tmp};`)
         }
       }
       output(graphcanvas, '}', false)
@@ -92,11 +92,11 @@ export function nwdiag (graphcanvas) {
       }
       const mappedShape = NetworkDiagShapeMap[obj.shape] ? NetworkDiagShapeMap[obj.shape] : NetworkDiagShapeMap.default
       // ICON does not work, using background
-      let tmp = getAttributeAndFormat(obj, 'color', ',color="{0}"') +
-                getAttributeAndFormat(obj, 'image', ',background="icons{0}"') + ',shape="{0}"'.format(mappedShape) +
-                getAttributeAndFormat(obj, 'label', ',label="{0}"')
+      let tmp = getAttributeAndFormat(obj, 'color', ', color="{0}"') +
+                getAttributeAndFormat(obj, 'image', ', background="icons{0}"') + ', shape="{0}"'.format(mappedShape) +
+                getAttributeAndFormat(obj, 'label', ', label="{0}"')
       if (tmp.trim() !== '') {
-        tmp = `[${tmp.trim().substring(1)}]`
+        tmp = `[ ${tmp.trim().substring(1)} ]`
       }
       output(graphcanvas, `${obj.getName()}${tmp};`)
     }

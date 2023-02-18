@@ -18,19 +18,19 @@ export function mscgen (graphcanvas) {
     if (obj instanceof GraphGroup) {
       output(graphcanvas, ' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/')
       traverseVertices(obj, z => {
-        let tmp = getAttributeAndFormat(z, 'color', ',color="{0}"') +
-                    getAttributeAndFormat(z, 'style', ',style={0}') +
-                    getAttributeAndFormat(z, 'label', ',label="{0}"')
-        if (tmp.trim() !== '') { tmp = `[${tmp.trim().substring(1)}]` }
-        output(graphcanvas, (comma ? ',' : '') + '    ' + z.getName() + tmp)
+        let tmp = getAttributeAndFormat(z, 'color', ', color="{0}"') +
+                    getAttributeAndFormat(z, 'style', ', style={0}') +
+                    getAttributeAndFormat(z, 'label', ', label="{0}"')
+        if (tmp.trim() !== '') { tmp = `[ ${tmp.trim().substring(1)} ]` }
+        output(graphcanvas, (comma ? ',' : '') + z.getName() + tmp)
         comma = true
       })
     } else if (obj instanceof GraphVertex) {
-      let tmp = getAttributeAndFormat(obj, 'color', ',textbgcolor="{0}"') +
-                getAttributeAndFormat(obj, 'style', ',style={0}') +
-                getAttributeAndFormat(obj, 'label', ',label="{0}"')
-      if (tmp.trim() !== '') { tmp = `[${tmp.trim().substring(1)}]` }
-      output(graphcanvas, (comma ? ',' : '') + '  ' + obj.getName() + tmp)
+      let tmp = getAttributeAndFormat(obj, 'color', ', textbgcolor="{0}"') +
+                getAttributeAndFormat(obj, 'style', ', style={0}') +
+                getAttributeAndFormat(obj, 'label', ', label="{0}"')
+      if (tmp.trim() !== '') { tmp = `[ ${tmp.trim().substring(1)} ]` }
+      output(graphcanvas, (comma ? ',' : '') + obj.getName() + tmp)
       comma = true
     }
   })
@@ -106,22 +106,22 @@ export function mscgen (graphcanvas) {
       if (color) {
         attrs.push(`textcolor="${color}"`)
       }
-      output(graphcanvas, `...[${attrs.join(',')}];`)
+      output(graphcanvas, `... [ ${attrs.join(',')} ];`)
       return
     } else if (dash) {
       // dashed
       if (color) {
         attrs.push(`textcolor="${color}"`)
       }
-      output(graphcanvas, `---[${attrs.join(',')}];`)
+      output(graphcanvas, `--- [ ${attrs.join(',')} ];`)
       return
     } else {
       output(graphcanvas, 'ERROR: SHOULD NOT HAPPEN')
     }
 
-    output(graphcanvas, `${lhs.getName()}${edgeType}${rightName}[${attrs.join(',')}];`)
+    output(graphcanvas, `${lhs.getName()}${edgeType}${rightName}[${attrs.join(', ')}];`)
     if (note !== '') {
-      output(graphcanvas, `${rhs.getName()} abox ${rhs.getName()}[label="${note}"];`)
+      output(graphcanvas, `${rhs.getName()} abox ${rhs.getName()}[ label="${note}" ];`)
     }
   })
   output(graphcanvas, '}', false)

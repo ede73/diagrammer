@@ -2,18 +2,18 @@ digraph {
     compound=true;
     rankdir=TD;
     subgraph cluster_z {
-            label="Group1"; 
+        label="Group1";
         x;
     }//end of z undefined
     subgraph cluster_a {
-            label="Group2"; 
+        label="Group2";
         b;
     }//end of a undefined
     subgraph cluster_c {
-            label="Group3"; 
+        label="Group3";
         d;
     }//end of c undefined
     //links start
-    x->b[label="edge1", lhead=cluster_a, ltail=cluster_z];
-    x->d[label="edge1", lhead=cluster_c, ltail=cluster_z];
+    x->b[ label="edge1",  lhead=cluster_a,  ltail=cluster_z ];
+    x->d[ label="edge1",  lhead=cluster_c,  ltail=cluster_z ];
 }

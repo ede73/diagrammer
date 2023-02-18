@@ -11,8 +11,8 @@ autonumber
     b->a:Auto return edge
     b->c:Auto return edge
     c->b:Auto return edge
-     ==jotain kay tassanain== 
-     ...ja aikaa palaa... 
+    ==jotain kay tassanain==
+    ...ja aikaa palaa...
     a->b:lost signal
     b->a:lost signal
     a->b:signal

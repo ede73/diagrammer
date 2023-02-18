@@ -41,25 +41,25 @@ seqdiag {
     c5;
     d5;
     a5;
-    aLINE -> bLINE[label=""];
-    anl -> bnl[label="This is label for EVENT, NOT node bnl"];
-    aDOT --> bDOT[label=""];
-    aDASHED -->> bDASHED[label=""];
-    aDUAL => bDUAL[label=""];
-    aDUALDOTTED => bDUALDOTTED[label=""];
-    aDUALDASHED => bDUALDASHED[label=""];
-    AREVERSE <- bREVERSE[label=""];
-    AREVERSEDOTTED <-- bReverseDotted[label=""];
-    AREVERSEDASHED <<-- bReverseDashed[label=""];
+    aLINE -> bLINE[ label="" ];
+    anl -> bnl[ label="This is label for EVENT, NOT node bnl" ];
+    aDOT --> bDOT[ label="" ];
+    aDASHED -->> bDASHED[ label="" ];
+    aDUAL => bDUAL[ label="" ];
+    aDUALDOTTED => bDUALDOTTED[ label="" ];
+    aDUALDASHED => bDUALDASHED[ label="" ];
+    AREVERSE <- bREVERSE[ label="" ];
+    AREVERSEDOTTED <-- bReverseDotted[ label="" ];
+    AREVERSEDASHED <<-- bReverseDashed[ label="" ];
     
     
-    alr <- bLR[failed];
-    arr -> bRR[failed];
-    a1 -> b1[color="#ff0000"];
-    a2 -> b2[label="event label"];
-    a3 -> b3[color="#ff0000",label="event label"];
-    a4 -> b4[label=""];
-    a4 -> c4[label=""];
-    c5 -> a5[label=""];
-    d5 -> a5[label=""];
+    alr <- bLR[ failed ];
+    arr -> bRR[ failed ];
+    a1 -> b1[ color="#ff0000" ];
+    a2 -> b2[ label="event label" ];
+    a3 -> b3[ color="#ff0000", label="event label" ];
+    a4 -> b4[ label="" ];
+    a4 -> c4[ label="" ];
+    c5 -> a5[ label="" ];
+    d5 -> a5[ label="" ];
 }

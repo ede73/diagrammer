@@ -1,16 +1,16 @@
 digraph {
     compound=true;
     rankdir=TD;
-    a[fillcolor="#ff0000",style="filled,dashed",shape="box",label="dashed red rectangle"];
-    b[fillcolor="#ff0000",style="filled,bold",shape="circle",label="bold red circle"];
-    c[style="bold",label="bold c"];
-    d[style="bold",shape="diamond",label="Diamond d"];
-    e[fillcolor="#00ff00",style="filled,rounded",shape="diamond",label="green Diamond e"];
-    f[style="diagonals",label="diagonals"];
-    g[style="invis",label="invis"];
-    a1[fillcolor="#ff0000",style="filled,dashed",fontcolor="#00ff00",label="Red dashed a1 with green link"];
-    green[fillcolor="#ff0000",style="filled,dotted"];
-    b1[fillcolor="#0000ff",style="filled,rounded"];
+    a[ fillcolor="#ff0000", style="filled,dashed", shape="box", label="dashed red rectangle" ];
+    b[ fillcolor="#ff0000", style="filled,bold", shape="circle", label="bold red circle" ];
+    c[ style="bold", label="bold c" ];
+    d[ style="bold", shape="diamond", label="Diamond d" ];
+    e[ fillcolor="#00ff00", style="filled,rounded", shape="diamond", label="green Diamond e" ];
+    f[ style="diagonals", label="diagonals" ];
+    g[ style="invis", label="invis" ];
+    a1[ fillcolor="#ff0000", style="filled,dashed", fontcolor="#00ff00", label="Red dashed a1 with green link" ];
+    green[ fillcolor="#ff0000", style="filled,dotted" ];
+    b1[ fillcolor="#0000ff", style="filled,rounded" ];
     q;
     w;
     r;
@@ -18,17 +18,17 @@ digraph {
     y;
     z;
     x;
-    v[style="rounded"];
-    n[style="dashed"];
-    l[style="dashed"];
-    k[fillcolor="#ff0000",style="filled,dotted"];
+    v[ style="rounded" ];
+    n[ style="dashed" ];
+    l[ style="dashed" ];
+    k[ fillcolor="#ff0000", style="filled,dotted" ];
     j;
     h;
     m1;
     m2;
     m3;
     //links start
-    green->b1[label="dotted red node named green\nAnd green dotted link to rounded b1 node, that is blue\nRed label",color="#00ff00",fontcolor="#ff0000",style="dotted"];
+    green->b1[ label="dotted red node named green\nAnd green dotted link to rounded b1 node, that is blue\nRed label", color="#00ff00", fontcolor="#ff0000", style="dotted" ];
     q->r;
     q->t;
     q->y;
@@ -43,11 +43,11 @@ digraph {
     x->c;
     x->v;
     v->n;
-    l->k[label="dashed l links to k"];
-    k->j[label="red k to 'j'"];
+    l->k[ label="dashed l links to k" ];
+    k->j[ label="red k to 'j'" ];
     j->h;
     h->g;
-    g->f[label="last link text"];
-    m1->m2[label="m1 to m2"];
-    m1->m3[label="m1 to m3"];
+    g->f[ label="last link text" ];
+    m1->m2[ label="m1 to m2" ];
+    m1->m3[ label="m1 to m3" ];
 }

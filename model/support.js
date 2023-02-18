@@ -119,7 +119,7 @@ export function getAttributeAndFormat (cl, attr, fmt, resultarray) {
   // @ts-ignore
   const tmp = fmt.format(cl[attr])
   if (resultarray) { resultarray.push(tmp) }
-  return ` ${tmp} `
+  return `${tmp}`
 }
 
 let indentLevel = 0

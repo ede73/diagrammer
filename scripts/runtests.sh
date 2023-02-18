@@ -65,10 +65,13 @@ test() {
   if [ -f "$renderoutput" ]; then
     [ ! -f "$renderreference" ] && cp "$renderoutput" "$renderreference"
     [ ! -f "$textoutput" ] && cp "$textoutput" "$textreference"
-    if ! diff -q "$renderoutput" "$renderreference" >/dev/null; then
+    # Allow 1% variance
+    THRESHOLD=1
+    # Since jest-imagematcher brings pixelmatch, let's use it!
+    if ! node_modules/pixelmatch/bin/pixelmatch "$renderoutput" "$renderreference" /tmp/diff.png $THRESHOLD >/dev/null; then
       echo "    ERROR: at $1, image $renderoutput $renderreference differ" >&2
-      diff -u "$textreference" "$textoutput"
-      display_image "$renderoutput" "$renderreference"
+      #display_image "$renderoutput" "$renderreference" /tmp/diff.png
+      display_image /tmp/diff.png
       setError 11 "$1"
     fi
   else

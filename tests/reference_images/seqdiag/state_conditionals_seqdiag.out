@@ -1,8 +1,8 @@
 seqdiag {
     autonumber = True;
     activation = none;
-    q[ label="tamakin"];
-    w[ label="on"];
+    q[ label="tamakin" ];
+    w[ label="on" ];
     /*1 something would happend*/
     a1;
     b1;

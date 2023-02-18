@@ -1,9 +1,9 @@
 seqdiag {
     autonumber = True;
     activation = none;
-    b[ label="browser"];
-    d[ label="database"];
-    w[ label="webserver"];
+    b[ label="browser" ];
+    d[ label="database" ];
+    w[ label="webserver" ];
     b -> w[ label="GET /index.html" ];
     b <-- w[ label="" ];
     b -> w[ label="POST /blog/comment" ];

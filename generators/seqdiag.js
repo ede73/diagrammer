@@ -2,7 +2,7 @@ import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges } from '../model/model.js'
-import { getAttributeAndFormat, output } from '../model/support.js'
+import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="seqdiag">Sequence Diagram(cli)</option>
 
@@ -37,18 +37,18 @@ export function seqdiag (graphcanvas) {
         if (!Object.prototype.hasOwnProperty.call(obj.OBJECTS, j)) continue
         const z = obj.OBJECTS[j]
         // no color support either..
-        let styleAndLabel = getAttributeAndFormat(z, 'style', ', style={0}') +
-                    getAttributeAndFormat(z, 'label', ', label="{0}"')
-        if (styleAndLabel.trim() !== '') { styleAndLabel = `[ ${styleAndLabel.trim().substring(1)} ]` }
+        const styleAndLabel = multiAttrFmt(z, {
+          style: 'style={0}',
+          label: 'label="{0}"'
+        })
         lout(`${z.getName()}${styleAndLabel};`)
       }
     } else if (obj instanceof GraphVertex) {
-      let styleAndLabel = getAttributeAndFormat(obj, 'style', ', style={0}') +
-                getAttributeAndFormat(obj, 'label', ', label="{0}"') +
-                getAttributeAndFormat(obj, 'color', ', color="{0}"')
-      if (styleAndLabel.trim() !== '') {
-        styleAndLabel = `[${styleAndLabel.trim().substring(1)}]`
-      }
+      const styleAndLabel = multiAttrFmt(obj, {
+        style: 'style={0}',
+        label: 'label="{0}"',
+        color: 'color="{0}"'
+      })
       lout(`${obj.getName()}${styleAndLabel};`)
     }
   }

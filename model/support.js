@@ -138,12 +138,12 @@ export function multiAttrFmt (obj, attrMap, extras = []) {
   const attrMapFormatted = []
   for (const [key, value] of Object.entries(attrMap)) {
     const formattedValue = getAttributeAndFormat(obj, key, value)
-    if (formattedValue) {
+    if (formattedValue && formattedValue.trim()) {
       attrMapFormatted.push(formattedValue)
     }
   }
-  extras = extras.filter((p) => p.trim())
-  return attrMapFormatted ? `[ ${attrMapFormatted.concat(extras).sort().join(', ')} ]` : ''
+  extras = attrMapFormatted.concat(extras.filter((p) => p.trim())).sort()
+  return extras.length > 0 ? `[ ${extras.join(', ')} ]` : ''
 }
 
 let indentLevel = 0

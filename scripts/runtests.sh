@@ -44,40 +44,47 @@ test() {
     return
   fi
 
+  # Web Visualizers cannot be (currently) run in CLI
+  # So only thing we could do is test the final output
+  [ $webvisualizer -eq 0 ] && {
+    png="${1%.*}_${testbin}.png"
+    renderoutput="tests/test_outputs/$png"
+    renderreference="tests/reference_images/$testbin/$png"
+    if [ -f "$renderoutput" ]; then
+      [ ! -f "$renderreference" ] && cp "$renderoutput" "$renderreference"
+      [ ! -f "$textoutput" ] && cp "$textoutput" "$textreference"
+      # Allow 1% variance
+      THRESHOLD=1
+      # Since jest-imagematcher brings pixelmatch, let's use it!
+      if ! node_modules/pixelmatch/bin/pixelmatch "$renderoutput" "$renderreference" /tmp/diff.png $THRESHOLD >/dev/null; then
+        echo "    ERROR: at $1, image $renderoutput $renderreference differ" >&2
+        #display_image "$renderoutput" "$renderreference" /tmp/diff.png
+        display_image /tmp/diff.png
+        setError 11 "$1"
+      fi
+    else
+      echo "ERROR: Failed visualizing $testbin dit not produce output $renderoutput" >&2
+      ls -l "$renderoutput"
+      setError 12 "$1"
+    fi
+  }
+
   # Verify that the generated output matches what it used to
   if ! diff -q "$textoutput" "$textreference" >/dev/null; then
-    echo -n "\nERROR: at $1, $textoutput $textreference differ for $testbin" >&2
+    ERROR=ERROR
+    [ $webvisualizer -eq 0 ] && {
+      # if we ended up here, and not having a web visualizer, we've already compared output images
+      # And they DO match, so this probably is a formatting change
+      ERROR="Warning(output images match, so just formatting?)"
+    }
+    echo -n "\n$ERROR: at $1, $textoutput $textreference differ for $testbin" >&2
+    [ $webvisualizer -eq 0 ] && {
+      echo -n "\n\tcp $textoutput $textreference # as quick fix?\n" >&2
+    }
     diff -u "$textreference" "$textoutput"
     echo "\t# You can run this test also with:"
     echo "\tnode js/diagrammer.js tests/test_inputs/$1 $testbin"
     setError 11 "$1"
-  fi
-
-  [ $webvisualizer -ne 0 ] && {
-    # Web Visualizers cannot be (currently) run in CLI
-    # So only thing we could do is test the final output
-    return
-  }
-
-  png="${1%.*}_${testbin}.png"
-  renderoutput="tests/test_outputs/$png"
-  renderreference="tests/reference_images/$testbin/$png"
-  if [ -f "$renderoutput" ]; then
-    [ ! -f "$renderreference" ] && cp "$renderoutput" "$renderreference"
-    [ ! -f "$textoutput" ] && cp "$textoutput" "$textreference"
-    # Allow 1% variance
-    THRESHOLD=1
-    # Since jest-imagematcher brings pixelmatch, let's use it!
-    if ! node_modules/pixelmatch/bin/pixelmatch "$renderoutput" "$renderreference" /tmp/diff.png $THRESHOLD >/dev/null; then
-      echo "    ERROR: at $1, image $renderoutput $renderreference differ" >&2
-      #display_image "$renderoutput" "$renderreference" /tmp/diff.png
-      display_image /tmp/diff.png
-      setError 11 "$1"
-    fi
-  else
-    echo "ERROR: Failed visualizing $testbin dit not produce output $renderoutput" >&2
-    ls -l "$renderoutput"
-    setError 12 "$1"
   fi
 }
 

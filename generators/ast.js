@@ -48,7 +48,7 @@ export function ast (graphcanvas) {
         // items.push(`"${arrayKey}": ${collect}`)
         items.push(`${collect}`)
       })
-      return `[${items.join(',')}]\n`
+      return `[${items.sort().join(',')}]\n`
     } else {
       const items = []
       Object.keys(obj).forEach((propname) => {
@@ -69,7 +69,7 @@ export function ast (graphcanvas) {
           items.push(`\n"${propname}": ${collect}`)
         }
       })
-      return `{"${obj.constructor.name}" : {\n${items.join(',')}\n}}\n`
+      return `{"${obj.constructor.name}" : {\n${items.sort().join(',')}\n}}\n`
     }
   }
 

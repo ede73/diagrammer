@@ -41,7 +41,7 @@ msc {
     ,a5
     ;
     aLINE=>bLINE[id="1"];
-    anl=>bnl[label="This is label for EVENT, NOT node bnl", id="2"];
+    anl=>bnl[id="2", label="This is label for EVENT, NOT node bnl"];
     aDOT>>bDOT[id="3"];
     aDASHED->bDASHED[id="4"];
     aDUAL<=>bDUAL[id="5"];
@@ -54,9 +54,9 @@ msc {
     --- [ id="12" ];
     bLR-xalr[id="13"];
     arr-xbRR[id="14"];
-    a1=>b1[linecolor="#ff0000", id="15"];
-    a2=>b2[label="event label", id="16"];
-    a3=>b3[linecolor="#ff0000", label="event label", id="17"];
+    a1=>b1[id="15", linecolor="#ff0000"];
+    a2=>b2[id="16", label="event label"];
+    a3=>b3[id="17", label="event label", linecolor="#ff0000"];
     a4=>b4[id="18"];
     a4=>c4[id="19"];
     c5=>a5[id="20"];

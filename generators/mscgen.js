@@ -112,20 +112,20 @@ export function mscgen (graphcanvas) {
       if (color) {
         attrs.push(`textcolor="${color}"`)
       }
-      lout(`... [ ${attrs.join(',')} ];`)
+      lout(`... [ ${attrs.sort().join(',')} ];`)
       return
     } else if (dash) {
       // dashed
       if (color) {
         attrs.push(`textcolor="${color}"`)
       }
-      lout(`--- [ ${attrs.join(',')} ];`)
+      lout(`--- [ ${attrs.sort().join(',')} ];`)
       return
     } else {
       lout('ERROR: SHOULD NOT HAPPEN')
     }
 
-    lout(`${lhs.getName()}${edgeType}${rightName}[${attrs.join(', ')}];`)
+    lout(`${lhs.getName()}${edgeType}${rightName}[${attrs.sort().join(', ')}];`)
     if (note !== '') {
       lout(`${rhs.getName()} abox ${rhs.getName()}[ label="${note}" ];`)
     }

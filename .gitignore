@@ -1,5 +1,5 @@
 ./*.png
-*.out
+./*.out
 tests/web/snapshots/__diff_output__/
 node_modules
 web/post.txt

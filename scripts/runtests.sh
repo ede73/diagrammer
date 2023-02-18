@@ -131,6 +131,7 @@ runtest state13.txt
 runtest state14.txt
 runtest state15.txt
 runtest state16.txt
+runtest nwdiag.txt
 
 tests=${1:-mscgen seqdiag plantuml_sequence}
 for test in $tests; do

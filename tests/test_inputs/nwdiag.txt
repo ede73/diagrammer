@@ -1,0 +1,5 @@
+generator nwdiag
+
+cloud inet-router {
+    router web01 web02
+}

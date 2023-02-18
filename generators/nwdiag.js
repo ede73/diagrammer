@@ -1,6 +1,6 @@
 import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
-import { traverseEdges } from '../model/model.js'
+import { traverseEdges, traverseVertices } from '../model/model.js'
 import { output, getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="nwdiag">Network Diagram(cli)</option>
@@ -52,9 +52,7 @@ export function nwdiag (graphcanvas) {
   lout('nwdiag {', true)
   lout('default_fontsize = 16')
 
-  for (const i in graphcanvas.OBJECTS) {
-    if (!Object.prototype.hasOwnProperty.call(graphcanvas.OBJECTS, i)) continue
-    const obj = graphcanvas.OBJECTS[i]
+  traverseVertices(graphcanvas, obj => {
     if (obj instanceof GraphGroup) {
       // split the label to two, NAME and address
       lout(`network ${obj.getName()} {`, true)
@@ -103,7 +101,7 @@ export function nwdiag (graphcanvas) {
       }, [`shape="${mappedShape}"`])
       lout(`${obj.getName()}${tmp};`)
     }
-  }
+  })
 
   traverseEdges(graphcanvas, edge => {
     if (!(edge.left instanceof GraphGroup || edge.right instanceof GraphGroup)) {

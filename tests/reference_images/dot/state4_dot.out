@@ -18,18 +18,18 @@ digraph {
     LR_5[ fontcolor="#00aa00", shape="circle" ];
     LR_7[ fontcolor="#00aa00", shape="circle" ];
     //links start
-    LR_0->LR_2[ label="SS(B)", color="#555599", fontcolor="#ff0000" ];
-    LR_0->LR_1[ label="SS(S)", color="#555599", fontcolor="#ff0000" ];
-    LR_1->LR_3[ label="S($end)", color="#555599", fontcolor="#ff0000" ];
-    LR_2->LR_6[ label="SS(b)", color="#555599", fontcolor="#ff0000" ];
-    LR_2->LR_5[ label="SS(a)", color="#555599", fontcolor="#ff0000" ];
-    LR_2->LR_4[ label="S(A)", color="#555599", fontcolor="#ff0000" ];
-    LR_5->LR_7[ label="S(b)", color="#555599", fontcolor="#ff0000" ];
-    LR_5->LR_5[ label="S(a)", color="#555599", fontcolor="#ff0000" ];
-    LR_6->LR_6[ label="S(b)", color="#555599", fontcolor="#ff0000" ];
-    LR_6->LR_5[ label="S(a)", color="#555599", fontcolor="#ff0000" ];
-    LR_7->LR_8[ label="S(b)", color="#555599", fontcolor="#ff0000" ];
-    LR_7->LR_5[ label="S(a)", color="#555599", fontcolor="#ff0000" ];
-    LR_8->LR_6[ label="S(b)", color="#555599", fontcolor="#ff0000" ];
-    LR_8->LR_5[ label="S(a)", color="#555599", fontcolor="#ff0000" ];
+    LR_0->LR_2[ color="#555599", fontcolor="#ff0000", label="SS(B)" ];
+    LR_0->LR_1[ color="#555599", fontcolor="#ff0000", label="SS(S)" ];
+    LR_1->LR_3[ color="#555599", fontcolor="#ff0000", label="S($end)" ];
+    LR_2->LR_6[ color="#555599", fontcolor="#ff0000", label="SS(b)" ];
+    LR_2->LR_5[ color="#555599", fontcolor="#ff0000", label="SS(a)" ];
+    LR_2->LR_4[ color="#555599", fontcolor="#ff0000", label="S(A)" ];
+    LR_5->LR_7[ color="#555599", fontcolor="#ff0000", label="S(b)" ];
+    LR_5->LR_5[ color="#555599", fontcolor="#ff0000", label="S(a)" ];
+    LR_6->LR_6[ color="#555599", fontcolor="#ff0000", label="S(b)" ];
+    LR_6->LR_5[ color="#555599", fontcolor="#ff0000", label="S(a)" ];
+    LR_7->LR_8[ color="#555599", fontcolor="#ff0000", label="S(b)" ];
+    LR_7->LR_5[ color="#555599", fontcolor="#ff0000", label="S(a)" ];
+    LR_8->LR_6[ color="#555599", fontcolor="#ff0000", label="S(b)" ];
+    LR_8->LR_5[ color="#555599", fontcolor="#ff0000", label="S(a)" ];
 }

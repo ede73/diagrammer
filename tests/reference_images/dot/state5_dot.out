@@ -1,10 +1,10 @@
 digraph {
     compound=true;
     rankdir=TD;
-    a1[ shape="record", label="<f0> foo | x | <f1> bar" ];
-    b1[ shape="record", label="a | { <f0> foo | x | <f1> bar } | b" ];
-    a2[ shape="record", label="<f0> foo | x | <f1> bar" ];
-    b2[ shape="record", label="a | { <f0> foo | x | <f1> bar } | b" ];
+    a1[ label="<f0> foo | x | <f1> bar", shape="record" ];
+    b1[ label="a | { <f0> foo | x | <f1> bar } | b", shape="record" ];
+    a2[ label="<f0> foo | x | <f1> bar", shape="record" ];
+    b2[ label="a | { <f0> foo | x | <f1> bar } | b", shape="record" ];
     a2:f0[ shape="record" ];
     b2:f1
 [ shape="record" ];

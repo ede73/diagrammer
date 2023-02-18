@@ -4,7 +4,7 @@ digraph {
     a;
     b[ fillcolor="#ff0000", style="filled" ];
     c[ label="b is red" ];
-    d[ fillcolor="#00ff00", style="filled", label="Green" ];
+    d[ fillcolor="#00ff00", label="Green", style="filled" ];
     e;
     f;
     g;
@@ -16,7 +16,7 @@ digraph {
     za;
     zb[ fillcolor="#ff0000", style="filled" ];
     zc[ label="zb red" ];
-    zd[ fillcolor="#00ff00", style="filled", label="this is greeen" ];
+    zd[ fillcolor="#00ff00", label="this is greeen", style="filled" ];
     ze;
     zg;
     zi[ fillcolor="#ffff00", style="filled" ];
@@ -29,5 +29,5 @@ digraph {
     ze->f[ color="#772222", fontcolor="#772222" ];
     zg->h[ color="#ff00ff", fontcolor="#ff00ff" ];
     zi->j[ color="#aaaaaa", fontcolor="#aaaaaa" ];
-    zk->l[ label="moro", color="#f0f0f0", fontcolor="#f0f0f0" ];
+    zk->l[ color="#f0f0f0", fontcolor="#f0f0f0", label="moro" ];
 }

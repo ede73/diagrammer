@@ -1,8 +1,8 @@
 digraph {
     compound=true;
     rankdir=TD;
-    outside1[ fillcolor="#ff0000", style="filled", label="Group to node" ];
-    outside3[ fillcolor="#ff0000", style="filled", label="Inner group to node" ];
+    outside1[ fillcolor="#ff0000", label="Group to node", style="filled" ];
+    outside3[ fillcolor="#ff0000", label="Inner group to node", style="filled" ];
     subgraph cluster_master {
         ma[ fillcolor="#ff0000", style="filled" ];
         subgraph cluster_innermaster1 {
@@ -16,8 +16,8 @@ digraph {
             ima2[ fillcolor="#ff0000", style="filled" ];
         }//end of innermaster2 undefined
     }//end of master undefined
-    outside2[ fillcolor="#ffff00", style="filled", label="Node to group" ];
-    outside4[ fillcolor="#ffff00", style="filled", label="Node to inner group" ];
+    outside2[ fillcolor="#ffff00", label="Node to group", style="filled" ];
+    outside4[ fillcolor="#ffff00", label="Node to inner group", style="filled" ];
     subgraph cluster_other {
         o[ fillcolor="#ffff00", style="filled" ];
     }//end of other undefined

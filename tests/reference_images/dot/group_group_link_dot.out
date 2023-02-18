@@ -14,6 +14,6 @@ digraph {
         d;
     }//end of c undefined
     //links start
-    x->b[ label="edge1",  lhead=cluster_a,  ltail=cluster_z ];
-    x->d[ label="edge1",  lhead=cluster_c,  ltail=cluster_z ];
+    x->b[  lhead=cluster_a,  ltail=cluster_z, label="edge1" ];
+    x->d[  lhead=cluster_c,  ltail=cluster_z, label="edge1" ];
 }

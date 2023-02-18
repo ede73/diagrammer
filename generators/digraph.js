@@ -94,7 +94,7 @@ export function digraph (graphcanvas) {
         nattrs.push('width=0.01')
         nattrs.push('weight=0.01')
       } else {
-        nattrs.push(`style="${styles.join(',')}"`)
+        nattrs.push(`style="${styles.sort().join(',')}"`)
       }
     }
     getAttributeAndFormat(obj, 'image', 'image="icons{0}"', nattrs)
@@ -110,7 +110,7 @@ export function digraph (graphcanvas) {
     getAttributeAndFormat(obj, 'label', 'label="{0}"', nattrs)
     let t = ''
     if (nattrs.length > 0) {
-      t = `[ ${nattrs.join(', ')} ]`
+      t = `[ ${nattrs.sort().join(', ')} ]`
     }
     lout(`${obj.getName()}${t};`)
   }
@@ -348,7 +348,7 @@ export function digraph (graphcanvas) {
       attrs.push('dir=none')
     }
     let t = ''
-    if (attrs.length > 0) { t = `[ ${attrs.join(', ')} ]` }
+    if (attrs.length > 0) { t = `[ ${attrs.sort().join(', ')} ]` }
     debug(`print lhs ${lhs}`)
     debug(`print rhs ${rhs}`)
     if (lhs instanceof Array) {

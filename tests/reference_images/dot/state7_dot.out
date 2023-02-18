@@ -4,7 +4,7 @@ digraph {
     ablack;
     b[ label="label" ];
     cblue[ fillcolor="#0000ff", style="filled" ];
-    dred[ fillcolor="#ff0000", style="filled", label="red with label, c with blue, b has label, a without, e links to f" ];
+    dred[ fillcolor="#ff0000", label="red with label, c with blue, b has label, a without, e links to f", style="filled" ];
     eblack;
     fblack;
     gblack;
@@ -25,6 +25,6 @@ digraph {
     iblue->j;
     klightblue->l[ label="k links to l" ];
     myellow->n[ color="#ff00ff", fontcolor="#ff00ff" ];
-    ogray->p[ label="o p link orange", color="#ff7777", fontcolor="#ff7777" ];
-    qred->rblue[ label="q r link green", color="#00ff00", fontcolor="#00ff00" ];
+    ogray->p[ color="#ff7777", fontcolor="#ff7777", label="o p link orange" ];
+    qred->rblue[ color="#00ff00", fontcolor="#00ff00", label="q r link green" ];
 }

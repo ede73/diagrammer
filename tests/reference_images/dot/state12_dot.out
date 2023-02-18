@@ -12,17 +12,17 @@ digraph {
     a->b[ color="#ff0000", fontcolor="#ff0000" ];
     a->b[ color="#00ff00", fontcolor="#00ff00", style="dotted" ];
     a->b[ color="#0000ff", fontcolor="#0000ff", style="dashed" ];
-    a->b[ color="#00ffff", fontcolor="#00ffff", style="dashed", dir=none ];
-    a->b[ color="#ff00ff", fontcolor="#ff00ff", style="dotted", dir=none ];
+    a->b[ color="#00ffff", dir=none, fontcolor="#00ffff", style="dashed" ];
+    a->b[ color="#ff00ff", dir=none, fontcolor="#ff00ff", style="dotted" ];
     c->d[ color="#ff0000", fontcolor="#ff0000" ];
     c->d[ color="#00ff00", fontcolor="#00ff00", style="dotted" ];
     c->d[ color="#0000ff", fontcolor="#0000ff", style="dashed" ];
-    d->c[ color="#00ffff", fontcolor="#00ffff", style="dashed", dir=none ];
-    d->c[ color="#ff00ff", fontcolor="#ff00ff", style="dotted", dir=none ];
+    d->c[ color="#00ffff", dir=none, fontcolor="#00ffff", style="dashed" ];
+    d->c[ color="#ff00ff", dir=none, fontcolor="#ff00ff", style="dotted" ];
     special->link[ dir=both ];
-    special->link[ style="dotted", dir=both ];
-    special->link[ style="dashed", dir=both ];
+    special->link[ dir=both, style="dotted" ];
+    special->link[ dir=both, style="dashed" ];
     special->link[ arrowhead="tee" ];
-    sd->sd[ style="dotted", dir=none ];
-    sd->sd[ style="dashed", dir=none ];
+    sd->sd[ dir=none, style="dotted" ];
+    sd->sd[ dir=none, style="dashed" ];
 }

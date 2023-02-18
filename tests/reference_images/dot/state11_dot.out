@@ -1,8 +1,8 @@
 digraph {
     compound=true;
     rankdir=TD;
-    eka[ fillcolor="#0000ff", style="filled", label="slim shady and blue" ];
-    toinen[ fillcolor="#ff0000", style="filled", label="Punainen itseasiassa" ];
+    eka[ fillcolor="#0000ff", label="slim shady and blue", style="filled" ];
+    toinen[ fillcolor="#ff0000", label="Punainen itseasiassa", style="filled" ];
     //links start
     eka->toinen[ color="#111111", fontcolor="#111111" ];
     eka->toinen[ color="#ff0000", fontcolor="#ff0000" ];

@@ -12,21 +12,21 @@ digraph {
         start_backward;
         moving_forward;
     }
-    idle[ fillcolor="#ff0000", style="filled,dashed", label="idle\nevent" ];
+    idle[ fillcolor="#ff0000", label="idle\nevent", style="dashed,filled" ];
     xstart[ fillcolor="#7473b3", style="filled" ];
     start_forward[ fillcolor="#7473b3", style="filled" ];
-    moving_forward[ fillcolor="#7473b3", style="filled,dotted" ];
+    moving_forward[ fillcolor="#7473b3", style="dotted,filled" ];
     stop_motor[ fillcolor="#7473b3", style="filled" ];
     start_backward[ fillcolor="#7473b3", style="filled" ];
     moving_backward[ fillcolor="#7473b3", style="filled,rounded" ];
     //links start
     xstart->idle;
-    idle->start_forward[ label="on sound", color="#00ff00", fontcolor="#00ff00" ];
+    idle->start_forward[ color="#00ff00", fontcolor="#00ff00", label="on sound" ];
     start_forward->moving_forward[ color="#00ff00", fontcolor="#00ff00" ];
     moving_forward->stop_motor[ label="on touch" ];
     moving_forward->start_backward[ label="on sound" ];
     start_backward->moving_backward;
-    moving_backward->start_forward[ label="on sound", color="#00ff00", fontcolor="#00ff00" ];
+    moving_backward->start_forward[ color="#00ff00", fontcolor="#00ff00", label="on sound" ];
     moving_backward->stop_motor[ label="on touch" ];
     stop_motor->idle;
 }

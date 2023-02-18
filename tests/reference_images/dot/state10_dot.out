@@ -20,10 +20,10 @@ digraph {
     g;
     h;
     //links start
-    q1->z1[ label="Multiple RHS lists", color="#3333ff", fontcolor="#3333ff" ];
-    q1->z2[ label="Multiple RHS lists", color="#3333ff", fontcolor="#3333ff" ];
-    q1->z3[ label="Multiple RHS lists", color="#3333ff", fontcolor="#3333ff" ];
-    q1->z4[ label="Multiple RHS lists", color="#3333ff", fontcolor="#3333ff" ];
+    q1->z1[ color="#3333ff", fontcolor="#3333ff", label="Multiple RHS lists" ];
+    q1->z2[ color="#3333ff", fontcolor="#3333ff", label="Multiple RHS lists" ];
+    q1->z3[ color="#3333ff", fontcolor="#3333ff", label="Multiple RHS lists" ];
+    q1->z4[ color="#3333ff", fontcolor="#3333ff", label="Multiple RHS lists" ];
     q2->w1[ color="#999999", fontcolor="#999999" ];
     q2->w2[ color="#999999", fontcolor="#999999" ];
     q2->w3[ color="#999999", fontcolor="#999999" ];

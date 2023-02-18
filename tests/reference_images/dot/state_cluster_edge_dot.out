@@ -17,5 +17,5 @@ digraph {
     }//end of toinen undefined
     //links start
     joku1->toinen1[ label="node to node" ];
-    joku2->toinen1[ label="node to group",  lhead=cluster_toinen ];
+    joku2->toinen1[  lhead=cluster_toinen, label="node to group" ];
 }

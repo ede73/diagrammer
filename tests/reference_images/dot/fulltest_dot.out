@@ -1,15 +1,15 @@
 digraph {
     compound=true;
     rankdir=TD;
-    a[ fillcolor="#ff0000", style="filled,dashed", shape="box", label="dashed red rectangle" ];
-    b[ fillcolor="#ff0000", style="filled,bold", shape="circle", label="bold red circle" ];
-    c[ style="bold", label="bold c" ];
-    d[ style="bold", shape="diamond", label="Diamond d" ];
-    e[ fillcolor="#00ff00", style="filled,rounded", shape="diamond", label="green Diamond e" ];
-    f[ style="diagonals", label="diagonals" ];
-    g[ style="invis", label="invis" ];
-    a1[ fillcolor="#ff0000", style="filled,dashed", fontcolor="#00ff00", label="Red dashed a1 with green link" ];
-    green[ fillcolor="#ff0000", style="filled,dotted" ];
+    a[ fillcolor="#ff0000", label="dashed red rectangle", shape="box", style="dashed,filled" ];
+    b[ fillcolor="#ff0000", label="bold red circle", shape="circle", style="bold,filled" ];
+    c[ label="bold c", style="bold" ];
+    d[ label="Diamond d", shape="diamond", style="bold" ];
+    e[ fillcolor="#00ff00", label="green Diamond e", shape="diamond", style="filled,rounded" ];
+    f[ label="diagonals", style="diagonals" ];
+    g[ label="invis", style="invis" ];
+    a1[ fillcolor="#ff0000", fontcolor="#00ff00", label="Red dashed a1 with green link", style="dashed,filled" ];
+    green[ fillcolor="#ff0000", style="dotted,filled" ];
     b1[ fillcolor="#0000ff", style="filled,rounded" ];
     q;
     w;
@@ -21,14 +21,14 @@ digraph {
     v[ style="rounded" ];
     n[ style="dashed" ];
     l[ style="dashed" ];
-    k[ fillcolor="#ff0000", style="filled,dotted" ];
+    k[ fillcolor="#ff0000", style="dotted,filled" ];
     j;
     h;
     m1;
     m2;
     m3;
     //links start
-    green->b1[ label="dotted red node named green\nAnd green dotted link to rounded b1 node, that is blue\nRed label", color="#00ff00", fontcolor="#ff0000", style="dotted" ];
+    green->b1[ color="#00ff00", fontcolor="#ff0000", label="dotted red node named green\nAnd green dotted link to rounded b1 node, that is blue\nRed label", style="dotted" ];
     q->r;
     q->t;
     q->y;

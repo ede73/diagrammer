@@ -65,7 +65,7 @@ export function plantuml_sequence (graphcanvas) {
         nattrs.push('width=0.01')
         nattrs.push('weight=0.01')
       } else {
-        nattrs.push(`style="${styles.join(',')}"`)
+        nattrs.push(`style="${styles.sort().join(',')}"`)
       }
     }
     getAttributeAndFormat(obj, 'image', 'image="icons{0}"', nattrs)
@@ -79,7 +79,7 @@ export function plantuml_sequence (graphcanvas) {
       nattrs.push(shape)
     }
     let t = ''
-    if (nattrs.length > 0) { t = `[${nattrs.join(',')}]` }
+    if (nattrs.length > 0) { t = `[${nattrs.sort().join(',')}]` }
     lout('participant {0} {1} {2}'.format(
       getAttributeAndFormat(obj, 'label', '"{0}" as'),
       obj.getName(),

@@ -126,7 +126,7 @@ export function seqdiag (graphcanvas) {
     if (!attrs || attrs.length === 0) {
       attrs.push('label=""')
     }
-    lout(`${lhs.getName()} ${edgeType} ${rightName}[ ${attrs.join(', ')} ];`)
+    lout(`${lhs.getName()} ${edgeType} ${rightName}[ ${attrs.sort().join(', ')} ];`)
   })
   lout('}', false)
 }

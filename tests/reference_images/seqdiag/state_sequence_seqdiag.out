@@ -10,10 +10,10 @@ seqdiag {
     b => c[ label="Auto return edge" ];
     ===jotain kay tassanain===
     ...ja aikaa palaa...
-    a -> b[ label="lost signal", failed ];
-    a <- b[ label="lost signal", failed ];
-    a -> b[ note="and a big\nlined\nnote", label="signal" ];
-    a -> b[ note="and a big\nlined\nnote", label="signal" ];
+    a -> b[ failed, label="lost signal" ];
+    a <- b[ failed, label="lost signal" ];
+    a -> b[ label="signal", note="and a big\nlined\nnote" ];
+    a -> b[ label="signal", note="and a big\nlined\nnote" ];
     a -> b[ label="ab()" ];
     b -> c[ label="bc(TRUE)" ];
     c -> c[ label="process(1)" ];

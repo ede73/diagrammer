@@ -60,22 +60,19 @@ export function nwdiag (graphcanvas) {
         lout(`address="${obj.getLabel()}"`)
       }
       // TODO: bad, flatmatting the graph
-      for (const j in obj.OBJECTS) {
-        if (!Object.prototype.hasOwnProperty.call(obj.OBJECTS, j)) continue
-        const z = obj.OBJECTS[j]
-
-        if (z.shape && !NetworkDiagShapeMap[z.shape]) {
+      traverseVertices(obj, secondLvlObj => {
+        if (secondLvlObj.shape && !NetworkDiagShapeMap[secondLvlObj.shape]) {
           throw new Error('Missing shape mapping')
         }
-        const mappedShape = NetworkDiagShapeMap[z.shape] ? NetworkDiagShapeMap[z.shape] : NetworkDiagShapeMap.default
+        const mappedShape = NetworkDiagShapeMap[secondLvlObj.shape] ? NetworkDiagShapeMap[secondLvlObj.shape] : NetworkDiagShapeMap.default
 
-        const tmp = multiAttrFmt(z, {
+        const tmp = multiAttrFmt(secondLvlObj, {
           color: 'color="{0}"',
           label: 'address="{0}"'
 
         }, [`shape="${mappedShape}"`])
-        lout(`${z.getName()}${tmp};`)
-      }
+        lout(`${secondLvlObj.getName()}${tmp};`)
+      })
       // find if there are ANY edges that have this GROUP as participant!
       traverseEdges(graphcanvas, edge => {
         const tmp = getAttributeAndFormat(edge, 'label', '[ address="{0}" ]')

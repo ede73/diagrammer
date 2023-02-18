@@ -122,6 +122,30 @@ export function getAttributeAndFormat (cl, attr, fmt, resultarray) {
   return `${tmp}`
 }
 
+/**
+ * Apply getAttributeAndFormat for each attrMap listed attribute name(key) and formatting (value) for object obj
+ * Exclude empties
+ * Append all extras to the output array
+ * Comma join the output array and return it as [...]
+ * If output results in NOTHING, return empty string
+ *
+ * @param {GraphObject} obj
+ * @param {Object.<string, string>} attrMap key is attribute to fetch (if present), and value is format
+ * @param {string[]} extras Anything here will be appended to the result map
+ * @return {string} Return all successfully fetched and formatted properties joined with extras as a comma separared parameter list SORTED and enclosed in [] or '' if no attributes resulted
+ */
+export function multiAttrFmt (obj, attrMap, extras = []) {
+  const attrMapFormatted = []
+  for (const [key, value] of Object.entries(attrMap)) {
+    const formattedValue = getAttributeAndFormat(obj, key, value)
+    if (formattedValue) {
+      attrMapFormatted.push(formattedValue)
+    }
+  }
+  extras = extras.filter((p) => p.trim())
+  return attrMapFormatted ? `[ ${attrMapFormatted.concat(extras).sort().join(', ')} ]` : ''
+}
+
 let indentLevel = 0
 
 /**

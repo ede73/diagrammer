@@ -1,7 +1,7 @@
 import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { traverseEdges, traverseVertices } from '../model/model.js'
-import { getAttributeAndFormat, output } from '../model/support.js'
+import { getAttributeAndFormat, output, multiAttrFmt } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="actdiag">Activity Diagram(cli)</option>
 
@@ -75,14 +75,11 @@ export function actdiag (graphcanvas) {
           throw new Error('Missing shape mapping')
         }
         const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap.default
-
-        let colorShapeLabel = getAttributeAndFormat(obj, 'color', ', color="{0}"') +
-                    ', shape={0}'.format(mappedShape) +
-                    getAttributeAndFormat(obj, 'label', ', label="{0}"')
-        if (colorShapeLabel.trim() !== '') {
-          colorShapeLabel = ` [ ${colorShapeLabel.trim().substring(1)} ]`
-        }
-        lout(`${obj.getName()}${colorShapeLabel};`)
+        const colorShapeLabel = multiAttrFmt(obj, {
+          color: 'color="{0}"',
+          label: 'label="{0}"'
+        }, [`shape=${mappedShape}`])
+        lout(`${obj.getName()} ${colorShapeLabel};`)
       })
       lout('}', false)
     } else {
@@ -100,31 +97,28 @@ export function actdiag (graphcanvas) {
       const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap.default
 
       // ICON does not work, using background
-      let colorIconShapeLabel = getAttributeAndFormat(obj, 'color', ', color="{0}"') +
-                getAttributeAndFormat(obj, 'image', ', background="icons{0}"') +
-                style +
-                ',shape={0}'.format(mappedShape) +
-                getAttributeAndFormat(obj, 'label', ', label="{0}"')
-      if (colorIconShapeLabel.trim() !== '') { colorIconShapeLabel = ` [ ${colorIconShapeLabel.trim().substring(1)} ]` }
+      const colorIconShapeLabel = multiAttrFmt(obj, {
+        color: 'color="{0}"',
+        image: 'background="icons{0}"',
+        label: 'label="{0}"'
+      }, [`shape=${mappedShape}`])
       lout(`${obj.getName()}${colorIconShapeLabel};`)
     }
   }
   traverseVertices(graphcanvas, parseObjects)
 
   traverseEdges(graphcanvas, (edge) => {
-    let t = ''
+    let s = ''
     if (edge.isDotted()) {
-      t += ', style="dotted" '
+      s += 'style="dotted"'
     } else if (edge.isDashed()) {
-      t += ', style="dashed" '
+      s += 'style="dashed"'
     }
-    const labelAndItsColor = getAttributeAndFormat(edge, 'label', ', label="{0}"')
-    const color = getAttributeAndFormat(edge, 'color', ', color="{0}"')
-    t += labelAndItsColor + color
-    t = t.trim()
-    if (t.substring(0, 1) === ',') { t = t.substring(1).trim() }
-    if (t !== '') { t = ` [ ${t} ]` }
-    lout(`${edge.left.getName()} -> ${edge.right.getName()}${t};`)
+    const t = multiAttrFmt(edge, {
+      label: 'label="{0}"',
+      color: 'color="{0}"'
+    }, [s])
+    lout(`${edge.left.getName()} -> ${edge.right.getName()} ${t};`)
   })
   lout('}', false)
 }

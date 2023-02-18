@@ -2,45 +2,45 @@ actdiag {
     default_fontsize = 14
     orientation=portrait
     lane "GraphObject"{
-        name [  color="#ccccff", shape=box ];
-        color [  color="#ccccff", shape=box ];
-        textColor [  color="#ccccff", shape=box ];
-        label [  color="#ccccff", shape=box, label="label\nspecial syntax with :: for links\n(label::xlabel)" ];
+        name [ color="#ccccff", shape=box ];
+        color [ color="#ccccff", shape=box ];
+        textColor [ color="#ccccff", shape=box ];
+        label [ color="#ccccff", label="label\nspecial syntax with :: for links\n(label::xlabel)", shape=box ];
     }
     lane "GraphRoot"{
-        OBJECTS1 [  shape=flowchart.database, label="OBJECTS" ];
-        xGenerator [  color="#ccffcc", shape=box, label="generator" ];
-        xVisualizer [  color="#ccffcc", shape=box, label="visualizer" ];
-        direction [  color="#ccffcc", shape=box ];
-        xStart [  color="#ccffcc", shape=box, label="start" ];
-        xEqual [  color="#ccffcc", shape=box, label="equal" ];
-        currentShape [  shape=box ];
-        default2 [  shape=box, label="default\nnodecolor\ngroupcolor\nlinkcolor" ];
+        OBJECTS1 [ label="OBJECTS", shape=flowchart.database ];
+        xGenerator [ color="#ccffcc", label="generator", shape=box ];
+        xVisualizer [ color="#ccffcc", label="visualizer", shape=box ];
+        direction [ color="#ccffcc", shape=box ];
+        xStart [ color="#ccffcc", label="start", shape=box ];
+        xEqual [ color="#ccffcc", label="equal", shape=box ];
+        currentShape [ shape=box ];
+        default2 [ label="default\nnodecolor\ngroupcolor\nlinkcolor", shape=box ];
     }
     lane "xGroup"{
-        equal2 [  shape=box, label="equal" ];
-        OBJECTS2 [  shape=flowchart.database, label="OBJECTS" ];
+        equal2 [ label="equal", shape=box ];
+        OBJECTS2 [ label="OBJECTS", shape=flowchart.database ];
     }
     lane "Node"{
-        xShape [  shape=box, label="shape" ];
-        image [  shape=box ];
-        style [  shape=box ];
+        xShape [ label="shape", shape=box ];
+        image [ shape=box ];
+        style [ shape=box ];
     }
     lane "Link"{
-        linkType [  shape=box ];
-        left [  shape=box ];
-        right [  shape=box ];
+        linkType [ shape=box ];
+        left [ shape=box ];
+        right [ shape=box ];
     }
-    GraphObject -> GraphRoot [ style="dotted" , label="extends(GraphObject->GraphRoot)", color="#0000ff" ];
-    GraphObject -> Node [ style="dotted" , label="extends(GraphObject->Node)", color="#0000ff" ];
-    GraphObject -> xGroup [ style="dotted" , label="extends(GraphObject->xGroup)", color="#0000ff" ];
-    GraphObject -> Link [ style="dotted" , label="extends::extends(GraphObject->Link)", color="#0000ff" ];
-    left -> Node [ style="dashed" , label="links", color="#00ff00" ];
-    left -> xGroup [ style="dashed" , label="links", color="#00ff00" ];
-    right -> xGroup [ style="dashed" , label="links", color="#00ff00" ];
-    right -> Node [ style="dashed" , label="links", color="#00ff00" ];
-    OBJECTS1 -> Node [ label="contains", color="#ff0000" ];
-    OBJECTS1 -> xGroup [ label="contains", color="#ff0000" ];
-    OBJECTS2 -> Node [ label="contains", color="#ff0000" ];
-    OBJECTS2 -> xGroup [ label="contains", color="#ff0000" ];
+    GraphObject -> GraphRoot [ color="#0000ff", label="extends(GraphObject->GraphRoot)", style="dotted" ];
+    GraphObject -> Node [ color="#0000ff", label="extends(GraphObject->Node)", style="dotted" ];
+    GraphObject -> xGroup [ color="#0000ff", label="extends(GraphObject->xGroup)", style="dotted" ];
+    GraphObject -> Link [ color="#0000ff", label="extends::extends(GraphObject->Link)", style="dotted" ];
+    left -> Node [ color="#00ff00", label="links", style="dashed" ];
+    left -> xGroup [ color="#00ff00", label="links", style="dashed" ];
+    right -> xGroup [ color="#00ff00", label="links", style="dashed" ];
+    right -> Node [ color="#00ff00", label="links", style="dashed" ];
+    OBJECTS1 -> Node [ color="#ff0000", label="contains" ];
+    OBJECTS1 -> xGroup [ color="#ff0000", label="contains" ];
+    OBJECTS2 -> Node [ color="#ff0000", label="contains" ];
+    OBJECTS2 -> xGroup [ color="#ff0000", label="contains" ];
 }

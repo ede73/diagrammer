@@ -1,9 +1,6 @@
 // @ts-check
 import { diagrammerParser } from '../build/diagrammer_parser.js'
-import { removeAllChildNodes, removeOldVisualizations } from './d3support.js'
-import { getError, getGenerator, getHTMLElement, getInputElement, getVisualizer, openImage, setError, setGenerator, updateImage } from './uiComponentAccess.js'
-import { visualizations } from './globals.js'
-import { makeHTTPPost } from './ajax.js'
+import { getGenerator, getError, getInputElement, getVisualizer, setError, setGenerator } from './uiComponentAccess.js'
 
 /**
  * @type {number}
@@ -103,95 +100,8 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
     }
   } catch (ex) {
     console.error(`  ..parsed, and failed ${getError()} and ${ex}`)
-    clearBeautified()
     failureCallback(getError(), ex)
   } finally {
     parsingStarted = 0
-  }
-}
-
-function makeNewImageHolder () {
-  removeOldVisualizations()
-  const imgdiv = getHTMLElement('diagrammer-graph')
-  const img = document.createElement('img')
-  img.align = 'bottom'
-  // using % here fails (even if it works directly in HTML)
-  img.width = 400
-  img.height = 400
-  img.id = 'image'
-  // auto adjusts
-  img.style.height = 'auto'
-  img.src = 'web/result.png'
-  img.onclick = () => openImage('web/result.png')
-  imgdiv.appendChild(img)
-}
-
-function beautify (generatedCode) {
-  let data
-  try {
-    data = JSON.parse(generatedCode)
-  } catch (ex) {
-    setError('Failed parsing generated code, perhaps not JSON?')
-    return
-  }
-  // Get DOM-element for inserting json-tree
-  const wrapper = document.getElementById('diagrammer-beautified')
-  // @ts-ignore
-  // eslint-disable-next-line no-undef, no-unused-vars
-  const tree = jsonTree.create(data, wrapper)
-}
-
-function clearBeautified () {
-  const result = getInputElement('diagrammer-beautified')
-  removeAllChildNodes(result)
-}
-
-// TODO: move to editor (or elsewhere, but this really isn't parser thingy anymore)
-export function visualize (visualizer) {
-  /** @type {HTMLInputElement} */
-  const result = getInputElement('diagrammer-result')
-  const generatedResult = result.value
-
-  beautify(generatedResult)
-
-  if (!visualizer) {
-    throw new Error('Visualizer not defined')
-  }
-  const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
-  // TODO: loads uselessly if web visualizer used
-  makeNewImageHolder()
-  makeHTTPPost(visualizeUrl, generatedResult,
-    updateImage,
-    (statusCode, statusText, responseText) => {
-      alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
-    })
-
-  /*
-        <img align="bottom" id="image" width="30%" src="web/result.png"
-            onclick="javascript:openImage('web/result.png');" />
-    */
-
-  if (visualizations.has(visualizer)) {
-    // this is web only visualization
-    console.log(`Visualize using ${visualizer}`)
-    visualizations.get(visualizer)(result.value)
-    console.log(`Finished visualizing ${visualizer}`)
-  } else if (visualizer === 'dot') {
-    // hack to get Viz display graphviz as comparison..
-    try {
-      // TODO: Bring back viz/canviz
-      // @ts-ignore
-      // eslint-disable-next-line no-undef
-      getHTMLElement('viz_container').innerHTML = Viz(generatedResult, 'vin_container')
-    } catch (err) {
-      console.error(err)
-    }
-    // try{
-    // const canviz = new Canviz('canviz_container');
-    // canviz.load("http://192.168.11.215/~ede/state/post.txt");
-    // }catch(err){
-    // console.log(err);
-    // }
-    // TODO: Use visualizations/generators maps
   }
 }

@@ -1,8 +1,10 @@
 // @ts-check
 import { getSavedGraph } from './localStorage.js'
-import { parse, visualize } from './parserInteractions.js'
+import { parse } from './parserInteractions.js'
 import { getGenerator, getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js'
 import { makeHTTPGet } from './ajax.js'
+import { clearBeautified, visualize } from './visualize.js'
+
 // import { Editor } from '../ace/src-noconflict/ace.js';
 
 // Set to 0 to fall back to textarea(enable textarea in index.html)
@@ -142,6 +144,7 @@ function parseAndRegenerate (preferScriptSpecifiedGeneratorAndVisualizer = false
     visualize(finalVisualizer)
   // eslint-disable-next-line n/handle-callback-err
   }, (error, ex) => {
+    clearBeautified()
     console.log('  parseAndRegenerate() - Parsing failed :(')
   }, preferScriptSpecifiedGeneratorAndVisualizer)
 }

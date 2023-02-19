@@ -38,9 +38,9 @@ describe('Parser/grammar rule tests', () => {
    * @param {string} code
    */
   function parseCode (code) {
-    // @ts-ignore
     diagrammerParser.yy.graphcanvas = new GraphCanvas()
     try {
+      // @ts-ignore
       diagrammerParser.parse(code)
     } catch (ex) {
       console.log('=====failed parsing======')

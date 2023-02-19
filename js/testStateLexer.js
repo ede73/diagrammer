@@ -14,7 +14,7 @@ console.log(lexer)
 const st = lexer.diagrammerLexer
 st.setInput(raw)
 let h
-while (h != 'EOF' && h != 1) {
+while (h !== 'EOF' && h !== 1) {
   h = st.lex()
   console.log('State:' + h + '(' + st.yytext + ')')
 }

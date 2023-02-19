@@ -90,8 +90,8 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
     // If true, actually prefer generator/visualizer from loaded script IF specified
     // used while loading new examples...
     diagrammerParser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer
-    // @ts-ignore
     diagrammerParser.yy.graphcanvas = new GraphCanvas()
+    // @ts-ignore
     diagrammerParser.parse(diagrammerCode)
     console.log(`  ..parsed, calling it a success with ${getGenerator()} and ${getVisualizer()}`)
 

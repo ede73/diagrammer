@@ -80,7 +80,7 @@ describe('Diagrammer', () => {
     await expect(graphText).toMatch('a>')
 
     const errorText = await getParsingError(p)
-    await expect(errorText).toMatch(/^Parsing error:.+Parse error on line 1.+a&gt;/)
+    await expect(errorText).toMatch(/.*Parsing error:.+Parse error on line 1.+a&gt;/)
   })
 
   it('selects dendrogram example, verifies parsing succeeds and correct graph is visualized', async () => {

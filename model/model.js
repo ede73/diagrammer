@@ -125,13 +125,6 @@ export function getVertex (yy, objOrName, style) {
       if (style) obj.setStyle(style)
       return obj
     }
-    // TODO: remove
-    if (obj instanceof Array || Array.isArray(obj)) {
-      // TODO: Get rid of this block, makes no sense...?? ANymore??
-      throw new Error('Should never happen')
-      // eslint-disable-next-line no-unreachable
-      return obj
-    }
 
     const search = (function s (/** @type {GraphContainer} */container, name) {
       if (container.getName() === name) return container

@@ -571,22 +571,35 @@ export function hasOutwardEdge (yy, vertex) {
 // }
 
 /**
+ * Iterate thru all edges in the graph, call callback for each
+ *
+ * If callback returns a value (!= undefined) break loop and return just that
  * Usage: generators
+ *
  * @param {GraphCanvas} graphcanvas
  * @param {function(GraphEdge):void} callback
+ * @return {any}
  */
 export function traverseEdges (graphcanvas, callback) {
   debug(`${graphcanvas.ROOTVERTICES}`)
   for (const i in graphcanvas.EDGES) {
     if (!Object.prototype.hasOwnProperty.call(graphcanvas.EDGES, i)) continue
-    callback(graphcanvas.EDGES[i])
+    const ret = callback(graphcanvas.EDGES[i])
+    if (ret !== undefined) {
+      return ret
+    }
   }
 }
 
 /**
+ * Iterate thru all containers objects (flat), for each object, call callback.
+ * Should call back return value, loop is broken and what ever was returned is returned
+ *
  * Usage: generators
- * @param {GraphContainer} container
- * @param {function(GraphConnectable):void} callback
+ *
+ * @param {GraphContainer} container Go thru all objects within this container
+ * @param {function(GraphConnectable):void} callback Called for each object, IFF callback returns anything(!=undefined), this function will return that also
+ * @return {any}
  */
 export function traverseVertices (container, callback) {
   for (const i in container.OBJECTS) {
@@ -596,7 +609,10 @@ export function traverseVertices (container, callback) {
     const obj = container.OBJECTS[i]
     // just to keep linter happy... Also Inner is always Group, so not necessary
     if (obj instanceof GraphContainer || obj instanceof GraphVertex) {
-      callback(obj)
+      const ret = callback(obj)
+      if (ret !== undefined) {
+        return ret
+      }
     }
   }
 }

@@ -167,25 +167,13 @@ export function digraph (graphcanvas) {
   // pick node from group that is FIRST pointed by edges left hand side
   function getFirstLHSReferredNodeFromGroup (/** @type {GraphContainer} */grp) {
     // TODO: Replace with supported traversal (but it needs return support first)
-    for (const i in graphcanvas.EDGES) {
-      if (!Object.prototype.hasOwnProperty.call(graphcanvas.EDGES, i)) continue
-      const allEdges = graphcanvas.EDGES[i]
-      // TODO: Cannot return from traversal yet
-      // traverseVertices(grp, objectInGroup => {
-      //   if (objectInGroup === allEdges.left) {
-      //     return objectInGroup
-      //   }
-      // })
-      // TODO: Replace with above (soon)
-      for (const j in grp.OBJECTS) {
-        if (!Object.prototype.hasOwnProperty.call(grp.OBJECTS, j)) continue
-        const objectInGroup = grp.OBJECTS[j]
+    return traverseEdges(graphcanvas, allEdges => {
+      return traverseVertices(grp, objectInGroup => {
         if (objectInGroup === allEdges.left) {
           return objectInGroup
         }
-      }
-    }
-    return undefined
+      })
+    })
   }
 
   function getLastLHSOrRHSReferredNodeInGroup (/** @type {GraphContainer} */grp) {

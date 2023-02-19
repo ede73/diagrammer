@@ -241,18 +241,24 @@
 
 		<link href="js/jsonTree/jsonTree.css" rel="stylesheet" />
 		<script src="js/jsonTree/jsonTree.js"></script>
-
+		<!-- <script src="js/viz.js"></script> -->
+		<!-- <script src="js/full.render.js"></script> -->
 		<!-- <svg id='chart' xmlns="http://www.w3.org/2000/svg"></svg> -->
 		<!-- resulting data of grammar parser/ast generator -->
 		<p>Javascript generated(dot only)</p>
 		<div id="viz_container" style="border-width: 2px; border-style: dotted;" align="top"></div>
 
+		<p>Viz.js</p>
+		<div id="viz_container"></div>
 		<p>CanViZ</p>
 		<div id="canviz_container"></div>
 		<div id="diagrammer-debug"></div>
 	</form>
 </body>
-<script src="js/viz.js"></script>
+
+<!-- <script src="js/viz.js"></script> -->
+<script module="js/viz.es.js"></script>
+<script src="js/full.render.js"></script>
 <script type="module" src="web/parserInteractions.js"></script>
 <script type="module" src="web/editorInteractions.js"></script>
 <script src="ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>

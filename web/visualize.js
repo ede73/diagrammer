@@ -3,6 +3,9 @@ import { removeAllChildNodes, removeOldVisualizations } from './d3support.js'
 import { getHTMLElement, getInputElement, openImage, updateImage } from './uiComponentAccess.js'
 import { visualizations } from './globals.js'
 import { makeHTTPPost } from './ajax.js'
+import Viz from '../js/viz.es.js'
+// import Viz2 from '../js/viz.js'
+// import * as v from '../js/full.render.js'
 
 function makeNewImageHolder (imageName) {
   const imgdiv = getHTMLElement('diagrammer-graph')
@@ -41,7 +44,7 @@ export function clearBeautified () {
 }
 
 // TODO: move to editor (or elsewhere, but this really isn't parser thingy anymore)
-export function visualize (visualizer) {
+export async function visualize (visualizer) {
   /** @type {HTMLInputElement} */
   const result = getInputElement('diagrammer-result')
   const generatedResult = result.value
@@ -70,14 +73,44 @@ export function visualize (visualizer) {
         alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
       })
   }
-  if (visualizer === 'dot') {
-    // hack to get Viz display graphviz as comparison..
+  if (['circo', 'dot', 'fdp', 'neato', 'osage', 'twopi'].includes(visualizer)) {
+    // https://github.com/mdaines/viz.js/wiki/Usage
     try {
-      // TODO: Bring back viz/canviz
-      // @ts-ignore
-      // eslint-disable-next-line no-undef
-      getHTMLElement('viz_container').innerHTML = Viz(generatedResult, 'vin_container')
+      const workerURL = 'js/full.render.js'
+      const viz = new Viz({ workerURL })
+      const svg = await viz.renderSVGElement(generatedResult, {
+        engine: visualizer,
+        images: [
+          { path: 'icons/actor1.png', width: '64', height: '64' },
+          { path: 'icons/actor2.png', width: '64', height: '64' },
+          { path: 'icons/actor3.png', width: '64', height: '64' },
+          { path: 'icons/barcode.png', width: '64', height: '64' },
+          { path: 'icons/basestation.png', width: '64', height: '64' },
+          { path: 'icons/battery.png', width: '64', height: '64' },
+          { path: 'icons/camera.png', width: '64', height: '64' },
+          { path: 'icons/cpu.png', width: '64', height: '64' },
+          { path: 'icons/documents.png', width: '64', height: '64' },
+          { path: 'icons/harddisk.png', width: '64', height: '64' },
+          { path: 'icons/keyboard.png', width: '64', height: '64' },
+          { path: 'icons/laptop.png', width: '64', height: '64' },
+          { path: 'icons/laser.png', width: '64', height: '64' },
+          { path: 'icons/monitor.png', width: '64', height: '64' },
+          { path: 'icons/mouse.png', width: '64', height: '64' },
+          { path: 'icons/phone.png', width: '64', height: '64' },
+          { path: 'icons/printer.png', width: '64', height: '64' },
+          { path: 'icons/ram.png', width: '64', height: '64' },
+          { path: 'icons/satellite.png', width: '64', height: '64' },
+          { path: 'icons/scanner.png', width: '64', height: '64' },
+          { path: 'icons/sim.png', width: '64', height: '64' },
+          { path: 'icons/timer.png', width: '64', height: '64' },
+          { path: 'icons/usbmemory.png', width: '64', height: '64' },
+          { path: 'icons/wifi.png', width: '64', height: '64' }]
+      })
+      const vizContainer = getHTMLElement('viz_container')
+      removeAllChildNodes(vizContainer)
+      vizContainer.appendChild(svg)
     } catch (err) {
+      console.log('o...o')
       console.error(err)
     }
     // try{

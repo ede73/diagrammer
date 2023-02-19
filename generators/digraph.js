@@ -166,7 +166,7 @@ export function digraph (graphcanvas) {
 
   // pick node from group that is FIRST pointed by edges left hand side
   function getFirstLHSReferredNodeFromGroup (/** @type {GraphContainer} */grp) {
-    // TODO: Replace with supported traversal (but it needs return support first)
+    // TODO: equal to hasOutwardEdge in model.js (except canvas, not yy)
     return traverseEdges(graphcanvas, allEdges => {
       return traverseVertices(grp, objectInGroup => {
         if (objectInGroup === allEdges.left) {

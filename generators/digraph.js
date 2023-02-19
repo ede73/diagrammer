@@ -14,11 +14,11 @@ import { GraphVertex } from '../model/graphvertex.js'
 import { getVertex, hasOutwardEdge, traverseEdges, traverseVertices } from '../model/model.js'
 import { debug, getAttributeAndFormat, output } from '../model/support.js'
 
-// ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(cli/www)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:twopi">Graphviz - twopi(cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:neato">Graphviz - neato(cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:fdp">Graphviz - fdp(cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(www/cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:twopi">Graphviz - twopi(www/cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:neato">Graphviz - neato(www/cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:fdp">Graphviz - fdp(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:sfdp">Graphviz - sfdp(cli)</option>
 
 const DigraphShapeMap = {

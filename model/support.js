@@ -193,10 +193,10 @@ export function outputFormattedText (graphcanvas, txt, array) {
  * @param {GraphCanvas} graphcanvas
  */
 export function * iterateEdges (graphcanvas) {
-  for (const i in graphcanvas.EDGES) {
-    if (!Object.prototype.hasOwnProperty.call(graphcanvas.EDGES, i)) continue
+  for (const i in graphcanvas._EDGES) {
+    if (!Object.prototype.hasOwnProperty.call(graphcanvas._EDGES, i)) continue
     /** @type {GraphEdge} */
-    const foolTypeChecker = graphcanvas.EDGES[i]
+    const foolTypeChecker = graphcanvas._EDGES[i]
     yield foolTypeChecker
   }
 }

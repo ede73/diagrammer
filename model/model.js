@@ -270,15 +270,15 @@ export function exitSubGraph (yy) {
   // a>b>(c d>e f>g h)>(s>k)
   // activates for instance to 2nd edge (ie. one pointing from b to all of (c d>e..))
   // and also on 5th edge ie ..h)>(s..
-  for (const idx in yy.EDGES) {
-    if (!Object.prototype.hasOwnProperty.call(yy.EDGES, idx)) continue
-    edge = yy.EDGES[idx]
+  for (const idx in yy._EDGES) {
+    if (!Object.prototype.hasOwnProperty.call(yy._EDGES, idx)) continue
+    edge = yy._EDGES[idx]
     if (edge.right.name === currentSubGraph.name &&
             currentSubGraph.entrance instanceof GraphConnectable &&
             edge.left.name === currentSubGraph.entrance.name) {
       // remove this edge!
       edgeIndex = Number(idx)
-      yy.EDGES.splice(edgeIndex, 1)
+      yy._EDGES.splice(edgeIndex, 1)
       // and then relink it to containers vertices that have no LEFT edges
       break
     }
@@ -299,7 +299,7 @@ export function exitSubGraph (yy) {
       const newEdge = getEdge(yy, edge.edgeType, currentSubGraph.entrance, vertex, edge.label,
         undefined, undefined, undefined, undefined, true)
       newEdge.container = currentSubGraph
-      yy.EDGES.splice(edgeIndex++, 0, newEdge)
+      yy._EDGES.splice(edgeIndex++, 0, newEdge)
     }
   }
 
@@ -504,7 +504,7 @@ export function getGraphCanvas (yy) {
     /** @type  {GraphContainer} */
     yy.CURRENTCONTAINER = []
     /** @type {GraphEdge[]} */
-    yy.EDGES = []
+    yy._EDGES = []
     /** @type {number} */
     yy.CONTAINER_EXIT = 1
     /** @type  {GraphCanvas} */
@@ -519,9 +519,9 @@ export function getGraphCanvas (yy) {
  * @param {GraphConnectable} vertex
  */
 export function hasOutwardEdge (yy, vertex) {
-  for (const i in yy.EDGES) {
-    if (!Object.prototype.hasOwnProperty.call(yy.EDGES, i)) continue
-    const edge = yy.EDGES[i]
+  for (const i in yy._EDGES) {
+    if (!Object.prototype.hasOwnProperty.call(yy._EDGES, i)) continue
+    const edge = yy._EDGES[i]
     if (edge.left.name === vertex.name) {
       return true
     }
@@ -582,9 +582,9 @@ export function hasOutwardEdge (yy, vertex) {
  */
 export function traverseEdges (graphcanvas, callback) {
   debug(`${graphcanvas._ROOTVERTICES}`)
-  for (const i in graphcanvas.EDGES) {
-    if (!Object.prototype.hasOwnProperty.call(graphcanvas.EDGES, i)) continue
-    const ret = callback(graphcanvas.EDGES[i])
+  for (const i in graphcanvas._EDGES) {
+    if (!Object.prototype.hasOwnProperty.call(graphcanvas._EDGES, i)) continue
+    const ret = callback(graphcanvas._EDGES[i])
     if (ret !== undefined) {
       return ret
     }
@@ -687,7 +687,7 @@ function _addEdge (yy, edge) {
     debug(`PUSH EDGE:${edge}`, true)
     edge.container = getCurrentContainer(yy)
   }
-  yy.EDGES.push(edge)
+  yy._EDGES.push(edge)
   debug(false)
   return edge
 }

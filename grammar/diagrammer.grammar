@@ -74,7 +74,7 @@ S
 			    graphcanvas.setVisualizer(graphcanvas.getGenerator());
 			  }
 			}
-			graphcanvas.EDGES = yy.EDGES;
+			graphcanvas._EDGES = yy._EDGES;
 			graphcanvas.parseError = yy.parseError;
 			graphcanvas.result = yy.result;
 			graphcanvas.yy = yy;

@@ -333,7 +333,7 @@ Represents edge between two objects(vertices or groups) and all related visualiz
 
 Own properties are edgetype, left- and righthand sides (+GraphObject properties)
 
-Edges are stored separately and available for the generator in yy.EDGES
+Edges are stored separately and available for the generator in yy._EDGES
 
 ## GraphVertex
 

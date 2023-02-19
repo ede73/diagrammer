@@ -136,19 +136,19 @@ endif
 exit;exit node is also required
         `)
     // console.log(graphcanvas)
-    expect(graphcanvas._OBJECTS.length).toBe(5)
+    expect(graphcanvas._getObjects().length).toBe(5)
     expect(graphcanvas._ROOTVERTICES.length).toBe(5)
     // in this case only all the objects and root vertices do match
-    expect(graphcanvas._OBJECTS).toMatchObject(graphcanvas._ROOTVERTICES)
+    expect(graphcanvas._getObjects()).toMatchObject(graphcanvas._ROOTVERTICES)
 
     const conditionalGroups = new Set(['1', '2', '3'])
     const verticeNames = new Set(['entry', 'exit'])
 
-    graphcanvas._OBJECTS.forEach(obj => {
+    graphcanvas._getObjects().forEach(obj => {
       if (obj instanceof GraphGroup) {
         // TODO: grammar is buggy, there should be single vertex in, or none for no-vertices conditional
         // how ever 'then'/'else' is intepretex as one
-        // expect(obj._OBJECTS.length).toBe(1);
+        // expect(obj._getObjects().length).toBe(1);
         conditionalGroups.delete(obj.getName())
         if (obj.getName() === '1') {
           expect(obj.getLabel()).toBe('a')
@@ -191,7 +191,7 @@ exit;exit node is also required
     /** @type {GraphGroup} */
     // @ts-ignore
     const group = connectable
-    expect(graphcanvas._OBJECTS.length).toBe(1)
+    expect(graphcanvas._getObjects().length).toBe(1)
     expect(group.getName()).toBe('name')
     expect(group.getColor()).toBe(color)
     expect(group.isEmpty()).toBeTruthy()
@@ -205,7 +205,7 @@ exit;exit node is also required
     /** @type {GraphGroup} */
     // @ts-ignore
     const group = connectable
-    expect(graphcanvas._OBJECTS.length).toBe(1)
+    expect(graphcanvas._getObjects().length).toBe(1)
     expect(group.getName()).toBe('name')
     expect(group.getColor()).toBe(color)
     expect(group.isEmpty()).toBeTruthy()
@@ -224,13 +224,13 @@ exit;exit node is also required
     // 3 edges, between a (at NW corner) q,w,e to (at SE corner) edge text is edgelabel
     // readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> getEdge(yy,$EVENT,$readEvents,$vertexGroupListOrAttrs,$6,$8?$8.substring(1):$8,$5,$2,$4).right
     parseCode(`a:nw ->:se ${color} "edgelabel" q,w,e;label\n`)
-    expect(graphcanvas._OBJECTS.length).toBe(4)
+    expect(graphcanvas._getObjects().length).toBe(4)
     expect(graphcanvas._ROOTVERTICES.length).toBe(1)
     expect(graphcanvas._EDGES.length).toBe(3)
 
     // verify all objects accounted for
     const vertices = new Set(['a', 'q', 'w', 'e'])
-    graphcanvas._OBJECTS.forEach(vertex => {
+    graphcanvas._getObjects().forEach(vertex => {
       vertices.delete(vertex.getName())
     })
     expect(vertices.size).toBe(0)

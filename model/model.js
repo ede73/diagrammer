@@ -247,7 +247,8 @@ export function exitContainer (yy) {
  * Usage: grammar/diagrammer.grammar
  */
 export function enterSubGraph (yy) {
-  return enterContainer(yy, _getSubGraph(yy))
+  const subgraph = _getSubGraph(yy)
+  return enterContainer(yy, subgraph)
 }
 
 /*
@@ -669,13 +670,16 @@ function _getDefaultAttribute (yy, attrname, callback) {
 
 /**
  * Create a new sub graph or return passed in reference (if it is a subgraph)
+ * GraphInner>GraphGroup>GraphContainer>GraphConnectable
  * @param {GraphInner} [ref]
+ * @return {GraphInner}
  */
 function _getSubGraph (yy, ref) {
   if (ref instanceof GraphInner) return ref
   if (!yy.SUBGRAPHS) yy.SUBGRAPHS = 1
   const newSubGraph = new GraphInner(String(yy.SUBGRAPHS++))
-  return getCurrentContainer(yy).addObject(newSubGraph)
+  getCurrentContainer(yy).addObject(newSubGraph)
+  return newSubGraph
 }
 
 /**
@@ -709,5 +713,5 @@ function _pushToCurrentContainerAsReference (yy, referred) {
   }
   debug(`###Add (${referred.getName()}) as reference node to the current group (${cnt.getName()})`)
   const ref = new GraphReference(referred.getName())
-  cnt._OBJECTS.push(ref)
+  cnt.addObject(ref)
 }

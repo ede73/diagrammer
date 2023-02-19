@@ -4,8 +4,7 @@ import { getHTMLElement, getInputElement, openImage, setError, updateImage } fro
 import { visualizations } from './globals.js'
 import { makeHTTPPost } from './ajax.js'
 
-function makeNewImageHolder () {
-  removeOldVisualizations()
+function makeNewImageHolder (imageName) {
   const imgdiv = getHTMLElement('diagrammer-graph')
   const img = document.createElement('img')
   img.align = 'bottom'
@@ -15,8 +14,8 @@ function makeNewImageHolder () {
   img.id = 'image'
   // auto adjusts
   img.style.height = 'auto'
-  img.src = 'web/result.png'
-  img.onclick = () => openImage('web/result.png')
+  img.src = imageName
+  img.onclick = () => openImage(`web/${imageName}`)
   imgdiv.appendChild(img)
 }
 
@@ -52,10 +51,12 @@ export function visualize (visualizer) {
     throw new Error('Visualizer not defined')
   }
   const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
-  // TODO: loads uselessly if web visualizer used
-  makeNewImageHolder()
+  removeOldVisualizations()
   makeHTTPPost(visualizeUrl, generatedResult,
-    updateImage,
+    (image) => {
+      makeNewImageHolder(image)
+      updateImage(image)
+    },
     (statusCode, statusText, responseText) => {
       alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
     })

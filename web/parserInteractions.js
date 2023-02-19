@@ -81,8 +81,6 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
   setError('')
   try {
     delete (diagrammerParser.yy.GRAPHCANVAS)
-    delete (diagrammerParser.yy._EDGES)
-    delete (diagrammerParser.yy._OBJECTS)
     // TODO: MOVING TO GraphCanvas
     diagrammerParser.yy.USE_GENERATOR = generator
     // TODO: MOVING TO GraphCanvas
@@ -90,7 +88,7 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
     // If true, actually prefer generator/visualizer from loaded script IF specified
     // used while loading new examples...
     diagrammerParser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer
-    diagrammerParser.yy.graphcanvas = new GraphCanvas()
+    diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
     // @ts-ignore
     diagrammerParser.parse(diagrammerCode)
     console.log(`  ..parsed, calling it a success with ${getGenerator()} and ${getVisualizer()}`)

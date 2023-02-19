@@ -3,6 +3,12 @@
 // eslint-disable-next-line no-unused-vars
 import { GraphEdge } from '../model/graphedge.js'
 import { getAttribute, setAttr } from '../model/support.js'
+// typing
+// eslint-disable-next-line no-unused-vars
+import { GraphConnectable } from './graphconnectable.js'
+// typing
+// eslint-disable-next-line no-unused-vars
+import { GraphGroup } from './graphgroup.js'
 import { GraphContainer } from './graphcontainer.js'
 
 export const generators = new Map()
@@ -50,6 +56,47 @@ export class GraphCanvas extends GraphContainer {
     this.direction = undefined
     /** @type {string} */
     this.start = undefined
+
+    // parsing context
+    /**
+     * Current container stack.
+     *
+     * Everytime a group is created (in the context of parsing in process)
+     * it is entered, last on in this array (top of the stack) is the current
+     * One group is closed (in the context of parsing), it is popped (and it will never be entered again)
+     * and we have next..and next until we're back at GraphCanvas
+     * @type  {GraphContainer[]}
+     */
+    this.CURRENTCONTAINER = [this]
+    /**
+     * TODO: rename
+     * Used when processing conditional constructs (if/elseif/else)
+     * Currently ONLY used in conditional last else block where
+     * NEXT vertex seen will be stores as "else"s _conditionalExitEdge!
+     * @type {GraphGroup}
+     */
+    this._nextConnectableToExitEndIf = undefined
+    /** @type {number} */
+    this.CONTAINER_EXIT = 1
+    /**
+     * Automated indexing for created subgraphs (nameless)
+     * @type {number}
+     */
+    this.SUBGRAPHS = 1
+    /**
+     * Automated indexing for created groups (they can be nameless)
+     * @type {number}
+     */
+    this.GROUPIDS = 1
+    /**
+     * Store all declared variables (and their values)
+     * @type {Object.<string, string>}
+     */
+    this.VARIABLES = {}
+    /**
+     * @type {GraphConnectable}
+     */
+    this.lastSeenVertex = undefined
   }
 
   /**

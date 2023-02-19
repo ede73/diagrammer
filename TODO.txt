@@ -46,12 +46,8 @@ shoulg have
 - oMeta!
 
 - http://stackoverflow.com/questions/3428448/reducing-graph-size-in-graphviz
-- make eclipse plugin out of this all?? http://wiki.eclipse.org/Graphviz_DOT_as_a_DSL_for_Zest(tried editor already)
-- make generic AST traversal function with closures/callbacks for all generartors to use (so some business logic is not 
-  needed to be implemented on each generator)
 - make landscape/portrait be container properties(blockdiag support, dotty should as well subgraph cluster_1{rankdir=LR})
 - FIX if/elseif/else lexing/parsing (now a bit hackish) - need context(in lexer)
-- move collectNextVertex from yy property (like entryedge when implemented) to GROUP property (allowing inner if/elseif/elses)...
 - rectangle does not work in lexer..rect works..wtf?
 - For plantuml 
   alt succesfull case
@@ -71,7 +67,7 @@ shoulg have
 
 - ambiguity in group definitions {xxx could be group named xxx, or a group that has a vertex xxx. 
   Fix so that group declarations in one line! Always!
-- Check if something could be done for network graphs .. 
+- (IN PROGRESS..reference nodes) Check if something could be done for network graphs .. 
 	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
 	not mandatory, but would be NICE
 - HTML rendering available in svg and cairo (and hyperlinks), see if graphviz could create svg's. DIFFing could be done in pngs
@@ -96,12 +92,16 @@ shoulg have
 - constraint=false for edges in graphviz might help the layout to be as user wants
 - compass 4 plantuml
 -------
+(LOL, is there eclipse any more?) make eclipse plugin out of this all?? http://wiki.eclipse.org/Graphviz_DOT_as_a_DSL_for_Zest(tried editor already)
+(DONE) make generic AST traversal function with closures/callbacks for all generartors to use (so some business logic is not 
+  needed to be implemented on each generator)
+(DONE) move c ollectNextVertex from yy property (like _conditionalEntryEdge when implemented) to GROUP property (allowing inner if/elseif/elses)...
 (DONE)- GROUP>"a"group1,"b"group2,"c"group3  use all same label a
 (DONE)- GROUP>group1,group2,group3 not functional, (VERTEX>vertex1,vertex2,vertex3 does work)
 (DONE)- Have LINK be defined to vertex (lazily) like with xxx[http://xx.yy.xx] creates vertex xxx with HLINK or updates xxx with HLINK
 (DONE)- compass (a:ne->b:nw) for edges in graphviz might help the layout to be as user wants (ie. direct the edge start/end to compass directions)
   plant uml also supports these, but just for simple ones up,down,left,right(n,s,e,w)
-(DONE) - entryedge attribute collection(to getVertex) for IF group!
+(DONE) - _conditionalEntryEdge attribute collection(to getVertex) for IF group!
 (DONE) - Each group has UNIQUE name and UNIQUE exitvertex attr. That is enuf to and EXIT LINK as well
   Exit link is FIRST VERTEX that is referred or created AFTER endif
   The diamonds are FABRICATED! Earlier had just GROUPs, but flowchartish wey may be better
@@ -125,12 +125,12 @@ shoulg have
    if/else/elseif is just a grouping construct
   With contract of saying the first preceding vertex and first seen vertex after endif gets 'linked' in graphs
   For sequences those are not handled allows the if/Else/elseif construct to work on both graph types!
-  This got implemented as collectNextVertex in grammar/diagrammer.grammar and then used in model/getVertex
+  This got implemented as _nextConnectableToExitEndIf in grammar/diagrammer.grammar and then used in model/getVertex
   if/elseif/else/endif are all GROUPS now, each have special attributes
 	conditional	if/elseif/else/endif
 	exitvertex	a UNIQUE exitvertex within the graph.
-	exitedge	only with endif, first vertex seen after
-	entryedge	only with IF, first preceding vertex seen before "if"
+	_conditionalExitEdge	only with endif, first vertex seen after
+	_conditionalEntryEdge	only with IF, first preceding vertex seen before "if"
     {"node":{"name":"w","label":"on"}}
     {"group":{"name":1,"label":"if something would happend then","conditional":"if","exitvertex":1}}
         {"node":{"name":"a1"}}
@@ -144,7 +144,7 @@ shoulg have
     {"group":{"name":4,"label":"else","conditional":"else","exitvertex":4}}
         {"node":{"name":"a4"}}
         {"node":{"name":"b4"}}
-    {"group":{"name":5,"label":"endif","conditional":"endif","exitvertex":5,"exitedge":"outside"}}
+    {"group":{"name":5,"label":"endif","conditional":"endif","exitvertex":5,"_conditionalExitEdge":"outside"}}
     {"node":{"name":"outside"}}
  
 (DONE)- Make EQUAL container property (not it ALWAYS belongs to graphcanvas(root), but network diag can have groups inside network..

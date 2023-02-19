@@ -11,6 +11,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as lexer from '../build/diagrammer_lexer.js'
 import { diagrammerParser } from '../build/diagrammer_parser.js'
+import { GraphCanvas } from '../model/graphcanvas.js'
 import { setVerbose } from '../model/support.js'
 
 let myArgs = process.argv.slice(2)
@@ -58,6 +59,7 @@ if (myArgs[1] === 'lex') {
     errors = 1
     throw new Error(str)
   }
+  diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
   diagrammerParser.parse(raw)
   if (errors === 1) {
     console.log('Errors....')

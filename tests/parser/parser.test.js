@@ -38,7 +38,7 @@ describe('Parser/grammar rule tests', () => {
    * @param {string} code
    */
   function parseCode (code) {
-    diagrammerParser.yy.graphcanvas = new GraphCanvas()
+    diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
     try {
       // @ts-ignore
       diagrammerParser.parse(code)
@@ -161,7 +161,7 @@ exit;exit node is also required
           expect(obj.getLabel()).toBe('a')
           expect(obj.exitvertex).toBe(1)
           expect(obj.conditional).toBe('if')
-          expect(obj.entryedge.getName()).toBe('entry')
+          expect(obj._conditionalEntryEdge.getName()).toBe('entry')
         } else if (obj.getName() === '2') {
           expect(obj.getLabel()).toBe('b')
           expect(obj.exitvertex).toBe(2)
@@ -170,7 +170,7 @@ exit;exit node is also required
           expect(obj.getLabel()).toBe('endif')
           expect(obj.exitvertex).toBe(3)
           expect(obj.conditional).toBe('endif')
-          expect(obj.exitedge.getName()).toBe('exit')
+          expect(obj._conditionalExitEdge.getName()).toBe('exit')
         }
       } else if (obj instanceof GraphVertex) {
         verticeNames.delete(obj.getName())
@@ -243,7 +243,7 @@ exit;exit node is also required
     expect(vertices.size).toBe(0)
 
     // @ts-ignore
-    expect(graphcanvas.yy.lastSeenVertex.getName()).toBe('e')
+    expect(graphcanvas.lastSeenVertex.getName()).toBe('e')
 
     const edges = new Set(['q', 'w', 'e'])
     graphcanvas._EDGES.forEach((edge, idx) => {

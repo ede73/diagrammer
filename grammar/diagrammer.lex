@@ -8,13 +8,6 @@ Jison adds negative lookahead using /!
 "foo" vs ("foo")
 */
 %{
-/** used as forward reference, if we know that something 
- * needs to be stored from "future" to here or from here to "future"
- * this'll be set temporarily for the reference node
- * Currently ONLY used in conditional last else block where
- * NEXT vertex seen will be store as else's exitedge!
- */ 
-collectNextVertex=undefined;
 function fixBrokenUnPut(t) {
 	// Ynput is broken, fixed MONTH ago, not seen in npm
 	// https://github.com/zaach/jison/pull/135

@@ -16,31 +16,34 @@ export class GraphGroup extends GraphContainer {
   constructor (name) {
     super(name)
 
-    /** @type {number} */
-    this.exitvertex = undefined
-
+    // === START Conditional construct support
     /**
-     * Only defined in case of start conditional (if clause)
-     * Most usually GraphVertex
+     * Only with IF, first preceding vertex seen before "if"
      * Set directly in diagrammer.grammar
      * @type {GraphConnectable}
      */
-    this.entryedge = undefined
+    this._conditionalEntryEdge = undefined
 
     /**
-     * Only defined in case of end conditional (else clause)
+     * Only with endif, first vertex(Connectable) seen after
      * TODO: Inconsistent: not a GraphConnectable
      *
-     * Set to yy.collectNextVertex
+     * Set to graphcanvas._nextConnectableToExitEndIf
      * @type {GraphConnectable}
      */
-    this.exitedge = undefined
+    this._conditionalExitEdge = undefined
 
     /**
      * Only used if this group(set) was created due if then/elseif/else construct
      * @type {string} conditional used
      */
     this.conditional = undefined
+
+    /**
+     * a UNIQUE exitvertex within the graph.
+     * @type {number}
+     */
+    this.exitvertex = undefined
   }
 
   /**

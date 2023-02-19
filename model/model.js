@@ -2,6 +2,8 @@
 // =====================================
 // ONLY used in grammar/diagrammer.grammar
 // =====================================
+// used as type, by eslint doesn't get it
+// eslint-disable-next-line no-unused-vars
 import { GraphCanvas } from '../model/graphcanvas.js'
 // used as type, by eslint doesn't get it
 // eslint-disable-next-line no-unused-vars
@@ -24,11 +26,11 @@ import { GraphReference } from './graphreference.js'
  *
  * Usage: grammar/diagrammer.grammar
  *
- * @param yy Lexer yy
- * @param {string} variable ${XXX:yyy} assignment or ${XXX} query
+ * @param {GraphCanvas} graphCanvas
+ * @param {string} variable ${XXX:zzz} assignment or ${XXX} query
  * @return {string} Value of the variable
  */
-export function processVariable (yy, variable) {
+export function processVariable (graphCanvas, variable) {
   // ASSIGN VARIABLE
   // $(NAME:CONTENT...)
   // or
@@ -39,14 +41,14 @@ export function processVariable (yy, variable) {
     // Assignment
     const tmp = vari.split(':')
     debug(`GOT assignment ${tmp[0]}=${tmp[1]}`)
-    _getVariables(yy)[tmp[0]] = tmp[1]
+    _getVariables(graphCanvas)[tmp[0]] = tmp[1]
     return tmp[1]
   } else {
     // referral
-    if (!_getVariables(yy)[vari]) {
+    if (!_getVariables(graphCanvas)[vari]) {
       throw new Error(`Variable ${vari} not defined`)
     }
-    return _getVariables(yy)[vari]
+    return _getVariables(graphCanvas)[vari]
   }
 }
 
@@ -56,20 +58,20 @@ export function processVariable (yy, variable) {
  *
  * Usage: grammar/diagrammer.grammar
  *
- * @param yy Lexer yy
+ * @param {GraphCanvas} graphCanvas
  * @param {(GraphConnectable|GraphConnectable[])} lhs left hand side of the list
  * @param {GraphConnectable} rhs right hand side of the list
  * @param {string} rhsEdgeLabel optional RHS label
  * @return {(GraphConnectable|GraphConnectable[])}
  */
-export function getList (yy, lhs, rhs, rhsEdgeLabel) {
+export function getList (graphCanvas, lhs, rhs, rhsEdgeLabel) {
   if (lhs instanceof GraphVertex) {
     debug(`getList(vertex:${lhs},rhs:[${rhs}])`, true)
     /** @type {(GraphConnectable|GraphConnectable[])} */
     const lst = []
     lst.push(lhs)
     // TODO assuming RHS is Vertex
-    const rhsFound = getVertex(yy, rhs)
+    const rhsFound = getVertex(graphCanvas, rhs)
     if (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex) {
       rhsFound._setEdgeLabel(rhsEdgeLabel)
     }
@@ -82,7 +84,7 @@ export function getList (yy, lhs, rhs, rhsEdgeLabel) {
     const lst = []
     lst.push(lhs)
     // TODO assuming RHS is Group
-    lst.push(getGroup(yy, rhs)._setEdgeLabel(rhsEdgeLabel))
+    lst.push(getGroup(graphCanvas, rhs)._setEdgeLabel(rhsEdgeLabel))
     debug(`return group:${lst}`, false)
     return lst
   }
@@ -91,7 +93,7 @@ export function getList (yy, lhs, rhs, rhsEdgeLabel) {
   }
   debug(`getList(lhs:[${lhs}],rhs:${rhs}`, true)
   // LHS not a vertex..
-  const rhsFound = getVertex(yy, rhs)
+  const rhsFound = getVertex(graphCanvas, rhs)
   if (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex) {
     rhsFound._setEdgeLabel(rhsEdgeLabel)
   }
@@ -115,15 +117,15 @@ export function getList (yy, lhs, rhs, rhsEdgeLabel) {
  *
  * Usage: grammar/diagrammer.grammar
  *
- * @param yy Lexer yy
+ * @param {GraphCanvas} graphCanvas
  * @param {(string|GraphConnectable)} objOrName Reference, Vertex/(never observed Array)/Group
  * @param {string} [style] OPTIONAL if style given, update (only if name refers to vertex)
  * @return {GraphConnectable} Comment claims to return Array, but quick run didn't reveal Array ever returned..
  */
-export function getVertex (yy, objOrName, style) {
+export function getVertex (graphCanvas, objOrName, style) {
   debug(`getVertex (name:${objOrName},style:${style})`, true)
 
-  function findVertex (yy, /** @type {(string|GraphConnectable)} */obj, style) {
+  function findVertex (graphCanvas, /** @type {(string|GraphConnectable)} */obj, style) {
     if (obj instanceof GraphVertex) {
       if (style) obj.setStyle(style)
       return obj
@@ -141,7 +143,7 @@ export function getVertex (yy, objOrName, style) {
           if (found) return found
         }
       })
-    }(getGraphCanvas(yy), obj))
+    }(graphCanvas, obj))
 
     if (foundConnectable) {
       // if vertex was found, return it, ELSE it will be added to current container
@@ -151,7 +153,7 @@ export function getVertex (yy, objOrName, style) {
       // And to be precise this is violation of the language as well! We DO have the vertex IN the group, even if it was declared at the top
       // TODO: Fix this, without breaking all other generators, introduce Reference wrapper (GraphReference(GraphVertex))
       // This allows filtering it out in all traversal code, but allows nwdiag see the REFERENCE
-      _pushToCurrentContainerAsReference(yy, foundConnectable)
+      _pushToCurrentContainerAsReference(graphCanvas, foundConnectable)
       return foundConnectable
     }
     // if obj was GraphConnectable?
@@ -159,31 +161,28 @@ export function getVertex (yy, objOrName, style) {
       throw new Error('Expecting GraphConnectable')
     }
     debug(`Create new vertex name=${obj}`, true)
-    const vertex = new GraphVertex(obj, getGraphCanvas(yy).getCurrentShape())
+    const vertex = new GraphVertex(obj, graphCanvas.getCurrentShape())
     if (style) vertex.setStyle(style)
     vertex._noedges = true
 
-    _getDefaultAttribute(yy, 'vertexcolor', function (color) {
+    _getDefaultAttribute(graphCanvas, 'vertexcolor', function (color) {
       vertex.setColor(color)
     })
-    _getDefaultAttribute(yy, 'vertextextcolor', function (color) {
+    _getDefaultAttribute(graphCanvas, 'vertextextcolor', function (color) {
       vertex.setTextColor(color)
     })
     debug(false)
-    return getCurrentContainer(yy).addObject(vertex)
+    return getCurrentContainer(graphCanvas).addObject(vertex)
   }
 
-  const vertex = findVertex(yy, objOrName, style)
+  const vertex = findVertex(graphCanvas, objOrName, style)
   debug(`  in getVertex gotVertex ${vertex}`)
-  // TODO: MOVING TO GraphCanvas
-  yy.lastSeenVertex = vertex
-  if (yy.collectNextVertex) {
+  graphCanvas.lastSeenVertex = vertex
+  if (graphCanvas._nextConnectableToExitEndIf) {
     debug('Collect next vertex')
     // TODO: make vertex? Do we know that it is vertex(yet?)
-    // TODO: MOVING TO GraphCanvas
-    yy.collectNextVertex.exitedge = vertex
-    // TODO: MOVING TO GraphCanvas
-    yy.collectNextVertex = undefined
+    graphCanvas._nextConnectableToExitEndIf._conditionalExitEdge = vertex
+    graphCanvas._nextConnectableToExitEndIf = undefined
   }
   debug(false)
   return vertex
@@ -195,26 +194,25 @@ export function getVertex (yy, objOrName, style) {
  * Usage: grammar/diagrammer.grammar
  *
  * Get current container
- * @param yy Lexer
+ * @param {GraphCanvas} graphCanvas
  * @return {GraphContainer}
  */
-export function getCurrentContainer (yy) {
+export function getCurrentContainer (graphCanvas) {
   // no need for value, but runs init if missing
-  getGraphCanvas(yy)
-  return yy.CURRENTCONTAINER[yy.CURRENTCONTAINER.length - 1]
+  return graphCanvas.CURRENTCONTAINER[graphCanvas.CURRENTCONTAINER.length - 1]
 }
 
 /**
  * Enter into a new container, set it as current container
- *
+ * TODO: move to GraphCanvas
  * Usage: grammar/diagrammer.grammar
  *
- * @param yy lexer
+ * @param {GraphCanvas} graphCanvas
  * @param {GraphContainer} container Set this container as current container
  * @return {GraphContainer}
  */
-export function enterContainer (yy, container) {
-  yy.CURRENTCONTAINER.push(container)
+export function enterContainer (graphCanvas, container) {
+  graphCanvas.CURRENTCONTAINER.push(container)
   return container
 }
 
@@ -223,14 +221,17 @@ export function enterContainer (yy, container) {
  * Return the previous one
  * Previous one also set as current container
  *
+ * TODO: Move to GraphCanvas
  * Usage: grammar/diagrammer.grammar
  *
- * @param yy lexer
+ * @param {GraphCanvas} graphCanvas
  */
-export function exitContainer (yy) {
-  if (yy.CURRENTCONTAINER.length <= 1) { throw new Error('INTERNAL ERROR:Trying to exit ROOT container') }
-  const currentContainer = yy.CURRENTCONTAINER.pop()
-  currentContainer.exitvertex = yy.CONTAINER_EXIT++
+export function exitContainer (graphCanvas) {
+  if (graphCanvas.CURRENTCONTAINER.length <= 1) { throw new Error('INTERNAL ERROR:Trying to exit ROOT container') }
+  const currentContainer = graphCanvas.CURRENTCONTAINER.pop()
+  if (currentContainer instanceof GraphGroup) {
+    currentContainer.exitvertex = graphCanvas.CONTAINER_EXIT++
+  }
   // TODO: digraph (or graphviz rather) visualizing empty subgraph breaks, it needs a node (invisible for instance)
   // digraph generator imlpements this by injecting empty invis node for all empty groups.
   // While this works, it does edit the graph, which is bad..
@@ -246,18 +247,18 @@ export function exitContainer (yy) {
  *
  * Usage: grammar/diagrammer.grammar
  */
-export function enterSubGraph (yy) {
-  const subgraph = _getSubGraph(yy)
-  return enterContainer(yy, subgraph)
+export function enterSubGraph (graphCanvas) {
+  const subgraph = _getSubGraph(graphCanvas)
+  return enterContainer(graphCanvas, subgraph)
 }
 
 /*
  * ie. o>(s1,s2,s3) nodes s1-s3 form a GraphInner (a subgraph)
  * Usage: grammar/diagrammer.grammar
  */
-export function exitSubGraph (yy) {
+export function exitSubGraph (graphCanvas) {
   // Now should edit the ENTRANCE EDGE to point to a>b, a>d, a>e
-  const currentSubGraphTypeCheckerFix = getCurrentContainer(yy)
+  const currentSubGraphTypeCheckerFix = getCurrentContainer(graphCanvas)
   if (!(currentSubGraphTypeCheckerFix instanceof GraphInner)) {
     throw new Error(`Subgraph cannot be any other than GraphInner:${typeof (currentSubGraphTypeCheckerFix)}`)
   }
@@ -276,15 +277,15 @@ export function exitSubGraph (yy) {
   // a>b>(c d>e f>g h)>(s>k)
   // activates for instance to 2nd edge (ie. one pointing from b to all of (c d>e..))
   // and also on 5th edge ie ..h)>(s..
-  for (const idx in yy._EDGES) {
-    if (!Object.prototype.hasOwnProperty.call(yy._EDGES, idx)) continue
-    edge = yy._EDGES[idx]
+  for (const idx in graphCanvas._EDGES) {
+    if (!Object.prototype.hasOwnProperty.call(graphCanvas._EDGES, idx)) continue
+    edge = graphCanvas._EDGES[idx]
     if (edge.right.name === currentSubGraph.name &&
             currentSubGraph._entrance instanceof GraphConnectable &&
             edge.left.name === currentSubGraph._entrance.name) {
       // remove this edge!
       edgeIndex = Number(idx)
-      yy._EDGES.splice(edgeIndex, 1)
+      graphCanvas._EDGES.splice(edgeIndex, 1)
       // and then relink it to containers vertices that have no LEFT edges
       break
     }
@@ -302,10 +303,10 @@ export function exitSubGraph (yy) {
         currentSubGraph._entrance._noedges = undefined
       }
       vertex._noedges = undefined
-      const newEdge = getEdge(yy, edge.edgeType, currentSubGraph._entrance, vertex, edge.label,
+      const newEdge = getEdge(graphCanvas, edge.edgeType, currentSubGraph._entrance, vertex, edge.label,
         undefined, undefined, undefined, undefined, true)
       newEdge.container = currentSubGraph
-      yy._EDGES.splice(edgeIndex++, 0, newEdge)
+      graphCanvas._EDGES.splice(edgeIndex++, 0, newEdge)
     }
   }
 
@@ -317,7 +318,7 @@ export function exitSubGraph (yy) {
   const exits = []
   traverseVertices(currentSubGraph, vertex => {
     lastVertex = vertex
-    if (!hasOutwardEdge(yy, vertex)) {
+    if (!hasOutwardEdge(graphCanvas, vertex)) {
       exits.push(vertex)
     }
   })
@@ -326,30 +327,28 @@ export function exitSubGraph (yy) {
   if (lastVertex) {
     currentSubGraph._setExit(lastVertex)
   }
-  return exitContainer(yy)
+  return exitContainer(graphCanvas)
 }
 
 /**
- * Create a NEW GROUP if one (ref) does not exist yet getGroup(yy) => create a
- * new anonymous group getGroup(yy,GroupRef) => create a new group if GroupRef
+ * Create a NEW GROUP if one (ref) does not exist yet getGroup(..) => create a
+ * new anonymous group getGroup(.., GroupRef) => create a new group if GroupRef
  * is not a Group or return GroupRef if it is...1
  *
  * Usage: grammar/diagrammer.grammar
  *
- * @param yy lexer
+ * @param {GraphCanvas} graphCanvas
  * @param ref Type of reference, if group, return it
  * @return ref if ref instance of group, else the newly created group
  */
-export function getGroup (yy, ref) {
+export function getGroup (graphCanvas, ref) {
   if (ref instanceof GraphGroup) return ref
-  debug(`getGroup() NEW GROUP:${yy}/${ref}`, true)
-  // TODO: MOVING TO GraphCanvas
-  if (!yy.GROUPIDS) yy.GROUPIDS = 1
-  const newGroup = new GraphGroup(String(yy.GROUPIDS++))
-  debug(`push group ${newGroup} to ${yy}`)
-  getCurrentContainer(yy).addObject(newGroup)
+  debug(`getGroup() NEW GROUP:$${ref}`, true)
+  const newGroup = new GraphGroup(String(graphCanvas.GROUPIDS++))
+  debug(`push group ${newGroup}`)
+  getCurrentContainer(graphCanvas).addObject(newGroup)
 
-  _getDefaultAttribute(yy, 'groupcolor', function (color) {
+  _getDefaultAttribute(graphCanvas, 'groupcolor', function (color) {
     newGroup.setColor(color)
   })
   debug(false)
@@ -359,8 +358,8 @@ export function getGroup (yy, ref) {
 // Get an edge such that l links to r, return the added Edge or EDGES
 
 /**
- * edgeType >,<,.>,<.,->,<-,<> l = left side, Vertex(xxx) or Group(yyy), or
- * Array(smthg) r = right side, Vertex(xxx) or Group(yyy), or Array(smthg) label =
+ * edgeType >,<,.>,<.,->,<-,<> l = left side, Vertex(xxx) or Group(zzz), or
+ * Array(smthg) r = right side, Vertex(xxx) or Group(zzz), or Array(smthg) label =
  * if defined, LABEL for the edge color = if defined, COLOR for the edge
  *
  * if there is a list a>b,c,x,d;X then X is gonna be edge label for EVERYONE
@@ -368,7 +367,7 @@ export function getGroup (yy, ref) {
  *
  * Usage: grammar/diagrammer.grammar
  *
- * @param yy lexer
+ * @param {GraphCanvas} graphCanvas
  * @param {string} edgeType Type of the edge(grammar)
  * @param {(GraphConnectable|GraphConnectable[])} lhs Left hand side (must be Array,Vertex,Group)
  * @param {(GraphConnectable|GraphConnectable[])} rhs Right hand side (must be Array,Vertex,Group)
@@ -380,9 +379,9 @@ export function getGroup (yy, ref) {
  * @param {boolean} [dontadd] Reft hand side compass value
  * @return {GraphEdge} the edge that got added
  */
-export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass, dontadd) {
+export function getEdge (graphCanvas, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass, dontadd) {
   let lastEdge
-  const currentContainer = getCurrentContainer(yy)
+  const currentContainer = getCurrentContainer(graphCanvas)
   debug(true)
   if (rhs instanceof GraphInner && !rhs._getEntrance()) {
     rhs._setEntrance(lhs)
@@ -417,7 +416,7 @@ export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabe
     debug(`getEdge LHS array, type:${edgeType} l:[${lhs}] r:${rhs} inlineEdgeLabel:${inlineEdgeLabel} commonEdgeLabel: ${commonEdgeLabel} edgeColor:${edgeColor} lcompass:${lcompass} rcompass:${rcompass}`)
     for (let i = 0; i < lhs.length; i++) {
       debug(`    1Get edge ${lhs[i]}`)
-      lastEdge = getEdge(yy, edgeType, lhs[i], rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass)
+      lastEdge = getEdge(graphCanvas, edgeType, lhs[i], rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass)
     }
     debug(false)
     return lastEdge
@@ -426,7 +425,7 @@ export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabe
     debug(`getEdge RHS array, type:${edgeType} l:${lhs} r:[${rhs}] inlineEdgeLabel:${inlineEdgeLabel} commonEdgeLabel: ${commonEdgeLabel} edgeColor:${edgeColor} lcompass:${lcompass} rcompass:${rcompass}`)
     for (let i = 0; i < rhs.length; i++) {
       debug(`    2Get edge ${rhs[i]}`)
-      lastEdge = getEdge(yy, edgeType, lhs, rhs[i], inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass)
+      lastEdge = getEdge(graphCanvas, edgeType, lhs, rhs[i], inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass)
     }
     debug(false)
     return lastEdge
@@ -454,10 +453,10 @@ export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabe
   if (rcompass) edge.rcompass = rcompass
   else if (getAttribute(rhs, 'compass')) edge.rcompass = getAttribute(rhs, 'compass')
 
-  _getDefaultAttribute(yy, 'edgecolor', function (edgeColor) {
+  _getDefaultAttribute(graphCanvas, 'edgecolor', function (edgeColor) {
     edge.setColor(edgeColor)
   })
-  _getDefaultAttribute(yy, 'edgetextcolor', function (edgeColor) {
+  _getDefaultAttribute(graphCanvas, 'edgetextcolor', function (edgeColor) {
     edge.setTextColor(edgeColor)
   })
   if (commonEdgeLabel) {
@@ -481,7 +480,7 @@ export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabe
   if (edgeColor) edge.setColor(edgeColor)
 
   if (!dontadd) {
-    _addEdge(yy, edge)
+    _addEdge(graphCanvas, edge)
   }
   debug(false)
   return edge
@@ -492,41 +491,14 @@ export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabe
 // =====================================
 
 /**
- * Get current singleton graphcanvas or create new one
- * External utility support for generator
- *
- * Usage: grammar/diagrammer.grammar, generators
- * @return {GraphCanvas}
- */
-export function getGraphCanvas (yy) {
-  if (!yy.GRAPHCANVAS) {
-    if (!yy.result) {
-      throw new Error('Initialization has failed!')
-    }
-    debug(`...Initialize emptyroot ${yy}`)
-    // TODO: DOESN'T WORK as type hint! Modularize to own obj..
-    /** @type  {GraphContainer} */
-    yy.CURRENTCONTAINER = []
-    /** @type {GraphEdge[]} */
-    yy._EDGES = []
-    /** @type {number} */
-    yy.CONTAINER_EXIT = 1
-    /** @type  {GraphCanvas} */
-    yy.GRAPHCANVAS = new GraphCanvas()
-    enterContainer(yy, yy.GRAPHCANVAS)
-  }
-  return yy.GRAPHCANVAS
-}
-
-/**
  * Usage: grammar/diagrammer.grammar, generators/digraph.js
  * @param {GraphConnectable} vertex
  */
-export function hasOutwardEdge (yy, vertex) {
+export function hasOutwardEdge (graphCanvas, vertex) {
   // TODO: Replace with traverseEdges&GraphCanvas
-  for (const i in yy._EDGES) {
-    if (!Object.prototype.hasOwnProperty.call(yy._EDGES, i)) continue
-    const edge = yy._EDGES[i]
+  for (const i in graphCanvas._EDGES) {
+    if (!Object.prototype.hasOwnProperty.call(graphCanvas._EDGES, i)) continue
+    const edge = graphCanvas._EDGES[i]
     if (edge.left.name === vertex.name) {
       return true
     }
@@ -536,13 +508,14 @@ export function hasOutwardEdge (yy, vertex) {
 
 // /**
 //  * return true if vertex has inward edge OUTSIDE container it is in
+//  * @param {GraphCanvas} graphCanvas
 //  * @param {GraphConnectable} vertex
 //  * @param {GraphContainer} verticesContainer (Group?)
 //  */
-// function hasInwardEdge (yy, vertex, verticesContainer) {
-//   for (const i in yy.EDGES) {
-//     if (!Object.prototype.hasOwnProperty.call(yy.EDGES, i)) continue
-//     const edge = yy.EDGES[i]
+// function hasInwardEdge (graphCanvas, vertex, verticesContainer) {
+//   for (const i in graphcanvas._EDGES) {
+//     if (!Object.prototype.hasOwnProperty.call(graphcanvas._EDGES, i)) continue
+//     const edge = graphcanvas._EDGES[i]
 //     if (verticesContainer &&
 //             edge.container.name === verticesContainer.name) {
 //       continue
@@ -581,15 +554,15 @@ export function hasOutwardEdge (yy, vertex) {
  * If callback returns a value (!= undefined) break loop and return just that
  * Usage: generators
  *
- * @param {GraphCanvas} graphcanvas
+ * @param {GraphCanvas} graphCanvas
  * @param {function(GraphEdge):void} callback
  * @return {any}
  */
-export function traverseEdges (graphcanvas, callback) {
-  debug(`${graphcanvas._ROOTVERTICES}`)
-  for (const i in graphcanvas._EDGES) {
-    if (!Object.prototype.hasOwnProperty.call(graphcanvas._EDGES, i)) continue
-    const ret = callback(graphcanvas._EDGES[i])
+export function traverseEdges (graphCanvas, callback) {
+  debug(`${graphCanvas._ROOTVERTICES}`)
+  for (const i in graphCanvas._EDGES) {
+    if (!Object.prototype.hasOwnProperty.call(graphCanvas._EDGES, i)) continue
+    const ret = callback(graphCanvas._EDGES[i])
     if (ret !== undefined) {
       return ret
     }
@@ -628,38 +601,36 @@ export function traverseVertices (container, callback, includeReferred = false) 
 // =====================================
 
 /**
- * Return all the variables from the collection (hard coded to yy)
+ * Return all the variables from the collection
+ * @param {GraphCanvas} graphCanvas
  */
-function _getVariables (yy) {
-  if (!yy.VARIABLES) {
-    // TODO: MOVING TO GraphCanvas
-    yy.VARIABLES = {}
-  }
-  return yy.VARIABLES
+function _getVariables (graphCanvas) {
+  return graphCanvas.VARIABLES
 }
 
 /**
  * Get default attribute vertexcolor,edgecolor,groupcolor and bubble upwards if
  * otherwise 'unobtainable'
  *
- * @param yy lexer
+ * @param {GraphCanvas} graphCanvas
  * @param {string} attrname Name of the default attribute. If not found, returns undefined
  * @param {function(string):void} [callback] Pass the attribute to the this function as only argument - if attribute WAS actually defined!
  * @return {string}
  */
-function _getDefaultAttribute (yy, attrname, callback) {
-  // no need for the value, but runs init if missing
-  getGraphCanvas(yy)
-  for (const i in yy.CURRENTCONTAINER) {
-    if (!Object.prototype.hasOwnProperty.call(yy.CURRENTCONTAINER, i)) continue
-    const ctr = yy.CURRENTCONTAINER[i]
-    const defaultAttribute = ctr.getDefault(attrname)
-    if (defaultAttribute) {
-      if (callback) { callback(defaultAttribute) }
-      return defaultAttribute
+function _getDefaultAttribute (graphCanvas, attrname, callback) {
+  for (const i in graphCanvas.CURRENTCONTAINER) {
+    if (!Object.prototype.hasOwnProperty.call(graphCanvas.CURRENTCONTAINER, i)) continue
+    const ctr = graphCanvas.CURRENTCONTAINER[i]
+    // inner groups have no defaults
+    if (ctr instanceof GraphGroup) {
+      const defaultAttribute = ctr.getDefault(attrname)
+      if (defaultAttribute) {
+        if (callback) { callback(defaultAttribute) }
+        return defaultAttribute
+      }
     }
   }
-  const defaultAttribute = getGraphCanvas(yy).getDefault(attrname)
+  const defaultAttribute = graphCanvas.getDefault(attrname)
   if (defaultAttribute) {
     debug('_getDefaultAttribute got from graphcanvas')
     if (callback) { callback(defaultAttribute) }
@@ -671,37 +642,39 @@ function _getDefaultAttribute (yy, attrname, callback) {
 /**
  * Create a new sub graph or return passed in reference (if it is a subgraph)
  * GraphInner>GraphGroup>GraphContainer>GraphConnectable
+ * @param {GraphCanvas} graphCanvas
  * @param {GraphInner} [ref]
  * @return {GraphInner}
  */
-function _getSubGraph (yy, ref) {
+function _getSubGraph (graphCanvas, ref) {
   if (ref instanceof GraphInner) return ref
-  if (!yy.SUBGRAPHS) yy.SUBGRAPHS = 1
-  const newSubGraph = new GraphInner(String(yy.SUBGRAPHS++))
-  getCurrentContainer(yy).addObject(newSubGraph)
+  const newSubGraph = new GraphInner(String(graphCanvas.SUBGRAPHS++))
+  getCurrentContainer(graphCanvas).addObject(newSubGraph)
   return newSubGraph
 }
 
 /**
  * Add edge to the list of edges, return the Edge
- * @param yy lexer
+ * @param {GraphCanvas} graphCanvas
  * @param {(GraphEdge[]|GraphEdge)} edge Edge (Edge or Edge[])
  * @return {(GraphEdge[]|GraphEdge)} Return What ever passed in
  */
-function _addEdge (yy, edge) {
+function _addEdge (graphCanvas, edge) {
   if (edge instanceof Array) {
+    // TODO: No longer happens..remove
     debug(`PUSH EDGE ARRAY:${edge}`, true)
+    throw new Error('xx')
   } else {
     debug(`PUSH EDGE:${edge}`, true)
-    edge.container = getCurrentContainer(yy)
+    edge.container = getCurrentContainer(graphCanvas)
   }
-  yy._EDGES.push(edge)
+  graphCanvas._EDGES.push(edge)
   debug(false)
   return edge
 }
 
-function _pushToCurrentContainerAsReference (yy, referred) {
-  const cnt = getCurrentContainer(yy)
+function _pushToCurrentContainerAsReference (graphCanvas, referred) {
+  const cnt = getCurrentContainer(graphCanvas)
   if (!(cnt instanceof GraphGroup)) {
     return
   }

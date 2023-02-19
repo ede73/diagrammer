@@ -53,6 +53,8 @@ export function ast (graphcanvas) {
       const items = []
       Object.keys(obj).forEach((propname) => {
         const value = obj[propname]
+        // skip empties..
+        if (value === null || value === undefined) return
         if (
           // TODO only apply to GraphEdges
           propname === 'left' ||

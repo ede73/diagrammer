@@ -284,8 +284,8 @@ SHAPE RECORD
 graphobject;GraphObject | {name | color | textcolor | url | label }
 avertex;GraphVertex | { shape | image | style}
 alink;GraphEdge | { edgetype | left | right}
-agroup;GraphGroup | { name | _OBJECTS[] | _ROOTVERTICES[] | edgelabel | "defaults"}
-asubgraph;GraphInner | { name | _OBJECTS[] | _ROOTVERTICES[] | edgelabel | entrance | exit | "defaults"}
+agroup;GraphGroup | { name | _OBJECTS[] | _ROOTVERTICES[] | _edgelabel | "defaults"}
+asubgraph;GraphInner | { name | _OBJECTS[] | _ROOTVERTICES[] | _edgelabel | entrance | exit | "defaults"}
 
 avertex>"inherit"graphobject
 alink>"inherit"graphobject
@@ -341,7 +341,7 @@ Own properties are name, shape, image - if specified, style - if specified (+Gra
 
 ## GraphGroup
 
-Own properties are name, edgelabel, defaults and list of _OBJECTS and _ROOTVERTICES.
+Own properties are name, _edgelabel, defaults and list of _OBJECTS and _ROOTVERTICES.
 
 ## GraphInner
 Only used to represented "sub graphs" ie. like in :
@@ -363,7 +363,7 @@ GraphCanvas:
 - equals
 - defaults
 
-Own properties are name, edgelabel, defaults and list of _OBJECTS and _ROOTVERTICES, entrance and exit.
+Own properties are name, _edgelabel, defaults and list of _OBJECTS and _ROOTVERTICES, entrance and exit.
 
 # Generators
 Two convenience methods available:

@@ -15,23 +15,23 @@ export class GraphConnectable extends GraphObject {
      * also ONLY set for Vertices (even if reset for all Connectables).
      * @type {boolean}
      */
-    this.noedges = undefined
+    this._noedges = undefined
     // UH... this is used in grammar parser to TEMPORARILY store edge object
     /** @type {string} */
-    this.edgelabel = undefined
+    this._edgelabel = undefined
   }
 
   /**
    * Temporary for RHS list array!!
    * @param {string} edgeLabel
    */
-  setEdgeLabel (edgeLabel) {
-    this.edgelabel = edgeLabel
+  _setEdgeLabel (edgeLabel) {
+    this._edgelabel = edgeLabel
     return this
   }
 
-  getEdgeLabel () {
-    const tmp = this.edgelabel
+  _getEdgeLabel () {
+    const tmp = this._edgelabel
     // TODO: Uhoh, makes no sense! Move away to generator if needed
     /*
         Resetting edge label breaks:
@@ -41,7 +41,7 @@ export class GraphConnectable extends GraphObject {
           where edge a>b is named A2B, a>c A2c
           and r>c R2C
         */
-    this.edgelabel = undefined
+    this._edgelabel = undefined
     return tmp
   }
 };

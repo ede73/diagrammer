@@ -68,7 +68,7 @@ export function getList (yy, lhs, rhs, rhsEdgeLabel) {
     // TODO assuming RHS is Vertex
     const rhsFound = getVertex(yy, rhs)
     if (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex) {
-      rhsFound.setEdgeLabel(rhsEdgeLabel)
+      rhsFound._setEdgeLabel(rhsEdgeLabel)
     }
     // @ts-ignore
     lst.push(rhsFound)
@@ -79,7 +79,7 @@ export function getList (yy, lhs, rhs, rhsEdgeLabel) {
     const lst = []
     lst.push(lhs)
     // TODO assuming RHS is Group
-    lst.push(getGroup(yy, rhs).setEdgeLabel(rhsEdgeLabel))
+    lst.push(getGroup(yy, rhs)._setEdgeLabel(rhsEdgeLabel))
     debug(`return group:${lst}`, false)
     return lst
   }
@@ -90,7 +90,7 @@ export function getList (yy, lhs, rhs, rhsEdgeLabel) {
   // LHS not a vertex..
   const rhsFound = getVertex(yy, rhs)
   if (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex) {
-    rhsFound.setEdgeLabel(rhsEdgeLabel)
+    rhsFound._setEdgeLabel(rhsEdgeLabel)
   }
   // @ts-ignore
   lhs.push(rhsFound)
@@ -159,7 +159,7 @@ export function getVertex (yy, objOrName, style) {
     debug(`Create new vertex name=${obj}`, true)
     const vertex = new GraphVertex(obj, getGraphCanvas(yy).getCurrentShape())
     if (style) vertex.setStyle(style)
-    vertex.noedges = true
+    vertex._noedges = true
 
     _getDefaultAttribute(yy, 'vertexcolor', function (color) {
       vertex.setColor(color)
@@ -293,9 +293,9 @@ export function exitSubGraph (yy) {
       const vertex = currentSubGraph._ROOTVERTICES[n]
       if (currentSubGraph.entrance && currentSubGraph.entrance instanceof GraphVertex) {
         // TODO: Assumes entrance is GraphVertex, but it looks it can be other things
-        currentSubGraph.entrance.noedges = undefined
+        currentSubGraph.entrance._noedges = undefined
       }
-      vertex.noedges = undefined
+      vertex._noedges = undefined
       const newEdge = getEdge(yy, edge.edgeType, currentSubGraph.entrance, vertex, edge.label,
         undefined, undefined, undefined, undefined, true)
       newEdge.container = currentSubGraph
@@ -385,7 +385,7 @@ export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabe
   }
   if (rhs instanceof GraphVertex) {
     // if RHS has no edges (and is contained in a container) AND found from ROOTVERTICES, remove it from ROOTVERTICES
-    if (rhs.noedges && currentContainer) {
+    if (rhs._noedges && currentContainer) {
       debug(`REMOVE ${rhs} from root vertices of the container ${currentContainer}`)
       const idx = currentContainer._ROOTVERTICES.indexOf(rhs)
       if (idx >= 0) {
@@ -398,9 +398,9 @@ export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabe
     // oddly this seems wrong, but removing breaks plantuml_context and plantuml_context2
     // And for plantuml context this is spot on..
     if (lhs instanceof GraphVertex) {
-      lhs.noedges = undefined
+      lhs._noedges = undefined
     }
-    rhs.noedges = undefined
+    rhs._noedges = undefined
   }
   if (currentContainer instanceof GraphInner &&
         !currentContainer.getEntrance() &&
@@ -468,7 +468,7 @@ export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabe
     debug(`  set commonEdgeLabel ${commonEdgeLabel}`)
   }
   if (rhs instanceof GraphVertex) {
-    const tmp = rhs.getEdgeLabel()
+    const tmp = rhs._getEdgeLabel()
     if (tmp) {
       edge.setLabel(tmp)
       debug(`  reset edge label to ${tmp}`)

@@ -61,7 +61,7 @@ export class GraphInner extends GraphGroup {
    * Edge labels only on Group and Vertex
    */
   // @ts-ignore
-  setEdgeLabel (value) {
+  _setEdgeLabel (value) {
     throw new Error('EdgeLabel N/A')
     // keeping type checker happy
     // eslint-disable-next-line no-unreachable
@@ -69,7 +69,7 @@ export class GraphInner extends GraphGroup {
   }
 
   // @ts-ignore
-  getEdgeLabel () {
+  _getEdgeLabel () {
     throw new Error('EdgeLabel N/A')
     // keeping type checker happy
     // eslint-disable-next-line no-unreachable
@@ -95,7 +95,7 @@ export class GraphInner extends GraphGroup {
 
   toString () {
     let fmt = ''
-    if (this.edgelabel) { fmt += `,edgelabel:${this.edgelabel}` }
+    if (this._edgelabel) { fmt += `,edgelabel:${this._edgelabel}` }
     if (this.entrance) { fmt += `,entrance:${this.entrance}` }
 
     if (this.exit) { fmt += `,exit:${this.exit}` }

@@ -169,10 +169,10 @@ exit;exit node is also required
         verticeNames.delete(obj.getName())
         if (obj.getName() === 'entry') {
           expect(obj.getLabel()).toBe('is required with conditional')
-          expect(obj.noedges).toBeTruthy()
+          expect(obj._noedges).toBeTruthy()
         } else if (obj.getName() === '2') {
           expect(obj.getLabel()).toBe('exit node is also required')
-          expect(obj.noedges).toBeTruthy()
+          expect(obj._noedges).toBeTruthy()
         }
       } else {
         // we only expect Groups/Vertices

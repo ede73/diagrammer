@@ -16,6 +16,14 @@ let debugIndent = 0
 let VERBOSE
 
 /**
+ * Toggle verbosity
+ * @param {boolean} verbose
+ */
+export function setVerbose (verbose) {
+  VERBOSE = verbose
+}
+
+/**
  * Pass debug messages
  * @param {(string|boolean)} msg Message
  * @param {(boolean|any)} indentOrDedent whether to indent or dedent

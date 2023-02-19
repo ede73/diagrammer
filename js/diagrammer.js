@@ -11,12 +11,12 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as lexer from '../build/diagrammer_lexer.js'
 import { diagrammerParser } from '../build/diagrammer_parser.js'
+import { setVerbose } from '../model/support.js'
 
 let myArgs = process.argv.slice(2)
 
-let VERBOSE = false
 if (myArgs[0] === 'verbose') {
-  VERBOSE = true
+  setVerbose(true)
   myArgs = myArgs.slice(1)
 }
 
@@ -49,7 +49,6 @@ if (myArgs[1] === 'lex') {
   diagrammerParser.yy.result = function (result) {
     console.log(result)
   }
-
   // {text: this.lexer.match, token: this.terminals_[symbol] || symbol, line: this.lexer.yylineno, loc: yyloc, expected: expected});
   // TODO: MOVING TO GraphCanvas
   diagrammerParser.yy.parseError = function (str, hash) {

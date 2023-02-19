@@ -77,7 +77,7 @@ rm -f "$OUT"
 
 getgenerator() {
   case "$1" in
-  neato | twopi | circo | fdp | sfdp | dot)
+  neato | twopi | circo | fdp | sfdp | dot | osage)
     echo digraph
     ;;
   *)

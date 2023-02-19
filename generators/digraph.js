@@ -16,10 +16,11 @@ import { debug, getAttributeAndFormat, output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(www/cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:twopi">Graphviz - twopi(www/cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:neato">Graphviz - neato(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:fdp">Graphviz - fdp(www/cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:neato">Graphviz - neato(www/cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:osage">Graphviz - osage(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:sfdp">Graphviz - sfdp(cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:twopi">Graphviz - twopi(www/cli)</option>
 
 const DigraphShapeMap = {
   default: 'box',
@@ -373,4 +374,4 @@ export function digraph (graphcanvas) {
   lout('}', false)
 }
 generators.set('digraph', digraph)
-visualizations.set('digraph', ['dot', 'circo', 'twopi', 'neato', 'fdp', 'sfpd'])
+visualizations.set('digraph', ['dot', 'circo', 'twopi', 'neato', 'fdp', 'sfpd', 'osage'])

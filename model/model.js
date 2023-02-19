@@ -274,8 +274,8 @@ export function exitSubGraph (yy) {
     if (!Object.prototype.hasOwnProperty.call(yy._EDGES, idx)) continue
     edge = yy._EDGES[idx]
     if (edge.right.name === currentSubGraph.name &&
-            currentSubGraph.entrance instanceof GraphConnectable &&
-            edge.left.name === currentSubGraph.entrance.name) {
+            currentSubGraph._entrance instanceof GraphConnectable &&
+            edge.left.name === currentSubGraph._entrance.name) {
       // remove this edge!
       edgeIndex = Number(idx)
       yy._EDGES.splice(edgeIndex, 1)
@@ -291,12 +291,12 @@ export function exitSubGraph (yy) {
     for (const n in currentSubGraph._ROOTVERTICES) {
       if (!Object.prototype.hasOwnProperty.call(currentSubGraph._ROOTVERTICES, n)) continue
       const vertex = currentSubGraph._ROOTVERTICES[n]
-      if (currentSubGraph.entrance && currentSubGraph.entrance instanceof GraphVertex) {
+      if (currentSubGraph._entrance && currentSubGraph._entrance instanceof GraphVertex) {
         // TODO: Assumes entrance is GraphVertex, but it looks it can be other things
-        currentSubGraph.entrance._noedges = undefined
+        currentSubGraph._entrance._noedges = undefined
       }
       vertex._noedges = undefined
-      const newEdge = getEdge(yy, edge.edgeType, currentSubGraph.entrance, vertex, edge.label,
+      const newEdge = getEdge(yy, edge.edgeType, currentSubGraph._entrance, vertex, edge.label,
         undefined, undefined, undefined, undefined, true)
       newEdge.container = currentSubGraph
       yy._EDGES.splice(edgeIndex++, 0, newEdge)
@@ -380,8 +380,8 @@ export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabe
   let lastEdge
   const currentContainer = getCurrentContainer(yy)
   debug(true)
-  if (rhs instanceof GraphInner && !rhs.getEntrance()) {
-    rhs.setEntrance(lhs)
+  if (rhs instanceof GraphInner && !rhs._getEntrance()) {
+    rhs._setEntrance(lhs)
   }
   if (rhs instanceof GraphVertex) {
     // if RHS has no edges (and is contained in a container) AND found from ROOTVERTICES, remove it from ROOTVERTICES
@@ -403,10 +403,10 @@ export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabe
     rhs._noedges = undefined
   }
   if (currentContainer instanceof GraphInner &&
-        !currentContainer.getEntrance() &&
+        !currentContainer._getEntrance() &&
         lhs instanceof GraphVertex &&
         !(rhs instanceof GraphInner)) {
-    currentContainer.setEntrance(lhs)
+    currentContainer._setEntrance(lhs)
   }
 
   if (lhs instanceof Array) {

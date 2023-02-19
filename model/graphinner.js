@@ -23,21 +23,21 @@ export class GraphInner extends GraphGroup {
     this.exit = undefined
 
     /** @type {(GraphConnectable|GraphConnectable[])} */
-    this.entrance = undefined
+    this._entrance = undefined
   }
 
   /**
    * @param {(GraphConnectable|GraphConnectable[])} entrance
    * @return {*}
    */
-  setEntrance (entrance) {
+  _setEntrance (entrance) {
     debug(`subgraph:Set entrance to ${entrance}`)
-    this.entrance = entrance
+    this._entrance = entrance
     return this
   }
 
-  getEntrance () {
-    return this.entrance
+  _getEntrance () {
+    return this._entrance
   }
 
   /**
@@ -96,7 +96,7 @@ export class GraphInner extends GraphGroup {
   toString () {
     let fmt = ''
     if (this._edgelabel) { fmt += `,edgelabel:${this._edgelabel}` }
-    if (this.entrance) { fmt += `,entrance:${this.entrance}` }
+    if (this._entrance) { fmt += `,entrance:${this._entrance}` }
 
     if (this.exit) { fmt += `,exit:${this.exit}` }
     if (this._ROOTVERTICES) { fmt += `,rootvertices:${this._ROOTVERTICES}` }

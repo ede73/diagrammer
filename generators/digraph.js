@@ -71,7 +71,7 @@ export function digraph (graphcanvas) {
      * @returns
      */
   const skipEntrances = (key, value) => {
-    if (key === 'entrance' || key === 'exit') {
+    if (key === 'entrance' || key === '_entrance' || key === 'exit') {
       return null
     }
     return value

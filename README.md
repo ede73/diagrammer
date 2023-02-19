@@ -285,7 +285,7 @@ graphobject;GraphObject | {name | color | textcolor | url | label }
 avertex;GraphVertex | { shape | image | style}
 alink;GraphEdge | { edgetype | left | right}
 agroup;GraphGroup | { name | _OBJECTS[] | _ROOTVERTICES[] | _edgelabel | "defaults"}
-asubgraph;GraphInner | { name | _OBJECTS[] | _ROOTVERTICES[] | _edgelabel | entrance | exit | "defaults"}
+asubgraph;GraphInner | { name | _OBJECTS[] | _ROOTVERTICES[] | _edgelabel | _entrance | exit | "defaults"}
 
 avertex>"inherit"graphobject
 alink>"inherit"graphobject
@@ -363,7 +363,7 @@ GraphCanvas:
 - equals
 - defaults
 
-Own properties are name, _edgelabel, defaults and list of _OBJECTS and _ROOTVERTICES, entrance and exit.
+Own properties are name, _edgelabel, defaults and list of _OBJECTS and _ROOTVERTICES, _entrance and exit.
 
 # Generators
 Two convenience methods available:

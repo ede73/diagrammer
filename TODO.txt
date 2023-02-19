@@ -1,3 +1,5 @@
+- MSCGENJS https://www.npmjs.com/package/mscgenjs?activeTab=readme
+-  https://github.com/mscgenjs/mscgenjs-inpage/blob/master/src/mscgen-inpage.js
 
 b>(c>d>e,f>g>h)>"eandh"z
 when linking to subgraph, link all entrance vertices b>c,f and all exit vertices e,h>z (if exit exists)

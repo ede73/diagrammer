@@ -9,6 +9,7 @@
     "@types/jquery": "^3.5.16",
     "@types/node": "^18.13.0",
     "@types/puppeteer": "^7.0.4",
+    "@types/viz.js": "^2.1.2",
     "d3": "^7.8.2",
     "d3-sankey": "^0.12.3",
     "eslint": "^8.34.0",
@@ -26,15 +27,15 @@
     "jquery": "^3.6.3",
     "puppeteer": "^19.6.3",
     "ts-node": "^10.9.1",
-    "@types/viz.js": "^2.1.2",
-    "viz.js": "^2.1.2",
-    "tslib": "^2.5.0"
+    "tslib": "^2.5.0",
+    "viz.js": "^2.1.2"
   },
   "scripts": {
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest"
   },
   "dependencies": {
     "@types/viz.js": "^2.1.2",
+    "mscgenjs": "^6.0.2",
     "viz.js": "^2.1.2"
   }
 }

@@ -4,6 +4,7 @@ import { getHTMLElement, getInputElement, openImage, updateImage } from './uiCom
 import { visualizations } from './globals.js'
 import { makeHTTPPost } from './ajax.js'
 import Viz from '../js/viz.es.js'
+// import { renderMsc } from 'mscgenjs'
 
 function makeNewImageHolder (imageName) {
   const imgdiv = getHTMLElement('diagrammer-graph')
@@ -54,13 +55,15 @@ export async function visualize (visualizer) {
   }
   removeOldVisualizations()
 
+  const canUseViz = ['circo', 'dot', 'fdp', 'neato', 'osage', 'twopi'].includes(visualizer)
+
   if (visualizations.has(visualizer)) {
     // this is web only visualization
     console.log(`Visualize using ${visualizer}`)
     visualizations.get(visualizer)(result.value)
     console.log(`Finished visualizing ${visualizer}`)
-  } else {
-    // backend visualizer
+  } else if (!canUseViz) {
+    // backend visualizer (unless if we could use Viz)
     const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
     makeHTTPPost(visualizeUrl, generatedResult,
       (image) => {
@@ -70,12 +73,13 @@ export async function visualize (visualizer) {
       (statusCode, statusText, responseText) => {
         alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
       })
-  }
-  if (['circo', 'dot', 'fdp', 'neato', 'osage', 'twopi'].includes(visualizer)) {
+  } else if (canUseViz) {
     // https://github.com/mdaines/viz.js/wiki/Usage
     try {
       const workerURL = 'js/full.render.js'
       const viz = new Viz({ workerURL })
+      const anchor = 'diagrammer-graph' // viz_container
+
       // @ts-ignore
       const svg = await viz.renderSVGElement(generatedResult, {
         engine: visualizer,
@@ -105,7 +109,7 @@ export async function visualize (visualizer) {
           { path: 'icons/usbmemory.png', width: '64', height: '64' },
           { path: 'icons/wifi.png', width: '64', height: '64' }]
       })
-      const vizContainer = getHTMLElement('viz_container')
+      const vizContainer = getHTMLElement(anchor)
       removeAllChildNodes(vizContainer)
       vizContainer.appendChild(svg)
     } catch (err) {

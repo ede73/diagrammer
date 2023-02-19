@@ -24,7 +24,8 @@ function beautify (generatedCode) {
   try {
     data = JSON.parse(generatedCode)
   } catch (ex) {
-    setError('Failed parsing generated code, perhaps not JSON?')
+    // too aggressive for the use... many generated code not actually JSON
+    console.log('Failed parsing generated code, perhaps not JSON(digraph etc)?')
     return
   }
   // Get DOM-element for inserting json-tree
@@ -50,28 +51,26 @@ export function visualize (visualizer) {
   if (!visualizer) {
     throw new Error('Visualizer not defined')
   }
-  const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
   removeOldVisualizations()
-  makeHTTPPost(visualizeUrl, generatedResult,
-    (image) => {
-      makeNewImageHolder(image)
-      updateImage(image)
-    },
-    (statusCode, statusText, responseText) => {
-      alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
-    })
-
-  /*
-        <img align="bottom" id="image" width="30%" src="web/result.png"
-            onclick="javascript:openImage('web/result.png');" />
-    */
 
   if (visualizations.has(visualizer)) {
     // this is web only visualization
     console.log(`Visualize using ${visualizer}`)
     visualizations.get(visualizer)(result.value)
     console.log(`Finished visualizing ${visualizer}`)
-  } else if (visualizer === 'dot') {
+  } else {
+    // backend visualizer
+    const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
+    makeHTTPPost(visualizeUrl, generatedResult,
+      (image) => {
+        makeNewImageHolder(image)
+        updateImage(image)
+      },
+      (statusCode, statusText, responseText) => {
+        alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
+      })
+  }
+  if (visualizer === 'dot') {
     // hack to get Viz display graphviz as comparison..
     try {
       // TODO: Bring back viz/canviz

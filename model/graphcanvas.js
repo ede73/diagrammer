@@ -65,6 +65,7 @@ export class GraphCanvas extends GraphContainer {
      * it is entered, last on in this array (top of the stack) is the current
      * One group is closed (in the context of parsing), it is popped (and it will never be entered again)
      * and we have next..and next until we're back at GraphCanvas
+     * Can be GraphGroup or GraphInnerGroup
      * @type  {GraphContainer[]}
      */
     this.CURRENTCONTAINER = [this]

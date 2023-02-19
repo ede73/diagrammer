@@ -166,9 +166,17 @@ export function digraph (graphcanvas) {
 
   // pick node from group that is FIRST pointed by edges left hand side
   function getFirstLHSReferredNodeFromGroup (/** @type {GraphContainer} */grp) {
+    // TODO: Replace with supported traversal (but it needs return support first)
     for (const i in graphcanvas.EDGES) {
       if (!Object.prototype.hasOwnProperty.call(graphcanvas.EDGES, i)) continue
       const allEdges = graphcanvas.EDGES[i]
+      // TODO: Cannot return from traversal yet
+      // traverseVertices(grp, objectInGroup => {
+      //   if (objectInGroup === allEdges.left) {
+      //     return objectInGroup
+      //   }
+      // })
+      // TODO: Replace with above (soon)
       for (const j in grp.OBJECTS) {
         if (!Object.prototype.hasOwnProperty.call(grp.OBJECTS, j)) continue
         const objectInGroup = grp.OBJECTS[j]
@@ -183,16 +191,12 @@ export function digraph (graphcanvas) {
   function getLastLHSOrRHSReferredNodeInGroup (/** @type {GraphContainer} */grp) {
     /** @type {(GraphConnectable|undefined)} */
     let nod
-    for (const i in graphcanvas.EDGES) {
-      if (!Object.prototype.hasOwnProperty.call(graphcanvas.EDGES, i)) continue
-      const allEdges = graphcanvas.EDGES[i]
-      for (const j in grp.OBJECTS) {
-        if (!Object.prototype.hasOwnProperty.call(grp.OBJECTS, j)) continue
-        const node = grp.OBJECTS[j]
+    traverseEdges(graphcanvas, allEdges => {
+      traverseVertices(grp, node => {
         if (node === allEdges.left) { nod = node }
         if (node === allEdges.right) { nod = node }
-      }
-    }
+      })
+    })
     return nod
   }
 
@@ -313,13 +317,11 @@ export function digraph (graphcanvas) {
         // get containers all vertices that have no outward links...(TODO:should be in model actually!)
         // perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
         const exits = []
-        for (const i in lhs.OBJECTS) {
-          if (!Object.prototype.hasOwnProperty.call(lhs.OBJECTS, i)) continue
-          const go = lhs.OBJECTS[i]
+        traverseVertices(lhs, go => {
           if (!hasOutwardEdge(graphcanvas.yy, go)) {
             exits.push(go)
           }
-        }
+        })
         lhs = exits
       } else {
         lhs = lhs.OBJECTS[0]

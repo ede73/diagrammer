@@ -150,6 +150,13 @@ export function getVertex (yy, objOrName, style) {
       return undefined
     }(getGraphCanvas(yy), obj))
     if (search) {
+      // if vertex was found, return it, ELSE it will be added to current container
+      // While this works perfectly for pretty much ALL graph/visualizing engines (ie. vertex is instantiated/declared where it is seen)
+      // Some engines (nwdiag) DO want to see the vertex in the group as well
+      // a-b { b} draws a different graph in nwdiag if b is also in the group, like a--b network 1 {} vs, a--b network 1 {b}
+      // And to be precise this is violation of the language as well! We DO have the vertex IN the group, even if it was declared at the top
+      // TODO: Fix this, without breaking all other generators, introduce Reference wrapper (GraphReference(GraphVertex))
+      // This allows filtering it out in all traversal code, but allows nwdiag see the REFERENCE
       return search
     }
     // if obj was GraphConnectable?
@@ -229,6 +236,9 @@ export function exitContainer (yy) {
   if (yy.CURRENTCONTAINER.length <= 1) { throw new Error('INTERNAL ERROR:Trying to exit ROOT container') }
   const currentContainer = yy.CURRENTCONTAINER.pop()
   currentContainer.exitvertex = yy.CONTAINER_EXIT++
+  // TODO: digraph (or graphviz rather) visualizing empty subgraph breaks, it needs a node (invisible for instance)
+  // digraph generator imlpements this by injecting empty invis node for all empty groups.
+  // While this works, it does edit the graph, which is bad..
   return currentContainer
 }
 

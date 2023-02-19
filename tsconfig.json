@@ -11,7 +11,8 @@
       "jest",
       "d3",
       "jquery",
-      "go"
+      "go",
+      "viz.js"
     ]
   },
   "compilerOptions": {

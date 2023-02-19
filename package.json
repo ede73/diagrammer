@@ -26,6 +26,8 @@
     "jquery": "^3.6.3",
     "puppeteer": "^19.6.3",
     "ts-node": "^10.9.1",
+    "@types/viz.js": "^2.1.2",
+    "viz.js": "^2.1.2",
     "tslib": "^2.5.0"
   },
   "scripts": {

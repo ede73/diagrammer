@@ -4,8 +4,6 @@ import { getHTMLElement, getInputElement, openImage, updateImage } from './uiCom
 import { visualizations } from './globals.js'
 import { makeHTTPPost } from './ajax.js'
 import Viz from '../js/viz.es.js'
-// import Viz2 from '../js/viz.js'
-// import * as v from '../js/full.render.js'
 
 function makeNewImageHolder (imageName) {
   const imgdiv = getHTMLElement('diagrammer-graph')
@@ -78,6 +76,7 @@ export async function visualize (visualizer) {
     try {
       const workerURL = 'js/full.render.js'
       const viz = new Viz({ workerURL })
+      // @ts-ignore
       const svg = await viz.renderSVGElement(generatedResult, {
         engine: visualizer,
         images: [

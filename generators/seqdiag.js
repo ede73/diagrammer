@@ -1,7 +1,7 @@
 import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { traverseEdges } from '../model/model.js'
+import { traverseEdges, traverseVertices } from '../model/model.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="seqdiag">Sequence Diagram(cli)</option>
@@ -27,22 +27,17 @@ export function seqdiag (graphcanvas) {
   lout('activation = none;')
 
   // print out all node declarations FIRST (if any)
-  for (const i in graphcanvas.OBJECTS) {
-    if (!Object.prototype.hasOwnProperty.call(graphcanvas.OBJECTS, i)) continue
-    const obj = graphcanvas.OBJECTS[i]
-
+  traverseVertices(graphcanvas, obj => {
     if (obj instanceof GraphGroup) {
       lout('/*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'))
-      for (const j in obj.OBJECTS) {
-        if (!Object.prototype.hasOwnProperty.call(obj.OBJECTS, j)) continue
-        const z = obj.OBJECTS[j]
+      traverseVertices(obj, secondLvlObj => {
         // no color support either..
-        const styleAndLabel = multiAttrFmt(z, {
+        const styleAndLabel = multiAttrFmt(secondLvlObj, {
           style: 'style={0}',
           label: 'label="{0}"'
         })
-        lout(`${z.getName()}${styleAndLabel};`)
-      }
+        lout(`${secondLvlObj.getName()}${styleAndLabel};`)
+      })
     } else if (obj instanceof GraphVertex) {
       const styleAndLabel = multiAttrFmt(obj, {
         style: 'style={0}',
@@ -51,7 +46,7 @@ export function seqdiag (graphcanvas) {
       })
       lout(`${obj.getName()}${styleAndLabel};`)
     }
-  }
+  })
 
   traverseEdges(graphcanvas, edge => {
     const attrs = []

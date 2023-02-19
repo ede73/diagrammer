@@ -11,6 +11,9 @@ GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.
 MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js model/graphcontainer.js model/graphconnectable.js
 MODEL_REST = model/shapes.js model/tree.js
 
+all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST) nodemodules
+	@echo Make ALL
+
 nodemodules: node_modules
 	@if [ ! -d $< ]; then \
 	  echo "ERROR: Lotsa modules needed, run npm i";\
@@ -22,9 +25,6 @@ plantuml: ext/plantuml.jar
 	  echo "ERROR: Need plantuml JAR to run tests, put it $<";\
 	  exit 10; \
 	fi
-
-all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST) nodemodules
-	@echo Make ALL
 
 index.html : index_template.html Makefile generators/*.js tests/test_inputs/*.txt web/visualizations/*.js
 	awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs/*.txt | sort |sed 's,^tests/test_inputs/,,g'" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations/*.js | sort" | getline var) printf("<script type=\"module\" src=\"%s\"></script>\n",var);next}/{REPLACE_WITH_GENERATORS}/{ while ("grep \"ADD TO INDEX.HTML AS:\" generators/*.js|sort|cut -d: -f3-|sort" | getline var) printf("%s\n",var,var);next}{print $0}' $< >$@

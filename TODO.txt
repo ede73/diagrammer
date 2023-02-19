@@ -1,23 +1,3 @@
-{result:
-    {"node":{"name":"b"}}
-    {"group":{"name":1,"isInnerGraph":true,"entrance":null,"exitvertex":1,"exit":null}}
-    {
-        {"node":{"name":"c"}}
-        {"node":{"name":"d"}}
-        {"node":{"name":"e"}}
-        {"node":{"name":"f"}}
-        {"node":{"name":"g"}}
-        {"node":{"name":"h"}}
-    }
-    {"node":{"name":"z"}}
-    {"link":{"edgeType":">","left":"b","right":1,"container":1}}
-    {"link":{"edgeType":">","left":"c","right":"d","container":1}}
-    {"link":{"edgeType":">","left":"d","right":"e","container":1}}
-    {"link":{"edgeType":">","left":"d","right":"f","container":1}}
-    {"link":{"edgeType":">","left":"f","right":"g","container":1}}
-    {"link":{"edgeType":">","left":"g","right":"h","container":1}}
-    {"link":{"edgeType":">","left":1,"right":"z","label":"eandh"}}
-}
 
 b>(c>d>e,f>g>h)>"eandh"z
 when linking to subgraph, link all entrance vertices b>c,f and all exit vertices e,h>z (if exit exists)

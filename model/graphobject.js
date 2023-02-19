@@ -10,38 +10,38 @@ export class GraphObject {
      */
   constructor (name) {
     /**
-         * Every object in a graph have a name
-         * That's how it can get linked.
-         * "name" for display purposes may be a label instead
-         * @type {string}
-         */
+     * Every object in a graph have a name
+     * That's how it can get linked.
+     * "name" for display purposes may be a label instead
+     * @type {string}
+     */
     this.name = name
     /**
-         * If provided, this will be used as visual name
-         * @type {string}
-         */
+     * If provided, this will be used as visual name
+     * @type {string}
+     */
     this.label = undefined
     /**
-         * Main color for this object
-         * @type {string}
-         */
+     * Main color for this object
+     * @type {string}
+     */
     this.color = undefined
     /**
-         * Color for any text rendered for this object
-         * @type {string}
-         */
+     * Color for any text rendered for this object
+     * @type {string}
+     */
     this.textcolor = undefined
     /**
-         * External link (only works for dynamic visualizations like SVG)
-         * @type {string}
-         */
+     * External link (only works for dynamic visualizations like SVG)
+     * @type {string}
+     */
     this.url = undefined
   }
 
   /**
-     * Set the name for the object
-     * @param {string} name
-     */
+   * Set the name for the object
+   * @param {string} name
+   */
   setName (name) {
     // TODO: Something odd in the parser
     if (name) {
@@ -55,9 +55,9 @@ export class GraphObject {
   }
 
   /**
-     * Set color
-     * @param {string} color
-     */
+   * Set color
+   * @param {string} color
+   */
   setColor (color) {
     // TODO: Something odd in the parser
     if (color) {
@@ -71,9 +71,9 @@ export class GraphObject {
   }
 
   /**
-     * Set text color
-     * @param {string} textColor
-     */
+   * Set text color
+   * @param {string} textColor
+   */
   setTextColor (textColor) {
     this.textcolor = textColor.trim()
     return this
@@ -84,9 +84,9 @@ export class GraphObject {
   }
 
   /**
-     * Set URL
-     * @param {string} url
-     */
+   * Set URL
+   * @param {string} url
+   */
   setUrl (url) {
     this.url = url.trim()
     return this
@@ -97,10 +97,10 @@ export class GraphObject {
   }
 
   /**
-     * Set label. Label is a complex object that will be parsed and parts of it
-     * extracted to textColor and potentially URL
-     * @param {string} label
-     */
+   * Set label. Label is a complex object that will be parsed and parts of it
+   * extracted to textColor and potentially URL
+   * @param {string} label
+   */
   setLabel (label) {
     if (label) {
       label = label.trim().replace(/"/gi, '')

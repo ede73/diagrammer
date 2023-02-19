@@ -6,15 +6,15 @@ import { GraphObject } from '../model/graphobject.js'
  */
 export class GraphConnectable extends GraphObject {
   /**
-     * @param {string} name
-     */
+   * @param {string} name
+   */
   constructor (name) {
     super(name) // TODO:
     /**
-         * TODO: Internal flag for no edge objects. Looks like originally used only for Vertices and
-         * also ONLY set for Vertices (even if reset for all Connectables).
-         * @type {boolean}
-         */
+     * TODO: Internal flag for no edge objects. Looks like originally used only for Vertices and
+     * also ONLY set for Vertices (even if reset for all Connectables).
+     * @type {boolean}
+     */
     this.noedges = undefined
     // UH... this is used in grammar parser to TEMPORARILY store edge object
     /** @type {string} */
@@ -22,9 +22,9 @@ export class GraphConnectable extends GraphObject {
   }
 
   /**
-     * Temporary for RHS list array!!
-     * @param {string} edgeLabel
-     */
+   * Temporary for RHS list array!!
+   * @param {string} edgeLabel
+   */
   setEdgeLabel (edgeLabel) {
     this.edgelabel = edgeLabel
     return this

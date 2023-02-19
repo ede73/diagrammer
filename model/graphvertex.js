@@ -11,10 +11,10 @@ import { Shapes } from './shapes.js'
  */
 export class GraphVertex extends GraphConnectable {
   /**
-     *
-     * @param {string} name
-     * @param {string} shape
-     */
+   *
+   * @param {string} name
+   * @param {string} shape
+   */
   constructor (name, shape) {
     super(name)
     if (shape) {
@@ -35,9 +35,9 @@ export class GraphVertex extends GraphConnectable {
   }
 
   /**
-     * @param {string} shape
-     * @returns {GraphVertex}
-     */
+   * @param {string} shape
+   * @returns {GraphVertex}
+   */
   setShape (shape) {
     if (shape) {
       this._assertRegonizedShape(shape)
@@ -51,9 +51,9 @@ export class GraphVertex extends GraphConnectable {
   }
 
   /**
-     * @param {string} style  // TODO: Restrict
-     * @returns {GraphVertex}
-     */
+   * @param {string} style  // TODO: Restrict
+   * @returns {GraphVertex}
+   */
   setStyle (style) {
     if (style) {
       this.style = style.toLowerCase()
@@ -66,9 +66,9 @@ export class GraphVertex extends GraphConnectable {
   }
 
   /**
-     * @param {string} image
-     * @returns {GraphVertex}
-     */
+   * @param {string} image
+   * @returns {GraphVertex}
+   */
   setImage (image) {
     if (image) {
       this.image = image

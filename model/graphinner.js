@@ -27,9 +27,9 @@ export class GraphInner extends GraphGroup {
   }
 
   /**
-     * @param {(GraphConnectable|GraphConnectable[])} entrance
-     * @return {*}
-     */
+   * @param {(GraphConnectable|GraphConnectable[])} entrance
+   * @return {*}
+   */
   setEntrance (entrance) {
     debug(`subgraph:Set entrance to ${entrance}`)
     this.entrance = entrance
@@ -41,9 +41,9 @@ export class GraphInner extends GraphGroup {
   }
 
   /**
-     * @param {GraphConnectable} exit
-     * @return {GraphInner}
-     */
+   * @param {GraphConnectable} exit
+   * @return {GraphInner}
+   */
   setExit (exit) {
     debug(`subgraph:Set exit to ${exit}`)
     this.exit = exit
@@ -51,15 +51,15 @@ export class GraphInner extends GraphGroup {
   }
 
   /**
-     * @return {*}
-     */
+   * @return {*}
+   */
   getExit () {
     return this.exit
   }
 
   /**
-     * Edge labels only on Group and Vertex
-     */
+   * Edge labels only on Group and Vertex
+   */
   // @ts-ignore
   setEdgeLabel (value) {
     throw new Error('EdgeLabel N/A')
@@ -77,8 +77,8 @@ export class GraphInner extends GraphGroup {
   }
 
   /**
-     * Equals only on Group and Vertex
-     */
+   * Equals only on Group and Vertex
+   */
   // @ts-ignore
   setEqual (value) {
     throw new Error('Equals N/A')

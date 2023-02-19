@@ -26,14 +26,14 @@ export const visualizations = new Map()
  */
 export class GraphCanvas extends GraphContainer {
   /**
-     * @type {function(string,string):void}
-     */
+   * @type {function(string,string):void}
+   */
   parseError = undefined
 
   /**
-     * Output the generated result
-     * @type {function(string):void}
-     */
+   * Output the generated result
+   * @type {function(string):void}
+   */
   result = undefined
 
   constructor () {
@@ -53,9 +53,9 @@ export class GraphCanvas extends GraphContainer {
   }
 
   /**
-     * @param {string} value
-     * @return {GraphCanvas}
-     */
+   * @param {string} value
+   * @return {GraphCanvas}
+   */
   setGenerator (value) {
     this.generator = value.toLowerCase()
     return this
@@ -66,9 +66,9 @@ export class GraphCanvas extends GraphContainer {
   }
 
   /**
-     * @param {string} value
-     * @return {GraphCanvas}
-     */
+   * @param {string} value
+   * @return {GraphCanvas}
+   */
   setVisualizer (value) {
     this.visualizer = value.toLowerCase()
     return this
@@ -79,9 +79,9 @@ export class GraphCanvas extends GraphContainer {
   }
 
   /**
-     * @param {string} value
-     * @return {GraphCanvas}
-     */
+   * @param {string} value
+   * @return {GraphCanvas}
+   */
   setCurrentShape (value) {
     // value?.toLowerCase() not yet in node 12.29 (default in ubuntu)
     if (value) { value = value.toLowerCase() }
@@ -94,8 +94,8 @@ export class GraphCanvas extends GraphContainer {
   }
 
   /**
-     * @param {string} value
-     */
+   * @param {string} value
+   */
   setDirection (value) {
     this.direction = value
     return this
@@ -106,8 +106,8 @@ export class GraphCanvas extends GraphContainer {
   }
 
   /**
-     * @param {string} value
-     */
+   * @param {string} value
+   */
   setStart (value) {
     this.start = value
     return this
@@ -118,11 +118,11 @@ export class GraphCanvas extends GraphContainer {
   }
 
   /**
-     * Set default vertexcolor, groupcolor, edgecolor Always ask from the
-     * currentContainer first
-     * @param {string} key
-     * @param {any} value
-     */
+   * Set default vertexcolor, groupcolor, edgecolor Always ask from the
+   * currentContainer first
+   * @param {string} key
+   * @param {any} value
+   */
   setDefault (key, value) {
     if (this.ALLOWED_DEFAULTS.indexOf(key.toLowerCase()) === -1) {
       throw new Error(`Trying to set unknown default ${key}`)
@@ -132,8 +132,8 @@ export class GraphCanvas extends GraphContainer {
   }
 
   /**
-     *  @param {string} key
-     */
+   *  @param {string} key
+   */
   getDefault (key) {
     return getAttribute(this, key)
   }

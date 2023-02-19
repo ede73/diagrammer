@@ -1,6 +1,7 @@
 // @ts-check
 
 import { GraphConnectable } from './graphconnectable.js'
+import { GraphReference } from './graphreference.js'
 // used in type declarations
 // eslint-disable-next-line no-unused-vars
 import { GraphVertex } from './graphvertex.js'
@@ -48,11 +49,18 @@ export class GraphContainer extends GraphConnectable {
     return this.equal
   }
 
-  isEmpty () {
-    return this._OBJECTS.length === 0
+  /**
+   * @param {boolean} allowReferences If true, allow all GraphReferences also, else skip all GraphReferences
+   */
+  _getObjects (allowReferences = false) {
+    return this._OBJECTS.filter(p => allowReferences || !(p instanceof GraphReference)) // OK
   }
 
-  getFirstObject () {
-    return this._OBJECTS[0]
+  isEmpty (allowReferences = false) {
+    return this._getObjects(allowReferences).length === 0
+  }
+
+  getFirstObject (allowReferences = false) {
+    return this._getObjects(allowReferences)[0]
   }
 };

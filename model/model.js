@@ -3,6 +3,8 @@
 // ONLY used in grammar/diagrammer.grammar
 // =====================================
 import { GraphCanvas } from '../model/graphcanvas.js'
+// used as type, by eslint doesn't get it
+// eslint-disable-next-line no-unused-vars
 import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphEdge } from '../model/graphedge.js'
 import { GraphGroup } from '../model/graphgroup.js'
@@ -10,6 +12,7 @@ import { GraphInner } from '../model/graphinner.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { debug, getAttribute } from '../model/support.js'
 import { GraphConnectable } from './graphconnectable.js'
+import { GraphReference } from './graphreference.js'
 
 /**
  *
@@ -139,6 +142,7 @@ export function getVertex (yy, objOrName, style) {
         }
       })
     }(getGraphCanvas(yy), obj))
+
     if (foundConnectable) {
       // if vertex was found, return it, ELSE it will be added to current container
       // While this works perfectly for pretty much ALL graph/visualizing engines (ie. vertex is instantiated/declared where it is seen)
@@ -147,11 +151,12 @@ export function getVertex (yy, objOrName, style) {
       // And to be precise this is violation of the language as well! We DO have the vertex IN the group, even if it was declared at the top
       // TODO: Fix this, without breaking all other generators, introduce Reference wrapper (GraphReference(GraphVertex))
       // This allows filtering it out in all traversal code, but allows nwdiag see the REFERENCE
+      _pushToCurrentContainerAsReference(yy, foundConnectable)
       return foundConnectable
     }
     // if obj was GraphConnectable?
     if (obj instanceof GraphConnectable) {
-      throw new Error('Expecting string')
+      throw new Error('Expecting GraphConnectable')
     }
     debug(`Create new vertex name=${obj}`, true)
     const vertex = new GraphVertex(obj, getGraphCanvas(yy).getCurrentShape())
@@ -600,18 +605,19 @@ export function traverseEdges (graphcanvas, callback) {
  * @param {function(GraphConnectable):void} callback Called for each object, IFF callback returns anything(!=undefined), this function will return that also
  * @return {any}
  */
-export function traverseVertices (container, callback) {
-  for (const i in container._OBJECTS) {
-    if (!Object.prototype.hasOwnProperty.call(container._OBJECTS, i)) continue
+export function traverseVertices (container, callback, includeReferred = false) {
+  const nodes = container._getObjects(includeReferred)
+  for (const i in nodes) {
+    if (!Object.prototype.hasOwnProperty.call(nodes, i)) continue
     // this can only be GraphVertex|GraphGroup|GraphInner
     // didn't figure out how to keep typechecker happy now (TODO:)
-    const obj = container._OBJECTS[i]
-    // just to keep linter happy... Also Inner is always Group, so not necessary
-    if (obj instanceof GraphContainer || obj instanceof GraphVertex) {
-      const ret = callback(obj)
-      if (ret !== undefined) {
-        return ret
-      }
+    const obj = nodes[i]
+    if (!includeReferred && (obj instanceof GraphReference)) {
+      continue
+    }
+    const ret = callback(obj)
+    if (ret !== undefined) {
+      return ret
     }
   }
 }
@@ -689,6 +695,22 @@ function _addEdge (yy, edge) {
   yy._EDGES.push(edge)
   debug(false)
   return edge
+}
+
+function _pushToCurrentContainerAsReference (yy, referred) {
+  const cnt = getCurrentContainer(yy)
+  if (!(cnt instanceof GraphGroup)) {
+    return
+  }
+  const nodes = cnt._getObjects(true)
+  const alreadyIncluded = nodes.filter(n => n.getName() === referred.getName()) // OK
+  if (alreadyIncluded.length > 0) {
+    debug('###Already included..so bail out')
+    return
+  }
+  debug(`###Add (${referred.getName()}) as reference node to the current group (${cnt.getName()})`)
+  const ref = new GraphReference(referred.getName())
+  cnt._OBJECTS.push(ref)
 }
 
 /**

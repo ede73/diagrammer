@@ -1,5 +1,6 @@
 import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
+import { GraphReference } from '../model/graphreference.js'
 import { traverseEdges, traverseVertices } from '../model/model.js'
 import { output, getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
 
@@ -52,6 +53,12 @@ export function nwdiag (graphcanvas) {
   lout('nwdiag {', true)
   lout('default_fontsize = 16')
 
+  traverseEdges(graphcanvas, edge => {
+    if (!(edge.left instanceof GraphGroup || edge.right instanceof GraphGroup)) {
+      lout(`${edge.left.getName()} -- ${edge.right.getName()};`)
+    }
+  })
+
   traverseVertices(graphcanvas, obj => {
     if (obj instanceof GraphGroup) {
       // split the label to two, NAME and address
@@ -61,7 +68,10 @@ export function nwdiag (graphcanvas) {
       }
       // TODO: bad, flatmatting the graph
       traverseVertices(obj, secondLvlObj => {
-        if (secondLvlObj.shape && !NetworkDiagShapeMap[secondLvlObj.shape]) {
+        if (secondLvlObj instanceof GraphReference) {
+          // this is referred node
+          lout(`${secondLvlObj.getName()};`)
+        } else if (secondLvlObj.shape && !NetworkDiagShapeMap[secondLvlObj.shape]) {
           throw new Error('Missing shape mapping')
         }
         const mappedShape = NetworkDiagShapeMap[secondLvlObj.shape] ? NetworkDiagShapeMap[secondLvlObj.shape] : NetworkDiagShapeMap.default
@@ -72,7 +82,8 @@ export function nwdiag (graphcanvas) {
 
         }, [`shape="${mappedShape}"`])
         lout(`${secondLvlObj.getName()}${tmp};`)
-      })
+      }, true)
+
       // find if there are ANY edges that have this GROUP as participant!
       traverseEdges(graphcanvas, edge => {
         const tmp = getAttributeAndFormat(edge, 'label', '[ address="{0}" ]')
@@ -99,11 +110,6 @@ export function nwdiag (graphcanvas) {
     }
   })
 
-  traverseEdges(graphcanvas, edge => {
-    if (!(edge.left instanceof GraphGroup || edge.right instanceof GraphGroup)) {
-      lout(`${edge.left.getName()} -- ${edge.right.getName()};`)
-    }
-  })
   lout('}', false)
 }
 generators.set('nwdiag', nwdiag)

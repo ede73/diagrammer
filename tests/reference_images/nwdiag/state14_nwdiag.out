@@ -9,6 +9,10 @@ nwdiag {
     }
     network Sample_back {
         address="192.168.20.0/24"
+        web01;
+        web01[ shape="box" ];
+        web02;
+        web02[ shape="box" ];
         db01[ address=".101", color="#ffff00", shape="box" ];
         db02[ address=".102", color="#ffff00", shape="box" ];
         web01[ address=".1" ];

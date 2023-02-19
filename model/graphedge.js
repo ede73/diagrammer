@@ -3,6 +3,7 @@ import { GraphObject } from '../model/graphobject.js'
 // used in type declarations
 // eslint-disable-next-line no-unused-vars
 import { GraphConnectable } from './graphconnectable.js'
+import { GraphReference } from './graphreference.js'
 
 /**
  * Represents an edge(link) between objects (vertices,groups,lists)
@@ -32,6 +33,12 @@ export class GraphEdge extends GraphObject {
     this.edgecolor = undefined
     /** @type {GraphConnectable} */
     this.container = undefined
+    if (lhs && (lhs instanceof GraphReference)) {
+      throw new Error(`LHS if reference ${lhs.getName()}`)
+    }
+    if (rhs && (rhs instanceof GraphReference)) {
+      throw new Error(`RHS if reference ${rhs.getName()}`)
+    }
   }
 
   isDotted () {

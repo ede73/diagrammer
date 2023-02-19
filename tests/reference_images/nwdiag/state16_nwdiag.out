@@ -1,5 +1,6 @@
 nwdiag {
     default_fontsize = 16
+    inet -- router;
     inet[ shape="cloud" ];
     network empty {
         address="x"
@@ -7,5 +8,4 @@ nwdiag {
         web01[ shape="box" ];
         web02[ shape="box" ];
     }
-    inet -- router;
 }

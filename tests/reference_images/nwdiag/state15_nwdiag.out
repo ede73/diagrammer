@@ -9,6 +9,10 @@ nwdiag {
     }
     network internal {
         address="x"
+        web01;
+        web01[ shape="box" ];
+        web02;
+        web02[ shape="box" ];
         db01[ shape="box" ];
         web01;
         web02;

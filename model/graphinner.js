@@ -20,7 +20,7 @@ export class GraphInner extends GraphGroup {
     this.isInnerGraph = true
 
     /** @type {GraphConnectable} */
-    this.exit = undefined
+    this._exit = undefined
 
     /** @type {(GraphConnectable|GraphConnectable[])} */
     this._entrance = undefined
@@ -44,17 +44,17 @@ export class GraphInner extends GraphGroup {
    * @param {GraphConnectable} exit
    * @return {GraphInner}
    */
-  setExit (exit) {
+  _setExit (exit) {
     debug(`subgraph:Set exit to ${exit}`)
-    this.exit = exit
+    this._exit = exit
     return this
   }
 
   /**
-   * @return {*}
+   * @return {GraphConnectable}
    */
-  getExit () {
-    return this.exit
+  _getExit () {
+    return this._exit
   }
 
   /**
@@ -98,7 +98,7 @@ export class GraphInner extends GraphGroup {
     if (this._edgelabel) { fmt += `,edgelabel:${this._edgelabel}` }
     if (this._entrance) { fmt += `,entrance:${this._entrance}` }
 
-    if (this.exit) { fmt += `,exit:${this.exit}` }
+    if (this._exit) { fmt += `,exit:${this._exit}` }
     if (this._ROOTVERTICES) { fmt += `,rootvertices:${this._ROOTVERTICES}` }
     return `SubGraph(name:${this.name}${fmt})`
   };

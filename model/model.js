@@ -320,7 +320,7 @@ export function exitSubGraph (yy) {
 
   debug(`exits ${exits}`)
   if (lastVertex) {
-    currentSubGraph.setExit(lastVertex)
+    currentSubGraph._setExit(lastVertex)
   }
   return exitContainer(yy)
 }

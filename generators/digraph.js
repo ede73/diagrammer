@@ -71,7 +71,7 @@ export function digraph (graphcanvas) {
      * @returns
      */
   const skipEntrances = (key, value) => {
-    if (key === 'entrance' || key === '_entrance' || key === 'exit') {
+    if (['entrance', '_entrance', 'exit', '_exit'].includes(key)) {
       return null
     }
     return value
@@ -301,7 +301,7 @@ export function digraph (graphcanvas) {
     }
     if (lhs instanceof GraphGroup) {
       if (!lhs.isInnerGraph) { attrs.push(` ltail=cluster_${lhs.getName()}`) }
-      if (lhs instanceof GraphInner && lhs.getExit()) {
+      if (lhs instanceof GraphInner && lhs._getExit()) {
         // get containers all vertices that have no outward links...(TODO:should be in model actually!)
         // perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
         const exits = []

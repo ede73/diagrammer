@@ -126,7 +126,7 @@ export function getVertex (yy, objOrName, style) {
       return obj
     }
 
-    const search = (function s (/** @type {GraphContainer} */container, name) {
+    const foundConnectable = (/** @return {GraphConnectable} */function s (/** @type {GraphContainer} */container, name) {
       if (container.getName() === name) return container
       return traverseVertices(container, o => {
         if (o instanceof GraphVertex && o.getName() === name) {
@@ -139,7 +139,7 @@ export function getVertex (yy, objOrName, style) {
         }
       })
     }(getGraphCanvas(yy), obj))
-    if (search) {
+    if (foundConnectable) {
       // if vertex was found, return it, ELSE it will be added to current container
       // While this works perfectly for pretty much ALL graph/visualizing engines (ie. vertex is instantiated/declared where it is seen)
       // Some engines (nwdiag) DO want to see the vertex in the group as well
@@ -147,7 +147,7 @@ export function getVertex (yy, objOrName, style) {
       // And to be precise this is violation of the language as well! We DO have the vertex IN the group, even if it was declared at the top
       // TODO: Fix this, without breaking all other generators, introduce Reference wrapper (GraphReference(GraphVertex))
       // This allows filtering it out in all traversal code, but allows nwdiag see the REFERENCE
-      return search
+      return foundConnectable
     }
     // if obj was GraphConnectable?
     if (obj instanceof GraphConnectable) {

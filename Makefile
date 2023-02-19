@@ -11,7 +11,19 @@ GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.
 MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js model/graphcontainer.js model/graphconnectable.js
 MODEL_REST = model/shapes.js model/tree.js
 
-all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST)
+nodemodules: node_modules
+	@if [ ! -d $< ]; then \
+	  echo "ERROR: Lotsa modules needed, run npm i";\
+	  exit 10; \
+	fi
+
+plantuml: ext/plantuml.jar
+	@if [ ! -f $< ]; then \
+	  echo "ERROR: Need plantuml JAR to run tests, put it $<";\
+	  exit 10; \
+	fi
+
+all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST) nodemodules
 	@echo Make ALL
 
 index.html : index_template.html Makefile generators/*.js tests/test_inputs/*.txt web/visualizations/*.js
@@ -67,11 +79,16 @@ export: build/diagrammer_lexer.js build/diagrammer_parser.js js/diagrammer.js
 	@./scripts/export.sh
 	@echo 'Add alias depict="~/{EXPORT_DIR_HERE}/t.sh silent " to your profile/bashrc etc.\nYou need (depending) visualizers graphviz,mscgen,plantuml.jar,nwdiag,blockdiag,actdiag.\nplantuml requires java\nblockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html\nPlantuml from http://plantuml.sourceforge.net/\n' >export/README.txt
 
-.PHONY: test
-test: all
+testrunner: ./scripts/runtests.sh all plantuml nodemodules
+	./scripts/runtests.sh
+
+jesttests: all nodemodules
 	@mkdir -p tests/test_outputs
 	npm test
-	./scripts/runtests.sh
+
+test: all testrunner jesttests
+
+tests: test
 
 clean:
 	rm -f build/*

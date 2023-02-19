@@ -1,3 +1,5 @@
+// @ts-check
+
 import { GraphObject } from '../model/graphobject.js'
 
 /**

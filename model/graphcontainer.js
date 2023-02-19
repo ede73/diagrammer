@@ -1,3 +1,5 @@
+// @ts-check
+
 import { GraphConnectable } from './graphconnectable.js'
 // used in type declarations
 // eslint-disable-next-line no-unused-vars

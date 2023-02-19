@@ -137,8 +137,8 @@ export function umlclass (graphcanvas) {
       groups.push({
         key,
         name: nameAndLabel(o),
-        properties: getProperties(o.OBJECTS),
-        methods: getMethods(o.OBJECTS)
+        properties: getProperties(o._OBJECTS),
+        methods: getMethods(o._OBJECTS)
       })
     }
   })

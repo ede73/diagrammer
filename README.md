@@ -284,15 +284,15 @@ SHAPE RECORD
 graphobject;GraphObject | {name | color | textcolor | url | label }
 avertex;GraphVertex | { shape | image | style}
 alink;GraphEdge | { edgetype | left | right}
-agroup;GraphGroup | { name | OBJECTS[] | ROOTVERTICES[] | edgelabel | "defaults"}
-asubgraph;GraphInner | { name | OBJECTS[] | ROOTVERTICES[] | edgelabel | entrance | exit | "defaults"}
+agroup;GraphGroup | { name | _OBJECTS[] | _ROOTVERTICES[] | edgelabel | "defaults"}
+asubgraph;GraphInner | { name | _OBJECTS[] | _ROOTVERTICES[] | edgelabel | entrance | exit | "defaults"}
 
 avertex>"inherit"graphobject
 alink>"inherit"graphobject
 agroup>"inherit"graphobject
 asubgraph>"inherit"graphobject
 
-graphroot;GraphCanvas | {OBJECTS[] | ROOTVERTICES[] | generator | visualizer | (current)shape | direction | start | equal | "defaults"}
+graphroot;GraphCanvas | {_OBJECTS[] | _ROOTVERTICES[] | generator | visualizer | (current)shape | direction | start | equal | "defaults"}
 
 graphobject->"many:1"graphroot
 ```
@@ -315,8 +315,8 @@ What's the current default shape - only used during parsing the diagrammer langu
 AST/Model note. Edges are not stored in GraphCanvas, but separately! Why? It's easier to handle them in the generators and vertices and edges are output separately to separate sections anyway.
 
 GraphCanvas:
-- OBJECTS[GraphVertex(a), GraphInner(GraphVertex(b), GraphVertex(c), GraphVertex(d), GraphGroup(GraphVertex(f), GraphVertex(g)))]
-- ROOTVERTICES[GraphVertex, GraphInner] # this graph has two root vertices
+- _OBJECTS[GraphVertex(a), GraphInner(GraphVertex(b), GraphVertex(c), GraphVertex(d), GraphGroup(GraphVertex(f), GraphVertex(g)))]
+- _ROOTVERTICES[GraphVertex, GraphInner] # this graph has two root vertices
 - generator digraph
 - visualizer circo
 - shape ..
@@ -341,7 +341,7 @@ Own properties are name, shape, image - if specified, style - if specified (+Gra
 
 ## GraphGroup
 
-Own properties are name, edgelabel, defaults and list of OBJECTS and ROOTVERTICES.
+Own properties are name, edgelabel, defaults and list of _OBJECTS and _ROOTVERTICES.
 
 ## GraphInner
 Only used to represented "sub graphs" ie. like in :
@@ -354,8 +354,8 @@ Ie. a graph where output vertex is connected to all the inner vertices.
 That constructs
 
 GraphCanvas:
-- OBJECTS[GraphVertex(a), GraphInner(GraphVertex(b), GraphVertex(c), GraphVertex(d), GraphInner(GraphVertex(f), GraphVertex(g)))]
-- ROOTVERTICES[same as objects]
+- _OBJECTS[GraphVertex(a), GraphInner(GraphVertex(b), GraphVertex(c), GraphVertex(d), GraphInner(GraphVertex(f), GraphVertex(g)))]
+- _ROOTVERTICES[same as objects]
 - generator
 - visualizer
 - shape
@@ -363,7 +363,7 @@ GraphCanvas:
 - equals
 - defaults
 
-Own properties are name, edgelabel, defaults and list of OBJECTS and ROOTVERTICES, entrance and exit.
+Own properties are name, edgelabel, defaults and list of _OBJECTS and _ROOTVERTICES, entrance and exit.
 
 # Generators
 Two convenience methods available:

@@ -15,7 +15,7 @@ export class GraphEdge extends GraphObject {
    * @constuctor
    */
   constructor (edgeType, lhs, rhs) {
-    super(undefined) // TODO:
+    super(undefined) // edges have no names, ever
     /** @type {string} */
     this.edgeType = edgeType.trim()
     /** @type {GraphConnectable} */

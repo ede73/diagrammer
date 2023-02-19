@@ -9,14 +9,13 @@ export class GraphContainer extends GraphConnectable {
 
   /** @param {string} name */
   constructor (name) {
-    super(name) // TODO:
+    super(name)
 
     /**
-     * TODO: make private
-     * GraphContainer | GraphVertex
+     * "Private" (uh..there's no reliable overarching privacy support in ES/node/browser space), indicate with _
      *  @type {GraphConnectable[]}
      */
-    this.OBJECTS = []
+    this._OBJECTS = []
     /**
      * This holds vertices that have no incoming edges (no edge has this vertex as right hand side)
      *
@@ -28,7 +27,7 @@ export class GraphContainer extends GraphConnectable {
      * GraphContainer | GraphVertex
      * @type {GraphConnectable[]}
      */
-    this.ROOTVERTICES = []
+    this._ROOTVERTICES = []
     /** @type {GraphConnectable[]} */
     this.equal = []
   }
@@ -48,10 +47,10 @@ export class GraphContainer extends GraphConnectable {
   }
 
   isEmpty () {
-    return this.OBJECTS.length === 0
+    return this._OBJECTS.length === 0
   }
 
   getFirstObject () {
-    return this.OBJECTS[0]
+    return this._OBJECTS[0]
   }
 };

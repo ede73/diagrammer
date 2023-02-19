@@ -136,19 +136,19 @@ endif
 exit;exit node is also required
         `)
     // console.log(graphcanvas)
-    expect(graphcanvas.OBJECTS.length).toBe(5)
-    expect(graphcanvas.ROOTVERTICES.length).toBe(5)
+    expect(graphcanvas._OBJECTS.length).toBe(5)
+    expect(graphcanvas._ROOTVERTICES.length).toBe(5)
     // in this case only all the objects and root vertices do match
-    expect(graphcanvas.OBJECTS).toMatchObject(graphcanvas.ROOTVERTICES)
+    expect(graphcanvas._OBJECTS).toMatchObject(graphcanvas._ROOTVERTICES)
 
     const conditionalGroups = new Set(['1', '2', '3'])
     const verticeNames = new Set(['entry', 'exit'])
 
-    graphcanvas.OBJECTS.forEach(obj => {
+    graphcanvas._OBJECTS.forEach(obj => {
       if (obj instanceof GraphGroup) {
         // TODO: grammar is buggy, there should be single vertex in, or none for no-vertices conditional
         // how ever 'then'/'else' is intepretex as one
-        // expect(obj.OBJECTS.length).toBe(1);
+        // expect(obj._OBJECTS.length).toBe(1);
         conditionalGroups.delete(obj.getName())
         if (obj.getName() === '1') {
           expect(obj.getLabel()).toBe('a')
@@ -186,29 +186,29 @@ exit;exit node is also required
   it('graphContent/GROUP/state 34', async () => {
     const color = makeRandomRGB()
     parseCode(`group name ${color};label\ngroup end\n`)
-    const connectable = graphcanvas.OBJECTS[0]
+    const connectable = graphcanvas._OBJECTS[0]
     expect(connectable).toBeInstanceOf(GraphGroup)
     /** @type {GraphGroup} */
     // @ts-ignore
     const group = connectable
-    expect(graphcanvas.OBJECTS.length).toBe(1)
+    expect(graphcanvas._OBJECTS.length).toBe(1)
     expect(group.getName()).toBe('name')
     expect(group.getColor()).toBe(color)
-    expect(group.OBJECTS.length).toBe(0)
+    expect(group._OBJECTS.length).toBe(0)
   })
 
   it('graphContent/GROUP(brief)/state 34', async () => {
     const color = makeRandomRGB()
     parseCode(`{name${color};label\n}\n`)
-    const connectable = graphcanvas.OBJECTS[0]
+    const connectable = graphcanvas._OBJECTS[0]
     expect(connectable).toBeInstanceOf(GraphGroup)
     /** @type {GraphGroup} */
     // @ts-ignore
     const group = connectable
-    expect(graphcanvas.OBJECTS.length).toBe(1)
+    expect(graphcanvas._OBJECTS.length).toBe(1)
     expect(group.getName()).toBe('name')
     expect(group.getColor()).toBe(color)
-    expect(group.OBJECTS.length).toBe(0)
+    expect(group._OBJECTS.length).toBe(0)
   })
 
   it('graphContent/START/state 35', async () => {
@@ -224,13 +224,13 @@ exit;exit node is also required
     // 3 edges, between a (at NW corner) q,w,e to (at SE corner) edge text is edgelabel
     // readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> getEdge(yy,$EVENT,$readEvents,$vertexGroupListOrAttrs,$6,$8?$8.substring(1):$8,$5,$2,$4).right
     parseCode(`a:nw ->:se ${color} "edgelabel" q,w,e;label\n`)
-    expect(graphcanvas.OBJECTS.length).toBe(4)
-    expect(graphcanvas.ROOTVERTICES.length).toBe(1)
+    expect(graphcanvas._OBJECTS.length).toBe(4)
+    expect(graphcanvas._ROOTVERTICES.length).toBe(1)
     expect(graphcanvas.EDGES.length).toBe(3)
 
     // verify all objects accounted for
     const vertices = new Set(['a', 'q', 'w', 'e'])
-    graphcanvas.OBJECTS.forEach(vertex => {
+    graphcanvas._OBJECTS.forEach(vertex => {
       vertices.delete(vertex.getName())
     })
     expect(vertices.size).toBe(0)
@@ -272,7 +272,7 @@ exit;exit node is also required
     // all vertices gradually interconnected, hence this graph has only one ROOT node q
     // q has subs w,e which have c,a,b
     // model how ever misproduces the situations and incorrectly has q,w AND e in the ROOTVERTICES list
-    expect(graphcanvas.ROOTVERTICES.length).toBe(1)
-    expect(graphcanvas.ROOTVERTICES[0].getName()).toBe('q')
+    expect(graphcanvas._ROOTVERTICES.length).toBe(1)
+    expect(graphcanvas._ROOTVERTICES[0].getName()).toBe('q')
   })
 })

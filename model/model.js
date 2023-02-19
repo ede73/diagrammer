@@ -135,9 +135,9 @@ export function getVertex (yy, objOrName, style) {
 
     const search = (function s (/** @type {GraphContainer} */container, name) {
       if (container.getName() === name) return container
-      for (const i in container.OBJECTS) {
-        if (!Object.prototype.hasOwnProperty.call(container.OBJECTS, i)) continue
-        const o = container.OBJECTS[i]
+      for (const i in container._OBJECTS) {
+        if (!Object.prototype.hasOwnProperty.call(container._OBJECTS, i)) continue
+        const o = container._OBJECTS[i]
         if (o instanceof GraphVertex && o.getName() === name) {
           if (style) o.setStyle(style)
           return o
@@ -288,9 +288,9 @@ export function exitSubGraph (yy) {
   if (edge !== null) {
     // and then relink it to containers vertices that have no LEFT edges
     // traverse
-    for (const n in currentSubGraph.ROOTVERTICES) {
-      if (!Object.prototype.hasOwnProperty.call(currentSubGraph.ROOTVERTICES, n)) continue
-      const vertex = currentSubGraph.ROOTVERTICES[n]
+    for (const n in currentSubGraph._ROOTVERTICES) {
+      if (!Object.prototype.hasOwnProperty.call(currentSubGraph._ROOTVERTICES, n)) continue
+      const vertex = currentSubGraph._ROOTVERTICES[n]
       if (currentSubGraph.entrance && currentSubGraph.entrance instanceof GraphVertex) {
         // TODO: Assumes entrance is GraphVertex, but it looks it can be other things
         currentSubGraph.entrance.noedges = undefined
@@ -309,9 +309,9 @@ export function exitSubGraph (yy) {
   // fix exits
   // {"link":{"edgeType":">","left":1,"right":"z","label":"from e and h"}}
   const exits = []
-  for (const idx in currentSubGraph.OBJECTS) {
-    if (!Object.prototype.hasOwnProperty.call(currentSubGraph.OBJECTS, idx)) continue
-    const vertex = currentSubGraph.OBJECTS[idx]
+  for (const idx in currentSubGraph._OBJECTS) {
+    if (!Object.prototype.hasOwnProperty.call(currentSubGraph._OBJECTS, idx)) continue
+    const vertex = currentSubGraph._OBJECTS[idx]
     lastVertex = vertex
     if (!hasOutwardEdge(yy, vertex)) {
       exits.push(vertex)
@@ -387,9 +387,9 @@ export function getEdge (yy, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabe
     // if RHS has no edges (and is contained in a container) AND found from ROOTVERTICES, remove it from ROOTVERTICES
     if (rhs.noedges && currentContainer) {
       debug(`REMOVE ${rhs} from root vertices of the container ${currentContainer}`)
-      const idx = currentContainer.ROOTVERTICES.indexOf(rhs)
+      const idx = currentContainer._ROOTVERTICES.indexOf(rhs)
       if (idx >= 0) {
-        const removed = currentContainer.ROOTVERTICES.splice(idx, 1)
+        const removed = currentContainer._ROOTVERTICES.splice(idx, 1)
         debug(`REMOVE ${removed} from ROOTVERTICES`)
       }
     }
@@ -581,7 +581,7 @@ export function hasOutwardEdge (yy, vertex) {
  * @return {any}
  */
 export function traverseEdges (graphcanvas, callback) {
-  debug(`${graphcanvas.ROOTVERTICES}`)
+  debug(`${graphcanvas._ROOTVERTICES}`)
   for (const i in graphcanvas.EDGES) {
     if (!Object.prototype.hasOwnProperty.call(graphcanvas.EDGES, i)) continue
     const ret = callback(graphcanvas.EDGES[i])
@@ -602,11 +602,11 @@ export function traverseEdges (graphcanvas, callback) {
  * @return {any}
  */
 export function traverseVertices (container, callback) {
-  for (const i in container.OBJECTS) {
-    if (!Object.prototype.hasOwnProperty.call(container.OBJECTS, i)) continue
+  for (const i in container._OBJECTS) {
+    if (!Object.prototype.hasOwnProperty.call(container._OBJECTS, i)) continue
     // this can only be GraphVertex|GraphGroup|GraphInner
     // didn't figure out how to keep typechecker happy now (TODO:)
-    const obj = container.OBJECTS[i]
+    const obj = container._OBJECTS[i]
     // just to keep linter happy... Also Inner is always Group, so not necessary
     if (obj instanceof GraphContainer || obj instanceof GraphVertex) {
       const ret = callback(obj)
@@ -699,9 +699,9 @@ function _addEdge (yy, edge) {
 function _pushObject (yy, o) {
   const cnt = getCurrentContainer(yy)
   debug(`_pushObject ${o}to ${cnt}`, true)
-  cnt.OBJECTS.push(o)
+  cnt._OBJECTS.push(o)
   debug(`PUSHING OBJECT ${o} to ROOTVERTICES`)
-  cnt.ROOTVERTICES.push(o)
+  cnt._ROOTVERTICES.push(o)
   debug(false)
   return o
 }

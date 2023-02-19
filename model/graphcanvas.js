@@ -37,7 +37,7 @@ export class GraphCanvas extends GraphContainer {
   result = undefined
 
   constructor () {
-    super(undefined) // TODO:
+    super(undefined) // Canvas has no name
     /** @type {GraphEdge[]} */
     this.EDGES = []
     /** @type {string} */

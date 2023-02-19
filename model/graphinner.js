@@ -99,7 +99,7 @@ export class GraphInner extends GraphGroup {
     if (this.entrance) { fmt += `,entrance:${this.entrance}` }
 
     if (this.exit) { fmt += `,exit:${this.exit}` }
-    if (this.ROOTVERTICES) { fmt += `,rootvertices:${this.ROOTVERTICES}` }
+    if (this._ROOTVERTICES) { fmt += `,rootvertices:${this._ROOTVERTICES}` }
     return `SubGraph(name:${this.name}${fmt})`
   };
 };

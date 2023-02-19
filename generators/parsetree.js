@@ -29,7 +29,7 @@ export function parsetree (graphcanvas) {
 
   // debug(JSON.stringify(graphcanvas.EDGES));
 
-  const root = graphcanvas.ROOTVERTICES
+  const root = graphcanvas._ROOTVERTICES
   if (root.length > 1) {
     throw new Error('Only one root node supported')
   }

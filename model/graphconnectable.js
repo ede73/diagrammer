@@ -9,7 +9,7 @@ export class GraphConnectable extends GraphObject {
    * @param {string} name
    */
   constructor (name) {
-    super(name) // TODO:
+    super(name)
     /**
      * TODO: Internal flag for no edge objects. Looks like originally used only for Vertices and
      * also ONLY set for Vertices (even if reset for all Connectables).

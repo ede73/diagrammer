@@ -84,7 +84,7 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
   try {
     delete (diagrammerParser.yy.GRAPHCANVAS)
     delete (diagrammerParser.yy.EDGES)
-    delete (diagrammerParser.yy.OBJECTS)
+    delete (diagrammerParser.yy._OBJECTS)
     // TODO: MOVING TO GraphCanvas
     diagrammerParser.yy.USE_GENERATOR = generator
     // TODO: MOVING TO GraphCanvas

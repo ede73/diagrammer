@@ -156,7 +156,7 @@ export function digraph (graphcanvas) {
       return
     }
     if (grp.isEmpty()) {
-      grp.OBJECTS.push(new GraphVertex(`invis_${grp.getName()}`)
+      grp._OBJECTS.push(new GraphVertex(`invis_${grp.getName()}`)
         .setStyle('invis'))
       return
     }

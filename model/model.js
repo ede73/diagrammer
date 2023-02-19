@@ -135,9 +135,7 @@ export function getVertex (yy, objOrName, style) {
 
     const search = (function s (/** @type {GraphContainer} */container, name) {
       if (container.getName() === name) return container
-      for (const i in container._OBJECTS) {
-        if (!Object.prototype.hasOwnProperty.call(container._OBJECTS, i)) continue
-        const o = container._OBJECTS[i]
+      return traverseVertices(container, o => {
         if (o instanceof GraphVertex && o.getName() === name) {
           if (style) o.setStyle(style)
           return o
@@ -146,8 +144,7 @@ export function getVertex (yy, objOrName, style) {
           const found = s(o, name)
           if (found) return found
         }
-      }
-      return undefined
+      })
     }(getGraphCanvas(yy), obj))
     if (search) {
       // if vertex was found, return it, ELSE it will be added to current container
@@ -319,14 +316,12 @@ export function exitSubGraph (yy) {
   // fix exits
   // {"link":{"edgeType":">","left":1,"right":"z","label":"from e and h"}}
   const exits = []
-  for (const idx in currentSubGraph._OBJECTS) {
-    if (!Object.prototype.hasOwnProperty.call(currentSubGraph._OBJECTS, idx)) continue
-    const vertex = currentSubGraph._OBJECTS[idx]
+  traverseVertices(currentSubGraph, vertex => {
     lastVertex = vertex
     if (!hasOutwardEdge(yy, vertex)) {
       exits.push(vertex)
     }
-  }
+  })
 
   debug(`exits ${exits}`)
   if (lastVertex) {
@@ -529,6 +524,7 @@ export function getGraphCanvas (yy) {
  * @param {GraphConnectable} vertex
  */
 export function hasOutwardEdge (yy, vertex) {
+  // TODO: Replace with traverseEdges&GraphCanvas
   for (const i in yy._EDGES) {
     if (!Object.prototype.hasOwnProperty.call(yy._EDGES, i)) continue
     const edge = yy._EDGES[i]

@@ -186,7 +186,7 @@ exit;exit node is also required
   it('graphContent/GROUP/state 34', async () => {
     const color = makeRandomRGB()
     parseCode(`group name ${color};label\ngroup end\n`)
-    const connectable = graphcanvas._OBJECTS[0]
+    const connectable = graphcanvas.getFirstObject()
     expect(connectable).toBeInstanceOf(GraphGroup)
     /** @type {GraphGroup} */
     // @ts-ignore
@@ -194,13 +194,13 @@ exit;exit node is also required
     expect(graphcanvas._OBJECTS.length).toBe(1)
     expect(group.getName()).toBe('name')
     expect(group.getColor()).toBe(color)
-    expect(group._OBJECTS.length).toBe(0)
+    expect(group.isEmpty()).toBeTruthy()
   })
 
   it('graphContent/GROUP(brief)/state 34', async () => {
     const color = makeRandomRGB()
     parseCode(`{name${color};label\n}\n`)
-    const connectable = graphcanvas._OBJECTS[0]
+    const connectable = graphcanvas.getFirstObject()
     expect(connectable).toBeInstanceOf(GraphGroup)
     /** @type {GraphGroup} */
     // @ts-ignore
@@ -208,7 +208,7 @@ exit;exit node is also required
     expect(graphcanvas._OBJECTS.length).toBe(1)
     expect(group.getName()).toBe('name')
     expect(group.getColor()).toBe(color)
-    expect(group._OBJECTS.length).toBe(0)
+    expect(group.isEmpty()).toBeTruthy()
   })
 
   it('graphContent/START/state 35', async () => {

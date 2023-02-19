@@ -39,7 +39,14 @@ describe('Parser/grammar rule tests', () => {
    */
   function parseCode (code) {
     // @ts-ignore
-    diagrammerParser.parse(code)
+    diagrammerParser.yy.graphcanvas = new GraphCanvas()
+    try {
+      diagrammerParser.parse(code)
+    } catch (ex) {
+      console.log('=====failed parsing======')
+      console.log(code)
+      throw ex
+    }
   }
 
   function makeRandomRGB () {
@@ -52,7 +59,7 @@ describe('Parser/grammar rule tests', () => {
     parseCode('$(variable:value) $(toinen:kolmas)')
     /** @type Map<string, string> */
     // @ts-ignore
-    const variables = new Map(Object.entries(Array(graphcanvas.yy.VARIABLES)[0]))
+    const variables = new Map(Object.entries(Array(graphcanvas.VARIABLES)[0]))
     expect(variables.has('variable')).toBeTruthy()
     expect(variables.has('toinen')).toBeTruthy()
     expect(variables.get('variable')).toMatch('value')

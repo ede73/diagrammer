@@ -63,4 +63,14 @@ export class GraphContainer extends GraphConnectable {
   getFirstObject (allowReferences = false) {
     return this._getObjects(allowReferences)[0]
   }
+
+  /**
+   * Add object to this container
+   * @param {GraphConnectable} connectable
+   */
+  addObject (connectable) {
+    this._OBJECTS.push(connectable)
+    this._ROOTVERTICES.push(connectable)
+    return connectable
+  }
 };

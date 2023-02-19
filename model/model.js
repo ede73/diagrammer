@@ -170,7 +170,7 @@ export function getVertex (yy, objOrName, style) {
       vertex.setTextColor(color)
     })
     debug(false)
-    return _pushObject(yy, vertex)
+    return getCurrentContainer(yy).addObject(vertex)
   }
 
   const vertex = findVertex(yy, objOrName, style)
@@ -346,7 +346,7 @@ export function getGroup (yy, ref) {
   if (!yy.GROUPIDS) yy.GROUPIDS = 1
   const newGroup = new GraphGroup(String(yy.GROUPIDS++))
   debug(`push group ${newGroup} to ${yy}`)
-  _pushObject(yy, newGroup)
+  getCurrentContainer(yy).addObject(newGroup)
 
   _getDefaultAttribute(yy, 'groupcolor', function (color) {
     newGroup.setColor(color)
@@ -675,8 +675,7 @@ function _getSubGraph (yy, ref) {
   if (ref instanceof GraphInner) return ref
   if (!yy.SUBGRAPHS) yy.SUBGRAPHS = 1
   const newSubGraph = new GraphInner(String(yy.SUBGRAPHS++))
-  _pushObject(yy, newSubGraph)
-  return newSubGraph
+  return getCurrentContainer(yy).addObject(newSubGraph)
 }
 
 /**
@@ -711,18 +710,4 @@ function _pushToCurrentContainerAsReference (yy, referred) {
   debug(`###Add (${referred.getName()}) as reference node to the current group (${cnt.getName()})`)
   const ref = new GraphReference(referred.getName())
   cnt._OBJECTS.push(ref)
-}
-
-/**
- * Push given object into a current container
- * @param {(GraphVertex|GraphContainer)} o
- */
-function _pushObject (yy, o) {
-  const cnt = getCurrentContainer(yy)
-  debug(`_pushObject ${o}to ${cnt}`, true)
-  cnt._OBJECTS.push(o)
-  debug(`PUSHING OBJECT ${o} to ROOTVERTICES`)
-  cnt._ROOTVERTICES.push(o)
-  debug(false)
-  return o
 }

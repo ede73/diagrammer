@@ -4,7 +4,7 @@ import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { debug, getAttributeAndFormat, iterateEdges, output, outputFormattedText } from '../model/support.js'
-import { getVertex } from '../model/model.js'
+import { getVertex, traverseVertices } from '../model/model.js'
 
 // ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
 
@@ -211,52 +211,47 @@ export function plantuml_sequence (graphcanvas) {
     }
   }
 
-  const traverseVertices = (/** @type {GraphConnectable} */root, /** @type {boolean} */isInnerGraph) => {
+  const ltraverseVertices = (/** @type {GraphConnectable} */root, /** @type {boolean} */isInnerGraph) => {
     // Dump this groups participants first...
-    for (const i in root.OBJECTS) {
-      if (!Object.prototype.hasOwnProperty.call(root.OBJECTS, i)) continue
-      const obj = root.OBJECTS[i]
-      if (obj instanceof GraphVertex) { processAVertex(obj, isInnerGraph) }
-    }
+    traverseVertices(root, maybeVertex => {
+      if (maybeVertex instanceof GraphVertex) { processAVertex(maybeVertex, isInnerGraph) }
+    })
     printEdges(root, isInnerGraph)
-    for (const i in root.OBJECTS) {
-      if (!Object.prototype.hasOwnProperty.call(root.OBJECTS, i)) continue
-      const obj = root.OBJECTS[i]
-      if (obj instanceof GraphGroup) {
-        // TODO:
+
+    traverseVertices(root, maybeGroup => {
+      // TODO:
+      if (maybeGroup instanceof GraphGroup) {
         // Group name,OBJECTS,get/setEqual,toString
-        ((o) => {
-          debug('processAGroup:' + JSON.stringify(o))
-          let cond = o.conditional
-          if (cond) {
-            if (cond === 'if') {
-              cond = 'alt'
-            } else if (cond === 'elseif') {
-              cond = 'else'
-            } else if (cond === 'else') {
-              cond = 'else'
-            } else if (cond === 'endif') {
-              cond = 'end'
-            }
-            lout(cond + ' ' + o.getLabel())
-          } else {
-            cond = ''// cond = "ref";
+        debug('processAGroup:' + JSON.stringify(maybeGroup))
+        let cond = maybeGroup.conditional
+        if (cond) {
+          if (cond === 'if') {
+            cond = 'alt'
+          } else if (cond === 'elseif') {
+            cond = 'else'
+          } else if (cond === 'else') {
+            cond = 'else'
+          } else if (cond === 'endif') {
+            cond = 'end'
           }
-          const nodeIsSubGraph = o.isInnerGraph
-          if (o.getColor()) {
-            lout('style=filled;')
-            lout(getAttributeAndFormat(o, 'color',
-              '   color="{0}";\n'))
-          }
-          traverseVertices(o, nodeIsSubGraph)
-          printEdges(o)
-        })(obj)
-      } else if (!(obj instanceof GraphVertex)) {
+          lout(cond + ' ' + maybeGroup.getLabel())
+        } else {
+          cond = ''// cond = "ref";
+        }
+        const nodeIsSubGraph = maybeGroup.isInnerGraph
+        if (maybeGroup.getColor()) {
+          lout('style=filled;')
+          lout(getAttributeAndFormat(maybeGroup, 'color',
+            '   color="{0}";\n'))
+        }
+        ltraverseVertices(maybeGroup, nodeIsSubGraph)
+        printEdges(maybeGroup)
+      } else if (!(maybeGroup instanceof GraphVertex)) {
         throw new Error('Not a node nor a group, NOT SUPPORTED')
       }
-    }
+    })
   }
-  traverseVertices(graphcanvas, false)
+  ltraverseVertices(graphcanvas, false)
   printEdges(graphcanvas)
   output(false)
   lout('@enduml')

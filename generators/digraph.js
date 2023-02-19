@@ -151,16 +151,16 @@ export function digraph (graphcanvas) {
   }
 
   // Fix groups that have no nodes by adding invisible node there
-  const fixgroup = (o) => {
+  const fixgroup = (grp) => {
     if (!(output instanceof GraphGroup)) {
       return
     }
-    if (o.OBJECTS.length === 0) {
-      o.OBJECTS.push(new GraphVertex(`invis_${o.getName()}`)
+    if (grp.isEmpty()) {
+      grp.OBJECTS.push(new GraphVertex(`invis_${grp.getName()}`)
         .setStyle('invis'))
       return
     }
-    traverseVertices(o, fixgroup)
+    traverseVertices(grp, fixgroup)
   }
   traverseVertices(graphcanvas, fixgroup)
 
@@ -307,8 +307,8 @@ export function digraph (graphcanvas) {
       if (!rhs.isInnerGraph) {
         attrs.push(` lhead=cluster_${rhs.getName()}`)
       }
-      if (rhs.OBJECTS[0]) {
-        rhs = rhs.OBJECTS[0]
+      if (!rhs.isEmpty()) {
+        rhs = rhs.getFirstObject()
       }
     }
     if (lhs instanceof GraphGroup) {
@@ -324,7 +324,11 @@ export function digraph (graphcanvas) {
         })
         lhs = exits
       } else {
-        lhs = lhs.OBJECTS[0]
+        if (lhs.isEmpty()) {
+          // TODO:?
+        } else {
+          lhs = lhs.getFirstObject()
+        }
       }
       if (!lhs) {
         // Same as above

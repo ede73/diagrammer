@@ -20,21 +20,20 @@ export class GraphGroup extends GraphContainer {
     this.exitvertex = undefined
 
     /**
-         * Only defined in case of start conditional (if clause)
-         * Most usually GraphVertex
-         * Set directly in diagrammer.grammar
-         * @type {GraphConnectable}
-         */
-
+     * Only defined in case of start conditional (if clause)
+     * Most usually GraphVertex
+     * Set directly in diagrammer.grammar
+     * @type {GraphConnectable}
+     */
     this.entryedge = undefined
 
     /**
-         * Only defined in case of end conditional (else clause)
-         * TODO: Inconsistent: not a GraphConnectable
-         *
-         * Set to yy.collectNextVertex
-         * @type {GraphConnectable}
-         */
+     * Only defined in case of end conditional (else clause)
+     * TODO: Inconsistent: not a GraphConnectable
+     *
+     * Set to yy.collectNextVertex
+     * @type {GraphConnectable}
+     */
     this.exitedge = undefined
 
     /**
@@ -45,11 +44,11 @@ export class GraphGroup extends GraphContainer {
   }
 
   /**
-     * Set default vertexcolor, groupcolor, edgecolor Always ask from the
-     * currentContainer first
-     * @param {string} key
-     * @param {any} value
-     */
+   * Set default vertexcolor, groupcolor, edgecolor Always ask from the
+   * currentContainer first
+   * @param {string} key
+   * @param {any} value
+   */
   setDefault (key, value) {
     if (this.ALLOWED_DEFAULTS.indexOf(key.toLowerCase()) === -1) {
       throw new Error(`Trying to set unknown default ${key}`)
@@ -59,8 +58,8 @@ export class GraphGroup extends GraphContainer {
   }
 
   /**
-     * @param {string} key
-     */
+   * @param {string} key
+   */
   getDefault (key) {
     debug(`group:Get group ${key}`)
     return getAttribute(this, key)

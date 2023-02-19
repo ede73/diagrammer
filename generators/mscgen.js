@@ -53,10 +53,11 @@ export function mscgen (graphcanvas) {
       // TODO: Assuming it is Vertex (if Recursive groups implemented, it
       // could be smthg else)
       edgeType += ` lhead=cluster_${rhs.getName()}`
-      rhs = rhs.OBJECTS[0]
-      if (!rhs) {
+      if (rhs.isEmpty()) {
         // TODO:Bad thing, EMPTY group..add one invisible node there...
         // But should add already at TOP
+      } else {
+        rhs = rhs.getFirstObject()
       }
     }
     // TODO:Assuming producing DIGRAPH

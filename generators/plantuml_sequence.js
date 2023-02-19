@@ -134,19 +134,21 @@ export function plantuml_sequence (graphcanvas) {
         // it could be smthg else)
         // attrs.push(" lhead=cluster_" + lr.getName());
         // TODO:
-        rhs = rhs.OBJECTS[0]
-        if (!rhs) {
+        if (rhs.isEmpty()) {
           // TODO:Bad thing, EMPTY group..add one invisible node
           // there...
           // But should add already at TOP
+        } else {
+          rhs = rhs.getFirstObject()
         }
       }
       if (lhs instanceof GraphGroup) {
         // attrs.push(" ltail=cluster_" + ll.getName());
         // TODO:
-        lhs = lhs.OBJECTS[0]
-        if (!lhs) {
+        if (lhs.isEmpty()) {
           // Same as above
+        } else {
+          lhs = lhs.getFirstObject()
         }
       }
       // TODO:Assuming producing DIGRAPH

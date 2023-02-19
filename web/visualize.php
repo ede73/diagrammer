@@ -6,7 +6,7 @@
 #<!-- Prevents caching at the Proxy Server -->
 #<meta http-equiv="Expires" content="0"/>
 
-$outputFile="web/result.png";
+$outputFile="result.png";
 
 function getExe($name)
 {
@@ -80,4 +80,4 @@ switch ($_REQUEST["visualizer"]) {
     break;
 }
 file_put_contents("./error.txt", $r);
-echo $outputFile;
+echo "web/$outputFile";

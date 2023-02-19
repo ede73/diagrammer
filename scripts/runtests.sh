@@ -60,6 +60,7 @@ test() {
         echo "    ERROR: at $1, image $renderoutput $renderreference differ" >&2
         #display_image "$renderoutput" "$renderreference" /tmp/diff.png
         display_image /tmp/diff.png
+        diff -u "$textoutput" "$textreference"
         setError 11 "$1"
       fi
     else

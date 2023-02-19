@@ -1,11 +1,10 @@
 // @ts-check
 import { removeAllChildNodes, removeOldVisualizations } from './d3support.js'
-import { getHTMLElement, getInputElement, openImage, setError, updateImage } from './uiComponentAccess.js'
+import { getHTMLElement, getInputElement, openImage, updateImage } from './uiComponentAccess.js'
 import { visualizations } from './globals.js'
 import { makeHTTPPost } from './ajax.js'
 
-function makeNewImageHolder () {
-  removeOldVisualizations()
+function makeNewImageHolder (imageName) {
   const imgdiv = getHTMLElement('diagrammer-graph')
   const img = document.createElement('img')
   img.align = 'bottom'
@@ -15,8 +14,8 @@ function makeNewImageHolder () {
   img.id = 'image'
   // auto adjusts
   img.style.height = 'auto'
-  img.src = 'web/result.png'
-  img.onclick = () => openImage('web/result.png')
+  img.src = imageName
+  img.onclick = () => openImage(`web/${imageName}`)
   imgdiv.appendChild(img)
 }
 
@@ -25,7 +24,8 @@ function beautify (generatedCode) {
   try {
     data = JSON.parse(generatedCode)
   } catch (ex) {
-    setError('Failed parsing generated code, perhaps not JSON?')
+    // too aggressive for the use... many generated code not actually JSON
+    console.log('Failed parsing generated code, perhaps not JSON(digraph etc)?')
     return
   }
   // Get DOM-element for inserting json-tree
@@ -51,26 +51,26 @@ export function visualize (visualizer) {
   if (!visualizer) {
     throw new Error('Visualizer not defined')
   }
-  const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
-  // TODO: loads uselessly if web visualizer used
-  makeNewImageHolder()
-  makeHTTPPost(visualizeUrl, generatedResult,
-    updateImage,
-    (statusCode, statusText, responseText) => {
-      alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
-    })
-
-  /*
-        <img align="bottom" id="image" width="30%" src="web/result.png"
-            onclick="javascript:openImage('web/result.png');" />
-    */
+  removeOldVisualizations()
 
   if (visualizations.has(visualizer)) {
     // this is web only visualization
     console.log(`Visualize using ${visualizer}`)
     visualizations.get(visualizer)(result.value)
     console.log(`Finished visualizing ${visualizer}`)
-  } else if (visualizer === 'dot') {
+  } else {
+    // backend visualizer
+    const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
+    makeHTTPPost(visualizeUrl, generatedResult,
+      (image) => {
+        makeNewImageHolder(image)
+        updateImage(image)
+      },
+      (statusCode, statusText, responseText) => {
+        alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
+      })
+  }
+  if (visualizer === 'dot') {
     // hack to get Viz display graphviz as comparison..
     try {
       // TODO: Bring back viz/canviz

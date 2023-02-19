@@ -4,6 +4,19 @@
 %{
 	//generators = new Map();
 	//visualizations = new Map();
+	// there seems to be NO way to autoinitialize GraphCanvas
+	// this section is totally disconnected from the parser and has no access to yy
+	// lexer has yy access to is disconnected from here, no matter what you try..
+	// having simple accessible (global to ) parser variable like
+	// const graphcanvas=new GraphCanvas() doesn't work...
+	// nor yy.graphcanvas = new GraphCanvas()
+	// Some hacks towards that, but not really functional...
+	// https://stackoverflow.com/questions/30562134/jison-global-variables
+	// Basically ONLY way to get this done is to pass from above,ie.
+	// anytime doing parsing,
+	// diagrammer.parser.yy.GRAPHCANVAS = new GraphCanvas();
+	// diagrammer.parser.parse(code);
+	// https://gerhobbelt.github.io/jison/docs/#specifying-a-language
 %}
 %%
 S
@@ -30,8 +43,7 @@ S
 			*/
 
 			// Generator can be defined by the caller(user) or suggested by the graph
-			const graphcanvas = getGraphCanvas(yy);
-
+			const graphcanvas = yy.GRAPHCANVAS;
 			const parsedGenerator = graphcanvas.getGenerator();
 			const parsedVisualizer = graphcanvas.getVisualizer();
 			// TODO: Simplify, pass back to the caller, let it do decision what to use
@@ -74,10 +86,9 @@ S
 			    graphcanvas.setVisualizer(graphcanvas.getGenerator());
 			  }
 			}
-			graphcanvas._EDGES = yy._EDGES;
 			graphcanvas.parseError = yy.parseError;
 			graphcanvas.result = yy.result;
-			graphcanvas.yy = yy;
+			//graphcanvas.yy = yy;
 			
 			// Locate the generator, else just use digraph
 			const usegen = generators.get(graphcanvas.getGenerator());
@@ -97,13 +108,13 @@ S
 /* Read a color #xxxxxx or a variable $(xxx) or $(xxx:yyy) that MUST produce #xxxxxx*/
 colorOrVariable
 	: COLOR		-> $COLOR
-	| VARIABLE	-> processVariable(yy, $VARIABLE) /*one can use named $VARIABLE or positional $1 args, like former, but latter seem more ...readable*/
+	| VARIABLE	-> processVariable(yy.GRAPHCANVAS, $VARIABLE) /*one can use named $VARIABLE or positional $1 args, like former, but latter seem more ...readable*/
 	;
 
 /* Read a shape  or a variable $(xxx) or $(xxx:yyy) that MUST produce a shape */
 shapeOrVariable
 	: VARIABLE {
-			$$=processVariable(yy, $1).trim().toLowerCase();
+			$$=processVariable(yy.GRAPHCANVAS, $1).trim().toLowerCase();
 			if (["actor", "beginpoint", "box", "circle", "cloud", "condition", "database", "default", "diamond", "dots", "doublecircle",
 				 "ellipse", "endpoint", "input", "loopin", "loopout", "mail", "minidiamond", "minisquare", "note", "record", "roundedbox",
 				 "square", "terminator", "loop", "loopend", "loopstart", "rect", "rectangle"].indexOf($$)==-1){
@@ -116,7 +127,7 @@ shapeOrVariable
 /* read vertice's attributes basically like: [STYLES] [SHAPES] NAME [IMAGE|COLOR]*/
 readVertexAttrs
     /*  1      2       3       4        5            6          7*/
-	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> getVertex(yy, $NAME, $1).setColor($5);if ($$ instanceof GraphVertex) setAttr($$.setShape($2).setImage($6), 'compass', $4)
+	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> getVertex(yy.GRAPHCANVAS, $NAME, $1).setColor($5);if ($$ instanceof GraphVertex) setAttr($$.setShape($2).setImage($6), 'compass', $4)
 	;
 
 /*
@@ -136,63 +147,62 @@ http://publib.boulder.ibm.com/infocenter/zvm/v5r4/index.jsp?topic=/com.ibm.zvm.v
 vertexGroupListOrAttrs cumulates an array of vertices, RHS is the latest GraphVertex
 */
 vertexGroupListOrAttrs
-	: OPAREN -> enterSubGraph(yy)
-	| vertexGroupListOrAttrs LISTSEP INLINE_STRING? readVertexAttrs -> getList(yy, $vertexGroupListOrAttrs, $readVertexAttrs, $3)
+	: OPAREN -> enterSubGraph(yy.GRAPHCANVAS)
+	| vertexGroupListOrAttrs LISTSEP INLINE_STRING? readVertexAttrs -> getList(yy.GRAPHCANVAS, $vertexGroupListOrAttrs, $readVertexAttrs, $3)
 	| readVertexAttrs -> $readVertexAttrs
-	| CPAREN -> exitSubGraph(yy)
+	| CPAREN -> exitSubGraph(yy.GRAPHCANVAS)
 	;
 	/* TOOD: Could concatenate $4, $6 or if $4 defined AND $6, $6 could be appended as ::, unless already(note)*/
 readEvents
         /*   1         2       3       4        5               6              7                   8*/
-	: readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> getEdge(yy, $EVENT, $readEvents, $vertexGroupListOrAttrs, $6, $8?$8.substring(1):$8, $5, $2, $4).right
+	: readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> getEdge(yy.GRAPHCANVAS, $EVENT, $readEvents, $vertexGroupListOrAttrs, $6, $8?$8.substring(1):$8, $5, $2, $4).right
 	| readEvents LABEL -> $$.setLabel($LABEL.substring(1))
 	| vertexGroupListOrAttrs
 	;
 
 graphContent
-	: VARIABLE -> processVariable(yy, $1)
+	: VARIABLE -> processVariable(yy.GRAPHCANVAS, $1)
 	| SHAPE shapeOrVariable
 		{
 			debug("SHAPE getShapeOrVariablleee ");
 			if ($2=="default") $2=undefined;
-			$$=getGraphCanvas(yy).setCurrentShape($2);
+			$$=yy.GRAPHCANVAS.setCurrentShape($2);
 		}
 	| EQUAL vertexGroupListOrAttrs
 		{
-			getCurrentContainer(yy).setEqual($2 instanceof GraphVertex?new Array($2):$2);
+			getCurrentContainer(yy.GRAPHCANVAS).setEqual($2 instanceof GraphVertex?new Array($2):$2);
 		}
 	| SHAPE NAME {throw new Error("Expecting one of the shapes, got ("+$2+")");}
-	| LANDSCAPE		    -> getGraphCanvas(yy).setDirection("landscape")
-	| GENERATOR NAME	-> getGraphCanvas(yy).setGenerator($NAME)
-	| VISUALIZER NAME	-> getGraphCanvas(yy).setVisualizer($NAME)
-	| PORTRAIT			-> getGraphCanvas(yy).setDirection("portrait")
+	| LANDSCAPE		    -> yy.GRAPHCANVAS.setDirection("landscape")
+	| GENERATOR NAME	-> yy.GRAPHCANVAS.setGenerator($NAME)
+	| VISUALIZER NAME	-> yy.GRAPHCANVAS.setVisualizer($NAME)
+	| PORTRAIT			-> yy.GRAPHCANVAS.setDirection("portrait")
 	| COMMENT			-> "/*"+$COMMENT.substring(2)+"*/\n"
-	| VERTEX_COLOR colorOrVariable	   -> getCurrentContainer(yy).setDefault('vertexcolor'    ,$2=="default"?undefined:$2)
-	| VERTEXTEXT_COLOR colorOrVariable -> getCurrentContainer(yy).setDefault('vertextextcolor',$2=="default"?undefined:$2)
-	| EDGE_COLOR colorOrVariable	   -> getCurrentContainer(yy).setDefault('edgecolor'      ,$2=="default"?undefined:$2)
-	| EDGETEXT_COLOR colorOrVariable   -> getCurrentContainer(yy).setDefault('edgetextcolor'  ,$2=="default"?undefined:$2)
-	| GROUP_COLOR colorOrVariable	   -> getCurrentContainer(yy).setDefault('groupcolor'     ,$2=="default"?undefined:$2)
-	| IF	 ->	setAttr(setAttr(enterContainer(yy, getGroup(yy).setLabel($IF.replace(/\s+then\s*$/, "").replace(/^\s*if\s*/, ""))), 'conditional', 'if'), 'entryedge', yy.lastSeenVertex)
+	| VERTEX_COLOR colorOrVariable	   -> getCurrentContainer(yy.GRAPHCANVAS).setDefault('vertexcolor'    ,$2=="default"?undefined:$2)
+	| VERTEXTEXT_COLOR colorOrVariable -> getCurrentContainer(yy.GRAPHCANVAS).setDefault('vertextextcolor',$2=="default"?undefined:$2)
+	| EDGE_COLOR colorOrVariable	   -> getCurrentContainer(yy.GRAPHCANVAS).setDefault('edgecolor'      ,$2=="default"?undefined:$2)
+	| EDGETEXT_COLOR colorOrVariable   -> getCurrentContainer(yy.GRAPHCANVAS).setDefault('edgetextcolor'  ,$2=="default"?undefined:$2)
+	| GROUP_COLOR colorOrVariable	   -> getCurrentContainer(yy.GRAPHCANVAS).setDefault('groupcolor'     ,$2=="default"?undefined:$2)
+	| IF	 ->	setAttr(setAttr(enterContainer(yy.GRAPHCANVAS, getGroup(yy.GRAPHCANVAS).setLabel($IF.replace(/\s+then\s*$/, "").replace(/^\s*if\s*/, ""))), 'conditional', 'if'), '_conditionalEntryEdge', yy.GRAPHCANVAS.lastSeenVertex)
 	| ELSEIF {
-		exitContainer(yy);
-		$$=setAttr(enterContainer(yy, getGroup(yy).setLabel($ELSEIF.replace(/\s+then\s*$/, "").replace(/^\s*elseif\s*/, ""))), 'conditional', 'elseif')
+		exitContainer(yy.GRAPHCANVAS);
+		$$=setAttr(enterContainer(yy.GRAPHCANVAS, getGroup(yy.GRAPHCANVAS).setLabel($ELSEIF.replace(/\s+then\s*$/, "").replace(/^\s*elseif\s*/, ""))), 'conditional', 'elseif')
 		}
 	| ELSE	 {
-		exitContainer(yy);
-		$$=setAttr(enterContainer(yy, getGroup(yy).setLabel($ELSE)), 'conditional', 'else')
+		exitContainer(yy.GRAPHCANVAS);
+		$$=setAttr(enterContainer(yy.GRAPHCANVAS, getGroup(yy.GRAPHCANVAS).setLabel($ELSE)), 'conditional', 'else')
 		}
 	| ENDIF	 { 
-		exitContainer(yy);
+		exitContainer(yy.GRAPHCANVAS);
 		// TODO: is ENDIF container necessary?YES, it could be invisible vertex! Could link to that instead of endif kludge in digraph
-        // TODO: MOVING TO GraphCanvas??
-		yy.collectNextVertex=setAttr(enterContainer(yy, getGroup(yy).setLabel($ENDIF)), 'conditional', 'endif')
-		debug("XXXXXXXXXXXXXXXXXXXXX collectNextVertex"+yy.collectNextVertex);
-		$$=exitContainer(yy)
+		yy.GRAPHCANVAS._nextConnectableToExitEndIf=setAttr(enterContainer(yy.GRAPHCANVAS, getGroup(yy.GRAPHCANVAS).setLabel($ENDIF)), 'conditional', 'endif')
+		debug("XXXXXXXXXXXXXXXXXXXXX _nextConnectableToExitEndIf"+yy.GRAPHCANVAS._nextConnectableToExitEndIf);
+		$$=exitContainer(yy.GRAPHCANVAS)
 	}
 	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */
-	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END -> enterContainer(yy, getGroup(yy).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
-	| GROUP_END  -> exitContainer(yy)
-	| START NAME -> getGraphCanvas(yy).setStart($NAME)
+	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END -> enterContainer(yy.GRAPHCANVAS, getGroup(yy.GRAPHCANVAS).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
+	| GROUP_END  -> exitContainer(yy.GRAPHCANVAS)
+	| START NAME -> yy.GRAPHCANVAS.setStart($NAME)
 	| readEvents {
 	}
 	;

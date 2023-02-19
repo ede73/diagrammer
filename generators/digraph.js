@@ -7,6 +7,8 @@ import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphInner } from '../model/graphinner.js'
+// typing
+// eslint-disable-next-line no-unused-vars
 import { GraphReference } from '../model/graphreference.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { getVertex, hasOutwardEdge, traverseEdges, traverseVertices } from '../model/model.js'
@@ -133,7 +135,7 @@ export function digraph (graphcanvas) {
   // This may FORWARD DECLARE a node...which creates problems with coloring
   const start = graphcanvas.getStart()
   if (start) {
-    const fwd = getVertex(graphcanvas.yy, start)
+    const fwd = getVertex(graphcanvas, start)
     processAVertex(fwd)
     lout('//startnode setup')
     lout(`{rank = same;null} {rank = same; ${start}}`, true)
@@ -220,10 +222,10 @@ export function digraph (graphcanvas) {
       lout(`//COND ${grp.getName()} ${cond}`)
       if (cond === 'endif') {
         // never reached
-        const exitedge = grp.exitedge
-        if (exitedge) {
-          lout(`${lastexit}->${exitedge.getName()}[ color=red ];`)
-          lout(`${lastendif}->${exitedge.getName()};`)
+        const _conditionalExitEdge = grp._conditionalExitEdge
+        if (_conditionalExitEdge) {
+          lout(`${lastexit}->${_conditionalExitEdge.getName()}[ color=red ];`)
+          lout(`${lastendif}->${_conditionalExitEdge.getName()};`)
         }
       } else {
         const exitVertexInConditional = `entry${grp.exitvertex}`
@@ -234,8 +236,8 @@ export function digraph (graphcanvas) {
         // TODO:else does not need diamond
         lout(`${exitVertexInConditional}[ shape=diamond, fixedsize=true, width=1, height=1, label="${grp.getLabel()}" ];`)
         if (cond === 'if') {
-          // entryedge!
-          lout(`${grp.entryedge.getName()}->${exitVertexInConditional};`)
+          // _conditionalEntryEdge!
+          lout(`${grp._conditionalEntryEdge.getName()}->${exitVertexInConditional};`)
         }
         // FIRST node of group and LAST node(GraphConnectable) in group..
         const firstReferredNode = getFirstLHSReferredNodeFromGroup(grp)
@@ -308,7 +310,7 @@ export function digraph (graphcanvas) {
         // perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
         const exits = []
         traverseVertices(lhs, go => {
-          if (!hasOutwardEdge(graphcanvas.yy, go)) {
+          if (!hasOutwardEdge(graphcanvas, go)) {
             exits.push(go)
           }
         })

@@ -56,7 +56,7 @@ export function setAttr (cl, attr, value) {
 
 /**
  * Create a string formatter.
- * Format string according to format rules with positional arguments like xxx={0} yyy={1}
+ * Format string according to format rules with positional arguments like xxx={0} zzz={1}
  * @returns {string}
  */
 // @ts-ignore

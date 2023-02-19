@@ -1,5 +1,6 @@
 // @ts-check
 import { diagrammerParser } from '../build/diagrammer_parser.js'
+import { GraphCanvas } from '../model/graphcanvas.js'
 import { getGenerator, getError, getInputElement, getVisualizer, setError, setGenerator } from './uiComponentAccess.js'
 
 /**
@@ -80,8 +81,6 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
   setError('')
   try {
     delete (diagrammerParser.yy.GRAPHCANVAS)
-    delete (diagrammerParser.yy._EDGES)
-    delete (diagrammerParser.yy._OBJECTS)
     // TODO: MOVING TO GraphCanvas
     diagrammerParser.yy.USE_GENERATOR = generator
     // TODO: MOVING TO GraphCanvas
@@ -89,6 +88,7 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
     // If true, actually prefer generator/visualizer from loaded script IF specified
     // used while loading new examples...
     diagrammerParser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer
+    diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
     // @ts-ignore
     diagrammerParser.parse(diagrammerCode)
     console.log(`  ..parsed, calling it a success with ${getGenerator()} and ${getVisualizer()}`)
@@ -99,7 +99,7 @@ export function parse (diagrammerCode, successCallback, failureCallback, preferS
       setError(`Parsing went ok, but visualization failed: ${getError()} and ${ex}`)
     }
   } catch (ex) {
-    console.error(`  ..parsed, and failed ${getError()} and ${ex}`)
+    setError(`  ..parsed, and failed ${getError()} and ${ex}`)
     failureCallback(getError(), ex)
   } finally {
     parsingStarted = 0

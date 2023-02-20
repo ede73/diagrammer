@@ -124,7 +124,7 @@ export function _getList (graphCanvas, lhs, rhs, rhsEdgeLabel) {
  * @return {GraphConnectable} Comment claims to return Array, but quick run didn't reveal Array ever returned..
  */
 export function _getVertex (graphCanvas, objOrName, style) {
-  debug(`getVertex (name:${objOrName},style:${style})`, true)
+  debug(`_getVertex (name:${objOrName}, style:${style})`, true)
 
   function findVertex (graphCanvas, /** @type {(string|GraphConnectable)} */obj, style) {
     if (obj instanceof GraphVertex) {
@@ -154,8 +154,9 @@ export function _getVertex (graphCanvas, objOrName, style) {
       // And to be precise this is violation of the language as well! We DO have the vertex IN the group, even if it was declared at the top
       // TODO: Fix this, without breaking all other generators, introduce Reference wrapper (GraphReference(GraphVertex))
       // This allows filtering it out in all traversal code, but allows nwdiag see the REFERENCE
-      _pushToCurrentContainerAsReference(graphCanvas, foundConnectable)
-      return foundConnectable
+      const ret = _pushToCurrentContainerAsReference(graphCanvas, foundConnectable)
+      debug(`_getVertex return ${foundConnectable.getName()}/${foundConnectable.constructor.name} vs ${ret.getName()}${ret.constructor.name}`, false)
+      return ret // foundConnectable
     }
     // if obj was GraphConnectable?
     if (obj instanceof GraphConnectable) {
@@ -177,7 +178,7 @@ export function _getVertex (graphCanvas, objOrName, style) {
   }
 
   const vertex = findVertex(graphCanvas, objOrName, style)
-  debug(`  in getVertex gotVertex ${vertex}`)
+  debug(`  in getVertex gotVertex ${vertex} / ${vertex.getName()}/${vertex.constructor.name}`)
   graphCanvas.lastSeenVertex = vertex
   if (graphCanvas._nextConnectableToExitEndIf) {
     debug('Collect next vertex')
@@ -344,9 +345,9 @@ export function _exitSubGraph (graphCanvas) {
  */
 export function _getGroup (graphCanvas, ref) {
   if (ref instanceof GraphGroup) return ref
-  debug(`getGroup() NEW GROUP:$${ref}`, true)
+  debug(`_getGroup() ref:${ref}`, true)
   const newGroup = new GraphGroup(String(graphCanvas.GROUPIDS++))
-  debug(`push group ${newGroup}`)
+  debug(`pushgroup ${newGroup}`)
   _getCurrentContainer(graphCanvas).addObject(newGroup)
 
   _getDefaultAttribute(graphCanvas, 'groupcolor', function (color) {
@@ -383,7 +384,7 @@ export function _getGroup (graphCanvas, ref) {
 export function _getEdge (graphCanvas, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass, dontadd) {
   let lastEdge
   const currentContainer = _getCurrentContainer(graphCanvas)
-  debug(true)
+  debug(`_getEdge edgeType=${edgeType} lhs=${lhs}/${lhs.constructor.name} rhs=${rhs} inlineEdgeLabel=${inlineEdgeLabel} commonEdgeLabel=${commonEdgeLabel} edgeColor=${edgeColor} lcompass=${lcompass} rcompass=${rcompass} dontadd=${dontadd}`, true)
   if (rhs instanceof GraphInner && !rhs._getEntrance()) {
     rhs._setEntrance(lhs)
   }
@@ -440,10 +441,10 @@ export function _getEdge (graphCanvas, edgeType, lhs, rhs, inlineEdgeLabel, comm
     if (rcompass) { fmt += `rcompass: ${rcompass}` }
     debug(`getEdge type:${edgeType} l:${lhs} r:${rhs}${fmt}`)
   }
-  if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) && !(lhs instanceof GraphInner)) {
+  if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) && !(lhs instanceof GraphInner) && !(lhs instanceof GraphReference)) {
     throw new Error(`LHS not a Vertex,Group nor a SubGraph(LHS=${lhs}) RHS=(${rhs})`)
   }
-  if (!(rhs instanceof GraphVertex) && !(rhs instanceof GraphGroup) && !(rhs instanceof GraphInner)) {
+  if (!(rhs instanceof GraphVertex) && !(rhs instanceof GraphGroup) && !(rhs instanceof GraphInner) && !(rhs instanceof GraphReference)) {
     throw new Error(`RHS not a Vertex,Group nor a SubGraph(LHS=${lhs}) RHS=(${rhs})`)
   }
   const edge = new GraphEdge(edgeType, lhs, rhs)
@@ -564,18 +565,26 @@ function _addEdge (graphCanvas, edge) {
   return edge
 }
 
+/**
+ *
+ * @param {GraphCanvas} graphCanvas
+ * @param {GraphConnectable} referred
+ * @returns {GraphConnectable}
+ */
 function _pushToCurrentContainerAsReference (graphCanvas, referred) {
   const cnt = _getCurrentContainer(graphCanvas)
   if (!(cnt instanceof GraphGroup)) {
-    return
+    // if current container is anything but a group, just return the same now
+    return referred
   }
   const nodes = cnt._getObjects(true)
   const alreadyIncluded = nodes.filter(n => n.getName() === referred.getName()) // OK
   if (alreadyIncluded.length > 0) {
-    debug('###Already included..so bail out')
-    return
+    debug(` This group (${cnt.getName()}) already has this named node in it, so just bail out`)
+    return referred
   }
-  debug(`###Add (${referred.getName()}) as reference node to the current group (${cnt.getName()})`)
+  debug(`  Add GraphReference(${referred.getName()}) to group (${cnt.getName()})`)
   const ref = new GraphReference(referred.getName())
   cnt.addObject(ref)
+  return ref
 }

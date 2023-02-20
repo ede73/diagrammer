@@ -184,7 +184,7 @@ vertexGroupListOrAttrs
 readEvents
         /*   1         2       3       4        5               6              7                   8*/
 	: readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? {
-		parser.trace('readEvents1 :'+$EVENT+","+$readEvents+","+$vertexGroupListOrAttrs+","+$6+","+$8+","+$5+","+$2+","+$4);
+		parser.trace('readEvents1 : edgetype='+$EVENT+", lhs="+$readEvents+",rhs="+$vertexGroupListOrAttrs+",inlineedge="+$6+",commonedge="+$8+",edgecolor="+$5+",lcompass="+$2+",rcompass="+$4);
 		$$=_getEdge(yy.GRAPHCANVAS, $EVENT, $readEvents, $vertexGroupListOrAttrs, $6, $8?$8.substring(1):$8, $5, $2, $4).right;
 	}
 	| readEvents LABEL {

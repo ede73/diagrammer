@@ -112,7 +112,7 @@ for test in $tests; do
     runtest url.txt
     runtest state.txt
     runtest state2.txt
-    runtest state3.txt
+    runtest node_and_edge_coloring.txt
     runtest state4.txt
     runtest state6.txt
     runtest state7.txt

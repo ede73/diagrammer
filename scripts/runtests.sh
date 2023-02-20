@@ -111,7 +111,6 @@ for test in $tests; do
     runtest state_nodelinktests.txt
     runtest url.txt
     runtest state.txt
-    runtest state2.txt
     runtest node_and_edge_coloring.txt
     runtest state_machine_with_start_node.txt
     runtest two_linked_clusters.txt

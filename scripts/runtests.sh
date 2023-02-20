@@ -133,7 +133,7 @@ for test in $tests; do
     runtest events.txt
     runtest compass.txt
   }
-  [ "$test" != "actdiag" ] && [ "$test" != "blockdiag" ] && runtest state5.txt
+  [ "$test" != "actdiag" ] && [ "$test" != "blockdiag" ] && runtest record_style.txt
   [ "$test" != "blockdiag" ] && runtest state_tcp.txt
   runtest state_group.txt
   runtest group_group_link.txt

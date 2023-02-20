@@ -1,6 +1,6 @@
 import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
-import { traverseEdges, traverseVertices } from '../model/model.js'
+import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { getAttributeAndFormat, output, multiAttrFmt } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="actdiag">Activity Diagram(cli)</option>

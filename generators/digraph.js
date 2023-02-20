@@ -7,11 +7,9 @@ import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphInner } from '../model/graphinner.js'
-// typing
-// eslint-disable-next-line no-unused-vars
-import { GraphReference } from '../model/graphreference.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { getVertex, hasOutwardEdge, traverseEdges, traverseVertices } from '../model/model.js'
+import { hasOutwardEdge, traverseEdges, traverseVertices } from '../model/traversal.js'
+import { getVertex } from '../model/model.js'
 import { debug, getAttributeAndFormat, output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>

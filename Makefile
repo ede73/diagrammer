@@ -79,6 +79,10 @@ testrunner: ./scripts/runtests.sh all plantuml nodemodules
 	./scripts/runtests.sh
 
 jesttests: all nodemodules
+	@if [ -f web/result.png ]; then \
+	  echo "TODO: Currently web/result.png might cause random test failures if graph was rendered prior from Web UI"; \
+	  exit 10; \
+	fi
 	@mkdir -p tests/test_outputs
 	npm test
 

@@ -1,7 +1,7 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
-import { traverseEdges, traverseVertices } from '../model/model.js'
+import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="layerbands">LayerBands(GoJS)</option>

@@ -12,7 +12,7 @@ import { GraphVertex } from '../model/graphvertex.js'
 import { GraphGroup } from '../model/graphgroup.js'
 // eslint-disable-next-line no-unused-vars
 import { GraphInner } from '../model/graphinner.js'
-import { traverseEdges, traverseVertices } from '../model/model.js'
+import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { output } from '../model/support.js'
 import { GraphReference } from '../model/graphreference.js'
 // ADD TO INDEX.HTML AS: <option value="ast_record">Abstract Syntax Tree(Record)</option>

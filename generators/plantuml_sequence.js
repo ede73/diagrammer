@@ -4,7 +4,8 @@ import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { debug, getAttributeAndFormat, iterateEdges, output, outputFormattedText } from '../model/support.js'
-import { getVertex, traverseVertices } from '../model/model.js'
+import { getVertex } from '../model/model.js'
+import { traverseVertices } from '../model/traversal.js'
 
 // ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
 

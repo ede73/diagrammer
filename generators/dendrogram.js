@@ -1,7 +1,7 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators, visualizations } from '../model/graphcanvas.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { traverseEdges } from '../model/model.js'
+import { traverseEdges } from '../model/traversal.js'
 import { debug, output } from '../model/support.js'
 import { findVertex, traverseTree, TreeVertex } from '../model/tree.js'
 

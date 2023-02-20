@@ -189,4 +189,50 @@ export class GraphCanvas extends GraphContainer {
   toString () {
     return 'GraphCanvas'
   }
+
+  /**
+   * TODO: DUAL DECLARATION
+   *
+   * Usage: grammar/diagrammer.grammar
+   *
+   * Get current container
+   * @return {GraphContainer}
+   */
+  _getCurrentContainer () {
+    return this.CURRENTCONTAINER[this.CURRENTCONTAINER.length - 1]
+  }
+
+  /**
+   * Enter into a new container, set it as current container
+   * TODO: move to GraphCanvas
+   * Usage: grammar/diagrammer.grammar
+   *
+   * @param {GraphContainer} container Set this container as current container
+   * @return {GraphContainer}
+   */
+  _enterContainer (container) {
+    this.CURRENTCONTAINER.push(container)
+    return container
+  }
+
+  /**
+   * Exit the current container
+   * Return the previous one
+   * Previous one also set as current container
+   *
+   * TODO: Move to GraphCanvas
+   * Usage: grammar/diagrammer.grammar
+   *
+   */
+  _exitContainer () {
+    if (this.CURRENTCONTAINER.length <= 1) { throw new Error('INTERNAL ERROR:Trying to exit ROOT container') }
+    const currentContainer = this.CURRENTCONTAINER.pop()
+    if (currentContainer instanceof GraphGroup) {
+      currentContainer.exitvertex = this.CONTAINER_EXIT++
+    }
+    // TODO: digraph (or graphviz rather) visualizing empty subgraph breaks, it needs a node (invisible for instance)
+    // digraph generator imlpements this by injecting empty invis node for all empty groups.
+    // While this works, it does edit the graph, which is bad..
+    return currentContainer
+  }
 };

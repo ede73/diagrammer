@@ -174,7 +174,7 @@ export function _getVertex (graphCanvas, objOrName, style) {
       vertex.setTextColor(color)
     })
     debug(false)
-    return _getCurrentContainer(graphCanvas).addObject(vertex)
+    return graphCanvas._getCurrentContainer().addObject(vertex)
   }
 
   const vertex = findVertex(graphCanvas, objOrName, style)
@@ -191,56 +191,6 @@ export function _getVertex (graphCanvas, objOrName, style) {
 }
 
 /**
- * TODO: DUAL DECLARATION
- *
- * Usage: grammar/diagrammer.grammar
- *
- * Get current container
- * @param {GraphCanvas} graphCanvas
- * @return {GraphContainer}
- */
-export function _getCurrentContainer (graphCanvas) {
-  // no need for value, but runs init if missing
-  return graphCanvas.CURRENTCONTAINER[graphCanvas.CURRENTCONTAINER.length - 1]
-}
-
-/**
- * Enter into a new container, set it as current container
- * TODO: move to GraphCanvas
- * Usage: grammar/diagrammer.grammar
- *
- * @param {GraphCanvas} graphCanvas
- * @param {GraphContainer} container Set this container as current container
- * @return {GraphContainer}
- */
-export function _enterContainer (graphCanvas, container) {
-  graphCanvas.CURRENTCONTAINER.push(container)
-  return container
-}
-
-/**
- * Exit the current container
- * Return the previous one
- * Previous one also set as current container
- *
- * TODO: Move to GraphCanvas
- * Usage: grammar/diagrammer.grammar
- *
- * @param {GraphCanvas} graphCanvas
- */
-export function _exitContainer (graphCanvas) {
-  if (graphCanvas.CURRENTCONTAINER.length <= 1) { throw new Error('INTERNAL ERROR:Trying to exit ROOT container') }
-  const currentContainer = graphCanvas.CURRENTCONTAINER.pop()
-  if (currentContainer instanceof GraphGroup) {
-    currentContainer.exitvertex = graphCanvas.CONTAINER_EXIT++
-  }
-  // TODO: digraph (or graphviz rather) visualizing empty subgraph breaks, it needs a node (invisible for instance)
-  // digraph generator imlpements this by injecting empty invis node for all empty groups.
-  // While this works, it does edit the graph, which is bad..
-  return currentContainer
-}
-
-/**
  * Enter to a new parented sub graph
  * like in a>(b>c,d,e)>h
  *
@@ -251,7 +201,7 @@ export function _exitContainer (graphCanvas) {
  */
 export function _enterSubGraph (graphCanvas) {
   const subgraph = _getSubGraph(graphCanvas)
-  return _enterContainer(graphCanvas, subgraph)
+  return graphCanvas._enterContainer(subgraph)
 }
 
 /*
@@ -260,7 +210,7 @@ export function _enterSubGraph (graphCanvas) {
  */
 export function _exitSubGraph (graphCanvas) {
   // Now should edit the ENTRANCE EDGE to point to a>b, a>d, a>e
-  const currentSubGraphTypeCheckerFix = _getCurrentContainer(graphCanvas)
+  const currentSubGraphTypeCheckerFix = graphCanvas._getCurrentContainer()
   if (!(currentSubGraphTypeCheckerFix instanceof GraphInner)) {
     throw new Error(`Subgraph cannot be any other than GraphInner:${typeof (currentSubGraphTypeCheckerFix)}`)
   }
@@ -329,7 +279,7 @@ export function _exitSubGraph (graphCanvas) {
   if (lastVertex) {
     currentSubGraph._setExit(lastVertex)
   }
-  return _exitContainer(graphCanvas)
+  return graphCanvas._exitContainer()
 }
 
 /**
@@ -348,7 +298,7 @@ export function _getGroup (graphCanvas, ref) {
   debug(`_getGroup() ref:${ref}`, true)
   const newGroup = new GraphGroup(String(graphCanvas.GROUPIDS++))
   debug(`pushgroup ${newGroup}`)
-  _getCurrentContainer(graphCanvas).addObject(newGroup)
+  graphCanvas._getCurrentContainer().addObject(newGroup)
 
   _getDefaultAttribute(graphCanvas, 'groupcolor', function (color) {
     newGroup.setColor(color)
@@ -383,7 +333,7 @@ export function _getGroup (graphCanvas, ref) {
  */
 export function _getEdge (graphCanvas, edgeType, lhs, rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass, dontadd) {
   let lastEdge
-  const currentContainer = _getCurrentContainer(graphCanvas)
+  const currentContainer = graphCanvas._getCurrentContainer()
   debug(`_getEdge edgeType=${edgeType} lhs=${lhs}/${lhs.constructor.name} rhs=${rhs} inlineEdgeLabel=${inlineEdgeLabel} commonEdgeLabel=${commonEdgeLabel} edgeColor=${edgeColor} lcompass=${lcompass} rcompass=${rcompass} dontadd=${dontadd}`, true)
   if (rhs instanceof GraphInner && !rhs._getEntrance()) {
     rhs._setEntrance(lhs)
@@ -541,7 +491,7 @@ function _getDefaultAttribute (graphCanvas, attrname, callback) {
 function _getSubGraph (graphCanvas, ref) {
   if (ref instanceof GraphInner) return ref
   const newSubGraph = new GraphInner(String(graphCanvas.SUBGRAPHS++))
-  _getCurrentContainer(graphCanvas).addObject(newSubGraph)
+  graphCanvas._getCurrentContainer().addObject(newSubGraph)
   return newSubGraph
 }
 
@@ -558,7 +508,7 @@ function _addEdge (graphCanvas, edge) {
     throw new Error('xx')
   } else {
     debug(`PUSH EDGE:${edge}`, true)
-    edge.container = _getCurrentContainer(graphCanvas)
+    edge.container = graphCanvas._getCurrentContainer()
   }
   graphCanvas._EDGES.push(edge)
   debug(false)
@@ -572,7 +522,7 @@ function _addEdge (graphCanvas, edge) {
  * @returns {GraphConnectable}
  */
 function _pushToCurrentContainerAsReference (graphCanvas, referred) {
-  const cnt = _getCurrentContainer(graphCanvas)
+  const cnt = graphCanvas._getCurrentContainer()
   if (!(cnt instanceof GraphGroup)) {
     // if current container is anything but a group, just return the same now
     return referred

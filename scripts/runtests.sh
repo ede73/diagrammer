@@ -114,7 +114,7 @@ for test in $tests; do
     runtest state2.txt
     runtest node_and_edge_coloring.txt
     runtest state_machine_with_start_node.txt
-    runtest state6.txt
+    runtest two_linked_clusters.txt
     runtest node_and_edge_coloring2.txt
     runtest state8.txt
     runtest multiple_lhs_lists.txt

@@ -116,7 +116,7 @@ for test in $tests; do
     runtest state_machine_with_start_node.txt
     runtest two_linked_clusters.txt
     runtest node_and_edge_coloring2.txt
-    runtest state8.txt
+    runtest two_linked_clusters_with_invisible_node.txt
     runtest multiple_lhs_lists.txt
     runtest lhs_rhs_lists.txt
     runtest two_filled_linked_vertices.txt

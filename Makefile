@@ -44,7 +44,11 @@ build/diagrammer.all: $(GRAMMAR_FILES)
 build/diagrammer_parser.js: build/diagrammer.all Makefile generators/* model/* js/*
 	@mkdir -p build
 	@echo make parser
-	@node_modules/.bin/jison $< -o $@
+	if [ ${DEBUG} ]; then \
+	node_modules/.bin/jison -t $< -o $@; \
+	else \
+	node_modules/.bin/jison $< -o $@; \
+	fi
 	sed -i "1 i\\\\" $@
 	for generator in generators/*.js; do \
 	  genfunc="$$(basename $$generator | cut -d. -f1)"; \

@@ -120,7 +120,7 @@ for test in $tests; do
     runtest multiple_lhs_lists.txt
     runtest lhs_rhs_lists.txt
     runtest state11.txt
-    runtest state12.txt
+    runtest landscape.txt
     runtest state_cluster_edge.txt
     runtest state_dual_node.txt
     runtest state_innergroups.txt

@@ -141,7 +141,7 @@ done
 
 testbin=nwdiag
 runtest state13.txt
-runtest state14.txt
+runtest nwdiag3.txt
 runtest state15.txt
 runtest nwdiag2.txt
 runtest nwdiag.txt

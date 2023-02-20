@@ -140,7 +140,7 @@ for test in $tests; do
 done
 
 testbin=nwdiag
-runtest state13.txt
+runtest nwdiag_multiple_ips.txt
 runtest nwdiag3.txt
 runtest state15.txt
 runtest nwdiag2.txt

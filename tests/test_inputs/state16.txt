@@ -1,8 +1,18 @@
+generator nwdiag
+
 shape cloud
 inet
 shape default
-{ empty;x
-	router web01 web02
+
+{comcast;73.0.0.0/8
+ cablemodem
+ router;73.63.53.43
 }
 
-inet - router
+{ home;192.168.1.0/24
+	router;192.168.1.1
+	printer;192.168.1.2
+	nas;192.168.1.3
+}
+
+inet - cablemodem

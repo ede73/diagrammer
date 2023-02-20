@@ -142,7 +142,7 @@ done
 testbin=nwdiag
 runtest nwdiag_multiple_ips.txt
 runtest nwdiag3.txt
-runtest state15.txt
+runtest nwdiag5.txt
 runtest nwdiag2.txt
 runtest nwdiag.txt
 

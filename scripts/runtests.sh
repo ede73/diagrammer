@@ -115,7 +115,7 @@ for test in $tests; do
     runtest node_and_edge_coloring.txt
     runtest state4.txt
     runtest state6.txt
-    runtest state7.txt
+    runtest node_and_edge_coloring2.txt
     runtest state8.txt
     runtest multiple_lhs_lists.txt
     runtest lhs_rhs_lists.txt

@@ -118,7 +118,7 @@ for test in $tests; do
     runtest state7.txt
     runtest state8.txt
     runtest state9.txt
-    runtest state10.txt
+    runtest lhs_rhs_lists.txt
     runtest state11.txt
     runtest state12.txt
     runtest state_cluster_edge.txt

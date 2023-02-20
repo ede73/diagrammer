@@ -108,13 +108,13 @@ S
 /* Read a color #xxxxxx or a variable $(xxx) or $(xxx:yyy) that MUST produce #xxxxxx*/
 colorOrVariable
 	: COLOR		-> $COLOR
-	| VARIABLE	-> processVariable(yy.GRAPHCANVAS, $VARIABLE) /*one can use named $VARIABLE or positional $1 args, like former, but latter seem more ...readable*/
+	| VARIABLE	-> _processVariable(yy.GRAPHCANVAS, $VARIABLE) /*one can use named $VARIABLE or positional $1 args, like former, but latter seem more ...readable*/
 	;
 
 /* Read a shape  or a variable $(xxx) or $(xxx:yyy) that MUST produce a shape */
 shapeOrVariable
 	: VARIABLE {
-			$$=processVariable(yy.GRAPHCANVAS, $1).trim().toLowerCase();
+			$$=_processVariable(yy.GRAPHCANVAS, $1).trim().toLowerCase();
 			if (["actor", "beginpoint", "box", "circle", "cloud", "condition", "database", "default", "diamond", "dots", "doublecircle",
 				 "ellipse", "endpoint", "input", "loopin", "loopout", "mail", "minidiamond", "minisquare", "note", "record", "roundedbox",
 				 "square", "terminator", "loop", "loopend", "loopstart", "rect", "rectangle"].indexOf($$)==-1){
@@ -127,7 +127,7 @@ shapeOrVariable
 /* read vertice's attributes basically like: [STYLES] [SHAPES] NAME [IMAGE|COLOR]*/
 readVertexAttrs
     /*  1      2       3       4        5            6          7*/
-	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> getVertex(yy.GRAPHCANVAS, $NAME, $1).setColor($5);if ($$ instanceof GraphVertex) setAttr($$.setShape($2).setImage($6), 'compass', $4)
+	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> _getVertex(yy.GRAPHCANVAS, $NAME, $1).setColor($5);if ($$ instanceof GraphVertex) setAttr($$.setShape($2).setImage($6), 'compass', $4)
 	;
 
 /*
@@ -135,7 +135,7 @@ NOT BEST...return GraphVertex or Group, but some commands allow only GraphVertex
 But it gets thing done..for now!
 TODO: Fix it
 
-This means getVertex MUST be able to return a Group as well! If name matches!!
+This means _getVertex MUST be able to return a Group as well! If name matches!!
 
 left recursive
   X=[STYLES] [SHAPES] NAME [IMAGE|COLOR]
@@ -147,21 +147,21 @@ http://publib.boulder.ibm.com/infocenter/zvm/v5r4/index.jsp?topic=/com.ibm.zvm.v
 vertexGroupListOrAttrs cumulates an array of vertices, RHS is the latest GraphVertex
 */
 vertexGroupListOrAttrs
-	: OPAREN -> enterSubGraph(yy.GRAPHCANVAS)
-	| vertexGroupListOrAttrs LISTSEP INLINE_STRING? readVertexAttrs -> getList(yy.GRAPHCANVAS, $vertexGroupListOrAttrs, $readVertexAttrs, $3)
+	: OPAREN -> _enterSubGraph(yy.GRAPHCANVAS)
+	| vertexGroupListOrAttrs LISTSEP INLINE_STRING? readVertexAttrs -> _getList(yy.GRAPHCANVAS, $vertexGroupListOrAttrs, $readVertexAttrs, $3)
 	| readVertexAttrs -> $readVertexAttrs
-	| CPAREN -> exitSubGraph(yy.GRAPHCANVAS)
+	| CPAREN -> _exitSubGraph(yy.GRAPHCANVAS)
 	;
 	/* TOOD: Could concatenate $4, $6 or if $4 defined AND $6, $6 could be appended as ::, unless already(note)*/
 readEvents
         /*   1         2       3       4        5               6              7                   8*/
-	: readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> getEdge(yy.GRAPHCANVAS, $EVENT, $readEvents, $vertexGroupListOrAttrs, $6, $8?$8.substring(1):$8, $5, $2, $4).right
+	: readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> _getEdge(yy.GRAPHCANVAS, $EVENT, $readEvents, $vertexGroupListOrAttrs, $6, $8?$8.substring(1):$8, $5, $2, $4).right
 	| readEvents LABEL -> $$.setLabel($LABEL.substring(1))
 	| vertexGroupListOrAttrs
 	;
 
 graphContent
-	: VARIABLE -> processVariable(yy.GRAPHCANVAS, $1)
+	: VARIABLE -> _processVariable(yy.GRAPHCANVAS, $1)
 	| SHAPE shapeOrVariable
 		{
 			debug("SHAPE getShapeOrVariablleee ");
@@ -170,7 +170,7 @@ graphContent
 		}
 	| EQUAL vertexGroupListOrAttrs
 		{
-			getCurrentContainer(yy.GRAPHCANVAS).setEqual($2 instanceof GraphVertex?new Array($2):$2);
+			_getCurrentContainer(yy.GRAPHCANVAS).setEqual($2 instanceof GraphVertex?new Array($2):$2);
 		}
 	| SHAPE NAME {throw new Error("Expecting one of the shapes, got ("+$2+")");}
 	| LANDSCAPE		    -> yy.GRAPHCANVAS.setDirection("landscape")
@@ -178,30 +178,30 @@ graphContent
 	| VISUALIZER NAME	-> yy.GRAPHCANVAS.setVisualizer($NAME)
 	| PORTRAIT			-> yy.GRAPHCANVAS.setDirection("portrait")
 	| COMMENT			-> "/*"+$COMMENT.substring(2)+"*/\n"
-	| VERTEX_COLOR colorOrVariable	   -> getCurrentContainer(yy.GRAPHCANVAS).setDefault('vertexcolor'    ,$2=="default"?undefined:$2)
-	| VERTEXTEXT_COLOR colorOrVariable -> getCurrentContainer(yy.GRAPHCANVAS).setDefault('vertextextcolor',$2=="default"?undefined:$2)
-	| EDGE_COLOR colorOrVariable	   -> getCurrentContainer(yy.GRAPHCANVAS).setDefault('edgecolor'      ,$2=="default"?undefined:$2)
-	| EDGETEXT_COLOR colorOrVariable   -> getCurrentContainer(yy.GRAPHCANVAS).setDefault('edgetextcolor'  ,$2=="default"?undefined:$2)
-	| GROUP_COLOR colorOrVariable	   -> getCurrentContainer(yy.GRAPHCANVAS).setDefault('groupcolor'     ,$2=="default"?undefined:$2)
-	| IF	 ->	setAttr(setAttr(enterContainer(yy.GRAPHCANVAS, getGroup(yy.GRAPHCANVAS).setLabel($IF.replace(/\s+then\s*$/, "").replace(/^\s*if\s*/, ""))), 'conditional', 'if'), '_conditionalEntryEdge', yy.GRAPHCANVAS.lastSeenVertex)
+	| VERTEX_COLOR colorOrVariable	   -> _getCurrentContainer(yy.GRAPHCANVAS).setDefault('vertexcolor'    ,$2=="default"?undefined:$2)
+	| VERTEXTEXT_COLOR colorOrVariable -> _getCurrentContainer(yy.GRAPHCANVAS).setDefault('vertextextcolor',$2=="default"?undefined:$2)
+	| EDGE_COLOR colorOrVariable	   -> _getCurrentContainer(yy.GRAPHCANVAS).setDefault('edgecolor'      ,$2=="default"?undefined:$2)
+	| EDGETEXT_COLOR colorOrVariable   -> _getCurrentContainer(yy.GRAPHCANVAS).setDefault('edgetextcolor'  ,$2=="default"?undefined:$2)
+	| GROUP_COLOR colorOrVariable	   -> _getCurrentContainer(yy.GRAPHCANVAS).setDefault('groupcolor'     ,$2=="default"?undefined:$2)
+	| IF	 ->	setAttr(setAttr(_enterContainer(yy.GRAPHCANVAS, _getGroup(yy.GRAPHCANVAS).setLabel($IF.replace(/\s+then\s*$/, "").replace(/^\s*if\s*/, ""))), 'conditional', 'if'), '_conditionalEntryEdge', yy.GRAPHCANVAS.lastSeenVertex)
 	| ELSEIF {
-		exitContainer(yy.GRAPHCANVAS);
-		$$=setAttr(enterContainer(yy.GRAPHCANVAS, getGroup(yy.GRAPHCANVAS).setLabel($ELSEIF.replace(/\s+then\s*$/, "").replace(/^\s*elseif\s*/, ""))), 'conditional', 'elseif')
+		_exitContainer(yy.GRAPHCANVAS);
+		$$=setAttr(_enterContainer(yy.GRAPHCANVAS, _getGroup(yy.GRAPHCANVAS).setLabel($ELSEIF.replace(/\s+then\s*$/, "").replace(/^\s*elseif\s*/, ""))), 'conditional', 'elseif')
 		}
 	| ELSE	 {
-		exitContainer(yy.GRAPHCANVAS);
-		$$=setAttr(enterContainer(yy.GRAPHCANVAS, getGroup(yy.GRAPHCANVAS).setLabel($ELSE)), 'conditional', 'else')
+		_exitContainer(yy.GRAPHCANVAS);
+		$$=setAttr(_enterContainer(yy.GRAPHCANVAS, _getGroup(yy.GRAPHCANVAS).setLabel($ELSE)), 'conditional', 'else')
 		}
 	| ENDIF	 { 
-		exitContainer(yy.GRAPHCANVAS);
+		_exitContainer(yy.GRAPHCANVAS);
 		// TODO: is ENDIF container necessary?YES, it could be invisible vertex! Could link to that instead of endif kludge in digraph
-		yy.GRAPHCANVAS._nextConnectableToExitEndIf=setAttr(enterContainer(yy.GRAPHCANVAS, getGroup(yy.GRAPHCANVAS).setLabel($ENDIF)), 'conditional', 'endif')
+		yy.GRAPHCANVAS._nextConnectableToExitEndIf=setAttr(_enterContainer(yy.GRAPHCANVAS, _getGroup(yy.GRAPHCANVAS).setLabel($ENDIF)), 'conditional', 'endif')
 		debug("XXXXXXXXXXXXXXXXXXXXX _nextConnectableToExitEndIf"+yy.GRAPHCANVAS._nextConnectableToExitEndIf);
-		$$=exitContainer(yy.GRAPHCANVAS)
+		$$=_exitContainer(yy.GRAPHCANVAS)
 	}
 	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */
-	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END -> enterContainer(yy.GRAPHCANVAS, getGroup(yy.GRAPHCANVAS).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
-	| GROUP_END  -> exitContainer(yy.GRAPHCANVAS)
+	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END -> _enterContainer(yy.GRAPHCANVAS, _getGroup(yy.GRAPHCANVAS).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
+	| GROUP_END  -> _exitContainer(yy.GRAPHCANVAS)
 	| START NAME -> yy.GRAPHCANVAS.setStart($NAME)
 	| readEvents {
 	}

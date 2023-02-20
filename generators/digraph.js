@@ -9,7 +9,7 @@ import { GraphGroup } from '../model/graphgroup.js'
 import { GraphInner } from '../model/graphinner.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { hasOutwardEdge, traverseEdges, traverseVertices } from '../model/traversal.js'
-import { getVertex } from '../model/model.js'
+import { _getVertex } from '../model/model.js'
 import { debug, getAttributeAndFormat, output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
@@ -134,7 +134,7 @@ export function digraph (graphcanvas) {
   // This may FORWARD DECLARE a node...which creates problems with coloring
   const start = graphcanvas.getStart()
   if (start) {
-    const fwd = getVertex(graphcanvas, start)
+    const fwd = _getVertex(graphcanvas, start)
     processAVertex(fwd)
     lout('//startnode setup')
     lout(`{rank = same;null} {rank = same; ${start}}`, true)

@@ -51,7 +51,7 @@ build/diagrammer_parser.js: build/diagrammer.all Makefile generators/* model/* j
 	  sed -i "1 i\import {$$genfunc} from '../$$generator';" $@ \
 	;done
 	#sed -i "1 i\import * as model from '../model/model.js';" $@
-	sed -i "1 i\import {enterSubGraph, exitSubGraph, getList, getEdge, getCurrentContainer, getVertex, getGroup, exitContainer, enterContainer, processVariable} from '../model/model.js';" $@
+	sed -i "1 i\import {_enterSubGraph, _exitSubGraph, _getList, _getEdge, _getCurrentContainer, _getVertex, _getGroup, _exitContainer, _enterContainer, _processVariable} from '../model/model.js';" $@
 	sed -i "1 i\import {traverseTree, findVertex, TreeVertex} from '../model/tree.js';" $@
 	sed -i "1 i\import {Shapes} from '../model/shapes.js';" $@
 	sed -i "1 i\import {iterateEdges, outputFormattedText, getAttributeAndFormat, output, getAttribute, setAttr, debug} from '../model/support.js';" $@

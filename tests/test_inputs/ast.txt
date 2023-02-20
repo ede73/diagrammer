@@ -27,7 +27,7 @@ $(par:#ccccff)
   database OBJECTS2;OBJECTS
 }
 
-{ Node;Node:GraphObject
+{ GNode;Node:GraphObject
   xShape;shape
   image
   style
@@ -42,18 +42,18 @@ $(par:#ccccff)
 
 edge color #0000ff
 GraphObject.>GraphRoot;extends(GraphObject->GraphRoot)
-GraphObject.>Node;extends(GraphObject->Node)
+GraphObject.>GNode;extends(GraphObject->GNode)
 GraphObject.>xGroup;extends(GraphObject->xGroup)
 GraphObject.>Link;extends::extends(GraphObject->Link)
 
 edge color #00ff00
-left<->"links"Node
+left<->"links"GNode
 left<->"links"xGroup
 right<->"links"xGroup
-right<->"links"Node
+right<->"links"GNode
 
 edge color #ff0000
-OBJECTS1>"contains"Node
+OBJECTS1>"contains"GNode
 OBJECTS1>"contains"xGroup
-OBJECTS2>"contains"Node
+OBJECTS2>"contains"GNode
 OBJECTS2>"contains"xGroup

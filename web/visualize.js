@@ -1,11 +1,11 @@
 // @ts-check
 import { removeAllChildNodes, removeOldVisualizations } from './d3support.js'
-import { getHTMLElement, getInputElement, openImage, updateImage } from './uiComponentAccess.js'
+import { getHTMLElement, getInputElement, openImage } from './uiComponentAccess.js'
 import { visualizations } from './globals.js'
 import { makeHTTPPost } from './ajax.js'
 import Viz from '../js/viz.es.js'
 
-function makeNewImageHolder (imageName) {
+function _makeNewImageHolder (pngBase64) {
   const imgdiv = getHTMLElement('diagrammer-graph')
   const img = document.createElement('img')
   img.align = 'bottom'
@@ -15,8 +15,8 @@ function makeNewImageHolder (imageName) {
   img.id = 'image'
   // auto adjusts
   img.style.height = 'auto'
-  img.src = imageName
-  img.onclick = () => openImage(`web/${imageName}`)
+  img.src = `data:image/png;base64,${pngBase64}`
+  img.onclick = () => openImage(`${pngBase64}`)
   imgdiv.appendChild(img)
 }
 
@@ -69,9 +69,8 @@ export async function visualize (visualizer) {
     // backend visualizer (unless if we could use Viz)
     const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
     makeHTTPPost(visualizeUrl, generatedResult,
-      (image) => {
-        makeNewImageHolder(image)
-        updateImage(image)
+      (pngBase64) => {
+        _makeNewImageHolder(pngBase64)
       },
       (statusCode, statusText, responseText) => {
         alert(`Visualize failed, error: ${responseText} status: ${statusText}`)

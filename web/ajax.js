@@ -18,7 +18,14 @@ export function makeHTTPPost (url, data, successCallback, errorCallback) {
     data,
     contentType: 'application/json; charset=utf-8',
     // Type: Function( Anything data, String textStatus, jqXHR jqXHR )
-    success: (data, textStatus, jqXHR) => successCallback(String(data)),
+    success: (data, textStatus, jqXHR) => {
+      const contentType = jqXHR.getResponseHeader('content-type')
+      if (contentType === 'image/png') {
+        successCallback(data)// .toString('base64'))
+      } else {
+        successCallback(String(data))
+      }
+    },
     // Type: Function( jqXHR jqXHR, String textStatus, String errorThrown )
     error: (jqXHR, textStatus, errorThrown) =>
       errorCallback(jqXHR.status, jqXHR.statusText, jqXHR.responseText)

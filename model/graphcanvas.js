@@ -191,7 +191,6 @@ export class GraphCanvas extends GraphContainer {
   }
 
   /**
-   * TODO: DUAL DECLARATION
    *
    * Usage: grammar/diagrammer.grammar
    *

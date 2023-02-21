@@ -6,7 +6,9 @@
 #<!-- Prevents caching at the Proxy Server -->
 #<meta http-equiv="Expires" content="0"/>
 
-$outputFile="result.png";
+header("Content-type: image/png");
+$prefix = 'result';
+$outputFileName=tempnam('.', $prefix);
 
 function getExe($name)
 {
@@ -30,11 +32,10 @@ if (FALSE === file_put_contents("./post.txt", $postText)) {
   return;
 }
 
-unlink($outputFile);
-
 function visualize(string $executable, string $extra_param = "", string $extra_image_format = "-Tpng"): string
 {
-  return exec(getExe($executable) . " ${extra_image_format} ${extra_param} -o result.png post.txt");
+  global $outputFileName;
+  return exec(getExe($executable) . " ${extra_image_format} ${extra_param} -o ${outputFileName} post.txt");
 }
 
 switch ($_REQUEST["visualizer"]) {
@@ -82,5 +83,11 @@ switch ($_REQUEST["visualizer"]) {
     $r = visualize("dot");
     break;
 }
+
 file_put_contents("./error.txt", $r);
-echo "web/$outputFile";
+
+$result=base64_encode(file_get_contents($outputFileName));
+header('Content-Length: ' . strlen($result));
+echo $result;
+unlink($outputFileName);
+exit;

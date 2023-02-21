@@ -33,7 +33,10 @@ describe('Diagrammer', () => {
     // eslint-disable-next-line no-undef
     const p = page
     await p.goto('http://localhost/~ede/diagrammer/')
-    await p.setViewport({ width: 1800, height: 1800 })
+    // Suddenly (after working for a long time!) started getting errors from here
+    // Protocol error (Emulation.setDeviceMetricsOverride): Invalid parameters Failed to deserialize params.height
+    // Usually if I close the chrome browser, this goes away, wtf? cache? out of memory?
+    await p.setViewport({ width: 1024, height: 800 })
     // await captureBrowserLogs(page);
   })
 
@@ -51,8 +54,6 @@ describe('Diagrammer', () => {
     expect.extend({
       toMatchImageSnapshot
     })
-    // TODO: Should delete web/result.png from messing up.. last graph render may linger there and come to haunt
-    // User-Agent trick? some test-header?
     const image = await p.screenshot({ fullPage: true })
     expect(image).toMatchImageSnapshot(setConfig('main_screen_just_loaded', 0.0001))
   })

@@ -17,4 +17,5 @@ jsconfig.json
 model/jsconfig.json
 package-lock.json
 puppeteer_gojs.js
-
+playground
+js/mscgen

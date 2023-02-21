@@ -33,12 +33,12 @@ export class GraphEdge extends GraphObject {
     this.edgecolor = undefined
     /** @type {GraphConnectable} */
     this.container = undefined
-    if (lhs && (lhs instanceof GraphReference)) {
-      throw new Error(`LHS if reference ${lhs.getName()}`)
-    }
-    if (rhs && (rhs instanceof GraphReference)) {
-      throw new Error(`RHS if reference ${rhs.getName()}`)
-    }
+    // if (lhs && (lhs instanceof GraphReference)) {
+    //   throw new Error(`LHS is reference ${lhs.getName()}`)
+    // }
+    // if (rhs && (rhs instanceof GraphReference)) {
+    //   throw new Error(`RHS if reference ${rhs.getName()}`)
+    // }
   }
 
   isDotted () {

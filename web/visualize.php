@@ -65,6 +65,9 @@ switch ($_REQUEST["visualizer"]) {
   case "fdp":
     $r = visualize("fdp");
     break;
+  case "osage":
+    $r = visualize("osage");
+    break;
   case "sfdp":
     $r = visualize("sfdp");
     break;

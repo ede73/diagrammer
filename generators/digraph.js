@@ -7,19 +7,18 @@ import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphInner } from '../model/graphinner.js'
-// typing
-// eslint-disable-next-line no-unused-vars
-import { GraphReference } from '../model/graphreference.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { getVertex, hasOutwardEdge, traverseEdges, traverseVertices } from '../model/model.js'
+import { hasOutwardEdge, traverseEdges, traverseVertices } from '../model/traversal.js'
+import { _getVertex } from '../model/model.js'
 import { debug, getAttributeAndFormat, output } from '../model/support.js'
 
-// ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(cli/www)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:twopi">Graphviz - twopi(cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:neato">Graphviz - neato(cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:fdp">Graphviz - fdp(cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(www/cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:fdp">Graphviz - fdp(www/cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:neato">Graphviz - neato(www/cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:osage">Graphviz - osage(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:sfdp">Graphviz - sfdp(cli)</option>
+// ADD TO INDEX.HTML AS: <option value="digraph:twopi">Graphviz - twopi(www/cli)</option>
 
 const DigraphShapeMap = {
   default: 'box',
@@ -135,7 +134,7 @@ export function digraph (graphcanvas) {
   // This may FORWARD DECLARE a node...which creates problems with coloring
   const start = graphcanvas.getStart()
   if (start) {
-    const fwd = getVertex(graphcanvas, start)
+    const fwd = _getVertex(graphcanvas, start)
     processAVertex(fwd)
     lout('//startnode setup')
     lout(`{rank = same;null} {rank = same; ${start}}`, true)
@@ -373,4 +372,4 @@ export function digraph (graphcanvas) {
   lout('}', false)
 }
 generators.set('digraph', digraph)
-visualizations.set('digraph', ['dot', 'circo', 'twopi', 'neato', 'fdp', 'sfpd'])
+visualizations.set('digraph', ['dot', 'circo', 'twopi', 'neato', 'fdp', 'sfpd', 'osage'])

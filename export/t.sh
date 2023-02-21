@@ -57,7 +57,7 @@ FORMAT=png
   FORMAT=svg
 }
 
-input=${1:-tests/test_inputs/state2.txt}
+input=${1:-tests/test_inputs/events.txt}
 generator=${2:-dot}
 echo $generator
 
@@ -77,7 +77,7 @@ rm -f "$OUT"
 
 getgenerator() {
   case "$1" in
-  neato | twopi | circo | fdp | sfdp | dot)
+  neato | twopi | circo | fdp | sfdp | dot | osage)
     echo digraph
     ;;
   *)

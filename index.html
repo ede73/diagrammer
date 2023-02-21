@@ -52,16 +52,18 @@
 		<select id="diagrammer-generator" name="generator" onChange="generatorChanged()">
  <option value="actdiag">Activity Diagram(cli)</option>
  <option value="ast">Abstract Syntax Tree</option>
+ <option value="ast_record">Abstract Syntax Tree(Record)</option>
  <option value="blockdiag">Block Diagram(cli)</option>
  <option value="dendrogram:circlepacked">Circle packed(TBD)</option>
  <option value="dendrogram:radialdendrogram">Radial Dendrogram</option>
  <option value="dendrogram:reingoldtilford">Reingold-Tilford</option>
- <option value="digraph:circo">Graphviz - circo(cli)</option>
- <option value="digraph:dot">Graphviz - dot(cli/www)</option>
- <option value="digraph:fdp">Graphviz - fdp(cli)</option>
- <option value="digraph:neato">Graphviz - neato(cli)</option>
+ <option value="digraph:circo">Graphviz - circo(www/cli)</option>
+ <option value="digraph:dot">Graphviz - dot(www/cli)</option>
+ <option value="digraph:fdp">Graphviz - fdp(www/cli)</option>
+ <option value="digraph:neato">Graphviz - neato(www/cli)</option>
+ <option value="digraph:osage">Graphviz - osage(www/cli)</option>
  <option value="digraph:sfdp">Graphviz - sfdp(cli)</option>
- <option value="digraph:twopi">Graphviz - twopi(cli)</option>
+ <option value="digraph:twopi">Graphviz - twopi(www/cli)</option>
  <option value="layerbands">LayerBands(GoJS)</option>
  <option value="mscgen">MSCGEN(cli)</option>
  <option value="nwdiag">Network Diagram(cli)</option>
@@ -90,30 +92,25 @@
 <option value="test_inputs/events.txt">events.txt</option>
 <option value="test_inputs/fulltest.txt">fulltest.txt</option>
 <option value="test_inputs/group_group_link.txt">group_group_link.txt</option>
+<option value="test_inputs/landscape.txt">landscape.txt</option>
 <option value="test_inputs/layerbands.txt">layerbands.txt</option>
+<option value="test_inputs/lhs_rhs_lists.txt">lhs_rhs_lists.txt</option>
+<option value="test_inputs/multiple_lhs_lists.txt">multiple_lhs_lists.txt</option>
+<option value="test_inputs/node_and_edge_coloring.txt">node_and_edge_coloring.txt</option>
+<option value="test_inputs/node_and_edge_coloring2.txt">node_and_edge_coloring2.txt</option>
 <option value="test_inputs/nodes.txt">nodes.txt</option>
 <option value="test_inputs/nwdiag.txt">nwdiag.txt</option>
+<option value="test_inputs/nwdiag2.txt">nwdiag2.txt</option>
+<option value="test_inputs/nwdiag3.txt">nwdiag3.txt</option>
+<option value="test_inputs/nwdiag5.txt">nwdiag5.txt</option>
+<option value="test_inputs/nwdiag_multiple_ips.txt">nwdiag_multiple_ips.txt</option>
 <option value="test_inputs/parsetree.txt">parsetree.txt</option>
 <option value="test_inputs/plantuml_context.txt">plantuml_context.txt</option>
 <option value="test_inputs/plantuml_context2.txt">plantuml_context2.txt</option>
+<option value="test_inputs/record_style.txt">record_style.txt</option>
 <option value="test_inputs/sankey.txt">sankey.txt</option>
 <option value="test_inputs/seqdiag.txt">seqdiag.txt</option>
 <option value="test_inputs/state.txt">state.txt</option>
-<option value="test_inputs/state10.txt">state10.txt</option>
-<option value="test_inputs/state11.txt">state11.txt</option>
-<option value="test_inputs/state12.txt">state12.txt</option>
-<option value="test_inputs/state13.txt">state13.txt</option>
-<option value="test_inputs/state14.txt">state14.txt</option>
-<option value="test_inputs/state15.txt">state15.txt</option>
-<option value="test_inputs/state16.txt">state16.txt</option>
-<option value="test_inputs/state2.txt">state2.txt</option>
-<option value="test_inputs/state3.txt">state3.txt</option>
-<option value="test_inputs/state4.txt">state4.txt</option>
-<option value="test_inputs/state5.txt">state5.txt</option>
-<option value="test_inputs/state6.txt">state6.txt</option>
-<option value="test_inputs/state7.txt">state7.txt</option>
-<option value="test_inputs/state8.txt">state8.txt</option>
-<option value="test_inputs/state9.txt">state9.txt</option>
 <option value="test_inputs/state_ancestry.txt">state_ancestry.txt</option>
 <option value="test_inputs/state_android.txt">state_android.txt</option>
 <option value="test_inputs/state_cluster_edge.txt">state_cluster_edge.txt</option>
@@ -122,6 +119,7 @@
 <option value="test_inputs/state_group.txt">state_group.txt</option>
 <option value="test_inputs/state_images.txt">state_images.txt</option>
 <option value="test_inputs/state_innergroups.txt">state_innergroups.txt</option>
+<option value="test_inputs/state_machine_with_start_node.txt">state_machine_with_start_node.txt</option>
 <option value="test_inputs/state_nodelinktests.txt">state_nodelinktests.txt</option>
 <option value="test_inputs/state_recursive_linking.txt">state_recursive_linking.txt</option>
 <option value="test_inputs/state_sequence.txt">state_sequence.txt</option>
@@ -129,6 +127,9 @@
 <option value="test_inputs/state_sip_sequence.txt">state_sip_sequence.txt</option>
 <option value="test_inputs/state_tcp.txt">state_tcp.txt</option>
 <option value="test_inputs/state_y_edge.txt">state_y_edge.txt</option>
+<option value="test_inputs/two_filled_linked_vertices.txt">two_filled_linked_vertices.txt</option>
+<option value="test_inputs/two_linked_clusters.txt">two_linked_clusters.txt</option>
+<option value="test_inputs/two_linked_clusters_with_invisible_node.txt">two_linked_clusters_with_invisible_node.txt</option>
 <option value="test_inputs/umlclass.txt">umlclass.txt</option>
 <option value="test_inputs/umlclass2.txt">umlclass2.txt</option>
 <option value="test_inputs/url.txt">url.txt</option>
@@ -324,8 +325,8 @@
 		<p>Javascript generated(dot only)</p>
 		<div id="viz_container" style="border-width: 2px; border-style: dotted;" align="top"></div>
 
-		<p>Viz.js</p>
-		<div id="viz_container"></div>
+		<!-- <p>Viz.js</p>
+		<div id="viz_container"></div> -->
 		<p>CanViZ</p>
 		<div id="canviz_container"></div>
 		<div id="diagrammer-debug"></div>

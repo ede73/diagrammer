@@ -1,8 +1,0 @@
-shape cloud
-inet
-shape default
-{ empty;x
-	router web01 web02
-}
-
-inet - router

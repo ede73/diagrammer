@@ -1,6 +1,6 @@
 import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
-import { traverseEdges, traverseVertices } from '../model/model.js'
+import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="blockdiag">Block Diagram(cli)</option>
@@ -83,7 +83,7 @@ const BlockDiagShapeMap = {
  *   thick
  *   fontsize=11
  *
- * To test: node js/diagrammer.js tests/test_inputs/state2.txt blockdiag |blockdiag3 -Tpng -o a.png - && open a.png
+ * To test: node js/diagrammer.js tests/test_inputs/events.txt blockdiag |blockdiag3 -Tpng -o a.png - && open a.png
  * @param {GraphCanvas} graphcanvas
  */
 export function blockdiag (graphcanvas) {

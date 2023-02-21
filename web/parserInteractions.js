@@ -45,7 +45,7 @@ diagrammerParser.yy.result = function (line) {
     result.value = ''
   }
   parsingStarted++
-  result.value = `${result.value + line}\n`
+  result.value = `${result.value + line.trimEnd()}\n`
 }
 
 /**

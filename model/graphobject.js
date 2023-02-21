@@ -1,4 +1,7 @@
 // @ts-check
+
+// import { debug } from './support.js'
+
 /**
  * GraphObject: Anything that is represented in a graph (diagram/visualization)
  */
@@ -102,6 +105,7 @@ export class GraphObject {
    * @param {string} label
    */
   setLabel (label) {
+    // debug(`  setLabel(${label.trim()}) this=${this.getName()} cons=${this.constructor.name}`)
     if (label) {
       label = label.trim().replace(/"/gi, '')
       // Take out COLOR if present

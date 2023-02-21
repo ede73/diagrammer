@@ -62,7 +62,7 @@ FORMAT=png
   FORMAT=svg
 }
 
-input=${1:-tests/test_inputs/state2.txt}
+input=${1:-tests/test_inputs/events.txt}
 generator=${2:-dot}
 echo $generator
 

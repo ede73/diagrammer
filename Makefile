@@ -44,14 +44,18 @@ build/diagrammer.all: $(GRAMMAR_FILES)
 build/diagrammer_parser.js: build/diagrammer.all Makefile generators/* model/* js/*
 	@mkdir -p build
 	@echo make parser
-	@node_modules/.bin/jison $< -o $@
+	if [ ${DEBUG} ]; then \
+	node_modules/.bin/jison -t $< -o $@; \
+	else \
+	node_modules/.bin/jison $< -o $@; \
+	fi
 	sed -i "1 i\\\\" $@
 	for generator in generators/*.js; do \
 	  genfunc="$$(basename $$generator | cut -d. -f1)"; \
 	  sed -i "1 i\import {$$genfunc} from '../$$generator';" $@ \
 	;done
 	#sed -i "1 i\import * as model from '../model/model.js';" $@
-	sed -i "1 i\import {enterSubGraph, exitSubGraph, getList, getEdge, getCurrentContainer, getVertex, getGroup, exitContainer, enterContainer, processVariable} from '../model/model.js';" $@
+	sed -i "1 i\import {_enterSubGraph, _exitSubGraph, _getList, _getEdge, _getVertex, _getGroup, _processVariable} from '../model/model.js';" $@
 	sed -i "1 i\import {traverseTree, findVertex, TreeVertex} from '../model/tree.js';" $@
 	sed -i "1 i\import {Shapes} from '../model/shapes.js';" $@
 	sed -i "1 i\import {iterateEdges, outputFormattedText, getAttributeAndFormat, output, getAttribute, setAttr, debug} from '../model/support.js';" $@
@@ -79,6 +83,10 @@ testrunner: ./scripts/runtests.sh all plantuml nodemodules
 	./scripts/runtests.sh
 
 jesttests: all nodemodules
+	@if [ -f web/result.png ]; then \
+	  echo "TODO: Currently web/result.png might cause random test failures if graph was rendered prior from Web UI"; \
+	  exit 10; \
+	fi
 	@mkdir -p tests/test_outputs
 	npm test
 

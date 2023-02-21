@@ -20,6 +20,8 @@ export function ast (graphcanvas) {
   const rvalue = (rvalue) => {
     if (typeof (rvalue) === 'number' || typeof (rvalue) === 'boolean') {
       return `${rvalue}`
+    } else if (typeof (rvalue) === 'string') {
+      return `"${rvalue.trim()}"`
     }
     return rvalue === undefined ? 'null' : `"${rvalue}"`
   }
@@ -53,6 +55,8 @@ export function ast (graphcanvas) {
       const items = []
       Object.keys(obj).forEach((propname) => {
         const value = obj[propname]
+        // skip empties..
+        if (value === null || value === undefined) return
         if (
           // TODO only apply to GraphEdges
           propname === 'left' ||
@@ -75,7 +79,13 @@ export function ast (graphcanvas) {
       return `{"${obj.constructor.name}" : {\n${items.sort().join(',')}\n}}\n`
     }
   }
-
-  o(JSON.stringify(JSON.parse(`${dumpObject(graphcanvas)}\n`), null, 3))
+  const dump = dumpObject(graphcanvas)
+  try {
+    const jsonbeauty = JSON.stringify(JSON.parse(`${dump}\n`), null, 3)
+    o(jsonbeauty)
+  } catch (ex) {
+    o('//Something broke, not full json')
+    o(dump)
+  }
 }
 generators.set('ast', ast)

@@ -4,10 +4,12 @@ import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { debug, getAttributeAndFormat, iterateEdges, output, outputFormattedText } from '../model/support.js'
-import { getVertex, traverseVertices } from '../model/model.js'
+import { _getVertex } from '../model/model.js'
+import { traverseVertices } from '../model/traversal.js'
 
 // ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
 
+// TODO: Looks like all these have changed(broken), see https://plantuml.com/sequence-diagram
 const PlantUMLShapeMap = {
   default: 'box',
   invis: 'invis',
@@ -75,8 +77,9 @@ export function plantuml_sequence (graphcanvas) {
       throw new Error('Missing shape mapping')
     }
     if (obj.shape) {
-      const shape = 'shape="{0}"'.format(PlantUMLShapeMap[obj.shape])
-      nattrs.push(shape)
+      // TODO: Looks like syntax has been broken
+      // const shape = 'shape="{0}"'.format(PlantUMLShapeMap[obj.shape])
+      // nattrs.push(shape)
     }
     let t = ''
     if (nattrs.length > 0) { t = `[${nattrs.sort().join(',')}]` }
@@ -95,7 +98,7 @@ export function plantuml_sequence (graphcanvas) {
   // This may FORWARD DECLARE a node...which creates problems with coloring
   const s = graphcanvas.getStart()
   if (s) {
-    const fwd = getVertex(graphcanvas.yy, s)
+    const fwd = _getVertex(graphcanvas, s)
     processAVertex(fwd, false)
   }
   /**
@@ -242,9 +245,11 @@ export function plantuml_sequence (graphcanvas) {
         }
         const nodeIsSubGraph = maybeGroup.isInnerGraph
         if (maybeGroup.getColor()) {
-          lout('style=filled;')
-          lout(getAttributeAndFormat(maybeGroup, 'color',
-            '   color="{0}";\n'))
+          // TODO: Looks like syntax has been broken..
+          // lout('style=filled;')
+          // TODO: Looks like syntax has been broken..
+          // lout(getAttributeAndFormat(maybeGroup, 'color',
+          //   '   color="{0}";\n'))
         }
         ltraverseVertices(maybeGroup, nodeIsSubGraph)
         printEdges(maybeGroup)

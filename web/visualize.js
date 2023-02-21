@@ -55,6 +55,11 @@ export async function visualize (visualizer) {
   }
   removeOldVisualizations()
 
+  // TODO: let generator decide visualizer
+  if (visualizer === 'ast_record') {
+    visualizer = 'dot'
+  }
+
   const canUseViz = ['circo', 'dot', 'fdp', 'neato', 'osage', 'twopi'].includes(visualizer)
 
   if (visualizations.has(visualizer)) {

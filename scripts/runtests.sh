@@ -111,16 +111,15 @@ for test in $tests; do
     runtest state_nodelinktests.txt
     runtest url.txt
     runtest state.txt
-    runtest state2.txt
-    runtest state3.txt
-    runtest state4.txt
-    runtest state6.txt
-    runtest state7.txt
-    runtest state8.txt
-    runtest state9.txt
-    runtest state10.txt
-    runtest state11.txt
-    runtest state12.txt
+    runtest node_and_edge_coloring.txt
+    runtest state_machine_with_start_node.txt
+    runtest two_linked_clusters.txt
+    runtest node_and_edge_coloring2.txt
+    runtest two_linked_clusters_with_invisible_node.txt
+    runtest multiple_lhs_lists.txt
+    runtest lhs_rhs_lists.txt
+    runtest two_filled_linked_vertices.txt
+    runtest landscape.txt
     runtest state_cluster_edge.txt
     runtest state_dual_node.txt
     runtest state_innergroups.txt
@@ -133,17 +132,17 @@ for test in $tests; do
     runtest events.txt
     runtest compass.txt
   }
-  [ "$test" != "actdiag" ] && [ "$test" != "blockdiag" ] && runtest state5.txt
+  [ "$test" != "actdiag" ] && [ "$test" != "blockdiag" ] && runtest record_style.txt
   [ "$test" != "blockdiag" ] && runtest state_tcp.txt
   runtest state_group.txt
   runtest group_group_link.txt
 done
 
 testbin=nwdiag
-runtest state13.txt
-runtest state14.txt
-runtest state15.txt
-runtest state16.txt
+runtest nwdiag_multiple_ips.txt
+runtest nwdiag3.txt
+runtest nwdiag5.txt
+runtest nwdiag2.txt
 runtest nwdiag.txt
 
 tests=${1:-mscgen seqdiag plantuml_sequence}

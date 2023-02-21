@@ -1,6 +1,6 @@
 import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
-import { traverseEdges, traverseVertices } from '../model/model.js'
+import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { getAttributeAndFormat, output, multiAttrFmt } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="actdiag">Activity Diagram(cli)</option>
@@ -41,7 +41,7 @@ const ActDiagShapeMap =
 
 /**
  *
- * To test: node js/diagrammer.js tests/test_inputs/state2.txt actdiag |actdiag -Tpng -o a.png - && open a.png
+ * To test: node js/diagrammer.js tests/test_inputs/events.txt actdiag |actdiag -Tpng -o a.png - && open a.png
  * http://blockdiag.com/en/actdiag/
  *
  * Actual grammar is vague (probably as with blockdiag, check there):

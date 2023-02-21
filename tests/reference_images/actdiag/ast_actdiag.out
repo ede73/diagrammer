@@ -21,7 +21,7 @@ actdiag {
         equal2 [ label="equal", shape=box ];
         OBJECTS2 [ label="OBJECTS", shape=flowchart.database ];
     }
-    lane "Node"{
+    lane "GNode"{
         xShape [ label="shape", shape=box ];
         image [ shape=box ];
         style [ shape=box ];
@@ -32,15 +32,15 @@ actdiag {
         right [ shape=box ];
     }
     GraphObject -> GraphRoot [ color="#0000ff", label="extends(GraphObject->GraphRoot)", style="dotted" ];
-    GraphObject -> Node [ color="#0000ff", label="extends(GraphObject->Node)", style="dotted" ];
+    GraphObject -> GNode [ color="#0000ff", label="extends(GraphObject->GNode)", style="dotted" ];
     GraphObject -> xGroup [ color="#0000ff", label="extends(GraphObject->xGroup)", style="dotted" ];
     GraphObject -> Link [ color="#0000ff", label="extends::extends(GraphObject->Link)", style="dotted" ];
-    left -> Node [ color="#00ff00", label="links", style="dashed" ];
+    left -> GNode [ color="#00ff00", label="links", style="dashed" ];
     left -> xGroup [ color="#00ff00", label="links", style="dashed" ];
     right -> xGroup [ color="#00ff00", label="links", style="dashed" ];
-    right -> Node [ color="#00ff00", label="links", style="dashed" ];
-    OBJECTS1 -> Node [ color="#ff0000", label="contains" ];
+    right -> GNode [ color="#00ff00", label="links", style="dashed" ];
+    OBJECTS1 -> GNode [ color="#ff0000", label="contains" ];
     OBJECTS1 -> xGroup [ color="#ff0000", label="contains" ];
-    OBJECTS2 -> Node [ color="#ff0000", label="contains" ];
+    OBJECTS2 -> GNode [ color="#ff0000", label="contains" ];
     OBJECTS2 -> xGroup [ color="#ff0000", label="contains" ];
 }

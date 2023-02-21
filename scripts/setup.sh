@@ -33,7 +33,7 @@ prepare_file() {
   sudo chmod 775 $1
 }
 
-for file in web web/post.txt web/result.png web/result.txt web/error.txt; do
+for file in web web/post.txt web/result.txt web/error.txt; do
   prepare_file $file
 done
 

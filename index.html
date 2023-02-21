@@ -306,7 +306,7 @@
 									</div>
 							</td>
 							<td>
-								<!-- result.png -->
+								<!-- Visualization results stored under here -->
 								<div id='diagrammer-graph' />
 							</td>
 						</tr>
@@ -353,10 +353,8 @@
 	window.getGraphText = getGraphText;
 	window.setGraphText = setGraphText;
 
-	import { getCurrentFilename, openImage, openPicWindow, reloadImg, getVisualizer, getInputElement } from './web/uiComponentAccess.js';
+	import { getCurrentFilename, openPicWindow, getVisualizer, getInputElement } from './web/uiComponentAccess.js';
 	window.getCurrentFilename = getCurrentFilename;
-	window.openImage = openImage;
-	window.reloadImg = reloadImg;
 	window.openPicWindow = openPicWindow;
 
 	import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList} from "./web/localStorage.js";

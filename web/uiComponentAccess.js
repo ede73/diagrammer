@@ -76,40 +76,24 @@ export function getError () {
   return document.getElementById('diagrammer-error').innerText
 }
 
-export function openImage (imageUrl) {
-  window.open(`${imageUrl}?x=${new Date().getTime()}`)
+export function openImage (imageBase64) {
+  // window.open(`<img src="data:image/png;base64,${imageBase64}"/>`)
+  const w = window.open('about:blank')
+
+  // FireFox seems to require a setTimeout for this to work.
+  setTimeout(() => {
+    w.document.body.appendChild(w.document.createElement('iframe')).src = `data:image/png;base64,${imageBase64}`
+    w.document.body.style.margin = '0'
+    w.document.getElementsByTagName('iframe')[0].style.width = '100%'
+    w.document.getElementsByTagName('iframe')[0].style.height = '100%'
+    w.document.getElementsByTagName('iframe')[0].style.border = '0'
+  }, 0)
 }
 
 let win
 export function openPicWindow () {
+  // TODO:
   win = window.open('web/result.png', 'extpic')
-}
-
-export function reloadImg (id) {
-  const obj = getInputElement(id)
-  let src = obj.src
-  const pos = src.indexOf('?')
-  if (pos >= 0) {
-    src = src.substr(0, pos)
-  }
-  const date = new Date()
-  obj.src = src + '?v=' + date.getTime()
-  if (win) { win.location.reload() }
-  return false
-}
-
-/**
- * Set image source (and reload the image)
- * Always updates 'image' ID'd image
- * @param {string} imageSource URI
- */
-export function updateImage (imageSource) {
-  if (!document.getElementById('image')) {
-    console.log('OH NO...image component not found')
-    return
-  }
-  document.getElementById('image').setAttribute('src', imageSource)
-  reloadImg('image')
 }
 
 // Get currently selected generator

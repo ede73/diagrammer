@@ -4,7 +4,6 @@ tests/web/snapshots/__diff_output__/
 node_modules
 web/post.txt
 web/result.txt
-web/result.png
 web/error.txt
 web/icons
 web/exported

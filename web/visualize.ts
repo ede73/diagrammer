@@ -5,7 +5,7 @@ import { visualizations } from './globals.js'
 import { makeHTTPPost } from './ajax.js'
 import Viz from '../js/viz.es.js'
 
-function _makeNewImageHolder (pngBase64) {
+function _makeNewImageHolder(pngBase64: string) {
   const imgdiv = getHTMLElement('diagrammer-graph')
   const img = document.createElement('img')
   img.align = 'bottom'
@@ -20,7 +20,7 @@ function _makeNewImageHolder (pngBase64) {
   imgdiv.appendChild(img)
 }
 
-function beautify (generatedCode) {
+function beautify(generatedCode: string) {
   let data
   try {
     data = JSON.parse(generatedCode)
@@ -36,13 +36,13 @@ function beautify (generatedCode) {
   const tree = jsonTree.create(data, wrapper)
 }
 
-export function clearBeautified () {
+export function clearBeautified() {
   const result = getInputElement('diagrammer-beautified')
   removeAllChildNodes(result)
 }
 
 // TODO: move to editor (or elsewhere, but this really isn't parser thingy anymore)
-export async function visualize (visualizer) {
+export async function visualize(visualizer: string) {
   /** @type {HTMLInputElement} */
   const result = getInputElement('diagrammer-result')
   const generatedResult = result.value
@@ -52,7 +52,7 @@ export async function visualize (visualizer) {
   if (!visualizer) {
     throw new Error('Visualizer not defined')
   }
-  removeOldVisualizations()
+  removeOldVisualizations('diagrammer-graph')
 
   // TODO: let generator decide visualizer
   if (visualizer === 'ast_record') {

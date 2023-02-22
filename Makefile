@@ -14,6 +14,7 @@ MODEL_REST = model/shapes.js model/tree.js
 %.js: %.ts
 	(cd model;tsc -p tsconfig.json)
 	(cd generators;tsc -p tsconfig.json)
+	(cd web;tsc -p tsconfig.json)
 
 all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST) nodemodules
 	@echo Make ALL

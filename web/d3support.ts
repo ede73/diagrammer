@@ -1,7 +1,9 @@
+// @ts-check
+
 import { getHTMLElement } from './uiComponentAccess.js'
 import * as d3 from 'd3'
 
-export function makeSVG (width, height) {
+export function makeSVG(width: number, height: number) {
   if (!width) {
     width = 300
   }
@@ -17,7 +19,7 @@ export function makeSVG (width, height) {
 }
 
 // TODO: Discrepancy between d3.js and GoJS, former results in #diagrammer-graph/(div#default_,svg) latter #graphVisualizerionHere/div#default_/svg
-export function removeOldVisualizations (idName) {
+export function removeOldVisualizations(idName: string) {
   const element = getHTMLElement('diagrammer-graph')
   removeAllChildNodes(element)
   const newDiv = document.createElement('div')
@@ -26,7 +28,7 @@ export function removeOldVisualizations (idName) {
   return newDiv
 }
 
-export function removeAllChildNodes (parent) {
+export function removeAllChildNodes(parent: HTMLElement) {
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild)
   }

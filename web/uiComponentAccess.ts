@@ -3,7 +3,7 @@
 // Various modules operate on UI
 // Provide type safe access here
 
-export function getHTMLElement (name) {
+export function getHTMLElement(name: string) {
   // @ts-ignore
   const element = document.getElementById(name)
   if (!element) {
@@ -15,14 +15,12 @@ export function getHTMLElement (name) {
 /**
  * Set a generator, only if loaded new content (storage, example)
  * it was just parsed AND it had a 'generator' directive
- * @param {string} generator
  */
-export function setGenerator (generator, visualizer = undefined) {
+export function setGenerator(generator: string, visualizer: string = undefined) {
   const genViz = generator + (visualizer ? ':' + visualizer : '')
   console.log(`setGenerator(${generator}:${visualizer}) ie. '${genViz}'`)
   // Change the generator via UI
-  /** @type {HTMLInputElement} */
-  const select = document.querySelector('#diagrammer-generator')
+  const select: HTMLInputElement = document.querySelector('#diagrammer-generator')
   select.value = genViz
   if (getGenerator() !== generator) {
     console.error(`Somewhy generator change did not go thru, we wanted ${generator} and have ${getGenerator()}`)
@@ -40,43 +38,34 @@ export function setGenerator (generator, visualizer = undefined) {
  * it may have other interfaces available, e.g. HTMLInputElement
  * Which contains .value where as the HTMLElement doesn't
  * This is just to keep typescript happy
- * @param {string} name
- * @returns  {HTMLInputElement}
  */
-export function getInputElement (name) {
-  // @ts-ignore
-  return getHTMLElement(name)
+export function getInputElement(name: string) {
+  return getHTMLElement(name) as HTMLInputElement
 }
 
-/**
- * @param {string} name
- * @returns {HTMLSelectElement}
- */
-export function getSelectElement (name) {
-  // @ts-ignore
-  return getHTMLElement(name)
+export function getSelectElement(name: string) {
+  return getHTMLElement(name) as HTMLSelectElement
 }
 
-export function getCurrentFilename () {
+export function getCurrentFilename() {
   return getInputElement('diagrammer-filename').value
 }
 
 /**
  * Set error on UI
- * @param {string} text
  */
-export function setError (text) {
+export function setError(text: string) {
   document.getElementById('diagrammer-error').innerText = text
 }
 
 /**
- * @returns {string} Return parse error(if any)
+ * @returns Return parse error(if any)
  */
-export function getError () {
+export function getError() {
   return document.getElementById('diagrammer-error').innerText
 }
 
-export function openImage (imageBase64) {
+export function openImage(imageBase64: string) {
   // window.open(`<img src="data:image/png;base64,${imageBase64}"/>`)
   const w = window.open('about:blank')
 
@@ -91,13 +80,13 @@ export function openImage (imageBase64) {
 }
 
 let win
-export function openPicWindow () {
+export function openPicWindow() {
   // TODO:
   win = window.open('web/result.png', 'extpic')
 }
 
 // Get currently selected generator
-export function getGenerator () {
+export function getGenerator() {
   const e = getSelectElement('diagrammer-generator')
   const gen = e.options[e.selectedIndex].value
   if (gen.indexOf(':') > -1) {
@@ -106,7 +95,7 @@ export function getGenerator () {
   return gen
 }
 
-export function getVisualizer () {
+export function getVisualizer() {
   const e = getSelectElement('diagrammer-generator')
   const gen = e.options[e.selectedIndex].value
   if (gen.indexOf(':') > -1) {

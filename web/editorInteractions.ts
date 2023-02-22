@@ -8,9 +8,9 @@ import { clearBeautified, visualize } from './visualize.js'
 // import { Editor } from '../ace/src-noconflict/ace.js';
 
 // Set to 0 to fall back to textarea(enable textarea in index.html)
-const acemode = 1
+const acemode: number = 1
 
-function getAceEditor () {
+function getAceEditor() {
   // TODO: fix type acq..
   /** type {Editor} */
   // @ts-ignore
@@ -20,7 +20,7 @@ function getAceEditor () {
 }
 
 // get all
-export function getGraphText () {
+export function getGraphText() {
   if (acemode) {
     return getAceEditor().getSession().getValue()
   } else {
@@ -29,7 +29,7 @@ export function getGraphText () {
 }
 
 // replace all
-export function setGraphText (data) {
+export function setGraphText(data: string) {
   if (acemode) {
     const editor = getAceEditor()
     // EDE:editor.destroy does not work reliably
@@ -45,9 +45,8 @@ export function setGraphText (data) {
  * Add text to top of document
  * try to maintain cursor position(TODO:fucked up)
  *
- * @param {string} data
  */
-function prependLine (data) {
+function prependLine(data: string) {
   if (acemode) {
     /** type {Editor} */
     const editor = getAceEditor()
@@ -66,10 +65,8 @@ function prependLine (data) {
 
 /**
  * add text to current cursor position(on a new line how ever)
- *
- * @param {string} data
  */
-function appendLine (data) {
+function appendLine(data: string) {
   if (acemode) {
     /** type {Editor} */
     const editor = getAceEditor()
@@ -87,12 +84,7 @@ function appendLine (data) {
   }
 }
 
-/**
- *
- * @param {(string|number)} i
- * @returns
- */
-export function addLine (i) {
+export function addLine(i: (string | number)) {
   if (typeof i === 'string') {
     appendLine(i + '\n')
   } else {
@@ -131,25 +123,25 @@ export function addLine (i) {
   return false
 }
 
-export function generatorChanged () {
+export function generatorChanged() {
   console.log('generatorChanged() - parseAndRegenerate')
   parseAndRegenerate()
 }
 
-function parseAndRegenerate (preferScriptSpecifiedGeneratorAndVisualizer = false) {
+function parseAndRegenerate(preferScriptSpecifiedGeneratorAndVisualizer = false) {
   console.log('parseAndRegenerate()')
   const code = getGraphText() + '\n'
   parse(code, (finalGenerator, finalVisualizer) => {
     console.log(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`)
     visualize(finalVisualizer)
-  // eslint-disable-next-line n/handle-callback-err
+    // eslint-disable-next-line n/handle-callback-err
   }, (error, ex) => {
     clearBeautified()
     console.log('  parseAndRegenerate() - Parsing failed :(')
   }, preferScriptSpecifiedGeneratorAndVisualizer)
 }
 
-export function savedChanged () {
+export function savedChanged() {
   // read the example...place to textArea(overwrite)
   const e = getSelectElement('diagrammer-saved')
   const doc = e.options[e.selectedIndex].value
@@ -163,7 +155,7 @@ export function savedChanged () {
   }
 }
 
-export function exampleChanged () {
+export function exampleChanged() {
   // read the example...place to textArea(overwrite)
   const e = getSelectElement('diagrammer-example')
   const doc = e.options[e.selectedIndex].value
@@ -183,7 +175,7 @@ export function exampleChanged () {
  * Hookup code editor, so that on every key(de)press a parsing starts after configurable delay UNLESS another keypress arrives.
  * Hence while typing, we don't constanly parse, but on a minute pause, we do and user get's feedback (ok/error)
  */
-function hookupToListenToManualCodeChanges (parseChangesAfterMillis) {
+function hookupToListenToManualCodeChanges(parseChangesAfterMillis: number) {
   let parsingTimerID
   getInputElement('diagrammer-code').onkeyup = function () { // onchange does not work on
     if (parsingTimerID) {
@@ -201,7 +193,7 @@ function hookupToListenToManualCodeChanges (parseChangesAfterMillis) {
  * while developing, it's nice to be able to quickly edit the generated code as well in
  * order to debug/experiment with actual visualizations!
  */
-function hookupToListenToManualGeneratorChanges (visualizeChangesAfterMillis) {
+function hookupToListenToManualGeneratorChanges(visualizeChangesAfterMillis: number) {
   let visualizationTimerID
   getInputElement('diagrammer-result').onkeyup = function () { // onchange does not work on
     if (!visualizationTimerID) {
@@ -221,7 +213,7 @@ try {
 } catch (ex) { }
 
 // @ts-ignore
-if (acemode && typeof ace !== 'undefined') {
+if (acemode && typeof (ace) !== 'undefined') {
   // some init race condition, editor null on page load
   /** type {Editor} */
   const editor = getAceEditor()

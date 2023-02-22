@@ -1,15 +1,7 @@
 // @ts-check
 import 'jquery'
 
-/**
- *
- * @param {string} url
- * @param {string} data
- * @param {function(string):void} successCallback
- * @param {function(number, string, string):void} errorCallback
- */
-export function makeHTTPPost (url, data, successCallback, errorCallback) {
-  // eslint-disable-next-line no-undef
+export function makeHTTPPost(url: string, data: string, successCallback: (result: string) => void, errorCallback: (statusCode: number, statusText: string, responseText: string) => void) {
   $.ajax({
     type: 'POST',
     async: true,
@@ -32,14 +24,7 @@ export function makeHTTPPost (url, data, successCallback, errorCallback) {
   })
 }
 
-/**
- *
- * @param {string} url
- * @param {function(any):void} successCallback
- * @param {function(number,string,string):void} errorCallback
- */
-export function makeHTTPGet (url, successCallback, errorCallback, contentType = undefined, dataType = undefined) {
-  // eslint-disable-next-line no-undef
+export function makeHTTPGet(url: string, successCallback: (result: any) => void, errorCallback: (statusCode: number, statusText: string, responseText: string) => void, contentType: string = undefined, dataType: string = undefined) {
   $.ajax({
     type: 'GET',
     async: true,

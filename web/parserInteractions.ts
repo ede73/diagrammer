@@ -3,25 +3,17 @@ import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { GraphCanvas } from '../model/graphcanvas.js'
 import { getGenerator, getError, getInputElement, getVisualizer, setError, setGenerator } from './uiComponentAccess.js'
 
-/**
- * @type {number}
- */
-let parsingStarted
+let parsingStarted: number
 
-/**
- *
- * @param {string} str
- * @param {string} hash
- */
 // TODO: MOVING TO GraphCanvas
-diagrammerParser.yy.parseError = function (str, hash) {
+diagrammerParser.yy.parseError = (str: string, hash: string) => {
   const pe = `Parsing error:\n${str}\n${hash}`
   console.log('pe')
   setError(pe)
   throw new Error(str)
 }
 
-diagrammerParser.yy.parsedGeneratorAndVisualizer = (generator, visualizer, preferParsed) => {
+diagrammerParser.yy.parsedGeneratorAndVisualizer = (generator: string, visualizer: string, preferParsed: boolean) => {
   console.log(`  ..script suggests using generator ${generator} and visualizer ${visualizer} and prefer ${preferParsed}`)
   if (preferParsed && generator) {
     const useVisualizer = visualizer === 'undefined' ? undefined : visualizer
@@ -62,7 +54,7 @@ diagrammerParser.trace = function (x) {
  * @param {function(string, string):void} successCallback Passing final generator, visualizer
  * @param {function(string, DOMException):void} failureCallback passing error as string, exception as Exception
  */
-export function parse (diagrammerCode, successCallback, failureCallback, preferScriptSpecifiedGeneratorAndVisualizer = false) {
+export function parse(diagrammerCode, successCallback, failureCallback, preferScriptSpecifiedGeneratorAndVisualizer = false) {
   const generator = getGenerator()
   const visualizer = getVisualizer()
 

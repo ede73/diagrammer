@@ -1,6 +1,6 @@
 // @ts-check
 
-export function getSavedGraph () {
+export function getSavedGraph() {
   let data = {}
   if (!localStorage.getItem('graphs')) {
     localStorage.setItem('graphs', JSON.stringify(data))
@@ -13,7 +13,7 @@ export function getSavedGraph () {
   return data
 }
 
-export function getSavedFilesAsOptionList () {
+export function getSavedFilesAsOptionList() {
   let t = ''
   for (const k in getSavedGraph()) {
     console.log(`Stored file:${k}`)
@@ -22,7 +22,7 @@ export function getSavedFilesAsOptionList () {
   return t
 }
 
-export function saveCurrentGraph (filename, diagrammerCode) {
+export function saveCurrentGraph(filename: string, diagrammerCode: string) {
   const data = getSavedGraph()
   data[filename] = diagrammerCode
   const jd = JSON.stringify(data)
@@ -30,7 +30,7 @@ export function saveCurrentGraph (filename, diagrammerCode) {
   // clipboardData.setData("text",jd);
 }
 
-export function loadGraph (filename) {
+export function loadGraph(filename: string) {
   const data = getSavedGraph()
   if (data[filename]) {
     return data[filename]

@@ -1,9 +1,14 @@
 {
   "exclude": [
-    "XXtests/*"
+    "tests/*",
+    "*.js",
+    "model/*.js",
+    "**/*.js",
+    "node_modules",
+    "node_modules/*",
   ],
   "typeAcquisition": {
-    "enable":true,
+    "enable": true,
     "include": [
       "model",
       "node",
@@ -16,10 +21,18 @@
     ]
   },
   "compilerOptions": {
-        "baseUrl": ".",
-        "paths": {
-            "https://cdn.jsdelivr.net/npm/d3@7/+esm": ["./node_modules/@types/d3"],
-            "//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js": ["./node_modules/@types/jquery"]
-        }
+    "target": "es2017",
+    "module": "ES6",
+    "sourceMap": true,
+    "allowJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "https://cdn.jsdelivr.net/npm/d3@7/+esm": [
+        "./node_modules/@types/d3"
+      ],
+      "//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js": [
+        "./node_modules/@types/jquery"
+      ]
     }
+  }
 }

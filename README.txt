@@ -1,3 +1,17 @@
+Something is totally broken in tsc, started generating shitloads of errors from totally unrelated modules!
+
+I can delete node_modules and still get a clean compile, so I'm not even depending on these shits:
+https://github.com/microsoft/TypeScript/issues/40426
+tsc -p tsconfig.json|grep node_modules|cut -d: -f1|cut -d'(' -f1|sort|uniq
+../node_modules/@types/babel__core/index.d.ts
+../node_modules/@types/babel__generator/index.d.ts
+../node_modules/@types/babel__template/index.d.ts
+../node_modules/@types/babel__traverse/index.d.ts
+../node_modules/@types/jest/index.d.ts
+../node_modules/puppeteer/lib/types.d.ts
+
+
+
 apt-get install make jison graphviz wslu # for debian 
 # sudo apt install openjdk-18-jre # if you want plantuml
 brew install graphviz --with-pango

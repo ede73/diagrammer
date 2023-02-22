@@ -1,15 +1,9 @@
 // @ts-check
 
-// used as type, by eslint doesn't get it
-// eslint-disable-next-line no-unused-vars
 import { GraphCanvas } from '../model/graphcanvas.js'
-// used as type, by eslint doesn't get it
-// eslint-disable-next-line no-unused-vars
 import { GraphContainer } from '../model/graphcontainer.js'
-// eslint-disable-next-line no-unused-vars
 import { GraphEdge } from '../model/graphedge.js'
 import { debug } from '../model/support.js'
-// eslint-disable-next-line no-unused-vars
 import { GraphConnectable } from './graphconnectable.js'
 import { GraphReference } from './graphreference.js'
 
@@ -19,9 +13,8 @@ import { GraphReference } from './graphreference.js'
 
 /**
  * Usage: grammar/diagrammer.grammar, generators/digraph.js
- * @param {GraphConnectable} vertex
  */
-export function hasOutwardEdge (graphCanvas, vertex) {
+export function hasOutwardEdge(graphCanvas: GraphCanvas, vertex: GraphConnectable) {
   // TODO: Replace with traverseEdges&GraphCanvas
   for (const i in graphCanvas._EDGES) {
     if (!Object.prototype.hasOwnProperty.call(graphCanvas._EDGES, i)) continue
@@ -35,11 +28,8 @@ export function hasOutwardEdge (graphCanvas, vertex) {
 
 // /**
 //  * return true if vertex has inward edge OUTSIDE container it is in
-//  * @param {GraphCanvas} graphCanvas
-//  * @param {GraphConnectable} vertex
-//  * @param {GraphContainer} verticesContainer (Group?)
 //  */
-// function hasInwardEdge (graphCanvas, vertex, verticesContainer) {
+// function hasInwardEdge (graphCanvas:GraphCanvas, vertex:GraphConnectable, verticesContainer:GraphContainer) {
 //   for (const i in graphcanvas._EDGES) {
 //     if (!Object.prototype.hasOwnProperty.call(graphcanvas._EDGES, i)) continue
 //     const edge = graphcanvas._EDGES[i]
@@ -56,10 +46,8 @@ export function hasOutwardEdge (graphCanvas, vertex) {
 
 // /**
 //  * test if container has the object
-//  * @param {GraphContainer} container
-//  * @param {GraphConnectable} obj
 //  */
-// function containsObject (container, obj) {
+// function containsObject (container:GraphContainer, obj:GraphConnectable) {
 //   for (const i in container.OBJECTS) {
 //     if (!Object.prototype.hasOwnProperty.call(container.OBJECTS, i)) continue
 //     const c = container.OBJECTS[i]
@@ -81,11 +69,8 @@ export function hasOutwardEdge (graphCanvas, vertex) {
  * If callback returns a value (!= undefined) break loop and return just that
  * Usage: generators
  *
- * @param {GraphCanvas} graphCanvas
- * @param {function(GraphEdge):void} callback
- * @return {any}
  */
-export function traverseEdges (graphCanvas, callback) {
+export function traverseEdges(graphCanvas: GraphCanvas, callback: (edge: GraphEdge) => any) {
   debug(`${graphCanvas._ROOTVERTICES}`)
   for (const i in graphCanvas._EDGES) {
     if (!Object.prototype.hasOwnProperty.call(graphCanvas._EDGES, i)) continue
@@ -102,11 +87,10 @@ export function traverseEdges (graphCanvas, callback) {
  *
  * Usage: generators
  *
- * @param {GraphContainer} container Go thru all objects within this container
- * @param {function(GraphConnectable):void} callback Called for each object, IFF callback returns anything(!=undefined), this function will return that also
- * @return {any}
+ * @param container Go thru all objects within this container
+ * @param callback Called for each object, IFF callback returns anything(!=undefined), this function will return that also
  */
-export function traverseVertices (container, callback, includeReferred = false) {
+export function traverseVertices(container: GraphContainer, callback: (node: GraphConnectable) => any, includeReferred: boolean = false) {
   const nodes = container._getObjects(includeReferred)
   for (const i in nodes) {
     if (!Object.prototype.hasOwnProperty.call(nodes, i)) continue

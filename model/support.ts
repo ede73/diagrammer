@@ -1,34 +1,25 @@
 // @ts-check
-// Used for typechecking
-// eslint-disable-next-line no-unused-vars
 import { GraphCanvas } from '../model/graphcanvas.js'
-// eslint-disable-next-line no-unused-vars
-import { GraphEdge } from '../model/graphedge.js'
-// eslint-disable-next-line no-unused-vars
 import { GraphObject } from '../model/graphobject.js'
 
-/** @type {number} */
-let debugIndent = 0
+let debugIndent: number = 0
 /**
  * DEBUG: Set to true to see debug messages
- *  @type {boolean}
  */
-let VERBOSE
+let VERBOSE: boolean
 
 /**
  * Toggle verbosity
- * @param {boolean} verbose
  */
-export function setVerbose (verbose) {
+export function setVerbose(verbose: boolean) {
   VERBOSE = verbose
 }
 
 /**
  * Pass debug messages
- * @param {(string|boolean)} msg Message
- * @param {(boolean|any)} indentOrDedent whether to indent or dedent
+ * @param indentOrDedent whether to indent or dedent
  */
-export function debug (msg, indentOrDedent = undefined) {
+export function debug(msg: (string | boolean), indentOrDedent: (boolean) = undefined) {
   if (VERBOSE === true && msg !== false && msg !== true) {
     let d = ''
     for (let i = 0; i < debugIndent; i++) d += '    '
@@ -44,12 +35,12 @@ export function debug (msg, indentOrDedent = undefined) {
 /**
  * Set attribute of an object
  *
- * @param {GraphObject} cl Object
- * @param {string} attr Attribute name
- * @param {any} value Value
- * @returns {GraphObject} Object itself(cl)
+ * @param cl Object
+ * @param attr Attribute name
+ * @param value Value
+ * @returns Object itself(cl)
  */
-export function setAttr (cl, attr, value) {
+export function setAttr(cl: GraphObject, attr: string, value: any) {
   cl[attr] = value
   return cl
 }
@@ -60,13 +51,11 @@ export function setAttr (cl, attr, value) {
  * @returns {string}
  */
 // @ts-ignore
-// eslint-disable-next-line no-extend-native
 String.prototype.format = function () {
   let formatted = this
   for (const arg in arguments) {
     formatted = formatted.replace(`{${arg}}`, arguments[arg])
   }
-  // @ts-ignore
   return formatted
 }
 
@@ -74,12 +63,10 @@ String.prototype.format = function () {
  * Format a string with provided array of values
  * For example. "{2}{0}{1}".formatArray([2,3,1]) prints 123
  *
- * @param {Array} array
  * @returns {string} Formatted string
  */
 // @ts-ignore
-// eslint-disable-next-line no-extend-native
-String.prototype.formatArray = function (array) {
+String.prototype.formatArray = function (array: Array) {
   let formatted = this
   for (let i = 0; i < array.length; i++) {
     formatted = formatted.replace(`{${i}}`, array[i])
@@ -91,11 +78,11 @@ String.prototype.formatArray = function (array) {
 /**
  * Return attribute like prefix="ATTRHERE" with padding at both sides or "" if 0
  * or undefined
- * @param {GraphObject} cl Object to scan
- * @param {string} attr Name of the attribute index to return
- * @return {string} Return the attribute
+ * @param cl Object to scan
+ * @param attr Name of the attribute index to return
+ * @return Return the attribute
  */
-export function getAttribute (cl, attr) {
+export function getAttribute(cl: GraphObject, attr: string) {
   if (!cl[attr] || cl[attr] === 0) { return undefined }
   return cl[attr]
 }
@@ -103,13 +90,13 @@ export function getAttribute (cl, attr) {
 /**
  * Return formatted attribute value
  *
- * @param {GraphObject} cl Object to scan thru
- * @param {(string|Array)} attr Name of the attribute to return
- * @param {string} fmt Format string to apply to returned variable (optional), example: fillcolor="{0}"
- * @param {Array} [resultarray] If given, in addition for returning, will PUSH the result to this array
- * @returns {string} (possibly formatted) value of the attribute or "" if attribute not found
+ * @param cl Object to scan thru
+ * @param attr Name of the attribute to return
+ * @param fmt Format string to apply to returned variable (optional), example: fillcolor="{0}"
+ * @param If given, in addition for returning, will PUSH the result to this array
+ * @returns (possibly formatted) value of the attribute or "" if attribute not found
  */
-export function getAttributeAndFormat (cl, attr, fmt, resultarray) {
+export function getAttributeAndFormat(cl: GraphObject, attr: (string | any[]), fmt: string, resultarray: any[] = undefined) {
   if (attr instanceof Array) {
     for (const i in attr) {
       if (!Object.prototype.hasOwnProperty.call(attr, i)) continue
@@ -137,12 +124,12 @@ export function getAttributeAndFormat (cl, attr, fmt, resultarray) {
  * Comma join the output array and return it as [...]
  * If output results in NOTHING, return empty string
  *
- * @param {GraphObject} obj
- * @param {Object.<string, string>} attrMap key is attribute to fetch (if present), and value is format
- * @param {string[]} extras Anything here will be appended to the result map
- * @return {string} Return all successfully fetched and formatted properties joined with extras as a comma separared parameter list SORTED and enclosed in [] or '' if no attributes resulted
+ * @param obj
+ * @param attrMap key is attribute to fetch (if present), and value is format
+ * @param extras Anything here will be appended to the result map
+ * @return Return all successfully fetched and formatted properties joined with extras as a comma separared parameter list SORTED and enclosed in [] or '' if no attributes resulted
  */
-export function multiAttrFmt (obj, attrMap, extras = []) {
+export function multiAttrFmt(obj: GraphObject, attrMap: { [key: string]: string }, extras: string[] = []) {
   const attrMapFormatted = []
   for (const [key, value] of Object.entries(attrMap)) {
     const formattedValue = getAttributeAndFormat(obj, key, value)
@@ -158,11 +145,12 @@ let indentLevel = 0
 
 /**
  * Output given string, potentially indenting or dedenting
- * @param {(boolean|GraphCanvas)} graphcanvas
- * @param {(string|boolean)} txt Text to output
- * @param {boolean} [indentOrDedent] whether to indent to dedent, OPTIONAL. true will LATENTLY increase the indent, flase will do that BEFORE the output is processed
+ * Function accepts (graphcanvas, txt, indentOrDedent) (txt, indentOrDedent) or (indentOrDedent)
+ * @param graphcanvas (or boolean as for indentOrDedent without outputting anything, or just a string)
+ * @param txt Text to output
+ * @param [indentOrDedent] whether to indent to dedent, OPTIONAL. true will LATENTLY increase the indent, flase will do that BEFORE the output is processed
  */
-export function output (graphcanvas, txt, indentOrDedent = undefined) {
+export function output(graphcanvas: (boolean | GraphCanvas), txt: (string | boolean), indentOrDedent: boolean = undefined) {
   let prefix = ''
   if (indentOrDedent === false || graphcanvas === false || txt === false) {
     if (indentLevel === 0) {
@@ -170,11 +158,11 @@ export function output (graphcanvas, txt, indentOrDedent = undefined) {
     }
     indentLevel--
   }
-  if (txt !== true && txt !== false && graphcanvas !== true && graphcanvas !== false) {
+  if (txt !== true && txt !== false && graphcanvas instanceof GraphCanvas) {
     for (let i = 0; i < indentLevel; i++) {
       prefix += '    '
     }
-    graphcanvas.result(prefix + txt)
+    graphcanvas.result(`${prefix}${txt}`)
   }
   if (indentOrDedent === true || graphcanvas === true || txt === true) {
     indentLevel++
@@ -183,11 +171,11 @@ export function output (graphcanvas, txt, indentOrDedent = undefined) {
 
 /**
  * Send the text to the output, or format the array
- * @param {GraphCanvas} graphcanvas
- * @param {string} txt
- * @param {Array} [array] Optional array format
+ * @param graphcanvas
+ * @param  txt
+ * @param [array] Optional array format
  */
-export function outputFormattedText (graphcanvas, txt, array) {
+export function outputFormattedText(graphcanvas: GraphCanvas, txt: string, array: any[]) {
   if (!array) {
     graphcanvas.result(txt)
   } else {
@@ -198,13 +186,10 @@ export function outputFormattedText (graphcanvas, txt, array) {
 
 /**
  * Iterate edges
- * @param {GraphCanvas} graphcanvas
  */
-export function * iterateEdges (graphcanvas) {
+export function* iterateEdges(graphcanvas: GraphCanvas) {
   for (const i in graphcanvas._EDGES) {
     if (!Object.prototype.hasOwnProperty.call(graphcanvas._EDGES, i)) continue
-    /** @type {GraphEdge} */
-    const foolTypeChecker = graphcanvas._EDGES[i]
-    yield foolTypeChecker
+    yield graphcanvas._EDGES[i]
   }
 }

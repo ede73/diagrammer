@@ -1,99 +1,71 @@
 // @ts-check
 import { GraphGroup } from '../model/graphgroup.js'
 import { debug } from '../model/support.js'
-// used in type declarations
-// eslint-disable-next-line no-unused-vars
 import { GraphConnectable } from './graphconnectable.js'
+import { GraphVertex } from './graphvertex.js'
 
 /**
  * An inner graph, where outside is linked to all the Vertices in side, like
  * outerVertex > ( LinkedToInnerVertex AndThese>Inner>VerticesAlso)
- * @param name Name of the container
- * @constructor
  */
 export class GraphInner extends GraphGroup {
-  /** @param {string} name */
-  constructor (name) {
+  private isInnerGraph: boolean = true
+
+  _exit: GraphConnectable = undefined
+
+  _entrance: (GraphConnectable | GraphConnectable[]) = undefined
+
+  constructor(name: string) {
     super(name)
-
-    /** @type {boolean} */
-    this.isInnerGraph = true
-
-    /** @type {GraphConnectable} */
-    this._exit = undefined
-
-    /** @type {(GraphConnectable|GraphConnectable[])} */
-    this._entrance = undefined
   }
 
-  /**
-   * @param {(GraphConnectable|GraphConnectable[])} entrance
-   * @return {*}
-   */
-  _setEntrance (entrance) {
+  _setEntrance(entrance: (GraphConnectable | GraphConnectable[])) {
     debug(`subgraph:Set entrance to ${entrance}`)
     this._entrance = entrance
     return this
   }
 
-  _getEntrance () {
+  _getEntrance() {
     return this._entrance
   }
 
-  /**
-   * @param {GraphConnectable} exit
-   * @return {GraphInner}
-   */
-  _setExit (exit) {
+  _setExit(exit: GraphConnectable) {
     debug(`subgraph:Set exit to ${exit}`)
     this._exit = exit
     return this
   }
 
-  /**
-   * @return {GraphConnectable}
-   */
-  _getExit () {
+  _getExit() {
     return this._exit
   }
 
   /**
    * Edge labels only on Group and Vertex
    */
-  // @ts-ignore
-  _setEdgeLabel (value) {
+  _setEdgeLabel(value: string) {
     throw new Error('EdgeLabel N/A')
-    // keeping type checker happy
-    // eslint-disable-next-line no-unreachable
     return this
   }
 
-  // @ts-ignore
-  _getEdgeLabel () {
+  _getEdgeLabel() {
     throw new Error('EdgeLabel N/A')
-    // keeping type checker happy
-    // eslint-disable-next-line no-unreachable
     return ''
   }
 
   /**
    * Equals only on Group and Vertex
    */
-  // @ts-ignore
-  setEqual (value) {
+  setEqual(value: GraphVertex[]) {
     throw new Error('Equals N/A')
-    // eslint-disable-next-line no-unreachable
     return this
   }
 
-  // @ts-ignore
-  getEqual () {
+  getEqual() {
     throw new Error('Equals N/A')
-    // eslint-disable-next-line no-unreachable
     return []
   }
 
-  toString () {
+  toString() {
     let fmt = ''
     if (this._edgelabel) { fmt += `,edgelabel:${this._edgelabel}` }
     if (this._entrance) { fmt += `,entrance:${this._entrance}` }

@@ -1,0 +1,28 @@
+generator sankey
+
+enter;Customer\nenter
+linkclick;Link on external website
+addcart;Add a product to cart
+anotherproduct;Check another product
+
+enter>"700"ad,"200"search,"100"linkclick
+
+// 524 users in mobile (399, 50, 75)
+mobile<"57%"ad,"25%"search,"75%"linkclick
+// 476 users in desktop (301, 150, 25)
+desktop<"43%"ad,"75%"search,"25%"linkclick
+
+// 476 (357 and 119)
+desktop>"75%"browse,"25%"exit
+//524 (393 and 131)
+mobile>"75%"browse,"25%"exit
+
+// 750 users, (75, 525,150)
+browse>"10%"addcart,"70%"anotherproduct,"20%"exit
+
+// (6, 15, 54)
+// alas this visualization doesnt allow circular links
+addcart>"8%"clearcart,"20%"timeout,"72%"checkout
+
+// 27,27
+checkout>"50%"exit,"50%"purchase

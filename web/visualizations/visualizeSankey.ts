@@ -30,7 +30,7 @@ export function visualizeSankey(generatorResult: string) {
   })
 
   const f = d4.format(',.0f')
-  const format = d => `${f(d)} TWh`
+  const format = d => `${f(d)}`
 
   const _color = d4.scaleOrdinal(d4.schemeCategory10)
   const color = name => _color('red')

@@ -173,4 +173,8 @@ launchTestInBackground ast.txt
 
 TEST_BINARY=ast_record
 launchTestInBackground ast.txt
+
+TEST_BINARY=sankey
+launchTestInBackground sankey.txt
+launchTestInBackground sankey2.txt
 exit 0

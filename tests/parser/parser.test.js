@@ -120,7 +120,7 @@ const dumpCanvas = (canvas) => {
     expect(false).toBeTruthy()
   }
 }
-
+// TODO: Add "strong" consice typing, instead of list of strings, make them: G("group stuff here"), N("NODE stff here"), E("EDGE stff here")
 // Collection of comprehensive but as simple as possible grammar tests (in increasing complexity)
 const grammarTests = [
   { g: 'vertical', f: [canvasHas('direction', 'portrait')] },

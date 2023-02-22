@@ -7,6 +7,10 @@ import { GraphObject } from '../model/graphobject.js'
  * (ie. Vertex, Group, InnerGroup)
  */
 export class GraphConnectable extends GraphObject {
+  // TODO: TypeScript doesn't allow quickly adding new members to objects, fix after TS conversion done(see plantuml_sequence/parsetree e.g.)
+  id: number = undefined
+  // TODO: TypeScript doesn't allow quickly adding new members to objects, fix after TS conversion done(see plantuml_sequence/parsetree e.g.)
+  active: boolean = undefined
   /**
    * TODO: Internal flag for no edge objects. Looks like originally used only for Vertices and
    * also ONLY set for Vertices (even if reset for all Connectables).

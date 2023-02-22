@@ -150,7 +150,7 @@ let indentLevel = 0
  * @param txt Text to output
  * @param [indentOrDedent] whether to indent to dedent, OPTIONAL. true will LATENTLY increase the indent, flase will do that BEFORE the output is processed
  */
-export function output(graphcanvas: (boolean | GraphCanvas), txt: (string | boolean), indentOrDedent: boolean = undefined) {
+export function output(graphcanvas: (boolean | GraphCanvas), txt: (string | boolean) = undefined, indentOrDedent: boolean = undefined) {
   let prefix = ''
   if (indentOrDedent === false || graphcanvas === false || txt === false) {
     if (indentLevel === 0) {
@@ -175,7 +175,7 @@ export function output(graphcanvas: (boolean | GraphCanvas), txt: (string | bool
  * @param  txt
  * @param [array] Optional array format
  */
-export function outputFormattedText(graphcanvas: GraphCanvas, txt: string, array: any[]) {
+export function outputFormattedText(graphcanvas: GraphCanvas, txt: string, array: any[] = undefined) {
   if (!array) {
     graphcanvas.result(txt)
   } else {

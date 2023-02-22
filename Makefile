@@ -13,6 +13,10 @@ MODEL_REST = model/shapes.js model/tree.js
 
 %.js: %.ts
 	(cd model;tsc -p tsconfig.json)
+	(cd generators;tsc -p tsconfig.json)
+	# TODO: TSC tries to overwrite build/diagrammer_parser.js & js/viz.es.js (or so it claims, there is no typescript file, just imported)
+	(cd web;tsc -p tsconfig.json)||true
+	(cd web/visualizations;tsc -p tsconfig.json)
 
 all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST) nodemodules
 	@echo Make ALL
@@ -29,8 +33,8 @@ plantuml: ext/plantuml.jar
 	  exit 10; \
 	fi
 
-index.html : index_template.html Makefile generators/*.js tests/test_inputs/*.txt web/visualizations/*.js
-	awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs/*.txt | sort |sed 's,^tests/test_inputs/,,g'" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations/*.js | sort" | getline var) printf("<script type=\"module\" src=\"%s\"></script>\n",var);next}/{REPLACE_WITH_GENERATORS}/{ while ("grep \"ADD TO INDEX.HTML AS:\" generators/*.js|sort|cut -d: -f3-|sort" | getline var) printf("%s\n",var,var);next}{print $0}' $< >$@
+index.html : index_template.html Makefile generators/*.ts tests/test_inputs/*.txt web/visualizations/*.ts
+	awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs/*.txt | sort |sed 's,^tests/test_inputs/,,g'" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations/*.ts | sort" | getline var) {tsjs=var;gsub("[.]ts",".js",tsjs);printf("<script type=\"module\" src=\"%s\"></script>\n",tsjs);}next}/{REPLACE_WITH_GENERATORS}/{ while ("grep \"ADD TO INDEX.HTML AS:\" generators/*.ts|sort|cut -d: -f3-|sort" | getline var) printf("%s\n",var,var);next}{print $0}' $< >$@
 
 build/diagrammer_lexer.js: grammar/diagrammer.lex
 	@mkdir -p build
@@ -44,7 +48,7 @@ build/diagrammer.all: $(GRAMMAR_FILES)
 	@echo Compile build/diagrammer.all
 	@cat $^ >$@
 
-build/diagrammer_parser.js: build/diagrammer.all Makefile generators/* model/* js/*
+build/diagrammer_parser.js: build/diagrammer.all Makefile generators/*.js model/* js/*
 	@mkdir -p build
 	@echo make parser
 	if [ ${DEBUG} ]; then \
@@ -95,3 +99,4 @@ tests: test
 
 clean:
 	rm -f build/*
+	rm -f generators/*.js model/*.js web/*.js web/visualizations/*.js

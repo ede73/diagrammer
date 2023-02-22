@@ -9,7 +9,6 @@ import { GraphVertex } from './graphvertex.js'
  * outerVertex > ( LinkedToInnerVertex AndThese>Inner>VerticesAlso)
  */
 export class GraphInner extends GraphGroup {
-  private isInnerGraph: boolean = true
 
   _exit: GraphConnectable = undefined
 
@@ -17,6 +16,7 @@ export class GraphInner extends GraphGroup {
 
   constructor(name: string) {
     super(name)
+    this.isInnerGraph = true
   }
 
   _setEntrance(entrance: (GraphConnectable | GraphConnectable[])) {

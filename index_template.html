@@ -6,9 +6,9 @@
 {
   "imports": {
     "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm",
-    "go": "./js/go-debug-module.js",
-	"jquery": "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js",
-	"mscgenjs": "./js/mscgen-inpage.js"
+    "gojs": "./node_modules/gojs/release/go-debug-module.js",
+    "jquery": "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js",
+    "mscgenjs": "./js/mscgen-inpage.js"
  }
 }
 </script>
@@ -278,7 +278,7 @@
 	window.getGraphText = getGraphText;
 	window.setGraphText = setGraphText;
 
-	import { getCurrentFilename, openPicWindow, getVisualizer, getInputElement } from './web/uiComponentAccess.js';
+	import { getCurrentFilename, openPicWindow, getVisualizer, getInputElement, setGenerator } from './web/uiComponentAccess.js';
 	window.getCurrentFilename = getCurrentFilename;
 	window.openPicWindow = openPicWindow;
 

@@ -6,6 +6,8 @@ import { GraphConnectable } from './graphconnectable.js'
  * Represents an edge(link) between objects (vertices,groups,lists)
  */
 export class GraphEdge extends GraphObject {
+  // TODO: TypeScript doesn't allow quickly adding new members to objects, fix after TS conversion done(see plantuml_sequence/parsetree e.g.)
+  printed: boolean = undefined
   edgeType: string
   left: GraphConnectable
   right: GraphConnectable

@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "module": "ES6",
+    "esModuleInterop": true,
+    "target": "ES2017",
+    //"sourceMap": true,
+    "allowJs": true,
+    "removeComments": true,
+    // not even this AND exclude PREVENT tsc going to node_modules
+    // completely removing node_modules works, transpiles beautifully still! WTF?
+    "noImplicitAny": false,
+    // tsc is "TOTALLY" nuts,i've echo > support.ts, + this config, tsc runs thru node_modules :)
+    // Disabling lib check helps (or if puppeteer, jest, babel type errors get fixed)
+    "skipLibCheck": true
+  },
+  // "include": [
+  //   "*.ts"
+  // ],
+  "exclude": [
+    "tests/*",
+    "*.js",
+    "model/*.js",
+    "**/*.js",
+    "node_modules",
+    "node_modules/*",
+  ]
+}

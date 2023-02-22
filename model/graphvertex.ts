@@ -15,7 +15,7 @@ export class GraphVertex extends GraphConnectable {
    * @param [shape] Optional shape for the vertex, if not give, will default to what ever default is being used at the moment
    * @constructor
    */
-  constructor(name: string, shape: string) {
+  constructor(name: string, shape: string = undefined) {
     super(name)
     if (shape) {
       this._assertRegonizedShape(shape)

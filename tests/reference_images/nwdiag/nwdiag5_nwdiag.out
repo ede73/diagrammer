@@ -2,18 +2,18 @@ nwdiag {
     default_fontsize = 16
     network dmz {
         address="y"
-        web01[ shape="box" ];
-        web02[ shape="box" ];
+        web01[ shape=box ];
+        web02[ shape=box ];
         web01;
         web02;
     }
     network internal {
         address="x"
         web01;
-        web01[ shape="box" ];
+        web01;
         web02;
-        web02[ shape="box" ];
-        db01[ shape="box" ];
+        web02;
+        db01[ shape=box ];
         web01;
         web02;
     }

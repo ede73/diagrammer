@@ -12,12 +12,12 @@ import { output } from '../model/support.js'
  * To test: node js/diagrammer.js verbose tests/test_inputs/layerbands.txt layerbands
 */
 export function layerbands(graphcanvas: GraphCanvas) {
-  const lout = (...args) => {
+  const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
 
-  const groups = {
+  const groups: { key: string, category: string, itemArray: { text: string }[] } = {
     key: '_BANDS',
     category: 'Bands',
     itemArray: []
@@ -28,7 +28,7 @@ export function layerbands(graphcanvas: GraphCanvas) {
 
   traverseVertices(graphcanvas, obj => {
     if (obj instanceof GraphGroup) {
-      groups.itemArray.push({ text: obj.name })
+      groups.itemArray.push({ text: obj.name ?? '' })
     }
   })
 

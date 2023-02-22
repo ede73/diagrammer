@@ -13,7 +13,7 @@ import { GraphConnectable } from '../model/graphconnectable.js'
  * To test: node js/diagrammer.js tests/test_inputs/parsetree.txt parsetree
  */
 export function parsetree(graphcanvas: GraphCanvas) {
-  const lout = (...args) => {
+  const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }

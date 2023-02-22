@@ -9,11 +9,11 @@ import { output } from '../model/support.js'
  * TO test: node js/diagrammer.js verbose tests/test_inputs/ast.txt ast
 */
 export function ast(graphcanvas: GraphCanvas) {
-  const lout = (...args) => {
+  const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
-  const o = (msg, indent = undefined) => {
+  const o = (msg: string, indent = undefined) => {
     lout(msg, indent)
   }
 
@@ -43,7 +43,7 @@ export function ast(graphcanvas: GraphCanvas) {
 
     if (Array.isArray(obj)) {
       // EDGES, OBJECTS, ROOTVERTICES are true ARRAYS (vs.named)
-      const items = []
+      const items: string[] = []
       obj.forEach((item) => {
         const collect = dumpObject(item, level)
         // const collect = dumpObject(obj[arrayKey], level + 1)
@@ -52,7 +52,7 @@ export function ast(graphcanvas: GraphCanvas) {
       })
       return `[${items.sort().join(',')}]\n`
     } else {
-      const items = []
+      const items: string[] = []
       Object.keys(obj).forEach((propname) => {
         const value = obj[propname]
         // skip empties..

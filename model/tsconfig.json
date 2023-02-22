@@ -8,10 +8,16 @@
     "removeComments": true,
     // not even this AND exclude PREVENT tsc going to node_modules
     // completely removing node_modules works, transpiles beautifully still! WTF?
-    "noImplicitAny": false,
+    //"noImplicitAny": false,
     // tsc is "TOTALLY" nuts,i've echo > support.ts, + this config, tsc runs thru node_modules :)
     // Disabling lib check helps (or if puppeteer, jest, babel type errors get fixed)
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // Be as strict as possible
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "strictNullChecks": true,
   },
   // "include": [
   //   "*.ts"

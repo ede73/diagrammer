@@ -8,16 +8,16 @@ import { GraphObject } from '../model/graphobject.js'
  */
 export class GraphConnectable extends GraphObject {
   // TODO: TypeScript doesn't allow quickly adding new members to objects, fix after TS conversion done(see plantuml_sequence/parsetree e.g.)
-  id: number = undefined
+  id?: number = undefined
   // TODO: TypeScript doesn't allow quickly adding new members to objects, fix after TS conversion done(see plantuml_sequence/parsetree e.g.)
-  active: boolean = undefined
+  active?: boolean = undefined
   /**
    * TODO: Internal flag for no edge objects. Looks like originally used only for Vertices and
    * also ONLY set for Vertices (even if reset for all Connectables).
    */
-  _noedges: boolean = undefined
+  _noedges?: boolean = undefined
   // UH... this is used in grammar parser to TEMPORARILY store edge object
-  _edgelabel: string = undefined
+  _edgelabel?: string = undefined
 
   constructor(name: string) {
     super(name)

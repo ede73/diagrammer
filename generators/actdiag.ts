@@ -54,7 +54,7 @@ const ActDiagShapeMap =
  * http://blockdiag.com/en/blockdiag/
  */
 export function actdiag(graphcanvas: GraphCanvas) {
-  const lout = (...args) => {
+  const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
@@ -77,10 +77,11 @@ export function actdiag(graphcanvas: GraphCanvas) {
       traverseVertices(obj, (obj: GraphConnectable) => {
         const mappedShape = (obj => {
           if (obj instanceof GraphVertex) {
-            if (obj.shape && !ActDiagShapeMap[obj.shape]) {
+            const currentShape = obj.shape as keyof typeof ActDiagShapeMap
+            if (obj.shape && !ActDiagShapeMap[currentShape]) {
               throw new Error('Missing shape mapping')
             }
-            const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap.default
+            const mappedShape = ActDiagShapeMap[currentShape] ? ActDiagShapeMap[currentShape] : ActDiagShapeMap.default
             return [`shape=${mappedShape}`]
           }
         })(obj);
@@ -103,10 +104,12 @@ export function actdiag(graphcanvas: GraphCanvas) {
 
       const mappedShape = (obj => {
         if (obj instanceof GraphVertex) {
-          if (obj.shape && !ActDiagShapeMap[obj.shape]) {
+          const currentShape = obj.shape as keyof typeof ActDiagShapeMap
+
+          if (obj.shape && !ActDiagShapeMap[currentShape]) {
             throw new Error('Missing shape mapping')
           }
-          const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap.default
+          const mappedShape = ActDiagShapeMap[currentShape] ? ActDiagShapeMap[currentShape] : ActDiagShapeMap.default
           return [`shape=${mappedShape}`]
         }
       })(obj);

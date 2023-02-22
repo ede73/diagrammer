@@ -22,7 +22,7 @@ tests/parser/parser.test.js: tests/parser/tsconfig.json tests/parser/parser.test
 	tsc -p model/tsconfig.json
 	tsc -p generators/tsconfig.json
 	# TODO: TSC tries to overwrite build/diagrammer_parser.js & js/viz.es.js (or so it claims, there is no typescript file, just imported)
-	tsc -p wen/tsconfig.json ||true
+	tsc -p web/tsconfig.json ||true
 	tsc -p web/visualizations/tsconfig.json
 
 nodemodules: node_modules

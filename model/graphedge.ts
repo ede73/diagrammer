@@ -7,15 +7,15 @@ import { GraphConnectable } from './graphconnectable.js'
  */
 export class GraphEdge extends GraphObject {
   // TODO: TypeScript doesn't allow quickly adding new members to objects, fix after TS conversion done(see plantuml_sequence/parsetree e.g.)
-  printed: boolean = undefined
+  printed?: boolean = undefined
   edgeType: string
   left: GraphConnectable
   right: GraphConnectable
-  lcompass: string = undefined
-  rcompass: string = undefined
-  edgetextcolor: string = undefined
-  edgecolor: string = undefined
-  container: GraphConnectable = undefined
+  lcompass?: string = undefined
+  rcompass?: string = undefined
+  edgetextcolor?: string = undefined
+  edgecolor?: string = undefined
+  container?: GraphConnectable = undefined
 
   /**
      * @param edgeType Type of the edge(grammar!)
@@ -24,7 +24,7 @@ export class GraphEdge extends GraphObject {
      * @constuctor
      */
   constructor(edgeType: string, lhs: GraphConnectable, rhs: GraphConnectable) {
-    super(undefined) // edges have no names, ever
+    super('') // edges have no names, ever
     this.edgeType = edgeType.trim()
     this.left = lhs
     this.right = rhs

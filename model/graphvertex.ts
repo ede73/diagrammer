@@ -6,21 +6,21 @@ import { Shapes } from './shapes.js'
  * Represents a Vertex in a visualization
  */
 export class GraphVertex extends GraphConnectable {
-  shape: string
-  image: string = undefined
-  style: string = undefined
+  shape?: string
+  image?: string = undefined
+  style?: string = undefined
 
   /**
    * @param name Name of the vertex
-   * @param [shape] Optional shape for the vertex, if not give, will default to what ever default is being used at the moment
+   * @param [shape] Optional shape for the vertex, if not given, will default to what ever default is being used at the moment
    * @constructor
    */
-  constructor(name: string, shape: string = undefined) {
+  constructor(name: string, shape?: string) {
     super(name)
     if (shape) {
       this._assertRegonizedShape(shape)
+      this.shape = shape
     }
-    this.shape = shape
   }
 
   _assertRegonizedShape(shape: string) {

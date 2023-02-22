@@ -24,7 +24,7 @@ const canvasHas = (prop: string, value: any) => {
 // curried, canvas passed on call site
 const canvasContains = (callback: (vertex: GraphConnectable) => any, match: string[]) => {
   return (canvas: GraphCanvas) => {
-    const res = []
+    const res: string[] = []
     traverseVertices(canvas, vertex => {
       res.push(callback(vertex))
     })
@@ -40,10 +40,10 @@ const canvasContains = (callback: (vertex: GraphConnectable) => any, match: stri
 // curried, canvas passed on call site
 const canvasContainsAutoProps = (match: string[]) => {
   return (canvas: GraphCanvas) => {
-    const res = []
+    const res: string[] = []
     const collectIfDefined = (a: string[], prop: string) => { if (prop) a.push(prop) }
 
-    function containerName(container) {
+    function containerName(container: GraphContainer) {
       if (container instanceof GraphCanvas) {
         return ''
       }
@@ -59,7 +59,7 @@ const canvasContainsAutoProps = (match: string[]) => {
     traverseVertices(canvas, function c(connectable) {
       if (connectable instanceof GraphContainer) {
         container = connectable
-        const containerProps = []
+        const containerProps: string[] = []
         collectIfDefined(containerProps, containerName(container))
         // todo defaults...
         collectIfDefined(containerProps, container.getLabel())
@@ -69,7 +69,7 @@ const canvasContainsAutoProps = (match: string[]) => {
         traverseVertices(connectable, c)
         container = connectable
       } else {
-        const vertexProps = []
+        const vertexProps: string[] = []
         if (connectable instanceof GraphVertex) {
           collectIfDefined(vertexProps, containerName(container))
         }
@@ -88,7 +88,7 @@ const canvasContainsAutoProps = (match: string[]) => {
     }, false) // TODO: also innards
 
     traverseEdges(canvas, edge => {
-      const edgeProps = []
+      const edgeProps: string[] = []
       collectIfDefined(edgeProps, edge.left.getName())
       collectIfDefined(edgeProps, edge.lcompass)
       collectIfDefined(edgeProps, edge.edgeType)
@@ -221,19 +221,18 @@ describe('Parser/grammar rule tests', () => {
   // linter failure, it's used in beforeAll error handler
   // eslint-disable-next-line no-unused-vars
   let errors = 0
-  /** @type {GraphCanvas} */
-  let graphcanvas
+  let graphcanvas: GraphCanvas
 
   beforeAll(async () => {
     // Copied over to sharedstate
     generators.set('abba', (gv) => {
       graphcanvas = gv
     })
-    diagrammerParser.yy.result = function (result) {
+    diagrammerParser.yy.result = function (result: string) {
       throw new Error('Setup failure')
     }
     diagrammerParser.yy.USE_GENERATOR = 'abba'
-    diagrammerParser.yy.parseError = function (str, hash) {
+    diagrammerParser.yy.parseError = function (str: string, hash: string) {
       console.log('Parsing error found:')
       console.log(str)
       console.log(hash)
@@ -246,7 +245,7 @@ describe('Parser/grammar rule tests', () => {
    *
    * @param {string} code
    */
-  function parseCode(code) {
+  function parseCode(code: string) {
     diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
     try {
       // @ts-ignore
@@ -259,7 +258,7 @@ describe('Parser/grammar rule tests', () => {
   }
 
   function makeRandomRGB() {
-    const randomBetween = (min, max) => min + Math.floor(Math.random() * (max - min + 1))
+    const randomBetween = (min: number, max: number) => min + Math.floor(Math.random() * (max - min + 1))
     const rgb = randomBetween(0, 16777215)
     return '#' + ('000000' + rgb.toString(16)).substr(-6)
   }

@@ -8,6 +8,7 @@ import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { output } from '../model/support.js'
 import { GraphReference } from '../model/graphreference.js'
 import { GraphObject } from 'model/graphobject.js'
+import { GraphConnectable } from '../model/graphconnectable.js'
 
 // ADD TO INDEX.HTML AS: <option value="ast_record">Abstract Syntax Tree(Record)</option>
 
@@ -45,13 +46,13 @@ A-C-B-E
  * TO test: node js/diagrammer.js verbose tests/test_inputs/state5.txt ast_record
 */
 export function ast_record(graphcanvas: GraphCanvas) {
-  const lout = (...args) => {
+  const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
 
   const collectProperties = (obj: GraphObject) => {
-    const params = {}
+    const params: { [key: string]: string } = {}
     const excludeSomeFields = ['ALLOWED_DEFAULTS', 'CURRENTCONTAINER', '_nextConnectableToExitEndIf', 'lastSeenVertex']
     const collectJustNames = ['_OBJECTS', '_ROOTVERTICES', '_EDGES', 'equal']
     const collectJustName = ['left', 'right', 'container']
@@ -70,12 +71,12 @@ export function ast_record(graphcanvas: GraphCanvas) {
       }
 
       if (collectJustNames.includes(k)) {
-        const names = Object.values(v).map((l: GraphObject) => `${getName(l)}`).join(', ')
+        const names = Object.values(v).map((l) => `${getName(l as GraphObject)}`).join(', ')
         // if list is longer than 64, try to break it at commas, but so that one block is atleast 32 chars long not exceeding 64
         // if not possible, then just break
         // also do not loose anything!
         if (names.length > 64) {
-          params[k] = `${names.match(/.{32,64}[,]/g).join('\\n')}`
+          params[k] = `${names.match(/.{32,64}[,]/g)?.join('\\n')}`
         } else {
           params[k] = `${names}`
         }
@@ -105,7 +106,7 @@ export function ast_record(graphcanvas: GraphCanvas) {
   lout(`GraphCanvas[shape=record, color=yellow, fillcolor=yellow, label="${label}"];`)
 
   traverseVertices(graphcanvas, function c(n) {
-    function getName(obj) {
+    function getName(obj: GraphObject) {
       if (obj instanceof GraphReference) {
         return `inner_${obj.getName()}`
       }

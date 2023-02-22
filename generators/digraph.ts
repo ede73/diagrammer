@@ -63,7 +63,7 @@ export function digraph(graphcanvas: GraphCanvas) {
   // TODO: Start note fdp/neato
   // http://www.graphviz.org/doc/info/attrs.html#d:start
 
-  const lout = (...args) => {
+  const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
@@ -73,7 +73,7 @@ export function digraph(graphcanvas: GraphCanvas) {
      * @param {string} key
      * @returns
      */
-  const skipEntrances = (key, value) => {
+  const skipEntrancesReplacer = (key: string, value: any) => {
     if (['entrance', '_entrance', 'exit', '_exit'].includes(key)) {
       return null
     }
@@ -83,9 +83,9 @@ export function digraph(graphcanvas: GraphCanvas) {
   /**
      * @param {GraphVertex} obj
      */
-  const processAVertex = obj => {
-    const nattrs = []
-    const styles = []
+  const processAVertex = (obj: GraphConnectable) => {
+    const nattrs: string[] = []
+    const styles: string[] = []
     getAttributeAndFormat(obj, 'color', 'fillcolor="{0}"', nattrs)
     getAttributeAndFormat(obj, 'color', 'filled', styles)
     getAttributeAndFormat(obj, 'style', '{0}', styles)
@@ -106,13 +106,19 @@ export function digraph(graphcanvas: GraphCanvas) {
         nattrs.push(`style="${styles.sort().join(',')}"`)
       }
     }
+    // credit: Typescript documentation, src 
+    // https://www.typescriptlang.org/docs/handbook/advanced-types.html#index-types
+    // function getProperty<T, K extends keyof T>(o: T, propertyName: K): T[K] {
+    //   return o[propertyName]; // o[propertyName] is of type T[K]
+    // }
     getAttributeAndFormat(obj, 'image', 'image="icons{0}"', nattrs)
     getAttributeAndFormat(obj, 'textcolor', 'fontcolor="{0}"', nattrs)
-    if (obj.shape) {
-      if (obj.shape && !DigraphShapeMap[obj.shape]) {
+    if (obj instanceof GraphVertex && obj.shape) {
+      const currentShape = obj.shape as keyof typeof DigraphShapeMap
+      if (obj.shape && !DigraphShapeMap[currentShape]) {
         throw new Error('Missing shape mapping')
       }
-      const mappedShape = DigraphShapeMap[obj.shape] ? DigraphShapeMap[obj.shape] : DigraphShapeMap.default
+      const mappedShape = DigraphShapeMap[currentShape] ? DigraphShapeMap[currentShape] : DigraphShapeMap.default
       const r = `shape="${mappedShape}"`
       nattrs.push(r)
     }
@@ -154,22 +160,22 @@ export function digraph(graphcanvas: GraphCanvas) {
   }
 
   // Fix groups that have no nodes by adding invisible node there
-  const fixgroup = (grp) => {
+  const fixgroup = (grp: GraphConnectable) => {
     if (!(output instanceof GraphGroup)) {
       return
     }
-    if (grp.isEmpty()) {
+    if ((grp as GraphGroup).isEmpty()) {
       // TODO: This is ugly
-      grp.addObject(new GraphVertex(`invis_${grp.getName()}`)
+      (grp as GraphGroup).addObject(new GraphVertex(`invis_${grp.getName()}`)
         .setStyle('invis'))
       return
     }
-    traverseVertices(grp, fixgroup)
+    traverseVertices(grp as GraphContainer, fixgroup)
   }
   traverseVertices(graphcanvas, fixgroup)
 
   // pick node from group that is FIRST pointed by edges left hand side
-  function getFirstLHSReferredNodeFromGroup(/** @type {GraphContainer} */grp) {
+  function getFirstLHSReferredNodeFromGroup(grp: GraphContainer) {
     // TODO: equal to hasOutwardEdge in model.js (except canvas, not yy)
     return traverseEdges(graphcanvas, allEdges => {
       return traverseVertices(grp, objectInGroup => {
@@ -180,9 +186,8 @@ export function digraph(graphcanvas: GraphCanvas) {
     })
   }
 
-  function getLastLHSOrRHSReferredNodeInGroup(/** @type {GraphContainer} */grp) {
-    /** @type {(GraphConnectable|undefined)} */
-    let nod
+  function getLastLHSOrRHSReferredNodeInGroup(grp: GraphContainer) {
+    let nod: (GraphConnectable | undefined)
     traverseEdges(graphcanvas, allEdges => {
       traverseVertices(grp, node => {
         if (node === allEdges.left) { nod = node }
@@ -192,13 +197,11 @@ export function digraph(graphcanvas: GraphCanvas) {
     return nod
   }
 
-  let lastexit
-  let lastendif
-  /**
-    * @param {GraphGroup} grp
-    */
-  const processAGroup = grp => {
-    debug(JSON.stringify(grp, skipEntrances))
+  let lastexit: string
+  let lastendif: string
+
+  const processAGroup = (grp: GraphGroup) => {
+    debug(JSON.stringify(grp, skipEntrancesReplacer))
     lout(`subgraph cluster_${grp.getName()} {`, true)
     const cond = grp.conditional
     // if (cond=="endif")continue;
@@ -235,8 +238,7 @@ export function digraph(graphcanvas: GraphCanvas) {
         }
         // TODO:else does not need diamond
         lout(`${exitVertexInConditional}[ shape=diamond, fixedsize=true, width=1, height=1, label="${grp.getLabel()}" ];`)
-        if (cond === 'if') {
-          // _conditionalEntryEdge!
+        if (cond === 'if' && grp._conditionalEntryEdge) {
           lout(`${grp._conditionalEntryEdge.getName()}->${exitVertexInConditional};`)
         }
         // FIRST node of group and LAST node(GraphConnectable) in group..
@@ -251,13 +253,15 @@ export function digraph(graphcanvas: GraphCanvas) {
         }
         // YES LINK to first node of the group
         lout(`${exitVertexInConditional}->${firstReferredNode.getName()}[ label="YES", color=green, lhead=cluster_${grp.getName()} ];`)
-        lout(`${lastReferredNode.getName()}->${lastendif}[ label="" ];`)
+        if (lastReferredNode) {
+          lout(`${lastReferredNode.getName()}->${lastendif}[ label="" ];`)
+        }
         lastexit = exitVertexInConditional
       }
     }
   }
 
-  const ltraverseVertices = /** @type {function(GraphConnectable)} */obj => {
+  const ltraverseVertices = (obj: GraphConnectable) => {
     if (obj instanceof GraphVertex) {
       processAVertex(obj)
     } else if (obj instanceof GraphGroup) {
@@ -287,7 +291,7 @@ export function digraph(graphcanvas: GraphCanvas) {
     }
     getAttributeAndFormat(edge, 'color', 'color="{0}"', attrs)
     getAttributeAndFormat(edge, ['textcolor', 'color'], 'fontcolor="{0}"', attrs)
-    let edgeType
+    let edgeType: string
     let rhs: (GraphConnectable | GraphConnectable[]) = edge.right
     let lhs: (GraphConnectable | GraphConnectable[]) = edge.left
 
@@ -308,7 +312,7 @@ export function digraph(graphcanvas: GraphCanvas) {
       if (lhs instanceof GraphInner && lhs._getExit()) {
         // get containers all vertices that have no outward links...(TODO:should be in model actually!)
         // perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
-        const exits = []
+        const exits: GraphConnectable[] = []
         traverseVertices(lhs, go => {
           if (!hasOutwardEdge(graphcanvas, go)) {
             exits.push(go)

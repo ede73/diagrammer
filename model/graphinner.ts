@@ -10,9 +10,8 @@ import { GraphVertex } from './graphvertex.js'
  */
 export class GraphInner extends GraphGroup {
 
-  _exit: GraphConnectable = undefined
-
-  _entrance: (GraphConnectable | GraphConnectable[]) = undefined
+  _exit?: GraphConnectable = undefined
+  _entrance?: (GraphConnectable | GraphConnectable[]) = undefined
 
   constructor(name: string) {
     super(name)

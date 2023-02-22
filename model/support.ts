@@ -19,7 +19,7 @@ export function setVerbose(verbose: boolean) {
  * Pass debug messages
  * @param indentOrDedent whether to indent or dedent
  */
-export function debug(msg: (string | boolean), indentOrDedent: (boolean) = undefined) {
+export function debug(msg: (string | boolean), indentOrDedent?: (boolean)) {
   if (VERBOSE === true && msg !== false && msg !== true) {
     let d = ''
     for (let i = 0; i < debugIndent; i++) d += '    '
@@ -35,13 +35,20 @@ export function debug(msg: (string | boolean), indentOrDedent: (boolean) = undef
 /**
  * Set attribute of an object
  *
- * @param cl Object
+ * TODO: See getAttr, make prop map
+ * @param cl GraphObject (or any of its subclasses)
  * @param attr Attribute name
  * @param value Value
  * @returns Object itself(cl)
  */
 export function setAttr(cl: GraphObject, attr: string, value: any) {
-  cl[attr] = value
+  Object.defineProperty(cl, attr, {
+    value,
+    // mimic pure JS obj[attr]=value (these both needed)
+    writable: true,
+    enumerable: true
+  })
+  //cl[attr] = value
   return cl
 }
 
@@ -78,13 +85,21 @@ String.prototype.formatArray = function (array: Array) {
 /**
  * Return attribute like prefix="ATTRHERE" with padding at both sides or "" if 0
  * or undefined
- * @param cl Object to scan
+ * 
+ * TODO: This is ugly, difficult to maintain, confusing in TypeScript. Make this a property map
+ * 
+ * @param cl GraphObject(or any of its subclasses) to scan
  * @param attr Name of the attribute index to return
  * @return Return the attribute
  */
 export function getAttribute(cl: GraphObject, attr: string) {
-  if (!cl[attr] || cl[attr] === 0) { return undefined }
-  return cl[attr]
+  // if (Object.prototype.hasOwnProperty.call(cl, attr)) {
+  //   debug(`no own prop ${attr}`)
+  //   return undefined
+  // }
+  const obtained = Object.getOwnPropertyDescriptor(cl, attr);
+  if (!obtained || !obtained.value || obtained.value === 0) { return undefined }
+  return obtained?.value
 }
 
 /**
@@ -96,7 +111,7 @@ export function getAttribute(cl: GraphObject, attr: string) {
  * @param If given, in addition for returning, will PUSH the result to this array
  * @returns (possibly formatted) value of the attribute or "" if attribute not found
  */
-export function getAttributeAndFormat(cl: GraphObject, attr: (string | any[]), fmt: string, resultarray: any[] = undefined) {
+export function getAttributeAndFormat(cl: GraphObject, attr: (string | any[]), fmt: string, resultarray?: string[]): string {
   if (attr instanceof Array) {
     for (const i in attr) {
       if (!Object.prototype.hasOwnProperty.call(attr, i)) continue
@@ -108,11 +123,16 @@ export function getAttributeAndFormat(cl: GraphObject, attr: (string | any[]), f
     }
     return ''
   }
-  if (!cl[attr] || cl[attr] === 0) {
+
+  const obtained = Object.getOwnPropertyDescriptor(cl, attr);
+  // Not gonna fly coz cl can be subclass of GraphObject and we're fetching ITS properies
+  // const attrType = attr as keyof typeof GraphObject;
+  if (!obtained || !obtained.value || obtained.value === 0) {
     return ''
   }
+  const valStr: string = obtained.value
   // @ts-ignore
-  const tmp = fmt.format(cl[attr])
+  const tmp = fmt.format(valStr)
   if (resultarray) { resultarray.push(tmp) }
   return `${tmp}`
 }
@@ -150,7 +170,9 @@ let indentLevel = 0
  * @param txt Text to output
  * @param [indentOrDedent] whether to indent to dedent, OPTIONAL. true will LATENTLY increase the indent, flase will do that BEFORE the output is processed
  */
-export function output(graphcanvas: (boolean | GraphCanvas), txt: (string | boolean) = undefined, indentOrDedent: boolean = undefined) {
+export function output(graphcanvas: (boolean | GraphCanvas),
+  txt?: (string | boolean),
+  indentOrDedent?: boolean) {
   let prefix = ''
   if (indentOrDedent === false || graphcanvas === false || txt === false) {
     if (indentLevel === 0) {
@@ -162,7 +184,9 @@ export function output(graphcanvas: (boolean | GraphCanvas), txt: (string | bool
     for (let i = 0; i < indentLevel; i++) {
       prefix += '    '
     }
-    graphcanvas.result(`${prefix}${txt}`)
+    if (graphcanvas.result) {
+      graphcanvas.result(`${prefix}${txt}`)
+    }
   }
   if (indentOrDedent === true || graphcanvas === true || txt === true) {
     indentLevel++
@@ -175,9 +199,11 @@ export function output(graphcanvas: (boolean | GraphCanvas), txt: (string | bool
  * @param  txt
  * @param [array] Optional array format
  */
-export function outputFormattedText(graphcanvas: GraphCanvas, txt: string, array: any[] = undefined) {
+export function outputFormattedText(graphcanvas: GraphCanvas, txt: string, array?: any[]) {
   if (!array) {
-    graphcanvas.result(txt)
+    if (graphcanvas.result) {
+      graphcanvas.result(txt)
+    }
   } else {
     // @ts-ignore
     graphcanvas.result(txt.formatArray(array))

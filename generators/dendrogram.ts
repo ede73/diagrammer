@@ -16,11 +16,12 @@ import { findVertex, traverseTree, TreeVertex } from '../model/tree.js'
  * To test: node js/diagrammer.js verbose tests/test_inputs/dendrogram.txt dendrogram
 */
 export function dendrogram(graphcanvas: GraphCanvas) {
-  const lout = (...args) => {
+  const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
-  let tree: TreeVertex
+
+  let tree: TreeVertex | undefined
   function addVertex(lhs: GraphConnectable, rhs: GraphConnectable) {
     if (!tree) {
       tree = new TreeVertex(lhs)
@@ -44,6 +45,10 @@ export function dendrogram(graphcanvas: GraphCanvas) {
     addVertex(edge.left, edge.right)
   })
 
+  // just for the linter
+  if (!tree) {
+    throw new Error("No tree")
+  }
   traverseTree(tree, (t, isLeaf, hasSibling) => {
     if (isLeaf) {
       let comma = ''

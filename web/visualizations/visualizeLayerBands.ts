@@ -1,5 +1,7 @@
 // @ts-check
-import go from 'go'
+//import go from '../../node_modules/gojs/release/go-debug-module.js'
+import go from 'gojs'
+//import * as go from 'go';
 import { removeOldVisualizations } from '../d3support.js'
 // Use in editor.. gets go.d.ts
 // import * as go from '../../js/go'
@@ -9,13 +11,15 @@ import { visualizations } from '../globals.js'
 visualizations.set('layerbands', visualizeLayerBands)
 
 // use ../manual_test_diagrams/layerbands.d
-export function visualizeLayerBands (generatorResult) {
+export function visualizeLayerBands(generatorResult: string) {
   const jsonData = JSON.parse(generatorResult)
   const HORIZONTAL = true
   // Perform a TreeLayout where commitLayers is overridden to modify the background Part whose key is "_BANDS".
   class BandedTreeLayout extends go.TreeLayout {
-    constructor () {
+    constructor() {
       super()
+      // Some contradiction with gojs modules...
+      // @ts-ignore 
       this.layerStyle = go.TreeLayout.LayerUniform // needed for straight layers
     }
 
@@ -23,13 +27,19 @@ export function visualizeLayerBands (generatorResult) {
          * @param {go.Rect[]} layerRects an Array of Rects with the bounds of each of the "layers"
          * @param {go.Point} offset the position of the top-left corner of the banded area relative to the coordinates given by the layerRects
         */
-    commitLayers (layerRects, offset) {
+    commitLayers(layerRects, offset) {
       // update the background object holding the visual "bands"
+      // Some contradiction with gojs modules...
+      // @ts-ignore 
       const bands = this.diagram.findPartForKey('_BANDS')
       if (!bands) {
         return
       }
+      // Some contradiction with gojs modules...
+      // @ts-ignore 
       const model = this.diagram.model
+      // Some contradiction with gojs modules...
+      // @ts-ignore 
       bands.location = this.arrangementOrigin.copy().add(offset)
 
       // make each band visible or not, depending on whether there is a layer for it
@@ -53,7 +63,7 @@ export function visualizeLayerBands (generatorResult) {
   // go.TreeLayout.call(this);
   // this.layerStyle = go.TreeLayout.LayerUniform;  // needed for straight layers
 
-  function init () {
+  function init() {
     const $ = go.GraphObject.make
 
     const svgimg = removeOldVisualizations('LAYEREDBANDNODE')
@@ -70,11 +80,11 @@ export function visualizeLayerBands (generatorResult) {
       })
 
     myDiagram.nodeTemplate =
-            $(go.Node, go.Panel.Auto,
-              $(go.Shape, 'Rectangle',
-                { fill: 'white' }),
-              $(go.TextBlock, { margin: 5 },
-                new go.Binding('text', 'key')))
+      $(go.Node, go.Panel.Auto,
+        $(go.Shape, 'Rectangle',
+          { fill: 'white' }),
+        $(go.TextBlock, { margin: 5 },
+          new go.Binding('text', 'key')))
 
     // There should be at most a single object of this category.
     // This Part will be modified by BandedTreeLayout.commitLayers to display visual "bands"
@@ -93,34 +103,34 @@ export function visualizeLayerBands (generatorResult) {
           pickable: false,
           selectable: false,
           itemTemplate:
-                        $(go.Panel, HORIZONTAL ? 'Vertical' : 'Horizontal',
-                          new go.Binding('position', 'bounds', function (b) { return b.position }),
-                          $(go.TextBlock,
-                            {
-                              angle: HORIZONTAL ? 0 : 270,
-                              textAlign: 'center',
-                              wrap: go.TextBlock.None,
-                              font: 'bold 11pt sans-serif',
-                              // @ts-ignore
-                              background: $(go.Brush, 'Linear', { 0: 'aqua', 1: go.Brush.darken('aqua') })
-                            },
-                            new go.Binding('text'),
-                            // always bind "width" because the angle does the rotation
-                            new go.Binding('width', 'bounds', function (r) { return HORIZONTAL ? r.width : r.height })
-                          ),
-                          // option 1: rectangular bands
-                          $(go.Shape,
-                            { stroke: null, strokeWidth: 0 },
-                            new go.Binding('desiredSize', 'bounds', function (r) { return r.size }),
-                            // @ts-ignore
-                            new go.Binding('fill', 'itemIndex', function (i) { return i % 2 === 0 ? 'whitesmoke' : go.Brush.darken('whitesmoke') }).ofObject())
-                        )
+            $(go.Panel, HORIZONTAL ? 'Vertical' : 'Horizontal',
+              new go.Binding('position', 'bounds', function (b) { return b.position }),
+              $(go.TextBlock,
+                {
+                  angle: HORIZONTAL ? 0 : 270,
+                  textAlign: 'center',
+                  wrap: go.TextBlock.None,
+                  font: 'bold 11pt sans-serif',
+                  // @ts-ignore
+                  background: $(go.Brush, 'Linear', { 0: 'aqua', 1: go.Brush.darken('aqua') })
+                },
+                new go.Binding('text'),
+                // always bind "width" because the angle does the rotation
+                new go.Binding('width', 'bounds', function (r) { return HORIZONTAL ? r.width : r.height })
+              ),
+              // option 1: rectangular bands
+              $(go.Shape,
+                { stroke: null, strokeWidth: 0 },
+                new go.Binding('desiredSize', 'bounds', function (r) { return r.size }),
+                // @ts-ignore
+                new go.Binding('fill', 'itemIndex', function (i) { return i % 2 === 0 ? 'whitesmoke' : go.Brush.darken('whitesmoke') }).ofObject())
+            )
         }
       ))
 
     myDiagram.linkTemplate =
-            $(go.Link,
-              $(go.Shape)) // simple black line, no arrowhead needed
+      $(go.Link,
+        $(go.Shape)) // simple black line, no arrowhead needed
 
     // define the tree node data
     const nodearray = jsonData

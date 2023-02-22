@@ -52,7 +52,7 @@ export async function visualize(visualizer: string) {
   if (!visualizer) {
     throw new Error('Visualizer not defined')
   }
-  removeOldVisualizations('diagrammer-graph')
+  removeOldVisualizations()
 
   // TODO: let generator decide visualizer
   if (visualizer === 'ast_record') {

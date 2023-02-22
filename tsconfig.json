@@ -16,7 +16,7 @@
       "jest",
       "d3",
       "jquery",
-      "go",
+      "gojs",
       "viz.js"
     ]
   },

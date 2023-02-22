@@ -6,6 +6,10 @@
     "**/*.js",
     "node_modules",
     "node_modules/*",
+    // No idea why, but this config causes tsc to think diagrammer_parser is a target and complains about overwriting it (even if it is just imported, not generated, not even a typescript file)
+    "build/diagrammer_parser.js",
+    "diagrammer_parser.js",
+    "**/diagrammer_parser.js"
   ],
   "typeAcquisition": {
     "enable": true,

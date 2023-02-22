@@ -9,29 +9,31 @@ export class GraphObject {
    * That's how it can get linked.
    * "name" for display purposes may be a label instead
    */
-  name: string
+  name?: string
   /**
    * If provided, this will be used as visual name
    */
-  label: string = undefined
+  label?: string = undefined
   /**
    * Main color for this object
    */
-  color: string = undefined
+  color?: string = undefined
   /**
    * Color for any text rendered for this object
    */
-  textcolor: string = undefined
+  textcolor?: string = undefined
   /**
    * External link (only works for dynamic visualizations like SVG)
    */
-  url: string = undefined
+  url?: string = undefined
 
   /**
        * Name of the object. Exception being edges, they don't have names
        */
   constructor(name: string) {
-    this.name = name
+    if (name) {
+      this.name = name
+    }
   }
 
   /**

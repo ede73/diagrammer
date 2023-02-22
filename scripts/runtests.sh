@@ -8,161 +8,169 @@ fi
 
 #parallelism for 8 cores
 PARALLEL=${2:-12}
-verbose=1
+VERBOSE=1
 
 rm -f .error
 
-checkError() {
+assertNoError() {
   if [ -f .error ]; then
     echo ERROR
     exit 10
   fi
 }
 
-setError() {
+setErrorAndExit() {
+  ERROR_CODE="$1"
+  ERROR_TEXT="$2"
   touch .error
-  echo "ERROR $1 in $2"
-  checkError
+  echo "ERROR $ERROR_CODE in $ERROR_TEXT"
+  assertNoError
 }
 
-test() {
-  checkError
-  [ $verbose -ne 0 ] && echo "    test($*) using $testbin"
+runATest() {
+  TEST_FILENAME="$1"
+  assertNoError
+  [ $VERBOSE -ne 0 ] && echo "    test($*) using $TEST_BINARY"
   no_visual=''
-  [ $webvisualizer -ne 0 ] && no_visual="dont_run_visualizer"
+  [ $WEB_VISUALIZER -ne 0 ] && no_visual="dont_run_visualizer"
 
-  ./scripts/t.sh skipparsermake silent tests $no_visual "tests/test_inputs/$1" "$testbin" >/dev/null
-  rc=$?
-  [ $rc -ne 0 ] && setError "$rc" "$1"
+  ./scripts/t.sh skipparsermake silent tests $no_visual "tests/test_inputs/$TEST_FILENAME" "$TEST_BINARY" >/dev/null
+  RC=$?
+  [ $RC -ne 0 ] && setErrorAndExit "$RC" "$TEST_FILENAME"
 
-  out="${1%.*}_${testbin}.out"
-  textoutput="tests/test_outputs/$out"
-  textreference="tests/reference_images/$testbin/$out"
-  if [ ! -f "$textoutput" ]; then
-    echo "    ERROR: at $1, generator failed, missing $textoutput" >&2
-    setError 11 "$1"
+  out="${TEST_FILENAME%.*}_${TEST_BINARY}.out"
+  GENERATED_CODE="tests/test_outputs/$out"
+  GENERATED_CODE_REFERENCE="tests/reference_images/$TEST_BINARY/$out"
+  if [ ! -f "$GENERATED_CODE" ]; then
+    echo "    ERROR: at $TEST_FILENAME, generator failed, missing $GENERATED_CODE" >&2
+    setErrorAndExit 20 "$TEST_FILENAME"
     return
   fi
 
   # Web Visualizers cannot be (currently) run in CLI
   # So only thing we could do is test the final output
-  [ $webvisualizer -eq 0 ] && {
-    png="${1%.*}_${testbin}.png"
-    renderoutput="tests/test_outputs/$png"
-    renderreference="tests/reference_images/$testbin/$png"
-    if [ -f "$renderoutput" ]; then
-      [ ! -f "$renderreference" ] && cp "$renderoutput" "$renderreference"
-      [ ! -f "$textoutput" ] && cp "$textoutput" "$textreference"
+  [ $WEB_VISUALIZER -eq 0 ] && {
+    png="${TEST_FILENAME%.*}_${TEST_BINARY}.png"
+    GENERATED_IMAGE="tests/test_outputs/$png"
+    GENERATED_IMAGE_REFERENCE="tests/reference_images/$TEST_BINARY/$png"
+    if [ -f "$GENERATED_IMAGE" ]; then
+      [ ! -f "$GENERATED_IMAGE_REFERENCE" ] && cp "$GENERATED_IMAGE" "$GENERATED_IMAGE_REFERENCE"
+      [ ! -f "$GENERATED_CODE" ] && cp "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE"
       # Allow 1% variance
       THRESHOLD=1
       # Since jest-imagematcher brings pixelmatch, let's use it!
-      if ! node_modules/pixelmatch/bin/pixelmatch "$renderoutput" "$renderreference" /tmp/diff.png $THRESHOLD >/dev/null; then
-        echo "    ERROR: at $1, image $renderoutput $renderreference differ" >&2
-        #display_image "$renderoutput" "$renderreference" /tmp/diff.png
-        display_image /tmp/diff.png
-        diff -u "$textoutput" "$textreference"
-        setError 11 "$1"
+      GRAPH_DIFF=$(mktemp)
+      if ! node_modules/pixelmatch/bin/pixelmatch "$GENERATED_IMAGE" "$GENERATED_IMAGE_REFERENCE" "$GRAPH_DIFF" $THRESHOLD >/dev/null; then
+        echo "    ERROR: at $TEST_FILENAME, image $GENERATED_IMAGE $GENERATED_IMAGE_REFERENCE differ" >&2
+        #display_image "$GENERATED_IMAGE" "$GENERATED_IMAGE_REFERENCE" "$GRAPH_DIFF"
+        display_image "$GRAPH_DIFF"
+        diff -u "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE"
+        setErrorAndExit 21 "$TEST_FILENAME"
       fi
+      rm -f "$GRAPH_DIFF"
     else
-      echo "ERROR: Failed visualizing $testbin dit not produce output $renderoutput" >&2
-      ls -l "$renderoutput"
-      setError 12 "$1"
+      echo "ERROR: Failed visualizing $TEST_BINARY dit not produce output $GENERATED_IMAGE" >&2
+      ls -l "$GENERATED_IMAGE"
+      setErrorAndExit 22 "$TEST_FILENAME"
     fi
   }
 
   # Verify that the generated output matches what it used to
-  if ! diff -q "$textoutput" "$textreference" >/dev/null; then
+  if ! diff -q "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE" >/dev/null; then
     ERROR=ERROR
-    [ $webvisualizer -eq 0 ] && {
+    [ $WEB_VISUALIZER -eq 0 ] && {
       # if we ended up here, and not having a web visualizer, we've already compared output images
       # And they DO match, so this probably is a formatting change
       ERROR="Warning(output images match, so just formatting?)"
     }
-    echo -n "\n$ERROR: at $1, $textoutput $textreference differ for $testbin" >&2
-    [ $webvisualizer -eq 0 ] && {
-      echo -n "\n\tcp $textoutput $textreference # as quick fix?\n" >&2
+    echo -n "\n$ERROR: at $TEST_FILENAME, $GENERATED_CODE $GENERATED_CODE_REFERENCE differ for $TEST_BINARY" >&2
+    [ $WEB_VISUALIZER -eq 0 ] && {
+      echo -n "\n\tcp $GENERATED_CODE $GENERATED_CODE_REFERENCE # as quick fix?\n" >&2
     }
-    diff -u "$textreference" "$textoutput"
+    diff -u "$GENERATED_CODE_REFERENCE" "$GENERATED_CODE"
     echo "\t# You can run this test also with:"
-    echo "\tnode js/diagrammer.js tests/test_inputs/$1 $testbin"
-    setError 11 "$1"
+    echo "\tnode js/diagrammer.js tests/test_inputs/$TEST_FILENAME $TEST_BINARY"
+    setErrorAndExit 23 "$TEST_FILENAME"
   fi
 }
 
 i=0
-runtest() {
-  checkError
+launchTestInBackground() {
+  assertNoError
   i=$((i + 1))
-  [ $verbose -ne 0 ] && echo "  runtest($*) #$i with testbin=$testbin"
-  test "$*" &
+  [ $VERBOSE -ne 0 ] && echo "  launchTestInBackground($*) #$i with TEST_BINARY=$TEST_BINARY"
+  runATest "$*" &
   [ $((i % PARALLEL)) = 0 ] && wait
-  checkError
-  [ $verbose -ne 0 ] && echo "      test #$i ok"
+  assertNoError
+  [ $VERBOSE -ne 0 ] && echo "      runATest #$i ok"
 }
 
-webvisualizer=0
-#EDE:New act dag is fucked..instead of Lane1 it prints out random number as lane title, groups work though
+WEB_VISUALIZER=0
 tests="${1:-dot actdiag blockdiag}"
-for test in $tests; do
-  echo "Test suite $test" >&2
-  testbin=$test
-  runtest ast.txt
-  [ "$test" != "actdiag" ] && [ "$test" != "blockdiag" ] && {
-    runtest state_nodelinktests.txt
-    runtest url.txt
-    runtest state.txt
-    runtest node_and_edge_coloring.txt
-    runtest state_machine_with_start_node.txt
-    runtest two_linked_clusters.txt
-    runtest node_and_edge_coloring2.txt
-    runtest two_linked_clusters_with_invisible_node.txt
-    runtest multiple_lhs_lists.txt
-    runtest lhs_rhs_lists.txt
-    runtest two_filled_linked_vertices.txt
-    runtest landscape.txt
-    runtest state_cluster_edge.txt
-    runtest state_dual_node.txt
-    runtest state_innergroups.txt
-    runtest state_recursive_linking.txt
-    runtest state_images.txt
-    runtest fulltest.txt
-    runtest state_y_edge.txt
-    runtest state_conditionals.txt
-    runtest nodes.txt
-    runtest events.txt
-    runtest compass.txt
+for TEST_BINARY in $tests; do
+  echo "Test suite $TEST_BINARY" >&2
+  launchTestInBackground ast.txt
+  [ "$TEST_BINARY" != "actdiag" ] && [ "$TEST_BINARY" != "blockdiag" ] && {
+    launchTestInBackground state_nodelinktests.txt
+    launchTestInBackground url.txt
+    launchTestInBackground state.txt
+    launchTestInBackground node_and_edge_coloring.txt
+    launchTestInBackground state_machine_with_start_node.txt
+    launchTestInBackground two_linked_clusters.txt
+    launchTestInBackground node_and_edge_coloring2.txt
+    launchTestInBackground two_linked_clusters_with_invisible_node.txt
+    launchTestInBackground multiple_lhs_lists.txt
+    launchTestInBackground lhs_rhs_lists.txt
+    launchTestInBackground two_filled_linked_vertices.txt
+    launchTestInBackground landscape.txt
+    launchTestInBackground state_cluster_edge.txt
+    launchTestInBackground state_dual_node.txt
+    launchTestInBackground state_innergroups.txt
+    launchTestInBackground state_recursive_linking.txt
+    launchTestInBackground state_images.txt
+    launchTestInBackground fulltest.txt
+    launchTestInBackground state_y_edge.txt
+    launchTestInBackground state_conditionals.txt
+    launchTestInBackground nodes.txt
+    launchTestInBackground events.txt
+    launchTestInBackground compass.txt
   }
-  [ "$test" != "actdiag" ] && [ "$test" != "blockdiag" ] && runtest record_style.txt
-  [ "$test" != "blockdiag" ] && runtest state_tcp.txt
-  runtest state_group.txt
-  runtest group_group_link.txt
+  [ "$TEST_BINARY" != "actdiag" ] && [ "$TEST_BINARY" != "blockdiag" ] && launchTestInBackground record_style.txt
+  [ "$TEST_BINARY" != "blockdiag" ] && launchTestInBackground state_tcp.txt
+  launchTestInBackground state_group.txt
+  launchTestInBackground group_group_link.txt
 done
 
-testbin=nwdiag
-runtest nwdiag_multiple_ips.txt
-runtest nwdiag3.txt
-runtest nwdiag5.txt
-runtest nwdiag2.txt
-runtest nwdiag.txt
+TEST_BINARY=nwdiag
+launchTestInBackground nwdiag_multiple_ips.txt
+launchTestInBackground nwdiag3.txt
+launchTestInBackground nwdiag5.txt
+launchTestInBackground nwdiag2.txt
+launchTestInBackground nwdiag.txt
 
 tests=${1:-mscgen seqdiag plantuml_sequence}
-for test in $tests; do
-  testbin=$test
-  runtest state_sequence.txt
-  runtest state_sequence2.txt
-  runtest state_conditionals.txt
-  runtest events.txt
+for TEST_BINARY in $tests; do
+  launchTestInBackground state_sequence.txt
+  launchTestInBackground state_sequence2.txt
+  launchTestInBackground state_conditionals.txt
+  launchTestInBackground events.txt
 done
 
-testbin=plantuml_sequence
-runtest plantuml_context.txt
-runtest plantuml_context2.txt
+TEST_BINARY=plantuml_sequence
+launchTestInBackground plantuml_context.txt
+launchTestInBackground plantuml_context2.txt
 
 # Web visualizers, so test only generator
-webvisualizer=1
+WEB_VISUALIZER=1
 for web_generators_only in $(grep -l 'WEB VISUALIZER ONLY' generators/*.js | tr . / | cut -d/ -f2); do
-  testbin=$web_generators_only
-  runtest ${web_generators_only}.txt
-  [ "$testbin" = "umlclass" ] && runtest umlclass2.txt
+  TEST_BINARY=$web_generators_only
+  launchTestInBackground ${web_generators_only}.txt
+  [ "$TEST_BINARY" = "umlclass" ] && launchTestInBackground umlclass2.txt
 done
+
+TEST_BINARY=ast
+launchTestInBackground ast.txt
+
+TEST_BINARY=ast_record
+launchTestInBackground ast.txt
 exit 0

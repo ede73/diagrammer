@@ -13,7 +13,7 @@ export class GraphGroup extends GraphContainer {
    * Only with IF, first preceding vertex seen before "if"
    * Set directly in diagrammer.grammar
    */
-  _conditionalEntryEdge: GraphConnectable = undefined
+  _conditionalEntryEdge?: GraphConnectable = undefined
 
   /**
    * Only with endif, first vertex(Connectable) seen after
@@ -21,17 +21,17 @@ export class GraphGroup extends GraphContainer {
    *
    * Set to graphcanvas._nextConnectableToExitEndIf
    */
-  _conditionalExitEdge: GraphConnectable = undefined
+  _conditionalExitEdge?: GraphConnectable = undefined
 
   /**
    * Only used if this group(set) was created due if then/elseif/else construct
    */
-  conditional: string = undefined
+  conditional?: string = undefined
 
   /**
    * a UNIQUE exitvertex within the graph.
    */
-  exitvertex: number = undefined
+  exitvertex?: number = undefined
 
   constructor(name: string) {
     super(name)

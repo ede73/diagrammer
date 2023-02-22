@@ -20,7 +20,7 @@ export class TreeVertex {
  *
  * @param findData What ever data the tree vertex might have
  */
-export function findVertex(tree: TreeVertex, findData: any): TreeVertex {
+export function findVertex(tree: TreeVertex, findData: any): TreeVertex | undefined {
   if (tree.data === findData) {
     return tree
   }
@@ -50,7 +50,13 @@ export function findVertex(tree: TreeVertex, findData: any): TreeVertex {
  * @param hasSibling Just used internally, omit
  * @param parent Just used internally, omit
  */
-export function traverseTree(root: TreeVertex, callback: (node: TreeVertex, isLeaf: boolean, hasSiblings: boolean) => void, enter: (node: TreeVertex) => void, exit: (node: TreeVertex, hasSiblings: boolean) => void, level: number = undefined, hasSibling: boolean = undefined, parent: TreeVertex = undefined) {
+export function traverseTree(root: TreeVertex,
+  callback: (node: TreeVertex, isLeaf: boolean, hasSiblings: boolean) => void,
+  enter: (node: TreeVertex) => void,
+  exit: (node: TreeVertex, hasSiblings: boolean) => void,
+  level?: number,
+  hasSibling?: boolean,
+  parent?: TreeVertex) {
   if (!level) level = 0
   if (!hasSibling) hasSibling = false
   if (level === 0) {

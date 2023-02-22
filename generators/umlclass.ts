@@ -9,6 +9,13 @@ import { GraphConnectable } from '../model/graphconnectable.js'
 
 // ADD TO INDEX.HTML AS: <option value="umlclass">UMLClass(GoJS)</option>
 
+type RegexMatchedClassMembersT = {
+  visibility: string,
+  name: string,
+  type: string,
+  default: string
+};
+
 // Basically [+-#] [name:] [String] [=defaultValue]
 export function umlclassParseMember(member: string) {
   const regex = /^(?<visibility>[+#-]|)(?<name>[^:]+(?=:)|)[:]{0,1}(?<type>[^=]+)[=]{0,1}(?<default>.+|)/
@@ -25,19 +32,33 @@ export function umlclassParseMethod(method: string) {
  * Test: node js/diagrammer.js tests/test_inputs/umlclass2.txt umlclass
  */
 export function umlclass(graphcanvas: GraphCanvas) {
-  const lout = (...args) => {
+  const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
 
-  const groups = []
-  const edges = []
+  type PropertyT = {
+    name: string,
+    visibility: string,
+    default: string,
+    type: string
+  };
+  type MethodT = {
+    name: string;
+    visibility: string;
+    type: string;
+  };
+  type GroupsT = {
+    key: number, name: string, properties: PropertyT[], methods: MethodT[]
+  };
+  const groups: GroupsT[] = []
+  const edges: { from: string, to: string, relationship: string }[] = []
 
-  const nameAndLabel = (ln: GraphConnectable) => {
+  const nameAndLabel = (ln: GraphConnectable): string => {
     // name;name():?? -> name():??
     // name;:?? -> name():??
     const label = (!ln.label) ? '' : ln.label
-    if (label.startsWith(ln.name)) {
+    if (ln.name && label.startsWith(ln.name)) {
       return label
     }
     return `${ln.name}${label}`
@@ -47,7 +68,7 @@ export function umlclass(graphcanvas: GraphCanvas) {
     return name.replace(/_+$/, '').replace(/^_+/, '')
   }
 
-  const getProperties = (vertices: GraphConnectable[]) => {
+  const getProperties = (vertices: GraphConnectable[]): PropertyT[] => {
     // instead of array of names...{name:???,type=???,visibility=???,default=??}
     // Example:
     // NAME;LABEL
@@ -59,31 +80,35 @@ export function umlclass(graphcanvas: GraphCanvas) {
         default: '',
         type: ''
       }
+
       // By default, name=name
-      ret.name = mangleName(p.name)
+      ret.name = mangleName(p.name ?? '')
 
       // If there's a label attached, parse that
       if (p.label) {
         const all = umlclassParseMember(p.label)
-        switch (all.groups.visibility) {
-          case '+':
-            ret.visibility = 'public'
-            break
-          case '-':
-            ret.visibility = 'private'
-            break
-          case '#':
-            ret.visibility = 'protected'
-            break
-        }
-        if (all.groups.name) {
-          ret.name = all.groups.name // specific label name, NO MANGLING
-        }
-        if (all.groups.type) {
-          ret.type = all.groups.type
-        }
-        if (all.groups.default) {
-          ret.default = all.groups.default
+        if (all?.groups) {
+          const parsedMembers: RegexMatchedClassMembersT = all.groups as RegexMatchedClassMembersT
+          switch (parsedMembers.visibility) {
+            case '+':
+              ret.visibility = 'public'
+              break
+            case '-':
+              ret.visibility = 'private'
+              break
+            case '#':
+              ret.visibility = 'protected'
+              break
+          }
+          if (parsedMembers.name) {
+            ret.name = parsedMembers.name // specific label name, NO MANGLING
+          }
+          if (parsedMembers.type) {
+            ret.type = parsedMembers.type
+          }
+          if (parsedMembers.default) {
+            ret.default = parsedMembers.default
+          }
         }
       }
       return ret
@@ -104,34 +129,36 @@ export function umlclass(graphcanvas: GraphCanvas) {
         visibility: '',
         type: ''
       }
-      ret.name = mangleName(m.name)
+      ret.name = mangleName(m.name ?? '')
       if (m.label) {
         const all = umlclassParseMethod(m.label)
-        switch (all.groups.visibility) {
-          case '+':
-            ret.visibility = 'public'
-            break
-          case '-':
-            ret.visibility = 'private'
-            break
-          case '#':
-            ret.visibility = 'protected'
-            break
+        if (all?.groups) {
+          switch (all.groups.visibility) {
+            case '+':
+              ret.visibility = 'public'
+              break
+            case '-':
+              ret.visibility = 'private'
+              break
+            case '#':
+              ret.visibility = 'protected'
+              break
+          }
+          if (all.groups.parameters) {
+            ret.name = mangleName(m.name ?? '') + all.groups.parameters
+          }
+          if (all.groups.return) {
+            ret.type = all.groups.return
+          }
+          // TODO:
+          // ret["parameters"] = [{name:???,type:???}];
+          // if (all[3]) {
+          // ret['type'] = all[3];
+          // }
+          // if (all[4]) {
+          // ret['default'] = all[4];
+          // }
         }
-        if (all.groups.parameters) {
-          ret.name = mangleName(m.name) + all.groups.parameters
-        }
-        if (all.groups.return) {
-          ret.type = all.groups.return
-        }
-        // TODO:
-        // ret["parameters"] = [{name:???,type:???}];
-        // if (all[3]) {
-        // ret['type'] = all[3];
-        // }
-        // if (all[4]) {
-        // ret['default'] = all[4];
-        // }
       }
       return ret
     })

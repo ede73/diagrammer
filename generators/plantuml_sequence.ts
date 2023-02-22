@@ -47,13 +47,13 @@ const PlantUMLShapeMap = {
  * node js/diagrammer.js verbose tests/test_inputs/events.txt plantuml_sequence | java -Xmx2048m -jar ext/plantuml.jar -tpng -pipe > output.png && open output.png
 */
 export function plantuml_sequence(graphcanvas: GraphCanvas) {
-  const lout = (...args) => {
+  const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
   const processAVertex = function (obj: GraphConnectable, isSubGraph: boolean) {
-    const nattrs = []
-    const styles = []
+    const nattrs: string[] = []
+    const styles: string[] = []
 
     getAttributeAndFormat(obj, 'style', '{0}', styles)
     if (styles.length > 0) {
@@ -209,7 +209,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
     }
   }
 
-  const ltraverseVertices = (/** @type {GraphConnectable} */root, /** @type {boolean} */isInnerGraph) => {
+  const ltraverseVertices = (root: GraphContainer, isInnerGraph: boolean) => {
     // Dump this groups participants first...
     traverseVertices(root, maybeVertex => {
       if (maybeVertex instanceof GraphVertex) { processAVertex(maybeVertex, isInnerGraph) }

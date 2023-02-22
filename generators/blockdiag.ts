@@ -5,6 +5,7 @@ import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
+import { GraphConnectable } from '../model/graphconnectable.js'
 
 // ADD TO INDEX.HTML AS: <option value="blockdiag">Block Diagram(cli)</option>
 
@@ -89,7 +90,7 @@ const BlockDiagShapeMap = {
  * To test: node js/diagrammer.js tests/test_inputs/events.txt blockdiag |blockdiag3 -Tpng -o a.png - && open a.png
  */
 export function blockdiag(graphcanvas: GraphCanvas) {
-  const lout = (...args) => {
+  const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
@@ -104,10 +105,7 @@ export function blockdiag(graphcanvas: GraphCanvas) {
 
   let lastNode = graphcanvas.getStart()
 
-  /**
-     * @param {(GraphVertex|GraphGroup)} obj
-     */
-  const parseObjects = /** @type {function(GraphConnectable)} */obj => {
+  const parseObjects = (obj: GraphConnectable) => {
     if (obj instanceof GraphGroup) {
       lout(`group "${obj.getLabel()}"{`, true)
       lout(getAttributeAndFormat(obj, 'color', 'color="{0}"'))
@@ -118,10 +116,11 @@ export function blockdiag(graphcanvas: GraphCanvas) {
       traverseVertices(obj, obj => {
         const mappedShape = (obj => {
           if (obj instanceof GraphVertex) {
-            if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
+            const currentShape = obj.shape as keyof typeof BlockDiagShapeMap
+            if (obj.shape && !BlockDiagShapeMap[currentShape]) {
               throw new Error('Missing shape mapping')
             }
-            const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : BlockDiagShapeMap.default
+            const mappedShape = BlockDiagShapeMap[currentShape] ? BlockDiagShapeMap[currentShape] : BlockDiagShapeMap.default
             return [`shape=${mappedShape}`]
           }
         })(obj);
@@ -141,10 +140,11 @@ export function blockdiag(graphcanvas: GraphCanvas) {
       if (style !== '' && style.match(/(dotted|dashed|solid)/) == null) {
         style = ''
       }
-      if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
+      const currentShape = (obj as GraphVertex).shape as keyof typeof BlockDiagShapeMap
+      if ((obj as GraphVertex).shape && !BlockDiagShapeMap[currentShape]) {
         throw new Error('Missing shape mapping')
       }
-      const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : BlockDiagShapeMap.default
+      const mappedShape = BlockDiagShapeMap[currentShape] ? BlockDiagShapeMap[currentShape] : BlockDiagShapeMap.default
 
       const colorIconShapeLabel = multiAttrFmt(obj, {
         color: 'color="{0}"',

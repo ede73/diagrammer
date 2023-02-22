@@ -9,16 +9,15 @@ import { output } from '../model/support.js'
  * To test: node js/diagrammer.js verbose tests/test_inputs/sankey.txt sankey
  */
 export function sankey(graphcanvas: GraphCanvas) {
-  const lout = (...args) => {
+  const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
 
-  /**
-   * @param {string} str
-   * @returns {number}
-   */
-  function getNumber(str) {
+  function getNumber(str?: string) {
+    if (!str) {
+      return 0
+    }
     const nums = str.trim().match('^[0-9]+')
     if (nums) {
       return Number(nums[0])

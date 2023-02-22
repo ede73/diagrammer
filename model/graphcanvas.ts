@@ -41,13 +41,13 @@ export class GraphCanvas extends GraphContainer {
   /**
    * Output the generated result
    */
-  result: IResult = undefined
-  parseError: IParseError = undefined
-  generator: string = undefined
-  visualizer: string = undefined
-  shape: string = undefined
-  direction: string = undefined
-  start: string = undefined
+  result?: IResult = undefined
+  parseError?: IParseError = undefined
+  generator?: string = undefined
+  visualizer?: string = undefined
+  shape?: string = undefined
+  direction?: string = undefined
+  start?: string = undefined
   _EDGES: GraphEdge[] = []
 
   // parsing context
@@ -67,7 +67,7 @@ export class GraphCanvas extends GraphContainer {
    * Currently ONLY used in conditional last else block where
    * NEXT vertex seen will be stores as "else"s _conditionalExitEdge!
    */
-  _nextConnectableToExitEndIf: GraphGroup
+  _nextConnectableToExitEndIf?: GraphGroup
   CONTAINER_EXIT: number = 1
   /**
    * Automated indexing for created subgraphs (nameless)
@@ -81,10 +81,10 @@ export class GraphCanvas extends GraphContainer {
    * Store all declared variables (and their values)
    */
   VARIABLES: IVariables = {}
-  lastSeenVertex: GraphConnectable
+  lastSeenVertex?: GraphConnectable
 
   constructor() {
-    super(undefined) // Canvas has no name
+    super('') // Canvas has no name
     this.CURRENTCONTAINER = [this]
   }
 

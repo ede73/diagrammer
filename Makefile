@@ -11,15 +11,19 @@ GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.
 MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js model/graphcontainer.js model/graphconnectable.js
 MODEL_REST = model/shapes.js model/tree.js
 
-%.js: %.ts
-	(cd model;tsc -p tsconfig.json)
-	(cd generators;tsc -p tsconfig.json)
-	# TODO: TSC tries to overwrite build/diagrammer_parser.js & js/viz.es.js (or so it claims, there is no typescript file, just imported)
-	(cd web;tsc -p tsconfig.json)||true
-	(cd web/visualizations;tsc -p tsconfig.json)
-
 all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST) nodemodules
 	@echo Make ALL
+
+tests/parser/parser.test.js: tests/parser/tsconfig.json tests/parser/parser.test.ts
+	@echo "Make parser.test.js"
+	tsc -p $< || true
+
+%.js: %.ts
+	tsc -p model/tsconfig.json
+	tsc -p generators/tsconfig.json
+	# TODO: TSC tries to overwrite build/diagrammer_parser.js & js/viz.es.js (or so it claims, there is no typescript file, just imported)
+	tsc -p wen/tsconfig.json ||true
+	tsc -p web/visualizations/tsconfig.json
 
 nodemodules: node_modules
 	@if [ ! -d $< ]; then \
@@ -89,7 +93,7 @@ export: build/diagrammer_lexer.js build/diagrammer_parser.js js/diagrammer.js
 testrunner: ./scripts/runtests.sh all plantuml nodemodules
 	./scripts/runtests.sh
 
-jesttests: all nodemodules
+jesttests: all nodemodules tests/parser/parser.test.js
 	@mkdir -p tests/test_outputs
 	npm test
 

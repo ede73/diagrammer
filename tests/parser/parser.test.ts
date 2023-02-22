@@ -1,9 +1,7 @@
 // @ts-check
 
 import { diagrammerParser } from '../../build/diagrammer_parser.js'
-// eslint-disable-next-line no-unused-vars
 import { generators, GraphCanvas } from '../../model/graphcanvas.js'
-// eslint-disable-next-line no-unused-vars
 import { GraphConnectable } from '../../model/graphconnectable.js'
 import { GraphContainer } from '../../model/graphcontainer.js'
 import { GraphGroup } from '../../model/graphgroup.js'
@@ -12,8 +10,8 @@ import { GraphVertex } from '../../model/graphvertex.js'
 import { traverseEdges, traverseVertices } from '../../model/traversal.js'
 
 // curried, canvas passed on call site
-const canvasHas = (prop, value, canvas) => {
-  return (/** @type {GraphCanvas} */canvas) => {
+const canvasHas = (prop: string, value: any) => {
+  return (canvas: GraphCanvas) => {
     try {
       expect(canvas[prop]).toStrictEqual(value)
     } catch (ex) {
@@ -24,8 +22,8 @@ const canvasHas = (prop, value, canvas) => {
 }
 
 // curried, canvas passed on call site
-const canvasContains = (/** @type {function(GraphConnectable)} */callback, match, canvas) => {
-  return (/** @type {GraphCanvas} */canvas) => {
+const canvasContains = (callback: (vertex: GraphConnectable) => any, match: string[]) => {
+  return (canvas: GraphCanvas) => {
     const res = []
     traverseVertices(canvas, vertex => {
       res.push(callback(vertex))
@@ -40,12 +38,12 @@ const canvasContains = (/** @type {function(GraphConnectable)} */callback, match
 }
 
 // curried, canvas passed on call site
-const canvasContainsAutoProps = (match, canvas) => {
-  return (/** @type {GraphCanvas} */canvas) => {
+const canvasContainsAutoProps = (match: string[]) => {
+  return (canvas: GraphCanvas) => {
     const res = []
-    const collectIfDefined = (/** @type {any[]} */a, /** @type {string} */prop) => { if (prop) a.push(prop) }
+    const collectIfDefined = (a: string[], prop: string) => { if (prop) a.push(prop) }
 
-    function containerName (container) {
+    function containerName(container) {
       if (container instanceof GraphCanvas) {
         return ''
       }
@@ -57,8 +55,8 @@ const canvasContainsAutoProps = (match, canvas) => {
       }
       throw new Error('Unexpected container')
     }
-    let /** @type {GraphContainer} */ container = canvas
-    traverseVertices(canvas, function c (connectable) {
+    let container: GraphContainer = canvas
+    traverseVertices(canvas, function c(connectable) {
       if (connectable instanceof GraphContainer) {
         container = connectable
         const containerProps = []
@@ -114,8 +112,8 @@ const canvasContainsAutoProps = (match, canvas) => {
 }
 
 // curried, canvas passed on call site
-const dumpCanvas = (canvas) => {
-  return (/** @type {GraphCanvas} */canvas) => {
+const dumpCanvas = () => {
+  return (canvas: GraphCanvas) => {
     console.log(canvas)
     expect(false).toBeTruthy()
   }
@@ -127,7 +125,7 @@ const grammarTests = [
   { g: 'landscape', f: [canvasHas('direction', 'landscape')] },
   { g: 'start a', f: [canvasHas('start', 'a')] },
   { g: 'shape cloud', f: [canvasHas('shape', 'cloud')] },
-  { g: 'equal a,b,c', f: [canvasContains((vertex) => vertex.getName(), ['a', 'b', 'c'])] },
+  { g: 'equal a,b,c', f: [canvasContainsAutoProps(['a', 'b', 'c'])] },
   { g: 'edge color #0000ff', f: [canvasHas('edgecolor', '#0000ff')] },
   { g: 'group color #0000ff', f: [canvasHas('groupcolor', '#0000ff')] },
   { g: 'vertex color #0000ff', f: [canvasHas('vertexcolor', '#0000ff')] },
@@ -248,7 +246,7 @@ describe('Parser/grammar rule tests', () => {
    *
    * @param {string} code
    */
-  function parseCode (code) {
+  function parseCode(code) {
     diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
     try {
       // @ts-ignore
@@ -260,7 +258,7 @@ describe('Parser/grammar rule tests', () => {
     }
   }
 
-  function makeRandomRGB () {
+  function makeRandomRGB() {
     const randomBetween = (min, max) => min + Math.floor(Math.random() * (max - min + 1))
     const rgb = randomBetween(0, 16777215)
     return '#' + ('000000' + rgb.toString(16)).substr(-6)

@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "module": "ES6",
+    "esModuleInterop": true,
+    "target": "ES2017",
+    //"sourceMap": true,
+    "allowJs": true,
+    "removeComments": true,
+    // not even this AND exclude PREVENT tsc going to node_modules
+    // completely removing node_modules works, transpiles beautifully still! WTF?
+    "noImplicitAny": false,
+    // tsc is "TOTALLY" nuts,i've echo > support.ts, + this config, tsc runs thru node_modules :)
+    // Disabling lib check helps (or if puppeteer, jest, babel type errors get fixed)
+    "skipLibCheck": true
+  },
+  // "include": [
+  //   "*.ts"
+  // ],
+  "exclude": [
+    "tests/*",
+    "*.js",
+    "model/*.js",
+    "**/*.js",
+    "node_modules",
+    "node_modules/*",
+    // No idea why, but this config causes tsc to think diagrammer_parser is a target and complains about overwriting it (even if it is just imported, not generated, not even a typescript file)
+    "build/diagrammer_parser.js",
+    "diagrammer_parser.js",
+    "**/diagrammer_parser.js"
+  ]
+}

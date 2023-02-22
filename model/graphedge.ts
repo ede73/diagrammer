@@ -1,87 +1,74 @@
 // @ts-check
 import { GraphObject } from '../model/graphobject.js'
-// used in type declarations
-// eslint-disable-next-line no-unused-vars
 import { GraphConnectable } from './graphconnectable.js'
-import { GraphReference } from './graphreference.js'
 
 /**
  * Represents an edge(link) between objects (vertices,groups,lists)
  */
 export class GraphEdge extends GraphObject {
+  edgeType: string
+  left: GraphConnectable
+  right: GraphConnectable
+  lcompass: string = undefined
+  rcompass: string = undefined
+  edgetextcolor: string = undefined
+  edgecolor: string = undefined
+  container: GraphConnectable = undefined
+
   /**
-   * @param {string} edgeType Type of the edge(grammar!)
-   * @param {GraphConnectable|undefined} lhs Left hand side of the edge
-   * @param {GraphConnectable|undefined} rhs Right hand side of the edge
-   * @constuctor
-   */
-  constructor (edgeType, lhs, rhs) {
+     * @param edgeType Type of the edge(grammar!)
+     * @param lhs Left hand side of the edge
+     * @param rhs Right hand side of the edge
+     * @constuctor
+     */
+  constructor(edgeType: string, lhs: GraphConnectable, rhs: GraphConnectable) {
     super(undefined) // edges have no names, ever
-    /** @type {string} */
     this.edgeType = edgeType.trim()
-    /** @type {GraphConnectable} */
     this.left = lhs
-    /** @type {GraphConnectable} */
     this.right = rhs
-    /** @type {string} */
-    this.lcompass = undefined
-    /** @type {string} */
-    this.rcompass = undefined
-    /** @type {string} */
-    this.edgetextcolor = undefined
-    /** @type {string} */
-    this.edgecolor = undefined
-    /** @type {GraphConnectable} */
-    this.container = undefined
-    // if (lhs && (lhs instanceof GraphReference)) {
-    //   throw new Error(`LHS is reference ${lhs.getName()}`)
-    // }
-    // if (rhs && (rhs instanceof GraphReference)) {
-    //   throw new Error(`RHS if reference ${rhs.getName()}`)
-    // }
   }
 
-  isDotted () {
+  isDotted() {
     return this.edgeType.indexOf('.') !== -1
   }
 
-  isDashed () {
+  isDashed() {
     return this.edgeType.indexOf('-') !== -1
   }
 
-  isBroken () {
+  isBroken() {
     return this.edgeType.indexOf('/') !== -1
   }
 
   /**
    * @returns True if edge has arrows on both sides
    */
-  isBidirectional () {
+  isBidirectional() {
     return this.isLeftPointingEdge() && this.isRightPointingEdge()
   }
 
   /**
    * @returns true if this edge is undirected (no arrows)
    */
-  isUndirected () {
+  isUndirected() {
     return !this.isLeftPointingEdge() && !this.isRightPointingEdge()
   }
 
   /**
    * @returns true if edge points left. Notice! Edge can still be birectional!
    */
-  isLeftPointingEdge () {
+  isLeftPointingEdge() {
     return this.edgeType.indexOf('<') !== -1
   }
 
   /**
    * @returns true if edge points right. Notice! Edge can still be birectional!
    */
-  isRightPointingEdge () {
+  isRightPointingEdge() {
     return this.edgeType.indexOf('>') !== -1
   }
 
-  toString () {
+  toString() {
     let fmt = ''
     if (this.lcompass) { fmt += `,lcompass: ${this.lcompass}` }
     if (this.rcompass) { fmt += `,rcompass: ${this.rcompass}` }

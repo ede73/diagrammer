@@ -368,11 +368,15 @@
 	import { visualize } from "./web/visualize.js";
 	window.visualize = visualize;
 
-	const e = getInputElement('diagrammer-saved') // TODO: move up
+	const e = getInputElement('diagrammer-saved')
 	e.innerHTML = getSavedFilesAsOptionList()
-	// select ast.txt example
-	document.querySelector('select#diagrammer-example>option[value="test_inputs/ast.txt"').selected=true
-	exampleChanged()
+	
+	const params = new URLSearchParams(window.location.search)
+	if (!params.has('do_not_load_initial_example')) {
+	  // select ast.txt example
+	  document.querySelector('select#diagrammer-example>option[value="test_inputs/ast.txt"').selected=true
+	  exampleChanged()
+	}
 </script>
 <script type="text/javascript">
 	//_MscParse("a>b");

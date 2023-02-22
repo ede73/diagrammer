@@ -36,6 +36,8 @@
   "dependencies": {
     "@types/viz.js": "^2.1.2",
     "mscgenjs": "^6.0.2",
+    "devtools-protocol": "^0.0.1107588",
+    "typescript": "^4.9.5",
     "viz.js": "^2.1.2"
   }
 }

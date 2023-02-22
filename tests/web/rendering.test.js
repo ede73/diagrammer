@@ -32,7 +32,7 @@ describe('Diagrammer', () => {
     // @ts-ignore
     // eslint-disable-next-line no-undef
     const p = page
-    await p.goto('http://localhost/~ede/diagrammer/')
+    await p.goto('http://localhost/~ede/diagrammer/?do_not_load_initial_example=1')
     // Suddenly (after working for a long time!) started getting errors from here
     // Protocol error (Emulation.setDeviceMetricsOverride): Invalid parameters Failed to deserialize params.height
     // Usually if I close the chrome browser, this goes away, wtf? cache? out of memory?
@@ -136,10 +136,12 @@ describe('Diagrammer', () => {
   };
 
   it('asserts reingold-tilford(dendrogram)(d3.js) visualization works', async () => {
+    // flaky: main page loads (initializes with) AST visualization BEFORE our new selection overrides it. Not a TEST problem, but rather index loading default visualization problem
     await testDynamicRendering(p, 'test_inputs/dendrogram.txt')
   }, 1000)
 
   it('asserts radial dendrogram(d3.js) visualization works', async () => {
+    // flaky: main page loads (initializes with) AST visualization BEFORE our new selection overrides it. Not a TEST problem, but rather index loading default visualization problem
     await testDynamicRendering(p, 'test_inputs/dendrogram.txt', 'dendrogram:radialdendrogram')
   }, 1000)
 

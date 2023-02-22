@@ -4,41 +4,32 @@ import { Shapes } from './shapes.js'
 
 /**
  * Represents a Vertex in a visualization
- *
- * @param name Name of the vertex
- * @param [shape] Optional shape for the vertex, if not give, will default to what ever default is being used at the moment
- * @constructor
  */
 export class GraphVertex extends GraphConnectable {
+  shape: string
+  image: string = undefined
+  style: string = undefined
+
   /**
-   *
-   * @param {string} name
-   * @param {string} shape
+   * @param name Name of the vertex
+   * @param [shape] Optional shape for the vertex, if not give, will default to what ever default is being used at the moment
+   * @constructor
    */
-  constructor (name, shape) {
+  constructor(name: string, shape: string) {
     super(name)
     if (shape) {
       this._assertRegonizedShape(shape)
     }
-    /** @type {string} */
     this.shape = shape
-    /** @type {string} */
-    this.image = undefined
-    /** @type {string} */
-    this.style = undefined
   }
 
-  _assertRegonizedShape (shape) {
+  _assertRegonizedShape(shape: string) {
     if (!Object.prototype.hasOwnProperty.call(Shapes, shape.toLowerCase())) {
       throw new Error(`Trying to set unrecognized shape ${shape}`)
     }
   }
 
-  /**
-   * @param {string} shape
-   * @returns {GraphVertex}
-   */
-  setShape (shape) {
+  setShape(shape: string) {
     if (shape) {
       this._assertRegonizedShape(shape)
       this.shape = shape.toLowerCase()
@@ -46,41 +37,36 @@ export class GraphVertex extends GraphConnectable {
     return this
   }
 
-  getShape () {
+  getShape() {
     return this.shape
   }
 
   /**
-   * @param {string} style  // TODO: Restrict
-   * @returns {GraphVertex}
+   * @param style  // TODO: Restrict
    */
-  setStyle (style) {
+  setStyle(style: string) {
     if (style) {
       this.style = style.toLowerCase()
     }
     return this
   }
 
-  getStyle () {
+  getStyle() {
     return this.style
   }
 
-  /**
-   * @param {string} image
-   * @returns {GraphVertex}
-   */
-  setImage (image) {
+  setImage(image: string) {
     if (image) {
       this.image = image
     }
     return this
   }
 
-  getImage () {
+  getImage() {
     return this.image
   }
 
-  toString () {
+  toString() {
     let fmt = ''
     if (this.color) { fmt += `,color: ${this.color}` }
     if (this.label) { fmt += `,label: ${this.label}` }

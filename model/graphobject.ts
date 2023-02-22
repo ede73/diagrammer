@@ -1,51 +1,43 @@
 // @ts-check
 
-// import { debug } from './support.js'
-
 /**
  * GraphObject: Anything that is represented in a graph (diagram/visualization)
  */
 export class GraphObject {
   /**
-     * Name of the object. Exception being edges, they don't have names
-     *
-     * @param {string} name
-     */
-  constructor (name) {
-    /**
-     * Every object in a graph have a name
-     * That's how it can get linked.
-     * "name" for display purposes may be a label instead
-     * @type {string}
-     */
+   * Every object in a graph have a name
+   * That's how it can get linked.
+   * "name" for display purposes may be a label instead
+   */
+  name: string
+  /**
+   * If provided, this will be used as visual name
+   */
+  label: string = undefined
+  /**
+   * Main color for this object
+   */
+  color: string = undefined
+  /**
+   * Color for any text rendered for this object
+   */
+  textcolor: string = undefined
+  /**
+   * External link (only works for dynamic visualizations like SVG)
+   */
+  url: string = undefined
+
+  /**
+       * Name of the object. Exception being edges, they don't have names
+       */
+  constructor(name: string) {
     this.name = name
-    /**
-     * If provided, this will be used as visual name
-     * @type {string}
-     */
-    this.label = undefined
-    /**
-     * Main color for this object
-     * @type {string}
-     */
-    this.color = undefined
-    /**
-     * Color for any text rendered for this object
-     * @type {string}
-     */
-    this.textcolor = undefined
-    /**
-     * External link (only works for dynamic visualizations like SVG)
-     * @type {string}
-     */
-    this.url = undefined
   }
 
   /**
    * Set the name for the object
-   * @param {string} name
    */
-  setName (name) {
+  setName(name: string) {
     // TODO: Something odd in the parser
     if (name) {
       this.name = name.trim()
@@ -53,15 +45,14 @@ export class GraphObject {
     return this
   }
 
-  getName () {
+  getName() {
     return this.name
   }
 
   /**
    * Set color
-   * @param {string} color
    */
-  setColor (color) {
+  setColor(color: string) {
     // TODO: Something odd in the parser
     if (color) {
       this.color = color.trim()
@@ -69,42 +60,39 @@ export class GraphObject {
     return this
   }
 
-  getColor () {
+  getColor() {
     return this.color
   }
 
   /**
    * Set text color
-   * @param {string} textColor
    */
-  setTextColor (textColor) {
+  setTextColor(textColor: string) {
     this.textcolor = textColor.trim()
     return this
   }
 
-  getTextColor () {
+  getTextColor() {
     return this.textcolor
   }
 
   /**
    * Set URL
-   * @param {string} url
    */
-  setUrl (url) {
+  setUrl(url: string) {
     this.url = url.trim()
     return this
   }
 
-  getUrl () {
+  getUrl() {
     return this.url
   }
 
   /**
    * Set label. Label is a complex object that will be parsed and parts of it
    * extracted to textColor and potentially URL
-   * @param {string} label
    */
-  setLabel (label) {
+  setLabel(label: string) {
     // debug(`  setLabel(${label.trim()}) this=${this.getName()} cons=${this.constructor.name}`)
     if (label) {
       label = label.trim().replace(/"/gi, '')
@@ -131,11 +119,11 @@ export class GraphObject {
     return this
   }
 
-  getLabel () {
+  getLabel() {
     return this.label
   }
 
-  toString () {
+  toString() {
     return 'GraphObject'
   }
 };

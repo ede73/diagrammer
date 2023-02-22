@@ -11,6 +11,9 @@ GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.
 MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js model/graphcontainer.js model/graphconnectable.js
 MODEL_REST = model/shapes.js model/tree.js
 
+%.js: %.ts
+	(cd model;tsc -p tsconfig.json)
+
 all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST) nodemodules
 	@echo Make ALL
 

@@ -1,7 +1,7 @@
 // @ts-check
-import { GraphGroup } from '../model/graphgroup.js'
 import { debug } from '../model/support.js'
 import { GraphConnectable } from './graphconnectable.js'
+import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from './graphvertex.js'
 
 /**

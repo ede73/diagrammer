@@ -38,15 +38,15 @@ export function umlclass(graphcanvas: GraphCanvas) {
   }
 
   type PropertyT = {
-    name: string,
     visibility: string,
-    default: string,
-    type: string
+    name: string,
+    type: string,
+    default?: string,
   };
   type MethodT = {
     name: string;
     visibility: string;
-    type: string;
+    type?: string;
   };
   type GroupsT = {
     key: number, name: string, properties: PropertyT[], methods: MethodT[]
@@ -74,10 +74,9 @@ export function umlclass(graphcanvas: GraphCanvas) {
     // NAME;LABEL
     // name;[+-#][name:]String[=defaultValue]
     return [...vertices].filter(node => !nameAndLabel(node).includes(')')).map(p => {
-      const ret = {
+      const ret: PropertyT = {
         name: '',
         visibility: '',
-        default: '',
         type: ''
       }
 
@@ -124,10 +123,9 @@ export function umlclass(graphcanvas: GraphCanvas) {
     // name()
     // name;[+-#][name(...):]RETURNTYPE
     return [...vertices].filter(node => nameAndLabel(node).includes('(')).map(m => {
-      const ret = {
+      const ret: MethodT = {
         name: '',
-        visibility: '',
-        type: ''
+        visibility: ''
       }
       ret.name = mangleName(m.name ?? '')
       if (m.label) {

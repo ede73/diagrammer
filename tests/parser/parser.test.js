@@ -5,8 +5,219 @@ import { diagrammerParser } from '../../build/diagrammer_parser.js'
 import { generators, GraphCanvas } from '../../model/graphcanvas.js'
 // eslint-disable-next-line no-unused-vars
 import { GraphConnectable } from '../../model/graphconnectable.js'
+import { GraphContainer } from '../../model/graphcontainer.js'
 import { GraphGroup } from '../../model/graphgroup.js'
+import { GraphInner } from '../../model/graphinner.js'
 import { GraphVertex } from '../../model/graphvertex.js'
+import { traverseEdges, traverseVertices } from '../../model/traversal.js'
+
+// curried, canvas passed on call site
+const canvasHas = (prop, value, canvas) => {
+  return (/** @type {GraphCanvas} */canvas) => {
+    try {
+      expect(canvas[prop]).toStrictEqual(value)
+    } catch (ex) {
+      console.log(canvas)
+    }
+    expect(canvas[prop]).toStrictEqual(value)
+  }
+}
+
+// curried, canvas passed on call site
+const canvasContains = (/** @type {function(GraphConnectable)} */callback, match, canvas) => {
+  return (/** @type {GraphCanvas} */canvas) => {
+    const res = []
+    traverseVertices(canvas, vertex => {
+      res.push(callback(vertex))
+    })
+    try {
+      expect(res).toStrictEqual(match)
+    } catch (ex) {
+      console.log(canvas, res)
+    }
+    expect(res).toStrictEqual(match)
+  }
+}
+
+// curried, canvas passed on call site
+const canvasContainsAutoProps = (match, canvas) => {
+  return (/** @type {GraphCanvas} */canvas) => {
+    const res = []
+    const collectIfDefined = (/** @type {any[]} */a, /** @type {string} */prop) => { if (prop) a.push(prop) }
+
+    function containerName (container) {
+      if (container instanceof GraphCanvas) {
+        return ''
+      }
+      if (container instanceof GraphGroup) {
+        return `:${container.getName()}`
+      }
+      if (container instanceof GraphInner) {
+        return `:${container.getName()}`
+      }
+      throw new Error('Unexpected container')
+    }
+    let /** @type {GraphContainer} */ container = canvas
+    traverseVertices(canvas, function c (connectable) {
+      if (connectable instanceof GraphContainer) {
+        container = connectable
+        const containerProps = []
+        collectIfDefined(containerProps, containerName(container))
+        // todo defaults...
+        collectIfDefined(containerProps, container.getLabel())
+        collectIfDefined(containerProps, container.getColor())
+        collectIfDefined(containerProps, container.getTextColor())
+        res.push(containerProps.join(','))
+        traverseVertices(connectable, c)
+        container = connectable
+      } else {
+        const vertexProps = []
+        if (connectable instanceof GraphVertex) {
+          collectIfDefined(vertexProps, containerName(container))
+        }
+        collectIfDefined(vertexProps, connectable.getName())
+        if (connectable instanceof GraphVertex) {
+          collectIfDefined(vertexProps, connectable.getStyle())
+        }
+        collectIfDefined(vertexProps, connectable.getLabel())
+        collectIfDefined(vertexProps, connectable.getColor())
+        collectIfDefined(vertexProps, connectable.getTextColor())
+        collectIfDefined(vertexProps, connectable.getUrl())
+        if (connectable instanceof GraphVertex) { collectIfDefined(vertexProps, connectable.getImage()) }
+        // also iterate INTO containers
+        res.push(vertexProps.join(','))
+      }
+    }, false) // TODO: also innards
+
+    traverseEdges(canvas, edge => {
+      const edgeProps = []
+      collectIfDefined(edgeProps, edge.left.getName())
+      collectIfDefined(edgeProps, edge.lcompass)
+      collectIfDefined(edgeProps, edge.edgeType)
+      collectIfDefined(edgeProps, edge.right.getName())
+      collectIfDefined(edgeProps, edge.rcompass)
+      collectIfDefined(edgeProps, edge.color)
+      collectIfDefined(edgeProps, edge.edgecolor) // always empty
+      collectIfDefined(edgeProps, edge.edgetextcolor)
+      collectIfDefined(edgeProps, edge.label)
+      collectIfDefined(edgeProps, edge.container.getName() ? edge.container.getName() : '') // what to do with unnamed containers?
+      res.push(edgeProps.join(','))
+    })
+    try {
+      expect(res).toStrictEqual(match)
+    } catch (ex) {
+      // console.log(canvas, res)
+      console.log(`[ "${res.join('","')}" ]`)
+    }
+    expect(res).toStrictEqual(match)
+  }
+}
+
+// curried, canvas passed on call site
+const dumpCanvas = (canvas) => {
+  return (/** @type {GraphCanvas} */canvas) => {
+    console.log(canvas)
+    expect(false).toBeTruthy()
+  }
+}
+
+// Collection of comprehensive but as simple as possible grammar tests (in increasing complexity)
+const grammarTests = [
+  { g: 'vertical', f: [canvasHas('direction', 'portrait')] },
+  { g: 'landscape', f: [canvasHas('direction', 'landscape')] },
+  { g: 'start a', f: [canvasHas('start', 'a')] },
+  { g: 'shape cloud', f: [canvasHas('shape', 'cloud')] },
+  { g: 'equal a,b,c', f: [canvasContains((vertex) => vertex.getName(), ['a', 'b', 'c'])] },
+  { g: 'edge color #0000ff', f: [canvasHas('edgecolor', '#0000ff')] },
+  { g: 'group color #0000ff', f: [canvasHas('groupcolor', '#0000ff')] },
+  { g: 'vertex color #0000ff', f: [canvasHas('vertexcolor', '#0000ff')] },
+  { g: 'vertex text color #0000ff', f: [canvasHas('vertextextcolor', '#0000ff')] },
+  { g: 'edge text color #0000ff', f: [canvasHas('edgetextcolor', '#0000ff')] },
+  { g: '$(c:#badede)', f: [canvasHas('VARIABLES', { c: '#badede' })] },
+  {
+    g: '$(c:#badede)\nedge color $(c)',
+    f: [
+      canvasHas('VARIABLES', { c: '#badede' }),
+      canvasHas('edgecolor', '#badede')]
+  },
+  { g: 'node', f: [canvasContainsAutoProps(['node'])] },
+  {
+    g: 'a/wifi.png>#ff0000b',
+    f: [canvasContainsAutoProps(['a,/wifi.png', 'b', 'a,>,b,#ff0000'])]
+  },
+  // No good test for this other than passing parsing
+  // { g: '// a line comment' },
+  // No good test for this other than passing parsing
+  // {
+  //   g: `/* a multi
+  // line
+  // comment*/`
+  // },
+  { g: 'node#000ede', f: [canvasContainsAutoProps(['node,#000ede'])] },
+  { g: 'f-#00fffff', f: [canvasContainsAutoProps(['f', 'f,-,f,#00ffff'])] },
+  { g: 'node;and its label', f: [canvasContainsAutoProps(['node,and its label'])] },
+  { g: 'node>(a,b,c)', f: [canvasContainsAutoProps(['node', ':1', ':1,a', ':1,b', ':1,c', 'node,>,a,1', 'node,>,b,1', 'node,>,c,1'])] },
+  { g: 'node>(a b c)', f: [canvasContainsAutoProps(['node', ':1', ':1,a', ':1,b', ':1,c', 'node,>,a,1', 'node,>,b,1', 'node,>,c,1'])] },
+  { g: 'node>(a>b>c)', f: [canvasContainsAutoProps(['node', ':1', ':1,a', ':1,b', ':1,c', 'node,>,a,1', 'a,>,b,1', 'b,>,c,1'])] },
+  { g: 'node>(a>(b c)>d)', f: [canvasContainsAutoProps(['node', ':1', ':1,a', ':2', ':2,b', ':2,c', ':2,d', 'node,>,a,1', 'node,>,2,1', 'a,>,b,2', 'a,>,c,2', '2,>,d,1'])] }, // should be :1,d
+  { g: '(a,b,c)>node', f: [canvasContainsAutoProps([':1', ':1,a', ':1,b', ':1,c', ':1,node', '1,>,node'])] }, // wrong!
+  { g: '(a b c)>node', f: [canvasContainsAutoProps([':1', ':1,a', ':1,b', ':1,c', ':1,node', '1,>,node'])] }, // wrong!
+  { g: '(a>b>c)>node', f: [canvasContainsAutoProps([':1', ':1,a', ':1,b', ':1,c', ':1,node', 'a,>,b,1', 'b,>,c,1', '1,>,node'])] },
+  {
+    g: '(a>(b c)>d)>node',
+    f: [canvasContainsAutoProps([':1', ':1,a', ':2', ':2,b', ':2,c', ':2,d', ':1,node', 'a,>,b,2', 'a,>,c,2', '2,>,d,1', '1,>,node'])]
+  },
+  { g: 'dotted a;dotted', f: [canvasContainsAutoProps(['a,dotted,dotted'])] },
+  { g: 'dashed b;dashed', f: [canvasContainsAutoProps(['b,dashed,dashed'])] },
+  { g: 'solid c;solid', f: [canvasContainsAutoProps(['c,solid,solid'])] },
+  { g: 'bold d;bold', f: [canvasContainsAutoProps(['d,bold,bold'])] },
+  { g: 'rounded e;rounded', f: [canvasContainsAutoProps(['e,rounded,rounded'])] },
+  { g: 'diagonals f;diagonals', f: [canvasContainsAutoProps(['f,diagonals,diagonals'])] },
+  { g: 'invis g;invis', f: [canvasContainsAutoProps(['g,invis,invis'])] },
+  { g: 'm1>"m1 to \'m2\'"m2,"m1 to m3"m3', f: [canvasContainsAutoProps(['m1', 'm2', 'm3', "m1,>,m2,m1 to 'm2'", 'm1,>,m3,m1 to m3'])] },
+  { g: 'node>linkedtoanothernode', f: [canvasContainsAutoProps(['node', 'linkedtoanothernode', 'node,>,linkedtoanothernode'])] },
+  { g: 'dashed rect a #ff0000 ;dashed red rectangle', f: [canvasContainsAutoProps(['a,dashed,dashed red rectangle,#ff0000'])] },
+  { g: 'node>linkedtoanothernode;AndEdgeLabel', f: [canvasContainsAutoProps(['node', 'linkedtoanothernode', 'node,>,linkedtoanothernode,AndEdgeLabel'])] },
+  { g: 'node>"AndEdgeLabel"linkedtoanothernode', f: [canvasContainsAutoProps(['node', 'linkedtoanothernode', 'node,>,linkedtoanothernode,AndEdgeLabel'])] },
+  { g: 'node:n>linkedtoanothernode', f: [canvasContainsAutoProps(['node', 'linkedtoanothernode', 'node,:n,>,linkedtoanothernode'])] },
+  { g: 'node:se>linkedtoanothernode:ne', f: [canvasContainsAutoProps(['node', 'linkedtoanothernode', 'node,:se,>,linkedtoanothernode,:ne'])] },
+  { g: 'node>linked,to,multiple,nodes', f: [canvasContainsAutoProps(['node', 'linked', 'to', 'multiple', 'nodes', 'node,>,linked', 'node,>,to', 'node,>,multiple', 'node,>,nodes'])] },
+  { g: 'many,nodes,linked,to,a>node', f: [canvasContainsAutoProps(['many', 'nodes', 'linked', 'to', 'a', 'node', 'many,>,node', 'nodes,>,node', 'linked,>,node', 'to,>,node', 'a,>,node'])] },
+  { g: 'node>linked:n,to:e,multiple:s,nodes:e', f: [canvasContainsAutoProps(['node', 'linked', 'to', 'multiple', 'nodes', 'node,>,linked,:n', 'node,>,to,:e', 'node,>,multiple,:s', 'node,>,nodes,:e'])] },
+  { g: 'node>linkedtoanothernode:w', f: [canvasContainsAutoProps(['node', 'linkedtoanothernode', 'node,>,linkedtoanothernode,:w'])] },
+  {
+    g: `{;UnNamedGroupAndItsMandatoryLabel
+  }`,
+    f: [canvasContainsAutoProps([':1,UnNamedGroupAndItsMandatoryLabel'])]
+  },
+  {
+    g: `{NamedGroup;AndItsMandatoryLabel
+  }`,
+    f: [canvasContainsAutoProps([':NamedGroup,AndItsMandatoryLabel'])]
+  },
+  {
+    g: `{NamedGroupWithColor#ff00ff;AndItsMandatoryLabel
+  }`,
+    f: [canvasContainsAutoProps([':NamedGroupWithColor,AndItsMandatoryLabel,#ff00ff'])]
+  },
+  { g: 'visualizer ast_record', f: [canvasHas('visualizer', 'ast_record')] },
+  { g: 'generator ast', f: [canvasHas('generator', 'abba')] }, // TODO: hmm..think we need to pass request to use grammar defined generators
+  {
+    g: `cloud inet-router {
+      router web01 web02
+  }`,
+    f: [canvasContainsAutoProps(['inet', 'router', ':1', ':1,web01', ':1,web02', 'inet,-,router'])]
+  },
+  {
+    g: `cloud router;label
+  {;grp
+      router;different label
+      web01 web02
+  }`,
+    f: [canvasContainsAutoProps(['router,label', ':1,grp', ':1,web01', ':1,web02'])]
+  },
+  { g: 'User>"DoWork"(A>"createRequesr"B>"DoWork"C>"WorkDone"B>"RequestCreated"A)>"Done"User', f: [canvasContainsAutoProps(['User', ':1', ':1,A', ':1,B', ':1,C', 'User,>,A,DoWork,1', 'A,>,B,createRequesr,1', 'B,>,C,DoWork,1', 'C,>,B,WorkDone,1', 'B,>,A,RequestCreated,1', '1,>,User,Done'])] }
+]
 
 describe('Parser/grammar rule tests', () => {
   // linter failure, it's used in beforeAll error handler
@@ -54,6 +265,28 @@ describe('Parser/grammar rule tests', () => {
     const rgb = randomBetween(0, 16777215)
     return '#' + ('000000' + rgb.toString(16)).substr(-6)
   }
+
+  // describe.each(contentarray)("xxx")
+  // TODO: there was a generator pattern for JESTs, so could 'feed' tests in here...
+  it('Run all grammar tests', async () => {
+    grammarTests.forEach((t) => {
+      const c = new GraphCanvas()
+      diagrammerParser.yy.GRAPHCANVAS = c
+      // console.log(`Test (${t.g})`)
+      // @ts-ignore
+      diagrammerParser.parse(`${t.g}\n`)
+      if (t.f) {
+        Object.entries(t.f).forEach((i) => {
+          const [, assertion] = i
+          assertion(c)
+        })
+      } else {
+        // used while building...
+        dumpCanvas()(c)
+        throw new Error('Missing assertions')
+      }
+    })
+  })
 
   it('graphContent/VARIABLE/state 16', async () => {
     parseCode('$(variable:value) $(toinen:kolmas)')

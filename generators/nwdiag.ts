@@ -1,8 +1,10 @@
-import { generators } from '../model/graphcanvas.js'
+// @ts-check
+import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphReference } from '../model/graphreference.js'
 import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { output, getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
+import { GraphVertex } from '../model/graphvertex.js'
 
 // ADD TO INDEX.HTML AS: <option value="nwdiag">Network Diagram(cli)</option>
 
@@ -43,11 +45,11 @@ const NetworkDiagShapeMap =
 /**
  * http://blockdiag.com/en/nwdiag/
  * To test: node js/diagrammer.js tests/test_inputs/state13.txt nwdiag |nwdiag3 -Tpng -o a.png - && open a.png
- * @param {GraphCanvas} graphcanvas
  */
-export function nwdiag (graphcanvas) {
+export function nwdiag(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
 
   lout('nwdiag {', true)
@@ -71,16 +73,24 @@ export function nwdiag (graphcanvas) {
         if (secondLvlObj instanceof GraphReference) {
           // this is referred node
           lout(`${secondLvlObj.getName()};`)
-        } else if (secondLvlObj.shape && !NetworkDiagShapeMap[secondLvlObj.shape]) {
-          throw new Error('Missing shape mapping')
+          //return??
         }
-        const mappedShape = NetworkDiagShapeMap[secondLvlObj.shape] ? NetworkDiagShapeMap[secondLvlObj.shape] : NetworkDiagShapeMap.default
+
+        const mappedShape = (obj => {
+          if (obj instanceof GraphVertex) {
+            if (obj.shape && !NetworkDiagShapeMap[obj.shape]) {
+              throw new Error('Missing shape mapping')
+            }
+            const mappedShape = NetworkDiagShapeMap[obj.shape] ? NetworkDiagShapeMap[obj.shape] : NetworkDiagShapeMap.default
+            return [`shape=${mappedShape}`]
+          }
+        })(secondLvlObj);
 
         const tmp = multiAttrFmt(secondLvlObj, {
           color: 'color="{0}"',
           label: 'address="{0}"'
+        }, mappedShape)
 
-        }, [`shape="${mappedShape}"`])
         lout(`${secondLvlObj.getName()}${tmp};`)
       }, true)
 
@@ -96,16 +106,21 @@ export function nwdiag (graphcanvas) {
       })
       lout('}', false)
     } else {
-      if (obj.shape && !NetworkDiagShapeMap[obj.shape]) {
-        throw new Error('Missing shape mapping')
-      }
-      const mappedShape = NetworkDiagShapeMap[obj.shape] ? NetworkDiagShapeMap[obj.shape] : NetworkDiagShapeMap.default
+      const mappedShape = (obj => {
+        if (obj instanceof GraphVertex) {
+          if (obj.shape && !NetworkDiagShapeMap[obj.shape]) {
+            throw new Error('Missing shape mapping')
+          }
+          const mappedShape = NetworkDiagShapeMap[obj.shape] ? NetworkDiagShapeMap[obj.shape] : NetworkDiagShapeMap.default
+          return [`shape=${mappedShape}`]
+        }
+      })(obj);
       // ICON does not work, using background
       const tmp = multiAttrFmt(obj, {
         color: 'color="{0}"',
         image: 'background="icons{0}"',
         label: 'label="{0}"'
-      }, [`shape="${mappedShape}"`])
+      }, mappedShape)
       lout(`${obj.getName()}${tmp};`)
     }
   })

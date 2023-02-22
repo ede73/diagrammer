@@ -1,23 +1,23 @@
-import { generators } from '../model/graphcanvas.js'
+// @ts-check
+
+import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="ast">Abstract Syntax Tree</option>
 
 /**
  * TO test: node js/diagrammer.js verbose tests/test_inputs/ast.txt ast
- * @param {GraphCanvas} graphcanvas
 */
-export function ast (graphcanvas) {
-  // debug(graphcanvas)
-
+export function ast(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
   const o = (msg, indent = undefined) => {
     lout(msg, indent)
   }
 
-  const rvalue = (rvalue) => {
+  const rvalue = (rvalue: any) => {
     if (typeof (rvalue) === 'number' || typeof (rvalue) === 'boolean') {
       return `${rvalue}`
     } else if (typeof (rvalue) === 'string') {
@@ -26,7 +26,7 @@ export function ast (graphcanvas) {
     return rvalue === undefined ? 'null' : `"${rvalue}"`
   }
 
-  const dumpObject = (obj, level = 0) => {
+  const dumpObject = (obj: any, level = 0) => {
     if (level > 50) {
       return `"/* Stopping recursion, already ${level}s deep and going ${obj}*/"`
     }

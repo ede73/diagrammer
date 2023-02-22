@@ -1,5 +1,7 @@
+// @ts-check
+
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators } from '../model/graphcanvas.js'
+import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { output } from '../model/support.js'
@@ -8,18 +10,19 @@ import { output } from '../model/support.js'
 
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/layerbands.txt layerbands
- * @param {GraphCanvas} graphcanvas
 */
-export function layerbands (graphcanvas) {
+export function layerbands(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
+
   const groups = {
     key: '_BANDS',
     category: 'Bands',
     itemArray: []
   }
-  const linkedVertices = [
+  const linkedVertices: any[] = [
     groups
   ]
 

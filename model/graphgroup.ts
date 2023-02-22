@@ -7,6 +7,7 @@ import { GraphConnectable } from './graphconnectable.js'
  * Represents a container
  */
 export class GraphGroup extends GraphContainer {
+  isInnerGraph: boolean = false
   // === START Conditional construct support
   /**
    * Only with IF, first preceding vertex seen before "if"

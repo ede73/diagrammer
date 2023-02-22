@@ -1,7 +1,11 @@
-import { generators } from '../model/graphcanvas.js'
+// @ts-check
+
+import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { getAttributeAndFormat, output, multiAttrFmt } from '../model/support.js'
+import { GraphConnectable } from '../model/graphconnectable.js'
+import { GraphVertex } from '../model/graphvertex.js'
 
 // ADD TO INDEX.HTML AS: <option value="actdiag">Activity Diagram(cli)</option>
 
@@ -48,11 +52,11 @@ const ActDiagShapeMap =
  * Example1: actdiag { A->B->C->D; lane foo{label="notFoo" A;B;} lane bar {C[label="Not C"];D;}}
  *
  * http://blockdiag.com/en/blockdiag/
- * @param {GraphCanvas} graphcanvas
  */
-export function actdiag (graphcanvas) {
+export function actdiag(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
   lout('actdiag {', true)
   lout('default_fontsize = 14')
@@ -67,18 +71,24 @@ export function actdiag (graphcanvas) {
      * (r.getDirection()==="portrait"){ lout(" orientation=portrait");
      * }else{ //DEFAULT lout(" orientation=landscape"); }
      */
-  const parseObjects = (/** @type {function(GraphConnectable)} */obj) => {
+  const parseObjects = (obj: GraphConnectable) => {
     if (obj instanceof GraphGroup) {
       lout(`lane "${obj.getName()}"{`, true)
-      traverseVertices(obj, (obj) => {
-        if (obj.shape && !ActDiagShapeMap[obj.shape]) {
-          throw new Error('Missing shape mapping')
-        }
-        const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap.default
+      traverseVertices(obj, (obj: GraphConnectable) => {
+        const mappedShape = (obj => {
+          if (obj instanceof GraphVertex) {
+            if (obj.shape && !ActDiagShapeMap[obj.shape]) {
+              throw new Error('Missing shape mapping')
+            }
+            const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap.default
+            return [`shape=${mappedShape}`]
+          }
+        })(obj);
+
         const colorShapeLabel = multiAttrFmt(obj, {
           color: 'color="{0}"',
           label: 'label="{0}"'
-        }, [`shape=${mappedShape}`])
+        }, mappedShape)
         lout(`${obj.getName()} ${colorShapeLabel};`)
       })
       lout('}', false)
@@ -91,17 +101,22 @@ export function actdiag (graphcanvas) {
         style = ''
       }
 
-      if (obj.shape && !ActDiagShapeMap[obj.shape]) {
-        throw new Error('Missing shape mapping')
-      }
-      const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap.default
+      const mappedShape = (obj => {
+        if (obj instanceof GraphVertex) {
+          if (obj.shape && !ActDiagShapeMap[obj.shape]) {
+            throw new Error('Missing shape mapping')
+          }
+          const mappedShape = ActDiagShapeMap[obj.shape] ? ActDiagShapeMap[obj.shape] : ActDiagShapeMap.default
+          return [`shape=${mappedShape}`]
+        }
+      })(obj);
 
       // ICON does not work, using background
       const colorIconShapeLabel = multiAttrFmt(obj, {
         color: 'color="{0}"',
         image: 'background="icons{0}"',
         label: 'label="{0}"'
-      }, [`shape=${mappedShape}`])
+      }, mappedShape)
       lout(`${obj.getName()}${colorIconShapeLabel};`)
     }
   }

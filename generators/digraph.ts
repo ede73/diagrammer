@@ -1,4 +1,5 @@
-import { generators, visualizations } from '../model/graphcanvas.js'
+// @ts-check
+import { generators, GraphCanvas, visualizations } from '../model/graphcanvas.js'
 // used in typing
 // eslint-disable-next-line no-unused-vars
 import { GraphConnectable } from '../model/graphconnectable.js'
@@ -55,18 +56,18 @@ const DigraphShapeMap = {
 
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/state1.txt digraph
- *
- * @param {GraphCanvas} graphcanvas
  */
-export function digraph (graphcanvas) {
+export function digraph(graphcanvas: GraphCanvas) {
   // TODO: See splines control
   // http://www.graphviz.org/doc/info/attrs.html#d:splines
   // TODO: Start note fdp/neato
   // http://www.graphviz.org/doc/info/attrs.html#d:start
 
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
+
   /**
      *
      * @param {string} key
@@ -112,7 +113,7 @@ export function digraph (graphcanvas) {
         throw new Error('Missing shape mapping')
       }
       const mappedShape = DigraphShapeMap[obj.shape] ? DigraphShapeMap[obj.shape] : DigraphShapeMap.default
-      const r = 'shape="{0}"'.format(mappedShape)
+      const r = `shape="${mappedShape}"`
       nattrs.push(r)
     }
     getAttributeAndFormat(obj, 'label', 'label="{0}"', nattrs)
@@ -168,7 +169,7 @@ export function digraph (graphcanvas) {
   traverseVertices(graphcanvas, fixgroup)
 
   // pick node from group that is FIRST pointed by edges left hand side
-  function getFirstLHSReferredNodeFromGroup (/** @type {GraphContainer} */grp) {
+  function getFirstLHSReferredNodeFromGroup(/** @type {GraphContainer} */grp) {
     // TODO: equal to hasOutwardEdge in model.js (except canvas, not yy)
     return traverseEdges(graphcanvas, allEdges => {
       return traverseVertices(grp, objectInGroup => {
@@ -179,7 +180,7 @@ export function digraph (graphcanvas) {
     })
   }
 
-  function getLastLHSOrRHSReferredNodeInGroup (/** @type {GraphContainer} */grp) {
+  function getLastLHSOrRHSReferredNodeInGroup(/** @type {GraphContainer} */grp) {
     /** @type {(GraphConnectable|undefined)} */
     let nod
     traverseEdges(graphcanvas, allEdges => {
@@ -273,9 +274,9 @@ export function digraph (graphcanvas) {
     let label = edge.label
     if (label) {
       if (label.indexOf('::') !== -1) {
-        label = label.split('::')
-        attrs.push(`label="${label[0].trim()}"`)
-        attrs.push(`xlabel="${label[1].trim()}"`)
+        const labels = label.split('::')
+        attrs.push(`label="${labels[0].trim()}"`)
+        attrs.push(`xlabel="${labels[1].trim()}"`)
       } else {
         attrs.push(`label="${label.trim()}"`)
       }
@@ -287,8 +288,8 @@ export function digraph (graphcanvas) {
     getAttributeAndFormat(edge, 'color', 'color="{0}"', attrs)
     getAttributeAndFormat(edge, ['textcolor', 'color'], 'fontcolor="{0}"', attrs)
     let edgeType
-    let rhs = edge.right
-    let lhs = edge.left
+    let rhs: (GraphConnectable | GraphConnectable[]) = edge.right
+    let lhs: (GraphConnectable | GraphConnectable[]) = edge.left
 
     debug(`// link from ${lhs} to ${rhs}`)
     if (rhs instanceof GraphGroup) {
@@ -359,14 +360,16 @@ export function digraph (graphcanvas) {
     debug(`print rhs ${rhs}`)
     if (lhs instanceof Array) {
       lhs.forEach((element, index, array) => {
+        const rname = (Array.isArray(rhs) ? rhs[0].getName() : rhs.getName());
         lout(element.getName() +
-                    getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() +
-                    getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')
+          getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rname +
+          getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')
       })
     } else {
+      const rname = (Array.isArray(rhs) ? rhs[0].getName() : rhs.getName());
       lout(lhs.getName() +
-                getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rhs.getName() +
-                getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')
+        getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rname +
+        getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')
     }
   })
   lout('}', false)

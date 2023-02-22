@@ -1,4 +1,5 @@
-import { generators } from '../model/graphcanvas.js'
+// @ts-check
+import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges, traverseVertices } from '../model/traversal.js'
@@ -13,12 +14,13 @@ import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js
  * http://blockdiag.com/en/seqdiag/examples.html#diagram-attributes
  *
  * To test: node js/diagrammer.js tests/test_inputs/state13.txt seqdiag |seqdiag3 -Tpng -o a.png - && open a.png
- * @param {GraphCanvas} graphcanvas
  */
-export function seqdiag (graphcanvas) {
+export function seqdiag(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
+
 
   lout('seqdiag {', true)
   lout('autonumber = True;')
@@ -61,9 +63,9 @@ export function seqdiag (graphcanvas) {
     let label = edge.label
     if (label) {
       if (label.indexOf('::') !== -1) {
-        label = label.split('::')
-        attrs.push(`note="${label[1].trim()}"`)
-        attrs.push(`label="${label[0].trim()}"`)
+        const labels = label.split('::')
+        attrs.push(`note="${labels[1].trim()}"`)
+        attrs.push(`label="${labels[0].trim()}"`)
       } else {
         attrs.push(`label="${label.trim()}"`)
       }

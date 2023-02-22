@@ -1,37 +1,39 @@
+// @ts-check
+
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators } from '../model/graphcanvas.js'
+import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { debug, output } from '../model/support.js'
+import { GraphConnectable } from '../model/graphconnectable.js'
 
 // ADD TO INDEX.HTML AS: <option value="umlclass">UMLClass(GoJS)</option>
 
 // Basically [+-#] [name:] [String] [=defaultValue]
-export function umlclassParseMember (member) {
+export function umlclassParseMember(member: string) {
   const regex = /^(?<visibility>[+#-]|)(?<name>[^:]+(?=:)|)[:]{0,1}(?<type>[^=]+)[=]{0,1}(?<default>.+|)/
   return member.match(regex)
 }
 
 // Basically [+-#] [name] [(parameters)] [:[RETURNTYPE]]
-export function umlclassParseMethod (method) {
+export function umlclassParseMethod(method: string) {
   const regex = /^(?<visibility>[+#-]|)(?<name>[^(]+|)(?<parameters>[^)]+\)|)[:]{0,1}(?<return>.+|)/
   return method.match(regex)
 }
 
 /**
  * Test: node js/diagrammer.js tests/test_inputs/umlclass2.txt umlclass
- *
- * @param {GraphCanvas} graphcanvas
  */
-export function umlclass (graphcanvas) {
+export function umlclass(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
 
   const groups = []
   const edges = []
 
-  const nameAndLabel = ln => {
+  const nameAndLabel = (ln: GraphConnectable) => {
     // name;name():?? -> name():??
     // name;:?? -> name():??
     const label = (!ln.label) ? '' : ln.label
@@ -41,17 +43,21 @@ export function umlclass (graphcanvas) {
     return `${ln.name}${label}`
   }
 
-  const mangleName = name => {
+  const mangleName = (name: string) => {
     return name.replace(/_+$/, '').replace(/^_+/, '')
   }
 
-  const getProperties = vertices => {
+  const getProperties = (vertices: GraphConnectable[]) => {
     // instead of array of names...{name:???,type=???,visibility=???,default=??}
     // Example:
     // NAME;LABEL
     // name;[+-#][name:]String[=defaultValue]
     return [...vertices].filter(node => !nameAndLabel(node).includes(')')).map(p => {
       const ret = {
+        name: '',
+        visibility: '',
+        default: '',
+        type: ''
       }
       // By default, name=name
       ret.name = mangleName(p.name)
@@ -84,7 +90,7 @@ export function umlclass (graphcanvas) {
     })
   }
 
-  const getMethods = vertices => {
+  const getMethods = (vertices: GraphConnectable[]) => {
     // instead of array of names...{name:???,parameters:[{name:???,type:???}],visiblity:???}
     // +public,-private,#protected
     // Example:
@@ -94,6 +100,9 @@ export function umlclass (graphcanvas) {
     // name;[+-#][name(...):]RETURNTYPE
     return [...vertices].filter(node => nameAndLabel(node).includes('(')).map(m => {
       const ret = {
+        name: '',
+        visibility: '',
+        type: ''
       }
       ret.name = mangleName(m.name)
       if (m.label) {
@@ -130,28 +139,28 @@ export function umlclass (graphcanvas) {
 
   let id = 1
   const groupNameIdMap = new Map()
-  traverseVertices(graphcanvas, o => {
-    if (o instanceof GraphGroup) {
+  traverseVertices(graphcanvas, node => {
+    if (node instanceof GraphGroup) {
       const key = id++
-      groupNameIdMap.set(o.name, key)
+      groupNameIdMap.set(node.name, key)
       groups.push({
         key,
-        name: nameAndLabel(o),
-        properties: getProperties(o._getObjects()),
-        methods: getMethods(o._getObjects())
+        name: nameAndLabel(node),
+        properties: getProperties(node._getObjects()),
+        methods: getMethods(node._getObjects())
       })
     }
   })
-  debug(groupNameIdMap)
+  debug(`${groupNameIdMap}`)
 
-  traverseEdges(graphcanvas, l => {
+  traverseEdges(graphcanvas, edge => {
     let relationship = 'generalization'
-    if (l.edgeType !== '>') {
+    if (edge.edgeType !== '>') {
       relationship = 'aggregation'
     }
     edges.push({
-      from: groupNameIdMap.get(l.left.name),
-      to: groupNameIdMap.get(l.right.name),
+      from: groupNameIdMap.get(edge.left.name),
+      to: groupNameIdMap.get(edge.right.name),
       relationship
     })
   })

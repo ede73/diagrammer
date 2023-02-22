@@ -1,5 +1,8 @@
-import { generators } from '../model/graphcanvas.js'
+// @ts-check
+
+import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
+import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
 
@@ -84,11 +87,11 @@ const BlockDiagShapeMap = {
  *   fontsize=11
  *
  * To test: node js/diagrammer.js tests/test_inputs/events.txt blockdiag |blockdiag3 -Tpng -o a.png - && open a.png
- * @param {GraphCanvas} graphcanvas
  */
-export function blockdiag (graphcanvas) {
+export function blockdiag(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
   lout('blockdiag {', true)
   lout('default_fontsize = 14')
@@ -113,14 +116,20 @@ export function blockdiag (graphcanvas) {
         lastNode = `[${lastNode.trim().substring(1)}]`
       }
       traverseVertices(obj, obj => {
-        if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
-          throw new Error('Missing shape mapping')
-        }
-        const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : BlockDiagShapeMap.default
+        const mappedShape = (obj => {
+          if (obj instanceof GraphVertex) {
+            if (obj.shape && !BlockDiagShapeMap[obj.shape]) {
+              throw new Error('Missing shape mapping')
+            }
+            const mappedShape = BlockDiagShapeMap[obj.shape] ? BlockDiagShapeMap[obj.shape] : BlockDiagShapeMap.default
+            return [`shape=${mappedShape}`]
+          }
+        })(obj);
+
         const tmp = multiAttrFmt(obj, {
           color: 'color="{0}"',
           label: 'label="{0}"'
-        }, [`shape=${mappedShape}`])
+        }, mappedShape)
         lout(`${obj.getName()}${tmp};`)
       })
       lout('}', false)

@@ -1,11 +1,12 @@
-import { generators } from '../model/graphcanvas.js'
-// eslint-disable-next-line no-unused-vars
+// @ts-check
+import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { debug, getAttributeAndFormat, iterateEdges, output, outputFormattedText } from '../model/support.js'
 import { _getVertex } from '../model/model.js'
 import { traverseVertices } from '../model/traversal.js'
+import { GraphContainer } from '../model/graphcontainer.js'
 
 // ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
 
@@ -43,17 +44,14 @@ const PlantUMLShapeMap = {
   loopend: 'invhouse'
 }
 /**
- *
  * node js/diagrammer.js verbose tests/test_inputs/events.txt plantuml_sequence | java -Xmx2048m -jar ext/plantuml.jar -tpng -pipe > output.png && open output.png
- * @param {GraphCanvas} graphcanvas
 */
-// eslint-disable-next-line camelcase
-export function plantuml_sequence (graphcanvas) {
+export function plantuml_sequence(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
-
-  const processAVertex = function (obj, sbgraph) {
+  const processAVertex = function (obj: GraphConnectable, isSubGraph: boolean) {
     const nattrs = []
     const styles = []
 
@@ -73,20 +71,17 @@ export function plantuml_sequence (graphcanvas) {
     getAttributeAndFormat(obj, 'image', 'image="icons{0}"', nattrs)
     getAttributeAndFormat(obj, 'textcolor', 'fontcolor="{0}"', nattrs)
 
-    if (obj.shape && !PlantUMLShapeMap[obj.shape]) {
-      throw new Error('Missing shape mapping')
-    }
-    if (obj.shape) {
-      // TODO: Looks like syntax has been broken
-      // const shape = 'shape="{0}"'.format(PlantUMLShapeMap[obj.shape])
-      // nattrs.push(shape)
-    }
+    // if (obj.shape && !PlantUMLShapeMap[obj.shape]) {
+    //   throw new Error('Missing shape mapping')
+    // }
+    // if (obj.shape) {
+    //   // TODO: Looks like syntax has been broken
+    //   // const shape = 'shape="{0}"'.format(PlantUMLShapeMap[obj.shape])
+    //   // nattrs.push(shape)
+    // }
     let t = ''
     if (nattrs.length > 0) { t = `[${nattrs.sort().join(',')}]` }
-    lout('participant {0} {1} {2}'.format(
-      getAttributeAndFormat(obj, 'label', '"{0}" as'),
-      obj.getName(),
-      t))
+    lout(`participant ${getAttributeAndFormat(obj, 'label', '"{0}" as')} ${obj.getName()} ${t}`)
   }
 
   lout('@startuml')
@@ -106,10 +101,8 @@ export function plantuml_sequence (graphcanvas) {
      * for this container, break out immediately
      * this is to emulate ORDERED nodes of plantuml
      * (node=edge,node,edge.group...all in order for this fucker)
-     * @param {GraphConnectable} container
-     * @param {boolean} sbgraph
      */
-  const printEdges = (container, sbgraph) => {
+  const printEdges = (container: GraphContainer, isSubGraph: boolean) => {
     for (const edge of iterateEdges(graphcanvas)) {
       if (edge.printed) { continue }
       // if container given, print ONLY THOSE edges that match this
@@ -120,9 +113,9 @@ export function plantuml_sequence (graphcanvas) {
       let label = edge.label
       if (label) {
         if (label.indexOf('::') !== -1) {
-          label = label.split('::')
-          note = label[1].trim()
-          label = label[0].trim()
+          const labels = label.split('::')
+          note = labels[1].trim()
+          label = labels[0].trim()
         }
       }
       const color = getAttributeAndFormat(edge, 'color', '[{0}]').trim()
@@ -192,7 +185,7 @@ export function plantuml_sequence (graphcanvas) {
       if (label) { label = `:${label}` } else { label = '' }
       lout(lhs.getName() + lt + rhs.getName() + t + label)
       if (swap) { lout(rhs.getName() + lt + lhs.getName() + t + label) }
-      if (sbgraph) {
+      if (isSubGraph) {
         if (!rhs.active) {
           lout(`activate ${rhs.getName()}`, true)
           rhs.active = true
@@ -252,14 +245,14 @@ export function plantuml_sequence (graphcanvas) {
           //   '   color="{0}";\n'))
         }
         ltraverseVertices(maybeGroup, nodeIsSubGraph)
-        printEdges(maybeGroup)
+        printEdges(maybeGroup, nodeIsSubGraph)
       } else if (!(maybeGroup instanceof GraphVertex)) {
         throw new Error('Not a node nor a group, NOT SUPPORTED')
       }
     })
   }
   ltraverseVertices(graphcanvas, false)
-  printEdges(graphcanvas)
+  printEdges(graphcanvas, false)
   output(false)
   lout('@enduml')
 }

@@ -1,24 +1,25 @@
+// @ts-check
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators } from '../model/graphcanvas.js'
+import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { debug, output } from '../model/support.js'
+import { GraphConnectable } from '../model/graphconnectable.js'
 
 // ADD TO INDEX.HTML AS: <option value="parsetree">ParseTree(GoJS)</option>
 
 /**
  * Only one root supported!
  * To test: node js/diagrammer.js tests/test_inputs/parsetree.txt parsetree
- *
- * @param {GraphCanvas} graphcanvas
  */
-export function parsetree (graphcanvas) {
+export function parsetree(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
 
   const nodeList = []
-  function addEdgeedVertex (left, right) {
+  function addEdgeedVertex(left: GraphConnectable, right: GraphConnectable) {
     if (!(left instanceof GraphVertex)) return
     if (!(right instanceof GraphVertex)) return
     const key = right.id

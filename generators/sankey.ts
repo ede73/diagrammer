@@ -1,5 +1,5 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators } from '../model/graphcanvas.js'
+import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { output } from '../model/support.js'
 
@@ -7,18 +7,18 @@ import { output } from '../model/support.js'
 
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/sankey.txt sankey
- * @param {GraphCanvas} graphcanvas
  */
-export function sankey (graphcanvas) {
+export function sankey(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
 
   /**
    * @param {string} str
    * @returns {number}
    */
-  function getNumber (str) {
+  function getNumber(str) {
     const nums = str.trim().match('^[0-9]+')
     if (nums) {
       return Number(nums[0])

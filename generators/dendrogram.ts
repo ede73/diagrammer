@@ -1,7 +1,10 @@
+// @ts-check
+
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators, visualizations } from '../model/graphcanvas.js'
+import { generators, GraphCanvas, visualizations } from '../model/graphcanvas.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges } from '../model/traversal.js'
+import { GraphConnectable } from '../model/graphconnectable.js'
 import { debug, output } from '../model/support.js'
 import { findVertex, traverseTree, TreeVertex } from '../model/tree.js'
 
@@ -11,18 +14,14 @@ import { findVertex, traverseTree, TreeVertex } from '../model/tree.js'
 
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/dendrogram.txt dendrogram
- * @param {GraphCanvas} graphcanvas
 */
-export function dendrogram (graphcanvas) {
+export function dendrogram(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
-  let tree
-  /**
-   * @param {GraphConnectable} lhs
-   * @param {GraphConnectable} rhs
-   */
-  function addVertex (lhs, rhs) {
+  let tree: TreeVertex
+  function addVertex(lhs: GraphConnectable, rhs: GraphConnectable) {
     if (!tree) {
       tree = new TreeVertex(lhs)
     }
@@ -32,7 +31,7 @@ export function dendrogram (graphcanvas) {
       throw new Error(`Left node (${lhs.name}) not found from tree`)
     }
     if (!findVertex(tree, rhs) && (rhs instanceof GraphVertex)) {
-      debug(`Add ${rhs.name} as child of ${cl.data.name} co ${rhs.container}`)
+      debug(`Add ${rhs.name} as child of ${cl.data.name}`)
       cl.CHILDREN.push(new TreeVertex(rhs))
     }
   }

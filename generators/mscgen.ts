@@ -1,4 +1,6 @@
-import { generators } from '../model/graphcanvas.js'
+// @ts-check
+
+import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { traverseEdges, traverseVertices } from '../model/traversal.js'
@@ -8,11 +10,11 @@ import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js
 
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/state_sequence.txt mscgen
- * @param {GraphCanvas} graphcanvas
  */
-export function mscgen (graphcanvas) {
+export function mscgen(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
 
   lout('msc {', true)
@@ -82,9 +84,9 @@ export function mscgen (graphcanvas) {
     }
     if (label) {
       if (label.indexOf('::') !== -1) {
-        label = label.split('::')
-        note = label[1].trim()
-        attrs.push(`label="${label[0].trim()}"`)
+        const labels = label.split('::')
+        note = labels[1].trim()
+        attrs.push(`label="${labels[0].trim()}"`)
       } else {
         attrs.push(`label="${label.trim()}"`)
       }

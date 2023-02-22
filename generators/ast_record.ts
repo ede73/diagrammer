@@ -1,20 +1,14 @@
-// typings
-// eslint-disable-next-line no-unused-vars
+// @ts-check
+
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphEdge } from '../model/graphedge.js'
-// typings
-// eslint-disable-next-line no-unused-vars
-import { GraphConnectable } from '../model/graphconnectable.js'
-// eslint-disable-next-line no-unused-vars
-import { GraphVertex } from '../model/graphvertex.js'
-// eslint-disable-next-line no-unused-vars
-import { GraphGroup } from '../model/graphgroup.js'
-// eslint-disable-next-line no-unused-vars
 import { GraphInner } from '../model/graphinner.js'
 import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { output } from '../model/support.js'
 import { GraphReference } from '../model/graphreference.js'
+import { GraphObject } from 'model/graphobject.js'
+
 // ADD TO INDEX.HTML AS: <option value="ast_record">Abstract Syntax Tree(Record)</option>
 
 /*
@@ -49,15 +43,14 @@ A-C-B-E
  * SHAPE record
  * d; { <f0> GraphCanvas | {x|q} |{x|q} }
  * TO test: node js/diagrammer.js verbose tests/test_inputs/state5.txt ast_record
- * @param {GraphCanvas} graphcanvas
 */
-// eslint-disable-next-line camelcase
-export function ast_record (graphcanvas) {
+export function ast_record(graphcanvas: GraphCanvas) {
   const lout = (...args) => {
-    output(graphcanvas, ...args)
+    const [textOrIndent, maybeIndent] = args
+    output(graphcanvas, textOrIndent, maybeIndent)
   }
 
-  const collectProperties = (obj) => {
+  const collectProperties = (obj: GraphObject) => {
     const params = {}
     const excludeSomeFields = ['ALLOWED_DEFAULTS', 'CURRENTCONTAINER', '_nextConnectableToExitEndIf', 'lastSeenVertex']
     const collectJustNames = ['_OBJECTS', '_ROOTVERTICES', '_EDGES', 'equal']
@@ -66,7 +59,7 @@ export function ast_record (graphcanvas) {
     Object.entries(obj).forEach(([k, v], idx) => {
       if (excludeSomeFields.includes(k) || v === undefined || v === null || typeof (v) === 'function') return
 
-      function getName (obj) {
+      function getName(obj: GraphObject) {
         if (obj instanceof GraphInner) {
           return 'GraphInner'
         }
@@ -77,7 +70,7 @@ export function ast_record (graphcanvas) {
       }
 
       if (collectJustNames.includes(k)) {
-        const names = Object.values(v).map(l => `${getName(l)}`).join(', ')
+        const names = Object.values(v).map((l: GraphObject) => `${getName(l)}`).join(', ')
         // if list is longer than 64, try to break it at commas, but so that one block is atleast 32 chars long not exceeding 64
         // if not possible, then just break
         // also do not loose anything!
@@ -98,7 +91,7 @@ export function ast_record (graphcanvas) {
     return params
   }
 
-  function makeRecord (params) {
+  function makeRecord(params: { [key: string]: string }) {
     return Object.entries(params).map(([k, v], idx) => `{${k}|${v.replace(/"/g, "'")}}`).join('|')
   }
 
@@ -111,8 +104,8 @@ export function ast_record (graphcanvas) {
   const label = `{ GraphCanvas | ${makeRecord(collectProperties(graphcanvas))} }`
   lout(`GraphCanvas[shape=record, color=yellow, fillcolor=yellow, label="${label}"];`)
 
-  traverseVertices(graphcanvas, function c (n) {
-    function getName (obj) {
+  traverseVertices(graphcanvas, function c(n) {
+    function getName(obj) {
       if (obj instanceof GraphReference) {
         return `inner_${obj.getName()}`
       }

@@ -62,7 +62,7 @@ export function _getList(graphCanvas: GraphCanvas,
     debug(`_getList(vertex:${lhs},rhs:[${rhs}])`, true)
     const lst: (GraphConnectable | GraphConnectable[]) = []
     lst.push(lhs)
-    const rhsFound = _getVertex(graphCanvas, rhs as GraphVertex)
+    const rhsFound = _getVertexOrGroup(graphCanvas, rhs as GraphVertex)
     if (rhsEdgeLabel && (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex)) {
       rhsFound._setEdgeLabel(rhsEdgeLabel)
     }
@@ -89,7 +89,7 @@ export function _getList(graphCanvas: GraphCanvas,
   }
   debug(`_getList(lhs:[${lhs}],rhs:${rhs}`, true)
   // LHS not a vertex..
-  const rhsFound = _getVertex(graphCanvas, rhs as GraphVertex)
+  const rhsFound = _getVertexOrGroup(graphCanvas, rhs as GraphVertex)
   if (rhsEdgeLabel && (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex)) {
     rhsFound._setEdgeLabel(rhsEdgeLabel)
   }
@@ -115,8 +115,8 @@ export function _getList(graphCanvas: GraphCanvas,
  * @param objOrName Reference, Vertex/(never observed Array)/Group
  * @param  [style] OPTIONAL if style given, update (only if name refers to vertex)
  */
-export function _getVertex(graphCanvas: GraphCanvas, objOrName: (string | GraphVertex), style?: string): GraphConnectable {
-  debug(`_getVertex (name:${objOrName}, style:${style})`, true)
+export function _getVertexOrGroup(graphCanvas: GraphCanvas, objOrName: (string | GraphVertex), style?: string): GraphConnectable {
+  debug(`_getVertexOrGroup (name:${objOrName}, style:${style})`, true)
 
   function findVertexCreateIfMissing(graphCanvas: GraphCanvas, vertexOrName: (string | GraphConnectable), style?: string) {
     if (vertexOrName instanceof GraphVertex) {
@@ -151,7 +151,7 @@ export function _getVertex(graphCanvas: GraphCanvas, objOrName: (string | GraphV
       // TODO: Fix this, without breaking all other generators, introduce Reference wrapper (GraphReference(GraphVertex))
       // This allows filtering it out in all traversal code, but allows nwdiag see the REFERENCE
       const ret = _maybePushToCurrentContainerAsReference(graphCanvas, rhsConnectable)
-      debug(`_getVertex return ${rhsConnectable.getName()}/${rhsConnectable.constructor.name} vs ${ret.getName()}${ret.constructor.name}`, false)
+      debug(`_getVertexOrGroup return ${rhsConnectable.getName()}/${rhsConnectable.constructor.name} vs ${ret.getName()}${ret.constructor.name}`, false)
       return ret // foundConnectable
     }
     debug(`Create new vertex name=${rhsObjectName}`, true)

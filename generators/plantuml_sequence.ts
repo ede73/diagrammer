@@ -4,7 +4,7 @@ import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { debug, getAttributeAndFormat, iterateEdges, output, outputFormattedText } from '../model/support.js'
-import { _getVertex } from '../model/model.js'
+import { _getVertexOrGroup } from '../model/model.js'
 import { GraphContainer } from '../model/graphcontainer.js'
 
 // ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
@@ -92,7 +92,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
   // This may FORWARD DECLARE a node...which creates problems with coloring
   const s = graphcanvas.getStart()
   if (s) {
-    const fwd = _getVertex(graphcanvas, s)
+    const fwd = _getVertexOrGroup(graphcanvas, s)
     processAVertex(fwd, false)
   }
   /**

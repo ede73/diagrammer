@@ -2,7 +2,6 @@
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="seqdiag">Sequence Diagram(cli)</option>
@@ -29,10 +28,10 @@ export function seqdiag(graphcanvas: GraphCanvas) {
   lout('activation = none;')
 
   // print out all node declarations FIRST (if any)
-  traverseVertices(graphcanvas, obj => {
+  graphcanvas.getObjects().forEach(obj => {
     if (obj instanceof GraphGroup) {
       lout('/*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}*/'))
-      traverseVertices(obj, secondLvlObj => {
+      obj.getObjects().forEach(secondLvlObj => {
         // no color support either..
         const styleAndLabel = multiAttrFmt(secondLvlObj, {
           style: 'style={0}',
@@ -50,7 +49,7 @@ export function seqdiag(graphcanvas: GraphCanvas) {
     }
   })
 
-  traverseEdges(graphcanvas, edge => {
+  graphcanvas.getEdges().forEach(edge => {
     const attrs = []
     let edgeType = ''
     let rhs = edge.right
@@ -75,7 +74,7 @@ export function seqdiag(graphcanvas: GraphCanvas) {
       // TODO: Assuming it is Vertex (if Recursive groups implemented, it
       // could be smthg else)
       edgeType += ` lhead=cluster_${rhs.getName()}`
-      if (rhs.isEmpty()) {
+      if (rhs.getObjects()) {
         // TODO:Bad thing, EMPTY group..add one invisible node there...
         // But should add already at TOP
       } else {

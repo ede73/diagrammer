@@ -45,16 +45,16 @@ export class GraphContainer extends GraphConnectable {
   /**
    *  If true, allow all GraphReferences also, else skip all GraphReferences
    */
-  _getObjects(allowReferences: boolean = false) {
+  getObjects(allowReferences: boolean = false) {
     return this._OBJECTS.filter(p => allowReferences || !(p instanceof GraphReference)) // OK
   }
 
   isEmpty(allowReferences: boolean = false) {
-    return this._getObjects(allowReferences).length === 0
+    return this.getObjects(allowReferences).length === 0
   }
 
   getFirstObject(allowReferences: boolean = false) {
-    return this._getObjects(allowReferences)[0]
+    return this.getObjects(allowReferences)[0]
   }
 
   /**

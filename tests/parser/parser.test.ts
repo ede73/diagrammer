@@ -8,17 +8,16 @@ import { GraphContainer } from '../../model/graphcontainer.js'
 import { GraphGroup } from '../../model/graphgroup.js'
 import { GraphInner } from '../../model/graphinner.js'
 import { GraphVertex } from '../../model/graphvertex.js'
-import { traverseEdges, traverseVertices } from '../../model/traversal.js'
 
 // curried, canvas passed on call site
 const canvasHas = (prop: string, value: any) => {
   return (canvas: GraphCanvas) => {
     try {
-      expect(canvas[prop]).toStrictEqual(value)
+      expect(canvas[prop as keyof GraphCanvas]).toStrictEqual(value)
     } catch (ex) {
       console.log(canvas)
     }
-    expect(canvas[prop]).toStrictEqual(value)
+    expect(canvas[prop as keyof GraphCanvas]).toStrictEqual(value)
   }
 }
 
@@ -26,7 +25,7 @@ const canvasHas = (prop: string, value: any) => {
 const canvasContains = (callback: (vertex: GraphConnectable) => any, match: string[]) => {
   return (canvas: GraphCanvas) => {
     const res: string[] = []
-    traverseVertices(canvas, vertex => {
+    canvas.getObjects().forEach(vertex => {
       res.push(callback(vertex))
     })
     try {
@@ -57,7 +56,7 @@ const canvasContainsAutoProps = (match: string[]) => {
       throw new Error('Unexpected container')
     }
     let container: GraphContainer = canvas
-    traverseVertices(canvas, function c(connectable) {
+    canvas.getObjects().forEach(function c(connectable) {
       if (connectable instanceof GraphContainer) {
         container = connectable
         const containerProps: string[] = []
@@ -67,7 +66,7 @@ const canvasContainsAutoProps = (match: string[]) => {
         collectIfDefined(containerProps, container.getColor())
         collectIfDefined(containerProps, container.getTextColor())
         res.push(containerProps.join(','))
-        traverseVertices(connectable, c)
+        connectable.getObjects().forEach(o => c(o))
         container = connectable
       } else {
         const vertexProps: string[] = []
@@ -88,7 +87,7 @@ const canvasContainsAutoProps = (match: string[]) => {
       }
     }, false) // TODO: also innards
 
-    traverseEdges(canvas, edge => {
+    canvas.getEdges().forEach(edge => {
       const edgeProps: string[] = []
       collectIfDefined(edgeProps, edge.left.getName())
       collectIfDefined(edgeProps, edge.lcompass)
@@ -215,7 +214,10 @@ const grammarTests = [
   }`,
     f: [canvasContainsAutoProps(['router,label', ':1,grp', ':1,web01', ':1,web02'])]
   },
-  { g: 'User>"DoWork"(A>"createRequesr"B>"DoWork"C>"WorkDone"B>"RequestCreated"A)>"Done"User', f: [canvasContainsAutoProps(['User', ':1', ':1,A', ':1,B', ':1,C', 'User,>,A,DoWork,1', 'A,>,B,createRequesr,1', 'B,>,C,DoWork,1', 'C,>,B,WorkDone,1', 'B,>,A,RequestCreated,1', '1,>,User,Done'])] }
+  {
+    g: 'User>"DoWork"(A>"createRequesr"B>"DoWork"C>"WorkDone"B>"RequestCreated"A)>"Done"User',
+    f: [canvasContainsAutoProps(['User', ':1', ':1,A', ':1,B', ':1,C', 'User,>,A,DoWork,1', 'A,>,B,createRequesr,1', 'B,>,C,DoWork,1', 'C,>,B,WorkDone,1', 'B,>,A,RequestCreated,1', '1,>,User,Done'])]
+  }
 ]
 
 describe('Parser/grammar rule tests', () => {
@@ -372,15 +374,15 @@ endif
 exit;exit node is also required
         `)
     // console.log(graphcanvas)
-    expect(graphcanvas._getObjects().length).toBe(5)
+    expect(graphcanvas.getObjects().length).toBe(5)
     expect(graphcanvas._ROOTVERTICES.length).toBe(5)
     // in this case only all the objects and root vertices do match
-    expect(graphcanvas._getObjects()).toMatchObject(graphcanvas._ROOTVERTICES)
+    expect(graphcanvas.getObjects()).toMatchObject(graphcanvas._ROOTVERTICES)
 
     const conditionalGroups = new Set(['1', '2', '3'])
     const verticeNames = new Set(['entry', 'exit'])
 
-    graphcanvas._getObjects().forEach(obj => {
+    graphcanvas.getObjects().forEach(obj => {
       const objectName: string = obj.getName() as string
       if (obj instanceof GraphGroup) {
         // TODO: grammar is buggy, there should be single vertex in, or none for no-vertices conditional
@@ -433,7 +435,7 @@ exit;exit node is also required
     const connectable = graphcanvas.getFirstObject()
     expect(connectable).toBeInstanceOf(GraphGroup)
     const group = connectable as GraphGroup
-    expect(graphcanvas._getObjects().length).toBe(1)
+    expect(graphcanvas.getObjects().length).toBe(1)
     expect(group.getName()).toBe('name')
     expect(group.getColor()).toBe(color)
     expect(group.isEmpty()).toBeTruthy()
@@ -445,7 +447,7 @@ exit;exit node is also required
     const connectable = graphcanvas.getFirstObject()
     expect(connectable).toBeInstanceOf(GraphGroup)
     const group = connectable as GraphGroup
-    expect(graphcanvas._getObjects().length).toBe(1)
+    expect(graphcanvas.getObjects().length).toBe(1)
     expect(group.getName()).toBe('name')
     expect(group.getColor()).toBe(color)
     expect(group.isEmpty()).toBeTruthy()
@@ -464,13 +466,13 @@ exit;exit node is also required
     // 3 edges, between a (at NW corner) q,w,e to (at SE corner) edge text is edgelabel
     // readEvents COMPASS? EVENT COMPASS? colorOrVariable? INLINE_STRING? vertexGroupListOrAttrs LABEL? -> getEdge(yy,$EVENT,$readEvents,$vertexGroupListOrAttrs,$6,$8?$8.substring(1):$8,$5,$2,$4).right
     parseCode(`a:nw ->:se ${color} "edgelabel" q,w,e;label\n`)
-    expect(graphcanvas._getObjects().length).toBe(4)
+    expect(graphcanvas.getObjects().length).toBe(4)
     expect(graphcanvas._ROOTVERTICES.length).toBe(1)
     expect(graphcanvas._EDGES.length).toBe(3)
 
     // verify all objects accounted for
     const vertices = new Set(['a', 'q', 'w', 'e'])
-    graphcanvas._getObjects().forEach(vertex => {
+    graphcanvas.getObjects().forEach(vertex => {
       vertices.delete(vertex.getName() as string)
     })
     expect(vertices.size).toBe(0)

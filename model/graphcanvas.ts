@@ -193,4 +193,8 @@ export class GraphCanvas extends GraphContainer {
     // While this works, it does edit the graph, which is bad..
     return currentContainer
   }
+
+  getEdges() {
+    return this._EDGES
+  }
 };

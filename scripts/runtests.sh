@@ -7,7 +7,7 @@ fi
 . ./scripts/display_image.sh
 
 #parallelism for 8 cores
-PARALLEL=${2:-1}
+PARALLEL=${2:-12}
 VERBOSE=1
 
 rm -f .error

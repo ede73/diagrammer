@@ -5,7 +5,6 @@ import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { debug, getAttributeAndFormat, iterateEdges, output, outputFormattedText } from '../model/support.js'
 import { _getVertex } from '../model/model.js'
-import { traverseVertices } from '../model/traversal.js'
 import { GraphContainer } from '../model/graphcontainer.js'
 
 // ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
@@ -211,12 +210,12 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
 
   const ltraverseVertices = (root: GraphContainer, isInnerGraph: boolean) => {
     // Dump this groups participants first...
-    traverseVertices(root, maybeVertex => {
+    root.getObjects().forEach(maybeVertex => {
       if (maybeVertex instanceof GraphVertex) { processAVertex(maybeVertex, isInnerGraph) }
     })
     printEdges(root, isInnerGraph)
 
-    traverseVertices(root, maybeGroup => {
+    root.getObjects().forEach(maybeGroup => {
       // TODO:
       if (maybeGroup instanceof GraphGroup) {
         // Group name,OBJECTS,get/setEqual,toString

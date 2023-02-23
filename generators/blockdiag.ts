@@ -3,7 +3,6 @@
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
 
@@ -113,7 +112,7 @@ export function blockdiag(graphcanvas: GraphCanvas) {
       if (lastNode && lastNode.trim() !== '') {
         lastNode = `[${lastNode.trim().substring(1)}]`
       }
-      traverseVertices(obj, obj => {
+      obj.getObjects().forEach(obj => {
         const mappedShape = (obj => {
           if (obj instanceof GraphVertex) {
             const currentShape = obj.shape as keyof typeof BlockDiagShapeMap
@@ -156,9 +155,9 @@ export function blockdiag(graphcanvas: GraphCanvas) {
     }
   }
 
-  traverseVertices(graphcanvas, parseObjects)
+  graphcanvas.getObjects().forEach(o => parseObjects(o))
 
-  traverseEdges(graphcanvas, edge => {
+  graphcanvas.getEdges().forEach(edge => {
     let s = ''
     if (edge.isDotted()) {
       s = 'style="dotted"'

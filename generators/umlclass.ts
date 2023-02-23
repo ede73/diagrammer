@@ -3,7 +3,6 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
-import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { debug, output } from '../model/support.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
 
@@ -164,21 +163,21 @@ export function umlclass(graphcanvas: GraphCanvas) {
 
   let id = 1
   const groupNameIdMap = new Map()
-  traverseVertices(graphcanvas, node => {
+  graphcanvas.getObjects().forEach(node => {
     if (node instanceof GraphGroup) {
       const key = id++
       groupNameIdMap.set(node.name, key)
       groups.push({
         key,
         name: nameAndLabel(node),
-        properties: getProperties(node._getObjects()),
-        methods: getMethods(node._getObjects())
+        properties: getProperties(node.getObjects()),
+        methods: getMethods(node.getObjects())
       })
     }
   })
   debug(`${groupNameIdMap}`)
 
-  traverseEdges(graphcanvas, edge => {
+  graphcanvas.getEdges().forEach(edge => {
     let relationship = 'generalization'
     if (edge.edgeType !== '>') {
       relationship = 'aggregation'

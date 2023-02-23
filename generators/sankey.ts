@@ -1,7 +1,6 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphEdge } from '../model/graphedge.js'
-import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { output } from '../model/support.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
 
@@ -50,7 +49,7 @@ export function sankey(graphcanvas: GraphCanvas) {
    */
   function returnEdgesLeadingTo(thisNode: GraphConnectable) {
     const edgesLeadingToGivenNode: GraphEdge[] = []
-    traverseEdges(graphcanvas, e => {
+    graphcanvas.getEdges().forEach(e => {
       if ((e.isRightPointingEdge() && e.right === thisNode)
         || (e.isLeftPointingEdge() && e.left === thisNode)) {
         edgesLeadingToGivenNode.push(e)
@@ -120,7 +119,7 @@ export function sankey(graphcanvas: GraphCanvas) {
   lout('"nodes":[', true)
   const vertexIndexes = new Map()
   let index = 0
-  traverseVertices(graphcanvas, vertex => {
+  graphcanvas.getObjects().forEach(vertex => {
     const name = vertex.getName()
     const label = vertex.getLabel()
     vertexIndexes.set(name, index++)
@@ -136,7 +135,7 @@ export function sankey(graphcanvas: GraphCanvas) {
    * For a dendrogram we're not interested in vertices
    * just edges(for now!)
    */
-  traverseEdges(graphcanvas, edge => {
+  graphcanvas.getEdges().forEach(edge => {
     const amount = getEdgeValue(edge)
     const left = vertexIndexes.get(edge.left.name)
     const right = vertexIndexes.get(edge.right.name)

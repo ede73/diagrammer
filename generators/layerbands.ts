@@ -3,7 +3,6 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
-import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="layerbands">LayerBands(GoJS)</option>
@@ -26,13 +25,13 @@ export function layerbands(graphcanvas: GraphCanvas) {
     groups
   ]
 
-  traverseVertices(graphcanvas, obj => {
+  graphcanvas.getObjects().forEach(obj => {
     if (obj instanceof GraphGroup) {
       groups.itemArray.push({ text: obj.name ?? '' })
     }
   })
 
-  traverseEdges(graphcanvas, edge => {
+  graphcanvas.getEdges().forEach(edge => {
     if (!edge.left) {
       // probably our root
       // linkedVertexs.push({key: l.right.name});

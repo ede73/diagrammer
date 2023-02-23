@@ -2,7 +2,6 @@
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphReference } from '../model/graphreference.js'
-import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { output, getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
 import { GraphVertex } from '../model/graphvertex.js'
 
@@ -55,13 +54,13 @@ export function nwdiag(graphcanvas: GraphCanvas) {
   lout('nwdiag {', true)
   lout('default_fontsize = 16')
 
-  traverseEdges(graphcanvas, edge => {
+  graphcanvas.getEdges().forEach(edge => {
     if (!(edge.left instanceof GraphGroup || edge.right instanceof GraphGroup)) {
       lout(`${edge.left.getName()} -- ${edge.right.getName()};`)
     }
   })
 
-  traverseVertices(graphcanvas, obj => {
+  graphcanvas.getObjects().forEach(obj => {
     if (obj instanceof GraphGroup) {
       // split the label to two, NAME and address
       lout(`network ${obj.getName()} {`, true)
@@ -69,7 +68,7 @@ export function nwdiag(graphcanvas: GraphCanvas) {
         lout(`address="${obj.getLabel()}"`)
       }
       // TODO: bad, flatmatting the graph
-      traverseVertices(obj, secondLvlObj => {
+      obj.getObjects(true).forEach(secondLvlObj => {
         if (secondLvlObj instanceof GraphReference) {
           // this is referred node
           lout(`${secondLvlObj.getName()};`)
@@ -96,7 +95,7 @@ export function nwdiag(graphcanvas: GraphCanvas) {
       }, true)
 
       // find if there are ANY edges that have this GROUP as participant!
-      traverseEdges(graphcanvas, edge => {
+      graphcanvas.getEdges().forEach(edge => {
         const tmp = getAttributeAndFormat(edge, 'label', '[ address="{0}" ]')
         if (edge.left === obj) {
           lout(`${edge.right.getName()}${tmp};`)

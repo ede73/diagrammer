@@ -7,9 +7,8 @@ import { GraphInner } from '../model/graphinner.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { debug, getAttribute } from '../model/support.js'
 import { GraphConnectable } from './graphconnectable.js'
-import { GraphObject } from './graphobject.js'
 import { GraphReference } from './graphreference.js'
-import { hasOutwardEdge, traverseVertices } from './traversal.js'
+import { hasOutwardEdge } from './traversal.js'
 
 /**
  *
@@ -63,7 +62,7 @@ export function _getList(graphCanvas: GraphCanvas,
     debug(`_getList(vertex:${lhs},rhs:[${rhs}])`, true)
     const lst: (GraphConnectable | GraphConnectable[]) = []
     lst.push(lhs)
-    const rhsFound = _getVertex(graphCanvas, rhs)
+    const rhsFound = _getVertex(graphCanvas, rhs as GraphVertex)
     if (rhsEdgeLabel && (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex)) {
       rhsFound._setEdgeLabel(rhsEdgeLabel)
     }
@@ -90,7 +89,7 @@ export function _getList(graphCanvas: GraphCanvas,
   }
   debug(`_getList(lhs:[${lhs}],rhs:${rhs}`, true)
   // LHS not a vertex..
-  const rhsFound = _getVertex(graphCanvas, rhs)
+  const rhsFound = _getVertex(graphCanvas, rhs as GraphVertex)
   if (rhsEdgeLabel && (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex)) {
     rhsFound._setEdgeLabel(rhsEdgeLabel)
   }
@@ -116,30 +115,34 @@ export function _getList(graphCanvas: GraphCanvas,
  * @param objOrName Reference, Vertex/(never observed Array)/Group
  * @param  [style] OPTIONAL if style given, update (only if name refers to vertex)
  */
-export function _getVertex(graphCanvas: GraphCanvas, objOrName: (string | GraphConnectable), style?: string): GraphConnectable {
+export function _getVertex(graphCanvas: GraphCanvas, objOrName: (string | GraphVertex), style?: string): GraphConnectable {
   debug(`_getVertex (name:${objOrName}, style:${style})`, true)
 
-  function findVertex(graphCanvas: GraphCanvas, obj: (string | GraphConnectable), style?: string) {
-    if (obj instanceof GraphVertex) {
-      if (style) obj.setStyle(style)
-      return obj
+  function findVertexCreateIfMissing(graphCanvas: GraphCanvas, vertexOrName: (string | GraphConnectable), style?: string) {
+    if (vertexOrName instanceof GraphVertex) {
+      if (style) vertexOrName.setStyle(style)
+      return vertexOrName
     }
+    const rhsObjectName = vertexOrName as string
 
-    const foundConnectable = (function s(container: GraphContainer, name: (string | GraphConnectable)): GraphConnectable | undefined {
-      if (container.getName() === name) return container
-      return traverseVertices<GraphConnectable>(container, o => {
-        if (o instanceof GraphVertex && o.getName() === name) {
-          if (style) o.setStyle(style)
-          return o
-        }
-        if (o instanceof GraphGroup) {
-          const found = s(o, name)
+    const rhsConnectable = (function locateVertex(container: GraphContainer): GraphVertex | GraphGroup | undefined {
+      if (container instanceof GraphGroup && container.getName() == rhsObjectName) {
+        return container
+      }
+      for (const node of container.getObjects()) {
+        if (node instanceof GraphVertex && node.getName() === rhsObjectName) {
+          return node
+        } else if (node instanceof GraphGroup) {
+          const found = locateVertex(node)
           if (found) return found
         }
-      }).returned
-    }(graphCanvas, obj))
+      }
+    }(graphCanvas))
 
-    if (foundConnectable) {
+    if (rhsConnectable) {
+      if (rhsConnectable instanceof GraphVertex && style) {
+        rhsConnectable.setStyle(style)
+      }
       // if vertex was found, return it, ELSE it will be added to current container
       // While this works perfectly for pretty much ALL graph/visualizing engines (ie. vertex is instantiated/declared where it is seen)
       // Some engines (nwdiag) DO want to see the vertex in the group as well
@@ -147,16 +150,12 @@ export function _getVertex(graphCanvas: GraphCanvas, objOrName: (string | GraphC
       // And to be precise this is violation of the language as well! We DO have the vertex IN the group, even if it was declared at the top
       // TODO: Fix this, without breaking all other generators, introduce Reference wrapper (GraphReference(GraphVertex))
       // This allows filtering it out in all traversal code, but allows nwdiag see the REFERENCE
-      const ret = _pushToCurrentContainerAsReference(graphCanvas, foundConnectable)
-      debug(`_getVertex return ${foundConnectable.getName()}/${foundConnectable.constructor.name} vs ${ret.getName()}${ret.constructor.name}`, false)
+      const ret = _maybePushToCurrentContainerAsReference(graphCanvas, rhsConnectable)
+      debug(`_getVertex return ${rhsConnectable.getName()}/${rhsConnectable.constructor.name} vs ${ret.getName()}${ret.constructor.name}`, false)
       return ret // foundConnectable
     }
-    // if obj was GraphConnectable?
-    if (obj instanceof GraphConnectable) {
-      throw new Error('Expecting GraphConnectable')
-    }
-    debug(`Create new vertex name=${obj}`, true)
-    const vertex = new GraphVertex(obj, graphCanvas.getCurrentShape())
+    debug(`Create new vertex name=${rhsObjectName}`, true)
+    const vertex = new GraphVertex(rhsObjectName, graphCanvas.getCurrentShape())
     if (style) vertex.setStyle(style)
     vertex._noedges = true
 
@@ -170,7 +169,7 @@ export function _getVertex(graphCanvas: GraphCanvas, objOrName: (string | GraphC
     return graphCanvas._getCurrentContainer().addObject(vertex)
   }
 
-  const vertex = findVertex(graphCanvas, objOrName, style)
+  const vertex = findVertexCreateIfMissing(graphCanvas, objOrName, style)
   debug(`  in getVertex gotVertex ${vertex} / ${vertex.getName()}/${vertex.constructor.name}`)
   graphCanvas.lastSeenVertex = vertex
   if (graphCanvas._nextConnectableToExitEndIf) {
@@ -256,7 +255,7 @@ export function _exitSubGraph(graphCanvas: GraphCanvas) {
   // fix exits
   // {"link":{"edgeType":">","left":1,"right":"z","label":"from e and h"}}
   const exits: GraphConnectable[] = []
-  traverseVertices(currentSubGraph, vertex => {
+  currentSubGraph.getObjects().forEach(vertex => {
     lastVertex = vertex
     if (!hasOutwardEdge(graphCanvas, vertex)) {
       exits.push(vertex)
@@ -503,13 +502,13 @@ function _addEdge(graphCanvas: GraphCanvas, edge: (GraphEdge[] | GraphEdge)): (G
   return edge
 }
 
-function _pushToCurrentContainerAsReference(graphCanvas: GraphCanvas, referred: GraphConnectable) {
+function _maybePushToCurrentContainerAsReference(graphCanvas: GraphCanvas, referred: GraphConnectable) {
   const cnt = graphCanvas._getCurrentContainer()
   if (!(cnt instanceof GraphGroup)) {
     // if current container is anything but a group, just return the same now
     return referred
   }
-  const nodes = cnt._getObjects(true)
+  const nodes = cnt.getObjects(true)
   const alreadyIncluded = nodes.filter(n => n.getName() === referred.getName()) // OK
   if (alreadyIncluded.length > 0) {
     debug(` This group (${cnt.getName()}) already has this named node in it, so just bail out`)

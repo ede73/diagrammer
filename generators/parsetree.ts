@@ -2,7 +2,6 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { debug, output } from '../model/support.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
 
@@ -40,14 +39,14 @@ export function parsetree(graphcanvas: GraphCanvas) {
     const text = (!root[0].label) ? root[0].name : root[0].label
     nodeList.push({ key: root[0].id, text, fill: '#f8f8f8', stroke: '#4d90fe' })
     let keyId = 2
-    traverseVertices(graphcanvas, node => {
+    graphcanvas.getObjects().forEach(node => {
       if (!node.id) {
         node.id = keyId++
       }
     })
   })()
 
-  traverseEdges(graphcanvas, edge => {
+  graphcanvas.getEdges().forEach(edge => {
     debug('edge ' + edge.left.name + ' to ' + edge.right.name)
     addEdgeedVertex(edge.left, edge.right)
   })

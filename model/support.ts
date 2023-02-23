@@ -52,33 +52,34 @@ export function setAttr(cl: GraphObject, attr: string, value: any) {
   return cl
 }
 
+declare global {
+  interface String {
+    //format(): string;
+    formatArray(array: any[]): string
+  }
+}
+
 /**
  * Create a string formatter.
  * Format string according to format rules with positional arguments like xxx={0} zzz={1}
- * @returns {string}
  */
-// @ts-ignore
-String.prototype.format = function () {
-  let formatted = this
-  for (const arg in arguments) {
-    formatted = formatted.replace(`{${arg}}`, arguments[arg])
-  }
-  return formatted
-}
+// String.prototype.format = function () {
+//   let formatted = this
+//   for (const arg in arguments) {
+//     formatted = formatted.replace(`{${arg}}`, arguments[arg])
+//   }
+//   return formatted
+// }
 
 /**
  * Format a string with provided array of values
  * For example. "{2}{0}{1}".formatArray([2,3,1]) prints 123
- *
- * @returns {string} Formatted string
  */
-// @ts-ignore
-String.prototype.formatArray = function (array: Array) {
+String.prototype.formatArray = function (array: any[]) {
   let formatted = this
   for (let i = 0; i < array.length; i++) {
     formatted = formatted.replace(`{${i}}`, array[i])
   }
-  // @ts-ignore
   return formatted
 }
 
@@ -131,8 +132,8 @@ export function getAttributeAndFormat(cl: GraphObject, attr: (string | any[]), f
     return ''
   }
   const valStr: string = obtained.value
-  // @ts-ignore
-  const tmp = fmt.format(valStr)
+
+  const tmp = fmt.replace('{0}', valStr)
   if (resultarray) { resultarray.push(tmp) }
   return `${tmp}`
 }

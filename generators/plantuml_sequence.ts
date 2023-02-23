@@ -75,7 +75,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
     // }
     // if (obj.shape) {
     //   // TODO: Looks like syntax has been broken
-    //   // const shape = 'shape="{0}"'.format(PlantUMLShapeMap[obj.shape])
+    //   // const shape = `shape="${PlantUMLShapeMap[obj.shape]}"`
     //   // nattrs.push(shape)
     // }
     let t = ''

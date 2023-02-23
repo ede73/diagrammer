@@ -4,7 +4,12 @@ import { parse } from './parserInteractions.js'
 import { getGenerator, getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js'
 import { makeHTTPGet } from './ajax.js'
 import { clearBeautified, visualize } from './visualize.js'
-
+// import 'ace' works for VScode (after setting deps), but it errors in webbrowser
+// and it will make jest tests fail. It fails accessing global[ns] where ns=ace in ace script (running jest) , globals is undefined, Window is undefiner
+// You can define those in Jest config (globals), but still it fails..
+// Some for of init/race condition. All because diagrammer-support required editorInteractions to import access functions :)
+//import 'ace'
+// but this setup now seems to with with JSDoc type hint also, so I'll take that!
 // import { Editor } from '../ace/src-noconflict/ace.js';
 
 // Set to 0 to fall back to textarea(enable textarea in index.html)
@@ -12,9 +17,7 @@ const acemode: number = 1
 
 function getAceEditor() {
   // TODO: fix type acq..
-  /** type {Editor} */
-  // @ts-ignore
-  // eslint-disable-next-line no-undef
+  /** type {AceAjax.Editor} */
   const editor = ace.edit('diagrammer-code')
   return editor
 }
@@ -55,7 +58,7 @@ function prependLine(data: string) {
     editor.navigateFileStart()
     editor.insert(data)
     // should roughly
-    editor.getSession().getSelection().selectionLead.setPosition(cursor.column, cursor.row - data.split('\n').length + 1)
+    editor.getSession().getSelection().getSelectionLead().setPosition(cursor.column, cursor.row - data.split('\n').length + 1)
   } else {
     // using textarea
     const comp = getInputElement('diagrammer-code')
@@ -68,7 +71,6 @@ function prependLine(data: string) {
  */
 function appendLine(data: string) {
   if (acemode) {
-    /** type {Editor} */
     const editor = getAceEditor()
 
     // using ace insert text into wherever the cursor is pointing.
@@ -212,10 +214,8 @@ try {
   hookupToListenToManualGeneratorChanges(500)
 } catch (ex) { }
 
-// @ts-ignore
 if (acemode && typeof (ace) !== 'undefined') {
   // some init race condition, editor null on page load
-  /** type {Editor} */
   const editor = getAceEditor()
   if (typeof editor !== 'undefined') {
     editor.getSession().on('change', function () {

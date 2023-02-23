@@ -6,16 +6,15 @@
 #<!-- Prevents caching at the Proxy Server -->
 #<meta http-equiv="Expires" content="0"/>
 
-header("Content-type: image/png");
-$prefix = 'result';
-$outputFileName=tempnam('.', $prefix);
+if (php_sapi_name() !== "cli") {
+  header("Content-type: image/png");
+}
 
 function getExe($name)
 {
   $paths = array("/usr/bin/", "/usr/local/bin/", "/opt/homebrew/bin/");
   foreach ($paths as $path) {
     $file = $path . $name;
-    error_log("test $file");
     if (file_exists($file)) {
       return $file;
     }
@@ -25,71 +24,144 @@ function getExe($name)
   return "./" . $name;
 }
 
-$postText = trim(file_get_contents('php://input'));
-if (FALSE === file_put_contents("./post.txt", $postText)) {
-  error_log("Failed storing input to ./post.txt");
-  http_response_code(500);
-  return;
-}
-
-function visualize(string $executable, string $extra_param = "", string $extra_image_format = "-Tpng"): string
+function dumpOutputAndDie($output)
 {
-  global $outputFileName;
-  return exec(getExe($executable) . " ${extra_image_format} ${extra_param} -o ${outputFileName} post.txt");
+  if (php_sapi_name() === "cli") {
+    echo substr($output, 0, 32);
+    die();
+  }
+  $result = base64_encode($output);
+  header('Content-Length: ' . strlen($result));
+  echo $result;
+  die();
 }
 
-switch ($_REQUEST["visualizer"]) {
+function visualize(string $executable, array $extra_param = []): string
+{
+  $descriptorspec = array(
+    0 => array("pipe", "r"),
+    // stdin is a pipe that the child will read from
+    1 => array("pipe", "w"),
+    // stdout is a pipe that the child will write to
+    2 => array("pipe", "w") // stderr is a file to write to
+  );
+
+  $cmddir = '/tmp';
+  $env = array();
+
+  $executable = getExe($executable) . " " . implode(' ', $extra_param);
+
+  $temp_file = false;
+  if (strstr($executable, 'TEMP_FILE_REQUIRED')) {
+    $prefix = 'result';
+    $temp_file = tempnam('/tmp', $prefix);
+    $executable = str_replace('TEMP_FILE_REQUIRED', $temp_file, $executable);
+    error_log("# Badly designed command, cannot pipe, requires seekable output file");
+  }
+  error_log("Got : $executable");
+
+  $process = proc_open($executable, $descriptorspec, $pipes, $cmddir, $env);
+
+  if (is_resource($process)) {
+    fwrite($pipes[0], getInput());
+    fclose($pipes[0]);
+
+    if (!$temp_file) {
+      $image = stream_get_contents($pipes[1]);
+    }
+
+    $errors = stream_get_contents($pipes[2]);
+    $return_value = proc_close($process);
+    if ($return_value === 0) {
+      if ($temp_file) {
+        $image = file_get_contents($temp_file);
+        unlink($temp_file);
+      }
+      dumpOutputAndDie($image);
+    } else {
+      error_log("Process returned error $return_value");
+      error_log($errors);
+    }
+    die();
+  }
+  if ($temp_file) {
+    unlink($temp_file);
+  }
+  error_log("Process creation failed");
+  // failed...
+  echo ("ERROR");
+  die(1);
+}
+
+function getInput()
+{
+  if (php_sapi_name() === "cli") {
+    return stream_get_contents(STDIN);
+  } else {
+    return trim(file_get_contents('php://input'));
+  }
+}
+
+function getGenerator($argv)
+{
+  if (php_sapi_name() === "cli") {
+    return $argv[1];
+  } else {
+    return $_REQUEST["visualizer"];
+  }
+}
+
+switch (getGenerator($argv)) {
   case "mscgen":
-    $r = visualize("mscgen");
+    visualize("mscgen", ["-i-", "-o-"]); // piped
     break;
   case "actdiag":
-    $r = visualize("actdiag3", "-a");
+    visualize("actdiag3", ["-a", "-Tpng", "-o TEMP_FILE_REQUIRED", "-"]);
     break;
   case "blockdiag":
-    $r = visualize("blockdiag3", "-a");
+    visualize("blockdiag3", ["-a", "-Tpng", "-o TEMP_FILE_REQUIRED", "-"]);
     break;
   case "nwdiag":
-    $r = visualize("nwdiag3", "-a");
+    visualize("nwdiag3", ["-a", "-Tpng", "-o TEMP_FILE_REQUIRED", "-"]);
     break;
   case "seqdiag":
-    $r = visualize("seqdiag3", "-a");
+    visualize("seqdiag3", ["-a", "-Tpng", "-o TEMP_FILE_REQUIRED", "-"]);
     break;
   case "dot":
-    $r = visualize("dot", "", "-Tpng:gd");
+    visualize("dot", ["-Tpng:gd"]); // piped
     break;
   case "twopi":
-    $r = visualize("twopi");
+    visualize("twopi", ["-Tpng:gd"]); // piped
     break;
   case "circo":
-    $r = visualize("circo");
+    visualize("circo", ["-Tpng:gd"]); // piped
     break;
   case "fdp":
-    $r = visualize("fdp");
+    visualize("fdp", ["-Tpng:gd"]); // piped
     break;
   case "osage":
-    $r = visualize("osage");
+    visualize("osage", ["-Tpng:gd"]); // piped
     break;
   case "sfdp":
-    $r = visualize("sfdp");
+    visualize("sfdp", ["-Tpng:gd"]); // piped
     break;
   case "neato":
-    $r = visualize("neato");
+    visualize("neato", ["-Tpng:gd"]); // piped
     break;
   case "plantuml_sequence":
-    copy("./post.txt", "./result.txt");
     # Sweet! -darkmode
     # Sweet! -tsvg
-    $r = exec("cat result.txt | ".getExe("java") . " -jar ../ext/plantuml.jar -darkmode -pipe > $outputFileName");
+    $jarpath = getcwd();
+    // web page runs in /web/ , CLI one dir up
+    if (php_sapi_name() !== "cli") {
+      $jarpath .= "/..";
+    }
+    $jarpath .= "/ext/plantuml.jar";
+    visualize("java", ["-jar", $jarpath, "-darkmode", "-pipe", "-o-"]); // piped
     break;
   default:
-    $r = visualize("dot");
+    visualize("dot", ["-Tpng:gd"]); // piped
     break;
 }
 
-file_put_contents("./error.txt", $r);
-
-$result=base64_encode(file_get_contents($outputFileName));
-header('Content-Length: ' . strlen($result));
-echo $result;
-unlink($outputFileName);
-exit;
+die("Should not happen");

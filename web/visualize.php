@@ -77,7 +77,9 @@ switch ($_REQUEST["visualizer"]) {
     break;
   case "plantuml_sequence":
     copy("./post.txt", "./result.txt");
-    $r = exec(getExe("java") . " -jar ../ext/plantuml.jar result.txt");
+    # Sweet! -darkmode
+    # Sweet! -tsvg
+    $r = exec("cat result.txt | ".getExe("java") . " -jar ../ext/plantuml.jar -darkmode -pipe > $outputFileName");
     break;
   default:
     $r = visualize("dot");

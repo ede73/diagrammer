@@ -7,7 +7,7 @@ import * as path from 'path'
 import * as lexer from '../build/diagrammer_lexer.js'
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { GraphCanvas } from '../model/graphcanvas.js'
-import { setVerbose } from '../model/support.js'
+import { setVerbose } from '../model/debug.js'
 
 let myArgs = process.argv.slice(2)
 

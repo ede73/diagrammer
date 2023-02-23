@@ -187,6 +187,9 @@
                      }
                   }
                ],
+               "defaults": {
+                  "Object": {}
+               },
                "equal": [],
                "exitvertex": 4,
                "isInnerGraph": false,
@@ -240,6 +243,9 @@
                      }
                   }
                ],
+               "defaults": {
+                  "Object": {}
+               },
                "equal": [],
                "exitvertex": 3,
                "isInnerGraph": false,
@@ -313,6 +319,9 @@
                      }
                   }
                ],
+               "defaults": {
+                  "Object": {}
+               },
                "equal": [],
                "exitvertex": 1,
                "isInnerGraph": false,
@@ -446,6 +455,9 @@
                      }
                   }
                ],
+               "defaults": {
+                  "Object": {}
+               },
                "equal": [],
                "exitvertex": 2,
                "isInnerGraph": false,
@@ -495,6 +507,9 @@
                      }
                   }
                ],
+               "defaults": {
+                  "Object": {}
+               },
                "equal": [],
                "exitvertex": 5,
                "isInnerGraph": false,
@@ -558,6 +573,9 @@
                      }
                   }
                ],
+               "defaults": {
+                  "Object": {}
+               },
                "equal": [],
                "exitvertex": 4,
                "isInnerGraph": false,
@@ -611,6 +629,9 @@
                      }
                   }
                ],
+               "defaults": {
+                  "Object": {}
+               },
                "equal": [],
                "exitvertex": 3,
                "isInnerGraph": false,
@@ -684,6 +705,9 @@
                      }
                   }
                ],
+               "defaults": {
+                  "Object": {}
+               },
                "equal": [],
                "exitvertex": 1,
                "isInnerGraph": false,
@@ -817,6 +841,9 @@
                      }
                   }
                ],
+               "defaults": {
+                  "Object": {}
+               },
                "equal": [],
                "exitvertex": 2,
                "isInnerGraph": false,
@@ -866,6 +893,9 @@
                      }
                   }
                ],
+               "defaults": {
+                  "Object": {}
+               },
                "equal": [],
                "exitvertex": 5,
                "isInnerGraph": false,
@@ -874,8 +904,12 @@
             }
          }
       ],
+      "defaults": {
+         "Object": {
+            "edgecolor": "#ff0000"
+         }
+      },
       "direction": "portrait",
-      "edgecolor": "#ff0000",
       "equal": [],
       "generator": "ast",
       "lastSeenVertex": {
@@ -924,6 +958,9 @@
                   }
                }
             ],
+            "defaults": {
+               "Object": {}
+            },
             "equal": [],
             "exitvertex": 3,
             "isInnerGraph": false,

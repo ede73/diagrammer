@@ -11,7 +11,9 @@ import { GraphInner } from '../model/graphinner.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { hasOutwardEdge } from '../model/traversal.js'
 import { _getVertexOrGroup } from '../model/model.js'
-import { debug, getAttributeAndFormat, output } from '../model/support.js'
+import { getAttributeAndFormat, output } from '../model/support.js'
+import { debug } from '../model/debug.js'
+
 
 // ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(www/cli)</option>
@@ -69,12 +71,10 @@ export function digraph(graphcanvas: GraphCanvas) {
   }
 
   /**
-     *
-     * @param {string} key
-     * @returns
-     */
+   * Help JSON.stringify dump our objects (that may have circular references)
+   */
   const skipEntrancesReplacer = (key: string, value: any) => {
-    if (['entrance', '_entrance', 'exit', '_exit'].includes(key)) {
+    if (['entrance', '_entrance', 'exit', '_exit', 'parent'].includes(key)) {
       return null
     }
     return value
@@ -166,7 +166,7 @@ export function digraph(graphcanvas: GraphCanvas) {
     }
     if ((grp as GraphGroup).isEmpty()) {
       // TODO: This is ugly
-      (grp as GraphGroup).addObject(new GraphVertex(`invis_${grp.getName()}`)
+      (grp as GraphGroup).addObject(new GraphVertex(`invis_${grp.getName()}`, grp as GraphGroup)
         .setStyle('invis'))
       return
     }

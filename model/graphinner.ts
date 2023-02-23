@@ -1,6 +1,7 @@
 // @ts-check
-import { debug } from '../model/support.js'
+import { debug } from './debug.js'
 import { GraphConnectable } from './graphconnectable.js'
+import { GraphContainer } from './graphcontainer'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from './graphvertex.js'
 
@@ -13,9 +14,12 @@ export class GraphInner extends GraphGroup {
   _exit?: GraphConnectable = undefined
   _entrance?: (GraphConnectable | GraphConnectable[]) = undefined
 
-  constructor(name: string) {
-    super(name)
+  constructor(name: string, parent: GraphContainer) {
+    super(name, parent)
     this.isInnerGraph = true
+    if (!parent) {
+      throw new Error('GraphInner REQUIRES a parent container')
+    }
   }
 
   _setEntrance(entrance: (GraphConnectable | GraphConnectable[])) {

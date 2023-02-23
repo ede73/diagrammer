@@ -1,11 +1,7 @@
 // @ts-check
 
 import { GraphCanvas } from '../model/graphcanvas.js'
-import { GraphContainer } from '../model/graphcontainer.js'
-import { GraphEdge } from '../model/graphedge.js'
-import { debug } from '../model/support.js'
 import { GraphConnectable } from './graphconnectable.js'
-import { GraphReference } from './graphreference.js'
 
 // =====================================
 // exposed to generators also

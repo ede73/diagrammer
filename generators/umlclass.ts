@@ -3,8 +3,9 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
-import { debug, output } from '../model/support.js'
+import { output } from '../model/support.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
+import { debug } from '../model/debug.js'
 
 // ADD TO INDEX.HTML AS: <option value="umlclass">UMLClass(GoJS)</option>
 

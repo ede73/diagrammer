@@ -1,7 +1,7 @@
 // @ts-check
 
 import { diagrammerParser } from '../../build/diagrammer_parser.js'
-import { DiagrammerParserYY, getParserYY } from '../../build/types/diagrammer_parser_types'
+import { getParserYY } from '../../build/types/diagrammer_parser_types'
 import { generators, GraphCanvas } from '../../model/graphcanvas.js'
 import { GraphConnectable } from '../../model/graphconnectable.js'
 import { GraphContainer } from '../../model/graphcontainer.js'
@@ -11,13 +11,28 @@ import { GraphVertex } from '../../model/graphvertex.js'
 
 // curried, canvas passed on call site
 const canvasHas = (prop: string, value: any) => {
+  // Moved away from setting 'defaults' directly as dynamic properties of canvas, they're now in 'defaults' type
   return (canvas: GraphCanvas) => {
+    // just to allow dumping helper debug (see TODO at Run all tests..will go away)
     try {
-      expect(canvas[prop as keyof GraphCanvas]).toStrictEqual(value)
+      // Actual canvas properties! vs
+      if (prop in canvas.defaults) {
+        const value2 = canvas.defaults[prop as keyof GraphCanvas['defaults']]
+        expect(value2).toStrictEqual(value)
+      } else if (prop in GraphCanvas) {
+        const value1 = canvas[prop as keyof GraphCanvas]
+        expect(value1).toStrictEqual(value)
+      }
     } catch (ex) {
       console.log(canvas)
     }
-    expect(canvas[prop as keyof GraphCanvas]).toStrictEqual(value)
+    if (prop in canvas.defaults) {
+      const value2 = canvas.defaults[prop as keyof GraphCanvas['defaults']]
+      expect(value2).toStrictEqual(value)
+    } else if (prop in GraphCanvas) {
+      const value1 = canvas[prop as keyof GraphCanvas]
+      expect(value1).toStrictEqual(value)
+    }
   }
 }
 
@@ -275,6 +290,8 @@ describe('Parser/grammar rule tests', () => {
       // @ts-ignore diagrammer parser type missing, but parse() exists, else this would never work
       diagrammerParser.parse(`${t.g}\n`)
       if (t.f) {
+        // dump the code (will be part of description, see TODO above)
+        //console.log(t.g)
         Object.entries(t.f).forEach((i) => {
           const [, assertion] = i
           assertion(c)

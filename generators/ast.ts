@@ -1,7 +1,9 @@
 // @ts-check
 
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { GraphConnectable } from '../model/graphconnectable.js'
 import { output } from '../model/support.js'
+
 
 // ADD TO INDEX.HTML AS: <option value="ast">Abstract Syntax Tree</option>
 
@@ -26,14 +28,14 @@ export function ast(graphcanvas: GraphCanvas) {
     return rvalue === undefined ? 'null' : `"${rvalue}"`
   }
 
-  const dumpObject = (obj: any, level = 0) => {
+  const dumpObject = (obj: GraphConnectable, level = 0) => {
     if (level > 50) {
       return `"/* Stopping recursion, already ${level}s deep and going ${obj}*/"`
     }
     // const t = typeof (obj)
     // const a = Array.isArray(obj)
     // const c = (obj && typeof (obj.constructor) !== 'undefined') ? obj.constructor.name : ''
-    // o(`type=${t} array?=${a} cons=${c}`)
+    // o(`type = ${ t } array ?= ${ a } cons = ${ c }`)
     if (typeof (obj) === 'function') {
       return ''
     }
@@ -47,23 +49,26 @@ export function ast(graphcanvas: GraphCanvas) {
       obj.forEach((item) => {
         const collect = dumpObject(item, level)
         // const collect = dumpObject(obj[arrayKey], level + 1)
-        // items.push(`"${arrayKey}": ${collect}`)
+        // items.push(`"${arrayKey}": ${ collect }`)
         items.push(`${collect}`)
       })
       return `[${items.sort().join(',')}]\n`
     } else {
       const items: string[] = []
-      Object.keys(obj).forEach((propname) => {
-        const value = obj[propname]
+      Object.entries(obj).forEach(([propname, value]) => {
         // skip empties..
         if (value === null || value === undefined) return
+        if (propname === 'parent') {
+          return value ? value.getName() : 'CANVAS'
+        }
         if (
           // TODO only apply to GraphEdges
           propname === 'left' ||
           propname === 'right' ||
           propname === 'container') {
           // special case for GraphEdges..don't traverse into these!
-          items.push(`\n"${propname}": ${rvalue(value.getName())}`)
+          items.push(`\n"${propname}": ${rvalue(value.getName())
+            }`)
         } else if (propname === 'CURRENTCONTAINER') {
           // infinity awaits..just dump the name
           items.push(`\n"${propname}": "...${value}"`)
@@ -73,15 +78,17 @@ export function ast(graphcanvas: GraphCanvas) {
           // nothing, ignore
         } else {
           const collect = dumpObject(value, level + 1)
-          items.push(`\n"${propname}": ${collect}`)
+          items.push(`\n"${propname}": ${collect} `)
         }
       })
-      return `{"${obj.constructor.name}" : {\n${items.sort().join(',')}\n}}\n`
+      return `{ "${obj.constructor.name}" : { \n${items.sort().join(',')} \n } } \n`
     }
   }
+
   const dump = dumpObject(graphcanvas)
+
   try {
-    const jsonbeauty = JSON.stringify(JSON.parse(`${dump}\n`), null, 3)
+    const jsonbeauty = JSON.stringify(JSON.parse(`${dump} \n`), null, 3)
     o(jsonbeauty)
   } catch (ex) {
     o('//Something broke, not full json')

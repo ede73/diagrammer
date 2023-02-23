@@ -3,9 +3,10 @@ import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { debug, getAttributeAndFormat, iterateEdges, output, outputFormattedText } from '../model/support.js'
+import { getAttributeAndFormat, iterateEdges, output, outputFormattedText } from '../model/support.js'
 import { _getVertexOrGroup } from '../model/model.js'
 import { GraphContainer } from '../model/graphcontainer.js'
+import { debug } from '../model/debug.js'
 
 // ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
 
@@ -50,6 +51,17 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
+
+  /**
+   * Help JSON.stringify dump our objects (that may have circular references)
+   */
+  const skipEntrancesReplacer = (key: string, value: any) => {
+    if (['entrance', '_entrance', 'exit', '_exit', 'parent'].includes(key)) {
+      return null
+    }
+    return value
+  }
+
   const processAVertex = function (obj: GraphConnectable, isSubGraph: boolean) {
     const nattrs: string[] = []
     const styles: string[] = []
@@ -219,7 +231,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
       // TODO:
       if (maybeGroup instanceof GraphGroup) {
         // Group name,OBJECTS,get/setEqual,toString
-        debug('processAGroup:' + JSON.stringify(maybeGroup))
+        debug('processAGroup:' + JSON.stringify(maybeGroup, skipEntrancesReplacer))
         let cond = maybeGroup.conditional
         if (cond) {
           if (cond === 'if') {

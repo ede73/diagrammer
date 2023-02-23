@@ -4,8 +4,10 @@
 import { generators, GraphCanvas, visualizations } from '../model/graphcanvas.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
-import { debug, output } from '../model/support.js'
+import { output } from '../model/support.js'
 import { findVertex, traverseTree, TreeVertex } from '../model/tree.js'
+import { debug } from '../model/debug.js'
+
 
 // ADD TO INDEX.HTML AS: <option value="dendrogram:radialdendrogram">Radial Dendrogram</option>
 // ADD TO INDEX.HTML AS: <option value="dendrogram:reingoldtilford">Reingold-Tilford</option>

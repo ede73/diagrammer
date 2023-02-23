@@ -1,6 +1,7 @@
 // @ts-check
 import { GraphObject } from '../model/graphobject.js'
 import { GraphConnectable } from './graphconnectable.js'
+import { GraphContainer } from './graphcontainer.js'
 
 /**
  * Represents an edge(link) between objects (vertices,groups,lists)
@@ -23,11 +24,14 @@ export class GraphEdge extends GraphObject {
      * @param rhs Right hand side of the edge
      * @constuctor
      */
-  constructor(edgeType: string, lhs: GraphConnectable, rhs: GraphConnectable) {
-    super('') // edges have no names, ever
+  constructor(edgeType: string, parent: GraphContainer, lhs: GraphConnectable, rhs: GraphConnectable) {
+    super('', parent) // edges have no names, ever
     this.edgeType = edgeType.trim()
     this.left = lhs
     this.right = rhs
+    if (!parent) {
+      throw new Error('GraphEdge REQUIRES a parent container')
+    }
   }
 
   isDotted() {

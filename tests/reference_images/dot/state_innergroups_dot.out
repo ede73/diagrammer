@@ -1,25 +1,28 @@
 digraph {
     compound=true;
     rankdir=TD;
-    outside1[ fillcolor="#ff0000", label="Group to node", style="filled" ];
-    outside3[ fillcolor="#ff0000", label="Inner group to node", style="filled" ];
+    outside1[ fillcolor="#ff0000", label="Group to node(MUST BE RED)", style="filled" ];
+    outside3[ fillcolor="#ff0000", label="Inner group to node(MUST BE RED)", style="filled" ];
     subgraph cluster_master {
-        ma[ fillcolor="#ff0000", style="filled" ];
+        ma[ fillcolor="#ff0000", label="ma(MUST BE RED)", style="filled" ];
         subgraph cluster_innermaster1 {
+            label="BLUE group";
             style=filled;
-            color="#999999";
-            ima1[ fillcolor="#ff0000", style="filled" ];
+            color="#0000ff";
+            ima1[ fillcolor="#ff0000", label="ima1(MUST BE RED)", style="filled" ];
         }//end of innermaster1 undefined
         subgraph cluster_innermaster2 {
+            label="GREEN group";
             style=filled;
-            color="#ffaaaa";
-            ima2[ fillcolor="#ff0000", style="filled" ];
+            color="#00ff00";
+            ima2[ fillcolor="#ff0000", label="ima2(MUST BE RED)", style="filled" ];
         }//end of innermaster2 undefined
     }//end of master undefined
-    outside2[ fillcolor="#ffff00", label="Node to group", style="filled" ];
-    outside4[ fillcolor="#ffff00", label="Node to inner group", style="filled" ];
+    outside2[ fillcolor="#ffff00", label="Node to group(MUST BE YELLOW)", style="filled" ];
+    outside4[ fillcolor="#ffff00", label="Node to inner group(MUST BE YELLOW)", style="filled" ];
     subgraph cluster_other {
-        o[ fillcolor="#ffff00", style="filled" ];
+        label="Uncolored group";
+        o[ fillcolor="#ffff00", label="o(MUST BE YELLOW)", style="filled" ];
     }//end of other undefined
     //links start
     ma->ima1;

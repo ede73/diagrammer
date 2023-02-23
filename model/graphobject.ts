@@ -1,5 +1,7 @@
 // @ts-check
 
+import { debug } from './debug.js'
+
 /**
  * GraphObject: Anything that is represented in a graph (diagram/visualization)
  */
@@ -26,14 +28,22 @@ export class GraphObject {
    * External link (only works for dynamic visualizations like SVG)
    */
   url?: string = undefined
+  parent: GraphObject
 
   /**
-       * Name of the object. Exception being edges, they don't have names
-       */
-  constructor(name: string) {
+   * Name of the object. Exception being edges, they don't have names
+   */
+  constructor(name: string, parent?/*TODO:Ugh..ugly*/: any) {
     if (name) {
       this.name = name
     }
+    // if (!parent && !(this instanceof GraphCanvas)) {
+    //   //throw new Error("Only GraphCanvas is allowed to NOT have a prent, since it is the root")
+    // }
+    if (!parent && this.constructor.name !== 'GraphCanvas') {
+      throw new Error(`All objects require a parent - EXCEPTION being canvas ${this.constructor.name}`)
+    }
+    this.parent = parent;
   }
 
   /**
@@ -55,7 +65,8 @@ export class GraphObject {
    * Set color
    */
   setColor(color: string) {
-    // TODO: Something odd in the parser
+    debug(`===Set color ${color} to ${this.getName()}`)
+    // Grammar uses call chaining, and doesn't check so it may ..setColor(OptionalColotThatIsUndefinedIeLeftOut..)
     if (color) {
       this.color = color.trim()
     }

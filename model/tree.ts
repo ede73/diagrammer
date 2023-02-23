@@ -1,4 +1,6 @@
-import { debug } from '../model/support.js'
+// @ts-check
+import { debug } from './debug.js'
+
 /**
  * Tree representration
  */

@@ -1,6 +1,5 @@
 // @ts-check
 import { GraphEdge } from '../model/graphedge.js'
-import { getAttribute, setAttr } from '../model/support.js'
 import { GraphConnectable } from './graphconnectable.js'
 import { GraphGroup } from './graphgroup.js'
 import { GraphContainer } from './graphcontainer.js'
@@ -21,23 +20,22 @@ interface IVariables {
 }
 
 /**
- * Represents the graph canvas.
- *
- * Some graphs may have a root code, but the whole graph canves is free to have as many as required
- *
- * Single root graph:
- * a>b>c>d
- *
- * A graph with four roots
- * a b c d
- *
- * Even if the TREE has multiple root vertices (or basically multiple trees)
- * the graph will only EVER have one GraphCanvas
- *
- * TODO: Shouldn't inherit from GraphConnectable!
- */
+* Represents the graph canvas.
+*
+* Some graphs may have a root code, but the whole graph canves is free to have as many as required
+*
+* Single root graph:
+* a>b>c>d
+*
+* A graph with four roots
+* a b c d
+*
+* Even if the TREE has multiple root vertices (or basically multiple trees)
+* the graph will only EVER have one GraphCanvas
+*
+* TODO: Shouldn't inherit from GraphConnectable!
+*/
 export class GraphCanvas extends GraphContainer {
-
   /**
    * Output the generated result
    */
@@ -84,7 +82,7 @@ export class GraphCanvas extends GraphContainer {
   lastSeenVertex?: GraphConnectable
 
   constructor() {
-    super('') // Canvas has no name
+    super('', undefined) // Canvas has no name
     this.CURRENTCONTAINER = [this]
   }
 
@@ -132,21 +130,6 @@ export class GraphCanvas extends GraphContainer {
 
   getStart() {
     return this.start
-  }
-
-  /**
-   * Set default vertexcolor, groupcolor, edgecolor Always ask from the
-   * currentContainer first
-   */
-  setDefault(key: string, value: any) {
-    if (this.ALLOWED_DEFAULTS.indexOf(key.toLowerCase()) === -1) {
-      throw new Error(`Trying to set unknown default ${key}`)
-    }
-    return setAttr(this, key, value)
-  }
-
-  getDefault(key: string) {
-    return getAttribute(this, key)
   }
 
   toString() {

@@ -85,7 +85,8 @@ build/diagrammer_parser.js: build/diagrammer.all Makefile generators/*.js model/
 	@sed -i "1 i\import {_enterSubGraph, _exitSubGraph, _getList, _getEdge, _getVertexOrGroup, _getGroup, _processVariable} from '../model/model.js';" $@
 	@sed -i "1 i\import {traverseTree, findVertex, TreeVertex} from '../model/tree.js';" $@
 	@sed -i "1 i\import {Shapes} from '../model/shapes.js';" $@
-	@sed -i "1 i\import {iterateEdges, outputFormattedText, getAttributeAndFormat, output, getAttribute, setAttr, debug} from '../model/support.js';" $@
+	@sed -i "1 i\import {debug} from '../model/debug.js';" $@
+	@sed -i "1 i\import {iterateEdges, outputFormattedText, getAttributeAndFormat, output, getAttribute, setAttr } from '../model/support.js';" $@
 	@sed -i "1 i\import {GraphInner} from '../model/graphinner.js';" $@
 	@sed -i "1 i\import {GraphEdge} from '../model/graphedge.js';" $@
 	@sed -i "1 i\import {GraphConnectable} from '../model/graphconnectable.js';" $@

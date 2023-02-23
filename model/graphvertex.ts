@@ -1,5 +1,6 @@
 // @ts-check
 import { GraphConnectable } from './graphconnectable.js'
+import { GraphContainer } from './graphcontainer.js'
 import { Shapes } from './shapes.js'
 
 /**
@@ -15,11 +16,14 @@ export class GraphVertex extends GraphConnectable {
    * @param [shape] Optional shape for the vertex, if not given, will default to what ever default is being used at the moment
    * @constructor
    */
-  constructor(name: string, shape?: string) {
-    super(name)
+  constructor(name: string, parent: GraphContainer, shape?: string) {
+    super(name, parent)
     if (shape) {
       this._assertRegonizedShape(shape)
       this.shape = shape
+    }
+    if (!parent) {
+      throw new Error('GraphVertex REQUIRES a parent container')
     }
   }
 

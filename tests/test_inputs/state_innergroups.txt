@@ -1,21 +1,21 @@
 vertex color #ff0000
-outside1;Group to node
-outside3;Inner group to node
+outside1;Group to node(MUST BE RED)
+outside3;Inner group to node(MUST BE RED)
 { master
-  ma
-  group innermaster1#999999
-    ima1
+  ma;ma(MUST BE RED)
+  group innermaster1#0000ff;BLUE group
+    ima1;ima1(MUST BE RED)
   } 
-  group innermaster2 #ffaaaa
-   ima2
+  group innermaster2 #00ff00;GREEN group
+   ima2;ima2(MUST BE RED)
   }
 }
 vertex color #ffff00
 
-outside2;Node to group
-outside4;Node to inner group
-{ other
- o
+outside2;Node to group(MUST BE YELLOW)
+outside4;Node to inner group(MUST BE YELLOW)
+{ other;Uncolored group
+ o;o(MUST BE YELLOW)
 }
 
 ma>ima1,ima2>o
@@ -23,4 +23,3 @@ outside2>master
 master>outside1
 innermaster1>outside3
 outside4>innermaster2
-

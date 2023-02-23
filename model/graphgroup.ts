@@ -1,5 +1,5 @@
 // @ts-check
-import { setAttr, getAttribute, debug } from '../model/support.js'
+import { errorMonitor } from 'events'
 import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphConnectable } from './graphconnectable.js'
 
@@ -33,24 +33,11 @@ export class GraphGroup extends GraphContainer {
    */
   exitvertex?: number = undefined
 
-  constructor(name: string) {
-    super(name)
-  }
-
-  /**
-   * Set default vertexcolor, groupcolor, edgecolor Always ask from the
-   * currentContainer first
-   */
-  setDefault(key: string, value: any) {
-    if (this.ALLOWED_DEFAULTS.indexOf(key.toLowerCase()) === -1) {
-      throw new Error(`Trying to set unknown default ${key}`)
+  constructor(name: string, parent: GraphContainer) {
+    super(name, parent)
+    if (!parent) {
+      throw new Error('GraphGroup REQUIRES a parent container')
     }
-    return setAttr(this, key, value)
-  }
-
-  getDefault(key: string) {
-    debug(`group:Get group ${key}`)
-    return getAttribute(this, key)
   }
 
   toString() {

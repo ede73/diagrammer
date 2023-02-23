@@ -19,8 +19,8 @@ export class GraphConnectable extends GraphObject {
   // UH... this is used in grammar parser to TEMPORARILY store edge object
   _edgelabel?: string = undefined
 
-  constructor(name: string) {
-    super(name)
+  constructor(name: string, parent?: any) {
+    super(name, parent)
   }
 
   /**

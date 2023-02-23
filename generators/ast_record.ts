@@ -53,11 +53,11 @@ export function ast_record(graphcanvas: GraphCanvas) {
     const params: { [key: string]: string } = {}
     const excludeSomeFields = ['ALLOWED_DEFAULTS', 'CURRENTCONTAINER', '_nextConnectableToExitEndIf', 'lastSeenVertex']
     const collectJustNames = ['_OBJECTS', '_ROOTVERTICES', '_EDGES', 'equal']
-    const collectJustName = ['left', 'right', 'container']
+    const collectJustName = ['left', 'right', 'container', 'parent', '_exit']
 
     Object.entries(obj).forEach(([k, v], idx) => {
       if (excludeSomeFields.includes(k) || v === undefined || v === null || typeof (v) === 'function') return
-
+      if (obj instanceof GraphInner && k == 'defaults') return
       function getName(obj: GraphObject) {
         if (obj instanceof GraphInner) {
           return 'GraphInner'

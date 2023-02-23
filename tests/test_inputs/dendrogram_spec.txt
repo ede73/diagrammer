@@ -7,7 +7,9 @@ proto>baltoslavic,germanic,celtic,italic,hellenic,anatolian,indoiranian,tocharia
         italic>latic>french,spanish,romanian,catalan,protuguese,italian
         celtic>manx,irish,scottish,welsh
         hellenic>greek 
-	germanic>northgermanic /*error */
-	germanic>westgermanic>olddutch,anglofrisian /*errors*/
+        // error
+	germanic>northgermanic
+	// errors
+	germanic>westgermanic>olddutch,anglofrisian
         germanic>(northgermanic>(oldnorse>(norwegian icelandic) swedish) westgermanic>(anglofrisian olddutch>middledutch>flemish,dutch,afri$
                 anglofrisian>(oldenglish>middleenglish>modernenglish oldfrisian>frisian)

@@ -94,10 +94,6 @@ String.prototype.formatArray = function (array: any[]) {
  * @return Return the attribute
  */
 export function getAttribute(cl: GraphObject, attr: string) {
-  // if (Object.prototype.hasOwnProperty.call(cl, attr)) {
-  //   debug(`no own prop ${attr}`)
-  //   return undefined
-  // }
   const obtained = Object.getOwnPropertyDescriptor(cl, attr);
   if (!obtained || !obtained.value || obtained.value === 0) { return undefined }
   return obtained?.value
@@ -114,10 +110,9 @@ export function getAttribute(cl: GraphObject, attr: string) {
  */
 export function getAttributeAndFormat(cl: GraphObject, attr: (string | any[]), fmt: string, resultarray?: string[]): string {
   if (attr instanceof Array) {
-    for (const i in attr) {
-      if (!Object.prototype.hasOwnProperty.call(attr, i)) continue
-      const tmp = getAttributeAndFormat(cl, attr[i], fmt, resultarray)
-      if (tmp !== '') {
+    for (const i of attr) {
+      const tmp = getAttributeAndFormat(cl, i, fmt, resultarray)
+      if (tmp) {
         debug(`Return ${tmp}`)
         return tmp
       }
@@ -135,7 +130,7 @@ export function getAttributeAndFormat(cl: GraphObject, attr: (string | any[]), f
 
   const tmp = fmt.replace('{0}', valStr)
   if (resultarray) { resultarray.push(tmp) }
-  return `${tmp}`
+  return tmp
 }
 
 /**
@@ -201,13 +196,12 @@ export function output(graphcanvas: (boolean | GraphCanvas),
  * @param [array] Optional array format
  */
 export function outputFormattedText(graphcanvas: GraphCanvas, txt: string, array?: any[]) {
-  if (!array) {
-    if (graphcanvas.result) {
+  if (graphcanvas.result) {
+    if (!array) {
       graphcanvas.result(txt)
+    } else {
+      graphcanvas.result(txt.formatArray(array))
     }
-  } else {
-    // @ts-ignore
-    graphcanvas.result(txt.formatArray(array))
   }
 }
 
@@ -215,8 +209,7 @@ export function outputFormattedText(graphcanvas: GraphCanvas, txt: string, array
  * Iterate edges
  */
 export function* iterateEdges(graphcanvas: GraphCanvas) {
-  for (const i in graphcanvas._EDGES) {
-    if (!Object.prototype.hasOwnProperty.call(graphcanvas._EDGES, i)) continue
-    yield graphcanvas._EDGES[i]
+  for (const edge of graphcanvas.getEdges()) {
+    yield edge
   }
 }

@@ -177,13 +177,13 @@ export function digraph(graphcanvas: GraphCanvas) {
   // pick node from group that is FIRST pointed by edges left hand side
   function getFirstLHSReferredNodeFromGroup(grp: GraphContainer) {
     // TODO: equal to hasOutwardEdge in model.js (except canvas, not yy)
-    return traverseEdges(graphcanvas, allEdges => {
-      return traverseVertices(grp, objectInGroup => {
+    return traverseEdges<GraphConnectable>(graphcanvas, allEdges => {
+      return traverseVertices<GraphConnectable>(grp, objectInGroup => {
         if (objectInGroup === allEdges.left) {
           return objectInGroup
         }
-      })
-    })
+      }).returned
+    }).returned
   }
 
   function getLastLHSOrRHSReferredNodeInGroup(grp: GraphContainer) {
@@ -252,7 +252,9 @@ export function digraph(graphcanvas: GraphCanvas) {
           // lastexit = undefined;
         }
         // YES LINK to first node of the group
-        lout(`${exitVertexInConditional}->${firstReferredNode.getName()}[ label="YES", color=green, lhead=cluster_${grp.getName()} ];`)
+        if (firstReferredNode) {
+          lout(`${exitVertexInConditional}->${firstReferredNode.getName()}[ label="YES", color=green, lhead=cluster_${grp.getName()} ];`)
+        }
         if (lastReferredNode) {
           lout(`${lastReferredNode.getName()}->${lastendif}[ label="" ];`)
         }

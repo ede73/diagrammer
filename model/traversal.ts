@@ -63,22 +63,25 @@ export function hasOutwardEdge(graphCanvas: GraphCanvas, vertex: GraphConnectabl
 //   return false
 // }
 
+type TraversalMayReturnEarly<T> = {
+  returned?: T
+}
+
 /**
  * Iterate thru all edges in the graph, call callback for each
  *
  * If callback returns a value (!= undefined) break loop and return just that
  * Usage: generators
- *
  */
-export function traverseEdges(graphCanvas: GraphCanvas, callback: (edge: GraphEdge) => any) {
+export function traverseEdges<T>(graphCanvas: GraphCanvas, callback: (edge: GraphEdge) => T | undefined): TraversalMayReturnEarly<T> {
   debug(`${graphCanvas._ROOTVERTICES}`)
-  for (const i in graphCanvas._EDGES) {
-    if (!Object.prototype.hasOwnProperty.call(graphCanvas._EDGES, i)) continue
-    const ret = callback(graphCanvas._EDGES[i])
+  for (const edge of graphCanvas._EDGES) {
+    const ret = callback(edge)
     if (ret !== undefined) {
-      return ret
+      return { returned: ret }
     }
   }
+  return { returned: undefined }
 }
 
 /**
@@ -90,19 +93,19 @@ export function traverseEdges(graphCanvas: GraphCanvas, callback: (edge: GraphEd
  * @param container Go thru all objects within this container
  * @param callback Called for each object, IFF callback returns anything(!=undefined), this function will return that also
  */
-export function traverseVertices(container: GraphContainer, callback: (node: GraphConnectable) => any, includeReferred: boolean = false) {
-  const nodes = container._getObjects(includeReferred)
-  for (const i in nodes) {
-    if (!Object.prototype.hasOwnProperty.call(nodes, i)) continue
+export function traverseVertices<T>(container: GraphContainer,
+  callback: (node: GraphConnectable) => T | undefined,
+  includeReferred: boolean = false): TraversalMayReturnEarly<T> {
+  for (const obj of container._getObjects(includeReferred)) {
     // this can only be GraphVertex|GraphGroup|GraphInner
     // didn't figure out how to keep typechecker happy now (TODO:)
-    const obj = nodes[i]
     if (!includeReferred && (obj instanceof GraphReference)) {
       continue
     }
     const ret = callback(obj)
     if (ret !== undefined) {
-      return ret
+      return { returned: ret }
     }
   }
+  return { returned: undefined }
 }

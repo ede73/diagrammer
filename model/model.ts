@@ -7,6 +7,7 @@ import { GraphInner } from '../model/graphinner.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { debug, getAttribute } from '../model/support.js'
 import { GraphConnectable } from './graphconnectable.js'
+import { GraphObject } from './graphobject.js'
 import { GraphReference } from './graphreference.js'
 import { hasOutwardEdge, traverseVertices } from './traversal.js'
 
@@ -124,9 +125,9 @@ export function _getVertex(graphCanvas: GraphCanvas, objOrName: (string | GraphC
       return obj
     }
 
-    const foundConnectable = (function s(container: GraphContainer, name: (string | GraphConnectable)): GraphConnectable {
+    const foundConnectable = (function s(container: GraphContainer, name: (string | GraphConnectable)): GraphConnectable | undefined {
       if (container.getName() === name) return container
-      return traverseVertices(container, o => {
+      return traverseVertices<GraphConnectable>(container, o => {
         if (o instanceof GraphVertex && o.getName() === name) {
           if (style) o.setStyle(style)
           return o
@@ -135,7 +136,7 @@ export function _getVertex(graphCanvas: GraphCanvas, objOrName: (string | GraphC
           const found = s(o, name)
           if (found) return found
         }
-      })
+      }).returned
     }(graphCanvas, obj))
 
     if (foundConnectable) {

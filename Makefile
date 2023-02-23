@@ -14,8 +14,12 @@ MODEL_REST = model/shapes.js model/tree.js
 all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST) nodemodules faketypes
 	@echo Make ALL
 
-tests/parser/parser.test.js: tests/parser/tsconfig.json tests/parser/parser.test.ts
-	@echo "Make parser.test.js"
+parsertests: tests/parser/tsconfig.json tests/parser/*.ts
+	@echo "Transpile jest parser tests"
+	tsc -p $< || true
+
+webtests: tests/web/tsconfig.json tests/web/*.ts
+	@echo "Transpile jest web tests"
 	tsc -p $< || true
 
 faketypes:
@@ -105,7 +109,7 @@ export: build/diagrammer_lexer.js build/diagrammer_parser.js js/diagrammer.js
 testrunner: ./scripts/runtests.sh all plantuml nodemodules
 	./scripts/runtests.sh
 
-jesttests: all nodemodules tests/parser/parser.test.js faketypes
+jesttests: all nodemodules parsertests webtests faketypes
 	@mkdir -p tests/test_outputs
 	npm test
 

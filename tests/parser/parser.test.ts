@@ -251,7 +251,7 @@ describe('Parser/grammar rule tests', () => {
   function parseCode(code: string) {
     getParserYY().GRAPHCANVAS = new GraphCanvas()
     try {
-      // @ts-ignore
+      // @ts-ignore diagrammerParser type missing, but parse() exists, else this would never work
       diagrammerParser.parse(code)
     } catch (ex) {
       console.log('=====failed parsing======')
@@ -272,8 +272,7 @@ describe('Parser/grammar rule tests', () => {
     grammarTests.forEach((t) => {
       const c = new GraphCanvas()
       getParserYY().GRAPHCANVAS = c
-      // console.log(`Test (${t.g})`)
-      // @ts-ignore
+      // @ts-ignore diagrammer parser type missing, but parse() exists, else this would never work
       diagrammerParser.parse(`${t.g}\n`)
       if (t.f) {
         Object.entries(t.f).forEach((i) => {
@@ -477,8 +476,7 @@ exit;exit node is also required
     })
     expect(vertices.size).toBe(0)
 
-    // @ts-ignore
-    expect(graphcanvas.lastSeenVertex.getName()).toBe('e')
+    expect(graphcanvas.lastSeenVertex?.getName()).toBe('e')
 
     const edges = new Set(['q', 'w', 'e'])
     graphcanvas._EDGES.forEach((edge, idx) => {

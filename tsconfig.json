@@ -21,7 +21,9 @@
       "d3",
       "jquery",
       "gojs",
-      "viz.js"
+      "viz.js",
+      "jest-puppeteer",
+      "puppeteer"
     ]
   },
   "compilerOptions": {

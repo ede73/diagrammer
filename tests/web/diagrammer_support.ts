@@ -1,48 +1,46 @@
 // @ts-check
-// eslint-disable-next-line no-unused-vars
 import { Page } from 'puppeteer'
 import { setGraphText, generatorChanged, getGraphText } from '../../web/editorInteractions.js'
 
+function getAndAssertHTMLElement(selector: string): HTMLElement {
+  return document.querySelector(selector) as HTMLElement
+}
+
+export function getAndAssertHTMLInputElement(selector: string): HTMLInputElement {
+  return getAndAssertHTMLElement(selector) as HTMLInputElement
+}
+
 /**
  * Clear the generator results (in order to be able to wait for the results)
- * @param {Page} page
- * @return {Promise<void>}
  */
-export async function clearGeneratorResults (page) {
+export async function clearGeneratorResults(page: Page) {
   await page.evaluate(function () {
-    // @ts-ignore
-    document.querySelector('#diagrammer-result').value = ''
+    // cannot refer to local functions, this is executed in the browser
+    (document.querySelector('#diagrammer-result') as HTMLInputElement).value = ''
   })
 }
 
 /**
  * Return parsed generated result
- * @param {Page} page
- * @return {Promise<string>}
  */
-export async function getGeneratorResult (page) {
+export async function getGeneratorResult(page: Page) {
   return await page.evaluate(() => {
-    // @ts-ignore
-    return document.querySelector('#diagrammer-result').value
+    // cannot refer to local functions, this is executed in the browser
+    return (document.querySelector('#diagrammer-result') as HTMLInputElement).value
   })
 }
 
 /**
  * Wait until diagrammer parser(generator) has completed parsing/generation job
- * @param {Page} page
- * @return {Promise<void>}
  */
-export async function waitForGeneratorResults (page) {
+export async function waitForGeneratorResults(page: Page) {
   await page.waitForSelector('#diagrammer-result:not([value=""])')
 }
 
 /**
  * Set diagrammer code and launch the parser
- * @param {Page} page
- * @param {string} code
- * @return {Promise<void>}
  */
-export async function setDiagrammerCode (page, code) {
+export async function setDiagrammerCode(page: Page, code: string) {
   await page.evaluate((code) => {
     setGraphText(code)
     generatorChanged()
@@ -51,10 +49,8 @@ export async function setDiagrammerCode (page, code) {
 
 /**
  * Return what ever is in the diagrammer text editor
- * @param {Page} page
- * @return {Promise<string>}
  */
-export async function getDiagrammerCode (page) {
+export async function getDiagrammerCode(page: Page) {
   return await page.evaluate(() => {
     return getGraphText()
   })
@@ -62,46 +58,38 @@ export async function getDiagrammerCode (page) {
 
 /**
  * Clear parsing errors
- * @param {Page} page
- * @return {Promise<void>}>
  */
-export async function clearParsingErrors (page) {
+export async function clearParsingErrors(page: Page) {
   return await page.evaluate(() => {
-    // @ts-ignore
-    document.querySelector('div#diagrammer-error').innerHTML = ''
+    // cannot refer to local functions, this is executed in the browser
+    (document.querySelector('div#diagrammer-error') as HTMLInputElement).innerHTML = ''
   })
 }
 
 /**
  * Return what ever parsing error
- * @param {Page} page
- * @return {Promise<string>}
  */
-export async function getParsingError (page) {
+export async function getParsingError(page: Page) {
   return await page.evaluate(() => {
-    // @ts-ignore
-    return document.querySelector('div#diagrammer-error').innerHTML
+    // cannot refer to local functions, this is executed in the browser
+    return (document.querySelector('div#diagrammer-error') as HTMLInputElement).innerHTML
   })
 }
 
 /**
  * Select a test input from dropdown, initiate parsing
- * @param {Page} page
- * @param {string} testname E.g. test_inputs/dendrogram.txt - antyhing that's coded to the dropdown
- * @return {Promise<void>}
+ * @param testname E.g. test_inputs/dendrogram.txt - antyhing that's coded to the dropdown
  */
-export async function selectExampleCode (page, testname) {
+export async function selectExampleCode(page: Page, testname: string) {
   // assert such a test exists in index.html example dropdown, will throw if doesn't
   await page.$(`select#diagrammer-example>option[value="${testname}"]`)
   await page.select('#diagrammer-example', testname)
 }
 
 /**
- *
- * @param {Page} page
- * @param {string} genViz eg. dendrogram:radialdendrogram
+ * @param genViz eg. dendrogram:radialdendrogram
  */
-export async function selectGeneratorVisualizer (page, genViz) {
+export async function selectGeneratorVisualizer(page: Page, genViz: string) {
   // assert such a test exists in index.html example dropdown, will throw if doesn't
   await page.$(`select#diagrammer-generator>option[value="${genViz}"]`)
   await page.select('#diagrammer-generator', genViz)
@@ -109,21 +97,18 @@ export async function selectGeneratorVisualizer (page, genViz) {
 
 /**
  * Clear the graph, so we can quickly wait for it to appear..
- * @param {Page} page
  */
-export async function clearGraph (page) {
+export async function clearGraph(page: Page) {
   await page.evaluate(() => {
-    // @ts-ignore
-    document.querySelector('#diagrammer-graph').innerHTML = ''
+    // cannot refer to local functions, this is executed in the browser
+    return (document.querySelector('#diagrammer-graph') as HTMLElement).innerHTML = ''
   })
 }
 
 /**
  * Wait until a NEW graph has been drawn
- * @param {Page} page
- * @return {Promise<void>}
  */
-export async function waitUntilGraphDrawn (page) {
+export async function waitUntilGraphDrawn(page: Page) {
   // Uhh...UI side is so slow to pick up changes..
   // around 5s image is still old, after 6 we see the radial dendrogram!
   await page.waitForSelector('#diagrammer-graph:not(:empty)')

@@ -1,13 +1,10 @@
 // @ts-check
-// eslint-disable-next-line no-unused-vars
 import { Page, Puppeteer } from 'puppeteer'
 
 /**
  * Dump the whole page HTML (and return it)
- * @param {Page} page
- * @return {Promise<string>} Page HTML
  */
-export async function dumpWholePage (page) {
+export async function dumpWholePage(page: Page) {
   const bodyHTML = await page.evaluate(() => document.body.innerHTML)
   return bodyHTML
 }
@@ -15,10 +12,8 @@ export async function dumpWholePage (page) {
 /**
  * Dump each element in the page (and return them)
  *
- * @param {Page} page
- * @return {Promise<string[]>} Page HTML
  */
-export async function dumpWholePage2 (page) {
+export async function dumpWholePage2(page: Page) {
   // https://stackoverflow.com/questions/54563410/how-to-get-all-html-data-after-all-scripts-and-page-loading-is-done-puppeteer
   const data = await page.evaluate(
     () => Array.from(document.querySelectorAll('*'))
@@ -32,11 +27,9 @@ export async function dumpWholePage2 (page) {
  *
  * Used internally flagging errors in selectors
  *
- * @param {Page} page
- * @param {string} elementId CSS selector like #IdHere or textarea[name=xx]
- * @return {Promise<void>}
+ * @param  elementId CSS selector like #IdHere or textarea[name=xx]
  */
-async function assertElementExists (page, elementId) {
+async function assertElementExists(page: Page, elementId: string) {
   if (await page.$(elementId) === null) {
     throw new Error(`Element ${elementId} does not exist`)
   }
@@ -44,32 +37,27 @@ async function assertElementExists (page, elementId) {
 
 /**
  * Sleep a bit, you should never need to use is after polishing the test properly
- * @param {number} milliSeconds
- * @return {Promise<void>}
  */
-export async function sleepABit (milliSeconds) {
+export async function sleepABit(milliSeconds: number) {
   await new Promise(function (resolve) { setTimeout(resolve, milliSeconds) })
 }
 
 /**
- * @param {Page} page
- * @param {string} elementId #IdHere, input[name=xx]
- * @returns {Promise<string>} Return element text(value)
+ * @param elementId #IdHere, input[name=xx]
+ * @returns Return element text(value)
  */
-export async function getElementText (page, elementId) {
+export async function getElementText(page: Page, elementId: string) {
   await assertElementExists(page, elementId)
   return await page.$eval(elementId, element => {
-    // @ts-ignore
-    return element.value
+    return (element as HTMLInputElement).value
   })
 }
 
 /**
- * @param {Page} page
- * @param {string} elementId #IdHere, input[name=xx]
- * @returns {Promise<string>} Return element innerHTML(value)
+ * @param elementId #IdHere, input[name=xx]
+ * @returns Return element innerHTML(value)
  */
-export async function getElementInnerHtml (page, elementId) {
+export async function getElementInnerHtml(page: Page, elementId: string) {
   await assertElementExists(page, elementId)
   return await page.$eval(elementId, element => {
     return element.innerHTML
@@ -77,42 +65,30 @@ export async function getElementInnerHtml (page, elementId) {
 }
 
 /**
- * @param {Page} page
- * @param {string} elementId #IdHere, input[name=xx]
- * @param {string} value
+ * @param elementId #IdHere, input[name=xx]
  */
-export async function setElementInnerHtml (page, elementId, value) {
+export async function setElementInnerHtml(page: Page, elementId: string, value: string) {
   await assertElementExists(page, elementId)
   return await page.$eval(elementId, (element, value) => {
     element.innerHTML = value
   }, value)
 }
 
-/**
- * @param {Page} page
- * @param {string} elementId
- * @param {string} text
- * @return {Promise<void>}
- */
-export async function writeToElement (page, elementId, text) {
+export async function writeToElement(page: Page, elementId: string, text: string) {
   await assertElementExists(page, elementId)
   await page.$eval(elementId, (el, text) => {
-    // @ts-ignore
-    el.value = text
+    (el as HTMLInputElement).value = text
   }, text)
 }
 
-function consoleLogWithTime (msg) {
+function consoleLogWithTime(msg: string) {
   console.log(`${new Date().toISOString()}: ${msg} `)
 }
 /**
  * Setup capture trap for all browser 'chatter' and dump on console
- * Usefull while debugging tests - since browser runs headless..
- *
- * @param {Page} page
- * @return {Promise<void>}
+ * Useful while debugging tests - since browser runs headless..
  */
-export async function captureBrowserLogs (page) {
+export async function captureBrowserLogs(page: Page) {
   page
     .on('console', message =>
       consoleLogWithTime(`${message.type().substr(0, 3).toUpperCase()} ${message.text()} `))

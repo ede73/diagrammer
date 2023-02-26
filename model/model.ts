@@ -119,58 +119,7 @@ export function _getList(graphCanvas: GraphCanvas,
 export function _getVertexOrGroup(graphCanvas: GraphCanvas, objOrName: (string | GraphVertex), style?: string): GraphConnectable {
   debug(`_getVertexOrGroup (name:${objOrName}, style:${style})`, true)
 
-  function findVertexCreateIfMissing(graphCanvas: GraphCanvas, vertexOrName: (string | GraphConnectable), style?: string) {
-    if (vertexOrName instanceof GraphVertex) {
-      if (style) vertexOrName.setStyle(style)
-      return vertexOrName
-    }
-    const rhsObjectName = vertexOrName as string
-
-    const rhsConnectable = (function locateVertex(container: GraphContainer): GraphVertex | GraphGroup | undefined {
-      if (container instanceof GraphGroup && container.getName() == rhsObjectName) {
-        return container
-      }
-      for (const node of container.getObjects()) {
-        if (node instanceof GraphVertex && node.getName() === rhsObjectName) {
-          return node
-        } else if (node instanceof GraphGroup) {
-          const found = locateVertex(node)
-          if (found) return found
-        }
-      }
-    }(graphCanvas))
-
-    if (rhsConnectable) {
-      if (rhsConnectable instanceof GraphVertex && style) {
-        rhsConnectable.setStyle(style)
-      }
-      // if vertex was found, return it, ELSE it will be added to current container
-      // While this works perfectly for pretty much ALL graph/visualizing engines (ie. vertex is instantiated/declared where it is seen)
-      // Some engines (nwdiag) DO want to see the vertex in the group as well
-      // a-b { b} draws a different graph in nwdiag if b is also in the group, like a--b network 1 {} vs, a--b network 1 {b}
-      // And to be precise this is violation of the language as well! We DO have the vertex IN the group, even if it was declared at the top
-      // TODO: Fix this, without breaking all other generators, introduce Reference wrapper (GraphReference(GraphVertex))
-      // This allows filtering it out in all traversal code, but allows nwdiag see the REFERENCE
-      const ret = _maybePushToCurrentContainerAsReference(graphCanvas, rhsConnectable)
-      debug(`_getVertexOrGroup return ${rhsConnectable.getName()}/${rhsConnectable.constructor.name} vs ${ret.getName()}${ret.constructor.name}`, false)
-      return ret // foundConnectable
-    }
-    debug(`Create new vertex name=${rhsObjectName}`, true)
-    const vertex = new GraphVertex(rhsObjectName, graphCanvas._getCurrentContainer(), graphCanvas.getCurrentShape())
-    if (style) vertex.setStyle(style)
-    vertex._noedges = true
-
-    _getDefaultAttribute(graphCanvas, 'vertexcolor', (color: string) => {
-      vertex.setColor(color)
-    })
-    _getDefaultAttribute(graphCanvas, 'vertextextcolor', (color: string) => {
-      vertex.setTextColor(color)
-    })
-    debug(false)
-    return graphCanvas._getCurrentContainer().addObject(vertex)
-  }
-
-  const vertex = findVertexCreateIfMissing(graphCanvas, objOrName, style)
+  const vertex = findOrCreateVertex(graphCanvas, objOrName, style)
   debug(`in getVertex gotVertex ${vertex} / ${vertex.getName()}/${vertex.constructor.name}`)
   graphCanvas.lastSeenVertex = vertex
   if (graphCanvas._nextConnectableToExitEndIf) {
@@ -181,6 +130,61 @@ export function _getVertexOrGroup(graphCanvas: GraphCanvas, objOrName: (string |
   }
   debug(false)
   return vertex
+}
+
+function locateVertex(container: GraphContainer, rhsObjectName: string): GraphVertex | GraphGroup | undefined {
+  if (container instanceof GraphGroup && container.getName() == rhsObjectName) {
+    return container
+  }
+  for (const node of container.getObjects()) {
+    if (node instanceof GraphVertex && node.getName() === rhsObjectName) {
+      return node
+    } else if (node instanceof GraphGroup) { // TODO: why not inner? SHouldn't this be container? According to same philosophy
+      const found = locateVertex(node, rhsObjectName)
+      if (found) return found
+    }
+  }
+}
+
+function findOrCreateVertex(graphCanvas: GraphCanvas, vertexOrName: (string | GraphConnectable), style?: string) {
+  if (vertexOrName instanceof GraphVertex) {
+    if (style) vertexOrName.setStyle(style)
+    return vertexOrName
+  }
+
+  const rhsObjectName = vertexOrName as string
+
+  const rhsConnectable = locateVertex(graphCanvas, rhsObjectName)
+  if (rhsConnectable) {
+    if (rhsConnectable instanceof GraphVertex && style) {
+      rhsConnectable.setStyle(style)
+    }
+    // if vertex was found, return it, ELSE it will be added to current container
+    // While this works perfectly for pretty much ALL graph/visualizing engines (ie. vertex is instantiated/declared where it is seen)
+    // Some engines (nwdiag) DO want to see the vertex in the group as well
+    // a-b { b} draws a different graph in nwdiag if b is also in the group, like a--b network 1 {} vs, a--b network 1 {b}
+    // And to be precise this is violation of the language as well! We DO have the vertex IN the group, even if it was declared at the top
+    // TODO: Fix this, without breaking all other generators, introduce Reference wrapper (GraphReference(GraphVertex))
+    // This allows filtering it out in all traversal code, but allows nwdiag see the REFERENCE
+    const ret = _maybePushToCurrentContainerAsReference(graphCanvas, rhsConnectable)
+    debug(`_getVertexOrGroup return ${rhsConnectable.getName()}/${rhsConnectable.constructor.name} vs ${ret.getName()}${ret.constructor.name}`, false)
+    return ret // foundConnectable
+  }
+
+  // not found, so create vertex
+  debug(`Create new vertex name=${rhsObjectName}`, true)
+  const vertex = new GraphVertex(rhsObjectName, graphCanvas._getCurrentContainer(), graphCanvas.getCurrentShape())
+  if (style) vertex.setStyle(style)
+  vertex._noedges = true
+
+  _getDefaultAttribute(graphCanvas, 'vertexcolor', (color: string) => {
+    vertex.setColor(color)
+  })
+  _getDefaultAttribute(graphCanvas, 'vertextextcolor', (color: string) => {
+    vertex.setTextColor(color)
+  })
+  debug(false)
+  return graphCanvas._getCurrentContainer().addObject(vertex)
 }
 
 /**
@@ -381,23 +385,17 @@ export function _getEdge(graphCanvas: GraphCanvas,
     debug(false)
     return lastEdge as GraphEdge
   }
-  {
-    let fmt = ''
-    if (inlineEdgeLabel) { fmt += `inlineEdgeLabel: ${inlineEdgeLabel}` }
-    if (commonEdgeLabel) { fmt += `commonEdgeLabel: ${commonEdgeLabel}` }
-    if (edgeColor) { fmt += `edgeColor: ${edgeColor}` }
-    if (lcompass) { fmt += `lcompass: ${lcompass}` }
-    if (rcompass) { fmt += `rcompass: ${rcompass}` }
-    debug(`getEdge type:${edgeType} l:${lhs} r:${rhs}${fmt}`)
-  }
-  if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) && !(lhs instanceof GraphInner) && !(lhs instanceof GraphReference)) {
+
+  if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) &&
+    !(lhs instanceof GraphInner) && !(lhs instanceof GraphReference)) {
     throw new Error(`LHS not a Vertex,Group nor a SubGraph(LHS=${lhs}) RHS=(${rhs})`)
   }
-  if (!(rhs instanceof GraphVertex) && !(rhs instanceof GraphGroup) && !(rhs instanceof GraphInner) && !(rhs instanceof GraphReference)) {
+  if (!(rhs instanceof GraphVertex) && !(rhs instanceof GraphGroup) &&
+    !(rhs instanceof GraphInner) && !(rhs instanceof GraphReference)) {
     throw new Error(`RHS not a Vertex,Group nor a SubGraph(LHS=${lhs}) RHS=(${rhs})`)
   }
   const edge = new GraphEdge(edgeType, currentContainer, lhs, rhs)
-
+  debug(`${edge}`)
   if (lcompass) edge.lcompass = lcompass
   else if (getAttribute(lhs, 'compass')) edge.lcompass = getAttribute(lhs, 'compass')
 
@@ -405,11 +403,9 @@ export function _getEdge(graphCanvas: GraphCanvas,
   else if (getAttribute(rhs, 'compass')) edge.rcompass = getAttribute(rhs, 'compass')
 
   _getDefaultAttribute(graphCanvas, 'edgecolor', (edgeColor: string) => {
-    debug(`Copy edge color from default/edgecolor ${edgeColor}`)
     edge.setColor(edgeColor)
   })
   _getDefaultAttribute(graphCanvas, 'edgetextcolor', (edgeTextColor: string) => {
-    debug(`Copy edge text color from default/dgetextcolor ${edgeTextColor}`)
     edge.setTextColor(edgeTextColor)
   })
   if (commonEdgeLabel) {

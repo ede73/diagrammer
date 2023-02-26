@@ -3,9 +3,9 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
-import { traverseEdges, traverseVertices } from '../model/traversal.js'
-import { debug, output } from '../model/support.js'
+import { output } from '../model/support.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
+import { debug } from '../model/debug.js'
 
 // ADD TO INDEX.HTML AS: <option value="umlclass">UMLClass(GoJS)</option>
 
@@ -38,15 +38,15 @@ export function umlclass(graphcanvas: GraphCanvas) {
   }
 
   type PropertyT = {
-    name: string,
     visibility: string,
-    default: string,
-    type: string
+    name: string,
+    type: string,
+    default?: string,
   };
   type MethodT = {
     name: string;
     visibility: string;
-    type: string;
+    type?: string;
   };
   type GroupsT = {
     key: number, name: string, properties: PropertyT[], methods: MethodT[]
@@ -74,10 +74,9 @@ export function umlclass(graphcanvas: GraphCanvas) {
     // NAME;LABEL
     // name;[+-#][name:]String[=defaultValue]
     return [...vertices].filter(node => !nameAndLabel(node).includes(')')).map(p => {
-      const ret = {
+      const ret: PropertyT = {
         name: '',
         visibility: '',
-        default: '',
         type: ''
       }
 
@@ -124,10 +123,9 @@ export function umlclass(graphcanvas: GraphCanvas) {
     // name()
     // name;[+-#][name(...):]RETURNTYPE
     return [...vertices].filter(node => nameAndLabel(node).includes('(')).map(m => {
-      const ret = {
+      const ret: MethodT = {
         name: '',
-        visibility: '',
-        type: ''
+        visibility: ''
       }
       ret.name = mangleName(m.name ?? '')
       if (m.label) {
@@ -166,21 +164,21 @@ export function umlclass(graphcanvas: GraphCanvas) {
 
   let id = 1
   const groupNameIdMap = new Map()
-  traverseVertices(graphcanvas, node => {
+  graphcanvas.getObjects().forEach(node => {
     if (node instanceof GraphGroup) {
       const key = id++
       groupNameIdMap.set(node.name, key)
       groups.push({
         key,
         name: nameAndLabel(node),
-        properties: getProperties(node._getObjects()),
-        methods: getMethods(node._getObjects())
+        properties: getProperties(node.getObjects()),
+        methods: getMethods(node.getObjects())
       })
     }
   })
   debug(`${groupNameIdMap}`)
 
-  traverseEdges(graphcanvas, edge => {
+  graphcanvas.getEdges().forEach(edge => {
     let relationship = 'generalization'
     if (edge.edgeType !== '>') {
       relationship = 'aggregation'

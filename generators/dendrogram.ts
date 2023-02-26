@@ -3,10 +3,11 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators, GraphCanvas, visualizations } from '../model/graphcanvas.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { traverseEdges } from '../model/traversal.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
-import { debug, output } from '../model/support.js'
+import { output } from '../model/support.js'
 import { findVertex, traverseTree, TreeVertex } from '../model/tree.js'
+import { debug } from '../model/debug.js'
+
 
 // ADD TO INDEX.HTML AS: <option value="dendrogram:radialdendrogram">Radial Dendrogram</option>
 // ADD TO INDEX.HTML AS: <option value="dendrogram:reingoldtilford">Reingold-Tilford</option>
@@ -41,7 +42,7 @@ export function dendrogram(graphcanvas: GraphCanvas) {
    * For a dendrogram we're not interested in vertices
    * just edges(for now!)
    */
-  traverseEdges(graphcanvas, edge => {
+  graphcanvas.getEdges().forEach(edge => {
     addVertex(edge.left, edge.right)
   })
 

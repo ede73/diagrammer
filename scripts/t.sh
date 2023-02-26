@@ -137,7 +137,7 @@ blockdiag() {
 
 case "$generator" in
 plantuml_sequence)
-  java -Xmx2048m -jar "$PLANTUML_JAR" "$OUT" >"$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
+  java -Djava.awt.headless=true -Xmx2048m -jar "$PLANTUML_JAR" "$OUT" >"$IMAGEFILE" && [ $silent = 0 ] && display_image "$IMAGEFILE"
   ;;
 nwdiag | actdiag | blockdiag | seqdiag)
   "$generator" <"$OUT" -a -T"${FORMAT}" -o "$IMAGEFILE" - && [ $silent = 0 ] && display_image "$IMAGEFILE"

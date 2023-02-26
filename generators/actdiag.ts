@@ -2,7 +2,6 @@
 
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
-import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { getAttributeAndFormat, output, multiAttrFmt } from '../model/support.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphVertex } from '../model/graphvertex.js'
@@ -74,7 +73,7 @@ export function actdiag(graphcanvas: GraphCanvas) {
   const parseObjects = (obj: GraphConnectable) => {
     if (obj instanceof GraphGroup) {
       lout(`lane "${obj.getName()}"{`, true)
-      traverseVertices(obj, (obj: GraphConnectable) => {
+      obj.getObjects().forEach((obj: GraphConnectable) => {
         const mappedShape = (obj => {
           if (obj instanceof GraphVertex) {
             const currentShape = obj.shape as keyof typeof ActDiagShapeMap
@@ -123,9 +122,9 @@ export function actdiag(graphcanvas: GraphCanvas) {
       lout(`${obj.getName()}${colorIconShapeLabel};`)
     }
   }
-  traverseVertices(graphcanvas, parseObjects)
+  graphcanvas.getObjects().forEach(o => parseObjects(o))
 
-  traverseEdges(graphcanvas, (edge) => {
+  graphcanvas.getEdges().forEach((edge) => {
     let s = ''
     if (edge.isDotted()) {
       s += 'style="dotted"'

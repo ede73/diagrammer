@@ -9,9 +9,11 @@ import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphInner } from '../model/graphinner.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { hasOutwardEdge, traverseEdges, traverseVertices } from '../model/traversal.js'
-import { _getVertex } from '../model/model.js'
-import { debug, getAttributeAndFormat, output } from '../model/support.js'
+import { hasOutwardEdge } from '../model/traversal.js'
+import { _getVertexOrGroup } from '../model/model.js'
+import { getAttributeAndFormat, output } from '../model/support.js'
+import { debug } from '../model/debug.js'
+
 
 // ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(www/cli)</option>
@@ -69,12 +71,10 @@ export function digraph(graphcanvas: GraphCanvas) {
   }
 
   /**
-     *
-     * @param {string} key
-     * @returns
-     */
+   * Help JSON.stringify dump our objects (that may have circular references)
+   */
   const skipEntrancesReplacer = (key: string, value: any) => {
-    if (['entrance', '_entrance', 'exit', '_exit'].includes(key)) {
+    if (['entrance', '_entrance', 'exit', '_exit', 'parent'].includes(key)) {
       return null
     }
     return value
@@ -141,7 +141,7 @@ export function digraph(graphcanvas: GraphCanvas) {
   // This may FORWARD DECLARE a node...which creates problems with coloring
   const start = graphcanvas.getStart()
   if (start) {
-    const fwd = _getVertex(graphcanvas, start)
+    const fwd = _getVertexOrGroup(graphcanvas, start)
     processAVertex(fwd)
     lout('//startnode setup')
     lout(`{rank = same;null} {rank = same; ${start}}`, true)
@@ -166,30 +166,26 @@ export function digraph(graphcanvas: GraphCanvas) {
     }
     if ((grp as GraphGroup).isEmpty()) {
       // TODO: This is ugly
-      (grp as GraphGroup).addObject(new GraphVertex(`invis_${grp.getName()}`)
+      (grp as GraphGroup).addObject(new GraphVertex(`invis_${grp.getName()}`, grp as GraphGroup)
         .setStyle('invis'))
       return
     }
-    traverseVertices(grp as GraphContainer, fixgroup)
+    (grp as GraphContainer).getObjects().forEach(o => fixgroup(o))
   }
-  traverseVertices(graphcanvas, fixgroup)
+  graphcanvas.getObjects().forEach(o => fixgroup(o))
 
   // pick node from group that is FIRST pointed by edges left hand side
   function getFirstLHSReferredNodeFromGroup(grp: GraphContainer) {
     // TODO: equal to hasOutwardEdge in model.js (except canvas, not yy)
-    return traverseEdges(graphcanvas, allEdges => {
-      return traverseVertices(grp, objectInGroup => {
-        if (objectInGroup === allEdges.left) {
-          return objectInGroup
-        }
-      })
-    })
+    return graphcanvas.getEdges().find(allEdges =>
+      undefined != grp.getObjects().find(objectInGroup => objectInGroup === allEdges.left)
+    )?.left
   }
 
   function getLastLHSOrRHSReferredNodeInGroup(grp: GraphContainer) {
     let nod: (GraphConnectable | undefined)
-    traverseEdges(graphcanvas, allEdges => {
-      traverseVertices(grp, node => {
+    graphcanvas.getEdges().forEach(allEdges => {
+      grp.getObjects().forEach(node => {
         if (node === allEdges.left) { nod = node }
         if (node === allEdges.right) { nod = node }
       })
@@ -218,7 +214,7 @@ export function digraph(graphcanvas: GraphCanvas) {
       lout(getAttributeAndFormat(grp, 'color',
         'color="{0}";'))
     }
-    traverseVertices(grp, ltraverseVertices)
+    grp.getObjects().forEach(o => ltraverseVertices(o))
     lout(`}//end of ${grp.getName()} ${cond}`, false)
     if (cond) {
       // IF.elseif..else construct...
@@ -252,7 +248,9 @@ export function digraph(graphcanvas: GraphCanvas) {
           // lastexit = undefined;
         }
         // YES LINK to first node of the group
-        lout(`${exitVertexInConditional}->${firstReferredNode.getName()}[ label="YES", color=green, lhead=cluster_${grp.getName()} ];`)
+        if (firstReferredNode) {
+          lout(`${exitVertexInConditional}->${firstReferredNode.getName()}[ label="YES", color=green, lhead=cluster_${grp.getName()} ];`)
+        }
         if (lastReferredNode) {
           lout(`${lastReferredNode.getName()}->${lastendif}[ label="" ];`)
         }
@@ -270,10 +268,10 @@ export function digraph(graphcanvas: GraphCanvas) {
       throw new Error('Not a node nor a group, NOT SUPPORTED')
     }
   }
-  traverseVertices(graphcanvas, ltraverseVertices)
+  graphcanvas.getObjects().forEach(o => ltraverseVertices(o))
 
   lout('//links start')
-  traverseEdges(graphcanvas, edge => {
+  graphcanvas.getEdges().forEach(edge => {
     const attrs = []
     let label = edge.label
     if (label) {
@@ -313,7 +311,7 @@ export function digraph(graphcanvas: GraphCanvas) {
         // get containers all vertices that have no outward links...(TODO:should be in model actually!)
         // perhaps when linking SUBGRAPH to a node (or another SUBGRAPH which might be very tricky)
         const exits: GraphConnectable[] = []
-        traverseVertices(lhs, go => {
+        lhs.getObjects().forEach(go => {
           if (!hasOutwardEdge(graphcanvas, go)) {
             exits.push(go)
           }

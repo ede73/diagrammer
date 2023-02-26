@@ -4,11 +4,9 @@ import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphEdge } from '../model/graphedge.js'
 import { GraphInner } from '../model/graphinner.js'
-import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { output } from '../model/support.js'
 import { GraphReference } from '../model/graphreference.js'
 import { GraphObject } from 'model/graphobject.js'
-import { GraphConnectable } from '../model/graphconnectable.js'
 
 // ADD TO INDEX.HTML AS: <option value="ast_record">Abstract Syntax Tree(Record)</option>
 
@@ -55,11 +53,11 @@ export function ast_record(graphcanvas: GraphCanvas) {
     const params: { [key: string]: string } = {}
     const excludeSomeFields = ['ALLOWED_DEFAULTS', 'CURRENTCONTAINER', '_nextConnectableToExitEndIf', 'lastSeenVertex']
     const collectJustNames = ['_OBJECTS', '_ROOTVERTICES', '_EDGES', 'equal']
-    const collectJustName = ['left', 'right', 'container']
+    const collectJustName = ['left', 'right', 'container', 'parent', '_exit']
 
     Object.entries(obj).forEach(([k, v], idx) => {
       if (excludeSomeFields.includes(k) || v === undefined || v === null || typeof (v) === 'function') return
-
+      if (obj instanceof GraphInner && k == 'defaults') return
       function getName(obj: GraphObject) {
         if (obj instanceof GraphInner) {
           return 'GraphInner'
@@ -105,7 +103,7 @@ export function ast_record(graphcanvas: GraphCanvas) {
   const label = `{ GraphCanvas | ${makeRecord(collectProperties(graphcanvas))} }`
   lout(`GraphCanvas[shape=record, color=yellow, fillcolor=yellow, label="${label}"];`)
 
-  traverseVertices(graphcanvas, function c(n) {
+  graphcanvas.getObjects().forEach(function c(n) {
     function getName(obj: GraphObject) {
       if (obj instanceof GraphReference) {
         return `inner_${obj.getName()}`
@@ -121,7 +119,7 @@ export function ast_record(graphcanvas: GraphCanvas) {
       lout('color=blue;')
       lout(`${n.getName()}[shape=record, color=blue, fillcolor=blue, label="${label}"];`)
       // group or inner
-      traverseVertices(n, c, true)
+      n.getObjects(true).forEach(o => c(o))
       lout('}', false)
     } else {
       // Vertex (or ref)
@@ -129,7 +127,7 @@ export function ast_record(graphcanvas: GraphCanvas) {
     }
   }, true)
 
-  traverseEdges(graphcanvas, e => {
+  graphcanvas.getEdges().forEach(e => {
     // TODO: Add default edgetype (flip if flipped) report in label
     const params = collectProperties(e)
     const paramTextBlock = Object.entries(params).map(([k, v], idx) => `${k}=${v}`).join('\\n')

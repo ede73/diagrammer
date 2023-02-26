@@ -1,36 +1,7 @@
 // @ts-check
-import { GraphCanvas } from '../model/graphcanvas.js'
-import { GraphObject } from '../model/graphobject.js'
-
-let debugIndent: number = 0
-/**
- * DEBUG: Set to true to see debug messages
- */
-let VERBOSE: boolean
-
-/**
- * Toggle verbosity
- */
-export function setVerbose(verbose: boolean) {
-  VERBOSE = verbose
-}
-
-/**
- * Pass debug messages
- * @param indentOrDedent whether to indent or dedent
- */
-export function debug(msg: (string | boolean), indentOrDedent?: (boolean)) {
-  if (VERBOSE === true && msg !== false && msg !== true) {
-    let d = ''
-    for (let i = 0; i < debugIndent; i++) d += '    '
-    console.log(d + msg + '//')
-  }
-  if (indentOrDedent === true || msg === true) {
-    debugIndent++
-  } else if (indentOrDedent === false || msg === false) {
-    debugIndent--
-  }
-}
+import { GraphCanvas } from './graphcanvas.js'
+import { GraphObject } from './graphobject.js'
+import { debug } from './debug.js'
 
 /**
  * Set attribute of an object
@@ -52,33 +23,34 @@ export function setAttr(cl: GraphObject, attr: string, value: any) {
   return cl
 }
 
+declare global {
+  interface String {
+    //format(): string;
+    formatArray(array: any[]): string
+  }
+}
+
 /**
  * Create a string formatter.
  * Format string according to format rules with positional arguments like xxx={0} zzz={1}
- * @returns {string}
  */
-// @ts-ignore
-String.prototype.format = function () {
-  let formatted = this
-  for (const arg in arguments) {
-    formatted = formatted.replace(`{${arg}}`, arguments[arg])
-  }
-  return formatted
-}
+// String.prototype.format = function () {
+//   let formatted = this
+//   for (const arg in arguments) {
+//     formatted = formatted.replace(`{${arg}}`, arguments[arg])
+//   }
+//   return formatted
+// }
 
 /**
  * Format a string with provided array of values
  * For example. "{2}{0}{1}".formatArray([2,3,1]) prints 123
- *
- * @returns {string} Formatted string
  */
-// @ts-ignore
-String.prototype.formatArray = function (array: Array) {
+String.prototype.formatArray = function (array: any[]) {
   let formatted = this
   for (let i = 0; i < array.length; i++) {
     formatted = formatted.replace(`{${i}}`, array[i])
   }
-  // @ts-ignore
   return formatted
 }
 
@@ -93,10 +65,6 @@ String.prototype.formatArray = function (array: Array) {
  * @return Return the attribute
  */
 export function getAttribute(cl: GraphObject, attr: string) {
-  // if (Object.prototype.hasOwnProperty.call(cl, attr)) {
-  //   debug(`no own prop ${attr}`)
-  //   return undefined
-  // }
   const obtained = Object.getOwnPropertyDescriptor(cl, attr);
   if (!obtained || !obtained.value || obtained.value === 0) { return undefined }
   return obtained?.value
@@ -113,10 +81,9 @@ export function getAttribute(cl: GraphObject, attr: string) {
  */
 export function getAttributeAndFormat(cl: GraphObject, attr: (string | any[]), fmt: string, resultarray?: string[]): string {
   if (attr instanceof Array) {
-    for (const i in attr) {
-      if (!Object.prototype.hasOwnProperty.call(attr, i)) continue
-      const tmp = getAttributeAndFormat(cl, attr[i], fmt, resultarray)
-      if (tmp !== '') {
+    for (const i of attr) {
+      const tmp = getAttributeAndFormat(cl, i, fmt, resultarray)
+      if (tmp) {
         debug(`Return ${tmp}`)
         return tmp
       }
@@ -131,10 +98,10 @@ export function getAttributeAndFormat(cl: GraphObject, attr: (string | any[]), f
     return ''
   }
   const valStr: string = obtained.value
-  // @ts-ignore
-  const tmp = fmt.format(valStr)
+
+  const tmp = fmt.replace('{0}', valStr)
   if (resultarray) { resultarray.push(tmp) }
-  return `${tmp}`
+  return tmp
 }
 
 /**
@@ -200,13 +167,12 @@ export function output(graphcanvas: (boolean | GraphCanvas),
  * @param [array] Optional array format
  */
 export function outputFormattedText(graphcanvas: GraphCanvas, txt: string, array?: any[]) {
-  if (!array) {
-    if (graphcanvas.result) {
+  if (graphcanvas.result) {
+    if (!array) {
       graphcanvas.result(txt)
+    } else {
+      graphcanvas.result(txt.formatArray(array))
     }
-  } else {
-    // @ts-ignore
-    graphcanvas.result(txt.formatArray(array))
   }
 }
 
@@ -214,8 +180,7 @@ export function outputFormattedText(graphcanvas: GraphCanvas, txt: string, array
  * Iterate edges
  */
 export function* iterateEdges(graphcanvas: GraphCanvas) {
-  for (const i in graphcanvas._EDGES) {
-    if (!Object.prototype.hasOwnProperty.call(graphcanvas._EDGES, i)) continue
-    yield graphcanvas._EDGES[i]
+  for (const edge of graphcanvas.getEdges()) {
+    yield edge
   }
 }

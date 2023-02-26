@@ -3,10 +3,10 @@ import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { debug, getAttributeAndFormat, iterateEdges, output, outputFormattedText } from '../model/support.js'
-import { _getVertex } from '../model/model.js'
-import { traverseVertices } from '../model/traversal.js'
+import { getAttributeAndFormat, iterateEdges, output, outputFormattedText } from '../model/support.js'
+import { _getVertexOrGroup } from '../model/model.js'
 import { GraphContainer } from '../model/graphcontainer.js'
+import { debug } from '../model/debug.js'
 
 // ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
 
@@ -51,6 +51,17 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
+
+  /**
+   * Help JSON.stringify dump our objects (that may have circular references)
+   */
+  const skipEntrancesReplacer = (key: string, value: any) => {
+    if (['entrance', '_entrance', 'exit', '_exit', 'parent'].includes(key)) {
+      return null
+    }
+    return value
+  }
+
   const processAVertex = function (obj: GraphConnectable, isSubGraph: boolean) {
     const nattrs: string[] = []
     const styles: string[] = []
@@ -76,7 +87,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
     // }
     // if (obj.shape) {
     //   // TODO: Looks like syntax has been broken
-    //   // const shape = 'shape="{0}"'.format(PlantUMLShapeMap[obj.shape])
+    //   // const shape = `shape="${PlantUMLShapeMap[obj.shape]}"`
     //   // nattrs.push(shape)
     // }
     let t = ''
@@ -86,6 +97,8 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
 
   lout('@startuml')
   lout('autonumber', true)
+  // Helps testing, limiting to a widely available font
+  lout('skinparam defaultFontName SansSerif')
   /*
      * if (r.getDirection() === "portrait") { lout( indent("rankdir=LR;")); }
      * else { lout( indent("rankdir=TD;")); }
@@ -93,7 +106,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
   // This may FORWARD DECLARE a node...which creates problems with coloring
   const s = graphcanvas.getStart()
   if (s) {
-    const fwd = _getVertex(graphcanvas, s)
+    const fwd = _getVertexOrGroup(graphcanvas, s)
     processAVertex(fwd, false)
   }
   /**
@@ -211,16 +224,16 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
 
   const ltraverseVertices = (root: GraphContainer, isInnerGraph: boolean) => {
     // Dump this groups participants first...
-    traverseVertices(root, maybeVertex => {
+    root.getObjects().forEach(maybeVertex => {
       if (maybeVertex instanceof GraphVertex) { processAVertex(maybeVertex, isInnerGraph) }
     })
     printEdges(root, isInnerGraph)
 
-    traverseVertices(root, maybeGroup => {
+    root.getObjects().forEach(maybeGroup => {
       // TODO:
       if (maybeGroup instanceof GraphGroup) {
         // Group name,OBJECTS,get/setEqual,toString
-        debug('processAGroup:' + JSON.stringify(maybeGroup))
+        debug('processAGroup:' + JSON.stringify(maybeGroup, skipEntrancesReplacer))
         let cond = maybeGroup.conditional
         if (cond) {
           if (cond === 'if') {

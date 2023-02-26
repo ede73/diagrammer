@@ -3,7 +3,6 @@
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { traverseEdges, traverseVertices } from '../model/traversal.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="mscgen">MSCGEN(cli)</option>
@@ -20,10 +19,10 @@ export function mscgen(graphcanvas: GraphCanvas) {
   lout('msc {', true)
   let comma = false
   // print out all node declarations FIRST (if any)
-  traverseVertices(graphcanvas, obj => {
+  graphcanvas.getObjects().forEach(obj => {
     if (obj instanceof GraphGroup) {
       lout(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/')
-      traverseVertices(obj, z => {
+      obj.getObjects().forEach(z => {
         const tmp = multiAttrFmt(z, {
           color: 'color="{0}"',
           style: 'style={0}',
@@ -45,7 +44,7 @@ export function mscgen(graphcanvas: GraphCanvas) {
 
   lout(';')
   let id = 1
-  traverseEdges(graphcanvas, edge => {
+  graphcanvas.getEdges().forEach(edge => {
     let edgeType = ''
     let rhs = edge.right
     let lhs = edge.left

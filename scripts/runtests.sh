@@ -59,12 +59,16 @@ runATest() {
       # Allow 1% variance
       THRESHOLD=1
       # Since jest-imagematcher brings pixelmatch, let's use it!
-      GRAPH_DIFF=$(mktemp)
-      if ! node_modules/pixelmatch/bin/pixelmatch "$GENERATED_IMAGE" "$GENERATED_IMAGE_REFERENCE" "$GRAPH_DIFF" $THRESHOLD >/dev/null; then
+      GRAPH_DIFF=$(mktemp --suffix "$png")
+      if ! node_modules/pixelmatch/bin/pixelmatch "$GENERATED_IMAGE" "$GENERATED_IMAGE_REFERENCE" "$GRAPH_DIFF" "$THRESHOLD" >/dev/null; then
         echo "    ERROR: at $TEST_FILENAME, image $GENERATED_IMAGE $GENERATED_IMAGE_REFERENCE differ" >&2
         #display_image "$GENERATED_IMAGE" "$GENERATED_IMAGE_REFERENCE" "$GRAPH_DIFF"
-        display_image "$GRAPH_DIFF"
-        diff -u "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE"
+        if [ -s "$GRAPH_DIFF" ]; then
+          display_image $GRAPH_DIFF
+        else
+          echo "   Weird, pixelmatch failed, but did not produce diff to $GRAPH_DIFF"
+        fi
+        diff -u "$GENERATED_CODE_REFERENCE" "$GENERATED_CODE"
         setErrorAndExit 21 "$TEST_FILENAME"
       fi
       rm -f "$GRAPH_DIFF"
@@ -173,4 +177,8 @@ launchTestInBackground ast.txt
 
 TEST_BINARY=ast_record
 launchTestInBackground ast.txt
+
+TEST_BINARY=sankey
+launchTestInBackground sankey.txt
+launchTestInBackground sankey2.txt
 exit 0

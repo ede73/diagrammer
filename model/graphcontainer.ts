@@ -3,11 +3,18 @@
 import { GraphConnectable } from './graphconnectable.js'
 import { GraphReference } from './graphreference.js'
 import { GraphVertex } from './graphvertex.js'
+import { debug } from './debug.js'
+
+export type ALLOWED_DEFAULTS = {
+  edgecolor?: string,
+  groupcolor?: string,
+  vertexcolor?: string,
+  vertextextcolor?: string,
+  edgetextcolor?: string
+}
 
 // Common 'subclass' for GraphInner, GraphGroup, GraphCanvas
 export class GraphContainer extends GraphConnectable {
-  ALLOWED_DEFAULTS = Object.freeze(['edgecolor', 'groupcolor', 'vertexcolor', 'vertextextcolor', 'edgetextcolor'])
-
   /**
    * "Private" (uh..there's no reliable overarching privacy support in ES/node/browser space), indicate with _
    */
@@ -23,10 +30,11 @@ export class GraphContainer extends GraphConnectable {
    * GraphContainer | GraphVertex
    */
   _ROOTVERTICES: GraphConnectable[] = []
+  defaults: ALLOWED_DEFAULTS = {}
   private equal: GraphConnectable[] = []
 
-  constructor(name: string) {
-    super(name)
+  constructor(name: string, parent?: GraphContainer) {
+    super(name, parent)
   }
 
   /**
@@ -45,16 +53,16 @@ export class GraphContainer extends GraphConnectable {
   /**
    *  If true, allow all GraphReferences also, else skip all GraphReferences
    */
-  _getObjects(allowReferences: boolean = false) {
+  getObjects(allowReferences: boolean = false) {
     return this._OBJECTS.filter(p => allowReferences || !(p instanceof GraphReference)) // OK
   }
 
   isEmpty(allowReferences: boolean = false) {
-    return this._getObjects(allowReferences).length === 0
+    return this.getObjects(allowReferences).length === 0
   }
 
   getFirstObject(allowReferences: boolean = false) {
-    return this._getObjects(allowReferences)[0]
+    return this.getObjects(allowReferences)[0]
   }
 
   /**
@@ -64,5 +72,20 @@ export class GraphContainer extends GraphConnectable {
     this._OBJECTS.push(connectable)
     this._ROOTVERTICES.push(connectable)
     return connectable
+  }
+
+  /**
+   * Set default vertexcolor, groupcolor, edgecolor Always ask from the
+   * currentContainer first
+   */
+  setDefault(key: keyof ALLOWED_DEFAULTS, value: string) {
+    debug(`****Set defaylt attribute ${key}=${value} for container ${this.getName()}`)
+    this.defaults[key] = value
+  }
+
+  getDefault(key: keyof ALLOWED_DEFAULTS) {
+    if (this.defaults[key]) {
+      return this.defaults[key]
+    }
   }
 };

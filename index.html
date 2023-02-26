@@ -7,8 +7,7 @@
   "imports": {
     "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm",
     "gojs": "./node_modules/gojs/release/go-debug-module.js",
-    "jquery": "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js",
-    "mscgenjs": "./js/mscgen-inpage.js"
+    "jquery": "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
  }
 }
 </script>
@@ -17,6 +16,7 @@
 <script type="module" src="web/visualizations/visualizations.js"></script>
 <script type="module" src="web/visualizations/visualizeCirclePacked.js"></script>
 <script type="module" src="web/visualizations/visualizeLayerBands.js"></script>
+<script type="module" src="web/visualizations/visualizeMscGen.js"></script>
 <script type="module" src="web/visualizations/visualizeParseTree.js"></script>
 <script type="module" src="web/visualizations/visualizeRadialDendrogram.js"></script>
 <script type="module" src="web/visualizations/visualizeReingoldTilford.js"></script>
@@ -44,6 +44,7 @@
 <!-- Only way to get d3-sankey up and running, neither comply with importmapt or ES6 imports/exports -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script type="module" src="https://unpkg.com/d3-sankey@0"></script>
+<script src="node_modules/mscgenjs/dist/bundle/index.min.js"></script>
 
 <body>
 	<!-- top menu strip - horizontal -->
@@ -109,6 +110,7 @@
 <option value="test_inputs/plantuml_context2.txt">plantuml_context2.txt</option>
 <option value="test_inputs/record_style.txt">record_style.txt</option>
 <option value="test_inputs/sankey.txt">sankey.txt</option>
+<option value="test_inputs/sankey2.txt">sankey2.txt</option>
 <option value="test_inputs/seqdiag.txt">seqdiag.txt</option>
 <option value="test_inputs/state.txt">state.txt</option>
 <option value="test_inputs/state_ancestry.txt">state_ancestry.txt</option>
@@ -138,11 +140,13 @@
 		<input type="text" id="diagrammer-filename" name="filename" value="output" />
 		<button id="diagrammer-savefile"
 			onclick="saveCurrentGraph(getCurrentFilename(), getGraphText());return false;">Save</button>
-		<button id="diagrammer-loadfile" onclick="setGraphText(loadGraph(getCurrentFilename()));return false;">Load</button>
+		<button id="diagrammer-loadfile"
+			onclick="setGraphText(loadGraph(getCurrentFilename()));return false;">Load</button>
 		<button id="diagrammer-import" onclick="importGraphs();return false;">Import</button>
 		<button id="diagrammer-export" onclick="exportGraphs();return false;">Export</button>
 		<!-- saved combobox and handlers -->
-		<label for="saved">Saved graphs</label> <select id="diagrammer-saved" name="saved" onChange="savedChanged()"></select>
+		<label for="saved">Saved graphs</label> <select id="diagrammer-saved" name="saved"
+			onChange="savedChanged()"></select>
 		<button onclick="visualize(getVisualizer());return false;">Visualize</button>
 		<br />
 
@@ -248,17 +252,26 @@
 					<!-- second middle vertical menu strip -->
 					<div class="toolbar">
 						<ul class="toolbar">
-							<li onclick="addLine('NodeName/actor1.png');"><img height="30" src="icons/actor1.png" /></li>
-							<li onclick="addLine('NodeName/actor2.png');"><img height="30" src="icons/actor2.png" /></li>
-							<li onclick="addLine('NodeName/actor3.png');"><img height="30" src="icons/actor3.png" /></li>
-							<li onclick="addLine('NodeName/barcode.png');"><img height="30" src="icons/barcode.png" /></li>
-							<li onclick="addLine('NodeName/camera.png');"><img height="30" src="icons/camera.png" /></li>
-							<li onclick="addLine('NodeName/harddisk.png');"><img height="30" src="icons/harddisk.png" /></li>
+							<li onclick="addLine('NodeName/actor1.png');"><img height="30" src="icons/actor1.png" />
+							</li>
+							<li onclick="addLine('NodeName/actor2.png');"><img height="30" src="icons/actor2.png" />
+							</li>
+							<li onclick="addLine('NodeName/actor3.png');"><img height="30" src="icons/actor3.png" />
+							</li>
+							<li onclick="addLine('NodeName/barcode.png');"><img height="30" src="icons/barcode.png" />
+							</li>
+							<li onclick="addLine('NodeName/camera.png');"><img height="30" src="icons/camera.png" />
+							</li>
+							<li onclick="addLine('NodeName/harddisk.png');"><img height="30" src="icons/harddisk.png" />
+							</li>
 							<li onclick="addLine('NodeName/laser.png');"><img height="30" src="icons/laser.png" /></li>
 							<li onclick="addLine('NodeName/phone.png');"><img height="30" src="icons/phone.png" /></li>
-							<li onclick="addLine('NodeName/satellite.png');"><img height="30" src="icons/satellite.png" /></li>
-							<li onclick="addLine('NodeName/usbmemory.png');"><img height="30" src="icons/usbmemory.png" /></li>
-							<li onclick="addLine('NodeName/basestation.png');"><img height="30" src="icons/basestation.png" /></li>
+							<li onclick="addLine('NodeName/satellite.png');"><img height="30"
+									src="icons/satellite.png" /></li>
+							<li onclick="addLine('NodeName/usbmemory.png');"><img height="30"
+									src="icons/usbmemory.png" /></li>
+							<li onclick="addLine('NodeName/basestation.png');"><img height="30"
+									src="icons/basestation.png" /></li>
 							<li onclick="addLine('NodeName/cpu.png');"><img height="30" src="icons/cpu.png" /></li>
 						</ul>
 					</div>
@@ -267,14 +280,21 @@
 					<!-- third rightmost vertical menu strip -->
 					<div class="toolbar">
 						<ul class="toolbar">
-							<li onclick="addLine('NodeName/keyboard.png');"><img height="30" src="icons/keyboard.png" /></li>
-							<li onclick="addLine('NodeName/monitor.png');"><img height="30" src="icons/monitor.png" /></li>
-							<li onclick="addLine('NodeName/printer.png');"><img height="30" src="icons/printer.png" /></li>
-							<li onclick="addLine('NodeName/scanner.png');"><img height="30" src="icons/scanner.png" /></li>
+							<li onclick="addLine('NodeName/keyboard.png');"><img height="30" src="icons/keyboard.png" />
+							</li>
+							<li onclick="addLine('NodeName/monitor.png');"><img height="30" src="icons/monitor.png" />
+							</li>
+							<li onclick="addLine('NodeName/printer.png');"><img height="30" src="icons/printer.png" />
+							</li>
+							<li onclick="addLine('NodeName/scanner.png');"><img height="30" src="icons/scanner.png" />
+							</li>
 							<li onclick="addLine('NodeName/wifi.png');"><img height="30" src="icons/wifi.png" /></li>
-							<li onclick="addLine('NodeName/battery.png');"><img height="30" src="icons/battery.png" /></li>
-							<li onclick="addLine('NodeName/documents.png');"><img height="30" src="icons/documents.png" /></li>
-							<li onclick="addLine('NodeName/laptop.png');"><img height="30" src="icons/laptop.png" /></li>
+							<li onclick="addLine('NodeName/battery.png');"><img height="30" src="icons/battery.png" />
+							</li>
+							<li onclick="addLine('NodeName/documents.png');"><img height="30"
+									src="icons/documents.png" /></li>
+							<li onclick="addLine('NodeName/laptop.png');"><img height="30" src="icons/laptop.png" />
+							</li>
 							<li onclick="addLine('NodeName/mouse.png');"><img height="30" src="icons/mouse.png" /></li>
 							<li onclick="addLine('NodeName/ram.png');"><img height="30" src="icons/ram.png" /></li>
 							<li onclick="addLine('NodeName/sim.png');"><img height="30" src="icons/sim.png" /></li>
@@ -287,23 +307,24 @@
 					<table>
 						<tr>
 							<td class="tabbed">
-									<input type="radio" id="tab1" name="css-tabs" checked>
-									<input type="radio" id="tab2" name="css-tabs">
-									<input type="radio" id="tab3" name="css-tabs">
-									
-									<ul class="tabs">
-										<li class="tab"><label for="tab1">Code</label></li>
-										<li class="tab"><label for="tab2">Generated result</label></li>
-										<li class="tab"><label for="tab3">Generated result (beautified)</label></li>
-									</ul>
-									<div class="tab-content">
-										<pre id="diagrammer-code" align="top" style="margin:0;left:0;height:600px;float:left"></pre>
-									</div>
-									<div class="tab-content">
-										<textarea id="diagrammer-result" rows="40" cols="10"></textarea>
-									</div>		
-									<div class="tab-content" id="diagrammer-beautified">
-									</div>
+								<input type="radio" id="tab1" name="css-tabs" checked>
+								<input type="radio" id="tab2" name="css-tabs">
+								<input type="radio" id="tab3" name="css-tabs">
+
+								<ul class="tabs">
+									<li class="tab"><label for="tab1">Code</label></li>
+									<li class="tab"><label for="tab2">Generated result</label></li>
+									<li class="tab"><label for="tab3">Generated result (beautified)</label></li>
+								</ul>
+								<div class="tab-content">
+									<pre id="diagrammer-code" align="top"
+										style="margin:0;left:0;height:600px;float:left"></pre>
+								</div>
+								<div class="tab-content">
+									<textarea id="diagrammer-result" rows="40" cols="10"></textarea>
+								</div>
+								<div class="tab-content" id="diagrammer-beautified">
+								</div>
 							</td>
 							<td>
 								<!-- Visualization results stored under here -->
@@ -315,7 +336,7 @@
 			</tr>
 		</table>
 
-		<script module="mscgenjs"></script>
+		<!-- <script module="mscgenjs"></script> -->
 		<link href="js/jsonTree/jsonTree.css" rel="stylesheet" />
 		<script src="js/jsonTree/jsonTree.js"></script>
 		<!-- <script src="js/viz.js"></script> -->
@@ -357,7 +378,7 @@
 	window.getCurrentFilename = getCurrentFilename;
 	window.openPicWindow = openPicWindow;
 
-	import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList} from "./web/localStorage.js";
+	import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList } from "./web/localStorage.js";
 	window.saveCurrentGraph = saveCurrentGraph;
 	window.loadGraph = loadGraph;
 
@@ -370,12 +391,12 @@
 
 	const e = getInputElement('diagrammer-saved')
 	e.innerHTML = getSavedFilesAsOptionList()
-	
+
 	const params = new URLSearchParams(window.location.search)
 	if (!params.has('do_not_load_initial_example')) {
-	  // select ast.txt example
-	  document.querySelector('select#diagrammer-example>option[value="test_inputs/ast.txt"').selected=true
-	  exampleChanged()
+		// select ast.txt example
+		document.querySelector('select#diagrammer-example>option[value="test_inputs/ast.txt"').selected = true
+		exampleChanged()
 	}
 </script>
 <script type="text/javascript">

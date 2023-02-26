@@ -1,7 +1,28 @@
 generator sankey
 
-autovero>"10 taalaa"budjetti
-tupakkavero>"8 taalaa"budjetti
-kakkavero>"3 taalaa"budjetti
-budjetti>"18 taalaa"sotaan
-sossuun<"1 taala"budjetti
+enter;Customer\nenter
+linkclick;Link on external website
+addcart;Add a product to cart
+anotherproduct;Check another product
+
+enter>"700"ad,"200"search,"100"linkclick
+
+// 57%(of ads), 25%(of search), 75% (of linkclick)
+mobile<"399"ad,"50"search,"75"linkclick
+// 43%(of ads), 75%(of search), 25% (of linkclick)
+desktop<"301"ad,"150"search,"25"linkclick
+
+// 476 (75%, 25%)
+desktop>"357"browse,"119"exit
+// 524 (75%, 25%)
+mobile>"393"browse,"131"exit
+
+// 750 users total (10%, 70%, 20%)
+browse>"75"addcart,"525"anotherproduct,"150"exit
+
+// 8%,20%,70%
+// alas this visualization doesnt allow circular links
+addcart>"6"clearcart,"15"timeout,"54"checkout
+
+// 50%, 50%
+checkout>"27"exit,"27"purchase

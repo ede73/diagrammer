@@ -1,8 +1,6 @@
 // @ts-check
 import { sleepABit, writeToElement } from './jest_puppeteer_support.js'
 import { getDiagrammerCode, setDiagrammerCode, getParsingError, clearParsingErrors } from './diagrammer_support.js'
-// used as type
-// eslint-disable-next-line no-unused-vars
 import { Page, HTTPRequest } from 'puppeteer'
 // import { jest } from '@jest/globals'
 
@@ -13,10 +11,8 @@ describe('Diagrammer', () => {
   const localStorageKey = 'graphs'
 
   beforeAll(async () => {
-    /** @type {Page} */
-    // @ts-ignore
-    // eslint-disable-next-line no-undef
-    const p = page
+    // @ts-ignore page = jest global
+    const p: Page = page
     await p.goto('http://localhost/~ede/diagrammer/')
     await p.setViewport({ width: 1800, height: 1800 })
     await p.evaluate((localStorageKey) => {
@@ -29,12 +25,9 @@ describe('Diagrammer', () => {
   })
 
   // Jest/Puppeteer annoyance, using globals
-  /** @type {Page} */
-  let p
+  let p: Page
   beforeEach(async () => {
-    /** @type {Page} */
-    // @ts-ignore
-    // eslint-disable-next-line no-undef
+    // @ts-ignore page = jest global
     p = page
   })
 

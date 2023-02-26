@@ -4,7 +4,7 @@ import { getHTMLElement, getInputElement, openImage } from './uiComponentAccess.
 import { visualizations } from './globals.js'
 import { makeHTTPPost } from './ajax.js'
 import Viz from '../js/viz.es.js'
-// import { renderMsc } from 'mscgenjs'
+import { mscgen } from '../generators/mscgen.js'
 
 function _makeNewImageHolder(pngBase64: string) {
   const imgdiv = getHTMLElement('diagrammer-graph')
@@ -44,7 +44,6 @@ export function clearBeautified() {
 
 // TODO: move to editor (or elsewhere, but this really isn't parser thingy anymore)
 export async function visualize(visualizer: string) {
-  /** @type {HTMLInputElement} */
   const result = getInputElement('diagrammer-result')
   const generatedResult = result.value
 
@@ -62,10 +61,14 @@ export async function visualize(visualizer: string) {
 
   const canUseViz = ['circo', 'dot', 'fdp', 'neato', 'osage', 'twopi'].includes(visualizer)
 
+  // if (visualizer === 'mscgen') {
+  //   mscgen(generatedResult);
+  //   return;
+  // }
   if (visualizations.has(visualizer)) {
     // this is web only visualization
     console.log(`Visualize using ${visualizer}`)
-    visualizations.get(visualizer)(result.value)
+    visualizations.get(visualizer)(generatedResult)
     console.log(`Finished visualizing ${visualizer}`)
   } else if (!canUseViz) {
     // backend visualizer (unless if we could use Viz)

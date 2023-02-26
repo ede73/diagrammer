@@ -1,22 +1,13 @@
 // @ts-check
-// eslint-disable-next-line no-unused-vars
-import { assert } from 'console'
-// type checking
-// eslint-disable-next-line no-unused-vars
 import * as jis from 'jest-image-snapshot'
 import { toMatchImageSnapshot } from 'jest-image-snapshot'
-// eslint-disable-next-line no-unused-vars
 import { Page } from 'puppeteer'
 import { clearGeneratorResults, clearGraph, clearParsingErrors, getDiagrammerCode, getParsingError, selectExampleCode, selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn } from './diagrammer_support.js'
 import { singleElementScreenSnapshot } from './snapshot_single_element.js'
 
 /**
- *
- * @param {string} filename
- * @param {number} threshold
- * @returns {jis.MatchImageSnapshotOptions}
  */
-export function setConfig (filename, threshold = 0.0001) {
+export function setConfig(filename: string, threshold: number = 0.0001): jis.MatchImageSnapshotOptions {
   return {
     failureThreshold: threshold,
     failureThresholdType: 'percent',
@@ -28,10 +19,8 @@ export function setConfig (filename, threshold = 0.0001) {
 
 describe('Diagrammer', () => {
   beforeAll(async () => {
-    /** @type {Page} */
-    // @ts-ignore
-    // eslint-disable-next-line no-undef
-    const p = page
+    // @ts-ignore Jest-puppeteer annoyance, using globals
+    const p: Page = page
     await p.goto('http://localhost/~ede/diagrammer/?do_not_load_initial_example=1')
     // Suddenly (after working for a long time!) started getting errors from here
     // Protocol error (Emulation.setDeviceMetricsOverride): Invalid parameters Failed to deserialize params.height
@@ -40,13 +29,9 @@ describe('Diagrammer', () => {
     // await captureBrowserLogs(page);
   })
 
-  // Jest/Puppeteer annoyance, using globals
-  /** @type {Page} */
-  let p
+  let p: Page
   beforeEach(async () => {
-    /** @type {Page} */
-    // @ts-ignore
-    // eslint-disable-next-line no-undef
+    // @ts-ignore Jest-puppeteer annoyance, using globals
     p = page
   })
 
@@ -99,11 +84,10 @@ describe('Diagrammer', () => {
 
   /**
    *
-   * @param {Page} page
-   * @param {string} example File in tests/test_inputs/*.txt
-   * @param {string|undefined} overrideGeneratorVisualizer
+   * @param example File in tests/test_inputs/*.txt
+   * @param overrideGeneratorVisualizer
    */
-  async function testDynamicRendering (page, example, overrideGeneratorVisualizer = undefined) {
+  async function testDynamicRendering(page: Page, example: string, overrideGeneratorVisualizer?: string) {
     await clearGeneratorResults(page)
     await clearGraph(page)
     await selectExampleCode(page, example)
@@ -117,18 +101,25 @@ describe('Diagrammer', () => {
     await waitUntilGraphDrawn(page)
 
     // TODO: D3.js ends up with div#graph../[div#default_,svg] GoJs div#graph../div#default_/svg
-    const selector = (await page.$('#diagrammer-graph>svg') != null) ? '#diagrammer-graph>svg' : '#diagrammer-graph>div>svg'
+    const selector: string = (await page.$('#diagrammer-graph>svg') != null) ? '#diagrammer-graph>svg' : '#diagrammer-graph>div>svg'
 
-    // @ts-ignore alas there's no way to satisfy VSCode strict null check, doesn't understand any asserts or not even if(x===null)throw... ie. no way null after that
-    const svg = await page.evaluate((selector) => document.querySelector(selector).outerHTML, selector)
     const elementHandle = await page.$(selector)
-    // @ts-ignore alas there's no way to satisfy VSCode strict null check, doesn't understand any asserts or not even if(x===null)throw... ie. no way null after that
+    if (!elementHandle) {
+      throw new Error(`Could not find element ${selector}`)
+    }
+    // BBox, getBoundingClientRect
     const bbox = await elementHandle.boundingBox()
-    // @ts-ignore alas there's no way to satisfy VSCode strict null check, doesn't understand any asserts or not even if(x===null)throw... ie. no way null after that
-    const filename = example.match(/.+\/([^.]+)/)[1] + (overrideGeneratorVisualizer ? '_' + overrideGeneratorVisualizer.replace(':', '_') : '')
+    const matches = example.match(/.+\/([^.]+)/)
+    if (!matches) {
+      throw new Error('Could not read example')
+    }
+    const filename = matches[1] + (overrideGeneratorVisualizer ? '_' + overrideGeneratorVisualizer.replace(':', '_') : '')
     const snapshotConfig = setConfig(filename, 1)
-    // @ts-ignore alas there's no way to satisfy VSCode strict null check, doesn't understand any asserts or not even if(x===null)throw... ie. no way null after that
-    const buffer = await singleElementScreenSnapshot(svg, bbox.width, bbox.height)
+    const svg = await page.evaluate((selector: string) => document.querySelector(selector)?.outerHTML, selector)
+    if (!svg) {
+      throw Error("Could not get SVG code")
+    }
+    const buffer = await singleElementScreenSnapshot(svg, bbox?.width, bbox?.height)
     expect.extend({
       toMatchImageSnapshot
     })

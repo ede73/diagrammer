@@ -24,4 +24,5 @@ model/*.js
 generators/*.js
 web/*.js
 web/visualizations/*.js
-tests/parser/parser.test.js
+tests/parser/*.js
+tests/web/*.js

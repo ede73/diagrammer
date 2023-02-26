@@ -1,5 +1,6 @@
 // @ts-check
 import { GraphObject } from '../../model/graphobject.js'
+import { GraphCanvas } from '../../model/graphcanvas.js'
 
 describe('GraphObject tests', () => {
   const labelCandidates = {
@@ -34,8 +35,8 @@ describe('GraphObject tests', () => {
     ]
   }
   Object.entries(labelCandidates).forEach(([label, verifications]) => {
-    /** @type {GraphObject} */
-    const obj = new GraphObject('')
+    const c = new GraphCanvas()
+    const obj = new GraphObject('', c)
     obj.setLabel(label)
 
     it(`Verify that GraphObject with label (${label}) is parsed as textcolor=${verifications[0]} label=${verifications[1]} url=${verifications[2]}`, async () => {

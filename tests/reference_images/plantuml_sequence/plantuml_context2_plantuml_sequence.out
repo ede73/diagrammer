@@ -1,5 +1,6 @@
 @startuml
 autonumber
+    skinparam defaultFontName SansSerif
     participant  User 
     participant  A 
     participant  B 

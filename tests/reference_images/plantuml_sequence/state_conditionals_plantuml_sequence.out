@@ -1,5 +1,6 @@
 @startuml
 autonumber
+    skinparam defaultFontName SansSerif
     participant "tamakin" as q 
     participant "on" as w 
     participant  outside 

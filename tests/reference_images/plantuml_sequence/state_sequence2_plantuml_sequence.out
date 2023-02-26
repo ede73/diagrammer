@@ -1,5 +1,6 @@
 @startuml
 autonumber
+    skinparam defaultFontName SansSerif
     participant "browser" as b 
     participant "database" as d 
     participant "webserver" as w 

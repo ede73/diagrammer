@@ -97,6 +97,8 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
 
   lout('@startuml')
   lout('autonumber', true)
+  // Helps testing, limiting to a widely available font
+  lout('skinparam defaultFontName SansSerif')
   /*
      * if (r.getDirection() === "portrait") { lout( indent("rankdir=LR;")); }
      * else { lout( indent("rankdir=TD;")); }

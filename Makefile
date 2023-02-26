@@ -16,11 +16,11 @@ all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js M
 
 parsertests: tests/parser/tsconfig.json tests/parser/*.ts
 	@echo "Transpile jest parser tests"
-	tsc -p $< || true
+	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 
 webtests: tests/web/tsconfig.json tests/web/*.ts
 	@echo "Transpile jest web tests"
-	tsc -p $< || true
+	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 
 faketypes:
 	@echo "Make diagrammer shared context type for jest tests"
@@ -32,7 +32,7 @@ faketypes:
 	@echo "Transpile typescripts"
 	@tsc -p model/tsconfig.json
 	@tsc -p generators/tsconfig.json
-	@tsc -p web/tsconfig.json >/dev/null || true
+	@tsc -p web/tsconfig.json |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 	@tsc -p web/visualizations/tsconfig.json
 
 nodemodules: node_modules

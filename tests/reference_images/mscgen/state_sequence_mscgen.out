@@ -1,8 +1,5 @@
 msc {
-    a
-    ,b
-    ,c
-    ;
+    a,b,c;
     a->*[id="1", label="A initiated broadcast"];
     b->*[id="2", label="B initiated broadcast"];
     a<=>b[id="3", label="Auto return edge"];

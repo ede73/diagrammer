@@ -1,22 +1,5 @@
 msc {
-    q[ label="tamakin" ]
-    ,w[ label="on" ]
-     /*1 something would happend*/
-    ,a1
-    ,b1
-     /*2 something probably would not happen*/
-    ,a2
-    ,b2
-     /*3 or if i see a flying bird*/
-    ,a3
-    ,b3
-     /*4 else*/
-    ,a4
-    ,b4
-     /*5 endif*/
-    ,outside
-    ,end
-    ;
+    q[ label="tamakin" ],w[ label="on" ],a1,b1,a2,b2,a3,b3,a4,b4,outside,end;
     q=>w[id="1"];
     a1=>b1[id="2"];
     a2=>b2[id="3"];

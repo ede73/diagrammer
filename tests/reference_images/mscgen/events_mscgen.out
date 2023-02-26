@@ -1,45 +1,5 @@
 msc {
-    aLINE
-    ,bLINE
-    ,anl
-    ,bnl
-    ,aDOT
-    ,bDOT
-    ,aDASHED
-    ,bDASHED
-    ,aDUAL
-    ,bDUAL
-    ,aDUALDOTTED
-    ,bDUALDOTTED
-    ,aDUALDASHED
-    ,bDUALDASHED
-    ,AREVERSE
-    ,bREVERSE
-    ,AREVERSEDOTTED
-    ,bReverseDotted
-    ,AREVERSEDASHED
-    ,bReverseDashed
-    ,aDotted
-    ,bDOTTED
-    ,aDashed
-    ,bdasHed
-    ,alr
-    ,bLR
-    ,arr
-    ,bRR
-    ,a1
-    ,b1
-    ,a2
-    ,b2
-    ,a3
-    ,b3
-    ,a4
-    ,b4
-    ,c4
-    ,c5
-    ,d5
-    ,a5
-    ;
+    aLINE,bLINE,anl,bnl,aDOT,bDOT,aDASHED,bDASHED,aDUAL,bDUAL,aDUALDOTTED,bDUALDOTTED,aDUALDASHED,bDUALDASHED,AREVERSE,bREVERSE,AREVERSEDOTTED,bReverseDotted,AREVERSEDASHED,bReverseDashed,aDotted,bDOTTED,aDashed,bdasHed,alr,bLR,arr,bRR,a1,b1,a2,b2,a3,b3,a4,b4,c4,c5,d5,a5;
     aLINE=>bLINE[id="1"];
     anl=>bnl[id="2", label="This is label for EVENT, NOT node bnl"];
     aDOT>>bDOT[id="3"];

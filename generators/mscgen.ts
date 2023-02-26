@@ -17,19 +17,20 @@ export function mscgen(graphcanvas: GraphCanvas) {
   }
 
   lout('msc {', true)
-  let comma = false
+
+  const vertices: string[] = []
+
   // print out all node declarations FIRST (if any)
   graphcanvas.getObjects().forEach(obj => {
     if (obj instanceof GraphGroup) {
-      lout(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/')
+      //vertices.push(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/')
       obj.getObjects().forEach(z => {
         const tmp = multiAttrFmt(z, {
           color: 'color="{0}"',
           style: 'style={0}',
           label: 'label="{0}"'
         })
-        lout((comma ? ',' : '') + z.getName() + tmp)
-        comma = true
+        vertices.push(z.getName() + tmp)
       })
     } else if (obj instanceof GraphVertex) {
       const tmp = multiAttrFmt(obj, {
@@ -37,12 +38,12 @@ export function mscgen(graphcanvas: GraphCanvas) {
         style: 'style={0}',
         label: 'label="{0}"'
       })
-      lout((comma ? ',' : '') + obj.getName() + tmp)
-      comma = true
+      vertices.push(obj.getName() + tmp)
     }
   })
 
-  lout(';')
+  lout(`${vertices.join(',')};`)
+
   let id = 1
   graphcanvas.getEdges().forEach(edge => {
     let edgeType = ''

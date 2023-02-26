@@ -1,8 +1,5 @@
 msc {
-    b[ label="browser" ]
-    ,d[ label="database" ]
-    ,w[ label="webserver" ]
-    ;
+    b[ label="browser" ],d[ label="database" ],w[ label="webserver" ];
     b=>w[id="1", label="GET /index.html"];
     w>>b[id="2"];
     b=>w[id="3", label="POST /blog/comment"];

@@ -22,5 +22,5 @@ export function visualizeMscGen(generatorResult: string) {
     }
 
     // @ts-ignore
-    mscgenjs.renderMsc(code, config, handleRenderMscResult);
+    mscgenjs.renderMsc(generatorResult, config, handleRenderMscResult);
 }

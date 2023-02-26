@@ -30,10 +30,10 @@ faketypes:
 
 %.js: %.ts
 	@echo "Transpile typescripts"
-	@tsc -p model/tsconfig.json
-	@tsc -p generators/tsconfig.json
+	@tsc -p model/tsconfig.json || true
+	@tsc -p generators/tsconfig.json|grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 	@tsc -p web/tsconfig.json |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-	@tsc -p web/visualizations/tsconfig.json
+	@tsc -p web/visualizations/tsconfig.json|| true
 
 nodemodules: node_modules
 	@echo "Check node_modules exist"

@@ -484,7 +484,7 @@ exit;exit node is also required
     parseCode(`a:nw ->:se ${color} "edgelabel" q,w,e;label\n`)
     expect(graphcanvas.getObjects().length).toBe(4)
     expect(graphcanvas._ROOTVERTICES.length).toBe(1)
-    expect(graphcanvas._EDGES.length).toBe(3)
+    expect(graphcanvas.getEdges().length).toBe(3)
 
     // verify all objects accounted for
     const vertices = new Set(['a', 'q', 'w', 'e'])
@@ -496,7 +496,7 @@ exit;exit node is also required
     expect(graphcanvas.lastSeenVertex?.getName()).toBe('e')
 
     const edges = new Set(['q', 'w', 'e'])
-    graphcanvas._EDGES.forEach((edge, idx) => {
+    graphcanvas.getEdges().forEach((edge, idx) => {
       expect(edge.getColor()).toBe(color)
       expect(edge.getName()).toBe(undefined)
       expect(edge.lcompass).toBe(':nw')

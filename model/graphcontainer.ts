@@ -4,6 +4,7 @@ import { GraphConnectable } from './graphconnectable.js'
 import { GraphReference } from './graphreference.js'
 import { GraphVertex } from './graphvertex.js'
 import { debug } from './debug.js'
+import { GraphObject } from './graphobject.js'
 
 export type ALLOWED_DEFAULTS = {
   edgecolor?: string,
@@ -15,10 +16,6 @@ export type ALLOWED_DEFAULTS = {
 
 // Common 'subclass' for GraphInner, GraphGroup, GraphCanvas
 export class GraphContainer extends GraphConnectable {
-  /**
-   * "Private" (uh..there's no reliable overarching privacy support in ES/node/browser space), indicate with _
-   */
-  _OBJECTS: GraphConnectable[] = []
   /**
    * This holds vertices that have no incoming edges (no edge has this vertex as right hand side)
    *
@@ -32,6 +29,7 @@ export class GraphContainer extends GraphConnectable {
   _ROOTVERTICES: GraphConnectable[] = []
   defaults: ALLOWED_DEFAULTS = {}
   private equal: GraphConnectable[] = []
+  private _OBJECTS: GraphObject[] = []
 
   constructor(name: string, parent?: GraphContainer) {
     super(name, parent)
@@ -53,8 +51,8 @@ export class GraphContainer extends GraphConnectable {
   /**
    *  If true, allow all GraphReferences also, else skip all GraphReferences
    */
-  getObjects(allowReferences: boolean = false) {
-    return this._OBJECTS.filter(p => allowReferences || !(p instanceof GraphReference)) // OK
+  getObjects(allowReferences: boolean = false): GraphConnectable[] {
+    return this._OBJECTS.filter(p => (p instanceof GraphConnectable && (allowReferences || !(p instanceof GraphReference)))) as GraphConnectable[]// OK
   }
 
   isEmpty(allowReferences: boolean = false) {
@@ -79,7 +77,7 @@ export class GraphContainer extends GraphConnectable {
    * currentContainer first
    */
   setDefault(key: keyof ALLOWED_DEFAULTS, value: string) {
-    debug(`****Set defaylt attribute ${key}=${value} for container ${this.getName()}`)
+    //debug(`****Set defaylt attribute ${key}=${value} for container ${this.getName()}`)
     this.defaults[key] = value
   }
 

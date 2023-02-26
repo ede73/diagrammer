@@ -160,13 +160,10 @@ export function _getVertexOrGroup(graphCanvas: GraphCanvas, objOrName: (string |
     if (style) vertex.setStyle(style)
     vertex._noedges = true
 
-    debug(`Fetch vertexcolor default attribute if defined?`)
     _getDefaultAttribute(graphCanvas, 'vertexcolor', (color: string) => {
-      debug(`Copy vertex color from default/vertexcolor ${color}`)
       vertex.setColor(color)
     })
     _getDefaultAttribute(graphCanvas, 'vertextextcolor', (color: string) => {
-      debug(`Copy vertex text color from default/vertextextcolor ${color}`)
       vertex.setTextColor(color)
     })
     debug(false)
@@ -174,7 +171,7 @@ export function _getVertexOrGroup(graphCanvas: GraphCanvas, objOrName: (string |
   }
 
   const vertex = findVertexCreateIfMissing(graphCanvas, objOrName, style)
-  debug(`  in getVertex gotVertex ${vertex} / ${vertex.getName()}/${vertex.constructor.name}`)
+  debug(`in getVertex gotVertex ${vertex} / ${vertex.getName()}/${vertex.constructor.name}`)
   graphCanvas.lastSeenVertex = vertex
   if (graphCanvas._nextConnectableToExitEndIf) {
     debug('Collect next vertex')
@@ -213,46 +210,7 @@ export function _exitSubGraph(graphCanvas: GraphCanvas) {
   const currentSubGraph: GraphInner = currentSubGraphTypeCheckerFix
 
   debug(`Exit subgraph ${currentSubGraph}`)
-  let edgeAndItsIndex: [GraphEdge, number] | undefined
-
-  // If there's an edge that (RHS) points to current inner sub graph AND the graph has
-  // entrance connectable and this edge (LHS) points to entrance node, then relink
-  // this edge:
-  // a>b>(c d>e f>g h)>(s>k)
-  // activates for instance to 2nd edge (ie. one pointing from b to all of (c d>e..))
-  // and also on 5th edge ie ..h)>(s..
-  for (const idx in graphCanvas._EDGES) {
-    if (!Object.prototype.hasOwnProperty.call(graphCanvas._EDGES, idx)) continue
-    const candidateEdge = graphCanvas._EDGES[idx]
-    if (candidateEdge.right.name === currentSubGraph.name &&
-      currentSubGraph._entrance instanceof GraphConnectable &&
-      candidateEdge.left.name === currentSubGraph._entrance.name) {
-      // remove this edge!
-      const edgeIndex = Number(idx)
-      edgeAndItsIndex = [candidateEdge, edgeIndex]
-      graphCanvas._EDGES.splice(edgeIndex, 1)
-      // and then relink it to containers vertices that have no LEFT edges
-      break
-    }
-  }
-
-  if (edgeAndItsIndex) {
-    // and then relink it to containers vertices that have no LEFT edges
-    // traverse
-    for (const n in currentSubGraph._ROOTVERTICES) {
-      if (!Object.prototype.hasOwnProperty.call(currentSubGraph._ROOTVERTICES, n)) continue
-      const vertex = currentSubGraph._ROOTVERTICES[n]
-      if (currentSubGraph._entrance && currentSubGraph._entrance instanceof GraphVertex) {
-        // TODO: Assumes entrance is GraphVertex, but it looks it can be other things
-        currentSubGraph._entrance._noedges = undefined
-      }
-      vertex._noedges = undefined
-      const newEdge = _getEdge(graphCanvas, edgeAndItsIndex[0].edgeType, currentSubGraph._entrance as (GraphConnectable | GraphConnectable[]), vertex, edgeAndItsIndex[0].label,
-        undefined, undefined, undefined, undefined, true)
-      newEdge.container = currentSubGraph
-      graphCanvas._EDGES.splice(edgeAndItsIndex[1]++, 0, newEdge)
-    }
-  }
+  relinkInnerSubgraphEntryAndExit(graphCanvas, currentSubGraph)
 
   let lastVertex: GraphConnectable | undefined
 
@@ -271,6 +229,46 @@ export function _exitSubGraph(graphCanvas: GraphCanvas) {
     currentSubGraph._setExit(lastVertex)
   }
   return graphCanvas._exitContainer()
+}
+
+function relinkInnerSubgraphEntryAndExit(graphCanvas: GraphCanvas, currentSubGraph: GraphInner) {
+  let edgeAndItsIndex: [GraphEdge, number] | undefined
+  debug(`relinkInnerSubgraphEntryAndExit ${currentSubGraph}`)
+  // If there's an edge that (RHS) points to current inner sub graph AND the graph has
+  // entrance connectable and this edge (LHS) points to entrance node, then relink
+  // this edge:
+  // a>b>(c d>e f>g h)>(s>k)
+  // activates for instance to 2nd edge (ie. one pointing from b to all of (c d>e..))
+  // and also on 5th edge ie ..h)>(s..
+  for (const [edgeIndex, candidateEdge] of graphCanvas.getEdges().entries()) {
+    if (candidateEdge.right.name === currentSubGraph.name &&
+      currentSubGraph._entrance instanceof GraphConnectable &&
+      candidateEdge.left.name === currentSubGraph._entrance.name) {
+      debug(`  Remove edge ${candidateEdge}`)
+      // remove this edge!
+      edgeAndItsIndex = [candidateEdge, edgeIndex]
+      graphCanvas.removeEdge(edgeIndex)
+      // and then relink it to containers vertices that have no LEFT edges
+      break
+    }
+  }
+
+  if (edgeAndItsIndex) {
+    // and then relink it to containers vertices that have no LEFT edges
+    // traverse
+    for (const vertex of currentSubGraph._ROOTVERTICES) {
+      if (currentSubGraph._entrance && currentSubGraph._entrance instanceof GraphVertex) {
+        // TODO: Assumes entrance is GraphVertex, but it looks it can be other things
+        currentSubGraph._entrance._noedges = undefined
+      }
+      vertex._noedges = undefined
+      const newEdge = _getEdge(graphCanvas, edgeAndItsIndex[0].edgeType, currentSubGraph._entrance as (GraphConnectable | GraphConnectable[]), vertex, edgeAndItsIndex[0].label,
+        undefined, undefined, undefined, undefined, true)
+      newEdge.container = currentSubGraph
+      debug(`  Add new edge ${newEdge}`)
+      graphCanvas.insertEdge(edgeAndItsIndex[1]++, newEdge)
+    }
+  }
 }
 
 /**
@@ -340,7 +338,7 @@ export function _getEdge(graphCanvas: GraphCanvas,
   if (rhs instanceof GraphVertex) {
     // if RHS has no edges (and is contained in a container) AND found from ROOTVERTICES, remove it from ROOTVERTICES
     if (rhs._noedges && currentContainer) {
-      debug(`REMOVE ${rhs} from root vertices of the container ${currentContainer}`)
+      //debug(`REMOVE ${rhs} from root vertices of the container ${currentContainer}`)
       const idx = currentContainer._ROOTVERTICES.indexOf(rhs)
       if (idx >= 0) {
         const removed = currentContainer._ROOTVERTICES.splice(idx, 1)
@@ -473,16 +471,16 @@ function _getDefaultAttribute(graphCanvas: GraphCanvas,
   while (container) {
     const value = container.getDefault(attrname);
     if (value && callback) {
-      debug(`dcontainer had default attr`)
+      //debug(`dcontainer had default attr`)
       callback(value)
       return value
     }
-    debug(`dcontainer ${container.getName()} had NO default attr`)
+    //debug(`dcontainer ${container.getName()} had NO default attr`)
     if (container.parent) {
-      debug(`check parent, since we have one`)
+      //debug(`check parent, since we have one`)
       container = container.parent as GraphContainer
     } else {
-      debug(`oh nooo,no parent`)
+      //debug(`oh nooo,no parent`)
       container = undefined
     }
   }
@@ -510,7 +508,7 @@ function _addEdge(graphCanvas: GraphCanvas, edge: (GraphEdge[] | GraphEdge)): (G
     debug(`PUSH EDGE:${edge}`, true)
     edge.container = graphCanvas._getCurrentContainer()
   }
-  graphCanvas._EDGES.push(edge)
+  graphCanvas.addEdge(edge)
   debug(false)
   return edge
 }

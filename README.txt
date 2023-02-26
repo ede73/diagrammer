@@ -148,3 +148,101 @@ web/index.js:        parsetreevis(JSON.parse(result.value));
 web/index.js:function parsetreevis(jsonData) {
 web/index.js:    // remove parsetree ID
 web/index.js:    // add parsetree ID
+a>b>(c d>e f>g h)>(s>k)
+
+// So when parser goes thru creating AST for this graph, it proceeds as:
+// a => make vertex (add to objects, rootvertices)
+// b => make new vertex (add to objects, rootvertices)
+// > => make new edge connecting a and b
+// # remove b from rootvertices
+// ( => enter a new subgraph(1), add b as entrance node
+// > => link node b into subgraph(1) - BTW If moving to storing EDGEs in object stream, this ordering is WRONG (grammar parsers processes this way)
+//      but end result of this kind of means edge connecting b and now inner subgraph will be IN the subgraph, where in fact it sits outside
+// c => make vertex (add to objects, rootvertices)
+// ...
+// h
+// exit subgraph 1 (entrance b)
+//   replace  edge from b to subgraph 1 with..
+//     b>c
+//     b>d
+//     b>f
+//     b>h
+//  subgraph 1 exit node will be h
+//  TODO: should have also remove the nodes from rootvertices (can be roots, they've incoming links)
+//  TODO: Add this a s property of Edge, when ever it RHS links Vertex, it's parent container will automatically remove edge from vertices
+//  Also mark that then 2nd link on the example above looks to be going to 'wrong container'
+//
+// And once exiting last innergraph
+//  Replace 2nd last edge, that links the inner sub 1 to inner sub 2 with
+//    Inner sub 1 > s
+// So in other words EXACT graph as depicted:
+// 
+//  a>b>|------------|
+//	|c d>e f>g h |
+//	|------------|
+//      \
+//	 s>k
+//
+// But with modifications presented it becomes:
+// |-------------
+// |a>b_______  |
+// | / |  \   \ |
+// | c d>e f>g h|
+// |------------|
+//  \
+//   s>k
+// 
+// This is how I wanted the language snippet be interpreted
+//
+// NOW, if I want to convert the language to AST and that BACk to the language (it should be doable :) )
+// it may be ambiguous, as the resulting graph could be defined in many ways
+//
+// Also how the linking of the subgroups should be though? Since it only links  
+//
+// If last part of the graph would be (s k) ie. no link connecting them, ie. making them root vertices of their own inner graph..or individual sbutrees
+// THen
+// |------------|
+//  \__ 
+//   s k
+// Group would connect to both, s and k
+//
+// Anyway, the point of the AST to is represent what the diagrammer language is supposed to represent, NOT to be exact precision storage of
+// the lexical elements of the languagen:)
+//
+//relinkInnerSubgraphEntryAndExit
+//	SubGraph(name:1, entrance:Vertex(name:b),
+//	rootvertices:Vertex(name:c),Vertex(name:d),Vertex(name:f),Vertex(name:h))
+//  Remove edge Edge(type:> as 	L:Vertex(name:b), 
+//				R:SubGraph(name:1, entrance:Vertex(name:b),
+//				rootvertices:Vertex(name:c),Vertex(name:d),Vertex(name:f),Vertex(name:h)), label=undefined)
+//  Add new edge Edge(type:> as L:Vertex(name:b), R:Vertex(name:c),label=undefined)
+//  Add new edge Edge(type:> as L:Vertex(name:b), R:Vertex(name:d),label=undefined)
+//  Add new edge Edge(type:> as L:Vertex(name:b), R:Vertex(name:f),label=undefined)
+//  Add new edge Edge(type:> as L:Vertex(name:b), R:Vertex(name:h),label=undefined)
+//
+//relinkInnerSubgraphEntryAndExit SubGraph(name:2,entrance:
+//	SubGraph(name:1, entrance:Vertex(name:b), exit:Vertex(name:h),
+//		rootvertices:
+//			Vertex(name:c),
+//			Vertex(name:d),
+//			Vertex(name:f),
+//			Vertex(name:h)),
+//	rootvertices:
+//		Vertex(name:s))
+//  Remove edge Edge(type:> as 	L:SubGraph(name:1, entrance:Vertex(name:b), exit:Vertex(name:h), rootvertices:Vertex(name:c),Vertex(name:d),Vertex(name:f),Vertex(name:h)),
+//				R:SubGraph(name:2, entrance:SubGraph(name:1,entrance:Vertex(name:b), exit:Vertex(name:h), rootvertices:Vertex(name:c),Vertex(name:d),Vertex(name:f),Vertex(name:h)),rootvertices:Vertex(name:s)),label=undefined)
+//  Add new edge Edge(type:> as L:SubGraph(name:1, entrance:Vertex(name:b), exit:Vertex(name:h), rootvertices:Vertex(name:c),Vertex(name:d),Vertex(name:f),Vertex(name:h)),
+//				R:Vertex(name:s), label=undefined)
+//msc {
+//    a,b,c,d,e,f,g,h,s,k;
+//    a=>b[id="1"];
+//    b=>c[id="2"];
+//    b=>d[id="3"];
+//    b=>f[id="4"];
+//    b=>h[id="5"];
+//    d=>e[id="6"];
+//    f=>g[id="7"];
+//    1=>s[id="8"];
+//    s=>k[id="9"];
+//}
+

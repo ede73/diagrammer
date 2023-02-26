@@ -3,10 +3,10 @@ digraph {
     rankdir=TD;
     subgraph cluster_canvas {
         color=yellow;
-        GraphCanvas[shape=record, color=yellow, fillcolor=yellow, label="{ GraphCanvas | {_OBJECTS|GraphObject, GraphRoot, xGroup, GNode, Link}|{_ROOTVERTICES|GraphObject, GraphRoot, xGroup, GNode, Link}|{defaults|[object Object]}|{equal|}|{generator|ast_record}|{visualizer|ast_record}|{direction|portrait}|{_EDGES|GraphObject-GraphRoot, GraphObject-GNode, GraphObject-xGroup,\n GraphObject-Link, left-GNode, left-xGroup, right-xGroup,\n right-GNode, OBJECTS1-GNode, OBJECTS1-xGroup, OBJECTS2-GNode,}|{CONTAINER_EXIT|6}|{SUBGRAPHS|1}|{GROUPIDS|6}|{VARIABLES|gen=#ccffcc, par=#ccccff} }"];
+        GraphCanvas[shape=record, color=yellow, fillcolor=yellow, label="{ GraphCanvas | {_ROOTVERTICES|GraphObject, GraphRoot, xGroup, GNode, Link}|{defaults|[object Object]}|{equal|}|{_OBJECTS|GraphObject, GraphRoot, xGroup, GNode, Link}|{generator|ast_record}|{visualizer|ast_record}|{direction|portrait}|{_EDGES|GraphObject-GraphRoot, GraphObject-GNode, GraphObject-xGroup,\n GraphObject-Link, left-GNode, left-xGroup, right-xGroup,\n right-GNode, OBJECTS1-GNode, OBJECTS1-xGroup, OBJECTS2-GNode,}|{CONTAINER_EXIT|6}|{SUBGRAPHS|1}|{GROUPIDS|6}|{VARIABLES|gen=#ccffcc, par=#ccccff} }"];
         subgraph cluster_GraphObject {
             color=blue;
-            GraphObject[shape=record, color=blue, fillcolor=blue, label="{ GraphGroup | {label|GraphObject}|{name|GraphObject}|{parent|GraphCanvas}|{_OBJECTS|name, color, textColor, label}|{_ROOTVERTICES|name, color, textColor, label}|{defaults|[object Object]}|{equal|}|{isInnerGraph|false}|{exitvertex|1} }"];
+            GraphObject[shape=record, color=blue, fillcolor=blue, label="{ GraphGroup | {label|GraphObject}|{name|GraphObject}|{parent|GraphCanvas}|{_ROOTVERTICES|name, color, textColor, label}|{defaults|[object Object]}|{equal|}|{_OBJECTS|name, color, textColor, label}|{isInnerGraph|false}|{exitvertex|1} }"];
             name[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {color|#ccccff}|{name|name}|{parent|GraphObject}|{_noedges|true} }"];
             color[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {color|#ccccff}|{name|color}|{parent|GraphObject}|{_noedges|true} }"];
             textColor[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {color|#ccccff}|{name|textColor}|{parent|GraphObject}|{_noedges|true} }"];
@@ -14,7 +14,7 @@ digraph {
         }
         subgraph cluster_GraphRoot {
             color=blue;
-            GraphRoot[shape=record, color=blue, fillcolor=blue, label="{ GraphGroup | {label|GraphRoot:GraphObject}|{name|GraphRoot}|{parent|GraphCanvas}|{_OBJECTS|OBJECTS1, xGenerator, xVisualizer, direction, xStart, xEqual,}|{_ROOTVERTICES|OBJECTS1, xGenerator, xVisualizer, direction, xStart, xEqual,}|{defaults|[object Object]}|{equal|}|{isInnerGraph|false}|{exitvertex|2} }"];
+            GraphRoot[shape=record, color=blue, fillcolor=blue, label="{ GraphGroup | {label|GraphRoot:GraphObject}|{name|GraphRoot}|{parent|GraphCanvas}|{_ROOTVERTICES|OBJECTS1, xGenerator, xVisualizer, direction, xStart, xEqual,}|{defaults|[object Object]}|{equal|}|{_OBJECTS|OBJECTS1, xGenerator, xVisualizer, direction, xStart, xEqual,}|{isInnerGraph|false}|{exitvertex|2} }"];
             OBJECTS1[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {label|OBJECTS}|{name|OBJECTS1}|{parent|GraphRoot}|{_noedges|true}|{shape|database} }"];
             xGenerator[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {label|generator}|{color|#ccffcc}|{name|xGenerator}|{parent|GraphRoot}|{_noedges|true} }"];
             xVisualizer[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {label|visualizer}|{color|#ccffcc}|{name|xVisualizer}|{parent|GraphRoot}|{_noedges|true} }"];
@@ -26,14 +26,14 @@ digraph {
         }
         subgraph cluster_xGroup {
             color=blue;
-            xGroup[shape=record, color=blue, fillcolor=blue, label="{ GraphGroup | {label|Group:GraphObject}|{name|xGroup}|{parent|GraphCanvas}|{_OBJECTS|name, equal2, OBJECTS2}|{_ROOTVERTICES|name, equal2, OBJECTS2}|{defaults|[object Object]}|{equal|}|{isInnerGraph|false}|{exitvertex|3} }"];
+            xGroup[shape=record, color=blue, fillcolor=blue, label="{ GraphGroup | {label|Group:GraphObject}|{name|xGroup}|{parent|GraphCanvas}|{_ROOTVERTICES|name, equal2, OBJECTS2}|{defaults|[object Object]}|{equal|}|{_OBJECTS|name, equal2, OBJECTS2}|{isInnerGraph|false}|{exitvertex|3} }"];
             inner_name[shape=record, color=red, fillcolor=red, label="{ GraphReference | {name|name}|{parent|xGroup} }"];
             equal2[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {label|equal}|{name|equal2}|{parent|xGroup}|{_noedges|true} }"];
             OBJECTS2[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {label|OBJECTS}|{name|OBJECTS2}|{parent|xGroup}|{_noedges|true}|{shape|database} }"];
         }
         subgraph cluster_GNode {
             color=blue;
-            GNode[shape=record, color=blue, fillcolor=blue, label="{ GraphGroup | {label|Node:GraphObject}|{name|GNode}|{parent|GraphCanvas}|{_OBJECTS|xShape, image, style, color}|{_ROOTVERTICES|xShape, image, style, color}|{defaults|[object Object]}|{equal|}|{isInnerGraph|false}|{exitvertex|4} }"];
+            GNode[shape=record, color=blue, fillcolor=blue, label="{ GraphGroup | {label|Node:GraphObject}|{name|GNode}|{parent|GraphCanvas}|{_ROOTVERTICES|xShape, image, style, color}|{defaults|[object Object]}|{equal|}|{_OBJECTS|xShape, image, style, color}|{isInnerGraph|false}|{exitvertex|4} }"];
             xShape[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {label|shape}|{name|xShape}|{parent|GNode}|{_noedges|true} }"];
             image[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {name|image}|{parent|GNode}|{_noedges|true} }"];
             style[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {name|style}|{parent|GNode}|{_noedges|true} }"];
@@ -41,7 +41,7 @@ digraph {
         }
         subgraph cluster_Link {
             color=blue;
-            Link[shape=record, color=blue, fillcolor=blue, label="{ GraphGroup | {label|Link:GraphObject}|{name|Link}|{parent|GraphCanvas}|{_OBJECTS|linkType, left, right}|{_ROOTVERTICES|linkType, left, right}|{defaults|[object Object]}|{equal|}|{isInnerGraph|false}|{exitvertex|5} }"];
+            Link[shape=record, color=blue, fillcolor=blue, label="{ GraphGroup | {label|Link:GraphObject}|{name|Link}|{parent|GraphCanvas}|{_ROOTVERTICES|linkType, left, right}|{defaults|[object Object]}|{equal|}|{_OBJECTS|linkType, left, right}|{isInnerGraph|false}|{exitvertex|5} }"];
             linkType[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {name|linkType}|{parent|Link}|{_noedges|true} }"];
             left[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {name|left}|{parent|Link}|{_noedges|true} }"];
             right[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {name|right}|{parent|Link}|{_noedges|true} }"];

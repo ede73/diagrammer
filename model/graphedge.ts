@@ -76,10 +76,10 @@ export class GraphEdge extends GraphObject {
 
   toString() {
     let fmt = ''
-    if (this.lcompass) { fmt += `,lcompass: ${this.lcompass}` }
-    if (this.rcompass) { fmt += `,rcompass: ${this.rcompass}` }
-    if (this.edgecolor) { fmt += `,color: " ${this.edgecolor}` }
-    if (this.edgetextcolor) { fmt += `,textcolor: ${this.edgetextcolor}` }
-    return `Edge(type:${this.edgeType} as L:${this.left.toString()}, R:${this.right.toString()},label=${this.getLabel()}${fmt})`
+    if (this.lcompass) { fmt += `, lcompass: ${this.lcompass}` }
+    if (this.rcompass) { fmt += `, rcompass: ${this.rcompass}` }
+    if (this.edgecolor) { fmt += `, color: " ${this.edgecolor}` }
+    if (this.edgetextcolor) { fmt += `, textcolor: ${this.edgetextcolor}` }
+    return `GraphEdge (type:${this.edgeType} as L:${this.left.toString()}, R:${this.right.toString()}, label=${this.getLabel()}${fmt})`
   }
 };

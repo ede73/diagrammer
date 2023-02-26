@@ -72,8 +72,8 @@ export class GraphVertex extends GraphConnectable {
 
   toString() {
     let fmt = ''
-    if (this.color) { fmt += `,color: ${this.color}` }
-    if (this.label) { fmt += `,label: ${this.label}` }
-    return `Vertex(name:${this.getName()}${fmt})`
+    if (this.color) { fmt += `, color: ${this.color}` }
+    if (this.label) { fmt += `, label: ${this.label}` }
+    return `GraphVertex (name:${this.getName()}${fmt})`
   }
 };

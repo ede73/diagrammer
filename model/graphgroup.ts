@@ -41,6 +41,6 @@ export class GraphGroup extends GraphContainer {
   }
 
   toString() {
-    return `group:Group(${this.name})`
+    return `GraphGroup (${this.name})`
   }
 };

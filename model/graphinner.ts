@@ -70,11 +70,11 @@ export class GraphInner extends GraphGroup {
 
   toString() {
     let fmt = ''
-    if (this._edgelabel) { fmt += `,edgelabel:${this._edgelabel}` }
-    if (this._entrance) { fmt += `,entrance:${this._entrance}` }
+    if (this._edgelabel) { fmt += `, edgelabel:${this._edgelabel}` }
+    if (this._entrance) { fmt += `, entrance:${this._entrance}` }
 
-    if (this._exit) { fmt += `,exit:${this._exit}` }
-    if (this._ROOTVERTICES) { fmt += `,rootvertices:${this._ROOTVERTICES}` }
-    return `SubGraph(name:${this.name}${fmt})`
+    if (this._exit) { fmt += `, exit:${this._exit}` }
+    if (this._ROOTVERTICES) { fmt += `, rootvertices:${this._ROOTVERTICES.map(r => r.getName())}` }
+    return `GraphInner (name:${this.name}${fmt})`
   };
 };

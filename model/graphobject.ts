@@ -65,7 +65,7 @@ export class GraphObject {
    * Set color
    */
   setColor(color: string) {
-    debug(`===Set color ${color} to ${this.getName()}`)
+    //debug(`===Set color ${color} to ${this.getName()}`)
     // Grammar uses call chaining, and doesn't check so it may ..setColor(OptionalColotThatIsUndefinedIeLeftOut..)
     if (color) {
       this.color = color.trim()

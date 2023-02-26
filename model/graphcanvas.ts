@@ -46,7 +46,7 @@ export class GraphCanvas extends GraphContainer {
   shape?: string = undefined
   direction?: string = undefined
   start?: string = undefined
-  _EDGES: GraphEdge[] = []
+  private _EDGES: GraphEdge[] = []
 
   // parsing context
   /**
@@ -179,5 +179,17 @@ export class GraphCanvas extends GraphContainer {
 
   getEdges() {
     return this._EDGES
+  }
+
+  addEdge(edge: GraphEdge) {
+    this._EDGES.push(edge)
+  }
+
+  removeEdge(edgeIndex: number) {
+    return this._EDGES.splice(edgeIndex, 1)
+  }
+
+  insertEdge(afterThisIndex: number, newEdge: GraphEdge) {
+    return this._EDGES.splice(afterThisIndex, 0, newEdge)
   }
 };

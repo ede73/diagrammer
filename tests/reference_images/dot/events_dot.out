@@ -56,9 +56,9 @@ digraph {
     aDashed->bdasHed[ dir=none, style="dashed" ];
     bLR->alr[ arrowhead="tee" ];
     arr->bRR[ arrowhead="tee" ];
-    a1->b1[ color="#ff0000", fontcolor="#ff0000" ];
+    a1->b1[ color="#ff0000" ];
     a2->b2[ label="event label" ];
-    a3->b3[ color="#ff0000", fontcolor="#ff0000", label="event label" ];
+    a3->b3[ color="#ff0000", label="event label" ];
     a4->b4;
     a4->c4;
     c5->a5;

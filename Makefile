@@ -7,33 +7,60 @@
 # $^ list of dependencies on the target
 # $< first dependency on the list
 
+CORES = 
+
 GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.grammar
 MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js model/graphcontainer.js model/graphconnectable.js
 MODEL_REST = model/shapes.js model/tree.js
+GENERATOR_FILES=$(shell find generators -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
+MODEL_FILES=$(shell find model -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
+WEB_FILES=$(shell find model -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
+WEB_VISUALIZER_FILES=$(shell find model -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
+PARSER_TEST_FILES=$(shell find tests/parser -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
+WEB_TEST_FILES=$(shell find tests/web -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
 
-all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST) nodemodules faketypes
+all:; @$(MAKE) _all -j$(CORES)
+_all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST) nodemodules parsertests webtests webvisualizations web model generators faketypes
 	@echo Make ALL
+.PHONY: all _all
 
-parsertests: tests/parser/tsconfig.json tests/parser/*.ts
+parsertests: tests/parser/tsconfig.json $(PARSER_TEST_FILES)
 	@echo "Transpile jest parser tests"
 	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 
-webtests: tests/web/tsconfig.json tests/web/*.ts
+webtests: tests/web/tsconfig.json $(WEB_TEST_FILES)
 	@echo "Transpile jest web tests"
 	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 
-faketypes:
+webvisualizations: web/visualizations/tsconfig.json $(WEB_VISUALIZER_FILES)
+	@echo "Transpile web visualization code"
+	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
+
+web: web/tsconfig.json $(WEB_FILES)
+	@echo "Transpile web code"
+	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
+
+model: model/tsconfig.json $(MODEL_FILES)
+	@echo "Transpile model code"
+	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
+
+generators: generators/tsconfig.json $(GENERATOR_FILES)
+	@echo "Transpile generators code: $(GENERATOR_FILES)"
+	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
+
+faketypes: build/types/diagrammer_parser_types.ts
 	@echo "Make diagrammer shared context type for jest tests"
 	@cp js/diagrammer_parser_types.ts build/types
 	@echo '{"type":"module"}' > build/types/package.json
 	@(cd build/types; tsc diagrammer_parser_types.ts -t es2017 -m es6 --allowjs --esModuleInterop>/dev/null || true)
 
 %.js: %.ts
-	@echo "Transpile typescripts"
-	@tsc -p model/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-	@tsc -p generators/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-	@tsc -p web/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-	@tsc -p web/visualizations/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
+	@echo Phony target.. tsc compiles projects, alas it cannot build individual files AND use tsconfig
+# 	@echo "Transpile typescripts"
+# 	@tsc -p model/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
+# 	@tsc -p generators/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
+# 	@tsc -p web/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
+# 	@tsc -p web/visualizations/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 
 nodemodules: node_modules
 	@echo "Check node_modules exist"
@@ -67,7 +94,7 @@ build/diagrammer.all: $(GRAMMAR_FILES)
 	@echo Compile build/diagrammer.all
 	@cat $^ >$@
 
-build/diagrammer_parser.js: build/diagrammer.all Makefile generators/*.js model/* js/*
+build/diagrammer_parser.js: build/diagrammer.all Makefile generators model js/*.js
 	@echo "Construct parser utility, add all imports"
 	@mkdir -p build
 	@echo make parser

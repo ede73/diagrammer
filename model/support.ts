@@ -74,24 +74,29 @@ export function getAttribute(cl: GraphObject, attr: string) {
  * Return formatted attribute value
  *
  * @param cl Object to scan thru
- * @param attr Name of the attribute to return
+ * @param attributeNameOrNames Name of the attribute(s) to return, FIRST matching attribute will satisfy
  * @param fmt Format string to apply to returned variable (optional), example: fillcolor="{0}"
  * @param If given, in addition for returning, will PUSH the result to this array
  * @returns (possibly formatted) value of the attribute or "" if attribute not found
  */
-export function getAttributeAndFormat(cl: GraphObject, attr: (string | any[]), fmt: string, resultarray?: string[]): string {
-  if (attr instanceof Array) {
-    for (const i of attr) {
-      const tmp = getAttributeAndFormat(cl, i, fmt, resultarray)
+export function getAttributeAndFormat(
+  cl: GraphObject,
+  attributeNameOrNames: (string | string[]),
+  fmt: string, resultarray?: string[]): string {
+
+  if (attributeNameOrNames instanceof Array) {
+    for (const attrName of attributeNameOrNames) {
+      const tmp = getAttributeAndFormat(cl, attrName, fmt, resultarray)
       if (tmp) {
-        debug(`Return ${tmp}`)
+        debug(`Return ${tmp} for ${attrName}`)
         return tmp
       }
     }
     return ''
   }
 
-  const obtained = Object.getOwnPropertyDescriptor(cl, attr);
+  // TODO:
+  const obtained = Object.getOwnPropertyDescriptor(cl, attributeNameOrNames);
   // Not gonna fly coz cl can be subclass of GraphObject and we're fetching ITS properies
   // const attrType = attr as keyof typeof GraphObject;
   if (!obtained || !obtained.value || obtained.value === 0) {

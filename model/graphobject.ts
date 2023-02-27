@@ -1,7 +1,9 @@
 // @ts-check
 
 import { debug } from './debug.js'
+import { GraphContainer, DefaultSettingKey } from './graphcontainer.js'
 
+type DefaultAndCallback = { attrName: DefaultSettingKey, callback: (value: string) => void }
 /**
  * GraphObject: Anything that is represented in a graph (diagram/visualization)
  */
@@ -135,6 +137,42 @@ export class GraphObject {
   getLabel() {
     return this.label
   }
+
+  fetchAndSetContainerDefaults(setup: DefaultAndCallback[]) {
+    if (this.parent) {
+      setup.forEach(check => {
+        this.getDefaultAttribute(this.parent as GraphContainer, check.attrName, check.callback)
+      });
+    }
+  }
+
+  /**
+   * Get default attribute vertexcolor,edgecolor,groupcolor and bubble upwards if
+   * otherwise 'unobtainable'
+   *
+   * @param graphCanvas
+   * @param attrname Name of the default attribute. If not found, returns undefined
+   * @param  [callback] Pass the attribute to the this function as only argument - if attribute WAS actually defined!
+   */
+  private getDefaultAttribute(container: GraphContainer,
+    attrname: DefaultSettingKey,
+    callback?: (defaultAttr: string) => void): string | undefined {
+
+    let loops = 0
+    while (container) {
+      const value = container.getDefault(attrname);
+      if (value && callback) {
+        callback(value)
+        return value
+      }
+      if (container.parent) {
+        container = container.parent as GraphContainer
+      } else {
+        break;
+      }
+    }
+  }
+
 
   toString() {
     return 'GraphObject'

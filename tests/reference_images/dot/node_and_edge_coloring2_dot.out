@@ -24,7 +24,7 @@ digraph {
     gblack->hblack[ label="g links to h" ];
     iblue->j;
     klightblue->l[ label="k links to l" ];
-    myellow->n[ color="#ff00ff", fontcolor="#ff00ff" ];
-    ogray->p[ color="#ff7777", fontcolor="#ff7777", label="o p link orange" ];
-    qred->rblue[ color="#00ff00", fontcolor="#00ff00", label="q r link green" ];
+    myellow->n[ color="#ff00ff" ];
+    ogray->p[ color="#ff7777", label="o p link orange" ];
+    qred->rblue[ color="#00ff00", label="q r link green" ];
 }

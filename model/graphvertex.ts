@@ -1,6 +1,6 @@
 // @ts-check
 import { GraphConnectable } from './graphconnectable.js'
-import { GraphContainer } from './graphcontainer.js'
+import { GraphContainer, DefaultSettingKey } from './graphcontainer.js'
 import { Shapes } from './shapes.js'
 
 /**
@@ -14,9 +14,9 @@ export class GraphVertex extends GraphConnectable {
   /**
    * @param name Name of the vertex
    * @param [shape] Optional shape for the vertex, if not given, will default to what ever default is being used at the moment
-   * @constructor
+   * @param [style] Optional, style
    */
-  constructor(name: string, parent: GraphContainer, shape?: string) {
+  constructor(name: string, parent: GraphContainer, shape?: string, style?: string) {
     super(name, parent)
     if (shape) {
       this._assertRegonizedShape(shape)
@@ -25,6 +25,16 @@ export class GraphVertex extends GraphConnectable {
     if (!parent) {
       throw new Error('GraphVertex REQUIRES a parent container')
     }
+    // Just created, so no on can point to us yet!
+    this._noedges = true
+
+    if (style) {
+      this.style = style
+    }
+
+    this.fetchAndSetContainerDefaults([
+      { attrName: 'vertexcolor' as DefaultSettingKey, callback: color => this.color = color },
+      { attrName: 'vertextextcolor' as DefaultSettingKey, callback: color => this.textcolor = color }])
   }
 
   _assertRegonizedShape(shape: string) {

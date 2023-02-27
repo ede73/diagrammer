@@ -37,16 +37,16 @@ digraph {
         right;
     }//end of Link undefined
     //links start
-    name->OBJECTS1[  lhead=cluster_GraphRoot,  ltail=cluster_GraphObject, color="#0000ff", fontcolor="#0000ff", label="extends(GraphObject->GraphRoot)", style="dotted" ];
-    name->xShape[  lhead=cluster_GNode,  ltail=cluster_GraphObject, color="#0000ff", fontcolor="#0000ff", label="extends(GraphObject->GNode)", style="dotted" ];
-    name->equal2[  lhead=cluster_xGroup,  ltail=cluster_GraphObject, color="#0000ff", fontcolor="#0000ff", label="extends(GraphObject->xGroup)", style="dotted" ];
-    name->linkType[  lhead=cluster_Link,  ltail=cluster_GraphObject, color="#0000ff", fontcolor="#0000ff", label="extends", style="dotted", xlabel="extends(GraphObject->Link)" ];
-    left->xShape[  lhead=cluster_GNode, color="#00ff00", dir=both, fontcolor="#00ff00", label="links", style="dashed" ];
-    left->equal2[  lhead=cluster_xGroup, color="#00ff00", dir=both, fontcolor="#00ff00", label="links", style="dashed" ];
-    right->equal2[  lhead=cluster_xGroup, color="#00ff00", dir=both, fontcolor="#00ff00", label="links", style="dashed" ];
-    right->xShape[  lhead=cluster_GNode, color="#00ff00", dir=both, fontcolor="#00ff00", label="links", style="dashed" ];
-    OBJECTS1->xShape[  lhead=cluster_GNode, color="#ff0000", fontcolor="#ff0000", label="contains" ];
-    OBJECTS1->equal2[  lhead=cluster_xGroup, color="#ff0000", fontcolor="#ff0000", label="contains" ];
-    OBJECTS2->xShape[  lhead=cluster_GNode, color="#ff0000", fontcolor="#ff0000", label="contains" ];
-    OBJECTS2->equal2[  lhead=cluster_xGroup, color="#ff0000", fontcolor="#ff0000", label="contains" ];
+    name->OBJECTS1[  lhead=cluster_GraphRoot,  ltail=cluster_GraphObject, color="#0000ff", label="extends(GraphObject->GraphRoot)", style="dotted" ];
+    name->xShape[  lhead=cluster_GNode,  ltail=cluster_GraphObject, color="#0000ff", label="extends(GraphObject->GNode)", style="dotted" ];
+    name->equal2[  lhead=cluster_xGroup,  ltail=cluster_GraphObject, color="#0000ff", label="extends(GraphObject->xGroup)", style="dotted" ];
+    name->linkType[  lhead=cluster_Link,  ltail=cluster_GraphObject, color="#0000ff", label="extends", style="dotted", xlabel="extends(GraphObject->Link)" ];
+    left->xShape[  lhead=cluster_GNode, color="#00ff00", dir=both, label="links", style="dashed" ];
+    left->equal2[  lhead=cluster_xGroup, color="#00ff00", dir=both, label="links", style="dashed" ];
+    right->equal2[  lhead=cluster_xGroup, color="#00ff00", dir=both, label="links", style="dashed" ];
+    right->xShape[  lhead=cluster_GNode, color="#00ff00", dir=both, label="links", style="dashed" ];
+    OBJECTS1->xShape[  lhead=cluster_GNode, color="#ff0000", label="contains" ];
+    OBJECTS1->equal2[  lhead=cluster_xGroup, color="#ff0000", label="contains" ];
+    OBJECTS2->xShape[  lhead=cluster_GNode, color="#ff0000", label="contains" ];
+    OBJECTS2->equal2[  lhead=cluster_xGroup, color="#ff0000", label="contains" ];
 }

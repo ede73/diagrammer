@@ -1,7 +1,7 @@
 // @ts-check
-import { errorMonitor } from 'events'
 import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphConnectable } from './graphconnectable.js'
+import { DefaultSettingKey } from '../model/graphcontainer.js'
 
 /**
  * Represents a container
@@ -38,6 +38,7 @@ export class GraphGroup extends GraphContainer {
     if (!parent) {
       throw new Error('GraphGroup REQUIRES a parent container')
     }
+    this.fetchAndSetContainerDefaults([{ attrName: 'groupcolor' as DefaultSettingKey, callback: color => this.color = color }])
   }
 
   toString() {

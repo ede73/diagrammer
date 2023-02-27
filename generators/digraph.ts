@@ -86,8 +86,10 @@ export function digraph(graphcanvas: GraphCanvas) {
   const processAVertex = (obj: GraphConnectable) => {
     const nattrs: string[] = []
     const styles: string[] = []
-    getAttributeAndFormat(obj, 'color', 'fillcolor="{0}"', nattrs)
-    getAttributeAndFormat(obj, 'color', 'filled', styles)
+    if (obj.color) {
+      nattrs.push(`fillcolor="${obj.color}"`)
+      styles.push(`filled`)
+    }
     getAttributeAndFormat(obj, 'style', '{0}', styles)
 
     const url = obj.url
@@ -206,13 +208,11 @@ export function digraph(graphcanvas: GraphCanvas) {
       lout('graph[ style=invis ];')
     }
     if (grp.getLabel()) {
-      lout(getAttributeAndFormat(grp, 'label',
-        'label="{0}";'))
+      lout(getAttributeAndFormat(grp, 'label', 'label="{0}";'))
     }
     if (grp.getColor()) {
       lout('style=filled;')
-      lout(getAttributeAndFormat(grp, 'color',
-        'color="{0}";'))
+      lout(getAttributeAndFormat(grp, 'color', 'color="{0}";'))
     }
     grp.getObjects().forEach(o => ltraverseVertices(o))
     lout(`}//end of ${grp.getName()} ${cond}`, false)
@@ -287,8 +287,12 @@ export function digraph(graphcanvas: GraphCanvas) {
     if (url) {
       attrs.push(`URL="${url.trim()}"`)
     }
-    getAttributeAndFormat(edge, 'color', 'color="{0}"', attrs)
-    getAttributeAndFormat(edge, ['textcolor', 'color'], 'fontcolor="{0}"', attrs)
+    if (edge.color) {
+      attrs.push(`color="${edge.color}"`)
+    }
+    if (edge.textcolor) {
+      attrs.push(`fontcolor="${edge.textcolor}"`)
+    }
     let edgeType: string
     let rhs: (GraphConnectable | GraphConnectable[]) = edge.right
     let lhs: (GraphConnectable | GraphConnectable[]) = edge.left

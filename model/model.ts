@@ -173,16 +173,8 @@ function findOrCreateVertex(graphCanvas: GraphCanvas, vertexOrName: (string | Gr
 
   // not found, so create vertex
   debug(`Create new vertex name=${rhsObjectName}`, true)
-  const vertex = new GraphVertex(rhsObjectName, graphCanvas._getCurrentContainer(), graphCanvas.getCurrentShape())
-  if (style) vertex.setStyle(style)
-  vertex._noedges = true
+  const vertex = new GraphVertex(rhsObjectName, graphCanvas._getCurrentContainer(), graphCanvas.getCurrentShape(), style)
 
-  _getDefaultAttribute(graphCanvas, 'vertexcolor', (color: string) => {
-    vertex.setColor(color)
-  })
-  _getDefaultAttribute(graphCanvas, 'vertextextcolor', (color: string) => {
-    vertex.setTextColor(color)
-  })
   debug(false)
   return graphCanvas._getCurrentContainer().addObject(vertex)
 }
@@ -235,6 +227,7 @@ export function _exitSubGraph(graphCanvas: GraphCanvas) {
   return graphCanvas._exitContainer()
 }
 
+// TODO: see if this could be done also at the end of the graph
 function relinkInnerSubgraphEntryAndExit(graphCanvas: GraphCanvas, currentSubGraph: GraphInner) {
   let edgeAndItsIndex: [GraphEdge, number] | undefined
   debug(`relinkInnerSubgraphEntryAndExit ${currentSubGraph}`)
@@ -287,17 +280,10 @@ function relinkInnerSubgraphEntryAndExit(graphCanvas: GraphCanvas, currentSubGra
  */
 export function _getGroup(graphCanvas: GraphCanvas, ref: GraphContainer): GraphContainer {
   if (ref instanceof GraphGroup) return ref
-  debug(`_getGroup() ref:${ref}`, true)
+  debug(`_getGroup() ref:${ref}`)
   const currenContainer = graphCanvas._getCurrentContainer()
   const newGroup = new GraphGroup(String(graphCanvas.GROUPIDS++), currenContainer)
-  debug(`pushgroup ${newGroup}`)
   currenContainer.addObject(newGroup)
-
-  _getDefaultAttribute(graphCanvas, 'groupcolor', (color: string) => {
-    debug(`SET default color ${color}`)
-    newGroup.setColor(color)
-  })
-  debug(false)
   return newGroup
 }
 
@@ -339,16 +325,9 @@ export function _getEdge(graphCanvas: GraphCanvas,
   if (rhs instanceof GraphInner && !rhs._getEntrance()) {
     rhs._setEntrance(lhs)
   }
+
   if (rhs instanceof GraphVertex) {
-    // if RHS has no edges (and is contained in a container) AND found from ROOTVERTICES, remove it from ROOTVERTICES
-    if (rhs._noedges && currentContainer) {
-      //debug(`REMOVE ${rhs} from root vertices of the container ${currentContainer}`)
-      const idx = currentContainer._ROOTVERTICES.indexOf(rhs)
-      if (idx >= 0) {
-        const removed = currentContainer._ROOTVERTICES.splice(idx, 1)
-        debug(`REMOVE ${removed} from ROOTVERTICES`)
-      }
-    }
+    maybeRemoveFromRootVertices(currentContainer, rhs)
     // TODO: Should noedges be set to GraphConnectable (except Edge..)
     // TODO: Also if this is an array, this assignment makes no sense
     // oddly this seems wrong, but removing breaks plantuml_context and plantuml_context2
@@ -386,14 +365,6 @@ export function _getEdge(graphCanvas: GraphCanvas,
     return lastEdge as GraphEdge
   }
 
-  if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) &&
-    !(lhs instanceof GraphInner) && !(lhs instanceof GraphReference)) {
-    throw new Error(`LHS not a Vertex,Group nor a SubGraph(LHS=${lhs}) RHS=(${rhs})`)
-  }
-  if (!(rhs instanceof GraphVertex) && !(rhs instanceof GraphGroup) &&
-    !(rhs instanceof GraphInner) && !(rhs instanceof GraphReference)) {
-    throw new Error(`RHS not a Vertex,Group nor a SubGraph(LHS=${lhs}) RHS=(${rhs})`)
-  }
   const edge = new GraphEdge(edgeType, currentContainer, lhs, rhs)
   debug(`${edge}`)
   if (lcompass) edge.lcompass = lcompass
@@ -402,12 +373,6 @@ export function _getEdge(graphCanvas: GraphCanvas,
   if (rcompass) edge.rcompass = rcompass
   else if (getAttribute(rhs, 'compass')) edge.rcompass = getAttribute(rhs, 'compass')
 
-  _getDefaultAttribute(graphCanvas, 'edgecolor', (edgeColor: string) => {
-    edge.setColor(edgeColor)
-  })
-  _getDefaultAttribute(graphCanvas, 'edgetextcolor', (edgeTextColor: string) => {
-    edge.setTextColor(edgeTextColor)
-  })
   if (commonEdgeLabel) {
     edge.setLabel(commonEdgeLabel)
     debug(`  set commonEdgeLabel ${commonEdgeLabel}`)
@@ -438,6 +403,19 @@ export function _getEdge(graphCanvas: GraphCanvas,
   return edge
 }
 
+function maybeRemoveFromRootVertices(currentContainer: GraphContainer, rhs: GraphVertex) {
+  // if RHS has no edges (and is contained in a container) AND found from ROOTVERTICES, remove it from ROOTVERTICES
+  if (rhs._noedges && currentContainer) {
+    //debug(`REMOVE ${rhs} from root vertices of the container ${currentContainer}`)
+    const idx = currentContainer._ROOTVERTICES.indexOf(rhs)
+    if (idx >= 0) {
+      const removed = currentContainer._ROOTVERTICES.splice(idx, 1)
+      debug(`REMOVE ${removed} from ROOTVERTICES`)
+    }
+  }
+}
+
+
 // =====================================
 // only model.js
 // =====================================
@@ -448,38 +426,6 @@ export function _getEdge(graphCanvas: GraphCanvas,
  */
 function _getVariables(graphCanvas: GraphCanvas) {
   return graphCanvas.VARIABLES
-}
-
-/**
- * Get default attribute vertexcolor,edgecolor,groupcolor and bubble upwards if
- * otherwise 'unobtainable'
- *
- * @param graphCanvas
- * @param attrname Name of the default attribute. If not found, returns undefined
- * @param  [callback] Pass the attribute to the this function as only argument - if attribute WAS actually defined!
- */
-function _getDefaultAttribute(graphCanvas: GraphCanvas,
-  attrname: keyof GraphContainer['defaults'],
-  callback?: (defaultAttr: string) => void): string | undefined {
-
-  let container: GraphContainer | undefined = graphCanvas._getCurrentContainer()
-  let loops = 0
-  while (container) {
-    const value = container.getDefault(attrname);
-    if (value && callback) {
-      //debug(`dcontainer had default attr`)
-      callback(value)
-      return value
-    }
-    //debug(`dcontainer ${container.getName()} had NO default attr`)
-    if (container.parent) {
-      //debug(`check parent, since we have one`)
-      container = container.parent as GraphContainer
-    } else {
-      //debug(`oh nooo,no parent`)
-      container = undefined
-    }
-  }
 }
 
 /**
@@ -526,3 +472,4 @@ function _maybePushToCurrentContainerAsReference(graphCanvas: GraphCanvas, refer
   currentContainer.addObject(ref)
   return ref
 }
+

@@ -20,8 +20,8 @@ digraph {
     z2->q1[ label="Multiple LHS lists" ];
     z3->q1[ label="Multiple LHS lists" ];
     z4->q1[ label="Multiple LHS lists" ];
-    w1->q1[ color="#00ffff", fontcolor="#00ffff" ];
-    w2->q1[ color="#00ffff", fontcolor="#00ffff" ];
-    w3->q1[ color="#00ffff", fontcolor="#00ffff" ];
-    w4->q1[ color="#00ffff", fontcolor="#00ffff" ];
+    w1->q1[ color="#00ffff" ];
+    w2->q1[ color="#00ffff" ];
+    w3->q1[ color="#00ffff" ];
+    w4->q1[ color="#00ffff" ];
 }

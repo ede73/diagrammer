@@ -14,6 +14,8 @@ export type ALLOWED_DEFAULTS = {
   edgetextcolor?: string
 }
 
+export type DefaultSettingKey = keyof ALLOWED_DEFAULTS;
+
 // Common 'subclass' for GraphInner, GraphGroup, GraphCanvas
 export class GraphContainer extends GraphConnectable {
   /**

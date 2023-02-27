@@ -12,14 +12,14 @@ visualizations.set('neato', visualizeNeato)
 visualizations.set('osage', visualizeOsage)
 visualizations.set('twopi', visualizeTwopi)
 
-export function visualizeCirco(generatorResult: string) { visualizeGraphviz(generatorResult, 'circo') }
-export function visualizeDot(generatorResult: string) { visualizeGraphviz(generatorResult, 'dot') }
-export function visualizeFdp(generatorResult: string) { visualizeGraphviz(generatorResult, 'fdp') }
-export function visualizeNeato(generatorResult: string) { visualizeGraphviz(generatorResult, 'neato') }
-export function visualizeOsage(generatorResult: string) { visualizeGraphviz(generatorResult, 'osage') }
-export function visualizeTwopi(generatorResult: string) { visualizeGraphviz(generatorResult, 'twopi') }
+export function visualizeCirco(generatedResult: string) { visualizeGraphviz(generatedResult, 'circo') }
+export function visualizeDot(generatedResult: string) { visualizeGraphviz(generatedResult, 'dot') }
+export function visualizeFdp(generatedResult: string) { visualizeGraphviz(generatedResult, 'fdp') }
+export function visualizeNeato(generatedResult: string) { visualizeGraphviz(generatedResult, 'neato') }
+export function visualizeOsage(generatedResult: string) { visualizeGraphviz(generatedResult, 'osage') }
+export function visualizeTwopi(generatedResult: string) { visualizeGraphviz(generatedResult, 'twopi') }
 
-async function visualizeGraphviz(generatorResult: string, visualizer: string) {
+async function visualizeGraphviz(generatedResult: string, visualizer: string) {
     // https://github.com/mdaines/viz.js/wiki/Usage
     try {
         const workerURL = 'js/full.render.js'

@@ -23,11 +23,11 @@ digraph {
     zk;
     //links start
     e->f;
-    g->h[ color="#ff00ff", fontcolor="#ff00ff" ];
+    g->h[ color="#ff00ff" ];
     i->j;
     k->l[ label="moro" ];
-    ze->f[ color="#772222", fontcolor="#772222" ];
-    zg->h[ color="#ff00ff", fontcolor="#ff00ff" ];
-    zi->j[ color="#aaaaaa", fontcolor="#aaaaaa" ];
-    zk->l[ color="#f0f0f0", fontcolor="#f0f0f0", label="moro" ];
+    ze->f[ color="#772222" ];
+    zg->h[ color="#ff00ff" ];
+    zi->j[ color="#aaaaaa" ];
+    zk->l[ color="#f0f0f0", label="moro" ];
 }

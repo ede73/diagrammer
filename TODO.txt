@@ -34,6 +34,21 @@ shoulg have
 - Make LIST (vertexlist,grouplist what ever list) actual object, not array kludge
 	- one could then map setLabel to all contained objects in one call
 	- hm.. we've not GraphConnectable[] in the _getEdge/_getList...
+- Now that conditional is GraphConditional, why not add some other flow constructs
+  - while
+  - for
+  - do-while?
+  - What would they look like?
+
+while condition    do                  for condition
+  a                  a                   a
+  b                  b                   b
+  c                  c                   c
+end while          while condition     end for
+
+for=while (you can textually explain counter)
+
+
 - For plantuml 
   alt succesfull case
   else some kind of failure

@@ -65,6 +65,8 @@ IF	"if"\s+.*"then"(?=\n)
 ELSEIF	"else"\s*"if"\s+.*"then"(?=\n)
 ELSE	"else"(?=\n)
 ENDIF	"end"\s*"if"(?=\n)
+WHILE   "while"\s+.*(?=\n)
+ENDWHILE "end"\s*"while"(?=\n)
 
 /*
 Could make out?
@@ -88,9 +90,10 @@ Special arrow is /> and </ that denotes a broken signal...
 '"'[^"]+'"'	return 'INLINE_STRING';
 <INITIAL,GROUP>"$("[^)]+")"	return 'VARIABLE';
 {IF}		return 'IF';
-{IF_CLAUSE}	return 'IF_CLAUSE';
 {ELSEIF}	return 'ELSEIF';
 {ELSE}		return 'ELSE';
+{WHILE}		return 'WHILE';
+{ENDWHILE}	return 'ENDWHILE';
 {ENDIF}		return 'ENDIF';
 <GROUP>{GLABEL}		return 'LABEL';
 {LABEL}		return 'LABEL';

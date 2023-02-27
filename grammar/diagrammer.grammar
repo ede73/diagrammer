@@ -235,7 +235,16 @@ graphContent
 		parser.trace('GROUP_COLOR :'+$2);
 		$$=yy.GRAPHCANVAS._getCurrentContainer().setDefault('groupcolor'     ,$2=="default"?undefined:$2)
 	}
-	| IF	 {
+	| WHILE	{
+		parser.trace('WHILE :'+$WHILE);
+		// TODO: Add proper GraphWhile
+		$$=yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS, 'while', $WHILE))
+	}
+	| ENDWHILE {
+		parser.trace('ENDWHILE :'+$ENDWHILE);
+		$$=yy.GRAPHCANVAS._exitContainer()
+	}
+	| IF {
 		parser.trace('IF :'+$IF);
 		$$=_getGroupConditionalOrMakeNew(yy.GRAPHCANVAS, 'if', $IF)
 	}

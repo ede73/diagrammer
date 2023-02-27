@@ -1,0 +1,10 @@
+generator digraph
+visualizer dot
+
+while happy
+ clap
+end while
+
+do
+ clapmore
+until exhausted

@@ -153,7 +153,7 @@ ace.define('ace/mode/state_highlight_rules', ['require', 'exports', 'module', 'a
           token: function (value) {
             return 'keyword'
           },
-          regex: /group[ ]*end|end[ ]*if|end[ ]*while|else[ ]*if|edge color[ ]*#[0-9a-f]{6}|edge textcolor[ ]*#[0-9a-f]{6}|vertex color[ ]*#[0-9a-f]{6}|vertex textcolor[ ]*#[0-9a-f]{6}|group color[ ]*#[0-9a-f]{6}|edge color[ ]*\$\([^)]+\)|edge textcolor[ ]*\$\([^)]+\)|vertex color[ ]*\$\([^)]+\)|vertex textcolor[ ]*\$\([^)]+\)|group color[ ]*\$\([^)]+\)/,
+          regex: /do([ ]|$)|until|group[ ]*end|end[ ]*if|end[ ]*while|else[ ]*if|edge color[ ]*#[0-9a-f]{6}|edge textcolor[ ]*#[0-9a-f]{6}|vertex color[ ]*#[0-9a-f]{6}|vertex textcolor[ ]*#[0-9a-f]{6}|group color[ ]*#[0-9a-f]{6}|edge color[ ]*\$\([^)]+\)|edge textcolor[ ]*\$\([^)]+\)|vertex color[ ]*\$\([^)]+\)|vertex textcolor[ ]*\$\([^)]+\)|group color[ ]*\$\([^)]+\)/,
           caseInsensitive: true
         }, {
           token: function (value) {

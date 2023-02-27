@@ -1,0 +1,13 @@
+digraph {
+    compound=true;
+    rankdir=TD;
+    subgraph cluster_1 {
+        label="while happy";
+        clap;
+    }//end of 1 undefined
+    subgraph cluster_2 {
+        label="until exhausted";
+        clapmore;
+    }//end of 2 undefined
+    //links start
+}

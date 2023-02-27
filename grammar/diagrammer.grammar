@@ -235,10 +235,21 @@ graphContent
 		parser.trace('GROUP_COLOR :'+$2);
 		$$=yy.GRAPHCANVAS._getCurrentContainer().setDefault('groupcolor'     ,$2=="default"?undefined:$2)
 	}
+	| DO	{
+		parser.trace('DO :'+$DO);
+		// TODO: Add proper GraphWhile(or GraphDo)
+		$$=yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS))
+	}
+	| UNTIL {
+		parser.trace('UNTIL :'+$UNTIL);
+		// TODO: hmm..how should we highlight the until condition here?
+		yy.GRAPHCANVAS._getCurrentContainer().setLabel($UNTIL)
+		$$=yy.GRAPHCANVAS._exitContainer()
+	}
 	| WHILE	{
 		parser.trace('WHILE :'+$WHILE);
 		// TODO: Add proper GraphWhile
-		$$=yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS, 'while', $WHILE))
+		$$=yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setLabel($WHILE))
 	}
 	| ENDWHILE {
 		parser.trace('ENDWHILE :'+$ENDWHILE);

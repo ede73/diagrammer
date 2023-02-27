@@ -67,6 +67,8 @@ ELSE	"else"(?=\n)
 ENDIF	"end"\s*"if"(?=\n)
 WHILE   "while"\s+.*(?=\n)
 ENDWHILE "end"\s*"while"(?=\n)
+DO      "do"(?=\n)
+UNTIL   "until"\s+.*(?=\n)
 
 /*
 Could make out?
@@ -94,6 +96,8 @@ Special arrow is /> and </ that denotes a broken signal...
 {ELSE}		return 'ELSE';
 {WHILE}		return 'WHILE';
 {ENDWHILE}	return 'ENDWHILE';
+{DO}		return 'DO';
+{UNTIL}	        return 'UNTIL';
 {ENDIF}		return 'ENDIF';
 <GROUP>{GLABEL}		return 'LABEL';
 {LABEL}		return 'LABEL';

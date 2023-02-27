@@ -10,6 +10,7 @@ import { GraphConnectable } from './graphconnectable.js'
 import { GraphReference } from './graphreference.js'
 import { hasOutwardEdge } from './traversal.js'
 import { debug } from './debug.js'
+import { GraphConditional } from './graphconditional.js'
 
 /**
  *
@@ -119,17 +120,15 @@ export function _getList(graphCanvas: GraphCanvas,
 export function _getVertexOrGroup(graphCanvas: GraphCanvas, objOrName: (string | GraphVertex), style?: string): GraphConnectable {
   debug(`_getVertexOrGroup (name:${objOrName}, style:${style})`, true)
 
-  const vertex = findOrCreateVertex(graphCanvas, objOrName, style)
-  debug(`in getVertex gotVertex ${vertex} / ${vertex.getName()}/${vertex.constructor.name}`)
-  graphCanvas.lastSeenVertex = vertex
-  if (graphCanvas._nextConnectableToExitEndIf) {
-    debug('Collect next vertex')
-    // TODO: make vertex? Do we know that it is vertex(yet?)
-    graphCanvas._nextConnectableToExitEndIf._conditionalExitEdge = vertex
+  const node = findOrCreateVertex(graphCanvas, objOrName, style)
+  debug(`in _getVertexOrGroup got ${node} / ${node.getName()}/${node.constructor.name}`)
+  graphCanvas.lastSeenVertex = node
+  if (graphCanvas._nextConnectableToExitEndIf && (node instanceof GraphConnectable)) {
+    graphCanvas._nextConnectableToExitEndIf._conditionalExitEdge = node
     graphCanvas._nextConnectableToExitEndIf = undefined
   }
   debug(false)
-  return vertex
+  return node
 }
 
 function locateVertex(container: GraphContainer, rhsObjectName: string): GraphVertex | GraphGroup | undefined {
@@ -281,24 +280,11 @@ function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInne
  * @param type if/elseif/else
  * @param label Anything between ^(if|elseif|else|endif) and then$
  */
-export function _getGroupConditionalOrMakeNew(graphCanvas: GraphCanvas, type: string, label: string, ref: GraphContainer): GraphContainer {
-  if (type !== 'if') {
-    graphCanvas._exitContainer()
-  }
-  const conditionalGroup = _getGroupOrMakeNew(graphCanvas, ref) as GraphGroup
-  conditionalGroup.setLabel(label.trim().replace(/(^(if|elseif|endif)\s*|(\s*then$))/g, '').trim())
-  conditionalGroup.conditional = type
-  graphCanvas._enterContainer(conditionalGroup)
-
-  if (type === 'if') {
-    conditionalGroup._conditionalEntryEdge = graphCanvas.lastSeenVertex
-  } else if (type == 'endif') {
-    graphCanvas._nextConnectableToExitEndIf = conditionalGroup
-    // TODO: currently no 'label/info' on endif..
-    conditionalGroup.label = 'endif'
-    graphCanvas._exitContainer()
-  }
-  return conditionalGroup
+export function _getGroupConditionalOrMakeNew(graphCanvas: GraphCanvas, type: string, label: string): GraphConditional {
+  const currentContainer = graphCanvas._getCurrentContainer()
+  const newConditional = new GraphConditional(graphCanvas, type, label, graphCanvas._getCurrentContainer())
+  return newConditional
+  //return newConditional.enter(type, label)
 }
 
 /**
@@ -311,7 +297,7 @@ export function _getGroupConditionalOrMakeNew(graphCanvas: GraphCanvas, type: st
  * @param ref Type of reference, if group, return it
  * @return ref if ref instance of group, else the newly created group
  */
-export function _getGroupOrMakeNew(graphCanvas: GraphCanvas, ref: GraphContainer): GraphContainer {
+export function _getGroupOrMakeNew(graphCanvas: GraphCanvas, ref?: GraphContainer): GraphContainer {
   if (ref instanceof GraphGroup) return ref
   debug(`_getGroup() ref:${ref}`)
   const currenContainer = graphCanvas._getCurrentContainer()

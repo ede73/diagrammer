@@ -56,8 +56,8 @@ export function ast_record(graphcanvas: GraphCanvas) {
       return `${msg.match(/.{${min_line_length},${max_line_length}}[,]/g)?.join('\\n')}`
     }
     return msg
-
   }
+
   const collectProperties = (obj: GraphObject) => {
     const params: { [key: string]: string } = {}
     const excludeSomeFields = ['ALLOWED_DEFAULTS', 'CURRENTCONTAINER', '_nextConnectableToExitEndIf', 'lastSeenVertex']

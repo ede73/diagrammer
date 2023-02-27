@@ -1,959 +1,196 @@
 {
-   "GraphCanvas": {
-      "CONTAINER_EXIT": 6,
-      "CURRENTCONTAINER": "...GraphCanvas",
-      "GRAPHINNER_INDEX": 1,
-      "GROUPIDS": 6,
-      "VARIABLES": {
-         "Object": {
+    "__PSEUDOTYPE": "GraphCanvas",
+    "_ROOTVERTICES": [],
+    "defaults": {
+            "__PSEUDOTYPE": "Object",
+            "edgecolor": "#ff0000",
+
+    },
+    "equal": [],
+    "_OBJECTS": [
+        {
+                "__PSEUDOTYPE": "GraphGroup",
+                "label": "GraphObject",
+                "name": "GraphObject",
+                "_ROOTVERTICES": [
+                    { "GraphVertex": { "name": "name" }},
+                    { "GraphVertex": { "name": "color" }},
+                    { "GraphVertex": { "name": "textColor" }},
+                    { "GraphVertex": { "name": "label" }},
+                ],
+                "defaults": { "__PSEUDOTYPE": "Object" },
+                "equal": [],
+                "_OBJECTS": [
+                    { "GraphVertex": { "name": "name" }},
+                    { "GraphVertex": { "name": "color" }},
+                    { "GraphVertex": { "name": "textColor" }},
+                    { "GraphVertex": { "name": "label" }},
+                ],
+                "isInnerGraph": false,
+                "exitvertex": 1,
+
+        },
+        {
+                "__PSEUDOTYPE": "GraphGroup",
+                "label": "GraphRoot:GraphObject",
+                "name": "GraphRoot",
+                "_ROOTVERTICES": [
+                    { "GraphVertex": { "name": "OBJECTS1" }},
+                    { "GraphVertex": { "name": "xGenerator" }},
+                    { "GraphVertex": { "name": "xVisualizer" }},
+                    { "GraphVertex": { "name": "direction" }},
+                    { "GraphVertex": { "name": "xStart" }},
+                    { "GraphVertex": { "name": "xEqual" }},
+                    { "GraphVertex": { "name": "currentShape" }},
+                    { "GraphVertex": { "name": "default2" }},
+                ],
+                "defaults": { "__PSEUDOTYPE": "Object" },
+                "equal": [],
+                "_OBJECTS": [
+                    { "GraphVertex": { "name": "OBJECTS1" }},
+                    { "GraphVertex": { "name": "xGenerator" }},
+                    { "GraphVertex": { "name": "xVisualizer" }},
+                    { "GraphVertex": { "name": "direction" }},
+                    { "GraphVertex": { "name": "xStart" }},
+                    { "GraphVertex": { "name": "xEqual" }},
+                    { "GraphVertex": { "name": "currentShape" }},
+                    { "GraphVertex": { "name": "default2" }},
+                ],
+                "isInnerGraph": false,
+                "exitvertex": 2,
+
+        },
+        {
+                "__PSEUDOTYPE": "GraphGroup",
+                "label": "Group:GraphObject",
+                "name": "xGroup",
+                "_ROOTVERTICES": [
+                    {
+                            "__PSEUDOTYPE": "GraphReference",
+                            "name": "name",
+
+                    },
+                    { "GraphVertex": { "name": "equal2" }},
+                    { "GraphVertex": { "name": "OBJECTS2" }},
+                ],
+                "defaults": { "__PSEUDOTYPE": "Object" },
+                "equal": [],
+                "_OBJECTS": [
+                    {
+                            "__PSEUDOTYPE": "GraphReference",
+                            "name": "name",
+
+                    },
+                    { "GraphVertex": { "name": "equal2" }},
+                    { "GraphVertex": { "name": "OBJECTS2" }},
+                ],
+                "isInnerGraph": false,
+                "exitvertex": 3,
+
+        },
+        {
+                "__PSEUDOTYPE": "GraphGroup",
+                "label": "Node:GraphObject",
+                "name": "GNode",
+                "_ROOTVERTICES": [
+                    { "GraphVertex": { "name": "xShape" }},
+                    { "GraphVertex": { "name": "image" }},
+                    { "GraphVertex": { "name": "style" }},
+                    {
+                            "__PSEUDOTYPE": "GraphReference",
+                            "name": "color",
+
+                    },
+                ],
+                "defaults": { "__PSEUDOTYPE": "Object" },
+                "equal": [],
+                "_OBJECTS": [
+                    { "GraphVertex": { "name": "xShape" }},
+                    { "GraphVertex": { "name": "image" }},
+                    { "GraphVertex": { "name": "style" }},
+                    {
+                            "__PSEUDOTYPE": "GraphReference",
+                            "name": "color",
+
+                    },
+                ],
+                "isInnerGraph": false,
+                "exitvertex": 4,
+
+        },
+        {
+                "__PSEUDOTYPE": "GraphGroup",
+                "label": "Link:GraphObject",
+                "name": "Link",
+                "_ROOTVERTICES": [
+                    { "GraphVertex": { "name": "linkType" }},
+                    { "GraphVertex": { "name": "left" }},
+                    { "GraphVertex": { "name": "right" }},
+                ],
+                "defaults": { "__PSEUDOTYPE": "Object" },
+                "equal": [],
+                "_OBJECTS": [
+                    { "GraphVertex": { "name": "linkType" }},
+                    { "GraphVertex": { "name": "left" }},
+                    { "GraphVertex": { "name": "right" }},
+                ],
+                "isInnerGraph": false,
+                "exitvertex": 5,
+
+        },
+        { "GraphEdge": { "edgeType": ".>", "left": "GraphObject", "right": "GraphRoot" }},
+        { "GraphEdge": { "edgeType": ".>", "left": "GraphObject", "right": "GNode" }},
+        { "GraphEdge": { "edgeType": ".>", "left": "GraphObject", "right": "xGroup" }},
+        { "GraphEdge": { "edgeType": ".>", "left": "GraphObject", "right": "Link" }},
+        { "GraphEdge": { "edgeType": "<->", "left": "left", "right": "GNode" }},
+        { "GraphEdge": { "edgeType": "<->", "left": "left", "right": "xGroup" }},
+        { "GraphEdge": { "edgeType": "<->", "left": "right", "right": "xGroup" }},
+        { "GraphEdge": { "edgeType": "<->", "left": "right", "right": "GNode" }},
+        { "GraphEdge": { "edgeType": ">", "left": "OBJECTS1", "right": "GNode" }},
+        { "GraphEdge": { "edgeType": ">", "left": "OBJECTS1", "right": "xGroup" }},
+        { "GraphEdge": { "edgeType": ">", "left": "OBJECTS2", "right": "GNode" }},
+        { "GraphEdge": { "edgeType": ">", "left": "OBJECTS2", "right": "xGroup" }},
+    ],
+    "generator": "ast",
+    "visualizer": "ast",
+    "direction": "portrait",
+    "CURRENTCONTAINER": "...GraphCanvas",
+    "CONTAINER_EXIT": 6,
+    "GRAPHINNER_INDEX": 1,
+    "GROUPIDS": 6,
+    "VARIABLES": {
+            "__PSEUDOTYPE": "Object",
             "gen": "#ccffcc",
-            "par": "#ccccff"
-         }
-      },
-      "_OBJECTS": [
-         {
-            "GraphEdge": {
-               "color": "#0000ff",
-               "edgeType": ".>",
-               "label": "extends(GraphObject->GNode)",
-               "left": "GraphObject",
-               "right": "GNode"
-            }
-         },
-         {
-            "GraphEdge": {
-               "color": "#0000ff",
-               "edgeType": ".>",
-               "label": "extends(GraphObject->GraphRoot)",
-               "left": "GraphObject",
-               "right": "GraphRoot"
-            }
-         },
-         {
-            "GraphEdge": {
-               "color": "#0000ff",
-               "edgeType": ".>",
-               "label": "extends(GraphObject->xGroup)",
-               "left": "GraphObject",
-               "right": "xGroup"
-            }
-         },
-         {
-            "GraphEdge": {
-               "color": "#0000ff",
-               "edgeType": ".>",
-               "label": "extends::extends(GraphObject->Link)",
-               "left": "GraphObject",
-               "right": "Link"
-            }
-         },
-         {
-            "GraphEdge": {
-               "color": "#00ff00",
-               "edgeType": "<->",
-               "label": "links",
-               "left": "left",
-               "right": "GNode"
-            }
-         },
-         {
-            "GraphEdge": {
-               "color": "#00ff00",
-               "edgeType": "<->",
-               "label": "links",
-               "left": "left",
-               "right": "xGroup"
-            }
-         },
-         {
-            "GraphEdge": {
-               "color": "#00ff00",
-               "edgeType": "<->",
-               "label": "links",
-               "left": "right",
-               "right": "GNode"
-            }
-         },
-         {
-            "GraphEdge": {
-               "color": "#00ff00",
-               "edgeType": "<->",
-               "label": "links",
-               "left": "right",
-               "right": "xGroup"
-            }
-         },
-         {
-            "GraphEdge": {
-               "color": "#ff0000",
-               "edgeType": ">",
-               "label": "contains",
-               "left": "OBJECTS1",
-               "right": "GNode"
-            }
-         },
-         {
-            "GraphEdge": {
-               "color": "#ff0000",
-               "edgeType": ">",
-               "label": "contains",
-               "left": "OBJECTS1",
-               "right": "xGroup"
-            }
-         },
-         {
-            "GraphEdge": {
-               "color": "#ff0000",
-               "edgeType": ">",
-               "label": "contains",
-               "left": "OBJECTS2",
-               "right": "GNode"
-            }
-         },
-         {
-            "GraphEdge": {
-               "color": "#ff0000",
-               "edgeType": ">",
-               "label": "contains",
-               "left": "OBJECTS2",
-               "right": "xGroup"
-            }
-         },
-         {
-            "GraphGroup": {
-               "_OBJECTS": [
-                  {
-                     "GraphReference": {
-                        "name": "color"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "shape",
-                        "name": "xShape"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "image"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "style"
-                     }
-                  }
-               ],
-               "_ROOTVERTICES": [
-                  {
-                     "GraphReference": {
-                        "name": "color"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "shape",
-                        "name": "xShape"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "image"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "style"
-                     }
-                  }
-               ],
-               "defaults": {
-                  "Object": {}
-               },
-               "equal": [],
-               "exitvertex": 4,
-               "isInnerGraph": false,
-               "label": "Node:GraphObject",
-               "name": "GNode"
-            }
-         },
-         {
-            "GraphGroup": {
-               "_OBJECTS": [
-                  {
-                     "GraphReference": {
-                        "name": "name"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "OBJECTS",
-                        "name": "OBJECTS2",
-                        "shape": "database"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "equal",
-                        "name": "equal2"
-                     }
-                  }
-               ],
-               "_ROOTVERTICES": [
-                  {
-                     "GraphReference": {
-                        "name": "name"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "OBJECTS",
-                        "name": "OBJECTS2",
-                        "shape": "database"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "equal",
-                        "name": "equal2"
-                     }
-                  }
-               ],
-               "defaults": {
-                  "Object": {}
-               },
-               "equal": [],
-               "exitvertex": 3,
-               "isInnerGraph": false,
-               "label": "Group:GraphObject",
-               "name": "xGroup"
-            }
-         },
-         {
-            "GraphGroup": {
-               "_OBJECTS": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "label": "label\nspecial syntax with :: for links\n(label::xlabel)",
-                        "name": "label",
-                        "textcolor": "#ff0000"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "color"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "name"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "textColor"
-                     }
-                  }
-               ],
-               "_ROOTVERTICES": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "label": "label\nspecial syntax with :: for links\n(label::xlabel)",
-                        "name": "label",
-                        "textcolor": "#ff0000"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "color"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "name"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "textColor"
-                     }
-                  }
-               ],
-               "defaults": {
-                  "Object": {}
-               },
-               "equal": [],
-               "exitvertex": 1,
-               "isInnerGraph": false,
-               "label": "GraphObject",
-               "name": "GraphObject"
-            }
-         },
-         {
-            "GraphGroup": {
-               "_OBJECTS": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "equal",
-                        "name": "xEqual"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "generator",
-                        "name": "xGenerator"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "start",
-                        "name": "xStart"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "visualizer",
-                        "name": "xVisualizer"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "name": "direction"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "OBJECTS",
-                        "name": "OBJECTS1",
-                        "shape": "database"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "default\nnodecolor\ngroupcolor\nlinkcolor",
-                        "name": "default2"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "currentShape"
-                     }
-                  }
-               ],
-               "_ROOTVERTICES": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "equal",
-                        "name": "xEqual"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "generator",
-                        "name": "xGenerator"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "start",
-                        "name": "xStart"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "visualizer",
-                        "name": "xVisualizer"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "name": "direction"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "OBJECTS",
-                        "name": "OBJECTS1",
-                        "shape": "database"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "default\nnodecolor\ngroupcolor\nlinkcolor",
-                        "name": "default2"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "currentShape"
-                     }
-                  }
-               ],
-               "defaults": {
-                  "Object": {}
-               },
-               "equal": [],
-               "exitvertex": 2,
-               "isInnerGraph": false,
-               "label": "GraphRoot:GraphObject",
-               "name": "GraphRoot"
-            }
-         },
-         {
-            "GraphGroup": {
-               "_OBJECTS": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "left"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "linkType"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "right"
-                     }
-                  }
-               ],
-               "_ROOTVERTICES": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "left"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "linkType"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "right"
-                     }
-                  }
-               ],
-               "defaults": {
-                  "Object": {}
-               },
-               "equal": [],
-               "exitvertex": 5,
-               "isInnerGraph": false,
-               "label": "Link:GraphObject",
-               "name": "Link"
-            }
-         }
-      ],
-      "_ROOTVERTICES": [
-         {
-            "GraphGroup": {
-               "_OBJECTS": [
-                  {
-                     "GraphReference": {
-                        "name": "color"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "shape",
-                        "name": "xShape"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "image"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "style"
-                     }
-                  }
-               ],
-               "_ROOTVERTICES": [
-                  {
-                     "GraphReference": {
-                        "name": "color"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "shape",
-                        "name": "xShape"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "image"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "style"
-                     }
-                  }
-               ],
-               "defaults": {
-                  "Object": {}
-               },
-               "equal": [],
-               "exitvertex": 4,
-               "isInnerGraph": false,
-               "label": "Node:GraphObject",
-               "name": "GNode"
-            }
-         },
-         {
-            "GraphGroup": {
-               "_OBJECTS": [
-                  {
-                     "GraphReference": {
-                        "name": "name"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "OBJECTS",
-                        "name": "OBJECTS2",
-                        "shape": "database"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "equal",
-                        "name": "equal2"
-                     }
-                  }
-               ],
-               "_ROOTVERTICES": [
-                  {
-                     "GraphReference": {
-                        "name": "name"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "OBJECTS",
-                        "name": "OBJECTS2",
-                        "shape": "database"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "equal",
-                        "name": "equal2"
-                     }
-                  }
-               ],
-               "defaults": {
-                  "Object": {}
-               },
-               "equal": [],
-               "exitvertex": 3,
-               "isInnerGraph": false,
-               "label": "Group:GraphObject",
-               "name": "xGroup"
-            }
-         },
-         {
-            "GraphGroup": {
-               "_OBJECTS": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "label": "label\nspecial syntax with :: for links\n(label::xlabel)",
-                        "name": "label",
-                        "textcolor": "#ff0000"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "color"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "name"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "textColor"
-                     }
-                  }
-               ],
-               "_ROOTVERTICES": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "label": "label\nspecial syntax with :: for links\n(label::xlabel)",
-                        "name": "label",
-                        "textcolor": "#ff0000"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "color"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "name"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccccff",
-                        "name": "textColor"
-                     }
-                  }
-               ],
-               "defaults": {
-                  "Object": {}
-               },
-               "equal": [],
-               "exitvertex": 1,
-               "isInnerGraph": false,
-               "label": "GraphObject",
-               "name": "GraphObject"
-            }
-         },
-         {
-            "GraphGroup": {
-               "_OBJECTS": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "equal",
-                        "name": "xEqual"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "generator",
-                        "name": "xGenerator"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "start",
-                        "name": "xStart"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "visualizer",
-                        "name": "xVisualizer"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "name": "direction"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "OBJECTS",
-                        "name": "OBJECTS1",
-                        "shape": "database"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "default\nnodecolor\ngroupcolor\nlinkcolor",
-                        "name": "default2"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "currentShape"
-                     }
-                  }
-               ],
-               "_ROOTVERTICES": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "equal",
-                        "name": "xEqual"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "generator",
-                        "name": "xGenerator"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "start",
-                        "name": "xStart"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "label": "visualizer",
-                        "name": "xVisualizer"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "color": "#ccffcc",
-                        "name": "direction"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "OBJECTS",
-                        "name": "OBJECTS1",
-                        "shape": "database"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "label": "default\nnodecolor\ngroupcolor\nlinkcolor",
-                        "name": "default2"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "currentShape"
-                     }
-                  }
-               ],
-               "defaults": {
-                  "Object": {}
-               },
-               "equal": [],
-               "exitvertex": 2,
-               "isInnerGraph": false,
-               "label": "GraphRoot:GraphObject",
-               "name": "GraphRoot"
-            }
-         },
-         {
-            "GraphGroup": {
-               "_OBJECTS": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "left"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "linkType"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "right"
-                     }
-                  }
-               ],
-               "_ROOTVERTICES": [
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "left"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "linkType"
-                     }
-                  },
-                  {
-                     "GraphVertex": {
-                        "_noedges": true,
-                        "name": "right"
-                     }
-                  }
-               ],
-               "defaults": {
-                  "Object": {}
-               },
-               "equal": [],
-               "exitvertex": 5,
-               "isInnerGraph": false,
-               "label": "Link:GraphObject",
-               "name": "Link"
-            }
-         }
-      ],
-      "defaults": {
-         "Object": {
-            "edgecolor": "#ff0000"
-         }
-      },
-      "direction": "portrait",
-      "equal": [],
-      "generator": "ast",
-      "lastSeenVertex": {
-         "GraphGroup": {
-            "_OBJECTS": [
-               {
-                  "GraphReference": {
-                     "name": "name"
-                  }
-               },
-               {
-                  "GraphVertex": {
-                     "_noedges": true,
-                     "label": "OBJECTS",
-                     "name": "OBJECTS2",
-                     "shape": "database"
-                  }
-               },
-               {
-                  "GraphVertex": {
-                     "_noedges": true,
-                     "label": "equal",
-                     "name": "equal2"
-                  }
-               }
-            ],
-            "_ROOTVERTICES": [
-               {
-                  "GraphReference": {
-                     "name": "name"
-                  }
-               },
-               {
-                  "GraphVertex": {
-                     "_noedges": true,
-                     "label": "OBJECTS",
-                     "name": "OBJECTS2",
-                     "shape": "database"
-                  }
-               },
-               {
-                  "GraphVertex": {
-                     "_noedges": true,
-                     "label": "equal",
-                     "name": "equal2"
-                  }
-               }
-            ],
-            "defaults": {
-               "Object": {}
-            },
-            "equal": [],
-            "exitvertex": 3,
-            "isInnerGraph": false,
+            "par": "#ccccff",
+
+    },
+    "lastSeenVertex": {
+            "__PSEUDOTYPE": "GraphGroup",
             "label": "Group:GraphObject",
-            "name": "xGroup"
-         }
-      },
-      "visualizer": "ast"
-   }
+            "name": "xGroup",
+            "_ROOTVERTICES": [
+                {
+                        "__PSEUDOTYPE": "GraphReference",
+                        "name": "name",
+
+                },
+                { "GraphVertex": { "name": "equal2" }},
+                { "GraphVertex": { "name": "OBJECTS2" }},
+            ],
+            "defaults": { "__PSEUDOTYPE": "Object" },
+            "equal": [],
+            "_OBJECTS": [
+                {
+                        "__PSEUDOTYPE": "GraphReference",
+                        "name": "name",
+
+                },
+                { "GraphVertex": { "name": "equal2" }},
+                { "GraphVertex": { "name": "OBJECTS2" }},
+            ],
+            "isInnerGraph": false,
+            "exitvertex": 3,
+
+    },
+
 }

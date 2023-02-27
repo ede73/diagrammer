@@ -70,6 +70,9 @@ export class GraphContainer extends GraphConnectable {
    */
   addObject(connectable: GraphConnectable) {
     this._OBJECTS.push(connectable)
+    if (connectable instanceof GraphContainer) {
+      return connectable
+    }
     this._ROOTVERTICES.push(connectable)
     return connectable
   }

@@ -74,7 +74,7 @@ export function digraph(graphcanvas: GraphCanvas) {
    * Help JSON.stringify dump our objects (that may have circular references)
    */
   const skipEntrancesReplacer = (key: string, value: any) => {
-    if (['entrance', '_entrance', 'exit', '_exit', 'parent'].includes(key)) {
+    if (['entrance', '_entrance', 'exit', '_exit', 'parent', 'canvas'].includes(key)) {
       return null
     }
     return value
@@ -223,13 +223,14 @@ export function digraph(graphcanvas: GraphCanvas) {
         // never reached
         const _conditionalExitEdge = grp._conditionalExitEdge
         if (_conditionalExitEdge) {
-          lout(`${lastexit}->${_conditionalExitEdge.getName()}[ color=red ];`)
+          //lout(`${lastexit}->${_conditionalExitEdge.getName()}[ color=red ];`)
+          lout(`${lastexit}->${lastendif}[ color=red ];`)
           lout(`${lastendif}->${_conditionalExitEdge.getName()};`)
         }
       } else {
-        const exitVertexInConditional = `entry${grp.exitvertex}`
+        const exitVertexInConditional = `conditional_${cond}_${grp.exitvertex}`
         if (!lastendif) {
-          lastendif = `endif${grp.exitvertex}`
+          lastendif = `conditional_endif_${grp.exitvertex}`
           lout(lastendif + '[ shape=circle, label="", width=0.01, height=0.01 ];')
         }
         // TODO:else does not need diamond

@@ -168,6 +168,7 @@ export class GraphCanvas extends GraphContainer {
     if (this.CURRENTCONTAINER.length <= 1) { throw new Error('INTERNAL ERROR:Trying to exit ROOT container') }
     const currentContainer = this.CURRENTCONTAINER.pop()
     if (currentContainer instanceof GraphGroup) {
+      // TODO: ???
       currentContainer.exitvertex = this.CONTAINER_EXIT++
     }
     // TODO: digraph (or graphviz rather) visualizing empty subgraph breaks, it needs a node (invisible for instance)

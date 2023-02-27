@@ -56,7 +56,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
    * Help JSON.stringify dump our objects (that may have circular references)
    */
   const skipEntrancesReplacer = (key: string, value: any) => {
-    if (['entrance', '_entrance', 'exit', '_exit', 'parent'].includes(key)) {
+    if (['entrance', '_entrance', 'exit', '_exit', 'parent', 'canvas'].includes(key)) {
       return null
     }
     return value

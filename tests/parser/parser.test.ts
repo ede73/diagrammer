@@ -8,6 +8,7 @@ import { GraphContainer } from '../../model/graphcontainer.js'
 import { GraphGroup } from '../../model/graphgroup.js'
 import { GraphInner } from '../../model/graphinner.js'
 import { GraphVertex } from '../../model/graphvertex.js'
+import { GraphConditional } from '../../model/graphconditional.js'
 
 // curried, canvas passed on call site
 const canvasHas = (prop: string, value: any) => {
@@ -172,7 +173,7 @@ const grammarTests = [
   { g: 'node>(a,b,c)', f: [canvasContainsAutoProps(['node', ':1', ':1,a', ':1,b', ':1,c', 'node,>,a,1', 'node,>,b,1', 'node,>,c,1'])] },
   { g: 'node>(a b c)', f: [canvasContainsAutoProps(['node', ':1', ':1,a', ':1,b', ':1,c', 'node,>,a,1', 'node,>,b,1', 'node,>,c,1'])] },
   { g: 'node>(a>b>c)', f: [canvasContainsAutoProps(['node', ':1', ':1,a', ':1,b', ':1,c', 'node,>,a,1', 'a,>,b,1', 'b,>,c,1'])] },
-  { g: 'node>(a>(b c)>d)', f: [canvasContainsAutoProps(['node', ':1', ':1,a', ':2', ':2,b', ':2,c', ':2,d', 'node,>,a,1', 'node,>,2,1', 'a,>,b,2', 'a,>,c,2', '2,>,d,1'])] }, // should be :1,d
+  { g: 'node>(a>(b c)>d)', f: [canvasContainsAutoProps(['node', ':1', ':1,a', ':2', ':2,b', ':2,c', ':2,d', 'node,>,a,1', 'a,>,b,2', 'a,>,c,2', '2,>,d,1'])] }, // should be :1,d
   { g: '(a,b,c)>node', f: [canvasContainsAutoProps([':1', ':1,a', ':1,b', ':1,c', ':1,node', '1,>,node'])] }, // wrong!
   { g: '(a b c)>node', f: [canvasContainsAutoProps([':1', ':1,a', ':1,b', ':1,c', ':1,node', '1,>,node'])] }, // wrong!
   { g: '(a>b>c)>node', f: [canvasContainsAutoProps([':1', ':1,a', ':1,b', ':1,c', ':1,node', 'a,>,b,1', 'b,>,c,1', '1,>,node'])] },
@@ -391,16 +392,16 @@ exit;exit node is also required
         `)
     // console.log(graphcanvas)
     expect(graphcanvas.getObjects().length).toBe(5)
-    expect(graphcanvas._ROOTVERTICES.length).toBe(5)
+    expect(graphcanvas._ROOTVERTICES.length).toBe(2)
     // in this case only all the objects and root vertices do match
-    expect(graphcanvas.getObjects()).toMatchObject(graphcanvas._ROOTVERTICES)
+    //expect(graphcanvas.getObjects()).toMatchObject(graphcanvas._ROOTVERTICES)
 
     const conditionalGroups = new Set(['1', '2', '3'])
     const verticeNames = new Set(['entry', 'exit'])
 
     graphcanvas.getObjects().forEach(obj => {
       const objectName: string = obj.getName() as string
-      if (obj instanceof GraphGroup) {
+      if (obj instanceof GraphConditional) {
         // TODO: grammar is buggy, there should be single vertex in, or none for no-vertices conditional
         // how ever 'then'/'else' is intepretex as one
         // expect(obj._getObjects().length).toBe(1);

@@ -238,7 +238,7 @@ graphContent
 	| DO	{
 		parser.trace('DO :'+$DO);
 		// TODO: Add proper GraphWhile(or GraphDo)
-		$$=yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS))
+		$$=_getGroupLoopOrMakeNew(yy.GRAPHCANVAS, 'do', $DO)
 	}
 	| UNTIL {
 		parser.trace('UNTIL :'+$UNTIL);
@@ -249,7 +249,7 @@ graphContent
 	| WHILE	{
 		parser.trace('WHILE :'+$WHILE);
 		// TODO: Add proper GraphWhile
-		$$=yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setLabel($WHILE))
+		$$=_getGroupLoopOrMakeNew(yy.GRAPHCANVAS, 'while', $WHILE)
 	}
 	| ENDWHILE {
 		parser.trace('ENDWHILE :'+$ENDWHILE);

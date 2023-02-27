@@ -11,6 +11,7 @@ import { GraphReference } from './graphreference.js'
 import { hasOutwardEdge } from './traversal.js'
 import { debug } from './debug.js'
 import { GraphConditional } from './graphconditional.js'
+import { GraphLoop } from './graphloop.js'
 
 /**
  *
@@ -280,11 +281,14 @@ function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInne
  * @param type if/elseif/else
  * @param label Anything between ^(if|elseif|else|endif) and then$
  */
-export function _getGroupConditionalOrMakeNew(graphCanvas: GraphCanvas, type: string, label: string): GraphConditional {
+export function _getGroupConditionalOrMakeNew(graphCanvas: GraphCanvas, type: string, label: string) {
   const currentContainer = graphCanvas._getCurrentContainer()
-  const newConditional = new GraphConditional(graphCanvas, type, label, graphCanvas._getCurrentContainer())
-  return newConditional
-  //return newConditional.enter(type, label)
+  return new GraphConditional(graphCanvas, type, label, graphCanvas._getCurrentContainer())
+}
+
+export function _getGroupLoopOrMakeNew(graphCanvas: GraphCanvas, type: string, label: string) {
+  const currentContainer = graphCanvas._getCurrentContainer()
+  return new GraphLoop(graphCanvas, type, label, graphCanvas._getCurrentContainer())
 }
 
 /**

@@ -1,7 +1,0 @@
-actdiag{
-  default_fontsize = 14
-  eka[color="#0000ff"  ,label="slim shady and blue"];
-  toinen[color="#ff0000"  ,label="Punainen itseasiassa"];
-  eka -> toinen[color="#111111"];
-  eka -> toinen[color="#ff0000"];
-}

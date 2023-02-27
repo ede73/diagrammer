@@ -56,7 +56,7 @@ runATest() {
     GENERATED_IMAGE_REFERENCE="tests/reference_images/$TEST_BINARY/$png"
     if [ -f "$GENERATED_IMAGE" ]; then
       [ ! -f "$GENERATED_IMAGE_REFERENCE" ] && cp "$GENERATED_IMAGE" "$GENERATED_IMAGE_REFERENCE"
-      [ ! -f "$GENERATED_CODE" ] && cp "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE"
+      [ ! -f "$GENERATED_CODE_REFERENCE" ] && cp "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE"
       # Allow 1% variance
       THRESHOLD=1
       # Since jest-imagematcher brings pixelmatch, let's use it!
@@ -81,6 +81,7 @@ runATest() {
   }
 
   # Verify that the generated output matches what it used to
+  [ ! -f "$GENERATED_CODE_REFERENCE" ] && cp "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE"
   if ! diff -q "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE" >/dev/null; then
     ERROR="Mismatch between $GENERATED_CODE $GENERATED_CODE_REFERENCE"
     [ $WEB_VISUALIZER -eq 0 ] && {

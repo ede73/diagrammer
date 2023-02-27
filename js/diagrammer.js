@@ -22,6 +22,7 @@ let trace = false
 if (myArgs[0] === 'trace') {
   myArgs = myArgs.slice(1)
   trace = true
+  console.log("# If you didn't compile with DEBUG=1 make, tracing grammar won't work")
 }
 
 const raw = fs.readFileSync(path.normalize('./' + myArgs[0]), 'utf8')

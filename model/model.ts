@@ -33,14 +33,14 @@ export function _processVariable(graphCanvas: GraphCanvas, variable: string) {
   if (vari.indexOf(':') !== -1) {
     // Assignment
     const tmp = vari.split(':')
-    _getVariables(graphCanvas)[tmp[0]] = tmp[1]
+    graphCanvas.VARIABLES[tmp[0]] = tmp[1]
     return tmp[1]
   } else {
     // referral
-    if (!_getVariables(graphCanvas)[vari]) {
+    if (!graphCanvas.VARIABLES[vari]) {
       throw new Error(`Variable ${vari} not defined`)
     }
-    return _getVariables(graphCanvas)[vari]
+    return graphCanvas.VARIABLES[vari]
   }
 }
 
@@ -88,7 +88,7 @@ export function _getList(graphCanvas: GraphCanvas,
   if (!(lhs instanceof Array)) {
     throw new Error('_getList requires LHS to be Vertex, Group or Array')
   }
-  debug(`_getList(lhs:[${lhs}],rhs:${rhs}`, true)
+  debug(`_getList ((array)lhs:[${lhs}],rhs:${rhs}`, true)
   // LHS not a vertex..
   const rhsFound = _getVertexOrGroup(graphCanvas, rhs as GraphVertex)
   if (rhsEdgeLabel && (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex)) {
@@ -417,14 +417,6 @@ function maybeRemoveFromRootVertices(currentContainer: GraphContainer, rhs: Grap
 // =====================================
 // only model.js
 // =====================================
-
-/**
- * Return all the variables from the collection
- * @param {GraphCanvas} graphCanvas
- */
-function _getVariables(graphCanvas: GraphCanvas) {
-  return graphCanvas.VARIABLES
-}
 
 function _maybePushToCurrentContainerAsReference(graphCanvas: GraphCanvas, referred: GraphConnectable) {
   const currentContainer = graphCanvas._getCurrentContainer()

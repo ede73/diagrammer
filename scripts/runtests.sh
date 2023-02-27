@@ -117,6 +117,7 @@ for TEST_BINARY in $tests; do
   echo "Test suite $TEST_BINARY" >&2
   launchTestInBackground ast.txt
   [ "$TEST_BINARY" != "actdiag" ] && [ "$TEST_BINARY" != "blockdiag" ] && {
+    launchTestInBackground colors.txt
     launchTestInBackground state_nodelinktests.txt
     launchTestInBackground url.txt
     launchTestInBackground state.txt

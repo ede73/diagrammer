@@ -49,6 +49,15 @@ export function ast_record(graphcanvas: GraphCanvas) {
     output(graphcanvas, textOrIndent, maybeIndent)
   }
 
+  // For a long text(list of words), try to split it at commas, trying to get at least min_line_length lines
+  // but at maximum max_line_length. If max_line_length reached, split, comma or not
+  const tryToSplit = (msg: string, max_line_length: number = 64, min_line_length: number = 32): string => {
+    if (msg.length > max_line_length) {
+      return `${msg.match(/.{${min_line_length},${max_line_length}}[,]/g)?.join('\\n')}`
+    }
+    return msg
+
+  }
   const collectProperties = (obj: GraphObject) => {
     const params: { [key: string]: string } = {}
     const excludeSomeFields = ['ALLOWED_DEFAULTS', 'CURRENTCONTAINER', '_nextConnectableToExitEndIf', 'lastSeenVertex']
@@ -73,11 +82,7 @@ export function ast_record(graphcanvas: GraphCanvas) {
         // if list is longer than 64, try to break it at commas, but so that one block is atleast 32 chars long not exceeding 64
         // if not possible, then just break
         // also do not loose anything!
-        if (names.length > 64) {
-          params[k] = `${names.match(/.{32,64}[,]/g)?.join('\\n')}`
-        } else {
-          params[k] = `${names}`
-        }
+        params[k] = tryToSplit(names, 64, 32)
       } else if (collectJustName.includes(k)) {
         params[k] = `${getName(v)}`
       } else if (k === 'VARIABLES') {

@@ -1,0 +1,53 @@
+EDGE COLOR #ff0000
+EDGE TEXT COLOR #00ff00
+group ColoR #0000ff
+VERTEX COLOR#ffff00
+VERTEX TEXTCOLOR#ff00ff
+
+// "legend"
+rect explanation;Default colors are:\nRed edges\nGreen edge texts\nGroups are blue(filled)\nVertices are filled yellow, but having pink texs
+
+// default colors
+default_yellow1>"red edge, green text"default_yellow2
+
+// all the colors specifically overridden for these vertices and edges
+not_default_black#000000>#ffff00not_default_green#00ff00;#ff0000Edge is yellow(#ffff00),\nbut edge color is red(#ff0000)\n(overriding defaults)
+
+// all the colors specifically(indirectly) overridden for these vertices and edges
+$(amaranth:#9F2B68)
+amarant$(amaranth);Amaranth colored node from variable
+$(darksalmon:#E9967A)
+$(seagreen:#2E8B57)
+$(peachpuff:#FFDAB9)
+$(darkviolet:#9400D3)
+not_default_darksalmon$(darksalmon)>$(seagreen)not_default_peachpuff$(peachpuff);$(darkviolet)Edge is seagreen($(seagreen)),\nbut edge color is darkviolet($(darkviolet))\n(overriding defaults)
+
+// Default group colors
+{agroup;Here's a default colored group,ie.blue
+  // default colors in side a group
+  group_default_yellow1>"red edge, green text"group_default_yellow
+
+  // all the colors specifically overridden for these vertices and edges
+  group_not_default_black#000000>#ffff00group_not_default_green#00ff00;#ff0000Edge is yellow(#ffff00),\nbut edge color is red(#ff0000)\n(overriding defaults)
+
+  // all the colors specifically(indirectly) overridden for these vertices and edges
+  group_not_default_darksalmon$(darksalmon)>$(seagreen)group_not_default_peachpuff$(peachpuff);$(darkviolet)Edge is seagreen($(seagreen)),\nbut edge color is darkviolet($(darkvioleta))\n(overriding defaults)
+}
+
+// Default group colors
+{anondefaultgroup;Here's a group with new context defaults
+    EDGE COLOR $(darksalmon)
+    EDGE TEXT COLOR $(peachpuff)
+    group ColoR #ff0000
+    VERTEX COLOR $(amaranth)
+    VERTEX TEXTCOLOR$(seagreen)
+
+    // default colors in side a group
+    group_default_amaranth>"darksalmon($(darksalmon)) edge, peachpuff($(peachpuff)) text"group_default_amaranth
+    
+    // all the colors specifically overridden for these vertices and edges
+    group_not_default_black2#000000>#ffff00group_not_default_green2#00ff00;#ff0000Edge is yellow(#ffff00),\nbut edge color is red(#ff0000)\n(overriding defaults)
+    {reddefaultgrp;New default red group
+        xxx;Amaranth($(amaranth)) colored node
+    }
+}

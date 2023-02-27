@@ -98,7 +98,7 @@ build/diagrammer_parser.js: build/diagrammer.all Makefile generators model js/*.
 	@echo "Construct parser utility, add all imports"
 	@mkdir -p build
 	@echo make parser
-	@if [ ${DEBUG} ]; then \
+	@if [ "${DEBUG}" != "" ]; then \
 	node_modules/.bin/jison -t $< -o $@ >/dev/null; \
 	else \
 	node_modules/.bin/jison $< -o $@ >/dev/null; \

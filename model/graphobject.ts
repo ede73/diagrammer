@@ -1,6 +1,7 @@
 // @ts-check
 
 import { debug } from './debug.js'
+import { GraphCanvas } from './graphcanvas.js'
 import { GraphContainer, DefaultSettingKey } from './graphcontainer.js'
 
 type DefaultAndCallback = { attrName: DefaultSettingKey, callback: (value: string) => void }
@@ -103,11 +104,24 @@ export class GraphObject {
     return this.url
   }
 
+  // Find canvas, it's the parent that has no parent
+  protected getCanvas(container: GraphObject = this): GraphCanvas {
+    if (!container.parent) {
+      return container as GraphCanvas
+    }
+    return container.getCanvas(container.parent)
+  }
+
   /**
    * Set label. Label is a complex object that will be parsed and parts of it
    * extracted to textColor and potentially URL
    */
   setLabel(label: string) {
+    // Destructure all variables in the label
+    for (const [variable, value] of Object.entries(this.getCanvas().VARIABLES)) {
+      label = label.replace(new RegExp(`\\$\\(${variable}\\)`, 'g'), value)
+    }
+
     // debug(`  setLabel(${label.trim()}) this=${this.getName()} cons=${this.constructor.name}`)
     if (label) {
       label = label.trim().replace(/"/gi, '')

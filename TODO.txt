@@ -17,7 +17,6 @@ shoulg have
     {"link":{"edgeType":">","left":h,"right":"z","label":"eandh"}}
 
 
-- LABEL can already have color definition as well, but NOT $(color) variable. Colro extracted directly in model setLabel grammar parsing not possible currently (;.* all label. no parsing)
 - See plain JS http://bramp.github.io/js-sequence-diagrams/ Good Raphael SEQ diag. PLAIN JS
 - http://mdaines.github.io/viz.js/example.html FUCKING AWSOME!! DOTTY!! JS!!!
 - https://github.com/mdaines/viz.js/ emscripten variant llvm
@@ -29,8 +28,12 @@ shoulg have
 
 - http://stackoverflow.com/questions/3428448/reducing-graph-size-in-graphviz
 - make landscape/portrait be container properties(blockdiag support, dotty should as well subgraph cluster_1{rankdir=LR})
-- FIX if/elseif/else lexing/parsing (now a bit hackish) - need context(in lexer)
+- (in progress) FIX if/elseif/else lexing/parsing (now a bit hackish) - need context(in lexer)
+   - clarified parsing, now that we've actual context objects, perhaps GraphConditional would make best sense :)
 - rectangle does not work in lexer..rect works..wtf?
+- Make LIST (vertexlist,grouplist what ever list) actual object, not array kludge
+	- one could then map setLabel to all contained objects in one call
+	- hm.. we've not GraphConnectable[] in the _getEdge/_getList...
 - For plantuml 
   alt succesfull case
   else some kind of failure
@@ -42,27 +45,20 @@ shoulg have
   else another type of failure
   end
 
-  For simplicity could make if then else and loop constructs that WOULD works automatically in graphviz...
+  For simplicity could make if then else and loop constructs that WOULD work automatically in graphviz...
   if x>y then
   else if x==y then
   end if
 
-- ambiguity in group definitions {xxx could be group named xxx, or a group that has a vertex xxx. 
+- (minor)ambiguity in group definitions {xxx could be group named xxx, or a group that has a vertex xxx. 
   Fix so that group declarations in one line! Always!
-- (IN PROGRESS..reference nodes) Check if something could be done for network graphs .. 
-	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
-	not mandatory, but would be NICE
-- HTML rendering available in svg and cairo (and hyperlinks), see if graphviz could create svg's. DIFFing could be done in pngs
-  still
 - Investigate following (graphviz) features for others as well:
 	bgcolor="#00ff00" for whole graph background
 	packmode? did not get to work
 	pagedir="BL", "BR", "TL", "TR", "RB", "RT", "LB", "LT"
 	colorList red:blue(depends on style/gradientangle) red;0.3:blue;0.7
    
-- Make LIST (vertexlist,grouplist what ever list) actual object, not array kludge
-	- one could then map setLabel to all contained objects in one call
-- Instead of exploding links in GRAMMAR(parser) it could save the link cluster as such and utilize the dotty
+- (minor)Instead of exploding links in GRAMMAR(parser) it could save the link cluster as such and utilize the dotty
       graph test123 {
                a -- b -- c;
                a -- {x y}[label="marks both edges"];
@@ -70,10 +66,19 @@ shoulg have
                x -- y [w=5.0,len=3];
        }
 	The generator could then offload it (but that would make generator bit more complex)
+	- minor..won't affect final render at all, just makes generated code nicer to read, probably not worth doing
+	- also this could be done in the generator now
 - decorate=true for edge labels in graphviz might help readability
 - constraint=false for edges in graphviz might help the layout to be as user wants
 - compass 4 plantuml
 -------
+(DONE)- HTML rendering available in svg and cairo (and hyperlinks), see if graphviz could create svg's. DIFFing could be done in pngs
+  still
+   GraphViz backend rendering completely (well except sfdp) replaced with CanViz web renderer (for WEB use), using svg
+(DONE)- Check if something could be done for network graphs .. 
+	so that SAME GRAPH printed in dotty would reflect SAME information as printed with actdiag or nwdiag
+	not mandatory, but would be NICE
+(DONE)- LABEL can already have color definition as well, but NOT $(color) variable. Colro extracted directly in model setLabel grammar parsing not possible currently (;.* all label. no parsing)
 (LOL, is there eclipse any more?) make eclipse plugin out of this all?? http://wiki.eclipse.org/Graphviz_DOT_as_a_DSL_for_Zest(tried editor already)
 (DONE) make generic AST traversal function with closures/callbacks for all generartors to use (so some business logic is not 
   needed to be implemented on each generator)

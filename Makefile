@@ -48,7 +48,7 @@ generators: generators/tsconfig.json $(GENERATOR_FILES)
 	@echo "Transpile generators code: $(GENERATOR_FILES)"
 	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 
-faketypes: build/types/diagrammer_parser_types.ts
+faketypes: js/diagrammer_parser_types.ts
 	@echo "Make diagrammer shared context type for jest tests"
 	@cp js/diagrammer_parser_types.ts build/types
 	@echo '{"type":"module"}' > build/types/package.json
@@ -149,6 +149,7 @@ test: all testrunner jesttests
 tests: test
 
 clean:
+	@echo "NOTICE! TODO: There's a dependency bug, if you make cleanl you have to make twice"
 	@find build -type f -delete & \
 	rm -f build/types/* & \
 	rm -f generators/*.js model/*.js web/*.js web/visualizations/*.js & \

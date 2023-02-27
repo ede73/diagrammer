@@ -136,6 +136,7 @@ export: build/diagrammer_lexer.js build/diagrammer_parser.js js/diagrammer.js
 
 testrunner: ./scripts/runtests.sh all plantuml nodemodules
 	./scripts/runtests.sh
+	[ -f .error ] && exit 100
 
 jesttests: all nodemodules parsertests webtests faketypes
 	@mkdir -p tests/test_outputs

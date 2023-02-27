@@ -14,8 +14,9 @@ rm -f .error
 
 assertNoError() {
   if [ -f .error ]; then
-    echo ERROR
-    exit 10
+    echo "Error encountered, exiting with error code"
+    set -e
+    exit 100
   fi
 }
 
@@ -81,7 +82,7 @@ runATest() {
 
   # Verify that the generated output matches what it used to
   if ! diff -q "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE" >/dev/null; then
-    ERROR=ERROR
+    ERROR="Mismatch between $GENERATED_CODE $GENERATED_CODE_REFERENCE"
     [ $WEB_VISUALIZER -eq 0 ] && {
       # if we ended up here, and not having a web visualizer, we've already compared output images
       # And they DO match, so this probably is a formatting change
@@ -96,6 +97,7 @@ runATest() {
     echo "\tnode js/diagrammer.js tests/test_inputs/$TEST_FILENAME $TEST_BINARY"
     setErrorAndExit 23 "$TEST_FILENAME"
   fi
+  assertNoError
 }
 
 i=0

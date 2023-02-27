@@ -237,25 +237,19 @@ graphContent
 	}
 	| IF	 {
 		parser.trace('IF :'+$IF);
-		$$=setAttr(setAttr(yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setLabel($IF.replace(/\s+then\s*$/, "").replace(/^\s*if\s*/, ""))), 'conditional', 'if'), '_conditionalEntryEdge', yy.GRAPHCANVAS.lastSeenVertex)
+		$$=_getGroupConditionalOrMakeNew(yy.GRAPHCANVAS, 'if', $IF)
 	}
 	| ELSEIF {
 		parser.trace('ELSEIF vertexGroupListOrAttrs :'+$ELSEIF);
-		yy.GRAPHCANVAS._exitContainer();
-		$$=setAttr(yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setLabel($ELSEIF.replace(/\s+then\s*$/, "").replace(/^\s*elseif\s*/, ""))), 'conditional', 'elseif')
+		$$=_getGroupConditionalOrMakeNew(yy.GRAPHCANVAS, 'elseif', $ELSEIF)
 	}
 	| ELSE {
 		parser.trace('ELSE :'+$ELSE);
-		yy.GRAPHCANVAS._exitContainer();
-		$$=setAttr(yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setLabel($ELSE)), 'conditional', 'else')
+		$$=_getGroupConditionalOrMakeNew(yy.GRAPHCANVAS, 'else', $ELSE)
 	}
-	| ENDIF	 { 
+	| ENDIF	 {
 		parser.trace('ENDIF :'+$ENDIF);
-		yy.GRAPHCANVAS._exitContainer();
-		// TODO: is ENDIF container necessary?YES, it could be invisible vertex! Could link to that instead of endif kludge in digraph
-		yy.GRAPHCANVAS._nextConnectableToExitEndIf=setAttr(yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setLabel($ENDIF)), 'conditional', 'endif')
-		debug("_nextConnectableToExitEndIf"+yy.GRAPHCANVAS._nextConnectableToExitEndIf);
-		$$=yy.GRAPHCANVAS._exitContainer()
+		_getGroupConditionalOrMakeNew(yy.GRAPHCANVAS,'endif', $ENDIF)
 	}
 	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */
 	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END {

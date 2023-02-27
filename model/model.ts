@@ -5,7 +5,7 @@ import { GraphEdge } from '../model/graphedge.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphInner } from '../model/graphinner.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { getAttribute } from '../model/support.js'
+import { getAttribute, setAttr } from '../model/support.js'
 import { GraphConnectable } from './graphconnectable.js'
 import { GraphReference } from './graphreference.js'
 import { hasOutwardEdge } from './traversal.js'
@@ -265,6 +265,40 @@ function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInne
       graphCanvas.insertEdge(edgeAndItsIndex[1]++, newEdge)
     }
   }
+}
+
+/**
+ * Placeholder for making a true GraphConditional
+ * ie. if/elseif/elseif.../else/endif
+ * 
+ * Will replace ^(if|elseif|else|endif) and then$ with ''
+ * 
+ * Every container returned is current container, and before making a new container here, current one is EXITED.
+ * Exception being if, it's the first one, not exiting current container, and endif, it's the last, it will return the
+ * container before entering the if
+ * TODO: GraphConditional has to be a container of containers actually, ie. each section if/elseif../else are own groups
+ * 
+ * @param type if/elseif/else
+ * @param label Anything between ^(if|elseif|else|endif) and then$
+ */
+export function _getGroupConditionalOrMakeNew(graphCanvas: GraphCanvas, type: string, label: string, ref: GraphContainer): GraphContainer {
+  if (type !== 'if') {
+    graphCanvas._exitContainer()
+  }
+  const conditionalGroup = _getGroupOrMakeNew(graphCanvas, ref) as GraphGroup
+  conditionalGroup.setLabel(label.trim().replace(/(^(if|elseif|endif)\s*|(\s*then$))/g, '').trim())
+  conditionalGroup.conditional = type
+  graphCanvas._enterContainer(conditionalGroup)
+
+  if (type === 'if') {
+    conditionalGroup._conditionalEntryEdge = graphCanvas.lastSeenVertex
+  } else if (type == 'endif') {
+    graphCanvas._nextConnectableToExitEndIf = conditionalGroup
+    // TODO: currently no 'label/info' on endif..
+    conditionalGroup.label = 'endif'
+    graphCanvas._exitContainer()
+  }
+  return conditionalGroup
 }
 
 /**

@@ -19,7 +19,6 @@ export class GraphEdge extends GraphObject {
   right: GraphConnectable
   lcompass?: string = undefined
   rcompass?: string = undefined
-  container?: GraphConnectable = undefined
 
   /**
      * @param edgeType Type of the edge(grammar!)

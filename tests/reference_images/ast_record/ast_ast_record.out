@@ -46,17 +46,17 @@ digraph {
             left[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {name|left}|{parent|Link}|{_noedges|true} }"];
             right[shape=record, color=red, fillcolor=red, label="{ GraphVertex | {name|right}|{parent|Link}|{_noedges|true} }"];
         }
-        GraphObject -> GraphRoot[label="GraphEdge\nlabel=extends(GraphObject->GraphRoot)\ncolor=#0000ff\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=.>\nleft=GraphObject\nright=GraphRoot"];
-        GraphObject -> GNode[label="GraphEdge\nlabel=extends(GraphObject->GNode)\ncolor=#0000ff\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=.>\nleft=GraphObject\nright=GNode"];
-        GraphObject -> xGroup[label="GraphEdge\nlabel=extends(GraphObject->xGroup)\ncolor=#0000ff\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=.>\nleft=GraphObject\nright=xGroup"];
-        GraphObject -> Link[label="GraphEdge\nlabel=extends::extends(GraphObject->Link)\ncolor=#0000ff\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=.>\nleft=GraphObject\nright=Link"];
-        left -> GNode[label="GraphEdge\nlabel=links\ncolor=#00ff00\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=<->\nleft=left\nright=GNode"];
-        left -> xGroup[label="GraphEdge\nlabel=links\ncolor=#00ff00\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=<->\nleft=left\nright=xGroup"];
-        right -> xGroup[label="GraphEdge\nlabel=links\ncolor=#00ff00\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=<->\nleft=right\nright=xGroup"];
-        right -> GNode[label="GraphEdge\nlabel=links\ncolor=#00ff00\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=<->\nleft=right\nright=GNode"];
-        OBJECTS1 -> GNode[label="GraphEdge\nlabel=contains\ncolor=#ff0000\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=>\nleft=OBJECTS1\nright=GNode"];
-        OBJECTS1 -> xGroup[label="GraphEdge\nlabel=contains\ncolor=#ff0000\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=>\nleft=OBJECTS1\nright=xGroup"];
-        OBJECTS2 -> GNode[label="GraphEdge\nlabel=contains\ncolor=#ff0000\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=>\nleft=OBJECTS2\nright=GNode"];
-        OBJECTS2 -> xGroup[label="GraphEdge\nlabel=contains\ncolor=#ff0000\nparent=GraphCanvas\ncontainer=GraphCanvas\nedgeType=>\nleft=OBJECTS2\nright=xGroup"];
+        GraphObject -> GraphRoot[label="GraphEdge\nlabel=extends(GraphObject->GraphRoot)\ncolor=#0000ff\nparent=GraphCanvas\nedgeType=.>\nleft=GraphObject\nright=GraphRoot"];
+        GraphObject -> GNode[label="GraphEdge\nlabel=extends(GraphObject->GNode)\ncolor=#0000ff\nparent=GraphCanvas\nedgeType=.>\nleft=GraphObject\nright=GNode"];
+        GraphObject -> xGroup[label="GraphEdge\nlabel=extends(GraphObject->xGroup)\ncolor=#0000ff\nparent=GraphCanvas\nedgeType=.>\nleft=GraphObject\nright=xGroup"];
+        GraphObject -> Link[label="GraphEdge\nlabel=extends::extends(GraphObject->Link)\ncolor=#0000ff\nparent=GraphCanvas\nedgeType=.>\nleft=GraphObject\nright=Link"];
+        left -> GNode[label="GraphEdge\nlabel=links\ncolor=#00ff00\nparent=GraphCanvas\nedgeType=<->\nleft=left\nright=GNode"];
+        left -> xGroup[label="GraphEdge\nlabel=links\ncolor=#00ff00\nparent=GraphCanvas\nedgeType=<->\nleft=left\nright=xGroup"];
+        right -> xGroup[label="GraphEdge\nlabel=links\ncolor=#00ff00\nparent=GraphCanvas\nedgeType=<->\nleft=right\nright=xGroup"];
+        right -> GNode[label="GraphEdge\nlabel=links\ncolor=#00ff00\nparent=GraphCanvas\nedgeType=<->\nleft=right\nright=GNode"];
+        OBJECTS1 -> GNode[label="GraphEdge\nlabel=contains\ncolor=#ff0000\nparent=GraphCanvas\nedgeType=>\nleft=OBJECTS1\nright=GNode"];
+        OBJECTS1 -> xGroup[label="GraphEdge\nlabel=contains\ncolor=#ff0000\nparent=GraphCanvas\nedgeType=>\nleft=OBJECTS1\nright=xGroup"];
+        OBJECTS2 -> GNode[label="GraphEdge\nlabel=contains\ncolor=#ff0000\nparent=GraphCanvas\nedgeType=>\nleft=OBJECTS2\nright=GNode"];
+        OBJECTS2 -> xGroup[label="GraphEdge\nlabel=contains\ncolor=#ff0000\nparent=GraphCanvas\nedgeType=>\nleft=OBJECTS2\nright=xGroup"];
     }
 }

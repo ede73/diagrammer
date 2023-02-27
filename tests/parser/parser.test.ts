@@ -110,10 +110,10 @@ const canvasContainsAutoProps = (match: string[]) => {
       collectIfDefined(edgeProps, edge.right.getName())
       collectIfDefined(edgeProps, edge.rcompass)
       collectIfDefined(edgeProps, edge.color)
-      collectIfDefined(edgeProps, edge.edgecolor) // always empty
-      collectIfDefined(edgeProps, edge.edgetextcolor)
+      collectIfDefined(edgeProps, edge.color) // always empty
+      collectIfDefined(edgeProps, edge.textcolor)
       collectIfDefined(edgeProps, edge.label)
-      collectIfDefined(edgeProps, edge.container?.getName() ? edge.container.getName() : '') // what to do with unnamed containers?
+      collectIfDefined(edgeProps, edge.parent?.getName() ? edge.parent.getName() : '') // what to do with unnamed containers?
       res.push(edgeProps.join(','))
     })
     try {
@@ -156,7 +156,7 @@ const grammarTests = [
   { g: 'node', f: [canvasContainsAutoProps(['node'])] },
   {
     g: 'a/wifi.png>#ff0000b',
-    f: [canvasContainsAutoProps(['a,/wifi.png', 'b', 'a,>,b,#ff0000'])]
+    f: [canvasContainsAutoProps(['a,/wifi.png', 'b', 'a,>,b,#ff0000,#ff0000'])]
   },
   // No good test for this other than passing parsing
   // { g: '// a line comment' },
@@ -167,7 +167,7 @@ const grammarTests = [
   // comment*/`
   // },
   { g: 'node#000ede', f: [canvasContainsAutoProps(['node,#000ede'])] },
-  { g: 'f-#00fffff', f: [canvasContainsAutoProps(['f', 'f,-,f,#00ffff'])] },
+  { g: 'f-#00fffff', f: [canvasContainsAutoProps(['f', 'f,-,f,#00ffff,#00ffff'])] },
   { g: 'node;and its label', f: [canvasContainsAutoProps(['node,and its label'])] },
   { g: 'node>(a,b,c)', f: [canvasContainsAutoProps(['node', ':1', ':1,a', ':1,b', ':1,c', 'node,>,a,1', 'node,>,b,1', 'node,>,c,1'])] },
   { g: 'node>(a b c)', f: [canvasContainsAutoProps(['node', ':1', ':1,a', ':1,b', ':1,c', 'node,>,a,1', 'node,>,b,1', 'node,>,c,1'])] },

@@ -261,7 +261,6 @@ function relinkInnerSubgraphEntryAndExit(graphCanvas: GraphCanvas, currentSubGra
       vertex._noedges = undefined
       const newEdge = _getEdge(graphCanvas, edgeAndItsIndex[0].edgeType, currentSubGraph._entrance as (GraphConnectable | GraphConnectable[]), vertex, edgeAndItsIndex[0].label,
         undefined, undefined, undefined, undefined, true)
-      newEdge.container = currentSubGraph
       debug(`  Add new edge ${newEdge}`)
       graphCanvas.insertEdge(edgeAndItsIndex[1]++, newEdge)
     }
@@ -446,9 +445,6 @@ function _addEdge(graphCanvas: GraphCanvas, edge: (GraphEdge[] | GraphEdge)): (G
     // TODO: No longer happens..remove
     debug(`PUSH EDGE ARRAY:${edge}`, true)
     throw new Error('xx')
-  } else {
-    debug(`PUSH EDGE:${edge}`, true)
-    edge.container = graphCanvas._getCurrentContainer()
   }
   graphCanvas.addEdge(edge)
   debug(false)

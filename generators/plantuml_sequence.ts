@@ -120,7 +120,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
       if (edge.printed) { continue }
       // if container given, print ONLY THOSE edges that match this
       // container!
-      if (edge.container !== container) { break }
+      if (edge.parent !== container) { break }
       edge.printed = true
       let note = ''
       let label = edge.label

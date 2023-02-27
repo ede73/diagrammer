@@ -93,6 +93,6 @@ export class GraphEdge extends GraphObject {
     if (this.rcompass) { fmt += `, rcompass: ${this.rcompass}` }
     if (this.color) { fmt += `, color: ${this.color}` }
     if (this.textcolor) { fmt += `, textcolor: ${this.textcolor}` }
-    return `GraphEdge (type:${this.edgeType} as L:${this.left.toString()}, R:${this.right.toString()}, label=${this.getLabel()}${fmt}X)`
+    return `GraphEdge (type:${this.edgeType} as L:${this.left.toString()}, R:${this.right.toString()}, parent=${this.parent?.getName()}, label=${this.getLabel()}${fmt}X)`
   }
 };

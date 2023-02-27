@@ -3,8 +3,8 @@
 import { GraphConnectable } from './graphconnectable.js'
 import { GraphReference } from './graphreference.js'
 import { GraphVertex } from './graphvertex.js'
-import { debug } from './debug.js'
 import { GraphObject } from './graphobject.js'
+import { GraphEdge } from './graphedge.js'
 
 export type ALLOWED_DEFAULTS = {
   edgecolor?: string,
@@ -31,7 +31,7 @@ export class GraphContainer extends GraphConnectable {
   _ROOTVERTICES: GraphConnectable[] = []
   defaults: ALLOWED_DEFAULTS = {}
   private equal: GraphConnectable[] = []
-  private _OBJECTS: GraphObject[] = []
+  protected _OBJECTS: GraphObject[] = []
 
   constructor(name: string, parent?: GraphContainer) {
     super(name, parent)

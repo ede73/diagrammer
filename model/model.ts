@@ -146,7 +146,7 @@ function locateVertex(container: GraphContainer, rhsObjectName: string): GraphVe
   }
 }
 
-function findOrCreateVertex(graphCanvas: GraphCanvas, vertexOrName: (string | GraphConnectable), style?: string) {
+function findOrCreateVertex(graphCanvas: GraphCanvas, vertexOrName: (string | GraphConnectable), style?: string): GraphConnectable {
   if (vertexOrName instanceof GraphVertex) {
     if (style) vertexOrName.setStyle(style)
     return vertexOrName
@@ -176,7 +176,7 @@ function findOrCreateVertex(graphCanvas: GraphCanvas, vertexOrName: (string | Gr
   const vertex = new GraphVertex(rhsObjectName, graphCanvas._getCurrentContainer(), graphCanvas.getCurrentShape(), style)
 
   debug(false)
-  return graphCanvas._getCurrentContainer().addObject(vertex)
+  return graphCanvas._getCurrentContainer().addObject(vertex) as GraphVertex
 }
 
 /**
@@ -237,15 +237,15 @@ function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInne
   // a>b>(c d>e f>g h)>(s>k)
   // activates for instance to 2nd edge (ie. one pointing from b to all of (c d>e..))
   // and also on 5th edge ie ..h)>(s..
-  for (const [edgeIndex, candidateEdge] of graphCanvas.getEdges().entries()) {
+  for (const candidateEdge of graphCanvas.getEdges()) {
     if (candidateEdge.right.name === currentGraphInner.name &&
       currentGraphInner._entrance instanceof GraphConnectable &&
       candidateEdge.left.name === currentGraphInner._entrance.name) {
       debug(`  Remove edge ${candidateEdge}`)
       // remove this edge!
-      edgeAndItsIndex = [candidateEdge, edgeIndex]
-      graphCanvas.removeEdge(edgeIndex)
+      const edgeIndex = graphCanvas.removeEdge(candidateEdge)
       // and then relink it to containers vertices that have no LEFT edges
+      edgeAndItsIndex = [candidateEdge, edgeIndex]
       break
     }
   }

@@ -3,7 +3,7 @@ digraph {
     rankdir=TD;
     subgraph cluster_canvas {
         color=yellow;
-        GraphCanvas[shape=record, color=yellow, fillcolor=yellow, label="{ GraphCanvas | {_ROOTVERTICES|GraphObject, GraphRoot, xGroup, GNode, Link}|{defaults|[object Object]}|{equal|}|{_OBJECTS|GraphObject, GraphRoot, xGroup, GNode, Link}|{generator|ast_record}|{visualizer|ast_record}|{direction|portrait}|{_EDGES|GraphObject-GraphRoot, GraphObject-GNode, GraphObject-xGroup,\n GraphObject-Link, left-GNode, left-xGroup, right-xGroup,\n right-GNode, OBJECTS1-GNode, OBJECTS1-xGroup, OBJECTS2-GNode,}|{CONTAINER_EXIT|6}|{GRAPHINNER_INDEX|1}|{GROUPIDS|6}|{VARIABLES|gen=#ccffcc, par=#ccccff} }"];
+        GraphCanvas[shape=record, color=yellow, fillcolor=yellow, label="{ GraphCanvas | {_ROOTVERTICES|GraphObject, GraphRoot, xGroup, GNode, Link}|{defaults|[object Object]}|{equal|}|{_OBJECTS|GraphObject, GraphRoot, xGroup, GNode, Link,\n GraphObject-GraphRoot, GraphObject-GNode, GraphObject-xGroup,\n GraphObject-Link, left-GNode, left-xGroup, right-xGroup,\n right-GNode, OBJECTS1-GNode, OBJECTS1-xGroup, OBJECTS2-GNode,}|{generator|ast_record}|{visualizer|ast_record}|{direction|portrait}|{CONTAINER_EXIT|6}|{GRAPHINNER_INDEX|1}|{GROUPIDS|6}|{VARIABLES|gen=#ccffcc, par=#ccccff} }"];
         subgraph cluster_GraphObject {
             color=blue;
             GraphObject[shape=record, color=blue, fillcolor=blue, label="{ GraphGroup | {label|GraphObject}|{name|GraphObject}|{parent|GraphCanvas}|{_ROOTVERTICES|name, color, textColor, label}|{defaults|[object Object]}|{equal|}|{_OBJECTS|name, color, textColor, label}|{isInnerGraph|false}|{exitvertex|1} }"];

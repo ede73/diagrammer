@@ -46,7 +46,6 @@ export class GraphCanvas extends GraphContainer {
   shape?: string = undefined
   direction?: string = undefined
   start?: string = undefined
-  private _EDGES: GraphEdge[] = []
 
   // parsing context
   /**
@@ -178,19 +177,21 @@ export class GraphCanvas extends GraphContainer {
   }
 
   getEdges() {
-    return this._EDGES
+    return this._OBJECTS.filter(p => (p instanceof GraphEdge)) as GraphEdge[] // OK
   }
 
   addEdge(edge: GraphEdge) {
-    this._EDGES.push(edge)
+    this._OBJECTS.push(edge)
     return edge
   }
 
-  removeEdge(edgeIndex: number) {
-    return this._EDGES.splice(edgeIndex, 1)
+  removeEdge(edge: GraphEdge) {
+    const edgeIndex = this._OBJECTS.findIndex(p => p === edge);
+    this._OBJECTS.splice(edgeIndex, 1)
+    return edgeIndex
   }
 
   insertEdge(afterThisIndex: number, newEdge: GraphEdge) {
-    return this._EDGES.splice(afterThisIndex, 0, newEdge)
+    return this._OBJECTS.splice(afterThisIndex, 0, newEdge)
   }
 };

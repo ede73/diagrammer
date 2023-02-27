@@ -2,21 +2,7 @@
 %start S
 %ebnf
 %{
-	//generators = new Map();
-	//visualizations = new Map();
-	// there seems to be NO way to autoinitialize GraphCanvas
-	// this section is totally disconnected from the parser and has no access to yy
-	// lexer has yy access to is disconnected from here, no matter what you try..
-	// having simple accessible (global to ) parser variable like
-	// const graphcanvas=new GraphCanvas() doesn't work...
-	// nor yy.graphcanvas = new GraphCanvas()
-	// Some hacks towards that, but not really functional...
-	// https://stackoverflow.com/questions/30562134/jison-global-variables
-	// Basically ONLY way to get this done is to pass from above,ie.
-	// anytime doing parsing,
-	// diagrammer.parser.yy.GRAPHCANVAS = new GraphCanvas();
-	// diagrammer.parser.parse(code);
-	// https://gerhobbelt.github.io/jison/docs/#specifying-a-language
+	// trace? DEBUG=1 make ... (make sure jison -t is used)
 	const Jison = {
 		print(msg) {
 			console.log(`TRACE: ${msg}`);

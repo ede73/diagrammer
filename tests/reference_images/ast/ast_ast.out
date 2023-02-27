@@ -10,7 +10,7 @@
             "par": "#ccccff"
          }
       },
-      "_EDGES": [
+      "_OBJECTS": [
          {
             "GraphEdge": {
                "color": "#0000ff",
@@ -118,9 +118,7 @@
                "left": "OBJECTS2",
                "right": "xGroup"
             }
-         }
-      ],
-      "_OBJECTS": [
+         },
          {
             "GraphGroup": {
                "_OBJECTS": [

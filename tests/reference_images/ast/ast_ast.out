@@ -2,8 +2,8 @@
    "GraphCanvas": {
       "CONTAINER_EXIT": 6,
       "CURRENTCONTAINER": "...GraphCanvas",
+      "GRAPHINNER_INDEX": 1,
       "GROUPIDS": 6,
-      "SUBGRAPHS": 1,
       "VARIABLES": {
          "Object": {
             "gen": "#ccffcc",

@@ -70,7 +70,7 @@ export class GraphCanvas extends GraphContainer {
   /**
    * Automated indexing for created subgraphs (nameless)
    */
-  SUBGRAPHS: number = 1
+  GRAPHINNER_INDEX: number = 1
   /**
    * Automated indexing for created groups (they can be nameless)
    */
@@ -183,6 +183,7 @@ export class GraphCanvas extends GraphContainer {
 
   addEdge(edge: GraphEdge) {
     this._EDGES.push(edge)
+    return edge
   }
 
   removeEdge(edgeIndex: number) {

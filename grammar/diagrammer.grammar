@@ -165,7 +165,7 @@ vertexGroupListOrAttrs cumulates an array of vertices, RHS is the latest GraphVe
 vertexGroupListOrAttrs
 	: OPAREN {
 		parser.trace('OPAREN ');
-		$$=_enterSubGraph(yy.GRAPHCANVAS)
+		$$=_enterNewGraphInner(yy.GRAPHCANVAS)
 	}
 	| vertexGroupListOrAttrs LISTSEP INLINE_STRING? readVertexAttrs {
 		parser.trace('vertexGroupListOrAttrs :'+$vertexGroupListOrAttrs+","+$readVertexAttrs+","+$3);
@@ -177,7 +177,7 @@ vertexGroupListOrAttrs
 	}
 	| CPAREN {
 		parser.trace('CPAREN ');
-		$$=_exitSubGraph(yy.GRAPHCANVAS)
+		$$=_exitCurrentGraphInner(yy.GRAPHCANVAS)
 	}
 	;
 	/* TOOD: Could concatenate $4, $6 or if $4 defined AND $6, $6 could be appended as ::, unless already(note)*/
@@ -251,30 +251,30 @@ graphContent
 	}
 	| IF	 {
 		parser.trace('IF :'+$IF);
-		$$=setAttr(setAttr(yy.GRAPHCANVAS._enterContainer(_getGroup(yy.GRAPHCANVAS).setLabel($IF.replace(/\s+then\s*$/, "").replace(/^\s*if\s*/, ""))), 'conditional', 'if'), '_conditionalEntryEdge', yy.GRAPHCANVAS.lastSeenVertex)
+		$$=setAttr(setAttr(yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setLabel($IF.replace(/\s+then\s*$/, "").replace(/^\s*if\s*/, ""))), 'conditional', 'if'), '_conditionalEntryEdge', yy.GRAPHCANVAS.lastSeenVertex)
 	}
 	| ELSEIF {
 		parser.trace('ELSEIF vertexGroupListOrAttrs :'+$ELSEIF);
 		yy.GRAPHCANVAS._exitContainer();
-		$$=setAttr(yy.GRAPHCANVAS._enterContainer(_getGroup(yy.GRAPHCANVAS).setLabel($ELSEIF.replace(/\s+then\s*$/, "").replace(/^\s*elseif\s*/, ""))), 'conditional', 'elseif')
+		$$=setAttr(yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setLabel($ELSEIF.replace(/\s+then\s*$/, "").replace(/^\s*elseif\s*/, ""))), 'conditional', 'elseif')
 	}
 	| ELSE {
 		parser.trace('ELSE :'+$ELSE);
 		yy.GRAPHCANVAS._exitContainer();
-		$$=setAttr(yy.GRAPHCANVAS._enterContainer(_getGroup(yy.GRAPHCANVAS).setLabel($ELSE)), 'conditional', 'else')
+		$$=setAttr(yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setLabel($ELSE)), 'conditional', 'else')
 	}
 	| ENDIF	 { 
 		parser.trace('ENDIF :'+$ENDIF);
 		yy.GRAPHCANVAS._exitContainer();
 		// TODO: is ENDIF container necessary?YES, it could be invisible vertex! Could link to that instead of endif kludge in digraph
-		yy.GRAPHCANVAS._nextConnectableToExitEndIf=setAttr(yy.GRAPHCANVAS._enterContainer(_getGroup(yy.GRAPHCANVAS).setLabel($ENDIF)), 'conditional', 'endif')
+		yy.GRAPHCANVAS._nextConnectableToExitEndIf=setAttr(yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setLabel($ENDIF)), 'conditional', 'endif')
 		debug("_nextConnectableToExitEndIf"+yy.GRAPHCANVAS._nextConnectableToExitEndIf);
 		$$=yy.GRAPHCANVAS._exitContainer()
 	}
 	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */
 	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END {
 		parser.trace('GROUP :'+$2+","+$3+","+$4);
-		$$=yy.GRAPHCANVAS._enterContainer(_getGroup(yy.GRAPHCANVAS).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
+		$$=yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
 	}
 	| GROUP_END  {
 		parser.trace('GROUP_END :'+$GROUP_END);

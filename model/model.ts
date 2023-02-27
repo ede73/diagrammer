@@ -33,7 +33,6 @@ export function _processVariable(graphCanvas: GraphCanvas, variable: string) {
   if (vari.indexOf(':') !== -1) {
     // Assignment
     const tmp = vari.split(':')
-    debug(`GOT assignment ${tmp[0]}=${tmp[1]}`)
     _getVariables(graphCanvas)[tmp[0]] = tmp[1]
     return tmp[1]
   } else {
@@ -59,6 +58,7 @@ export function _getList(graphCanvas: GraphCanvas,
   lhs: (GraphConnectable | GraphConnectable[]),
   rhs: GraphConnectable,
   rhsEdgeLabel?: string): (GraphConnectable | GraphConnectable[]) {
+
   if (lhs instanceof GraphVertex) {
     debug(`_getList(vertex:${lhs},rhs:[${rhs}])`, true)
     const lst: (GraphConnectable | GraphConnectable[]) = []
@@ -77,7 +77,7 @@ export function _getList(graphCanvas: GraphCanvas,
     if (!(rhs instanceof GraphContainer)) {
       throw new Error("RHS must be container");
     }
-    const grp = _getGroup(graphCanvas, rhs)
+    const grp = _getGroupOrMakeNew(graphCanvas, rhs)
     if (rhsEdgeLabel) {
       grp._setEdgeLabel(rhsEdgeLabel)
     }
@@ -180,7 +180,7 @@ function findOrCreateVertex(graphCanvas: GraphCanvas, vertexOrName: (string | Gr
 }
 
 /**
- * Enter to a new parented sub graph
+ * Enter to a new parented inner graph
  * like in a>(b>c,d,e)>h
  *
  * Edit grammar so it edges a>b and c,d,e to h
@@ -188,32 +188,31 @@ function findOrCreateVertex(graphCanvas: GraphCanvas, vertexOrName: (string | Gr
  *
  * Usage: grammar/diagrammer.grammar
  */
-export function _enterSubGraph(graphCanvas: GraphCanvas) {
-  const subgraph = _getSubGraph(graphCanvas)
-  return graphCanvas._enterContainer(subgraph)
+export function _enterNewGraphInner(graphCanvas: GraphCanvas): GraphInner {
+  const newGraphInner = new GraphInner(String(graphCanvas.GRAPHINNER_INDEX++), graphCanvas._getCurrentContainer())
+  graphCanvas._getCurrentContainer().addObject(newGraphInner)
+  return graphCanvas._enterContainer(newGraphInner) as GraphInner
 }
 
 /*
- * ie. o>(s1,s2,s3) nodes s1-s3 form a GraphInner (a subgraph)
+ * ie. o>(s1,s2,s3) nodes s1-s3 form a GraphInner (am inner graph)
  * Usage: grammar/diagrammer.grammar
  */
-export function _exitSubGraph(graphCanvas: GraphCanvas) {
+export function _exitCurrentGraphInner(graphCanvas: GraphCanvas) {
   // Now should edit the ENTRANCE EDGE to point to a>b, a>d, a>e
-  const currentSubGraphTypeCheckerFix = graphCanvas._getCurrentContainer()
-  if (!(currentSubGraphTypeCheckerFix instanceof GraphInner)) {
-    throw new Error(`Subgraph cannot be any other than GraphInner:${typeof (currentSubGraphTypeCheckerFix)}`)
+  const currentGraphInner = graphCanvas._getCurrentContainer()
+  if (!(currentGraphInner instanceof GraphInner)) {
+    throw new Error(`Inner Graph cannot be any other than GraphInner:${typeof (currentGraphInner)}`)
   }
-  const currentSubGraph: GraphInner = currentSubGraphTypeCheckerFix
 
-  debug(`Exit subgraph ${currentSubGraph}`)
-  relinkInnerSubgraphEntryAndExit(graphCanvas, currentSubGraph)
+  relinkGraphInnerEntryAndExit(graphCanvas, currentGraphInner)
 
   let lastVertex: GraphConnectable | undefined
 
   // fix exits
   // {"link":{"edgeType":">","left":1,"right":"z","label":"from e and h"}}
   const exits: GraphConnectable[] = []
-  currentSubGraph.getObjects().forEach(vertex => {
+  currentGraphInner.getObjects().forEach(vertex => {
     lastVertex = vertex
     if (!hasOutwardEdge(graphCanvas, vertex)) {
       exits.push(vertex)
@@ -222,25 +221,26 @@ export function _exitSubGraph(graphCanvas: GraphCanvas) {
 
   debug(`exits ${exits}`)
   if (lastVertex) {
-    currentSubGraph._setExit(lastVertex)
+    currentGraphInner._setExit(lastVertex)
   }
+  debug(`Exit innergraph ${currentGraphInner}`)
   return graphCanvas._exitContainer()
 }
 
 // TODO: see if this could be done also at the end of the graph
-function relinkInnerSubgraphEntryAndExit(graphCanvas: GraphCanvas, currentSubGraph: GraphInner) {
+function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInner: GraphInner) {
   let edgeAndItsIndex: [GraphEdge, number] | undefined
-  debug(`relinkInnerSubgraphEntryAndExit ${currentSubGraph}`)
-  // If there's an edge that (RHS) points to current inner sub graph AND the graph has
+  debug(`relinkGraphInnerEntryAndExit ${currentGraphInner}`)
+  // If there's an edge that (RHS) points to current inner inner graph AND the graph has
   // entrance connectable and this edge (LHS) points to entrance node, then relink
   // this edge:
   // a>b>(c d>e f>g h)>(s>k)
   // activates for instance to 2nd edge (ie. one pointing from b to all of (c d>e..))
   // and also on 5th edge ie ..h)>(s..
   for (const [edgeIndex, candidateEdge] of graphCanvas.getEdges().entries()) {
-    if (candidateEdge.right.name === currentSubGraph.name &&
-      currentSubGraph._entrance instanceof GraphConnectable &&
-      candidateEdge.left.name === currentSubGraph._entrance.name) {
+    if (candidateEdge.right.name === currentGraphInner.name &&
+      currentGraphInner._entrance instanceof GraphConnectable &&
+      candidateEdge.left.name === currentGraphInner._entrance.name) {
       debug(`  Remove edge ${candidateEdge}`)
       // remove this edge!
       edgeAndItsIndex = [candidateEdge, edgeIndex]
@@ -253,13 +253,13 @@ function relinkInnerSubgraphEntryAndExit(graphCanvas: GraphCanvas, currentSubGra
   if (edgeAndItsIndex) {
     // and then relink it to containers vertices that have no LEFT edges
     // traverse
-    for (const vertex of currentSubGraph._ROOTVERTICES) {
-      if (currentSubGraph._entrance && currentSubGraph._entrance instanceof GraphVertex) {
+    for (const vertex of currentGraphInner._ROOTVERTICES) {
+      if (currentGraphInner._entrance && currentGraphInner._entrance instanceof GraphVertex) {
         // TODO: Assumes entrance is GraphVertex, but it looks it can be other things
-        currentSubGraph._entrance._noedges = undefined
+        currentGraphInner._entrance._noedges = undefined
       }
       vertex._noedges = undefined
-      const newEdge = _getEdge(graphCanvas, edgeAndItsIndex[0].edgeType, currentSubGraph._entrance as (GraphConnectable | GraphConnectable[]), vertex, edgeAndItsIndex[0].label,
+      const newEdge = _getEdge(graphCanvas, edgeAndItsIndex[0].edgeType, currentGraphInner._entrance as (GraphConnectable | GraphConnectable[]), vertex, edgeAndItsIndex[0].label,
         undefined, undefined, undefined, undefined, true)
       debug(`  Add new edge ${newEdge}`)
       graphCanvas.insertEdge(edgeAndItsIndex[1]++, newEdge)
@@ -277,13 +277,12 @@ function relinkInnerSubgraphEntryAndExit(graphCanvas: GraphCanvas, currentSubGra
  * @param ref Type of reference, if group, return it
  * @return ref if ref instance of group, else the newly created group
  */
-export function _getGroup(graphCanvas: GraphCanvas, ref: GraphContainer): GraphContainer {
+export function _getGroupOrMakeNew(graphCanvas: GraphCanvas, ref: GraphContainer): GraphContainer {
   if (ref instanceof GraphGroup) return ref
   debug(`_getGroup() ref:${ref}`)
   const currenContainer = graphCanvas._getCurrentContainer()
   const newGroup = new GraphGroup(String(graphCanvas.GROUPIDS++), currenContainer)
-  currenContainer.addObject(newGroup)
-  return newGroup
+  return currenContainer.addObject(newGroup) as GraphContainer
 }
 
 // Get an edge such that l links to r, return the added Edge or EDGES
@@ -396,7 +395,7 @@ export function _getEdge(graphCanvas: GraphCanvas,
   }
 
   if (!dontadd) {
-    _addEdge(graphCanvas, edge)
+    graphCanvas.addEdge(edge)
   }
   debug(false)
   return edge
@@ -425,30 +424,6 @@ function maybeRemoveFromRootVertices(currentContainer: GraphContainer, rhs: Grap
  */
 function _getVariables(graphCanvas: GraphCanvas) {
   return graphCanvas.VARIABLES
-}
-
-/**
- * Create a new sub graph or return passed in reference (if it is a subgraph)
- * GraphInner>GraphGroup>GraphContainer>GraphConnectable
- */
-function _getSubGraph(graphCanvas: GraphCanvas) {
-  const newSubGraph = new GraphInner(String(graphCanvas.SUBGRAPHS++), graphCanvas._getCurrentContainer())
-  graphCanvas._getCurrentContainer().addObject(newSubGraph)
-  return newSubGraph
-}
-
-/**
- * Add edge to the list of edges, return the Edge
- */
-function _addEdge(graphCanvas: GraphCanvas, edge: (GraphEdge[] | GraphEdge)): (GraphEdge[] | GraphEdge) {
-  if (edge instanceof Array) {
-    // TODO: No longer happens..remove
-    debug(`PUSH EDGE ARRAY:${edge}`, true)
-    throw new Error('xx')
-  }
-  graphCanvas.addEdge(edge)
-  debug(false)
-  return edge
 }
 
 function _maybePushToCurrentContainerAsReference(graphCanvas: GraphCanvas, referred: GraphConnectable) {

@@ -37,7 +37,7 @@ not_default_darksalmon$(darksalmon)>$(seagreen)not_default_peachpuff$(peachpuff)
 // Default group colors
 {anondefaultgroup;Here's a group with new context defaults
     EDGE COLOR $(darksalmon)
-    EDGE TEXT COLOR $(peachpuff)
+    EDGE TEXTCOLOR $(peachpuff)
     group ColoR #ff0000
     VERTEX COLOR $(amaranth)
     VERTEX TEXTCOLOR$(seagreen)

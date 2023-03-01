@@ -74,7 +74,7 @@ runATest() {
       fi
       rm -f "$GRAPH_DIFF"
     else
-      echo "ERROR: Failed visualizing $TEST_BINARY dit not produce output $GENERATED_IMAGE" >&2
+      echo "ERROR: Failed visualizing $TEST_BINARY did not produce output $GENERATED_IMAGE" >&2
       ls -l "$GENERATED_IMAGE"
       setErrorAndExit 22 "$TEST_FILENAME"
     fi

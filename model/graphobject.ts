@@ -14,7 +14,7 @@ export class GraphObject {
    * That's how it can get linked.
    * "name" for display purposes may be a label instead
    */
-  name?: string
+  readonly name?: string
   /**
    * If provided, this will be used as visual name
    */
@@ -31,7 +31,7 @@ export class GraphObject {
    * External link (only works for dynamic visualizations like SVG)
    */
   url?: string = undefined
-  parent: GraphObject
+  readonly parent: GraphObject
 
   /**
    * Name of the object. Exception being edges, they don't have names
@@ -47,17 +47,6 @@ export class GraphObject {
       throw new Error(`All objects require a parent - EXCEPTION being canvas ${this.constructor.name}`)
     }
     this.parent = parent;
-  }
-
-  /**
-   * Set the name for the object
-   */
-  setName(name: string) {
-    // TODO: Something odd in the parser
-    if (name) {
-      this.name = name.trim()
-    }
-    return this
   }
 
   getName() {

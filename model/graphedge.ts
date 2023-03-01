@@ -14,9 +14,9 @@ import { GraphVertex } from './graphvertex.js'
 export class GraphEdge extends GraphObject {
   // TODO: TypeScript doesn't allow quickly adding new members to objects, fix after TS conversion done(see plantuml_sequence/parsetree e.g.)
   printed?: boolean = undefined
-  edgeType: string
-  left: GraphConnectable
-  right: GraphConnectable
+  readonly edgeType: string
+  readonly left: GraphConnectable
+  readonly right: GraphConnectable
   lcompass?: string = undefined
   rcompass?: string = undefined
 
@@ -28,6 +28,9 @@ export class GraphEdge extends GraphObject {
   constructor(edgeType: string, parent: GraphContainer, lhs: GraphConnectable, rhs: GraphConnectable) {
     super('', parent) // edges have no names, ever
     this.edgeType = edgeType.trim()
+    if (!this.edgeType) {
+      throw new Error('must had edgetype!')
+    }
     this.left = lhs
     this.right = rhs
     if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) &&
@@ -63,28 +66,28 @@ export class GraphEdge extends GraphObject {
    * @returns True if edge has arrows on both sides
    */
   isBidirectional() {
-    return this.isLeftPointingEdge() && this.isRightPointingEdge()
+    return (this.edgeType.indexOf('<') !== -1) && (this.edgeType.indexOf('>') !== -1)
   }
 
   /**
    * @returns true if this edge is undirected (no arrows)
    */
   isUndirected() {
-    return !this.isLeftPointingEdge() && !this.isRightPointingEdge()
+    return (this.edgeType.indexOf('<') === -1) && (this.edgeType.indexOf('>') === -1)
   }
 
   /**
-   * @returns true if edge points left. Notice! Edge can still be birectional!
+   * @returns true if edge points left and only left (cannot be bidirectional)
    */
-  isLeftPointingEdge() {
-    return this.edgeType.indexOf('<') !== -1
+  isLeftPointingEdge(): boolean {
+    return (this.edgeType.indexOf('<') !== -1) && (this.edgeType.indexOf('>') === -1)
   }
 
   /**
-   * @returns true if edge points right. Notice! Edge can still be birectional!
+   * @returns true if edge points right and only right (cannot be bidirectional)
    */
-  isRightPointingEdge() {
-    return this.edgeType.indexOf('>') !== -1
+  isRightPointingEdge(): boolean {
+    return (this.edgeType.indexOf('>') !== -1) && (this.edgeType.indexOf('<') === -1)
   }
 
   toString() {

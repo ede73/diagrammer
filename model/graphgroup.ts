@@ -19,12 +19,15 @@ export class GraphGroup extends GraphContainer {
    * Only with endif, first vertex(Connectable) seen after
    * TODO: Inconsistent: not a GraphConnectable
    *
+   * TODO: Drop close to GraphConditional(and perhaps GraphLoop)
    * Set to graphcanvas._nextConnectableToExitEndIf
    */
   _conditionalExitEdge?: GraphConnectable = undefined
 
   /**
    * Only used if this group(set) was created due if then/elseif/else construct
+   * 
+   * TODO: Drop close to GraphConditional(and perhaps GraphLoop)
    */
   conditional?: string = undefined
 

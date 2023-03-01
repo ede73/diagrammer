@@ -157,7 +157,7 @@
     "CURRENTCONTAINER": "...GraphCanvas",
     "CONTAINER_EXIT": 6,
     "GRAPHINNER_INDEX": 1,
-    "GROUPIDS": 6,
+    "GROUPIDS": 1,
     "VARIABLES": {
             "__PSEUDOTYPE": "Object",
             "gen": "#ccffcc",

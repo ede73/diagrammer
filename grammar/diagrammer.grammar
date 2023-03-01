@@ -273,8 +273,8 @@ graphContent
 	}
 	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */
 	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END {
-		parser.trace('GROUP :'+$2+","+$3+","+$4);
-		$$=yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS).setName($2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
+		parser.trace('GROUP : name='+$2+", color="+$3+", label="+$4);
+		$$=yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS, undefined, $2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
 	}
 	| GROUP_END  {
 		parser.trace('GROUP_END :'+$GROUP_END);

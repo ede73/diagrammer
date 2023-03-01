@@ -21,7 +21,7 @@ actdiag {
         notgroupA5 [ shape=box ];
         notgroupB6 [ shape=box ];
     }
-    lane "6"{
+    lane "2"{
         notgroupA6 [ shape=box ];
     }
 }

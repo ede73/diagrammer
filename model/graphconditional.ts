@@ -15,11 +15,8 @@ export class GraphConditional extends GraphGroup {
         // IN THE FUTURE, TODO: Make GraphConditional a NEW parent group for the WHOLE conditional section
         // is GraphConditional(If,elseif..else..endif)
         super(String(canvas.GROUPIDS++), (type === 'if' ? parent : parent.parent) as GraphContainer)
-        this.canvas = this.getCanvas()
-        this.enter(type, label)
-    }
+        this.canvas = this.getCanvas();
 
-    enter(type: string, label: string): GraphConditional {
         if (type === 'if') {
             this._conditionalEntryEdge = this.canvas.lastSeenVertex
         } else {
@@ -40,6 +37,5 @@ export class GraphConditional extends GraphGroup {
                 throw new Error('effinf puffin2')
             }
         }
-        return this
     }
 };

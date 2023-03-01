@@ -27,9 +27,9 @@ digraph {
         notgroupA5;
         notgroupB6;
     }//end of groupname5 undefined
-    subgraph cluster_6 {
+    subgraph cluster_2 {
         label="rgsergset";
         notgroupA6;
-    }//end of 6 undefined
+    }//end of 2 undefined
     //links start
 }

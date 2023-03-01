@@ -13,7 +13,9 @@ import { hasOutwardEdge } from '../model/traversal.js'
 import { _getVertexOrGroup } from '../model/model.js'
 import { getAttributeAndFormat, output } from '../model/support.js'
 import { debug } from '../model/debug.js'
-
+import { GraphEdge } from '../model/graphedge.js'
+import { mapMethodProperties, mapPropertyProperties, mapMethodsOrProperties } from '../model/transforms.js'
+import { ElementHandle } from '../node_modules/puppeteer/lib/types.js'
 
 // ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(www/cli)</option>
@@ -201,21 +203,21 @@ export function digraph(graphcanvas: GraphCanvas) {
   const processAGroup = (grp: GraphGroup) => {
     debug(JSON.stringify(grp, skipEntrancesReplacer))
     lout(`subgraph cluster_${grp.getName()} {`, true)
-    const cond = grp.conditional
     // if (cond=="endif")continue;
     // Group name,OBJECTS,get/setEqual,toString
-    if (grp.isInnerGraph) {
-      lout('graph[ style=invis ];')
-    }
-    if (grp.getLabel()) {
-      lout(getAttributeAndFormat(grp, 'label', 'label="{0}";'))
-    }
-    if (grp.getColor()) {
-      lout('style=filled;')
-      lout(getAttributeAndFormat(grp, 'color', 'color="{0}";'))
-    }
+    mapMethodsOrProperties(grp, [
+      ['isInnerGraph', (p, o) => lout('graph[ style=invis ];')],
+      ['getLabel', (p, o) => lout(getAttributeAndFormat(grp, 'label', 'label="{0}";'))],
+      ['getColor', (p, o, c) => {
+        lout('style=filled;')
+        lout(getAttributeAndFormat(grp, 'color', 'color="{0}";'))
+      }]
+    ])
     grp.getObjects().forEach(o => ltraverseVertices(o))
+
+    const cond = grp.conditional
     lout(`}//end of ${grp.getName()} ${cond}`, false)
+
     if (cond) {
       // IF.elseif..else construct...
       lout(`//COND ${grp.getName()} ${cond}`)
@@ -273,31 +275,35 @@ export function digraph(graphcanvas: GraphCanvas) {
 
   lout('//links start')
   graphcanvas.getEdges().forEach(edge => {
-    const attrs = []
-    let label = edge.label
-    if (label) {
-      if (label.indexOf('::') !== -1) {
-        const labels = label.split('::')
-        attrs.push(`label="${labels[0].trim()}"`)
-        attrs.push(`xlabel="${labels[1].trim()}"`)
-      } else {
-        attrs.push(`label="${label.trim()}"`)
-      }
-    }
-    const url = edge.url
-    if (url) {
-      attrs.push(`URL="${url.trim()}"`)
-    }
-    if (edge.color) {
-      attrs.push(`color="${edge.color}"`)
-    }
-    if (edge.textcolor) {
-      attrs.push(`fontcolor="${edge.textcolor}"`)
-    }
-    let edgeType: string
-    let rhs: (GraphConnectable | GraphConnectable[]) = edge.right
-    let lhs: (GraphConnectable | GraphConnectable[]) = edge.left
+    const attrs: string[] = []
 
+    const context = [edge.left, edge.right]
+    mapMethodsOrProperties(edge, [
+      ['label', (p, o) => {
+        if (p.indexOf('::') !== -1) {
+          const labels = p.split('::')
+          o.push(`label="${labels[0].trim()}"`)
+          o.push(`xlabel="${labels[1].trim()}"`)
+        } else {
+          o.push(`label="${p.trim()}"`)
+        }
+      }],
+      ['url', (p, o) => o.push(`URL="${p.trim()}"`)],
+      ['color', (p, o) => o.push(`color="${p}"`)],
+      ['textcolor', (p, o) => o.push(`fontcolor="${p}"`)],
+      ['isDotted', (p, o) => o.push('style="dotted"')],
+      ['isDashed', (p, o) => o.push('style="dashed"')],
+      ['isBroken', (p, o) => o.push('arrowhead="tee"')],
+      ['isBidirectional', (p, o) => o.push('dir=both')],
+      ['isUndirected', (p, o) => o.push('dir=none')],
+      ['isLeftPointingEdge', (p, o, c) => {
+        // Swap left hand side and right hand side, always using right pointing edges
+        c[0] = c.splice(1, 1, c[0])[0];
+      }],
+      ['isRightPointingEdge', (p, o) => { }]
+    ],
+      attrs, context)
+    let [lhs, rhs] = context
     debug(`// link from ${lhs} to ${rhs}`)
     if (rhs instanceof GraphGroup) {
       // just pick ONE Vertex from group and use lhead
@@ -321,6 +327,7 @@ export function digraph(graphcanvas: GraphCanvas) {
             exits.push(go)
           }
         })
+        // @ts-ignore
         lhs = exits
       } else {
         if (lhs.isEmpty()) {
@@ -333,34 +340,9 @@ export function digraph(graphcanvas: GraphCanvas) {
         // Same as above
       }
     }
-    // TODO:Assuming producing DIGRAPH
-    // For GRAPH all edges are type --
-    // but we could SET arrow type if we'd like
-    if (edge.isDotted()) {
-      attrs.push('style="dotted"')
-    } else if (edge.isDashed()) {
-      attrs.push('style="dashed"')
-    }
-    if (edge.isBroken()) {
-      // TODO: Somehow denote better this "quite does not reach"
-      // even though such an edge type MAKES NO SENSE in a graph
-      attrs.push('arrowhead="tee"')
-    }
-    if (edge.isBidirectional()) {
-      edgeType = '->'
-      attrs.push('dir=both')
-    } else if (edge.isLeftPointingEdge()) {
-      const tmp = lhs
-      lhs = rhs
-      rhs = tmp
-      edgeType = '->'
-    } else if (edge.isRightPointingEdge()) {
-      edgeType = '->'
-    } else {
-      // is dotted or dashed no direction
-      edgeType = '->'
-      attrs.push('dir=none')
-    }
+
+    // ======
+
     let t = ''
     if (attrs.length > 0) { t = `[ ${attrs.sort().join(', ')} ]` }
     debug(`print lhs ${lhs}`)
@@ -369,13 +351,13 @@ export function digraph(graphcanvas: GraphCanvas) {
       lhs.forEach((element, index, array) => {
         const rname = (Array.isArray(rhs) ? rhs[0].getName() : rhs.getName());
         lout(element.getName() +
-          getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rname +
+          getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + '->' + rname +
           getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')
       })
     } else {
       const rname = (Array.isArray(rhs) ? rhs[0].getName() : rhs.getName());
       lout(lhs.getName() +
-        getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + edgeType + rname +
+        getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + '->' + rname +
         getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')
     }
   })

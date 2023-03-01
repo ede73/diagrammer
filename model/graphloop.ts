@@ -14,18 +14,15 @@ export class GraphLoop extends GraphGroup {
         // is obviously this GraphConditional (ie. previous statement), so we will use the parent
         // IN THE FUTURE, TODO: Make GraphConditional a NEW parent group for the WHOLE conditional section
         // is GraphConditional(If,elseif..else..endif)
-        super(String(canvas.GROUPIDS++), parent)
-        this.canvas = this.getCanvas()
-        this.enter(type, label)
-    }
+        super(String(canvas.GROUPIDS++), parent);
+        this.canvas = this.getCanvas();
 
-    enter(type: string, label: string): GraphLoop {
-        (this.parent as GraphContainer).addObject(this)
+        (parent as GraphContainer).addObject(this);
         this.setLabel(label.trim().replace(/(^(end[ ]*while|until)\s)/g, '').trim())
         // TODO: right now, digraph generator assumes conditional means if/else.. neeed revamping
         //this.conditional = type
 
         this.canvas._enterContainer(this)
-        return this
+
     }
 };

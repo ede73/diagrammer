@@ -298,14 +298,15 @@ export function _getGroupLoopOrMakeNew(graphCanvas: GraphCanvas, type: string, l
  *
  * Usage: grammar/diagrammer.grammar
  *
- * @param ref Type of reference, if group, return it
+ * @param ref Type of reference, if group, return it, TODO: get rid, confusing, find the group in the callsite
+ * @param name If given, will be name of this group, otherwise group get's automatic name (that cannot be referred in the language)
  * @return ref if ref instance of group, else the newly created group
  */
-export function _getGroupOrMakeNew(graphCanvas: GraphCanvas, ref?: GraphContainer): GraphContainer {
+export function _getGroupOrMakeNew(graphCanvas: GraphCanvas, ref?: GraphContainer, name?: string): GraphContainer {
   if (ref instanceof GraphGroup) return ref
   debug(`_getGroup() ref:${ref}`)
   const currenContainer = graphCanvas._getCurrentContainer()
-  const newGroup = new GraphGroup(String(graphCanvas.GROUPIDS++), currenContainer)
+  const newGroup = new GraphGroup(name ? name : String(graphCanvas.GROUPIDS++), currenContainer)
   return currenContainer.addObject(newGroup) as GraphContainer
 }
 

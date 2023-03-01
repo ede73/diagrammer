@@ -30,13 +30,13 @@ describe('GraphEdge tests', () => {
       '!isDotted', '!isDashed', 'isBroken', '!isBidirectional', '!isUndirected', 'isLeftPointingEdge', '!isRightPointingEdge'
     ],
     '<>': [
-      '!isDotted', '!isDashed', '!isBroken', 'isBidirectional', '!isUndirected', 'isLeftPointingEdge', 'isRightPointingEdge'
+      '!isDotted', '!isDashed', '!isBroken', 'isBidirectional', '!isUndirected', '!isLeftPointingEdge', '!isRightPointingEdge'
     ],
     '<->': [
-      '!isDotted', 'isDashed', '!isBroken', 'isBidirectional', '!isUndirected', 'isLeftPointingEdge', 'isRightPointingEdge'
+      '!isDotted', 'isDashed', '!isBroken', 'isBidirectional', '!isUndirected', '!isLeftPointingEdge', '!isRightPointingEdge'
     ],
     '<.>': [
-      'isDotted', '!isDashed', '!isBroken', 'isBidirectional', '!isUndirected', 'isLeftPointingEdge', 'isRightPointingEdge'
+      'isDotted', '!isDashed', '!isBroken', 'isBidirectional', '!isUndirected', '!isLeftPointingEdge', '!isRightPointingEdge'
     ],
     '-': [
       '!isDotted', 'isDashed', '!isBroken', '!isBidirectional', 'isUndirected', '!isLeftPointingEdge', '!isRightPointingEdge'

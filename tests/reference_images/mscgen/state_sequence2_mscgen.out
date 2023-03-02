@@ -1,9 +1,9 @@
 msc {
     b[ label="browser" ],d[ label="database" ],w[ label="webserver" ];
     b=>w[id="1", label="GET /index.html"];
-    w>>b[id="2"];
+    b<<=w[id="2"];
     b=>w[id="3", label="POST /blog/comment"];
-    w>>d[id="4", label="INSERT comment"];
-    d>>w[id="5"];
-    w=>b[id="6"];
+    w=>>d[id="4", label="INSERT comment"];
+    w<<=d[id="5"];
+    b<=w[id="6"];
 }

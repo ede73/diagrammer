@@ -1,0 +1,46 @@
+generator digraph
+visualizer dot
+
+a>"cont/big/a>b1"b1;normal arrow\ndashed lined\na to b
+a<"cont/big/b1>a"b1;b to a
+a<>"cont/dual/big"b1;a and b
+
+a-"dash/-"b2;no arrow\ndashed line
+
+a.>"dotted/big"b3;normal arrow\ndotted line
+a<."dotted/big"b3
+a<.>"dotted/big"b3
+
+a->"dashed/dual/big"b4;normal arrow\ndashed line
+a<-"dashed/dual/big"b4
+a<->"dashed/dual/big"b5
+
+a.>"dotted/big/dual"b5;normal arrow\ndotted line
+a<."dotted/big/dual"b5
+a<.>"dotted/big/dual"b5
+
+a-"dashed/-"b6;dash\nno arrows
+a."dotted/-"b7;dot\nno arrows
+
+a</"broken"b8;broken arrow
+a/>"broken"b8
+
+a=>"unknown"b9;normal arrow\ndouble line
+a<="unknown"b9
+a<=>"unknown"b9
+
+a>>"unknown"b10;double arrow
+a<<"unknown"b10
+a<<>>"unknown"b10
+
+a-|"unknown"b11;flat(tee) arrow\ndashed line
+a|-"unknown"b11
+a|-|"unknown"b11
+
+a.|"unknown"b12;flat(tee) arrow\ndotted line
+a|."unknown"b12
+a|.|"unknown"b12
+
+a=|"unknown"b13;flat(tee) arrow\ndoube arrow
+a|="unknown"b13
+a|=|"unknown"b13

@@ -8,6 +8,8 @@ import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js
 // ADD TO INDEX.HTML AS: <option value="mscgen">MSCGEN(cli)</option>
 
 /**
+ * https://www.mcternan.me.uk/mscgen/
+ * 
  * To test: node js/diagrammer.js verbose tests/test_inputs/state_sequence.txt mscgen
  */
 export function mscgen(graphcanvas: GraphCanvas) {
@@ -43,6 +45,56 @@ export function mscgen(graphcanvas: GraphCanvas) {
   })
 
   lout(`${vertices.join(',')};`)
+  const mscEdgeMapping: Record<string, string> = {
+    '->': '->', // message, *continuous line, one sided arrow*
+    '<-': '<-', // message
+    '<->': '<->', // message
+
+    '-|': '->', // not supported by msc
+    '|-': '<-', // not supported by msc
+    '|-|': '<->', // not supported by msc
+    '.|': '->', // not supported by msc
+    '|.': '<-', // not supported by msc
+    '|.|': '<->', // not supported by msc
+    '=|': '->', // not supported by msc
+    '|=': '<-', // not supported by msc
+    '|=|': '<->', // not supported by msc
+
+    '>': '=>', // method call or function call *continuous line, bold arrow*
+    '<': '<=', //  method call or function call
+    '<>': '<=>',//
+
+    '.>': '=>>', // callback *continuous line, small arrow*
+    '<.': '<<=', // callback
+    '<.>': '<<=>>', // callback
+
+    '/>': '-x ', // Broken message *continuous line, broken not reaching arrow*
+    '</': ' x-', //  Broken message
+
+    '.': '...', // time passes  * vertical ... *
+    '-': '---', // horizontal comment * horizontal dash*
+
+    '>>': '>>', // method or function return value (dashed line, small arrow) *dashed line, small arrow*
+    '<<': '<<', // method or function return value
+    '<<>>': '<<=>>', // method or function return value
+
+    '=>': ':>', // Emphazised message *double arrow, bold arrow*
+    '<=': '<:', // Emphazised message
+    '<=>': '<:>', // Emphazised message
+
+    // '': '|||', // extra space between rows
+
+    // '': '->*', // Broadcast arcs, where the arc is extended to all but the source entity. Any arc label is centred across the whole chart.
+    // '': '*<-', // Broadcast arcs, where the arc is extended to all but the source entity.
+
+    // '': 'box', // a box a [label='']
+    // '': 'rbox', //  a rbox a [label='']
+    // '': 'abox', // a abox a [label='']
+    // '': 'note', // a note a  [label='']
+  }
+
+  // node attrs: label, URL, ID, IDURL, arcskip, linecolor, textcolor, arclinecolor, arctextcolor, arxtextbgcolor
+
 
   let id = 1
   graphcanvas.getEdges().forEach(edge => {
@@ -67,9 +119,9 @@ export function mscgen(graphcanvas: GraphCanvas) {
     // but we could SET arrow type if we'd like
     let rightName = rhs.getName()
 
-    const dot = edge.isDotted()
-    const dash = edge.isDashed()
-    const broken = edge.isBroken()
+    const dot = edge.isDottedLine()
+    const dash = edge.isDashedLine()
+    const broken = edge.isBrokenLine()
 
     const attrs = []
     let label = edge.label
@@ -92,6 +144,8 @@ export function mscgen(graphcanvas: GraphCanvas) {
       }
     }
     attrs.push(`id="${id++}"`)
+
+
     if (edge.isBidirectional()) {
       // Broadcast type (<>)
       // hmh..since seqdiag uses a<>a as broadcast and
@@ -100,16 +154,16 @@ export function mscgen(graphcanvas: GraphCanvas) {
         edgeType = '->'
         rightName = '*'
       } else {
-        edgeType = '<=>'
+        edgeType = mscEdgeMapping[edge.edgeType]
       }
     } else if (edge.isLeftPointingEdge()) {
-      const tmpl = lhs
-      lhs = rhs
-      rhs = tmpl
-      if (dot) { edgeType = '>>' } else if (dash) { edgeType = '->' } else if (broken) { edgeType = '-x' } else { edgeType = '=>' }
+      // const tmpl = lhs
+      // lhs = rhs
+      // rhs = tmpl
+      edgeType = mscEdgeMapping[edge.edgeType]
       rightName = rhs.getName()
     } else if (edge.isRightPointingEdge()) {
-      if (dot) { edgeType = '>>' } else if (dash) { edgeType = '->' } else if (broken) { edgeType = '-x' } else { edgeType = '=>' }
+      edgeType = mscEdgeMapping[edge.edgeType]
     } else if (dot) {
       // dotted
       if (color) {

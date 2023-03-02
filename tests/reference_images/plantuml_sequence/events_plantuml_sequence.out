@@ -54,10 +54,10 @@ autonumber
     bREVERSE->AREVERSE
     bReverseDotted-->AREVERSEDOTTED
     bReverseDashed->AREVERSEDASHED
-    
-    
-    bLR->alr
-    arr->bRR
+    ...Indicates time passing...
+    ==Creates horizontal line==
+    bLR->alr:broken event
+    arr->bRR:broken event
     a1-[#ff0000]>b1
     a2->b2:event label
     a3-[#ff0000]>b3:event label

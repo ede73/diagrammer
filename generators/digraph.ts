@@ -110,13 +110,10 @@ export function digraph(graphcanvas: GraphCanvas) {
         nattrs.push(`style="${styles.sort().join(',')}"`)
       }
     }
-    // credit: Typescript documentation, src 
-    // https://www.typescriptlang.org/docs/handbook/advanced-types.html#index-types
-    // function getProperty<T, K extends keyof T>(o: T, propertyName: K): T[K] {
-    //   return o[propertyName]; // o[propertyName] is of type T[K]
-    // }
+
     getAttributeAndFormat(obj, 'image', 'image="icons{0}"', nattrs)
     getAttributeAndFormat(obj, 'textcolor', 'fontcolor="{0}"', nattrs)
+
     if (obj instanceof GraphVertex && obj.shape) {
       const currentShape = obj.shape as keyof typeof DigraphShapeMap
       if (obj.shape && !DigraphShapeMap[currentShape]) {
@@ -142,7 +139,7 @@ export function digraph(graphcanvas: GraphCanvas) {
   } else {
     lout('rankdir=TD;')
   }
-  // This may FORWARD DECLARE a node...which creates problems with coloring
+  // This may FORWARD DECLARATION of a node...which creates problems with coloring
   const start = graphcanvas.getStart()
   if (start) {
     const fwd = _getVertexOrGroup(graphcanvas, start)
@@ -154,7 +151,7 @@ export function digraph(graphcanvas: GraphCanvas) {
     lout(`null->${start};\n`)
     lout(false)
   }
-  // This may FORWARD DECLARE a node...which creates problems with coloring
+  // This may FORWARD DECLARATION of a node...which creates problems with coloring
   if (graphcanvas.getEqual() && graphcanvas.getEqual().length > 0) {
     lout('{rank=same;', true)
     for (let x = 0; x < graphcanvas.getEqual().length; x++) {
@@ -291,9 +288,10 @@ export function digraph(graphcanvas: GraphCanvas) {
       ['url', (p, o) => o.push(`URL="${p.trim()}"`)],
       ['color', (p, o) => o.push(`color="${p}"`)],
       ['textcolor', (p, o) => o.push(`fontcolor="${p}"`)],
-      ['isDotted', (p, o) => o.push('style="dotted"')],
-      ['isDashed', (p, o) => o.push('style="dashed"')],
-      ['isBroken', (p, o) => o.push('arrowhead="tee"')],
+      ['isDottedLine', (p, o) => o.push('style="dotted"')],
+      ['isDoubleLine', (p, o) => o.push('peripheries=2')],
+      ['isDashedLine', (p, o) => o.push('style="dashed"')],
+      ['isBrokenLine', (p, o) => o.push('arrowhead="tee"')],
       ['isBidirectional', (p, o) => o.push('dir=both')],
       ['isUndirected', (p, o) => o.push('dir=none')],
       ['isLeftPointingEdge', (p, o, c) => {

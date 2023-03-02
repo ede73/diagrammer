@@ -103,7 +103,7 @@ ace.define('ace/mode/state_highlight_rules', ['require', 'exports', 'module', 'a
       ('dotted|dashed|solid|bold|rounded|diagonals|invis|singularity|actor|beginpoint|box|circle|cloud|condition|database|default|diamond|dots|doublecircle|ellipse|endpoint|input|loopin|loopout|mail|minidiamond|minisquare|note|record|roundedbox|square|terminator|loop|loopend|loopstart|rect|rectangle').split('|')
     )
     const edges = lang.arrayToMap(
-      ('</|/>|<.>|<->|<>|<-|<.|<|->|.>|>|-|.').split('|')
+      ('<<>> << >> <=> <.> <-> <> |-| |-| |=| |. |- |= .| -| =| </ />  <- <. <= < => -> .> > = - .').split(' ')
     )
 
     this.$rules = {

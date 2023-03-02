@@ -14,10 +14,13 @@ aDUALDASHED<->bDUALDASHED
 AREVERSE<bREVERSE
 AREVERSEDOTTED<.bReverseDotted
 AREVERSEDASHED<-bReverseDashed
-aDotted.bDOTTED
-aDashed-bdasHed
-alr</bLR
-arr/>bRR
+
+aDotted.bDOTTED;Indicates time passing
+aDashed-bdasHed;Creates horizontal line
+
+alr</bLR;broken event
+arr/>bRR;broken event
+
 //Event with color attached
 a1>#ff0000b1
 //Event with label attached

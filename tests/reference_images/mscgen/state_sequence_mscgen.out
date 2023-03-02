@@ -6,8 +6,8 @@ msc {
     b<=>c[id="4", label="Auto return edge"];
     --- [ id="5",label="jotain kay tassanain",linecolor="#0000ff",textcolor="#0000ff" ];
     ... [ id="6",label="ja aikaa palaa",linecolor="#ff0000",textcolor="#ff0000" ];
-    a-xb[id="7", label="lost signal"];
-    b-xa[id="8", label="lost signal"];
+    a-x b[id="7", label="lost signal"];
+    a x-b[id="8", label="lost signal"];
     a=>b[id="9", label="signal"];
     b abox b[ label="and a big\nlined\nnote" ];
     a=>b[id="10", label="signal"];
@@ -18,10 +18,10 @@ msc {
     c=>c[id="14", label="process(2)"];
     c=>c[id="15", label="process(n)", linecolor="#0000ff"];
     c=>c[id="16", label="process(END)"];
-    c=>a[id="17", label="callback()"];
+    a<=c[id="17", label="callback()"];
     a=>a[id="18", label="next()", linecolor="#ff0000"];
     a=>a[id="19", label="ac1()\nac2()"];
-    c=>b[id="20", label="cb(TRUE)"];
+    b<=c[id="20", label="cb(TRUE)"];
     b=>b[id="21", label="stalled(...)"];
-    b=>a[id="22", label="ab()=FALSE"];
+    a<=b[id="22", label="ab()=FALSE"];
 }

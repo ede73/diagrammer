@@ -1,5 +1,5 @@
 // @ts-check
-import { debug } from 'console'
+import { debug } from '../model/debug.js'
 import { DefaultSettingKey, GraphContainer } from '../model/graphcontainer.js'
 import { GraphObject } from '../model/graphobject.js'
 import { GraphConnectable } from './graphconnectable.js'
@@ -31,6 +31,10 @@ export class GraphEdge extends GraphObject {
     if (!this.edgeType) {
       throw new Error('must had edgetype!')
     }
+    // Exclude some ambiguous edge types
+    if (['|', '|/|'].includes(this.edgeType)) {
+      throw new Error(`Edgetype ${this.edgeType} is impossible`)
+    }
     this.left = lhs
     this.right = rhs
     if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) &&
@@ -50,44 +54,64 @@ export class GraphEdge extends GraphObject {
     ])
   }
 
-  isDotted() {
-    return this.edgeType.indexOf('.') !== -1
+  isDottedLine() {
+    return this.edgeType.match(/(^(<<|<|[|])[.])|(^[.](>>|>|[|])$)|(^[.]$)/) !== null
   }
 
-  isDashed() {
-    return this.edgeType.indexOf('-') !== -1
+  isDashedLine() {
+    return this.edgeType.match(/(^(<<|<|[|])[-])|(^[-](>>|>|[|])$)|(^-$)/) !== null
   }
 
-  isBroken() {
-    return this.edgeType.indexOf('/') !== -1
+  isDoubleLine() {
+    return this.edgeType.match(/(^(<<|<|[|]){0,1}[=])|(^[=](>>|>|[|]){0,1}$)|(^=$)/) !== null
+  }
+
+  isBrokenLine() {
+    return this.edgeType.match(/(^(<<|<|[|])[/])|(^[/](>>|>|[|])$)/) !== null
+  }
+
+  isDoubleArrow() {
+    return this.edgeType.match(/(^<<[=./-]{0,1})|(^[=./-]{0,1}>>$)/) !== null
+  }
+
+  isFlatArrow() {
+    return this.edgeType.match(/(^[|][=./-]{0,1})|(^[=./-]{0,1}[|]$)/) !== null
+  }
+
+  isNormalArrow() {
+    return this.edgeType.match(/(^<[^<])|([^>]>$)|(^[<>]$)/) !== null
   }
 
   /**
    * @returns True if edge has arrows on both sides
    */
   isBidirectional() {
-    return (this.edgeType.indexOf('<') !== -1) && (this.edgeType.indexOf('>') !== -1)
+    return this.edgeType.match(/(^(<<|<|[|]).*(>>|>|[|])$)/) !== null
   }
 
   /**
    * @returns true if this edge is undirected (no arrows)
    */
   isUndirected() {
-    return (this.edgeType.indexOf('<') === -1) && (this.edgeType.indexOf('>') === -1)
+    return this.edgeType.match(/^[=./-]$/) !== null
   }
 
   /**
    * @returns true if edge points left and only left (cannot be bidirectional)
    */
   isLeftPointingEdge(): boolean {
-    return (this.edgeType.indexOf('<') !== -1) && (this.edgeType.indexOf('>') === -1)
+    // One oddity here, |-| could be bidirectional, but we cannot determine if it is pointing left or right
+    if (this.edgeType.match(/^[|][=./-][|]$/) !== null) {
+      return false
+    }
+    return this.edgeType.match(/^(<<|<|[|])(|[=./-]{1})$/) !== null
   }
 
   /**
    * @returns true if edge points right and only right (cannot be bidirectional)
    */
   isRightPointingEdge(): boolean {
-    return (this.edgeType.indexOf('>') !== -1) && (this.edgeType.indexOf('<') === -1)
+    return this.edgeType.match(/^(|[=./-]{1})(>>|>|[|])$/) !== null
   }
 
   toString() {

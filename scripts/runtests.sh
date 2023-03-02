@@ -119,6 +119,7 @@ for TEST_BINARY in $tests; do
   launchTestInBackground ast.txt
   [ "$TEST_BINARY" != "actdiag" ] && [ "$TEST_BINARY" != "blockdiag" ] && {
     launchTestInBackground colors.txt
+    launchTestInBackground arrow_types.txt
     launchTestInBackground flow_control.txt
     launchTestInBackground state_nodelinktests.txt
     launchTestInBackground url.txt

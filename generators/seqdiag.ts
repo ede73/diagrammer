@@ -85,9 +85,9 @@ export function seqdiag(graphcanvas: GraphCanvas) {
     // For GRAPH all edges are type --
     // but we could SET arrow type if we'd like
     let rightName = rhs.getName()
-    const dot = edge.isDotted()
-    const dash = edge.isDashed()
-    if (edge.isBroken()) {
+    const dot = edge.isDottedLine()
+    const dash = edge.isDashedLine()
+    if (edge.isBrokenLine()) {
       attrs.push('failed')
     }
     if (edge.edgeType.indexOf('<') !== -1 && edge.edgeType.indexOf('>') !== -1) {

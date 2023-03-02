@@ -126,9 +126,9 @@ export function actdiag(graphcanvas: GraphCanvas) {
 
   graphcanvas.getEdges().forEach((edge) => {
     let s = ''
-    if (edge.isDotted()) {
+    if (edge.isDottedLine()) {
       s += 'style="dotted"'
-    } else if (edge.isDashed()) {
+    } else if (edge.isDashedLine()) {
       s += 'style="dashed"'
     }
     const t = multiAttrFmt(edge, {

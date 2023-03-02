@@ -52,10 +52,10 @@ digraph {
     bREVERSE->AREVERSE;
     bReverseDotted->AREVERSEDOTTED[ style="dotted" ];
     bReverseDashed->AREVERSEDASHED[ style="dashed" ];
-    aDotted->bDOTTED[ dir=none, style="dotted" ];
-    aDashed->bdasHed[ dir=none, style="dashed" ];
-    bLR->alr[ arrowhead="tee" ];
-    arr->bRR[ arrowhead="tee" ];
+    aDotted->bDOTTED[ dir=none, label="Indicates time passing", style="dotted" ];
+    aDashed->bdasHed[ dir=none, label="Creates horizontal line", style="dashed" ];
+    bLR->alr[ arrowhead="tee", label="broken event" ];
+    arr->bRR[ arrowhead="tee", label="broken event" ];
     a1->b1[ color="#ff0000" ];
     a2->b2[ label="event label" ];
     a3->b3[ color="#ff0000", label="event label" ];

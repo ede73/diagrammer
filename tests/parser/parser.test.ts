@@ -504,7 +504,7 @@ exit;exit node is also required
       expect(edge.rcompass).toBe(':se')
       expect(edge.isRightPointingEdge()).toBeTruthy()
       expect(edge.isLeftPointingEdge()).toBeFalsy()
-      expect(edge.isDashed()).toBeTruthy()
+      expect(edge.isDashedLine()).toBeTruthy()
       expect(edge.left.getName()).toBe('a')
 
       edges.delete(edge.right.getName() as string)

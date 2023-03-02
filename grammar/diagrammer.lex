@@ -128,7 +128,35 @@ Special arrow is /> and </ that denotes a broken signal...
 /* hint about visualizer*/
 "generator"	return 'GENERATOR';
 "visualizer"	return 'VISUALIZER';
-"</"|"/>"|"<.>"|"<->"|"<>"|"<-"|"<."|"<"|"->"|".>"|">"|"-"|"."	return 'EVENT';
+"</"|
+"/>"|
+"<>"|
+"<.>"|
+"<->"|
+"<=>"|
+"|.|"|
+"|-|"|
+"|=|"|
+"|."|
+"|-"|
+"|="|
+".|"|
+"-|"|
+"=|"|
+"<<>>"|
+">>"|
+"<<"|
+"<."|
+"<-"|
+"<="|
+".>"|
+"->"|
+"=>"|
+"<"|
+">"|
+"."|
+"-"|
+"="	return 'EVENT';
 {IMAGE}		return 'IMAGE';
 {COMPASS}	return 'COMPASS';
 {NAME}		return fixBrokenUnPut(this);

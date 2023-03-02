@@ -21,7 +21,7 @@ export function debug(msg: (string | boolean), indentOrDedent?: (boolean)) {
   if (VERBOSE === true && msg !== false && msg !== true) {
     let d = ''
     for (let i = 0; i < debugIndent; i++) d += '    '
-    console.log(d + msg + '//')
+    console.log(`// ${d}${msg}`)
   }
   if (indentOrDedent === true || msg === true) {
     debugIndent++

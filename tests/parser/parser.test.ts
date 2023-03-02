@@ -9,6 +9,7 @@ import { GraphGroup } from '../../model/graphgroup.js'
 import { GraphInner } from '../../model/graphinner.js'
 import { GraphVertex } from '../../model/graphvertex.js'
 import { GraphConditional } from '../../model/graphconditional.js'
+import { GraphEdgeDirectionType, GraphEdgeLineType } from '../../model/graphedge.js'
 
 // curried, canvas passed on call site
 const canvasHas = (prop: string, value: any) => {
@@ -502,9 +503,8 @@ exit;exit node is also required
       expect(edge.getName()).toBe(undefined)
       expect(edge.lcompass).toBe(':nw')
       expect(edge.rcompass).toBe(':se')
-      expect(edge.isRightPointingEdge()).toBeTruthy()
-      expect(edge.isLeftPointingEdge()).toBeFalsy()
-      expect(edge.isDashedLine()).toBeTruthy()
+      expect(edge.direction()).toBe(GraphEdgeDirectionType.RIGHT)
+      expect(edge.lineType() == GraphEdgeLineType.DASHED).toBeTruthy()
       expect(edge.left.getName()).toBe('a')
 
       edges.delete(edge.right.getName() as string)

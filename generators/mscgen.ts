@@ -1,6 +1,7 @@
 // @ts-check
 
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
@@ -119,34 +120,29 @@ export function mscgen(graphcanvas: GraphCanvas) {
     // but we could SET arrow type if we'd like
     let rightName = rhs.getName()
 
-    const dot = edge.isDottedLine()
-    const dash = edge.isDashedLine()
-    const broken = edge.isBrokenLine()
-
     const attrs = []
-    let label = edge.label
-    const color = edge.color
-    const url = edge.url
     let note = ''
-    if (url) {
-      attrs.push(`URL="${url}"`)
+    if (edge.url) {
+      attrs.push(`URL="${edge.url}"`)
     }
-    if (color) {
-      attrs.push(`linecolor="${color}"`)
+    if (edge.color) {
+      attrs.push(`linecolor="${edge.color}"`)
     }
-    if (label) {
-      if (label.indexOf('::') !== -1) {
-        const labels = label.split('::')
+    if (edge.label) {
+      if (edge.label.indexOf('::') !== -1) {
+        const labels = edge.label.split('::')
         note = labels[1].trim()
         attrs.push(`label="${labels[0].trim()}"`)
       } else {
-        attrs.push(`label="${label.trim()}"`)
+        attrs.push(`label="${edge.label.trim()}"`)
       }
     }
     attrs.push(`id="${id++}"`)
 
 
-    if (edge.isBidirectional()) {
+    const dir = edge.direction()
+    const line = edge.lineType()
+    if (dir === GraphEdgeDirectionType.BIDIRECTIONAL) {
       // Broadcast type (<>)
       // hmh..since seqdiag uses a<>a as broadcast and
       // a<>b as autoreturn, could we do as well?
@@ -156,25 +152,25 @@ export function mscgen(graphcanvas: GraphCanvas) {
       } else {
         edgeType = mscEdgeMapping[edge.edgeType]
       }
-    } else if (edge.isLeftPointingEdge()) {
+    } else if (dir === GraphEdgeDirectionType.LEFT) {
       // const tmpl = lhs
       // lhs = rhs
       // rhs = tmpl
       edgeType = mscEdgeMapping[edge.edgeType]
       rightName = rhs.getName()
-    } else if (edge.isRightPointingEdge()) {
+    } else if (dir === GraphEdgeDirectionType.RIGHT) {
       edgeType = mscEdgeMapping[edge.edgeType]
-    } else if (dot) {
+    } else if (line == GraphEdgeLineType.DOTTED) {
       // dotted
-      if (color) {
-        attrs.push(`textcolor="${color}"`)
+      if (edge.color) {
+        attrs.push(`textcolor="${edge.color}"`)
       }
       lout(`... [ ${attrs.sort().join(',')} ];`)
       return
-    } else if (dash) {
+    } else if (line == GraphEdgeLineType.DASHED) {
       // dashed
-      if (color) {
-        attrs.push(`textcolor="${color}"`)
+      if (edge.color) {
+        attrs.push(`textcolor="${edge.color}"`)
       }
       lout(`--- [ ${attrs.sort().join(',')} ];`)
       return

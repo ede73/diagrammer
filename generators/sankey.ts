@@ -1,6 +1,6 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
-import { GraphEdge } from '../model/graphedge.js'
+import { GraphEdge, GraphEdgeDirectionType } from '../model/graphedge.js'
 import { output } from '../model/support.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
 
@@ -37,7 +37,7 @@ export function sankey(graphcanvas: GraphCanvas) {
   }
 
   function getPrecedingNode(edge: GraphEdge) {
-    return edge.isRightPointingEdge() ? edge.left : edge.right
+    return edge.direction() == GraphEdgeDirectionType.RIGHT ? edge.left : edge.right
   }
 
   /*
@@ -50,8 +50,8 @@ export function sankey(graphcanvas: GraphCanvas) {
   function returnEdgesLeadingTo(thisNode: GraphConnectable) {
     const edgesLeadingToGivenNode: GraphEdge[] = []
     graphcanvas.getEdges().forEach(e => {
-      if ((e.isRightPointingEdge() && e.right === thisNode)
-        || (e.isLeftPointingEdge() && e.left === thisNode)) {
+      if ((e.direction() == GraphEdgeDirectionType.RIGHT && e.right === thisNode)
+        || (e.direction() == GraphEdgeDirectionType.LEFT && e.left === thisNode)) {
         edgesLeadingToGivenNode.push(e)
       }
     })
@@ -59,7 +59,7 @@ export function sankey(graphcanvas: GraphCanvas) {
   }
 
   function dumpEdge(edge: GraphEdge) {
-    if (edge.isRightPointingEdge()) {
+    if (edge.direction() == GraphEdgeDirectionType.RIGHT) {
       return `(${edge.left.getName()} ${edge.edgeType} ${edge.right.getName()} with label(${edge.getLabel() ?? ''})`
     } else {
       return `(${edge.right.getName()} r(${edge.edgeType}) ${edge.left.getName()} with label(${edge.getLabel() ?? ''})`
@@ -139,7 +139,7 @@ export function sankey(graphcanvas: GraphCanvas) {
     const amount = getEdgeValue(edge)
     const left = vertexIndexes.get(edge.left.name)
     const right = vertexIndexes.get(edge.right.name)
-    if (edge.isRightPointingEdge()) {
+    if (edge.direction() == GraphEdgeDirectionType.RIGHT) {
       lout(`${comma}{"source":${left},"target":${right},"value":${amount}}`)
     } else {
       lout(`${comma}{"source":${right},"target":${left},"value":${amount}}`)

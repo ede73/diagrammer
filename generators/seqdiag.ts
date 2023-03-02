@@ -1,5 +1,6 @@
 // @ts-check
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { GraphEdgeLineType } from '../model/graphedge.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
@@ -85,9 +86,9 @@ export function seqdiag(graphcanvas: GraphCanvas) {
     // For GRAPH all edges are type --
     // but we could SET arrow type if we'd like
     let rightName = rhs.getName()
-    const dot = edge.isDottedLine()
-    const dash = edge.isDashedLine()
-    if (edge.isBrokenLine()) {
+    const dot = edge.lineType() == GraphEdgeLineType.DOTTED
+    const dash = edge.lineType() == GraphEdgeLineType.DASHED
+    if (edge.lineType() == GraphEdgeLineType.BROKEN) {
       attrs.push('failed')
     }
     if (edge.edgeType.indexOf('<') !== -1 && edge.edgeType.indexOf('>') !== -1) {

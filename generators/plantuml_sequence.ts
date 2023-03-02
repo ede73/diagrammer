@@ -7,7 +7,7 @@ import { getAttributeAndFormat, iterateEdges, output, outputFormattedText } from
 import { _getVertexOrGroup } from '../model/model.js'
 import { GraphContainer } from '../model/graphcontainer.js'
 import { debug } from '../model/debug.js'
-import { GraphEdgeMeaningType } from '../model/graphedge.js'
+import { GraphEdgeLineType, GraphEdgeMeaningType } from '../model/graphedge.js'
 
 // ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
 
@@ -162,14 +162,14 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
       // TODO:Assuming producing DIGRAPH
       // For GRAPH all edges are type --
       // but we could SET arrow type if we'd like
-      if (edge.isBrokenLine()) {
+      if (edge.lineType() == GraphEdgeLineType.BROKEN) {
         // TODO: Somehow denote better this "quite does not reach"
         // even though such an edge type MAKES NO SENSE in a graph
         // attrs.push('arrowhead="tee"');
         // TODO:
       }
-      const dot = edge.isDottedLine()
-      const dash = edge.isDashedLine()
+      const dot = edge.lineType() == GraphEdgeLineType.DOTTED
+      const dash = edge.lineType() == GraphEdgeLineType.DASHED
       let swap = false
       if (edge.edgeType.indexOf('<') !== -1 && edge.edgeType.indexOf('>') !== -1) {
         lt = (dot ? '-' : '') + '-' + color + '>'

@@ -5,6 +5,7 @@ import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
+import { GraphEdgeLineType } from '../model/graphedge.js'
 
 // ADD TO INDEX.HTML AS: <option value="blockdiag">Block Diagram(cli)</option>
 
@@ -159,9 +160,9 @@ export function blockdiag(graphcanvas: GraphCanvas) {
 
   graphcanvas.getEdges().forEach(edge => {
     let s = ''
-    if (edge.isDottedLine()) {
+    if (edge.lineType() === GraphEdgeLineType.DOTTED) {
       s = 'style="dotted"'
-    } else if (edge.isDashedLine()) {
+    } else if (edge.lineType() === GraphEdgeLineType.DASHED) {
       s = 'style="dashed"'
     }
     const t = multiAttrFmt(edge, {

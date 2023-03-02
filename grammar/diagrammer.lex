@@ -72,12 +72,16 @@ UNTIL   "until"\s+.*(?=\n)
 
 /*
 Could make out?
--> normal
+-> normal (exists)
+->> diamond (DONE)
+-| tee (DONE)
+-<> would be MUCH better diamond :)
 -< inv
 -. dot
 -.< invdot
 -o odot (bad, clashes with name..but might work...)
--| tee
+-]
+-#
 
 
 this work, but lexer doesn't go to EOF!

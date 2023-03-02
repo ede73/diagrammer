@@ -1,5 +1,6 @@
 //@ts-check
 
+// TODO: make ANY, so enum value are passed correctly, if fixing this, need to go thru digraph!
 export type PropertyObtainedCB = (propertyValue: string, transformOutput: string[], context?: any) => any
 
 /**

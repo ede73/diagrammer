@@ -30,6 +30,11 @@ export enum GraphEdgeArrowType {
   NONE = 'none()'
 }
 
+export enum x {
+  FLAT = 'flat(|)',
+  NONE = 'none()'
+}
+
 export enum GraphEdgeDirectionType {
   LEFT = 'left',
   RIGHT = 'right',
@@ -114,60 +119,22 @@ export class GraphEdge extends GraphObject {
   }
 
   lineType(): GraphEdgeLineType {
-    if (this.isNormalLine()) {
-      return GraphEdgeLineType.NORMAL
-    } else if (this.isDottedLine()) {
-      return GraphEdgeLineType.DOTTED
-    } else if (this.isDoubleLine()) {
-      return GraphEdgeLineType.DOUBLE
-    } else if (this.isDashedLine()) {
-      return GraphEdgeLineType.DASHED
-    } else if (this.isBrokenLine()) {
-      return GraphEdgeLineType.BROKEN
+    const lineCandidate = this.edgeType.match(/^.*([.=/-])/)
+    if (lineCandidate) {
+      const line = lineCandidate[1]
+      const arrows = new Map(Object.entries({
+        '-': GraphEdgeLineType.DASHED,
+        '.': GraphEdgeLineType.DOTTED,
+        '=': GraphEdgeLineType.DOUBLE,
+        '/': GraphEdgeLineType.BROKEN,
+        '': GraphEdgeLineType.NORMAL
+      }))
+      return arrows.get(line) ?? GraphEdgeLineType.NORMAL
     }
-    throw new Error(`Unknown linetype in edgetype ${this.edgeType}`)
+    return GraphEdgeLineType.NORMAL
   }
 
   leftArrowType(): GraphEdgeArrowType {
-    // TODO: replace with proper test
-    if (this.isRightPointingEdge() || this.isUndirected()) return GraphEdgeArrowType.NONE
-    if (this.isNormalArrow()) {
-      return GraphEdgeArrowType.NORMAL
-    } else if (this.isDoubleArrow()) {
-      return GraphEdgeArrowType.DOUBLE
-    } else if (this.isFlatArrow()) {
-      return GraphEdgeArrowType.FLAT
-    }
-    return GraphEdgeArrowType.NONE
-  }
-
-  rightArrowType(): GraphEdgeArrowType {
-    // TODO: replace with proper test
-    if (this.isLeftPointingEdge() || this.isUndirected()) return GraphEdgeArrowType.NONE
-    if (this.isNormalArrow()) {
-      return GraphEdgeArrowType.NORMAL
-    } else if (this.isDoubleArrow()) {
-      return GraphEdgeArrowType.DOUBLE
-    } else if (this.isFlatArrow()) {
-      return GraphEdgeArrowType.FLAT
-    }
-    return GraphEdgeArrowType.NONE
-  }
-
-  direction(): GraphEdgeDirectionType {
-    if (this.isLeftPointingEdge()) {
-      return GraphEdgeDirectionType.LEFT
-    } else if (this.isRightPointingEdge()) {
-      return GraphEdgeDirectionType.RIGHT
-    } else if (this.isUndirected()) {
-      return GraphEdgeDirectionType.UNIDIRECTIONAL
-    } else if (this.isBidirectional()) {
-      return GraphEdgeDirectionType.BIDIRECTIONAL
-    }
-    throw new Error(`Unknown directional edgetype ${this.edgeType}`)
-  }
-
-  private getLeftArrow() {
     const leftCandidate = this.edgeType.match(/^(<<|<|[|]|[.=/-])/)
     if (leftCandidate) {
       const left = leftCandidate[1]
@@ -180,7 +147,8 @@ export class GraphEdge extends GraphObject {
     }
     return GraphEdgeArrowType.NONE
   }
-  private getRightArrow() {
+
+  rightArrowType(): GraphEdgeArrowType {
     const rightCandidate = this.edgeType.match(/([.=/-]|[|]|>>|>)$/)
     if (rightCandidate) {
       const right = rightCandidate[1]
@@ -193,89 +161,22 @@ export class GraphEdge extends GraphObject {
     }
     return GraphEdgeArrowType.NONE
   }
-  private getLineType() {
-    const lineCandidate = this.edgeType.match(/^.*([.=/-])/)
-    if (lineCandidate) {
-      const line = lineCandidate[1]
-      const arrows = new Map(Object.entries({
-        '-': GraphEdgeLineType.DASHED,
-        '.': GraphEdgeLineType.DOTTED,
-        '=': GraphEdgeLineType.DOUBLE,
-        '/': GraphEdgeLineType.BROKEN,
-        '': GraphEdgeLineType.NORMAL
-      }))
-      return arrows.get(line)
-    }
-    return GraphEdgeLineType.NORMAL
-  }
 
-  private isNormalLine() {
-    return this.getLineType() === GraphEdgeLineType.NORMAL
-  }
+  direction(): GraphEdgeDirectionType {
+    const l = this.leftArrowType()
+    const r = this.rightArrowType()
 
-  private isDottedLine() {
-    return this.getLineType() === GraphEdgeLineType.DOTTED
-  }
+    if (l === GraphEdgeArrowType.NONE && r === GraphEdgeArrowType.NONE) return GraphEdgeDirectionType.UNIDIRECTIONAL
+    if (l === GraphEdgeArrowType.FLAT && r === GraphEdgeArrowType.FLAT) return GraphEdgeDirectionType.BIDIRECTIONAL
 
-  private isDashedLine() {
-    return this.getLineType() === GraphEdgeLineType.DASHED
-  }
+    // if both arrow types are directional, this is bidirectional edge
+    if (l !== GraphEdgeArrowType.NONE && r !== GraphEdgeArrowType.NONE) return GraphEdgeDirectionType.BIDIRECTIONAL
 
-  private isDoubleLine() {
-    return this.getLineType() === GraphEdgeLineType.DOUBLE
-  }
+    // must be L or R pointing
+    if (l === GraphEdgeArrowType.NONE && r !== GraphEdgeArrowType.NONE) return GraphEdgeDirectionType.RIGHT
+    if (l !== GraphEdgeArrowType.NONE && r === GraphEdgeArrowType.NONE) return GraphEdgeDirectionType.LEFT
 
-  private isBrokenLine() {
-    return this.getLineType() === GraphEdgeLineType.BROKEN
-  }
-
-  private isDoubleArrow() {
-    return this.getLeftArrow() == GraphEdgeArrowType.DOUBLE || this.getRightArrow() == GraphEdgeArrowType.DOUBLE
-  }
-
-  private isFlatArrow() {
-    return this.getLeftArrow() == GraphEdgeArrowType.FLAT || this.getRightArrow() == GraphEdgeArrowType.FLAT
-  }
-
-  private isNormalArrow() {
-    return this.getLeftArrow() == GraphEdgeArrowType.NORMAL || this.getRightArrow() == GraphEdgeArrowType.NORMAL
-  }
-
-  /**
-   * @returns True if edge has arrows on both sides
-   */
-  private isBidirectional() {
-    const l = this.getLeftArrow()
-    const r = this.getRightArrow()
-
-    // ambiguous
-    return l !== GraphEdgeArrowType.NONE && r !== GraphEdgeArrowType.NONE
-    //return this.edgeType.match(/(^(<<|<|[|]).*(>>|>|[|])$)/) !== null
-  }
-
-  /**
-   * @returns true if this edge is undirected (no arrows)
-   */
-  private isUndirected() {
-    return this.edgeType.match(/^[=./-]$/) !== null
-  }
-
-  /**
-   * @returns true if edge points left and only left (cannot be bidirectional)
-   */
-  private isLeftPointingEdge(): boolean {
-    // One oddity here, |-| could be bidirectional, but we cannot determine if it is pointing left or right
-    if (this.edgeType.match(/^[|][=./-][|]$/) !== null) {
-      return false
-    }
-    return this.edgeType.match(/^(<<|<|[|])(|[=./-]{1})$/) !== null
-  }
-
-  /**
-   * @returns true if edge points right and only right (cannot be bidirectional)
-   */
-  private isRightPointingEdge(): boolean {
-    return this.edgeType.match(/^(|[=./-]{1})(>>|>|[|])$/) !== null
+    throw new Error(`Unknown directional edgetype ${this.edgeType}`)
   }
 
   toString() {

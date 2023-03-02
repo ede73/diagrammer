@@ -13,7 +13,7 @@ import { hasOutwardEdge } from '../model/traversal.js'
 import { _getVertexOrGroup } from '../model/model.js'
 import { getAttributeAndFormat, output } from '../model/support.js'
 import { debug } from '../model/debug.js'
-import { GraphEdge, GraphEdgeDirectionType } from '../model/graphedge.js'
+import { GraphEdge, GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
 import { mapMethodProperties, mapPropertyProperties, mapMethodsOrProperties } from '../model/transforms.js'
 import { ElementHandle } from '../node_modules/puppeteer/lib/types.js'
 
@@ -288,13 +288,6 @@ export function digraph(graphcanvas: GraphCanvas) {
       ['url', (p, o) => o.push(`URL="${p.trim()}"`)],
       ['color', (p, o) => o.push(`color="${p}"`)],
       ['textcolor', (p, o) => o.push(`fontcolor="${p}"`)],
-      ['isDottedLine', (p, o) => o.push('style="dotted"')],
-      ['isDoubleLine', (p, o) => {
-        o.push('peripheries=2')
-        const c = edge.getColor() ?? 'white'
-        o.push(`color="${c}:${c}:invis"`)
-      }
-      ],
       ['leftArrowType', (p, o) => {
         if (p == "none()" || p == "normal(< or >)") return;
         if (p == "double(<< or >>)") p = "diamond";
@@ -303,21 +296,35 @@ export function digraph(graphcanvas: GraphCanvas) {
         o.push(`${astyle}="${p}"`)
       }],
       ['rightArrowType', (p, o) => {
+        //
         if (p == "none()" || p == "normal(< or >)") return;
         if (p == "double(<< or >>)") p = "diamond";
         else if (p == "flat(|)") p = "tee";
         const astyle = "arrowhead"//edge.direction() == GraphEdgeDirectionType.RIGHT ? "arrowhead" : "arrowtail"
         o.push(`${astyle}="${p}"`)
       }],
-      ['isDashedLine', (p, o) => o.push('style="dashed"')],
-      ['isBrokenLine', (p, o) => o.push('arrowhead="tee"')],
-      ['isBidirectional', (p, o) => o.push('dir=both')],
-      ['isUndirected', (p, o) => o.push('dir=none')],
-      ['isLeftPointingEdge', (p, o, c) => {
-        // Swap left hand side and right hand side, always using right pointing edges
-        c[0] = c.splice(1, 1, c[0])[0];
+      ['lineType', (p, o) => {
+        if (p == GraphEdgeLineType.BROKEN) { o.push('arrowhead="tee"') }
+        else if (p == GraphEdgeLineType.DASHED) {
+          o.push('style="dashed"')
+        }
+        else if (p == GraphEdgeLineType.DOTTED) { o.push('style="dotted"') }
+        else if (p == GraphEdgeLineType.DOUBLE) {
+          o.push('peripheries=2')
+          const c = edge.getColor() ?? 'white'
+          o.push(`color="${c}:${c}:invis"`)
+        }
+        else if (p == GraphEdgeLineType.NORMAL) { }
       }],
-      ['isRightPointingEdge', (p, o) => { }]
+      ['direction', (p, o, c) => {
+        if (p == GraphEdgeDirectionType.BIDIRECTIONAL) { o.push('dir=both') }
+        else if (p == GraphEdgeDirectionType.UNIDIRECTIONAL) { o.push('dir=none') }
+        else if (p == GraphEdgeDirectionType.LEFT) {
+          // Swap left hand side and right hand side, always using right pointing edges
+          c[0] = c.splice(1, 1, c[0])[0];
+        }
+        else if (p == GraphEdgeDirectionType.RIGHT) { }
+      }],
     ],
       attrs, context)
     let [lhs, rhs] = context

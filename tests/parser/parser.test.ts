@@ -285,8 +285,8 @@ describe('Parser/grammar rule tests', () => {
 
   // describe.each(contentarray)("xxx")
   // TODO: there was a generator pattern for JESTs, so could 'feed' tests in here...
-  it('Run all grammar tests', async () => {
-    grammarTests.forEach((t) => {
+  grammarTests.forEach((t) => {
+    it(`Grammar test ${t.g}`, async () => {
       const c = new GraphCanvas()
       getParserYY().GRAPHCANVAS = c
       // @ts-ignore diagrammer parser type missing, but parse() exists, else this would never work

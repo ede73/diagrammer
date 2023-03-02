@@ -6,10 +6,28 @@ visualizations.set('mscgen', visualizeMscGen)
 
 export function visualizeMscGen(generatorResult: string) {
     const anchor: string = 'diagrammer-graph'
-    const config = { elementId: anchor }
+    // xu,mscgenny,json
+    // lazy, basic, classic, fountainpen, cygne, pegasse, grayscaled, inverted, noentityboxes
+    const config = {
+        elementId: anchor, input: 'mscgen', additionalTemplate: 'fountainpen', mirrorEntitiesOnBottom: true,
+        styleAdditions: '.mscgenjsdiagrammer-graph .bglayer { fill: rgb(29 26 26 / 0%);|'
+    }
+
+    /*
+    mscgenjsdiagrammer-graph .bglayer {
+    fill: rgb(29 26 26 / 0%);
+}
+    .mscgenjsdiagrammer-graph .bglayer {
+    fill: #9e2a2a;
+    stroke: white;
+    stroke-width: 0;
+}
+
+svg.mscgenjsdiagrammer-graph.font-size:24px didnt work
+
+    */
     //inputType: "msgenny",
     function handleRenderMscResult(pError: any, pSuccess: any) {
-        console.log(`mscresults ${pError} ${pSuccess}`);
         if (Boolean(pError)) {
             console.error(pError);
             return;

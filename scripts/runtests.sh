@@ -8,13 +8,12 @@ fi
 
 #parallelism for 8 cores
 PARALLEL=${2:-12}
-VERBOSE=1
+VERBOSE=0
 
 rm -f .error
 
 assertNoError() {
   if [ -f .error ]; then
-    echo "Error encountered, exiting with error code"
     set -e
     exit 100
   fi
@@ -23,26 +22,32 @@ assertNoError() {
 setErrorAndExit() {
   ERROR_CODE="$1"
   ERROR_TEXT="$2"
+  GENERATOR="$3"
+  RES="$4"
   touch .error
-  echo "ERROR $ERROR_CODE in $ERROR_TEXT"
+  echo "ERROR $ERROR_CODE in $ERROR_TEXT $GENERATOR $RES" | tee .error
   assertNoError
 }
 
 runATest() {
+  useGenerator=$1
+  shift
+  webOnlyVisualizer=$1
+  shift
   TEST_FILENAME="$1"
   assertNoError
-  [ $VERBOSE -ne 0 ] && echo "    test($*) using $TEST_BINARY"
+  [ $VERBOSE -ne 0 ] && echo "    test($*) using $useGenerator"
   no_visual=''
-  [ $WEB_VISUALIZER -ne 0 ] && no_visual="dont_run_visualizer"
+  [ $webOnlyVisualizer -ne 0 ] && no_visual="dont_run_visualizer"
 
   mkdir -p tests/test_outputs
-  ./scripts/t.sh skipparsermake silent tests $no_visual "tests/test_inputs/$TEST_FILENAME" "$TEST_BINARY" >/dev/null
+  res=$(./scripts/t.sh skipparsermake silent tests $no_visual "tests/test_inputs/$TEST_FILENAME" "$useGenerator")
   RC=$?
-  [ $RC -ne 0 ] && setErrorAndExit "$RC" "$TEST_FILENAME"
+  [ $RC -ne 0 ] && setErrorAndExit "$RC" "$TEST_FILENAME" "$useGenerator" "$res"
 
-  out="${TEST_FILENAME%.*}_${TEST_BINARY}.out"
+  out="${TEST_FILENAME%.*}_${useGenerator}.out"
   GENERATED_CODE="tests/test_outputs/$out"
-  GENERATED_CODE_REFERENCE="tests/reference_images/$TEST_BINARY/$out"
+  GENERATED_CODE_REFERENCE="tests/reference_images/$useGenerator/$out"
   if [ ! -f "$GENERATED_CODE" ]; then
     echo "    ERROR: at $TEST_FILENAME, generator failed, missing $GENERATED_CODE" >&2
     setErrorAndExit 20 "$TEST_FILENAME"
@@ -51,10 +56,10 @@ runATest() {
 
   # Web Visualizers cannot be (currently) run in CLI
   # So only thing we could do is test the final output
-  [ $WEB_VISUALIZER -eq 0 ] && {
-    png="${TEST_FILENAME%.*}_${TEST_BINARY}.png"
+  [ $webOnlyVisualizer -eq 0 ] && {
+    png="${TEST_FILENAME%.*}_${useGenerator}.png"
     GENERATED_IMAGE="tests/test_outputs/$png"
-    GENERATED_IMAGE_REFERENCE="tests/reference_images/$TEST_BINARY/$png"
+    GENERATED_IMAGE_REFERENCE="tests/reference_images/$useGenerator/$png"
     if [ -f "$GENERATED_IMAGE" ]; then
       [ ! -f "$GENERATED_IMAGE_REFERENCE" ] && cp "$GENERATED_IMAGE" "$GENERATED_IMAGE_REFERENCE"
       [ ! -f "$GENERATED_CODE_REFERENCE" ] && cp "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE"
@@ -75,7 +80,7 @@ runATest() {
       fi
       rm -f "$GRAPH_DIFF"
     else
-      echo "ERROR: Failed visualizing $TEST_BINARY did not produce output $GENERATED_IMAGE" >&2
+      echo "ERROR: Failed visualizing $useGenerator did not produce output $GENERATED_IMAGE" >&2
       ls -l "$GENERATED_IMAGE"
       setErrorAndExit 22 "$TEST_FILENAME"
     fi
@@ -85,18 +90,18 @@ runATest() {
   [ ! -f "$GENERATED_CODE_REFERENCE" ] && cp "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE"
   if ! diff -q "$GENERATED_CODE" "$GENERATED_CODE_REFERENCE" >/dev/null; then
     ERROR="Mismatch between $GENERATED_CODE $GENERATED_CODE_REFERENCE"
-    [ $WEB_VISUALIZER -eq 0 ] && {
+    [ $webOnlyVisualizer -eq 0 ] && {
       # if we ended up here, and not having a web visualizer, we've already compared output images
       # And they DO match, so this probably is a formatting change
       ERROR="Warning(output images match, so just formatting?)"
     }
-    echo -n "\n$ERROR: at $TEST_FILENAME, $GENERATED_CODE $GENERATED_CODE_REFERENCE differ for $TEST_BINARY" >&2
-    [ $WEB_VISUALIZER -eq 0 ] && {
+    echo -n "\n$ERROR: at $TEST_FILENAME, $GENERATED_CODE $GENERATED_CODE_REFERENCE differ for $useGenerator" >&2
+    [ $webOnlyVisualizer -eq 0 ] && {
       echo -n "\n\tcp $GENERATED_CODE $GENERATED_CODE_REFERENCE # as quick fix?\n" >&2
     }
     diff -u "$GENERATED_CODE_REFERENCE" "$GENERATED_CODE"
     echo "\t# You can run this test also with:"
-    echo "\tnode js/diagrammer.js tests/test_inputs/$TEST_FILENAME $TEST_BINARY"
+    echo "\tnode js/diagrammer.js tests/test_inputs/$TEST_FILENAME $useGenerator; diff -q \"$GENERATED_CODE\" \"$GENERATED_CODE_REFERENCE\""
     setErrorAndExit 23 "$TEST_FILENAME"
   fi
   assertNoError
@@ -104,88 +109,93 @@ runATest() {
 
 i=0
 launchTestInBackground() {
+  useGenerator=$1
+  shift
+  webOnlyVisualizer=$1
+  shift
   assertNoError
   i=$((i + 1))
-  [ $VERBOSE -ne 0 ] && echo "  launchTestInBackground($*) #$i with TEST_BINARY=$TEST_BINARY"
-  runATest "$*" &
+  [ $VERBOSE -ne 0 ] && echo "  launchTestInBackground $useGenerator $webOnlyVisualizer($*) #$i with useGenerator=$useGenerator"
+  runATest $useGenerator $webOnlyVisualizer "$*" &
   [ $((i % PARALLEL)) = 0 ] && wait
   assertNoError
-  [ $VERBOSE -ne 0 ] && echo "      runATest #$i ok"
+  [ $VERBOSE -ne 0 ] && echo "      runATest $useGenerator $webOnlyVisualizer #$i ok"
 }
 
-WEB_VISUALIZER=0
+webOnlyVisualizer=0
 tests="${1:-dot actdiag blockdiag}"
-for TEST_BINARY in $tests; do
-  echo "Test suite $TEST_BINARY" >&2
-  launchTestInBackground ast.txt
-  [ "$TEST_BINARY" != "actdiag" ] && [ "$TEST_BINARY" != "blockdiag" ] && {
-    launchTestInBackground colors.txt
-    launchTestInBackground arrow_types.txt
-    launchTestInBackground flow_control.txt
-    launchTestInBackground state_nodelinktests.txt
-    launchTestInBackground url.txt
-    launchTestInBackground state.txt
-    launchTestInBackground node_and_edge_coloring.txt
-    launchTestInBackground state_machine_with_start_node.txt
-    launchTestInBackground two_linked_clusters.txt
-    launchTestInBackground node_and_edge_coloring2.txt
-    launchTestInBackground two_linked_clusters_with_invisible_node.txt
-    launchTestInBackground multiple_lhs_lists.txt
-    launchTestInBackground lhs_rhs_lists.txt
-    launchTestInBackground two_filled_linked_vertices.txt
-    launchTestInBackground landscape.txt
-    launchTestInBackground state_cluster_edge.txt
-    launchTestInBackground state_dual_node.txt
-    launchTestInBackground state_innergroups.txt
-    launchTestInBackground state_recursive_linking.txt
-    launchTestInBackground state_images.txt
-    launchTestInBackground fulltest.txt
-    launchTestInBackground state_y_edge.txt
-    launchTestInBackground state_conditionals.txt
-    launchTestInBackground nodes.txt
-    launchTestInBackground events.txt
-    launchTestInBackground compass.txt
+for useGenerator in $tests; do
+  echo "Test suite $useGenerator" >&2
+  launchTestInBackground $useGenerator $webOnlyVisualizer ast.txt
+  [ "$useGenerator" != "actdiag" ] && [ "$useGenerator" != "blockdiag" ] && {
+    launchTestInBackground $useGenerator $webOnlyVisualizer colors.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer arrow_types.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer flow_control.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer state_nodelinktests.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer url.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer state.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer node_and_edge_coloring.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer state_machine_with_start_node.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer two_linked_clusters.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer node_and_edge_coloring2.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer two_linked_clusters_with_invisible_node.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer multiple_lhs_lists.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer lhs_rhs_lists.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer two_filled_linked_vertices.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer landscape.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer state_cluster_edge.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer state_dual_node.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer state_innergroups.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer state_recursive_linking.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer state_images.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer fulltest.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer state_y_edge.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer state_conditionals.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer nodes.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer events.txt
+    launchTestInBackground $useGenerator $webOnlyVisualizer compass.txt
   }
-  [ "$TEST_BINARY" != "actdiag" ] && [ "$TEST_BINARY" != "blockdiag" ] && launchTestInBackground record_style.txt
-  [ "$TEST_BINARY" != "blockdiag" ] && launchTestInBackground state_tcp.txt
-  launchTestInBackground state_group.txt
-  launchTestInBackground group_group_link.txt
+  [ "$useGenerator" != "actdiag" ] && [ "$useGenerator" != "blockdiag" ] && launchTestInBackground $useGenerator $webOnlyVisualizer record_style.txt
+  [ "$useGenerator" != "blockdiag" ] && launchTestInBackground $useGenerator $webOnlyVisualizer state_tcp.txt
+  launchTestInBackground $useGenerator $webOnlyVisualizer state_group.txt
+  launchTestInBackground $useGenerator $webOnlyVisualizer group_group_link.txt
 done
 
-TEST_BINARY=nwdiag
-launchTestInBackground nwdiag_multiple_ips.txt
-launchTestInBackground nwdiag3.txt
-launchTestInBackground nwdiag5.txt
-launchTestInBackground nwdiag2.txt
-launchTestInBackground nwdiag.txt
+useGenerator=nwdiag
+launchTestInBackground $useGenerator $webOnlyVisualizer nwdiag_multiple_ips.txt
+launchTestInBackground $useGenerator $webOnlyVisualizer nwdiag3.txt
+launchTestInBackground $useGenerator $webOnlyVisualizer nwdiag5.txt
+launchTestInBackground $useGenerator $webOnlyVisualizer nwdiag2.txt
+launchTestInBackground $useGenerator $webOnlyVisualizer nwdiag.txt
 
 tests=${1:-mscgen seqdiag plantuml_sequence}
-for TEST_BINARY in $tests; do
-  launchTestInBackground state_sequence.txt
-  launchTestInBackground state_sequence2.txt
-  launchTestInBackground state_conditionals.txt
-  launchTestInBackground events.txt
+for useGenerator in $tests; do
+  launchTestInBackground $useGenerator $webOnlyVisualizer state_sequence.txt
+  launchTestInBackground $useGenerator $webOnlyVisualizer state_sequence2.txt
+  launchTestInBackground $useGenerator $webOnlyVisualizer state_conditionals.txt
+  launchTestInBackground $useGenerator $webOnlyVisualizer events.txt
 done
 
-TEST_BINARY=plantuml_sequence
-launchTestInBackground plantuml_context.txt
-launchTestInBackground plantuml_context2.txt
+useGenerator=plantuml_sequence
+launchTestInBackground $useGenerator $webOnlyVisualizer plantuml_context.txt
+launchTestInBackground $useGenerator $webOnlyVisualizer plantuml_context2.txt
 
 # Web visualizers, so test only generator
-WEB_VISUALIZER=1
+webOnlyVisualizer=1
 for web_generators_only in $(grep -l 'WEB VISUALIZER ONLY' generators/*.js | tr . / | cut -d/ -f2); do
-  TEST_BINARY=$web_generators_only
-  launchTestInBackground ${web_generators_only}.txt
-  [ "$TEST_BINARY" = "umlclass" ] && launchTestInBackground umlclass2.txt
+  useGenerator=$web_generators_only
+  launchTestInBackground $useGenerator $webOnlyVisualizer ${web_generators_only}.txt
+  [ "$useGenerator" = "umlclass" ] && launchTestInBackground $useGenerator $webOnlyVisualizer umlclass2.txt
 done
 
-TEST_BINARY=ast
-launchTestInBackground ast.txt
+useGenerator=ast
+launchTestInBackground $useGenerator $webOnlyVisualizer ast.txt
 
-TEST_BINARY=ast_record
-launchTestInBackground ast.txt
+useGenerator=ast_record
+launchTestInBackground $useGenerator $webOnlyVisualizer ast.txt
 
-TEST_BINARY=sankey
-launchTestInBackground sankey.txt
-#launchTestInBackground sankey2.txt
+useGenerator=sankey
+launchTestInBackground $useGenerator $webOnlyVisualizer sankey.txt
+launchTestInBackground $useGenerator $webOnlyVisualizer sankey2.txt
+
 exit 0

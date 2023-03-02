@@ -57,13 +57,13 @@ if (myArgs[1] === 'lex') {
     console.log('Parsing error found:')
     console.log(str)
     console.log(hash)
-    errors = 1
+    errors++
     throw new Error(str)
   }
   diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
   diagrammerParser.parse(raw)
-  if (errors === 1) {
-    console.log('Errors....')
+  if (errors > 0) {
+    console.log(`Errors.... ${errors}`)
     process.exit(9)
   }
   process.exit(0)

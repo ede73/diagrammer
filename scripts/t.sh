@@ -96,21 +96,26 @@ getgenerator() {
   esac
 }
 
-echo Using generator $(getgenerator $generator)
-node --max-old-space-size=4096 "$MYPATH/js/diagrammer.js" "$input" "$(getgenerator $generator)" "$verbose" >"$OUT"
-[ $text -ne 0 ] && cat "$OUT"
-
+echo "Using generator $(getgenerator $generator)"
+rm -f "$OUT"
+node "$MYPATH/js/diagrammer.js" "$input" "$(getgenerator $generator)" "$verbose" >"$OUT"
 rc=$?
+
 # shellcheck disable=SC2181
-[ $? -ne 0 ] && {
-  echo "Fatal parsing error $rc"
+[ $rc -ne 0 ] && {
+  echo "Fatal parsing error $rc input=$input generator=$generator output=$OUT"
   exit $rc
 }
-[ $text -ne 0 ] && exit 0
 
 [ $(stat --format=%s "$OUT") -eq 0 ] && {
   echo "Something went wrong, generator produced EMPTY file $OUT"
-  exit 10
+  ls -l $OUT
+  exit 9
+}
+
+[ $text -ne 0 ] && {
+  cat "$OUT"
+  exit 0
 }
 
 [ $dont_run_visualizer -eq 1 ] && exit 0

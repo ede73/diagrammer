@@ -7,6 +7,7 @@ import { getAttributeAndFormat, iterateEdges, output, outputFormattedText } from
 import { _getVertexOrGroup } from '../model/model.js'
 import { GraphContainer } from '../model/graphcontainer.js'
 import { debug } from '../model/debug.js'
+import { GraphEdgeMeaningType } from '../model/graphedge.js'
 
 // ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
 
@@ -99,10 +100,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
   lout('autonumber', true)
   // Helps testing, limiting to a widely available font
   lout('skinparam defaultFontName SansSerif')
-  /*
-     * if (r.getDirection() === "portrait") { lout( indent("rankdir=LR;")); }
-     * else { lout( indent("rankdir=TD;")); }
-     */
+
   // This may FORWARD DECLARE a node...which creates problems with coloring
   const s = graphcanvas.getStart()
   if (s) {
@@ -125,6 +123,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
       let note = ''
       let label = edge.label
       if (label) {
+        //if (edge.edgeMeaningType() == GraphEdgeMeaningType.EDGE_AND_NOTE) {}
         if (label.indexOf('::') !== -1) {
           const labels = label.split('::')
           note = labels[1].trim()

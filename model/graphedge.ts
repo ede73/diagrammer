@@ -209,50 +209,42 @@ export class GraphEdge extends GraphObject {
     return GraphEdgeLineType.NORMAL
   }
 
-  isNormalLine() {
+  private isNormalLine() {
     return this.getLineType() === GraphEdgeLineType.NORMAL
-    //   return this.edgeType.match(/(^(<<|<|[|])$)|(^(>>|>|[|])$)|(^(<<|<|[|])(>>|>|[|])$)/) !== null
   }
 
-  isDottedLine() {
+  private isDottedLine() {
     return this.getLineType() === GraphEdgeLineType.DOTTED
-    //return this.edgeType.match(/(^(<<|<|[|])[.])|(^[.](>>|>|[|])$)|(^[.]$)/) !== null
   }
 
-  isDashedLine() {
+  private isDashedLine() {
     return this.getLineType() === GraphEdgeLineType.DASHED
-    //return this.edgeType.match(/(^(<<|<|[|])[-])|(^[-](>>|>|[|])$)|(^-$)/) !== null
   }
 
-  isDoubleLine() {
+  private isDoubleLine() {
     return this.getLineType() === GraphEdgeLineType.DOUBLE
-    //return this.edgeType.match(/(^(<<|<|[|]){0,1}[=])|(^[=](>>|>|[|]){0,1}$)|(^=$)/) !== null
   }
 
-  isBrokenLine() {
+  private isBrokenLine() {
     return this.getLineType() === GraphEdgeLineType.BROKEN
-    //return this.edgeType.match(/(^(<<|<|[|])[/])|(^[/](>>|>|[|])$)/) !== null
   }
 
-  isDoubleArrow() {
+  private isDoubleArrow() {
     return this.getLeftArrow() == GraphEdgeArrowType.DOUBLE || this.getRightArrow() == GraphEdgeArrowType.DOUBLE
-    //return this.edgeType.match(/(^<<[=./-]{0,1})|(^[=./-]{0,1}>>$)/) !== null
   }
 
-  isFlatArrow() {
+  private isFlatArrow() {
     return this.getLeftArrow() == GraphEdgeArrowType.FLAT || this.getRightArrow() == GraphEdgeArrowType.FLAT
-    //return this.edgeType.match(/(^[|][=./-]{0,1})|(^[=./-]{0,1}[|]$)/) !== null
   }
 
-  isNormalArrow() {
+  private isNormalArrow() {
     return this.getLeftArrow() == GraphEdgeArrowType.NORMAL || this.getRightArrow() == GraphEdgeArrowType.NORMAL
-    //return this.edgeType.match(/(^<[^<])|([^>]>$)|(^[<>]$)/) !== null
   }
 
   /**
    * @returns True if edge has arrows on both sides
    */
-  isBidirectional() {
+  private isBidirectional() {
     const l = this.getLeftArrow()
     const r = this.getRightArrow()
 
@@ -264,14 +256,14 @@ export class GraphEdge extends GraphObject {
   /**
    * @returns true if this edge is undirected (no arrows)
    */
-  isUndirected() {
+  private isUndirected() {
     return this.edgeType.match(/^[=./-]$/) !== null
   }
 
   /**
    * @returns true if edge points left and only left (cannot be bidirectional)
    */
-  isLeftPointingEdge(): boolean {
+  private isLeftPointingEdge(): boolean {
     // One oddity here, |-| could be bidirectional, but we cannot determine if it is pointing left or right
     if (this.edgeType.match(/^[|][=./-][|]$/) !== null) {
       return false
@@ -282,7 +274,7 @@ export class GraphEdge extends GraphObject {
   /**
    * @returns true if edge points right and only right (cannot be bidirectional)
    */
-  isRightPointingEdge(): boolean {
+  private isRightPointingEdge(): boolean {
     return this.edgeType.match(/^(|[=./-]{1})(>>|>|[|])$/) !== null
   }
 

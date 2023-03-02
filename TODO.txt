@@ -1,8 +1,6 @@
 - MSCGENJS https://www.npmjs.com/package/mscgenjs?activeTab=readme
 -  https://github.com/mscgenjs/mscgenjs-inpage/blob/master/src/mscgen-inpage.js
 
-- (DONE)Add support for | and << >> arrows heads
-- (DONE)Add support for double lines =
 - Add support for different left/right heads like |-> or <<->
 
 b>(c>d>e,f>g>h)>"eandh"z
@@ -91,6 +89,8 @@ for=while (you can textually explain counter)
 - constraint=false for edges in graphviz might help the layout to be as user wants
 - compass 4 plantuml
 -------
+(DONE)Add support for | and << >> arrows heads
+(DONE)Add support for double lines =
 (DONE)- HTML rendering available in svg and cairo (and hyperlinks), see if graphviz could create svg's. DIFFing could be done in pngs
   still
    GraphViz backend rendering completely (well except sfdp) replaced with CanViz web renderer (for WEB use), using svg

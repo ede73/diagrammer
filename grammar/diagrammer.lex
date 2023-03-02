@@ -76,7 +76,7 @@ Could make out?
 -< inv
 -. dot
 -.< invdot
--o odot
+-o odot (bad, clashes with name..but might work...)
 -| tee
 
 

@@ -113,7 +113,7 @@ ace.define('ace/mode/state_highlight_rules', ['require', 'exports', 'module', 'a
           regex: /\/\/.*$/
         }, {
           token: 'color',
-          regex: /#[0-9A-Fa-f]{6}$/
+          regex: /#[0-9A-Fa-f]{6}/
         }, {
           token: 'text',
           regex: /;.*$/
@@ -141,7 +141,7 @@ ace.define('ace/mode/state_highlight_rules', ['require', 'exports', 'module', 'a
           regex: /[\]}]/
         }, {
           token: 'keyword.operator',
-          regex: /<[/]|[/]>|<[.]>|<->|<>|<-|<[.]|<|->|[.]>|>|[-]/
+          regex: /([<][<]|[<]|[|])[.=/-]{0,1}([>][>]|[>]|[|]){0,1}|([<][<]|[<]|[|]){0,1}[.=/-]{0,1}([>][>]|[>]|[|])|([.=/-])/
         }, {
           token: 'variable',
           regex: /\$\([^)]+\)/
@@ -149,6 +149,7 @@ ace.define('ace/mode/state_highlight_rules', ['require', 'exports', 'module', 'a
           token: 'compass',
           regex: /:nw|:ne|:sw|:se|:n|:s|:e|:w/,
           caseInsensitive: true
+          // defaultToken: text
         }, {
           token: function (value) {
             return 'keyword'
@@ -157,6 +158,7 @@ ace.define('ace/mode/state_highlight_rules', ['require', 'exports', 'module', 'a
           caseInsensitive: true
         }, {
           token: function (value) {
+            console.log(`token(${value})`)
             if (keywords.hasOwnProperty(value.toLowerCase())) {
               return 'keyword'
             } else if (attributes.hasOwnProperty(value.toLowerCase())) {
@@ -169,7 +171,7 @@ ace.define('ace/mode/state_highlight_rules', ['require', 'exports', 'module', 'a
               //                        return "vertex";
             }
           },
-          regex: '\\-?[a-zA-Z_][a-zA-Z0-9_\\-]*'
+          regex: '\\-?[a-zA-Z_][a-zA-Z0-9_]*'
         }
       ],
       comment: [

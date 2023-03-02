@@ -79,6 +79,16 @@ Could make out?
 -o odot
 -| tee
 
+
+this work, but lexer doesn't go to EOF!
+
+([<][<]|[<]|[|]){0,1}[.=/-]{0,1}([>][>]|[>]|[|]){0,1}	return 'EVENT';
+
+([<][<]|[<]|[|])[.=/-]{0,1}([>][>]|[>]|[|]){0,1}|([<][<]|[<]|[|]){0,1}[.=/-]{0,1}([>][>]|[>]|[|])|([.=/-])
+
+
+And for sure, EMPTY does satisfy this regex...
+
 Currently supports only single arrow head and dotted or dashed.
 Two special cases for equence diagrams are ellipsis a.a., and event/broadcast a-a
 
@@ -128,48 +138,7 @@ Special arrow is /> and </ that denotes a broken signal...
 /* hint about visualizer*/
 "generator"	return 'GENERATOR';
 "visualizer"	return 'VISUALIZER';
-"<</"|
-"</"|
-"/>"|
-"/>>"|
-"<<>>"|
-"<>"|
-"<<.>>"|
-"<<->>"|
-"<<=>>"|
-"<.>"|
-"<->"|
-"<=>"|
-">>"|
-"<<"|
-"|.|"|
-"|-|"|
-"|=|"|
-"|."|
-"|-"|
-"|="|
-".|"|
-"-|"|
-"=|"|
-"<<."|
-"<<-"|
-"<<="|
-"<."|
-"<-"|
-"<="|
-".>>"|
-"->>"|
-"=>>"|
-".>"|
-"->"|
-"=>"|
-"<<"|
-">>"|
-"<"|
-">"|
-"."|
-"-"|
-"="	return 'EVENT';
+([<][<]|[<]|[|])[.=/-]{0,1}([>][>]|[>]|[|]){0,1}|([<][<]|[<]|[|]){0,1}[.=/-]{0,1}([>][>]|[>]|[|])|([.=/-])	return 'EVENT';
 {IMAGE}		return 'IMAGE';
 {COMPASS}	return 'COMPASS';
 {NAME}		return fixBrokenUnPut(this);

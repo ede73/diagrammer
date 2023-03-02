@@ -128,12 +128,20 @@ Special arrow is /> and </ that denotes a broken signal...
 /* hint about visualizer*/
 "generator"	return 'GENERATOR';
 "visualizer"	return 'VISUALIZER';
+"<</"|
 "</"|
 "/>"|
+"/>>"|
+"<<>>"|
 "<>"|
+"<<.>>"|
+"<<->>"|
+"<<=>>"|
 "<.>"|
 "<->"|
 "<=>"|
+">>"|
+"<<"|
 "|.|"|
 "|-|"|
 "|=|"|
@@ -143,15 +151,20 @@ Special arrow is /> and </ that denotes a broken signal...
 ".|"|
 "-|"|
 "=|"|
-"<<>>"|
-">>"|
-"<<"|
+"<<."|
+"<<-"|
+"<<="|
 "<."|
 "<-"|
 "<="|
+".>>"|
+"->>"|
+"=>>"|
 ".>"|
 "->"|
 "=>"|
+"<<"|
+">>"|
 "<"|
 ">"|
 "."|

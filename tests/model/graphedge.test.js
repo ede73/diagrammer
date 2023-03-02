@@ -1,30 +1,31 @@
 // @ts-check
-import { GraphEdge } from '../../model/graphedge.js'
+import { GraphEdge, GraphEdgeArrowType, GraphEdgeDirectionType, GraphEdgeLineType } from '../../model/graphedge.js'
 import { GraphCanvas } from '../../model/graphcanvas.js'
 import { GraphVertex } from '../../model/graphvertex.js'
 
 describe('GraphEdge tests', () => {
   const rightArrows = [
-    ['>', 'isNormalArrow'],
-    ['>>', 'isDoubleArrow'],
-    ['|', 'isFlatArrow']
+    ['>', 'isNormalArrow', GraphEdgeArrowType.NORMAL],
+    ['>>', 'isDoubleArrow', GraphEdgeArrowType.DOUBLE],
+    ['|', 'isFlatArrow', GraphEdgeArrowType.FLAT]
   ]
   const leftArrows = [
-    ['<', 'isNormalArrow'],
-    ['<<', 'isDoubleArrow'],
-    ['|', 'isFlatArrow']
+    ['<', 'isNormalArrow', GraphEdgeArrowType.NORMAL],
+    ['<<', 'isDoubleArrow', GraphEdgeArrowType.DOUBLE],
+    ['|', 'isFlatArrow', GraphEdgeArrowType.FLAT]
   ]
 
   const lineTypes = [
-    ['.', 'isDottedLine'],
-    ['-', 'isDashedLine'],
-    ['=', 'isDoubleLine'],
-    ['/', 'isBrokenLine'],
-    ['', 'nothing_matches']]
+    ['.', 'isDottedLine', GraphEdgeLineType.DOTTED],
+    ['-', 'isDashedLine', GraphEdgeLineType.DASHED],
+    ['=', 'isDoubleLine', GraphEdgeLineType.DOUBLE],
+    ['/', 'isBrokenLine', GraphEdgeLineType.BROKEN],
+    ['', 'isNormalLine', GraphEdgeLineType.NORMAL]]
 
-  const lineVerifications = ['isDottedLine', 'isDoubleLine', 'isDashedLine', 'isBrokenLine']
+  const lineVerifications = ['isDottedLine', 'isDoubleLine', 'isDashedLine', 'isBrokenLine', 'isNormalLine']
   const arrowVerifications = ['isFlatArrow', 'isDoubleArrow', 'isNormalArrow']
   const directionVerifications = ['isBidirectional', 'isUndirected', 'isLeftPointingEdge', 'isRightPointingEdge']
+  const directionTypes = [['left', GraphEdgeDirectionType.LEFT], ['right', GraphEdgeDirectionType.RIGHT], ['bidirectional', GraphEdgeDirectionType.BIDIRECTIONAL], ['undirected', GraphEdgeDirectionType.UNIDIRECTIONAL]]
 
   /**
    *
@@ -38,10 +39,10 @@ describe('GraphEdge tests', () => {
 
   // So we have arrow head types, line types
   // and common understanding that an edge can be undirected or directed. Directed can be left, right, or bidirectional
-  for (const [line, linef] of lineTypes) {
-    for (const [left, leftf] of leftArrows) {
-      for (const [right, rightf] of rightArrows) {
-        for (const direction of ['left', 'right', 'bidirectional', 'undirected']) {
+  for (const [/** @type {String} */line, /** @type {String} */linef, /** @type {GraphEdgeLineType} */linet] of lineTypes) {
+    for (const [/** @type {String} */left, /** @type {String} */leftf, /** @type {GraphEdgeArrowType} */arrowtl] of leftArrows) {
+      for (const [/** @type {String} */right, /** @type {String} */rightf, /** @type {GraphEdgeArrowType} */arrowtr] of rightArrows) {
+        for (const [/** @type {String} */direction, /** @type {GraphEdgeDirectionType} */directiont] of directionTypes) {
           // TODO: interesting, it COULD be possible to have |-> or <<-> bidirectional node types, but
           // I don't support that CURRENTLY, so skipping
           /** @type {string} */
@@ -102,13 +103,31 @@ describe('GraphEdge tests', () => {
           const edge = new GraphEdge(edgeType, c, lhs, rhs)
           expect(edge.edgeType).toMatch(edgeType)
           verifications.forEach(verification => {
-            it(`Test that for edgetype=(${edgeType}) this ${verification}() is true`, async () => {
+            it(`Test that for edgetype=(${edgeType}) this ${verification}() is true(${linet},${arrowtl},${arrowtr},${directiont})`, async () => {
               const inverse = verification.startsWith('!')
               if (inverse) {
                 verification = verification.substring(1)
               }
               // Bug in jest? Requires String?
               expect(String(edge[verification]())).toMatch(String(true && !inverse))
+              expect(edge.lineType()).toBe(linet)
+              expect(edge.direction()).toBe(directiont)
+              if (edge.direction() === GraphEdgeDirectionType.RIGHT) {
+                expect(edge.leftArrowType()).toBe(GraphEdgeArrowType.NONE)
+                expect(edge.rightArrowType()).toBe(arrowtr)
+              }
+              if (edge.direction() === GraphEdgeDirectionType.LEFT) {
+                expect(edge.leftArrowType()).toBe(arrowtl)
+                expect(edge.rightArrowType()).toBe(GraphEdgeArrowType.NONE)
+              }
+              if (edge.direction() === GraphEdgeDirectionType.BIDIRECTIONAL) {
+                expect(edge.leftArrowType()).toBe(arrowtl)
+                expect(edge.rightArrowType()).toBe(arrowtr)
+              }
+              if (edge.direction() === GraphEdgeDirectionType.UNIDIRECTIONAL) {
+                expect(edge.leftArrowType()).toBe(GraphEdgeArrowType.NONE)
+                expect(edge.rightArrowType()).toBe(GraphEdgeArrowType.NONE)
+              }
             })
           })
         }

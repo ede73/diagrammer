@@ -13,7 +13,7 @@ import { hasOutwardEdge } from '../model/traversal.js'
 import { _getVertexOrGroup } from '../model/model.js'
 import { getAttributeAndFormat, output } from '../model/support.js'
 import { debug } from '../model/debug.js'
-import { GraphEdge } from '../model/graphedge.js'
+import { GraphEdge, GraphEdgeDirectionType } from '../model/graphedge.js'
 import { mapMethodProperties, mapPropertyProperties, mapMethodsOrProperties } from '../model/transforms.js'
 import { ElementHandle } from '../node_modules/puppeteer/lib/types.js'
 
@@ -289,7 +289,26 @@ export function digraph(graphcanvas: GraphCanvas) {
       ['color', (p, o) => o.push(`color="${p}"`)],
       ['textcolor', (p, o) => o.push(`fontcolor="${p}"`)],
       ['isDottedLine', (p, o) => o.push('style="dotted"')],
-      ['isDoubleLine', (p, o) => o.push('peripheries=2')],
+      ['isDoubleLine', (p, o) => {
+        o.push('peripheries=2')
+        const c = edge.getColor() ?? 'white'
+        o.push(`color="${c}:${c}:invis"`)
+      }
+      ],
+      ['leftArrowType', (p, o) => {
+        if (p == "none()" || p == "normal(< or >)") return;
+        if (p == "double(<< or >>)") p = "diamond";
+        else if (p == "flat(|)") p = "tee";
+        const astyle = "arrowtail"//edge.direction() == GraphEdgeDirectionType.LEFT ? "arrowhead" : "arrowtail"
+        o.push(`${astyle}="${p}"`)
+      }],
+      ['rightArrowType', (p, o) => {
+        if (p == "none()" || p == "normal(< or >)") return;
+        if (p == "double(<< or >>)") p = "diamond";
+        else if (p == "flat(|)") p = "tee";
+        const astyle = "arrowhead"//edge.direction() == GraphEdgeDirectionType.RIGHT ? "arrowhead" : "arrowtail"
+        o.push(`${astyle}="${p}"`)
+      }],
       ['isDashedLine', (p, o) => o.push('style="dashed"')],
       ['isBrokenLine', (p, o) => o.push('arrowhead="tee"')],
       ['isBidirectional', (p, o) => o.push('dir=both')],

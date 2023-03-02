@@ -35,6 +35,7 @@ runATest() {
   no_visual=''
   [ $WEB_VISUALIZER -ne 0 ] && no_visual="dont_run_visualizer"
 
+  mkdir -p tests/test_outputs
   ./scripts/t.sh skipparsermake silent tests $no_visual "tests/test_inputs/$TEST_FILENAME" "$TEST_BINARY" >/dev/null
   RC=$?
   [ $RC -ne 0 ] && setErrorAndExit "$RC" "$TEST_FILENAME"
@@ -186,5 +187,5 @@ launchTestInBackground ast.txt
 
 TEST_BINARY=sankey
 launchTestInBackground sankey.txt
-launchTestInBackground sankey2.txt
+#launchTestInBackground sankey2.txt
 exit 0

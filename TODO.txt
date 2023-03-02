@@ -1,8 +1,8 @@
 - MSCGENJS https://www.npmjs.com/package/mscgenjs?activeTab=readme
 -  https://github.com/mscgenjs/mscgenjs-inpage/blob/master/src/mscgen-inpage.js
 
-- Add support for | and << >> arrows heads
-- Add support for double lines =
+- (DONE)Add support for | and << >> arrows heads
+- (DONE)Add support for double lines =
 - Add support for different left/right heads like |-> or <<->
 
 b>(c>d>e,f>g>h)>"eandh"z

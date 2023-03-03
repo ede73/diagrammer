@@ -22,16 +22,16 @@ export class TreeVertex {
  *
  * @param findData What ever data the tree vertex might have
  */
-export function findVertex(tree: TreeVertex, findData: any): TreeVertex | undefined {
-  if (tree.data === findData) {
-    return tree
+export function findVertex(subTree: TreeVertex, findData: any): TreeVertex | undefined {
+  if (subTree.data === findData) {
+    return subTree
   }
-  for (const tn of tree.CHILDREN) {
-    if (tn.data === findData) {
-      return tn
+  for (const treeNode of subTree.CHILDREN) {
+    if (treeNode.data === findData) {
+      return treeNode
     }
-    if (tn.CHILDREN.length > 0) {
-      const tmp = findVertex(tn, findData)
+    if (treeNode.CHILDREN.length > 0) {
+      const tmp = findVertex(treeNode, findData)
       if (tmp) {
         return tmp
       }

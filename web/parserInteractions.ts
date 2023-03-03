@@ -29,7 +29,6 @@ diagrammerParser.yy.parsedGeneratorAndVisualizer = (generator: string, visualize
 // called line by line...
 // TODO: MOVING TO GraphCanvas
 diagrammerParser.yy.result = (line: string): void => {
-  /** @type {HTMLInputElement} */
   const result = getInputElement('diagrammer-result')
 
   if (parsingStarted === 1) {

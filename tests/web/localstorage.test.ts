@@ -84,7 +84,7 @@ describe('Diagrammer', () => {
     // mock the import
     await clearParsingErrors(p)
     await p.setRequestInterception(true)
-    p.on('request', /** @type {HTTPRequest} */interceptedRequest => {
+    p.on('request', interceptedRequest => {
       if (interceptedRequest.url().includes('/web/saveExport.php')) {
         interceptedRequest.respond({
           contentType: 'text/plain',

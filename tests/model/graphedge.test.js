@@ -22,19 +22,21 @@ describe('GraphEdge tests', () => {
     ['/', GraphEdgeLineType.BROKEN],
     ['', GraphEdgeLineType.NORMAL]]
 
-  const directionTypes = [['left', GraphEdgeDirectionType.LEFT], ['right', GraphEdgeDirectionType.RIGHT], ['bidirectional', GraphEdgeDirectionType.BIDIRECTIONAL], ['undirected', GraphEdgeDirectionType.UNIDIRECTIONAL]]
+  const directionTypes = [
+    ['left', GraphEdgeDirectionType.LEFT],
+    ['right', GraphEdgeDirectionType.RIGHT],
+    ['bidirectional', GraphEdgeDirectionType.BIDIRECTIONAL],
+    ['undirected', GraphEdgeDirectionType.UNIDIRECTIONAL]]
 
   // So we have arrow head types, line types
   // and common understanding that an edge can be undirected or directed. Directed can be left, right, or bidirectional
-  for (const [/** @type {String} */line, /** @type {GraphEdgeLineType} */linet] of lineTypes) {
-    for (const [/** @type {String} */left, /** @type {GraphEdgeArrowType} */arrowtl] of leftArrows) {
-      for (const [/** @type {String} */right, /** @type {GraphEdgeArrowType} */arrowtr] of rightArrows) {
-        for (const [/** @type {String} */direction, /** @type {GraphEdgeDirectionType} */directiont] of directionTypes) {
+  for (const [line, linet] of lineTypes) {
+    for (const [left, arrowtl] of leftArrows) {
+      for (const [right, arrowtr] of rightArrows) {
+        for (const [direction, directiont] of directionTypes) {
           // TODO: interesting, it COULD be possible to have |-> or <<-> bidirectional node types, but
           // I don't support that CURRENTLY, so skipping
-          /** @type {string} */
           let edgeType = ''
-          /** @type {string[]} */
           switch (direction) {
             case 'left':
               edgeType = `${left}${line}`

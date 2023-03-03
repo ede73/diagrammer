@@ -24,19 +24,19 @@ _all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js 
 	@echo Make ALL
 .PHONY: all _all
 
-parsertests: tests/parser/tsconfig.json $(PARSER_TEST_FILES)
+parsertests: tests/parser/tsconfig.json $(PARSER_TEST_FILES) build/diagrammer_parser.js
 	@echo "Transpile jest parser tests"
 	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 
-webtests: tests/web/tsconfig.json $(WEB_TEST_FILES)
+webtests: tests/web/tsconfig.json $(WEB_TEST_FILES) web
 	@echo "Transpile jest web tests"
 	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 
-webvisualizations: web/visualizations/tsconfig.json $(WEB_VISUALIZER_FILES)
+webvisualizations: web/visualizations/tsconfig.json $(WEB_VISUALIZER_FILES) web
 	@echo "Transpile web visualization code"
 	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 
-web: web/tsconfig.json $(WEB_FILES)
+web: web/tsconfig.json $(WEB_FILES) build/diagrammer_parser.js
 	@echo "Transpile web code"
 	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
 
@@ -136,7 +136,7 @@ export: build/diagrammer_lexer.js build/diagrammer_parser.js js/diagrammer.js
 
 testrunner: ./scripts/runtests.sh all plantuml nodemodules
 	./scripts/runtests.sh
-	if [ -f .error ]; then\
+	@if [ -f .error ]; then\
 	  exit 100;\
 	fi
 
@@ -149,8 +149,8 @@ test: all testrunner jesttests
 tests: test
 
 clean:
-	@echo "NOTICE! TODO: There's a dependency bug, if you make cleanl you have to make twice"
 	@find build -type f -delete & \
+	rm -f .error & \
 	rm -f build/types/* & \
 	rm -f generators/*.js model/*.js web/*.js web/visualizations/*.js & \
 	wait

@@ -29,6 +29,10 @@ setErrorAndExit() {
   assertNoError
 }
 
+pmatch() {
+  node_modules/pixelmatch/bin/pixelmatch $* >/dev/null
+}
+
 runATest() {
   useGenerator=$1
   shift
@@ -41,7 +45,10 @@ runATest() {
   [ $webOnlyVisualizer -ne 0 ] && no_visual="dont_run_visualizer"
 
   mkdir -p tests/test_outputs
-  res=$(./scripts/t.sh skipparsermake silent tests $no_visual "tests/test_inputs/$TEST_FILENAME" "$useGenerator")
+  #res=$(./scripts/t.sh skipparsermake silent tests $no_visual "tests/test_inputs/$TEST_FILENAME" "$useGenerator")
+  png="${TEST_FILENAME%.*}_${useGenerator}.png"
+  GENERATED_IMAGE="tests/test_outputs/$png"
+  res=$(node ./scripts/t.js tests $no_visual "tests/test_inputs/$TEST_FILENAME" "$useGenerator" output "$GENERATED_IMAGE")
   RC=$?
   [ $RC -ne 0 ] && setErrorAndExit "$RC" "$TEST_FILENAME" "$useGenerator" "$res"
 
@@ -67,7 +74,7 @@ runATest() {
       THRESHOLD=1
       # Since jest-imagematcher brings pixelmatch, let's use it!
       GRAPH_DIFF=$(mktemp --suffix "$png")
-      if ! node_modules/pixelmatch/bin/pixelmatch "$GENERATED_IMAGE" "$GENERATED_IMAGE_REFERENCE" "$GRAPH_DIFF" "$THRESHOLD" >/dev/null; then
+      if ! pmatch "$GENERATED_IMAGE" "$GENERATED_IMAGE_REFERENCE" "$GRAPH_DIFF" "$THRESHOLD"; then
         echo "    ERROR: at $TEST_FILENAME, image $GENERATED_IMAGE $GENERATED_IMAGE_REFERENCE differ" >&2
         #display_image "$GENERATED_IMAGE" "$GENERATED_IMAGE_REFERENCE" "$GRAPH_DIFF"
         if [ -s "$GRAPH_DIFF" ]; then

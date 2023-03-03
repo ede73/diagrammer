@@ -98,9 +98,13 @@ getgenerator() {
 
 echo "Using generator $(getgenerator $generator)"
 rm -f "$OUT"
-node "$MYPATH/js/diagrammer.js" "$input" "$(getgenerator $generator)" "$verbose" >"$OUT"
+TMPOUTPUT=$(mktemp)
+node "$MYPATH/js/diagrammer.js" "$input" "$(getgenerator $generator)" "$verbose" >"$TMPOUTPUT"
 rc=$?
 
+# Perhaps weird WSL2 issue, but redirected output seems to be sometimes empty if inspected immediately (stat below)
+# Hoping temp redirect+mv will flush the filecache or what ever is affecting this
+mv "$TMPOUTPUT" "$OUT"
 # shellcheck disable=SC2181
 [ $rc -ne 0 ] && {
   echo "Fatal parsing error $rc input=$input generator=$generator output=$OUT"

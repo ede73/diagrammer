@@ -34,7 +34,7 @@ while true; do
     if [ $rc -gt 1 ]; then
       echo "LEXER CREATION ERROR: $rc"
     else
-      ./runtests.sh
+      ./runtests.js
     fi
   }
   cp "$new" "$old"

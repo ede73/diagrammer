@@ -1,4 +1,4 @@
-Add alias depict="~/{EXPORT_DIR_HERE}/t.sh silent " to your profile/bashrc etc.
+Add alias depict="~/{EXPORT_DIR_HERE}/t.js silent " to your profile/bashrc etc.
 You need (depending) visualizers graphviz,mscgen,plantuml.jar,nwdiag,blockdiag,actdiag.
 plantuml requires java
 blockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html

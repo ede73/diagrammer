@@ -37,7 +37,9 @@
   },
   "dependencies": {
     "@types/viz.js": "^2.1.2",
+    "colors": "^1.4.0",
     "devtools-protocol": "^0.0.1107588",
+    "diff": "^5.1.0",
     "gojs": "^2.3.2",
     "typescript": "^4.9.5",
     "viz.js": "^2.1.2"

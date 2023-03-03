@@ -1,140 +1,101 @@
 #!/usr/bin/env node
 import * as fs from 'fs'
 import { spawn } from 'child_process'
+// required to populate generators/visualizations
+import { diagrammerParser } from '../build/diagrammer_parser.js'
+import { generators, visualizations } from '../model/graphcanvas.js'
 
-const config = {
+function visualizerToGenerator () {
+  const visualiserToGenerator = new Map()
+  visualizations.forEach((visualizers, generator) => {
+    visualizers.forEach((visualizer, index) => {
+      visualiserToGenerator.set(visualizer, generator)
+    })
+  })
+
+  const g = Array.from(generators.keys()).map(k => [k, k])
+  return new Map([...visualiserToGenerator, ...g])
+}
+
+export const config = {
   tests: false,
   verbose: false,
   trace: false,
   text: false,
   format: 'png',
-  dont_run_visualizer: false,
+  dontRunVisualizer: false,
   input: '',
-  visualizer: 'dot',
-  output: '-',
-  buggy_diag: false
+  visualizer: '',
+  visualizedGraph: '-',
+  buggyDiag: false,
+  parsedCode: ''
 }
 
-function _usage () {
-  console.log('USAGE: [silent] [dont_run_visualizer] [tests] [verbose] [text] [svg] [output file] [INPUT] [VISUALIZER|dot]')
-  console.log('  Notice! Visualizer (like twopi) will be converted to generator(digraph)')
-  process.exit(0)
+function printError (msg) {
+  console.error(`${msg}`)
 }
 
-let _collectOutput = false
-for (const m of process.argv.splice(2)) {
-  if (_collectOutput) {
-    _collectOutput = false
-    config.output = m.trim()
-    continue
-  }
-  switch (m.toLocaleLowerCase().trim()) {
-    case '-h':
-    case '--help':
-    case 'help':
-      _usage()
-      continue
-    case 'output':
-      _collectOutput = true
-      continue
-    case 'skipparsermake':
-      config.skipparsermake = true
-      continue
-    case 'tests':
-      config.tests = true
-      continue
-    case 'verbose':
-      config.verbose = true
-      continue
-    case 'trace':
-      config.trace = true
-      continue
-    case 'text':
-      config.text = true
-      continue
-    case 'svg':
-      config.format = 'svg'
-      continue
-    case 'dont_run_visualizer':
-      config.dont_run_visualizer = true
-      continue
-  }
-  if (fs.existsSync(m.trim())) {
-    config.input = m.trim()
-    continue
-  }
-  config.visualizer = m.toLocaleLowerCase().trim()
+function traceProcess (msg) {
+  // console.log(`trace:${msg}`)
 }
 
 function _exitError (msg) {
-  console.error(msg)
+  printError(msg)
   process.exit(10)
 }
 
-if (!config.input || !fs.existsSync(config.input)) {
-  _exitError(`Existing input file required, got "${config.input}"`)
-}
-
-function _getGenerator () {
-  switch (config.visualizer) {
-    case 'neato':
-    case 'twopi':
-    case 'circo':
-    case 'fdp':
-    case 'osage':
-    case 'sfdp':
-    case 'dot':
-      return 'digraph'
-    default:
-      return config.visualizer
-  }
-}
-
-function _prepProcess (child, gotStdout, gotStdErr, closed) {
+function _prepProcess (child, gotStdout, gotStdErr) {
   if (gotStdout) { child.stdout.on('data', gotStdout) }
   if (gotStdErr) { child.stderr.on('data', gotStdErr) }
-  if (closed) { child.on('close', closed) }
   return child
 }
 
-function _startProcess (args, gotStdout, gotStdErr, closed) {
+function _startProcess (args, gotStdout, gotStdErr) {
   const options = { stdio: ['pipe', 'pipe', 'pipe'] }
   const cmd = args[0]
   const a = args.splice(1)
   const proc = spawn(cmd, a, options)
-  return _prepProcess(proc, gotStdout, gotStdErr, closed)
+  return _prepProcess(proc, gotStdout, gotStdErr)
 }
 
-function _startLexerTest (gotStdout, gotStdErr, closed) {
+function _startLexerTest (useConfig, gotStdout, gotStdErr) {
   return _startProcess(
-    ['node', 'js/testStateLexer.js', config.input],
-    gotStdout, gotStdErr, closed)
+    ['node', 'js/diagrammer.js', 'lex', 'trace', useConfig.input],
+    gotStdout, gotStdErr)
 }
 
-function _startGenerator (gotStdout, gotStdErr, closed) {
+function _resolveGenerator (useConfig) {
+  const generator = visualizerToGenerator().get(useConfig.visualizer)
+  if (!generator) {
+    throw Error(`Cannot map visualizer (${useConfig.visualizer}) to a generator`)
+  }
+  return generator
+}
+
+function _startGenerator (useConfig, gotStdout, gotStdErr) {
   const args = ['node', 'js/diagrammer.js']
-  if (config.verbose) {
+  if (useConfig.verbose) {
     args.push('verbose')
   }
-  if (config.trace) {
+  if (useConfig.trace) {
     args.push('trace')
   }
-  args.push(config.input)
-  args.push(_getGenerator())
-  return _startProcess(args, gotStdout, gotStdErr, closed)
+  args.push(useConfig.input)
+  args.push(_resolveGenerator(useConfig))
+  return _startProcess(args, gotStdout, gotStdErr)
 }
 
-function _startVisualizer (args, gotStdout, gotStdErr, closed) {
-  return _startProcess(args, gotStdout, gotStdErr, closed)
+function _startVisualizer (args, gotStdout, gotStdErr) {
+  return _startProcess(args, gotStdout, gotStdErr)
 }
 
-const _waitForProcesses = (processes) => {
+const _waitForProcesses = (useConfig, processes) => {
   return new Promise((resolve, reject) => {
     let completed = 0
 
     const onExit = (process) => () => {
+      traceProcess(`  Process ${process.spawnargs} exited`)
       completed++
-      // console.log(`${process.spawnargs} exited`)
       if (completed === processes.length) {
         resolve()
       }
@@ -142,23 +103,26 @@ const _waitForProcesses = (processes) => {
 
     processes.forEach((process) => {
       process.on('exit', onExit(process))
-      process.on('error', reject)
+      process.on('error', (r) => {
+        printError(`Something went wrong...${r}`)
+        reject(r)
+      })
     })
   })
 }
 
-function _getVisualizerCommand () {
+function _getVisualizerCommand (useConfig) {
   const plantUmlJar = 'ext/plantuml.jar'
 
-  switch (config.visualizer) {
+  switch (useConfig.visualizer) {
     case 'nwdiag':
     case 'seqdiag':
     case 'actdiag':
     case 'blockdiag':
-      if (config.format !== 'svg') {
-        config.buggy_diag = true
+      if (useConfig.format !== 'svg') {
+        useConfig.buggyDiag = true
       }
-      if (!config.buggy_diag) {
+      if (!useConfig.buggyDiag) {
         // heh, it's still buggy, but we can circumvent
         return [
           // piping works if running as cat file|nwdiag3 -o/dev/stdout -o/dev/stdin
@@ -166,19 +130,19 @@ function _getVisualizerCommand () {
           // https://github.com/nodejs/node/issues/21941
           'sh',
           '-c',
-                  `cat -| /usr/bin/${config.visualizer}3 -a -T${config.format} -o/dev/stdout /dev/stdin|cat`]
+                  `cat -| /usr/bin/${useConfig.visualizer}3 -a -T${useConfig.format} -o/dev/stdout /dev/stdin|cat`]
         // ALSO alas nwdiag's PNG library requires a seekable stream , which no pipe can provide
         // issue is in  /usr/lib/python3/dist-packages/PIL/Image.py 2209, fp = builtins.open(filename, "w+b")
         // ie opening binary write AND read file. Remove + fixes problem,but comment above shows for TIFFs this is required
         // also not nwdiag code, mock? import buildins..builtins.open=my_open?
       } else {
-        if (config.output === '-') {
+        if (useConfig.visualizedGraph === '-') {
           throw new Error('Alas *diags dont support dumping PNG to console')
         }
         return [
           'sh',
           '-c',
-                  `cat -| /usr/bin/${config.visualizer}3 -a -T${config.format} -o${config.output} /dev/stdin`]
+                  `cat -| /usr/bin/${useConfig.visualizer}3 -a -T${useConfig.format} -o${useConfig.visualizedGraph} /dev/stdin`]
       }
     case 'plantuml_sequence':
       // piping works
@@ -188,14 +152,14 @@ function _getVisualizerCommand () {
         '-Xmx2048m',
         '-jar',
         plantUmlJar,
-        `-t${config.format.toLocaleLowerCase()}`,
+        `-t${useConfig.format.toLocaleLowerCase()}`,
         '-p']
     case 'mscgen':
       // piping works
-      return [`${config.visualizer}`,
+      return [`${useConfig.visualizer}`,
         '-i-',
         '-o-',
-        `-T${config.format}`]
+        `-T${useConfig.format}`]
     case 'neato':
     case 'twopi':
     case 'circo':
@@ -204,53 +168,168 @@ function _getVisualizerCommand () {
     case 'dot':
     case 'osage':
       // piping works
-      return [`${config.visualizer}`,
-        `-T${config.format}`]
+      return [`${useConfig.visualizer}`,
+        `-T${useConfig.format}`]
     default:
-      throw new Error(`Unknown visualizer ${config.visualizer}`)
+      throw new Error(`Currently not supported visualizer (web visualizer?) ${useConfig.visualizer}`)
   }
 }
 
-const _stdout = (stderr) => { if (config.trace) console.error(`${stderr}`) }
-const _stderr = (stderr) => { console.error(`${stderr}`) }
-const _closed = (app) => {
-  return (code) => {
-    if (code !== 0) { _exitError(`${app} failed`) }
+const _stdout = (useConfig) => (stdout) => { if (useConfig.trace) printError(`${stdout}`) }
+const _stdoutCollect = (useConfig) => (stdout) => { useConfig.parsedCode += stdout; if (useConfig.trace) printError(`${stdout}`) }
+const _stderr = (who) => (stderr) => { console.error(`${who}: ${stderr}`) }
+const _closed = (id, app) => {
+  return (stream) => {
+    traceProcess(`A stdio stream ${stream} of app ${app} has been closed `)
   }
 }
 
-const _lexingProcess = _startLexerTest(_stdout, _stderr, _closed('Lexer'))
-const _parsingProcess = _startGenerator(_stdout, _stderr, _closed('Parsing'))
+export async function lexParseAndVisualize (useConfig, outputFinishedCallback) {
+  if (!useConfig.input || !fs.existsSync(useConfig.input)) {
+    _exitError(`Existing input file required, got "${useConfig.input}", check usage -h`)
+  }
+  const _lexingProcess = _startLexerTest(useConfig, _stdout(useConfig), _stderr('lexer'))
+  const _parsingProcess = _startGenerator(useConfig, _stdoutCollect(useConfig), _stderr('parser'))
 
-const _processes = [_lexingProcess, _parsingProcess]
+  const _processes = [_lexingProcess, _parsingProcess]
 
-if (!config.dont_run_visualizer) {
-  // uh, nwdiag(all diags) use buggy PIL library opening R&W (seekable) access to pipe
-  const stream = (config.output === '-' || config.buggy_diag)
-    ? undefined
-    : fs.createWriteStream(config.output, { flags: 'w' })
+  if (!useConfig.dontRunVisualizer) {
+    // uh, nwdiag(all diags) use buggy PIL library opening R&W (seekable) access to pipe
+    const outputFileStream = (useConfig.visualizedGraph === '-' || useConfig.buggyDiag)
+      ? undefined
+      : fs.createWriteStream(useConfig.visualizedGraph, { flags: 'w' })
+    // We're to run the visualizer also!
+    const cmd = _getVisualizerCommand(useConfig)
 
-  // We're to run the visualizer also!
-  const cmd = _getVisualizerCommand()
-  const visualizationProcess = _startVisualizer(
-    cmd,
-    (stdout) => {
-      if (stream) stream.write(stdout)
-    },
-    _stderr,
-    (closed) => {
-      if (stream) stream.close()
+    // So node streams have no close(), they do have end(), but end() is async, and doesn't finish immediately
+    // This didn't help either, on occasion (dot) is unable to write the graph completely
+    async function waitForStreamClose (output, stream) {
+      stream.end()
+      return new Promise((resolve) => {
+        stream.once('finish', () => {
+          traceProcess(`    Output ${output} has finally finished`)
+          const s = fs.statSync(useConfig.visualizedGraph)
+          if (s.size === 0) {
+            traceProcess(`      File size for ${useConfig.visualizedGraph} ${JSON.stringify(s)}`)
+            // throw new Error(`File ${useConfig.visualizedGraph} is empty`)
+          }
+          outputFinishedCallback()
+          resolve()
+        })
+      })
+    }
+
+    const visualizationProcess = _startVisualizer(
+      cmd,
+      (stdout) => {
+        if (outputFileStream) {
+          traceProcess(`Writing data chunk ${stdout.length} to file ${useConfig.visualizedGraph}`)
+          outputFileStream.write(stdout)
+        }
+      },
+      _stderr(`  Visualizer(${useConfig.visualizer})`)
+    )
+    visualizationProcess.on('exit', async () => {
+      traceProcess('  VISUALIZER EXIT')
+      if (outputFileStream) {
+        // closing the stream ..closes it too quickly, so where exactly is this stream closed
+        // apparently automatically TODO:
+        // await waitForStreamClose(useConfig.visualizedGraph, outputFileStream)
+        // outputFileStream.close()
+      }
     })
-  _parsingProcess.stdout.pipe(visualizationProcess.stdin)
-  if (config.output === '-' && !config.buggy_diag) {
-    visualizationProcess.stdout.pipe(process.stdout)
+
+    // something fishy with pipes
+    //  https://stackoverflow.com/questions/61856264/node-piping-process-stdout-doesnt-drain-automatically
+    _parsingProcess.stdout.pipe(visualizationProcess.stdin).on('error', err =>
+      printError(`mf! ${err}`)
+    )
+
+    if (useConfig.visualizedGraph === '-' && !useConfig.buggyDiag) {
+      traceProcess('DIAG DUMPING DMMPING')
+      visualizationProcess.stdout.pipe(process.stdout)
+    }
+    _processes.push(visualizationProcess)
   }
-  _processes.push(visualizationProcess)
+
+  await _waitForProcesses(useConfig, _processes).then((x) => {
+    // all done...
+    traceProcess(` All processed related to ${useConfig.visualizedGraph} have been completed`)
+  }, (rej) => {
+    _exitError(`Failure ${rej}`)
+  })
+
+  if (_processes.length === 3 && _processes[2].exitCode !== 0) {
+    throw new Error(`Visualizer ${useConfig.visualizer} failed processing ${useConfig.input}`)
+  }
 }
 
-await _waitForProcesses(_processes).then((x) => {
-  // all done...
-}, (rej) => {
-  console.error(`Failure ${rej}`)
-})
-process.exit(0)
+function _main (argv) {
+  function _usage () {
+    const visualizers = visualizerToGenerator().flatMap((k, v) => k[1])
+    console.log(`USAGE: [silent] [dont_run_visualizer] [tests] [verbose] [text] [svg] [output file] [INPUT] [${visualizers.join(', ')}]`)
+    console.log('  Notice! Visualizer (like twopi) will be converted to generator(digraph)')
+    process.exit(0)
+  }
+
+  let _collectOutput = false
+  for (const m of argv.splice(1)) {
+    if (_collectOutput) {
+      _collectOutput = false
+      config.visualizedGraph = m.trim()
+      continue
+    }
+    switch (m.toLocaleLowerCase().trim()) {
+      case '-h':
+      case '--help':
+      case 'help':
+        _usage()
+        continue
+      case 'output':
+        _collectOutput = true
+        continue
+      case 'skipparsermake':
+        config.skipparsermake = true
+        continue
+      case 'tests':
+        config.tests = true
+        continue
+      case 'verbose':
+        config.verbose = true
+        continue
+      case 'trace':
+        config.trace = true
+        continue
+      case 'text':
+        config.text = true
+        continue
+      case 'svg':
+        config.format = 'svg'
+        continue
+      case 'dont_run_visualizer':
+        config.dontRunVisualizer = true
+        continue
+    }
+    if (fs.existsSync(m.trim())) {
+      config.input = m.trim()
+      continue
+    }
+    // must be generator
+    const visualizer = m.toLocaleLowerCase().trim()
+    const v = visualizerToGenerator()
+    if (v.has(visualizer)) {
+      config.visualizer = visualizer
+    }
+    if (!config.visualizer || !_resolveGenerator(config)) {
+      throw new Error(`Could not determine visualizer (${visualizer}) (nor its generator)`)
+    }
+  }
+
+  lexParseAndVisualize(config, () => {
+    traceProcess('Visualization has been completed')
+  })
+}
+
+if (`${process.argv[1]}`.endsWith('t.js')) {
+  _main(process.argv.splice(1))
+}

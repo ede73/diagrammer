@@ -1,9 +1,9 @@
 generator digraph
 visualizer dot
 
-node color #eeeeee
+nodecolor #eeeeee
 shape box
-a>b>c>d>e>f>g>h>i>j>k;
+a>b>c>d>e>f>g>h>i>j>k
 
 ellipse a$(dark:#aaaaaa);Activity starts
 b;onCreate()

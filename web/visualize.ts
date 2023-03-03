@@ -5,7 +5,6 @@ import { visualizations } from './globals.js'
 import { makeHTTPPost } from './ajax.js'
 
 function _makeNewImageHolder(pngBase64: string) {
-  const imgdiv = getHTMLElement('diagrammer-graph')
   const img = document.createElement('img')
   img.align = 'bottom'
   // using % here fails (even if it works directly in HTML)
@@ -16,7 +15,7 @@ function _makeNewImageHolder(pngBase64: string) {
   img.style.height = 'auto'
   img.src = `data:image/png;base64,${pngBase64}`
   img.onclick = () => openImage(`${pngBase64}`)
-  imgdiv.appendChild(img)
+  getHTMLElement('diagrammer-graph')!.appendChild(img)
 }
 
 function beautify(generatedCode: string) {
@@ -60,7 +59,7 @@ export async function visualize(visualizer: string) {
   if (visualizations.has(visualizer)) {
     // this is web only visualization
     console.log(`Visualize using ${visualizer}`)
-    visualizations.get(visualizer)(generatedResult)
+    visualizations.get(visualizer)!(generatedResult)
     console.log(`Finished visualizing ${visualizer}`)
   } else {
     // backend visualizer (unless if we want use Viz)

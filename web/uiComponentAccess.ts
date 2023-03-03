@@ -13,14 +13,14 @@ export function getHTMLElement(name: string) {
 }
 
 /**
- * Set a generator, only if loaded new content (storage, example)
+ * Set a generator, only if loaded neweb/uiComponentAccess.tsw content (storage, example)
  * it was just parsed AND it had a 'generator' directive
  */
-export function setGenerator(generator: string, visualizer: string = undefined) {
+export function setGenerator(generator: string, visualizer?: string) {
   const genViz = generator + (visualizer ? ':' + visualizer : '')
   console.log(`setGenerator(${generator}:${visualizer}) ie. '${genViz}'`)
   // Change the generator via UI
-  const select: HTMLInputElement = document.querySelector('#diagrammer-generator')
+  const select: HTMLInputElement = document.querySelector('#diagrammer-generator') as HTMLInputElement
   select.value = genViz
   if (getGenerator() !== generator) {
     console.error(`Somewhy generator change did not go thru, we wanted ${generator} and have ${getGenerator()}`)
@@ -55,20 +55,21 @@ export function getCurrentFilename() {
  * Set error on UI
  */
 export function setError(text: string) {
-  document.getElementById('diagrammer-error').innerText = text
+  const element = document.getElementById('diagrammer-error')
+  element!.innerText = text
 }
 
 /**
  * @returns Return parse error(if any)
  */
 export function getError() {
-  return document.getElementById('diagrammer-error').innerText
+  return document.getElementById('diagrammer-error')!.innerText
 }
 
 export function openImage(imageBase64: string) {
   // window.open(`<img src="data:image/png;base64,${imageBase64}"/>`)
   const w = window.open('about:blank')
-
+  if (!w) return
   // FireFox seems to require a setTimeout for this to work.
   setTimeout(() => {
     w.document.body.appendChild(w.document.createElement('iframe')).src = `data:image/png;base64,${imageBase64}`

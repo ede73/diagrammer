@@ -1,38 +1,33 @@
 // @ts-check
 
-export function getSavedGraph() {
-  let data = {}
+export function getSavedGraphs(): { [key: string]: string } {
   if (!localStorage.getItem('graphs')) {
+    const data = {}
     localStorage.setItem('graphs', JSON.stringify(data))
     return data
   }
   const graph = localStorage.getItem('graphs')
-  // console.log("Have graph"+graph);
-  // eslint-disable-next-line no-eval
-  data = eval('(' + graph + ')')
-  return data
+  return eval(`(${graph})`)
 }
 
 export function getSavedFilesAsOptionList() {
   let t = ''
-  for (const k in getSavedGraph()) {
-    console.log(`Stored file:${k}`)
+  for (const k in getSavedGraphs()) {
     t += '<option value="' + k + '">' + k + '</option>'
   }
   return t
 }
 
 export function saveCurrentGraph(filename: string, diagrammerCode: string) {
-  const data = getSavedGraph()
+  const data = getSavedGraphs()
   data[filename] = diagrammerCode
   const jd = JSON.stringify(data)
   localStorage.setItem('graphs', jd)
-  // clipboardData.setData("text",jd);
 }
 
 export function loadGraph(filename: string) {
-  const data = getSavedGraph()
+  const data = getSavedGraphs()
   if (data[filename]) {
-    return data[filename]
+    return data[filename] as string
   }
 }

@@ -1,7 +1,11 @@
 // @ts-check
 import 'jquery'
 
-export function makeHTTPPost(url: string, data: string, successCallback: (result: string) => void, errorCallback: (statusCode: number, statusText: string, responseText: string) => void) {
+export function makeHTTPPost(
+  url: string,
+  data: string,
+  successCallback: (result: string) => void,
+  errorCallback: (statusCode: number, statusText: string, responseText: string) => void) {
   $.ajax({
     type: 'POST',
     async: true,
@@ -24,7 +28,12 @@ export function makeHTTPPost(url: string, data: string, successCallback: (result
   })
 }
 
-export function makeHTTPGet(url: string, successCallback: (result: any) => void, errorCallback: (statusCode: number, statusText: string, responseText: string) => void, contentType: string = undefined, dataType: string = undefined) {
+export function makeHTTPGet(
+  url: string,
+  successCallback: (result: any) => void,
+  errorCallback: (statusCode: number, statusText: string, responseText: string) => void,
+  contentType?: string,
+  dataType?: string) {
   $.ajax({
     type: 'GET',
     async: true,

@@ -28,7 +28,7 @@ diagrammerParser.yy.parsedGeneratorAndVisualizer = (generator: string, visualize
  */
 // called line by line...
 // TODO: MOVING TO GraphCanvas
-diagrammerParser.yy.result = function (line) {
+diagrammerParser.yy.result = (line: string): void => {
   /** @type {HTMLInputElement} */
   const result = getInputElement('diagrammer-result')
 
@@ -50,11 +50,11 @@ diagrammerParser.trace = function (x) {
 }
 
 /**
- * @param {string} diagrammerCode Diagrammer graph to parse using
- * @param {function(string, string):void} successCallback Passing final generator, visualizer
- * @param {function(string, DOMException):void} failureCallback passing error as string, exception as Exception
+ * @param diagrammerCode Diagrammer graph to parse using
+ * @param successCallback Passing final generator, visualizer
+ * @param failureCallback passing error as string, exception as Exception
  */
-export function parse(diagrammerCode, successCallback, failureCallback, preferScriptSpecifiedGeneratorAndVisualizer = false) {
+export function parse(diagrammerCode: string, successCallback: (generator: string, visualizer: string) => void, failureCallback: (error: string, exception: DOMException) => void, preferScriptSpecifiedGeneratorAndVisualizer = false) {
   const generator = getGenerator()
   const visualizer = getVisualizer()
 

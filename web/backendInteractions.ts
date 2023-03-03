@@ -1,11 +1,11 @@
 // @ts-check
-import { getSavedGraph } from './localStorage.js'
+import { getSavedGraphs } from './localStorage.js'
 import { makeHTTPGet, makeHTTPPost } from './ajax.js'
 import { setError } from './uiComponentAccess.js'
 
-export function exportGraphs () {
+export function exportGraphs() {
   makeHTTPPost('web/saveExport.php',
-    JSON.stringify(getSavedGraph()),
+    JSON.stringify(getSavedGraphs()),
     (msg) => {
       alert('Exported')
     },
@@ -16,7 +16,7 @@ export function exportGraphs () {
     })
 }
 
-export function importGraphs () {
+export function importGraphs() {
   // eslint-disable-next-line no-undef
   makeHTTPGet('web/loadExport.php',
     (msg) => {

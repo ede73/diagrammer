@@ -1,5 +1,5 @@
 // @ts-check
-import { getSavedGraph } from './localStorage.js'
+import { getSavedGraphs } from './localStorage.js'
 import { parse } from './parserInteractions.js'
 import { getGenerator, getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js'
 import { makeHTTPGet } from './ajax.js'
@@ -18,6 +18,7 @@ const acemode: number = 1
 function getAceEditor() {
   // TODO: fix type acq..
   /** type {AceAjax.Editor} */
+  // @ts-ignore ignore missing ace (it ain't missing, loaded in index.jtml)
   const editor = ace.edit('diagrammer-code')
   return editor
 }
@@ -25,9 +26,9 @@ function getAceEditor() {
 // get all
 export function getGraphText() {
   if (acemode) {
-    return getAceEditor().getSession().getValue()
+    return getAceEditor().getSession().getValue() as string
   } else {
-    return getInputElement('diagrammer-code').value
+    return getInputElement('diagrammer-code').value as string
   }
 }
 
@@ -46,8 +47,7 @@ export function setGraphText(data: string) {
 
 /**
  * Add text to top of document
- * try to maintain cursor position(TODO:fucked up)
- *
+ * try to maintain cursor position
  */
 function prependLine(data: string) {
   if (acemode) {
@@ -120,23 +120,19 @@ export function addLine(i: (string | number)) {
         break
     }
   }
-  console.log('getSavedFilesChanged..parse')
   parseAndRegenerate()
   return false
 }
 
 export function generatorChanged() {
-  console.log('generatorChanged() - parseAndRegenerate')
   parseAndRegenerate()
 }
 
 function parseAndRegenerate(preferScriptSpecifiedGeneratorAndVisualizer = false) {
-  console.log('parseAndRegenerate()')
   const code = getGraphText() + '\n'
   parse(code, (finalGenerator, finalVisualizer) => {
     console.log(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`)
     visualize(finalVisualizer)
-    // eslint-disable-next-line n/handle-callback-err
   }, (error, ex) => {
     clearBeautified()
     console.log('  parseAndRegenerate() - Parsing failed :(')
@@ -148,7 +144,7 @@ export function savedChanged() {
   const e = getSelectElement('diagrammer-saved')
   const doc = e.options[e.selectedIndex].value
   const filename = getInputElement('diagrammer-filename')
-  const data = getSavedGraph()
+  const data = getSavedGraphs()
   if (data[doc]) {
     setGraphText(data[doc])
     filename.value = doc
@@ -165,7 +161,6 @@ export function exampleChanged() {
   makeHTTPGet(`tests/${doc}`,
     (msg) => {
       setGraphText(String(msg))
-      console.log(`  exampleChanged(${doc}) - parse and regenerate, from UI ${getGenerator()} / ${getVisualizer()}`)
       parseAndRegenerate(true)
     },
     (stateCode, statusText, responseText) => {
@@ -178,15 +173,17 @@ export function exampleChanged() {
  * Hence while typing, we don't constanly parse, but on a minute pause, we do and user get's feedback (ok/error)
  */
 function hookupToListenToManualCodeChanges(parseChangesAfterMillis: number) {
-  let parsingTimerID
+  let parsingTimerID: number | undefined
   getInputElement('diagrammer-code').onkeyup = function () { // onchange does not work on
     if (parsingTimerID) {
       clearTimeout(parsingTimerID)
       parsingTimerID = undefined
     }
-    parsingTimerID = setTimeout(() => {
+    // Typescript thinks we're calling node.js setTimeout returning NodeJs.Timeout.
+    // This is a web page, we're calling Javascript setTimeout that returns a number!
+    parsingTimerID = (setTimeout(() => {
       parseAndRegenerate()
-    }, parseChangesAfterMillis)
+    }, parseChangesAfterMillis) as any) as number
   }
 }
 
@@ -196,15 +193,16 @@ function hookupToListenToManualCodeChanges(parseChangesAfterMillis: number) {
  * order to debug/experiment with actual visualizations!
  */
 function hookupToListenToManualGeneratorChanges(visualizeChangesAfterMillis: number) {
-  let visualizationTimerID
+  let visualizationTimerID: number | undefined
   getInputElement('diagrammer-result').onkeyup = function () { // onchange does not work on
     if (!visualizationTimerID) {
       clearTimeout(visualizationTimerID)
       visualizationTimerID = undefined
     }
-    visualizationTimerID = setTimeout(() => {
-      visualizationTimerID = visualize(getVisualizer())
-    }, visualizeChangesAfterMillis)
+    // same as above, js setTimeout, not NodeJs
+    visualizationTimerID = (setTimeout(async () => {
+      await visualize(getVisualizer())
+    }, visualizeChangesAfterMillis) as any) as number
   }
 }
 
@@ -214,6 +212,8 @@ try {
   hookupToListenToManualGeneratorChanges(500)
 } catch (ex) { }
 
+
+// @ts-ignore ignore missing ace (it ain't missing, loaded in index.jtml)
 if (acemode && typeof (ace) !== 'undefined') {
   // some init race condition, editor null on page load
   const editor = getAceEditor()

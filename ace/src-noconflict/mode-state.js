@@ -158,7 +158,7 @@ ace.define('ace/mode/state_highlight_rules', ['require', 'exports', 'module', 'a
           caseInsensitive: true
         }, {
           token: function (value) {
-            console.log(`token(${value})`)
+            //console.log(`token(${value})`)
             if (keywords.hasOwnProperty(value.toLowerCase())) {
               return 'keyword'
             } else if (attributes.hasOwnProperty(value.toLowerCase())) {

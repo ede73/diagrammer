@@ -19,8 +19,8 @@ export function makeSVG(width: number, height: number) {
 }
 
 // TODO: Discrepancy between d3.js and GoJS, former results in #diagrammer-graph/(div#default_,svg) latter #graphVisualizerionHere/div#default_/svg
-export function removeOldVisualizations(idName: string = undefined) {
-  const element = getHTMLElement('diagrammer-graph')
+export function removeOldVisualizations(idName?: string) {
+  const element = getHTMLElement('diagrammer-graph') as HTMLElement
   removeAllChildNodes(element)
   const newDiv = document.createElement('div')
   newDiv.setAttribute('id', idName || 'default_')

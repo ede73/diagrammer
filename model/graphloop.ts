@@ -1,6 +1,5 @@
 // @ts-check
 
-import { lab } from 'd3'
 import { GraphCanvas } from './graphcanvas.js'
 import { GraphContainer } from './graphcontainer.js'
 import { GraphGroup } from './graphgroup.js'

@@ -2,9 +2,9 @@
 import * as fs from 'fs'
 import { spawn } from 'child_process'
 // required to populate generators/visualizations
+// eslint-disable-next-line no-unused-vars
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { generators, visualizations } from '../model/graphcanvas.js'
-import { output } from '../model/support.js'
 
 function visualizerToGenerator () {
   const visualiserToGenerator = new Map()
@@ -18,19 +18,21 @@ function visualizerToGenerator () {
   return new Map([...visualiserToGenerator, ...g])
 }
 
-export const config = {
-  tests: false,
-  verbose: false,
-  trace: false,
-  text: false,
-  format: 'png',
-  dontRunVisualizer: false,
-  input: '',
-  visualizer: '',
-  visualizedGraph: '-',
-  buggyDiag: false,
-  parsedCode: '',
-  written: 0
+export function getEmptyConfig () {
+  return {
+    tests: false,
+    verbose: false,
+    trace: false,
+    text: false,
+    format: 'png',
+    dontRunVisualizer: false,
+    input: '',
+    visualizer: '',
+    visualizedGraph: '-',
+    buggyDiag: false,
+    parsedCode: '',
+    written: 0
+  }
 }
 
 function printError (msg) {
@@ -184,10 +186,12 @@ function _getVisualizerCommand (useConfig) {
 const _stdout = (useConfig) => (stdout) => {
   if (useConfig.trace) printError(`${stdout}`)
 }
+
 const _stdoutCollect = (useConfig) => (stdout) => {
   useConfig.parsedCode += stdout
   if (useConfig.trace) printError(`${stdout}`)
 }
+
 const _stderr = (who) => (stderr) => {
   console.error(`${who}: ${stderr}`)
 }
@@ -221,8 +225,7 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
 
     visualizationProcess.on('exit', async () => {
       traceProcess(`  ${conciseId(useConfig)} EXT`)
-      traceProcess(`${visualizationProcess.exitCode} is the failure`)
-      if (visualizationProcess.exitCode != 0) {
+      if (visualizationProcess.exitCode !== 0) {
         traceProcess(`${useConfig.parsedCode}`)
       }
       visualizationisComplete(visualizationProcess.exitCode)
@@ -253,12 +256,13 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
 
 function _main (argv) {
   function _usage () {
-    const visualizers = visualizerToGenerator().flatMap((k, v) => k[1])
+    const visualizers = Array.from(visualizerToGenerator().keys())
     console.log(`USAGE: [silent] [dont_run_visualizer] [tests] [verbose] [text] [svg] [output file] [INPUT] [${visualizers.join(', ')}]`)
     console.log('  Notice! Visualizer (like twopi) will be converted to generator(digraph)')
     process.exit(0)
   }
 
+  const config = getEmptyConfig()
   let _collectOutput = false
   for (const m of argv.splice(1)) {
     if (_collectOutput) {
@@ -297,6 +301,8 @@ function _main (argv) {
         config.dontRunVisualizer = true
         continue
     }
+    // Allow using absolute and relative paths! (currently abs.paths dont work)
+    // ALSO detect piping/redirection and make 'em work
     if (fs.existsSync(m.trim())) {
       config.input = m.trim()
       continue

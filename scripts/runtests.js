@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import * as fs from 'fs'
-import { lexParseAndVisualize, config as mainconfig } from './t.js'
+import { lexParseAndVisualize, getEmptyConfig } from './t.js'
+// required for coloring diff output
+// eslint-disable-next-line no-unused-vars
 import color from 'colors'
 import { diffLines } from 'diff'
 import * as path from 'path'
@@ -11,6 +13,7 @@ const PNG = PNGx.PNG
 const config = {
   parallel: 12,
   verbose: false,
+  trace: false,
   testInputPath: 'tests/test_inputs',
   currentTestRun: 'tests/testrun/current',
   previousStableRun: 'tests/testrun/previous',
@@ -45,10 +48,9 @@ for (const m of process.argv.splice(2)) {
       continue
     case 'verbose':
       config.verbose = true
-      mainconfig.verbose = true
       continue
     case 'trace':
-      mainconfig.verbose = true
+      config.trace = true
       continue
     default:
       config.testPatterns.push(m.trim())
@@ -101,7 +103,9 @@ async function diffImages (referenceImage, outputImage) {
 }
 
 async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
-  const cfg = Object.assign({}, mainconfig)
+  const cfg = Object.assign({}, getEmptyConfig())
+  cfg.verbose = config.verbose
+  cfg.trace = config.trace
   cfg.dontRunVisualizer = webOnlyVisualizer
   cfg.visualizer = useVisualizer
   cfg.input = `${config.testInputPath}/${testFileName}.txt`

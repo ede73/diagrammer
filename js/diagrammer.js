@@ -10,6 +10,7 @@ import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { setVerbose } from '../model/debug.js'
 
+let traceProcess = (msg) => { }
 export function doParse (
   /** @type {string} */diagrammerCode,
   /** @type {string} */generator,
@@ -36,6 +37,7 @@ export function doParse (
 export function doLex (
   /** @type {string} */diagrammerCode,
   /** @type {(token:string,codePart:any)=>void} */resultsCallback) {
+  traceProcess('Begin lex testing')
   const st = lexer.diagrammerLexer
   st.setInput(diagrammerCode)
   let h
@@ -51,12 +53,18 @@ async function _main (argv) {
   const config = {
     verbose: false,
     trace: false,
+    traceProcess: false,
     lex: false,
     input: '',
     gemerator: '',
     code: ''
   }
 
+  traceProcess = (msg) => {
+    if (config.traceProcess) {
+      console.error(`trace:${msg}`)
+    }
+  }
   function _usage () {
     console.log('USAGE: [trace] [verbose] [lex] [INPUT] [GENERATOR]')
     process.exit(0)
@@ -86,6 +94,9 @@ async function _main (argv) {
         console.log("# If you didn't compile with DEBUG=1 make, deep tracing the grammar won't work")
         config.trace = true
         continue
+      case 'traceprocess':
+        config.traceProcess = true
+        continue
     }
 
     if (m === '-') {
@@ -98,6 +109,7 @@ async function _main (argv) {
     }
 
     if (!config.input && fs.existsSync(m.trim())) {
+      traceProcess('Read diagrammer code')
       config.input = m.trim()
       config.code = fs.readFileSync(config.input, 'utf8')
       continue
@@ -111,6 +123,7 @@ async function _main (argv) {
   }
 
   if (beingPiped()) {
+    traceProcess('being piped')
     // we're probably being piped!
     config.input = '-'
     config.code = await (() => {
@@ -130,10 +143,10 @@ async function _main (argv) {
 
   if (config.lex) {
     // export function doLex (/** @type {string} */diagrammerCode, /** @type {(token:string,codeSnippet:any)=>void} */resultsCallback) {
-
     doLex(config.code, (token, codeSnippet) => {
       if (config.trace || config.verbose) {
-        console.log('State:' + token + '(' + codeSnippet.yytext + ')')
+        // pass to stderr, so we can still use the stdout for actual graph (well depending)
+        console.error('State:' + token + '(' + codeSnippet.yytext + ')')
       }
     })
   } else {
@@ -152,7 +165,8 @@ async function _main (argv) {
       },
       (msg) => {
         if (!config.trace) {
-          console.log('TRACE:' + msg)
+          // dump to stderr, so output graph might still be usable
+          console.error('TRACE:' + msg)
         }
       }
     )

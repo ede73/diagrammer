@@ -28,3 +28,4 @@ web/*.js
 web/visualizations/*.js
 tests/parser/*.js
 tests/web/*.js
+**/*.map

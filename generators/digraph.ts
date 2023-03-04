@@ -15,7 +15,6 @@ import { getAttributeAndFormat, output } from '../model/support.js'
 import { debug } from '../model/debug.js'
 import { GraphEdge, GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
 import { mapMethodProperties, mapPropertyProperties, mapMethodsOrProperties } from '../model/transforms.js'
-import { ElementHandle } from '../node_modules/puppeteer/lib/types.js'
 
 // ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(www/cli)</option>

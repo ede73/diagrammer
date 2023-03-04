@@ -10,91 +10,97 @@
 CORES = 
 
 GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.grammar
-MODEL_CLASSES = model/graphobject.js model/graphvertex.js model/graphgroup.js model/graphcanvas.js model/graphedge.js model/graphinner.js model/graphcontainer.js model/graphconnectable.js
-MODEL_REST = model/shapes.js model/tree.js
-GENERATOR_FILES=$(shell find generators -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
-MODEL_FILES=$(shell find model -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
-WEB_FILES=$(shell find model -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
-WEB_VISUALIZER_FILES=$(shell find model -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
-PARSER_TEST_FILES=$(shell find tests/parser -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
-WEB_TEST_FILES=$(shell find tests/web -maxdepth 1 -iname "*.ts" | sed 's/.ts$$/.js/g')
 
-all:; @$(MAKE) _all -j$(CORES)
-_all: build/diagrammer_lexer.js build/diagrammer.all build/diagrammer_parser.js Makefile index.html $(GRAMMAR_FILES) $(MODEL_CLASSES) $(MODEL_REST) nodemodules parsertests webtests webvisualizations web model generators faketypes
+GENERATOR_TSS=$(shell find generators -maxdepth 1 -iname "*.ts")
+GENERATOR_JSS:=$(GENERATOR_TSS:.ts=.js)
+MODEL_TSS=$(shell find model -maxdepth 1 -iname "*.ts")
+MODEL_JSS:=$(MODEL_TSS:.ts=.js)
+WEB_TSS=$(shell find web -maxdepth 1 -iname "*.ts")
+WEB_TSS_JSS:=$(WEB_TSS:.ts=.js)
+WEB_VISUALIZATION_TSS=$(shell find web/visualizations -maxdepth 1 -iname "*.ts")
+WEB_VISUALIZATION_JSS:=$(WEB_VISUALIZATION_TSS:.ts=.js)
+GENERATORS_TEST_TSS=$(shell find tests/generators -maxdepth 1 -iname "*.ts")
+GENERATORS_TEST_JSS:=$(GENERATORS_TEST_TSS:.ts=.js)
+MODEL_TEST_TSS=$(shell find tests/model -maxdepth 1 -iname "*.ts")
+MODEL_TEST_JSS:=$(MODEL_TEST_TSS:.ts=.js)
+PARSER_TEST_TSS=$(shell find tests/parser -maxdepth 1 -iname "*.ts")
+PARSER_TEST_JSS:=$(PARSER_TEST_FILES:.ts=.js)
+WEB_TEST_TSS=$(shell find tests/web -maxdepth 1 -iname "*.ts")
+WEB_TEST_JSS:=$(WEB_TEST_TSS:.ts=.js)
+
+TRANSPILER=tsc
+TRANSPILEOPTIONS=--module es6 --esModuleInterop --target es2017 --allowJs --removeComments --strict --checkJs --skipLibCheck
+TRANSPILE=$(TRANSPILER) $(TRANSPILEOPTIONS)
+S=| grep -v -E "(Cannot write file)" || true
+
+.PHONY: clean node_modules model
+
+all:; @$(MAKE) -j$(CORES) _all 
+_all: active_project_deps jest_test_deps parser
 	@echo Make ALL
-.PHONY: all _all
 
-parsertests: tests/parser/tsconfig.json $(PARSER_TEST_FILES) build/diagrammer_parser.js
-	@echo "Transpile jest parser tests"
-	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-
-webtests: tests/web/tsconfig.json $(WEB_TEST_FILES) web
-	@echo "Transpile jest web tests"
-	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-
-webvisualizations: web/visualizations/tsconfig.json $(WEB_VISUALIZER_FILES) web
-	@echo "Transpile web visualization code"
-	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-
-web: web/tsconfig.json $(WEB_FILES) build/diagrammer_parser.js
-	@echo "Transpile web code"
-	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-
-model: model/tsconfig.json $(MODEL_FILES)
-	@echo "Transpile model code"
-	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-
-generators: generators/tsconfig.json $(GENERATOR_FILES)
-	@echo "Transpile generators code: $(GENERATOR_FILES)"
-	tsc -p $< 2>&1 |grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-
-faketypes: js/diagrammer_parser_types.ts
-	@echo "Make diagrammer shared context type for jest tests"
-	@cp js/diagrammer_parser_types.ts build/types
-	@echo '{"type":"module"}' > build/types/package.json
-	@(cd build/types; tsc diagrammer_parser_types.ts -t es2017 -m es6 --allowjs --esModuleInterop>/dev/null || true)
-
-%.js: %.ts
-	@echo Phony target.. tsc compiles projects, alas it cannot build individual files AND use tsconfig
-# 	@echo "Transpile typescripts"
-# 	@tsc -p model/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-# 	@tsc -p generators/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-# 	@tsc -p web/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-# 	@tsc -p web/visualizations/tsconfig.json | grep -v -E 'Cannot write file.*(diagrammer_parser|viz.es)' || true
-
-nodemodules: node_modules
-	@echo "Check node_modules exist"
-	@if [ ! -d $< ]; then \
-	  echo "ERROR: Lotsa modules needed, run npm i";\
-	  exit 10; \
-	fi
-
-plantuml: ext/plantuml.jar
-	@echo "Check plantuml.jar"
-	@if [ ! -f $< ]; then \
-	  echo "ERROR: Need plantuml JAR to run tests, put it $<";\
-	  exit 10; \
-	fi
-
-index.html : index_template.html Makefile generators/*.ts tests/test_inputs/*.txt web/visualizations/*.ts
+active_project_deps: model generators web web_visualizations index.html
+generators/%.js : generators/%.ts
+generators: $(GENERATOR_JSS) model
+model/%.js : model/%.ts
+model: $(MODEL_JSS)
+web/%.js : web/%.ts
+web: $(WEB_JSS) model parser index.html
+web/visualizations/%.js : web/visualizations/%.ts
+web_visualizations: $(WEB_VISUALIZATION_JSS)
+index.html : index_template.html generators tests/test_inputs/*.txt web_visualizations
 	@echo "Create index.html (out of the template)"
 	@awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs/*.txt | sort |sed 's,^tests/test_inputs/,,g'" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations/*.ts | sort" | getline var) {tsjs=var;gsub("[.]ts",".js",tsjs);printf("<script type=\"module\" src=\"%s\"></script>\n",tsjs);}next}/{REPLACE_WITH_GENERATORS}/{ while ("grep \"ADD TO INDEX.HTML AS:\" generators/*.ts|sort|cut -d: -f3-|sort" | getline var) printf("%s\n",var,var);next}{print $0}' $< >$@
 
+jest_test_deps: parsertests webtests modeltests generatortests
+tests/parser/%.js: tests/parser/$.ts
+parsertests: $(PARSER_TEST_JSS) model parser faketypes
+tests/web/%.js: tests/parser/$.ts
+webtests: $(WEB_TEST_JSS) web/editorInteractions.js index.html
+tests/model/%.js: tests/parser/$.ts
+modeltests: $(MODEL_TEST_JSS) model
+tests/generators/%.js: tests/parser/$.ts
+generatortests: $(GENERATORS_TEST_JSS) generators
+
+build/types/diagrammer_parser_types.js: js/diagrammer_parser_types.ts
+	@echo "Make diagrammer shared context type for jest tests"
+	@cp js/diagrammer_parser_types.ts build/types
+	@echo '{"type":"module"}' > build/types/package.json
+	@(cd build/types; rm -f diagrammer_parser_types.js;$(TRANSPILE) diagrammer_parser_types.ts $(S))
+faketypes: build/types/diagrammer_parser_types.js
+
+ %.js: %.ts
+	@$(TRANSPILE) $< $(S)
+
+node_modules: package.json
+	npm install
+
+plantuml_jar:
+	@if [ ! -f ext/plantuml.jar ]; then \
+	  echo "ERROR: Need plantuml JAR to run tests, put it ext/plantuml_jar, e.g.";\
+	  exit 10; \
+	fi
+
+# Not actively used, but you can build and test just the lexer while developing
 build/diagrammer_lexer.js: grammar/diagrammer.lex
 	@echo "Build Lexer"
 	@mkdir -p build
-	@echo Make build/diagrammer_lexer.js from LEX
-	@node_modules/.bin/jison-lex $< -o $@ >/dev/null
+	node_modules/.bin/jison-lex $< -o $@ >/dev/null
 	@echo "exports.diagrammerLexer=diagrammerLexer;" >> $@
 	@#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
+# nicer to carry around than build target
+just_lexer: build/diagrammer_lexer.js
 
+# Jison considers lexer/parser separate, we combine to one file
 build/diagrammer.all: $(GRAMMAR_FILES)
 	@echo "Concatenate all grammar files"
 	@mkdir -p build
 	@echo Compile build/diagrammer.all
 	@cat $^ >$@
+# nicer to carry around than build target
+lexer_and_grammar: build/diagrammer.all
 
-build/diagrammer_parser.js: build/diagrammer.all Makefile generators model js/*.js
+build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators model js/*.js
 	@echo "Construct parser utility, add all imports"
 	@mkdir -p build
 	@echo make parser
@@ -128,29 +134,32 @@ build/diagrammer_parser.js: build/diagrammer.all Makefile generators model js/*.
 	@sed -i 's/^var diagrammer_parser/export var diagrammerParser/g' $@
 	@sed -i 's/exports.diagrammerLexer=diagrammerLexer;//g' build/diagrammer_lexer.js
 	@sed -i 's/^var diagrammer_lexer/export var diagrammerLexer/g' build/diagrammer_lexer.js
+# nicer to carry around than build target
+parser: build/diagrammer_parser.js
 
-.PHONY: export
-export: build/diagrammer_lexer.js build/diagrammer_parser.js js/diagrammer.js
+export: parser js/diagrammer.js scripts/export.sh scripts/display_image.sh
 	@./scripts/export.sh
-	@echo 'Add alias depict="~/{EXPORT_DIR_HERE}/t.js silent " to your profile/bashrc etc.\nYou need (depending) visualizers graphviz,mscgen,plantuml.jar,nwdiag,blockdiag,actdiag.\nplantuml requires java\nblockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html\nPlantuml from http://plantuml.sourceforge.net/\n' >export/README.txt
+	@echo 'Add alias depict="~/{EXPORT_DIR_HERE}/t.js silent " to your profile/bashrc etc.\nYou need (depending) visualizers graphviz,mscgen,plantuml_jar.jar,nwdiag,blockdiag,actdiag.\nplantuml requires java\nblockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html\nPlantuml from http://plantuml.sourceforge.net/\n' >export/README.txt
 
-testrunner: ./scripts/runtests.js all plantuml nodemodules
+testrunner: ./scripts/runtests.js ./scripts/t.js model generators parser plantuml_jar node_modules
 	./scripts/runtests.js
 	@if [ -f .error ]; then\
 	  exit 100;\
 	fi
 
-jesttests: all nodemodules parsertests webtests faketypes
+checkapache:
+	@echo "Make sure apache is running for web tests"
+
+jesttests: checkapache node_modules jest_test_deps
 	@mkdir -p tests/test_outputs
 	npm test
 
-test: all testrunner jesttests
+test: testrunner jesttests
 
 tests: test
 
 clean:
-	@find build -type f -delete & \
-	rm -f .error & \
-	rm -f build/types/* & \
-	rm -f generators/*.js model/*.js web/*.js web/visualizations/*.js & \
-	wait
+	@find build -type f -delete
+	rm -f .error
+	rm -f build/types/*
+	rm -f generators/*.js generators/*.js.map model/*.js model/*.js.map web/visualizations/*.js web/visualizations/*.js.map

@@ -46,6 +46,7 @@ declare global {
  * Format a string with provided array of values
  * For example. "{2}{0}{1}".formatArray([2,3,1]) prints 123
  */
+// @ts-ignore
 String.prototype.formatArray = function (array: any[]) {
   let formatted = this
   for (let i = 0; i < array.length; i++) {

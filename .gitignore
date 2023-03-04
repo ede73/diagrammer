@@ -9,6 +9,7 @@ web/exported
 tests/web/snapshots/__diff_output__/
 tests/test_outputs/*.png
 tests/test_outputs/*.out
+tests/testrun/**
 tests/reference_images/**
 js/canviz-0.1
 ext/plantuml.jar

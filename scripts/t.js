@@ -4,6 +4,7 @@ import { spawn } from 'child_process'
 // required to populate generators/visualizations
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { generators, visualizations } from '../model/graphcanvas.js'
+import { output } from '../model/support.js'
 
 function visualizerToGenerator () {
   const visualiserToGenerator = new Map()
@@ -28,7 +29,8 @@ export const config = {
   visualizer: '',
   visualizedGraph: '-',
   buggyDiag: false,
-  parsedCode: ''
+  parsedCode: '',
+  written: 0
 }
 
 function printError (msg) {
@@ -44,14 +46,18 @@ function _exitError (msg) {
   process.exit(10)
 }
 
+function conciseId (useConfig) {
+  return `${useConfig.visualizer} => ${useConfig.visualizedGraph}`
+}
+
 function _prepProcess (child, gotStdout, gotStdErr) {
   if (gotStdout) { child.stdout.on('data', gotStdout) }
   if (gotStdErr) { child.stderr.on('data', gotStdErr) }
   return child
 }
 
-function _startProcess (args, gotStdout, gotStdErr) {
-  const options = { stdio: ['pipe', 'pipe', 'pipe'] }
+function _startProcess (args, gotStdout, gotStdErr, fd) {
+  const options = { stdio: ['pipe', fd || 'pipe', 'pipe'] }
   const cmd = args[0]
   const a = args.splice(1)
   const proc = spawn(cmd, a, options)
@@ -85,8 +91,8 @@ function _startGenerator (useConfig, gotStdout, gotStdErr) {
   return _startProcess(args, gotStdout, gotStdErr)
 }
 
-function _startVisualizer (args, gotStdout, gotStdErr) {
-  return _startProcess(args, gotStdout, gotStdErr)
+function _startVisualizer (fd, args, gotStdout, gotStdErr) {
+  return _startProcess(args, gotStdout, gotStdErr, fd)
 }
 
 const _waitForProcesses = (useConfig, processes) => {
@@ -175,16 +181,18 @@ function _getVisualizerCommand (useConfig) {
   }
 }
 
-const _stdout = (useConfig) => (stdout) => { if (useConfig.trace) printError(`${stdout}`) }
-const _stdoutCollect = (useConfig) => (stdout) => { useConfig.parsedCode += stdout; if (useConfig.trace) printError(`${stdout}`) }
-const _stderr = (who) => (stderr) => { console.error(`${who}: ${stderr}`) }
-const _closed = (id, app) => {
-  return (stream) => {
-    traceProcess(`A stdio stream ${stream} of app ${app} has been closed `)
-  }
+const _stdout = (useConfig) => (stdout) => {
+  if (useConfig.trace) printError(`${stdout}`)
+}
+const _stdoutCollect = (useConfig) => (stdout) => {
+  useConfig.parsedCode += stdout
+  if (useConfig.trace) printError(`${stdout}`)
+}
+const _stderr = (who) => (stderr) => {
+  console.error(`${who}: ${stderr}`)
 }
 
-export async function lexParseAndVisualize (useConfig, outputFinishedCallback) {
+export async function lexParseAndVisualize (useConfig, visualizationisComplete) {
   if (!useConfig.input || !fs.existsSync(useConfig.input)) {
     _exitError(`Existing input file required, got "${useConfig.input}", check usage -h`)
   }
@@ -193,54 +201,33 @@ export async function lexParseAndVisualize (useConfig, outputFinishedCallback) {
 
   const _processes = [_lexingProcess, _parsingProcess]
 
+  let outputFileStream
   if (!useConfig.dontRunVisualizer) {
+    traceProcess(useConfig)
     // uh, nwdiag(all diags) use buggy PIL library opening R&W (seekable) access to pipe
-    const outputFileStream = (useConfig.visualizedGraph === '-' || useConfig.buggyDiag)
+    outputFileStream = (useConfig.visualizedGraph === '-' || useConfig.buggyDiag)
       ? undefined
-      : fs.createWriteStream(useConfig.visualizedGraph, { flags: 'w' })
-    // We're to run the visualizer also!
+      // something fishy with pipes
+      //  https://stackoverflow.com/questions/61856264/node-piping-process-stdout-doesnt-drain-automatically
+      // I couldn't figure out the writestream stdout usage, it mostly works, but sometimes
+      // last chunk goes missing, or piping doesn't start at all.
+      // Former, unknonw, latter, perhaps the fact the stream is opened async (even though i DID wait for it)
+      // fs.createWriteStream(useConfig.visualizedGraph, { flags: 'w', autoClose: true })
+      : fs.openSync(useConfig.visualizedGraph, 'w')
+
     const cmd = _getVisualizerCommand(useConfig)
+    const visualizationProcess = _startVisualizer(outputFileStream, cmd, undefined,
+      (stdout) => console.error(String(stdout)))
 
-    // So node streams have no close(), they do have end(), but end() is async, and doesn't finish immediately
-    // This didn't help either, on occasion (dot) is unable to write the graph completely
-    async function waitForStreamClose (output, stream) {
-      stream.end()
-      return new Promise((resolve) => {
-        stream.once('finish', () => {
-          traceProcess(`    Output ${output} has finally finished`)
-          const s = fs.statSync(useConfig.visualizedGraph)
-          if (s.size === 0) {
-            traceProcess(`      File size for ${useConfig.visualizedGraph} ${JSON.stringify(s)}`)
-            // throw new Error(`File ${useConfig.visualizedGraph} is empty`)
-          }
-          outputFinishedCallback()
-          resolve()
-        })
-      })
-    }
-
-    const visualizationProcess = _startVisualizer(
-      cmd,
-      (stdout) => {
-        if (outputFileStream) {
-          traceProcess(`Writing data chunk ${stdout.length} to file ${useConfig.visualizedGraph}`)
-          outputFileStream.write(stdout)
-        }
-      },
-      _stderr(`  Visualizer(${useConfig.visualizer})`)
-    )
     visualizationProcess.on('exit', async () => {
-      traceProcess('  VISUALIZER EXIT')
-      if (outputFileStream) {
-        // closing the stream ..closes it too quickly, so where exactly is this stream closed
-        // apparently automatically TODO:
-        // await waitForStreamClose(useConfig.visualizedGraph, outputFileStream)
-        // outputFileStream.close()
+      traceProcess(`  ${conciseId(useConfig)} EXT`)
+      traceProcess(`${visualizationProcess.exitCode} is the failure`)
+      if (visualizationProcess.exitCode != 0) {
+        traceProcess(`${useConfig.parsedCode}`)
       }
+      visualizationisComplete(visualizationProcess.exitCode)
     })
 
-    // something fishy with pipes
-    //  https://stackoverflow.com/questions/61856264/node-piping-process-stdout-doesnt-drain-automatically
     _parsingProcess.stdout.pipe(visualizationProcess.stdin).on('error', err =>
       printError(`mf! ${err}`)
     )
@@ -260,7 +247,7 @@ export async function lexParseAndVisualize (useConfig, outputFinishedCallback) {
   })
 
   if (_processes.length === 3 && _processes[2].exitCode !== 0) {
-    throw new Error(`Visualizer ${useConfig.visualizer} failed processing ${useConfig.input}`)
+    throw new Error(`Visualizer ${useConfig.visualizer} failed processing ${useConfig.input} code=${_processes[2].exitCode}`)
   }
 }
 

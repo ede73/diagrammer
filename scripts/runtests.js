@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 import * as fs from 'fs'
-import { exec, spawn } from 'child_process'
 import { lexParseAndVisualize, config as mainconfig } from './t.js'
+import color from 'colors'
 import { diffLines } from 'diff'
 import * as path from 'path'
-import color from 'colors'
 import pixelmatch from 'pixelmatch'
 import PNGx from 'pngjs'
 const PNG = PNGx.PNG
@@ -13,8 +12,8 @@ const config = {
   parallel: 12,
   verbose: false,
   testInputPath: 'tests/test_inputs',
-  testOutputPath: 'tests/test_outputs',
-  referenceImagePath: 'tests/reference_images',
+  currentTestRun: 'tests/testrun/current',
+  previousStableRun: 'tests/testrun/previous',
   testPatterns: []
 }
 
@@ -23,7 +22,7 @@ function printError (msg) {
 }
 
 function traceProcess (msg) {
-  // console.log(`${process.hrtime.bigint()} trace:${msg}`)
+  // console.log(`trace:${msg}`)
 }
 
 function _usage () {
@@ -82,13 +81,12 @@ function diff (originalFile, compareToText) {
   return filesSame
 }
 
-function diffImages (referenceImage, outputImage) {
+async function diffImages (referenceImage, outputImage) {
   if (!fs.existsSync(referenceImage)) {
-    traceProcess(' REFERENCE IMAGE DOESNT EXIST...COPY OVER')
+    traceProcess(' REFERENCE IMAGE DOESNT EXIST...COPY OVER (but first try opening')
     fs.renameSync(outputImage, referenceImage)
     return true
   }
-  traceProcess(` load ${referenceImage}`)
   const img1 = PNG.sync.read(fs.readFileSync(referenceImage))
   const img2 = PNG.sync.read(fs.readFileSync(outputImage))
   const { width, height } = img1
@@ -107,23 +105,25 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
   cfg.dontRunVisualizer = webOnlyVisualizer
   cfg.visualizer = useVisualizer
   cfg.input = `${config.testInputPath}/${testFileName}.txt`
-  cfg.visualizedGraph = `${config.testOutputPath}/${testFileName}_${useVisualizer}.png`
+  cfg.visualizedGraph = `${config.currentTestRun}/${useVisualizer}/${testFileName}.png`
 
-  const referenceImagePath = `${config.referenceImagePath}/${useVisualizer}`
-  const referenceCode = `${referenceImagePath}/${testFileName}_${useVisualizer}.out`
-
-  await lexParseAndVisualize(cfg, () => {
+  traceProcess(`lexParseAndVisualzize ${testFileName}`)
+  await lexParseAndVisualize(cfg, async (error) => {
+    if (error && error !== 0) {
+      throw Error(`eh...failed ${useVisualizer} ${testFileName}`)
+    }
+    const stableRunPath = `${config.previousStableRun}/${useVisualizer}`
+    const stableRunCodeFile = `${stableRunPath}/${testFileName}.txt`
     const errors = []
-
-    if (!diff(referenceCode, cfg.parsedCode)) {
-      errors.push(`Using visualizer ${useVisualizer} on ${cfg.input} generated code differs from ${referenceCode}`)
+    if (!diff(stableRunCodeFile, cfg.parsedCode)) {
+      errors.push(`Using visualizer ${useVisualizer} on ${cfg.input} generated code differs from ${stableRunCodeFile}`)
     }
 
     // TODO: Can't yet visualize web only renderers
     if (!webOnlyVisualizer) {
       // compare visualization
-      const referenceImage = `${config.referenceImagePath}/${useVisualizer}/${testFileName}_${useVisualizer}.png`
-      if (!diffImages(referenceImage, cfg.visualizedGraph)) {
+      const referenceImage = `${config.previousStableRun}/${useVisualizer}/${testFileName}.png`
+      if (!await diffImages(referenceImage, cfg.visualizedGraph)) {
         errors.push(`Using visualizer ${useVisualizer} on ${testFileName}.txt generated graph visualizations differ`)
       }
     }
@@ -140,7 +140,7 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
 const testsPath = path.join(process.cwd(), config.testInputPath)
 const testFiles = fs.readdirSync(testsPath).map(f => f.replace('.txt', ''))
 
-const testVisualizers = ['dot', 'actdiag', 'blockdiag', 'nwdiag', 'mscgen', 'seqdiag', 'plantuml_sequence']
+const testVisualizers = ['dot', 'mscgen', 'plantuml_sequence', 'actdiag', 'blockdiag', 'nwdiag', 'seqdiag']
 
 // Some diagrams cant be converted (might be generator limitation or just too expressive diagram)
 const exclusions = {
@@ -169,9 +169,10 @@ const webOnlyVisualizers = [
 ]
 
 const waitTests = []
-fs.mkdirSync(config.testOutputPath, { recursive: true })
-for (const visualizer of testVisualizers) {
-  fs.mkdirSync(`${config.referenceImagePath}/${visualizer}`, { recursive: true })
+const v = []
+for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
+  fs.mkdirSync(`${config.currentTestRun}/${visualizer}`, { recursive: true })
+  fs.mkdirSync(`${config.previousStableRun}/${visualizer}`, { recursive: true })
   for (const testFile of testFiles) {
     if (config.testPatterns.length > 0) {
       const testMatch = `${visualizer}:${testFile}`
@@ -192,12 +193,20 @@ for (const visualizer of testVisualizers) {
     if (onlyTheseTests[visualizer] && !onlyTheseTests[visualizer].includes(testFile)) {
       continue
     }
+
+    // Since config is complicated (exclusion, inclusion and default)
+    // make sure we don't accidentally run same test twice
+    const d = `${visualizer}:${testFile}`
+    if (v.includes(d)) {
+      throw new Error('THis is a test runner config error')
+    }
+    v.push(d)
     const webOnlyVisualizer = webOnlyVisualizers.includes(visualizer)
     waitTests.push(runATest(visualizer, webOnlyVisualizer, testFile))
   }
 }
 
-traceProcess(-1, 'Begin waiting all tests')
+traceProcess('Begin waiting all tests')
 await Promise.all(waitTests)
-traceProcess(-1, 'Done waiting for all tests')
+traceProcess('Done waiting for all tests')
 console.log('All good!')

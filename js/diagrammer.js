@@ -122,8 +122,7 @@ async function _main (argv) {
     config.generator = generator
   }
 
-  if (beingPiped()) {
-    traceProcess('being piped')
+  if (beingPiped() && config.input === '-') {
     // we're probably being piped!
     config.input = '-'
     config.code = await (() => {
@@ -170,6 +169,7 @@ async function _main (argv) {
         }
       }
     )
+    traceProcess('Parsing has been completed with no errrors')
   }
 }
 

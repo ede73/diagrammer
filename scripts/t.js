@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import * as fs from 'fs'
 import { spawn } from 'child_process'
+import * as tty from 'node:tty'
 // required to populate generators/visualizations
 // eslint-disable-next-line no-unused-vars
 import { diagrammerParser } from '../build/diagrammer_parser.js'
@@ -23,6 +24,7 @@ export function getEmptyConfig () {
     tests: false,
     verbose: false,
     trace: false,
+    traceProcess: false,
     text: false,
     format: 'png',
     dontRunVisualizer: false,
@@ -39,9 +41,7 @@ function printError (msg) {
   console.error(`${msg}`)
 }
 
-function traceProcess (msg) {
-  // console.log(`trace:${msg}`)
-}
+let traceProcess = (msg) => { }
 
 function _exitError (msg) {
   printError(msg)
@@ -58,10 +58,11 @@ function _prepProcess (child, gotStdout, gotStdErr) {
   return child
 }
 
-function _startProcess (args, gotStdout, gotStdErr, fd) {
-  const options = { stdio: ['pipe', fd || 'pipe', 'pipe'] }
+function _startProcess (args, gotStdout, gotStdErr, fd, inheritStdin) {
+  const options = { stdio: [inheritStdin ? 'inherit' : 'pipe', fd || 'pipe', 'pipe'] }
   const cmd = args[0]
   const a = args.splice(1)
+  traceProcess(`spawn ${cmd} with ${a} options ${JSON.stringify(options)}`)
   const proc = spawn(cmd, a, options)
   return _prepProcess(proc, gotStdout, gotStdErr)
 }
@@ -80,7 +81,7 @@ function _resolveGenerator (useConfig) {
   return generator
 }
 
-function _startGenerator (useConfig, gotStdout, gotStdErr) {
+function _startParser (useConfig, gotStdout, gotStdErr) {
   const args = ['node', 'js/diagrammer.js']
   if (useConfig.verbose) {
     args.push('verbose')
@@ -88,12 +89,16 @@ function _startGenerator (useConfig, gotStdout, gotStdErr) {
   if (useConfig.trace) {
     args.push('trace')
   }
+  if (useConfig.traceProcess) {
+    args.push('traceprocess')
+  }
   args.push(useConfig.input)
   args.push(_resolveGenerator(useConfig))
-  return _startProcess(args, gotStdout, gotStdErr)
+  return _startProcess(args, gotStdout, gotStdErr, undefined, useConfig.input === '-')
 }
 
 function _startVisualizer (fd, args, gotStdout, gotStdErr) {
+  traceProcess(`Start visualizer ${args}`)
   return _startProcess(args, gotStdout, gotStdErr, fd)
 }
 
@@ -197,17 +202,37 @@ const _stderr = (who) => (stderr) => {
 }
 
 export async function lexParseAndVisualize (useConfig, visualizationisComplete) {
-  if (!useConfig.input || !fs.existsSync(useConfig.input)) {
+  traceProcess = (msg) => {
+    if (useConfig.traceProcess) {
+      console.error(`trace:${msg}`)
+    }
+  }
+  if (useConfig.input === '-') {
+    if (!beingPiped()) {
+      _exitError('Supposed to receive graph via pipe, but not being piped!')
+    }
+    traceProcess('Expecting piped input')
+  } else if (!useConfig.input || !fs.existsSync(useConfig.input)) {
     _exitError(`Existing input file required, got "${useConfig.input}", check usage -h`)
   }
-  const _lexingProcess = _startLexerTest(useConfig, _stdout(useConfig), _stderr('lexer'))
-  const _parsingProcess = _startGenerator(useConfig, _stdoutCollect(useConfig), _stderr('parser'))
+  const _processes = []
 
-  const _processes = [_lexingProcess, _parsingProcess]
+  // use lexer (separate lexer test process) only during test runs
+  if (useConfig.tests) {
+    traceProcess('Prepare lexical tester')
+    const _lexingProcess = _startLexerTest(useConfig, _stdout(useConfig), _stderr('lexer'))
+    _processes.push(_lexingProcess)
+  }
 
+  traceProcess('Start parsing process')
+  const _parsingProcess = _startParser(useConfig, _stdoutCollect(useConfig), _stderr('parser'))
+  _processes.push(_parsingProcess)
+
+  traceProcess(`Config: ${JSON.stringify(useConfig)}`)
   let outputFileStream
+
   if (!useConfig.dontRunVisualizer) {
-    traceProcess(useConfig)
+    traceProcess('Going to run visualizer')
     // uh, nwdiag(all diags) use buggy PIL library opening R&W (seekable) access to pipe
     outputFileStream = (useConfig.visualizedGraph === '-' || useConfig.buggyDiag)
       ? undefined
@@ -236,12 +261,12 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     )
 
     if (useConfig.visualizedGraph === '-' && !useConfig.buggyDiag) {
-      traceProcess('DIAG DUMPING DMMPING')
       visualizationProcess.stdout.pipe(process.stdout)
     }
     _processes.push(visualizationProcess)
   }
 
+  traceProcess(`Wait for all the processes (${_processes.length})`)
   await _waitForProcesses(useConfig, _processes).then((x) => {
     // all done...
     traceProcess(` All processed related to ${useConfig.visualizedGraph} have been completed`)
@@ -249,12 +274,17 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     _exitError(`Failure ${rej}`)
   })
 
+  // TODO: move to exit above..
   if (_processes.length === 3 && _processes[2].exitCode !== 0) {
     throw new Error(`Visualizer ${useConfig.visualizer} failed processing ${useConfig.input} code=${_processes[2].exitCode}`)
   }
 }
 
-function _main (argv) {
+function beingPiped () {
+  return !(process.stdin instanceof tty.ReadStream)
+}
+
+async function _main (argv) {
   function _usage () {
     const visualizers = Array.from(visualizerToGenerator().keys())
     console.log(`USAGE: [silent] [dont_run_visualizer] [tests] [verbose] [text] [svg] [output file] [INPUT] [${visualizers.join(', ')}]`)
@@ -291,6 +321,9 @@ function _main (argv) {
       case 'trace':
         config.trace = true
         continue
+      case 'traceprocess':
+        config.traceProcess = true
+        continue
       case 'text':
         config.text = true
         continue
@@ -301,9 +334,19 @@ function _main (argv) {
         config.dontRunVisualizer = true
         continue
     }
+
+    if (m === '-') {
+      // we're told we're being piped
+      if (!beingPiped()) {
+        throw new Error('Expecting piped input')
+      }
+      config.input = '-'
+      continue
+    }
+
     // Allow using absolute and relative paths! (currently abs.paths dont work)
     // ALSO detect piping/redirection and make 'em work
-    if (fs.existsSync(m.trim())) {
+    if (!config.input && fs.existsSync(m.trim())) {
       config.input = m.trim()
       continue
     }
@@ -317,12 +360,18 @@ function _main (argv) {
       throw new Error(`Could not determine visualizer (${visualizer}) (nor its generator)`)
     }
   }
-
-  lexParseAndVisualize(config, () => {
+  if (!config.input && beingPiped()) {
+    config.input = '-'
+  }
+  if (beingPiped()) {
+    // we're probably being piped!
+    config.input = '-'
+  }
+  await lexParseAndVisualize(config, () => {
     traceProcess('Visualization has been completed')
   })
 }
 
 if (`${process.argv[1]}`.endsWith('t.js')) {
-  _main(process.argv.splice(1))
+  await _main(process.argv.splice(1))
 }

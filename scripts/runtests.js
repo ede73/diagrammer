@@ -14,6 +14,7 @@ const config = {
   parallel: 12,
   verbose: false,
   trace: false,
+  traceProcess: false,
   testInputPath: 'tests/test_inputs',
   currentTestRun: 'tests/testrun/current',
   previousStableRun: 'tests/testrun/previous',
@@ -25,7 +26,7 @@ function printError (msg) {
 }
 
 function traceProcess (msg) {
-  // console.log(`trace:${msg}`)
+  if (config.traceProcess) { console.error(`trace:${msg}`) }
 }
 
 function _usage () {
@@ -51,6 +52,9 @@ for (const m of process.argv.splice(2)) {
       continue
     case 'trace':
       config.trace = true
+      continue
+    case 'traceprocess':
+      config.traceProcess = true
       continue
     default:
       config.testPatterns.push(m.trim())
@@ -108,6 +112,7 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
   cfg.trace = config.trace
   cfg.dontRunVisualizer = webOnlyVisualizer
   cfg.visualizer = useVisualizer
+  cfg.traceProcess = config.traceProcess
   cfg.input = `${config.testInputPath}/${testFileName}.txt`
   cfg.visualizedGraph = `${config.currentTestRun}/${useVisualizer}/${testFileName}.png`
 
@@ -214,3 +219,4 @@ traceProcess('Begin waiting all tests')
 await Promise.all(waitTests)
 traceProcess('Done waiting for all tests')
 console.log('All good!')
+process.exit(0)

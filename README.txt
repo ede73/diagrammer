@@ -1,3 +1,5 @@
+make all -Bnd|grep -v tests/test_inputs|./make2graph |dot -Tpng -ograph.png
+
 Something is totally broken in tsc, started generating shitloads of errors from totally unrelated modules!
 
 I can delete node_modules and still get a clean compile, so I'm not even depending on these shits:

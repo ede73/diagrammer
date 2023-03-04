@@ -2,6 +2,7 @@
 import * as fs from 'fs'
 import { spawn } from 'child_process'
 import * as tty from 'node:tty'
+import path from 'path'
 // required to populate generators/visualizations
 // eslint-disable-next-line no-unused-vars
 import { diagrammerParser } from '../build/diagrammer_parser.js'
@@ -373,5 +374,7 @@ async function _main (argv) {
 }
 
 if (`${process.argv[1]}`.endsWith('t.js')) {
+  // this script sits in js, so going one path level up is expected
+  process.chdir(path.join(path.dirname(process.argv[1]), '..'))
   await _main(process.argv.splice(1))
 }

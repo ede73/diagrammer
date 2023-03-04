@@ -1,14 +1,14 @@
+#!/usr/bin/env node
 // Usage: (typically called from t.sh or CLI in general, web uses diagrammer_parser.js directly via index.js)
 // Usage: node js/diagrammer.js [verbose] inputFile [lex] digraph|nwdiag|actdiag|blockdiag|plantuml_sequence >output
 // Usage: node js/diagrammer.js verbose tests/test_inputs/state_group.txt ast
 
 import * as fs from 'fs'
-import * as path from 'path'
+import * as tty from 'node:tty'
 import * as lexer from '../build/diagrammer_lexer.js'
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { setVerbose } from '../model/debug.js'
-import { argv } from 'process'
 
 export function doParse (
   /** @type {string} */diagrammerCode,
@@ -47,7 +47,7 @@ export function doLex (
   }
 }
 
-function _main (argv) {
+async function _main (argv) {
   const config = {
     verbose: false,
     trace: false,
@@ -60,6 +60,10 @@ function _main (argv) {
   function _usage () {
     console.log('USAGE: [trace] [verbose] [lex] [INPUT] [GENERATOR]')
     process.exit(0)
+  }
+
+  function beingPiped () {
+    return !(process.stdin instanceof tty.ReadStream)
   }
 
   for (const m of argv.splice(1)) {
@@ -83,10 +87,19 @@ function _main (argv) {
         config.trace = true
         continue
     }
-    if (fs.existsSync(m.trim())) {
+
+    if (m === '-') {
+      // we're told we're being piped
+      if (!beingPiped()) {
+        throw new Error('Expecting piped input')
+      }
+      config.input = '-'
+      continue
+    }
+
+    if (!config.input && fs.existsSync(m.trim())) {
       config.input = m.trim()
-      const inputPath = path.normalize(`${process.cwd()}/${config.input}`)
-      config.code = fs.readFileSync(inputPath, 'utf8')
+      config.code = fs.readFileSync(config.input, 'utf8')
       continue
     }
     // must be generator
@@ -97,6 +110,20 @@ function _main (argv) {
     config.generator = generator
   }
 
+  if (beingPiped()) {
+    // we're probably being piped!
+    config.input = '-'
+    config.code = await (() => {
+      return new Promise(function (resolve, reject) {
+        const stdin = process.stdin
+        let data = ''
+        stdin.setEncoding('utf8')
+        stdin.on('data', function (chunk) { data += chunk })
+        stdin.on('end', function () { resolve(data) })
+        stdin.on('error', reject)
+      })
+    })().catch(console.error)
+  }
   if (!config.input) {
     _usage()
   }
@@ -134,5 +161,5 @@ function _main (argv) {
 
 // terrible
 if (`${process.argv[1]}`.endsWith('diagrammer.js')) {
-  _main(process.argv.splice(1))
+  await _main(process.argv.splice(1))
 }

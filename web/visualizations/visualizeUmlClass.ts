@@ -197,7 +197,7 @@ export function visualizeUmlClass(generatorResult: string) {
       nodeDataArray: nodedata,
       linkDataArray: linkdata
     })
-  const x = 0; const y = 0; const printSize = 300
+  const x = 0; const y = 0; const printSize = 900
   const u = new go.Size(printSize, printSize)
   const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: u })
   removeOldVisualizations().appendChild(svg)

@@ -5,10 +5,10 @@ import * as d3 from 'd3'
 
 export function makeSVG(width: number, height: number) {
   if (!width) {
-    width = 300
+    width = 800
   }
   if (!height) {
-    height = 300
+    height = 800
   }
   d3.select('#the_SVG_ID').remove()
   return d3.select('#diagrammer-graph').append('svg')

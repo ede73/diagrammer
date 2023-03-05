@@ -15,7 +15,29 @@ import { debug } from '../model/debug.js'
 
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/dendrogram.txt dendrogram
-*/
+ * TODO: The class hierarchy is disconnected. Just using getObjects() doesn't allow proper graph traversal
+ * 
+ * There's nothing wrong with the model - all are recorded (check ast/ast_record) but especially for dendrogram
+ * 
+ * It is possible to construct a graph say a>b>c>d c>(k,v) d>(l,o) (or similar) that dendrogram cannot reach all nodes
+ * 
+ * It processes edges first, first LHS becomes tree root (dendrogram can have 1 root only) and all 
+ * reminder nodes are added subsequently.
+ * 
+ * Some of the nodes are just GraphReferences (if seen few times), problem #1 - mitigated partially
+ * Then it seems like GraphInners werent includes (they're GraphGroups, but dendro generation missed this) - mitigated
+ * How ever the order the link traversal sees the nodes, the LHS GraphVertex may be MISSED in traversal
+ * 
+ * Now, taking GraphCanvas, its objects, we only see a,b,c,d..root notes, not the inners
+ * One would have to traverse deeper.
+ * 
+ * Anway, doable, but defeates the purposes hacking around this inefficiency in the generator.
+ * 
+ * GraphCanvas (or traversal/support) should provide this. Perhaps also instead of naive object
+ * storage, we could have a proper linked tree there.
+ * 
+ * Long rant, but gotta get fixed, else radial dendrogram visualization is iffy
+ */
 export function dendrogram(graphcanvas: GraphCanvas) {
   const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args

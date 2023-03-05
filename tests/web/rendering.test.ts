@@ -119,7 +119,7 @@ describe('Diagrammer', () => {
     if (!svg) {
       throw Error("Could not get SVG code")
     }
-    const buffer = await singleElementScreenSnapshot(svg, bbox?.width, bbox?.height)
+    const buffer = await singleElementScreenSnapshot(browser, svg, bbox?.width, bbox?.height)
     expect.extend({
       toMatchImageSnapshot
     })

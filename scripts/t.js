@@ -275,6 +275,11 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     _exitError(`Failure ${rej}`)
   })
 
+  if (_parsingProcess.exitCode !== 0) {
+    const generator = visualizerToGenerator().get(useConfig.visualizer)
+    throw new Error(`Transpiling diagrammer code with ${generator} failed ${_parsingProcess.exitCode}`)
+  }
+
   // TODO: move to exit above..
   if (_processes.length === 3 && _processes[2].exitCode !== 0) {
     throw new Error(`Visualizer ${useConfig.visualizer} failed processing ${useConfig.input} code=${_processes[2].exitCode}`)

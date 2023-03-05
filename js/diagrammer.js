@@ -10,6 +10,11 @@ import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { setVerbose } from '../model/debug.js'
 
+function startedAsCommandline () {
+  // terrible
+  return `${process.argv[1]}`.endsWith('diagrammer.js')
+}
+
 let traceProcess = (msg) => { }
 export function doParse (
   /** @type {string} */diagrammerCode,
@@ -174,6 +179,6 @@ async function _main (argv) {
 }
 
 // terrible
-if (`${process.argv[1]}`.endsWith('diagrammer.js')) {
+if (startedAsCommandline()) {
   await _main(process.argv.splice(1))
 }

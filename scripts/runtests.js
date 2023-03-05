@@ -113,6 +113,7 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
   cfg.dontRunVisualizer = webOnlyVisualizer
   cfg.visualizer = useVisualizer
   cfg.traceProcess = config.traceProcess
+  cfg.tests = true
   cfg.input = `${config.testInputPath}/${testFileName}.txt`
   cfg.visualizedGraph = `${config.currentTestRun}/${useVisualizer}/${testFileName}.png`
 

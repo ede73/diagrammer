@@ -119,6 +119,8 @@ describe('Diagrammer', () => {
     if (!svg) {
       throw Error("Could not get SVG code")
     }
+    // browser defined in jest globals
+    //@ts-ignore
     const buffer = await singleElementScreenSnapshot(browser, svg, bbox?.width, bbox?.height)
     expect.extend({
       toMatchImageSnapshot

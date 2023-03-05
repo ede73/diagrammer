@@ -7,6 +7,70 @@ import path from 'path'
 // eslint-disable-next-line no-unused-vars
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { generators, visualizations } from '../model/graphcanvas.js'
+import puppeteer from 'puppeteer'
+import { singleElementScreenSnapshot } from '../tests/web/snapshot_single_element.js'
+import { clearGeneratorResults, clearGraph, clearParsingErrors, getDiagrammerCode, getParsingError, selectExampleCode, selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn } from '../tests/web/diagrammer_support.js'
+import { trace } from 'console'
+
+async function sshot (page) {
+  const options = {
+    path: 'sshot.png',
+    fullPage: false,
+    clip: {
+      x: 0,
+      y: 0,
+      width: 1024,
+      height: 800
+    }
+  }
+  await page.screenshot(options)
+}
+
+async function webRender (visualizer, code, outputShot) {
+  traceProcess(`Web render using ${visualizer} saving output to ${outputShot}`)
+  traceProcess(code)
+  const browser = await puppeteer.launch()
+  const page = await browser.newPage()
+  await page.goto('http://localhost/~ede/diagrammer/?do_not_load_initial_example=1')
+  await page.setViewport({ width: 1024, height: 800 })
+
+  await selectGeneratorVisualizer(page, visualizer)
+  await waitUntilGraphDrawn(page)
+  await clearParsingErrors(page)
+  await clearGeneratorResults(page)
+  await setDiagrammerCode(page, code)
+  await waitForGeneratorResults(page)
+
+  // TODO: D3.js ends up with div#graph../[div#default_,svg] GoJs div#graph../div#default_/svg
+  const selector = (await page.$('#diagrammer-graph>svg') != null) ? '#diagrammer-graph>svg' : '#diagrammer-graph>div>svg'
+  const elementHandle = await page.$(selector)
+
+  const error = await getParsingError(page)
+  if (error.trim()) {
+    throw new Error(error)
+  }
+  if (!elementHandle) {
+    await sshot(page)
+    throw new Error(`Could not find element ${selector}`)
+  }
+  // BBox, getBoundingClientRect
+  const bbox = await elementHandle.boundingBox()
+  const svg = await page.evaluate((selector) => document.querySelector(selector).outerHTML, selector)
+  if (!svg) {
+    throw Error('Could not get SVG code')
+  }
+  const buffer = await singleElementScreenSnapshot(browser, svg, bbox?.width, bbox?.height)
+
+  if (outputShot === '-') {
+    // TODO: yeah..doesnt work
+    process.stdout.write(buffer)
+  } else {
+    const x = fs.createWriteStream(outputShot, { flags: 'w', autoClose: true })
+    x.write(buffer)
+    x.end()
+  }
+  await browser.close()
+}
 
 function visualizerToGenerator () {
   const visualiserToGenerator = new Map()
@@ -69,9 +133,28 @@ function _startProcess (args, gotStdout, gotStdErr, fd, inheritStdin) {
 }
 
 function _startLexerTest (useConfig, gotStdout, gotStdErr) {
+  const args = ['node', 'js/diagrammer.js', 'lex']
+  if (useConfig.trace) { args.push('trace') }
+  args.push(useConfig.input)
   return _startProcess(
-    ['node', 'js/diagrammer.js', 'lex', 'trace', useConfig.input],
+    args,
     gotStdout, gotStdErr)
+}
+
+// TODO: read dynamically
+function _getWebVisualizers () {
+  return ['dendrogram:circlepacked', 'dendrogram:radialdendrogram', 'dendrogram:reingoldtilford',
+    'digraph:circo', 'digraph:dot', 'digraph:fdp', 'digraph:neato', 'digraph:osage',
+    'digraph:sfdp', 'digraph:twopi', 'layerbands', 'parsetree', 'sankey', 'umlclass']
+}
+
+function _isHackyWebVisualizer (config, overrideVisualizer) {
+  // TODO: test runner support pending
+  if (config.tests) {
+    return false
+  }
+  const searchVisualizer = overrideVisualizer || config.visualizer
+  return _getWebVisualizers().includes(searchVisualizer)
 }
 
 function _resolveGenerator (useConfig) {
@@ -83,6 +166,9 @@ function _resolveGenerator (useConfig) {
 }
 
 function _startParser (useConfig, gotStdout, gotStdErr) {
+  if (_isHackyWebVisualizer(useConfig.visualizer)) {
+    throw new Error('No point parsing just webvisualizer code')
+  }
   const args = ['node', 'js/diagrammer.js']
   if (useConfig.verbose) {
     args.push('verbose')
@@ -183,9 +269,14 @@ function _getVisualizerCommand (useConfig) {
     case 'osage':
       // piping works
       return [`${useConfig.visualizer}`,
+        '-q',
         `-T${useConfig.format}`]
     default:
-      throw new Error(`Currently not supported visualizer (web visualizer?) ${useConfig.visualizer}`)
+      // TODO: ACTUALLY have a better check, there's no NICE list of web only visualizers available YET
+      if (!_isHackyWebVisualizer(useConfig)) {
+        throw new Error(`Currently not supported visualizer (web visualizer?) ${useConfig.visualizer}`)
+      }
+      return webRender
   }
 }
 
@@ -216,6 +307,36 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
   } else if (!useConfig.input || !fs.existsSync(useConfig.input)) {
     _exitError(`Existing input file required, got "${useConfig.input}", check usage -h`)
   }
+
+  if (_isHackyWebVisualizer(useConfig)) {
+    const cmd = _getVisualizerCommand(useConfig)
+    if (typeof (cmd) !== 'function') {
+      throw new Error('fix the code')
+    }
+    // since we won't use lexer, parser nor regular visualizer,we're left to load the code on our own
+    // TODO: isolate and share with diagrammer.js
+    if (beingPiped() && useConfig.input === '-') {
+      // we're probably being piped!
+      useConfig.code = await (() => {
+        return new Promise(function (resolve, reject) {
+          const stdin = process.stdin
+          let data = ''
+          stdin.setEncoding('utf8')
+          stdin.on('data', function (chunk) { data += chunk })
+          stdin.on('end', function () { resolve(data) })
+          stdin.on('error', reject)
+        })
+      })().catch(console.error)
+    } else {
+      useConfig.code = fs.readFileSync(useConfig.input, 'utf8')
+    }
+    if (useConfig.code.trim() === '') {
+      throw new Error('No code...')
+    }
+    await cmd(useConfig.visualizer, useConfig.code, useConfig.visualizedGraph)
+    process.exit(0)
+  }
+
   const _processes = []
 
   // use lexer (separate lexer test process) only during test runs
@@ -232,7 +353,7 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
   traceProcess(`Config: ${JSON.stringify(useConfig)}`)
   let outputFileStream
 
-  if (!useConfig.dontRunVisualizer) {
+  if (!useConfig.dontRunVisualizer && !_isHackyWebVisualizer(useConfig)) {
     traceProcess('Going to run visualizer')
     // uh, nwdiag(all diags) use buggy PIL library opening R&W (seekable) access to pipe
     outputFileStream = (useConfig.visualizedGraph === '-' || useConfig.buggyDiag)
@@ -246,6 +367,11 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
       : fs.openSync(useConfig.visualizedGraph, 'w')
 
     const cmd = _getVisualizerCommand(useConfig)
+    if (typeof (cmd) === 'function') {
+      await cmd(useConfig.visualizer, 'a>b>c>d>e', useConfig.visualizedGraph)
+      process.exit(0)
+    }
+
     const visualizationProcess = _startVisualizer(outputFileStream, cmd, undefined,
       (stdout) => console.error(String(stdout)))
 
@@ -294,7 +420,8 @@ async function _main (argv) {
   function _usage () {
     const visualizers = Array.from(visualizerToGenerator().keys())
     console.log(`USAGE: [silent] [dont_run_visualizer] [tests] [verbose] [text] [svg] [output file] [INPUT] [${visualizers.join(', ')}]`)
-    console.log('  Notice! Visualizer (like twopi) will be converted to generator(digraph)')
+    console.log('Each visualizer will get converted to proper generator')
+    console.log(`Experimental: Web only renderers: [${_getWebVisualizers().join(', ')}]`)
     process.exit(0)
   }
 
@@ -315,6 +442,7 @@ async function _main (argv) {
       case 'output':
         _collectOutput = true
         continue
+      // TODO:
       case 'skipparsermake':
         config.skipparsermake = true
         continue
@@ -330,6 +458,7 @@ async function _main (argv) {
       case 'traceprocess':
         config.traceProcess = true
         continue
+      // TODO:
       case 'text':
         config.text = true
         continue
@@ -359,10 +488,10 @@ async function _main (argv) {
     // must be generator
     const visualizer = m.toLocaleLowerCase().trim()
     const v = visualizerToGenerator()
-    if (v.has(visualizer)) {
+    if (v.has(visualizer) || _isHackyWebVisualizer(config, visualizer)) {
       config.visualizer = visualizer
     }
-    if (!config.visualizer || !_resolveGenerator(config)) {
+    if (!_isHackyWebVisualizer(config) && (!config.visualizer || !_resolveGenerator(config))) {
       throw new Error(`Could not determine visualizer (${visualizer}) (nor its generator)`)
     }
   }

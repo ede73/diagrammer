@@ -88,8 +88,6 @@ async function _main (argv) {
         continue
       case 'lex':
         config.lex = true
-        config.trace = true
-        config.verbose = true
         continue
       case 'verbose':
         setVerbose(true)

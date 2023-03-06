@@ -5,47 +5,49 @@ import { getGenerator, getError, getInputElement, getVisualizer, setError, setGe
 
 let parsingStarted: number
 
-// TODO: MOVING TO GraphCanvas
-diagrammerParser.yy.parseError = (str: string, hash: string) => {
-  const pe = `Parsing error:\n${str}\n${hash}`
-  console.log('pe')
-  setError(pe)
-  throw new Error(str)
-}
-
-diagrammerParser.yy.parsedGeneratorAndVisualizer = (generator: string, visualizer: string, preferParsed: boolean) => {
-  console.log(`  ..script suggests using generator ${generator} and visualizer ${visualizer} and prefer ${preferParsed}`)
-  if (preferParsed && generator) {
-    const useVisualizer = visualizer === 'undefined' ? undefined : visualizer
-    setGenerator(generator, useVisualizer)
-    console.log(`  .. changed generator to ${generator} and visualizer ${useVisualizer}`)
+function setupParser() {
+  // TODO: MOVING TO GraphCanvas
+  diagrammerParser.yy.parseError = (str: string, hash: string) => {
+    const pe = `Parsing error:\n${str}\n${hash}`
+    console.log('pe')
+    setError(pe)
+    throw new Error(str)
   }
-}
 
-/**
- *
- * @param {string} line
- */
-// called line by line...
-// TODO: MOVING TO GraphCanvas
-diagrammerParser.yy.result = (line: string): void => {
-  const result = getInputElement('diagrammer-result')
-
-  if (parsingStarted === 1) {
-    console.log('  ...parsing results start coming in...')
-    result.value = ''
+  diagrammerParser.yy.parsedGeneratorAndVisualizer = (generator: string, visualizer: string, preferParsed: boolean) => {
+    console.log(`  ..script suggests using generator ${generator} and visualizer ${visualizer} and prefer ${preferParsed}`)
+    if (preferParsed && generator) {
+      const useVisualizer = visualizer === 'undefined' ? undefined : visualizer
+      setGenerator(generator, useVisualizer)
+      console.log(`  .. changed generator to ${generator} and visualizer ${useVisualizer}`)
+    }
   }
-  parsingStarted++
-  result.value = `${result.value + line.trimEnd()}\n`
-}
 
-/**
- * @param {string} x
- */
-// TODO: MOVING TO GraphCanvas
-// @ts-ignore
-diagrammerParser.trace = function (x) {
-  console.log(`TRACE:${x}`)
+  /**
+   *
+   * @param {string} line
+   */
+  // called line by line...
+  // TODO: MOVING TO GraphCanvas
+  diagrammerParser.yy.result = (line: string): void => {
+    const result = getInputElement('diagrammer-result')
+
+    if (parsingStarted === 1) {
+      console.log('  ...parsing results start coming in...')
+      result.value = ''
+    }
+    parsingStarted++
+    result.value = `${result.value + line.trimEnd()}\n`
+  }
+
+  /**
+   * @param {string} x
+   */
+  // TODO: MOVING TO GraphCanvas
+  // @ts-ignore
+  diagrammerParser.trace = function (x) {
+    console.log(`TRACE:${x}`)
+  }
 }
 
 /**
@@ -57,6 +59,7 @@ export function parse(diagrammerCode: string, successCallback: (generator: strin
   const generator = getGenerator()
   const visualizer = getVisualizer()
 
+  setupParser()
   console.log(`parse(${generator} ${visualizer} ${preferScriptSpecifiedGeneratorAndVisualizer})`)
   if (!generator) {
     throw new Error('Generator not defined')

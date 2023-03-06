@@ -22,6 +22,9 @@ export function doParse (
   /** @type {[(resultLine:string)=>void]} */resultCallback,
   /** @type {[(parseError:string, hash:string)=>void]} */parseErrorCallback,
   /** @type {[(msg:string)=>void]} */traceCallback) {
+  if (!diagrammerCode.trim()) {
+    config.tp.throwError('No code to parser')
+  }
   diagrammerParser.yy.USE_GENERATOR = generator
   diagrammerParser.yy.trace = traceCallback || ((msg) => {})
 
@@ -46,12 +49,20 @@ export function doLex (
   config,
   /** @type {string} */diagrammerCode,
   /** @type {(token:string,codePart:any)=>void} */resultsCallback) {
+  if (!diagrammerCode.trim()) {
+    config.tp.throwError('No code to parser')
+  }
   config.tp('Begin lex testing')
   const st = lexer.diagrammerLexer
   st.setInput(diagrammerCode)
   let h
   while (h !== 'EOF' && h !== 1) {
-    h = st.lex()
+    try {
+      h = st.lex()
+    } catch (ex) {
+      config.tp(`${ex}`)
+      throw ex
+    }
     if (resultsCallback) {
       resultsCallback(h, st)
     }
@@ -75,6 +86,7 @@ async function _main (argv) {
     switch (unknownCommandLineOption.toLocaleLowerCase()) {
       case 'lex':
         config.lex = true
+        return
     }
     if (!config.input && fs.existsSync(unknownCommandLineOption)) {
       if (config.code) {

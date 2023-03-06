@@ -11,6 +11,7 @@ import puppeteer from 'puppeteer'
 import { singleElementScreenSnapshot } from '../tests/web/snapshot_single_element.js'
 import { clearGeneratorResults, clearGraph, clearParsingErrors, getDiagrammerCode, getParsingError, selectExampleCode, selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn } from '../tests/web/diagrammer_support.js'
 import { configSupport } from '../js/configsupport.js'
+import { doLex } from '../js/diagrammer.js'
 
 async function sshot (page) {
   const options = {
@@ -115,17 +116,6 @@ function _startProcess (useConfig, args, gotStdout, gotStdErr, fd, inheritStdin)
   useConfig.tp(`spawn ${cmd} with ${a} options ${JSON.stringify(options)}`)
   const proc = spawn(cmd, a, options)
   return _prepProcess(proc, gotStdout, gotStdErr)
-}
-
-function _startLexerTest (useConfig, gotStdout, gotStdErr) {
-  const args = ['js/diagrammer.js', 'lex']
-  if (useConfig.trace) { args.push('trace') }
-  args.push(useConfig.input)
-  const l = _startProcess(useConfig,
-    args,
-    gotStdout, gotStdErr)
-  l.title = 'LEXER'
-  return l
 }
 
 // TODO: read dynamically
@@ -300,21 +290,7 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     }
     // since we won't use lexer, parser nor regular visualizer,we're left to load the code on our own
     // TODO: isolate and share with diagrammer.js
-    if (useConfig.beingPiped() && useConfig.isPipeMarker(useConfig.input)) {
-      // we're probably being piped!
-      useConfig.code = await (() => {
-        return new Promise(function (resolve, reject) {
-          const stdin = process.stdin
-          let data = ''
-          stdin.setEncoding('utf8')
-          stdin.on('data', function (chunk) { data += chunk })
-          stdin.on('end', function () { resolve(data) })
-          stdin.on('error', reject)
-        })
-      })().catch(useConfig.printError)
-    } else {
-      useConfig.code = useConfig.readFile(useConfig.input)
-    }
+    useConfig.code = await useConfig.readFile(useConfig.input)
     if (useConfig.code.trim() === '') {
       useConfig.throwError('No code...')
     }
@@ -327,10 +303,10 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
   // use lexer (separate lexer test process) only during test runs
   if (useConfig.tests) {
     useConfig.tp('Prepare lexical tester')
-    const _lexingProcess = _startLexerTest(useConfig,
-      (stdout) => useConfig.tp(`${stdout}`),
-      (stderr) => useConfig.tp(`LEXER: STDERR: ${stderr}`))
-    _processes.push(_lexingProcess)
+    useConfig.code = await useConfig.readFile(useConfig.input)
+    doLex(useConfig, useConfig.code, (token, codePart) => {
+      if (useConfig.trace) { useConfig.tp(`LEX: ${token} ${codePart}`) }
+    })
   }
 
   useConfig.tp('Start parsing process')

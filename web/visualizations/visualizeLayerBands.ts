@@ -24,9 +24,9 @@ export function visualizeLayerBands(generatorResult: string) {
     }
 
     /**
-         * @param {go.Rect[]} layerRects an Array of Rects with the bounds of each of the "layers"
-         * @param {go.Point} offset the position of the top-left corner of the banded area relative to the coordinates given by the layerRects
-        */
+     * @param {go.Rect[]} layerRects an Array of Rects with the bounds of each of the "layers"
+     * @param {go.Point} offset the position of the top-left corner of the banded area relative to the coordinates given by the layerRects
+    */
     commitLayers(layerRects, offset) {
       // update the background object holding the visual "bands"
       // Some contradiction with gojs modules...

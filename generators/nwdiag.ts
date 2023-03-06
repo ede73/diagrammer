@@ -88,6 +88,7 @@ export function nwdiag(graphcanvas: GraphCanvas) {
 
         const tmp = multiAttrFmt(secondLvlObj, {
           color: 'color="{0}"',
+          image: 'icon="icons{0}"',
           label: 'address="{0}"'
         }, mappedShape)
 
@@ -107,7 +108,7 @@ export function nwdiag(graphcanvas: GraphCanvas) {
       lout('}', false)
     } else {
       const mappedShape = (obj => {
-        if (obj instanceof GraphVertex) {
+        if ((obj instanceof GraphVertex) || (obj instanceof GraphReference)) {
           const objShape = obj.shape as keyof typeof NetworkDiagShapeMap
           if (obj.shape && !NetworkDiagShapeMap[objShape]) {
             throw new Error('Missing shape mapping')
@@ -116,10 +117,10 @@ export function nwdiag(graphcanvas: GraphCanvas) {
           return [`shape=${mappedShape}`]
         }
       })(obj);
-      // ICON does not work, using background
+
       const tmp = multiAttrFmt(obj, {
         color: 'color="{0}"',
-        image: 'background="icons{0}"',
+        image: 'icon="icons{0}"',
         label: 'label="{0}"'
       }, mappedShape)
       lout(`${obj.getName()}${tmp};`)

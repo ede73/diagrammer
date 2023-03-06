@@ -129,7 +129,7 @@ shapeOrVariable
 /* read vertice's attributes basically like: [STYLES] [SHAPES] NAME [IMAGE|COLOR]*/
 readVertexAttrs
     /*  1      2       3       4        5            6          7*/
-	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> _getVertexOrGroup(yy.GRAPHCANVAS, $NAME, $1).setColor($5);if ($$ instanceof GraphVertex) setAttr($$.setShape($2).setImage($6), 'compass', $4)
+	: STYLES? SHAPES? NAME COMPASS? colorOrVariable? IMAGE? -> _getVertexOrGroup(yy.GRAPHCANVAS, $NAME, $1).setColor($5);if (($$ instanceof GraphVertex) || ($$ instanceof GraphReference)) setAttr($$.setShape($2).setImage($6), 'compass', $4)
 	;
 
 /*

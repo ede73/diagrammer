@@ -127,6 +127,7 @@ build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators 
 	@sed -i "1 i\import {generators, visualizations, GraphCanvas} from '../model/graphcanvas.js';" $@
 	@sed -i "1 i\import {GraphGroup} from '../model/graphgroup.js';" $@
 	@sed -i "1 i\import {GraphVertex} from '../model/graphvertex.js';" $@
+	@sed -i "1 i\import {GraphReference} from '../model/graphreference.js';" $@
 	@sed -i "1 i\import {GraphObject} from '../model/graphobject.js';" $@
 	@sed -i "1 i\\\\" $@
 	@#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN

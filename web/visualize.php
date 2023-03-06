@@ -46,7 +46,9 @@ function visualize(string $executable, array $extra_param = []): string
     2 => array("pipe", "w") // stderr is a file to write to
   );
 
-  $cmddir = '/tmp';
+  // great! except icons in parent...
+  //$cmddir = '/tmp';
+  $cmddir = '../';
   $env = array();
 
   $executable = getExe($executable) . " " . implode(' ', $extra_param);

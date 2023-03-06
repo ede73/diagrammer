@@ -118,16 +118,16 @@ switch (getGenerator($argv)) {
     visualize("mscgen", ["-i-", "-o-"]); // piped
     break;
   case "actdiag":
-    visualize("actdiag3", ["-a", "-Tpng", "-o TEMP_FILE_REQUIRED", "-"]);
+    visualize("actdiag3", ["-a", "-Tpng", "-f/usr/share/fonts/truetype/dejavu//DejaVuSans-Bold.ttf", "-o TEMP_FILE_REQUIRED", "-"]);
     break;
   case "blockdiag":
-    visualize("blockdiag3", ["-a", "-Tpng", "-o TEMP_FILE_REQUIRED", "-"]);
+    visualize("blockdiag3", ["-a", "-Tpng", "-f/usr/share/fonts/truetype/dejavu//DejaVuSans-Bold.ttf", "-o TEMP_FILE_REQUIRED", "-"]);
     break;
   case "nwdiag":
-    visualize("nwdiag3", ["-a", "-Tpng", "-o TEMP_FILE_REQUIRED", "-"]);
+    visualize("nwdiag3", ["-a", "-Tpng", "-f/usr/share/fonts/truetype/dejavu//DejaVuSans-Bold.ttf", "-o TEMP_FILE_REQUIRED", "-"]);
     break;
   case "seqdiag":
-    visualize("seqdiag3", ["-a", "-Tpng", "-o TEMP_FILE_REQUIRED", "-"]);
+    visualize("seqdiag3", ["-a", "-Tpng", "-f/usr/share/fonts/truetype/dejavu//DejaVuSans-Bold.ttf", "-o TEMP_FILE_REQUIRED", "-"]);
     break;
   case "dot":
     visualize("dot", ["-Tpng:gd"]); // piped

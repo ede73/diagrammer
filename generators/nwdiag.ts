@@ -4,6 +4,7 @@ import { GraphGroup } from '../model/graphgroup.js'
 import { GraphReference } from '../model/graphreference.js'
 import { output, getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
 import { GraphVertex } from '../model/graphvertex.js'
+import { GraphConnectable } from '../model/graphconnectable.js'
 
 // ADD TO INDEX.HTML AS: <option value="nwdiag">Network Diagram(cli)</option>
 
@@ -52,13 +53,41 @@ export function nwdiag(graphcanvas: GraphCanvas) {
   }
 
   lout('nwdiag {', true)
-  lout('default_fontsize = 16')
+  lout('// everything is so tiny, make bigger (and also badly colored)')
+  lout('default_fontsize = 20; ')
+  lout('default_node_color = lightblue;')
+  lout('default_group_color = "#7777FF";')
+  lout('default_linecolor = "#FFFFFF";')
+  lout('default_textcolor = red;')
+  lout('node_width = 200;  // default value is 128')
+  lout('node_height = 100;  // default value is 40')
 
   graphcanvas.getEdges().forEach(edge => {
     if (!(edge.left instanceof GraphGroup || edge.right instanceof GraphGroup)) {
       lout(`${edge.left.getName()} -- ${edge.right.getName()};`)
     }
   })
+
+
+  function getMappedShape(obj: GraphConnectable) {
+    if (obj instanceof GraphVertex) {
+      const objShape = obj.shape as keyof typeof NetworkDiagShapeMap
+      if (obj.shape && !NetworkDiagShapeMap[objShape]) {
+        throw new Error('Missing shape mapping')
+      }
+      const mappedShape = NetworkDiagShapeMap[objShape] ? NetworkDiagShapeMap[objShape] : NetworkDiagShapeMap.default
+      return [`shape=${mappedShape}`]
+    }
+    return []
+  }
+
+  function getNodeAttrs(obj: GraphConnectable, mappedShape: string[]): string {
+    return multiAttrFmt(obj, {
+      color: 'color="{0}"',
+      image: 'icon="icons{0}"',
+      label: 'address="{0}"'
+    }, mappedShape)
+  }
 
   graphcanvas.getObjects().forEach(obj => {
     if (obj instanceof GraphGroup) {
@@ -75,24 +104,8 @@ export function nwdiag(graphcanvas: GraphCanvas) {
           //return??
         }
 
-        const mappedShape = (obj => {
-          if (obj instanceof GraphVertex) {
-            const objShape = obj.shape as keyof typeof NetworkDiagShapeMap
-            if (obj.shape && !NetworkDiagShapeMap[objShape]) {
-              throw new Error('Missing shape mapping')
-            }
-            const mappedShape = NetworkDiagShapeMap[objShape] ? NetworkDiagShapeMap[objShape] : NetworkDiagShapeMap.default
-            return [`shape=${mappedShape}`]
-          }
-        })(secondLvlObj);
-
-        const tmp = multiAttrFmt(secondLvlObj, {
-          color: 'color="{0}"',
-          image: 'icon="icons{0}"',
-          label: 'address="{0}"'
-        }, mappedShape)
-
-        lout(`${secondLvlObj.getName()}${tmp};`)
+        const mappedShape = getNodeAttrs(secondLvlObj, getMappedShape(secondLvlObj))
+        lout(`${secondLvlObj.getName()}${mappedShape};`)
       }, true)
 
       // find if there are ANY edges that have this GROUP as participant!
@@ -107,23 +120,8 @@ export function nwdiag(graphcanvas: GraphCanvas) {
       })
       lout('}', false)
     } else {
-      const mappedShape = (obj => {
-        if ((obj instanceof GraphVertex) || (obj instanceof GraphReference)) {
-          const objShape = obj.shape as keyof typeof NetworkDiagShapeMap
-          if (obj.shape && !NetworkDiagShapeMap[objShape]) {
-            throw new Error('Missing shape mapping')
-          }
-          const mappedShape = NetworkDiagShapeMap[objShape] ? NetworkDiagShapeMap[objShape] : NetworkDiagShapeMap.default
-          return [`shape=${mappedShape}`]
-        }
-      })(obj);
-
-      const tmp = multiAttrFmt(obj, {
-        color: 'color="{0}"',
-        image: 'icon="icons{0}"',
-        label: 'label="{0}"'
-      }, mappedShape)
-      lout(`${obj.getName()}${tmp};`)
+      const mappedShape = getNodeAttrs(obj, getMappedShape(obj))
+      lout(`${obj.getName()}${mappedShape};`)
     }
   })
 

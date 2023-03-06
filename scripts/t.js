@@ -10,6 +10,7 @@ import { generators, visualizations } from '../model/graphcanvas.js'
 import puppeteer from 'puppeteer'
 import { singleElementScreenSnapshot } from '../tests/web/snapshot_single_element.js'
 import { clearGeneratorResults, clearGraph, clearParsingErrors, getDiagrammerCode, getParsingError, selectExampleCode, selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn } from '../tests/web/diagrammer_support.js'
+import { configSupport } from '../js/configsupport.js'
 
 async function sshot (page) {
   const options = {
@@ -27,7 +28,6 @@ async function sshot (page) {
 
 async function webRender (useConfig, visualizer, code, outputShot) {
   useConfig.tp(`Web render using ${visualizer} saving output to ${outputShot}`)
-  useConfig.tp(code)
   const browser = await puppeteer.launch()
   const page = await browser.newPage()
   await page.goto('http://localhost/~ede/diagrammer/?do_not_load_initial_example=1')
@@ -46,21 +46,21 @@ async function webRender (useConfig, visualizer, code, outputShot) {
 
   const error = await getParsingError(page)
   if (error.trim()) {
-    throw new Error(error)
+    useConfig.throwError(error)
   }
   if (!elementHandle) {
     await sshot(page)
-    throw new Error(`Could not find element ${selector}`)
+    useConfig.throwError(`Could not find element ${selector}`)
   }
   // BBox, getBoundingClientRect
   const bbox = await elementHandle.boundingBox()
   const svg = await page.evaluate((selector) => document.querySelector(selector).outerHTML, selector)
   if (!svg) {
-    throw Error('Could not get SVG code')
+    useConfig.throwError('Could not get SVG code')
   }
   const buffer = await singleElementScreenSnapshot(browser, svg, bbox?.width, bbox?.height)
 
-  if (outputShot === '-') {
+  if (useConfig.isPipeMarker(outputShot)) {
     // TODO: yeah..doesnt work
     process.stdout.write(buffer)
   } else {
@@ -84,35 +84,22 @@ function visualizerToGenerator () {
 }
 
 export function getEmptyConfig () {
-  return {
+  return configSupport('t.js', {
     tests: false,
-    verbose: false,
-    trace: false,
-    traceProcess: false,
     text: false,
     format: 'png',
     dontRunVisualizer: false,
-    input: '',
     visualizer: '',
     visualizedGraph: '-',
     buggyDiag: false,
     parsedCode: '',
-    written: 0,
-    traces: ''
-  }
+    written: 0
+  })
 }
 
-function printError (msg) {
-  console.error(`${msg}`)
-}
-
-function _exitError (msg) {
-  printError(msg)
+function _exitError (useConfig, msg) {
+  useConfig.printError(msg)
   process.exit(10)
-}
-
-function conciseId (useConfig) {
-  return `${useConfig.visualizer} => ${useConfig.visualizedGraph}`
 }
 
 function _prepProcess (child, gotStdout, gotStdErr) {
@@ -167,7 +154,7 @@ function _resolveGenerator (useConfig) {
 
 function _startParser (useConfig, gotStdout, gotStdErr) {
   if (_isHackyWebVisualizer(useConfig.visualizer)) {
-    throw new Error('No point parsing just webvisualizer code')
+    useConfig.throwError('No point parsing just webvisualizer code')
   }
   const args = ['js/diagrammer.js']
   if (useConfig.verbose) {
@@ -181,7 +168,13 @@ function _startParser (useConfig, gotStdout, gotStdErr) {
   }
   args.push(useConfig.input)
   args.push(_resolveGenerator(useConfig))
-  const p = _startProcess(useConfig, args, gotStdout, gotStdErr, undefined, useConfig.input === '-')
+  const p = _startProcess(
+    useConfig,
+    args,
+    gotStdout,
+    gotStdErr,
+    undefined,
+    useConfig.isPipeMarker(useConfig.input))
   p.title = 'PARSER'
   return p
 }
@@ -217,7 +210,7 @@ const _waitForProcesses = (useConfig, processes) => {
     processes.forEach((process) => {
       process.on('exit', onExit(process))
       process.on('error', (r) => {
-        printError(`Something went wrong with ${process.title} - ${r}`)
+        useConfig.printError(`Something went wrong with ${process.title} - ${r}`)
         reject(r)
       })
     })
@@ -249,8 +242,8 @@ function _getVisualizerCommand (useConfig) {
         // ie opening binary write AND read file. Remove + fixes problem,but comment above shows for TIFFs this is required
         // also not nwdiag code, mock? import buildins..builtins.open=my_open?
       } else {
-        if (useConfig.visualizedGraph === '-') {
-          throw new Error('Alas *diags dont support dumping PNG to console')
+        if (useConfig.isPipeMarker(useConfig.visualizedGraph)) {
+          useConfig.throwError('Alas *diags dont support dumping PNG to console')
         }
         return [
           'sh',
@@ -287,51 +280,27 @@ function _getVisualizerCommand (useConfig) {
     default:
       // TODO: ACTUALLY have a better check, there's no NICE list of web only visualizers available YET
       if (!_isHackyWebVisualizer(useConfig)) {
-        throw new Error(`Currently not supported visualizer (web visualizer?) ${useConfig.visualizer}`)
+        useConfig.throwError(`Currently not supported visualizer (web visualizer?) ${useConfig.visualizer}`)
       }
       return webRender
   }
 }
 
-const _stdout = (useConfig) => (stdout) => {
-  if (useConfig.trace) printError(`${stdout}`)
-}
-
-// const _stdoutCollect = (useConfig) => (stdout) => {
-//   useConfig.tp(`Received stdput ${stdout}`)
-//   useConfig.parsedCode += stdout
-//   if (useConfig.trace) printError(`${stdout}`)
-// }
-
-const _stderr = (useConfig, who) => (stderr) => {
-  useConfig.tp(`${who}: STDERR: ${stderr}`)
-  // console.error(`${who}: ${stderr}`)
-}
-
 export async function lexParseAndVisualize (useConfig, visualizationisComplete) {
-  useConfig.tp = (msg) => {
-    useConfig.traces += `${useConfig.input}:${useConfig.visualizer}:${process.hrtime.bigint()} t.js ${msg}\n`
-    if (useConfig.traceProcess) {
-      console.error(`trace:${msg}`)
-    }
-  }
-  if (useConfig.input === '-') {
-    if (!beingPiped()) {
-      _exitError('Supposed to receive graph via pipe, but not being piped!')
-    }
-    useConfig.tp('Expecting piped input')
+  if (useConfig.isPipeMarker(useConfig.input) && !useConfig.beingPiped()) {
+    _exitError(useConfig, 'Supposed to receive graph via pipe, but not being piped!')
   } else if (!useConfig.input || !fs.existsSync(useConfig.input)) {
-    _exitError(`Existing input file required, got "${useConfig.input}", check usage -h`)
+    _exitError(useConfig, `Existing input file required, got "${useConfig.input}", check usage -h`)
   }
 
   if (_isHackyWebVisualizer(useConfig)) {
     const cmd = _getVisualizerCommand(useConfig)
     if (typeof (cmd) !== 'function') {
-      throw new Error('fix the code')
+      useConfig.throwError('fix the code')
     }
     // since we won't use lexer, parser nor regular visualizer,we're left to load the code on our own
     // TODO: isolate and share with diagrammer.js
-    if (beingPiped() && useConfig.input === '-') {
+    if (useConfig.beingPiped() && useConfig.isPipeMarker(useConfig.input)) {
       // we're probably being piped!
       useConfig.code = await (() => {
         return new Promise(function (resolve, reject) {
@@ -342,12 +311,12 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
           stdin.on('end', function () { resolve(data) })
           stdin.on('error', reject)
         })
-      })().catch(console.error)
+      })().catch(useConfig.printError)
     } else {
-      useConfig.code = fs.readFileSync(useConfig.input, 'utf8')
+      useConfig.code = useConfig.readFile(useConfig.input)
     }
     if (useConfig.code.trim() === '') {
-      throw new Error('No code...')
+      useConfig.throwError('No code...')
     }
     await cmd(useConfig, useConfig.visualizer, useConfig.code, useConfig.visualizedGraph)
     process.exit(0)
@@ -358,7 +327,9 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
   // use lexer (separate lexer test process) only during test runs
   if (useConfig.tests) {
     useConfig.tp('Prepare lexical tester')
-    const _lexingProcess = _startLexerTest(useConfig, _stdout(useConfig), _stderr(useConfig, 'lexer'))
+    const _lexingProcess = _startLexerTest(useConfig,
+      (stdout) => useConfig.tp(`${stdout}`),
+      (stderr) => useConfig.tp(`LEXER: STDERR: ${stderr}`))
     _processes.push(_lexingProcess)
   }
 
@@ -367,14 +338,10 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     (stdout) => {
       useConfig.tp(`Received stdout ${stdout}`)
       useConfig.parsedCode += stdout
-      if (useConfig.trace) printError(`${stdout}`)
+      if (useConfig.trace) useConfig.printError(`${stdout}`)
     },
-    _stderr(useConfig, 'parser'))
+    (stderr) => useConfig.tp(`PARSER: STDERR: ${stderr}`))
 
-  // // NEVER called
-  // _parsingProcess.stdout.on('data', (data) => {
-  //   useConfig.tp(`receieved after all ${data}`)
-  // })
   _processes.push(_parsingProcess)
 
   useConfig.tp(`Config: ${JSON.stringify(useConfig)}`)
@@ -383,7 +350,7 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
   if (!useConfig.dontRunVisualizer && !_isHackyWebVisualizer(useConfig)) {
     useConfig.tp('Going to run visualizer')
     // uh, nwdiag(all diags) use buggy PIL library opening R&W (seekable) access to pipe
-    outputFileStream = (useConfig.visualizedGraph === '-' || useConfig.buggyDiag)
+    outputFileStream = (useConfig.isPipeMarker(useConfig.visualizedGraph) || useConfig.buggyDiag)
       ? undefined
       // something fishy with pipes
       //  https://stackoverflow.com/questions/61856264/node-piping-process-stdout-doesnt-drain-automatically
@@ -400,10 +367,10 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     }
 
     const visualizationProcess = _startVisualizer(useConfig, outputFileStream, cmd, undefined,
-      (stdout) => console.error(String(stdout)))
+      (stdout) => useConfig.printError(String(stdout)))
 
     visualizationProcess.on('exit', async () => {
-      useConfig.tp(`  ${conciseId(useConfig)} EXT`)
+      useConfig.tp(' visualization EXIT')
       if (visualizationProcess.exitCode !== 0) {
         useConfig.tp(`${useConfig.parsedCode}`)
       }
@@ -411,10 +378,10 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     })
 
     _parsingProcess.stdout.pipe(visualizationProcess.stdin).on('error', err =>
-      printError(`mf! ${err}`)
+      useConfig.printError(`mf! ${err}`)
     )
 
-    if (useConfig.visualizedGraph === '-' && !useConfig.buggyDiag) {
+    if (useConfig.isPipeMarker(useConfig.visualizedGraph) && !useConfig.buggyDiag) {
       visualizationProcess.stdout.pipe(process.stdout)
     }
     _processes.push(visualizationProcess)
@@ -438,105 +405,88 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
 
   if (_parsingProcess.exitCode !== 0) {
     const generator = visualizerToGenerator().get(useConfig.visualizer)
-    throw new Error(`Transpiling diagrammer code with ${generator} failed ${_parsingProcess.exitCode}`)
+    useConfig.throwError(`Transpiling diagrammer code with ${generator} failed ${_parsingProcess.exitCode}`)
   }
 
   // TODO: move to exit above..
   if (_processes.length === 3 && _processes[2].exitCode !== 0) {
-    throw new Error(`Visualizer ${useConfig.visualizer} failed processing ${useConfig.input} code=${_processes[2].exitCode}`)
+    useConfig.throwError(`Visualizer ${useConfig.visualizer} failed processing ${useConfig.input} code=${_processes[2].exitCode}`)
   }
-}
-
-function beingPiped () {
-  return !(process.stdin instanceof tty.ReadStream)
 }
 
 async function _main (argv) {
+  const config = getEmptyConfig()
   function _usage () {
     const visualizers = Array.from(visualizerToGenerator().keys())
-    console.error(`USAGE: [silent] [dont_run_visualizer] [tests] [verbose] [text] [svg] [output file] [INPUT] [${visualizers.join(', ')}]`)
-    console.error('Each visualizer will get converted to proper generator')
-    console.error(`Experimental: Web only renderers: [${_getWebVisualizers().join(', ')}]`)
+    config.printError(`USAGE: [silent] [dont_run_visualizer] [tests] [verbose] [text] [svg] [output file] [INPUT] [${visualizers.join(', ')}]`)
+    config.printError('Each visualizer will get converted to proper generator')
+    config.printError(`Experimental: Web only renderers: [${_getWebVisualizers().join(', ')}]`)
     process.exit(0)
   }
 
-  const config = getEmptyConfig()
   let _collectOutput = false
-  for (const m of argv.splice(1)) {
+  await config.parseCommandLine(argv.splice(1), _usage, async (unknownCommandLineOption) => {
     if (_collectOutput) {
       _collectOutput = false
-      config.visualizedGraph = m.trim()
-      continue
+      config.visualizedGraph = unknownCommandLineOption.trim()
+      return
     }
-    switch (m.toLocaleLowerCase().trim()) {
-      case '-h':
-      case '--help':
-      case 'help':
-        _usage()
-        continue
+    switch (unknownCommandLineOption.toLocaleLowerCase().trim()) {
       case 'output':
         _collectOutput = true
-        continue
+        return
       // TODO:
       case 'skipparsermake':
         config.skipparsermake = true
-        continue
+        return
       case 'tests':
         config.tests = true
-        continue
-      case 'verbose':
-        config.verbose = true
-        continue
-      case 'trace':
-        config.trace = true
-        continue
-      case 'traceprocess':
-        config.traceProcess = true
-        continue
+        return
       // TODO:
       case 'text':
         config.text = true
-        continue
+        return
       case 'svg':
         config.format = 'svg'
-        continue
+        return
       case 'dont_run_visualizer':
         config.dontRunVisualizer = true
-        continue
+        return
     }
-
-    if (m === '-') {
+    if (config.isPipeMarker(unknownCommandLineOption)) {
       // we're told we're being piped
-      if (!beingPiped()) {
-        throw new Error('Expecting piped input')
+      if (!config.beingPiped()) {
+        config.throwError('Expecting piped input')
       }
-      config.input = '-'
-      continue
+      config.input = config.pipeMarker
+      return
     }
-
     // Allow using absolute and relative paths! (currently abs.paths dont work)
     // ALSO detect piping/redirection and make 'em work
-    if (!config.input && fs.existsSync(m.trim())) {
-      config.input = m.trim()
-      continue
+    if (!config.input && fs.existsSync(unknownCommandLineOption)) {
+      config.input = unknownCommandLineOption.trim()
+      return
     }
     // must be generator
-    const visualizer = m.toLocaleLowerCase().trim()
+    const visualizer = unknownCommandLineOption.toLocaleLowerCase()
     const v = visualizerToGenerator()
     if (v.has(visualizer) || _isHackyWebVisualizer(config, visualizer)) {
       config.visualizer = visualizer
     }
     if (!_isHackyWebVisualizer(config) && (!config.visualizer || !_resolveGenerator(config))) {
-      throw new Error(`Could not determine visualizer (${visualizer}) (nor its generator)`)
+      config.throwError(`Could not determine visualizer (${visualizer}) (nor its generator)`)
     }
+  })
+
+  if (!config.input && config.beingPiped()) {
+    config.input = config.pipeMarker
   }
-  if (!config.input && beingPiped()) {
-    config.input = '-'
-  }
-  if (beingPiped()) {
+  if (config.beingPiped()) {
     // we're probably being piped!
-    config.input = '-'
+    config.input = config.pipeMarker
   }
+  config.tp('Begin lexParseAndVisualize')
+  console.error(config)
   await lexParseAndVisualize(config, () => {
     config.tp('Visualization has been completed')
   })

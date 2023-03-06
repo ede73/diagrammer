@@ -4,11 +4,11 @@
 // Usage: node js/diagrammer.js verbose tests/test_inputs/state_group.txt ast
 
 import * as fs from 'fs'
-import * as tty from 'node:tty'
 import * as lexer from '../build/diagrammer_lexer.js'
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { setVerbose } from '../model/debug.js'
+import { configSupport } from '../js/configsupport.js'
 
 function startedAsCommandline () {
   // terrible
@@ -26,6 +26,7 @@ export function doParse (
   diagrammerParser.yy.trace = traceCallback || ((msg) => {})
 
   diagrammerParser.yy.result = resultCallback || ((result) => {
+    // default callback unless overridden
     config.parsedCode += `${result}\n`
     console.log(result)
   })
@@ -35,7 +36,7 @@ export function doParse (
   // TODO: MOVING TO GraphCanvas
   diagrammerParser.yy.parseError = parseErrorCallback || ((str, hash) => {
     config.tp(`Parse error: ${str}`)
-    throw new Error(str)
+    config.throwError(str)
   })
   diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
   diagrammerParser.parse(diagrammerCode)
@@ -58,111 +59,65 @@ export function doLex (
 }
 
 async function _main (argv) {
-  const config = {
-    verbose: false,
-    trace: false,
-    traceProcess: false,
+  const config = configSupport('diagrammer.js', {
     lex: false,
-    input: '',
     gemerator: '',
     code: '',
-    traces: '',
     parsedCode: ''
-  }
+  })
 
   function _usage () {
-    console.error('USAGE: [trace] [verbose] [lex] [INPUT] [GENERATOR]')
+    config.printError('USAGE: [trace] [verbose] [lex] [INPUT] [GENERATOR]')
     process.exit(0)
   }
 
-  function beingPiped () {
-    return !(process.stdin instanceof tty.ReadStream)
-  }
-  config.tp = (msg) => {
-    config.traces += `${config.input}:${config.generator}:${process.hrtime.bigint()} diagrammer.js ${msg}\n`
-    if (config.traceProcess) {
-      console.error(`trace:${msg}`)
-    }
-  }
-
-  for (const m of argv.splice(1)) {
-    switch (m.toLocaleLowerCase().trim()) {
-      case '-h':
-      case '--help':
-      case 'help':
-        _usage()
-        continue
+  await config.parseCommandLine(argv.splice(1), _usage, async (unknownCommandLineOption) => {
+    switch (unknownCommandLineOption.toLocaleLowerCase()) {
       case 'lex':
         config.lex = true
-        continue
-      case 'verbose':
-        setVerbose(true)
-        config.verbose = true
-        continue
-      case 'trace':
-        console.error("# If you didn't compile with DEBUG=1 make, deep tracing the grammar won't work")
-        config.trace = true
-        continue
-      case 'traceprocess':
-        config.traceProcess = true
-        continue
     }
-
-    if (m === '-') {
-      // we're told we're being piped
-      if (!beingPiped()) {
-        throw new Error('Expecting piped input')
+    if (!config.input && fs.existsSync(unknownCommandLineOption)) {
+      if (config.code) {
+        config.throwError('Something is wrong, going to read the code twice')
       }
-      config.input = '-'
-      continue
-    }
-
-    if (!config.input && fs.existsSync(m.trim())) {
-      config.tp(`Read diagrammer code from ${m}`)
-      config.input = m.trim()
-      config.code = fs.readFileSync(config.input, 'utf8')
-      continue
+      config.tp(`Read diagrammer code from ${unknownCommandLineOption}`)
+      config.input = unknownCommandLineOption.trim()
+      config.code = await config.readFile(config.input)
+      return
     }
     // must be generator
-    const generator = m.toLocaleLowerCase().trim()
+    const generator = unknownCommandLineOption.toLocaleLowerCase()
     if (!generators.has(generator)) {
-      throw new Error(`Unknown generator (${generator})`)
+      config.throwError(`Unknown generator (${generator})`)
     }
     config.generator = generator
-  }
+  })
 
-  config.tp = (msg) => {
-    config.traces += `${config.input}:${config.generator}:${process.hrtime.bigint()} diagrammer.js ${msg}\n`
-    if (config.traceProcess) {
-      console.error(`trace:${msg}`)
-    }
+  if (config.verbose) {
+    setVerbose(true)
   }
-
-  if (beingPiped() && config.input === '-') {
+  if (config.trace) {
+    config.printError("# If you didn't compile with DEBUG=1 make, deep tracing the grammar won't work")
+  }
+  if (config.beingPiped() && config.isPipeMarker(config.input)) {
     // we're probably being piped!
     config.tp('Reading from pipe')
-    config.input = '-'
-    config.code = await (() => {
-      return new Promise(function (resolve, reject) {
-        const stdin = process.stdin
-        let data = ''
-        stdin.setEncoding('utf8')
-        stdin.on('data', function (chunk) { data += chunk })
-        stdin.on('end', function () { resolve(data) })
-        stdin.on('error', reject)
-      })
-    })().catch(console.error)
+    config.input = config.pipeMarker
+    config.code = await config.readFile(config.pipeMarker)
   }
   if (!config.input) {
     _usage()
   }
 
+  if (!config.code) {
+    config.throwError('Failed reading code to parse')
+  }
   if (config.lex) {
     // export function doLex (/** @type {string} */diagrammerCode, /** @type {(token:string,codeSnippet:any)=>void} */resultsCallback) {
     doLex(config, config.code, (token, codeSnippet) => {
       if (config.trace || config.verbose) {
         // pass to stderr, so we can still use the stdout for actual graph (well depending)
-        console.error('State:' + token + '(' + codeSnippet.yytext + ')')
+        config.printError('State:' + token + '(' + codeSnippet.yytext + ')')
       }
     })
   } else {
@@ -179,15 +134,13 @@ async function _main (argv) {
       },
       (parseError, hash) => {
         config.tp(`Parsing error ${parseError} ${hash}`)
-        console.error('Parsing error found:')
-        console.error(parseError)
-        console.error(hash)
-        throw new Error(parseError)
+        config.printError(`Parsing error found: ${parseError} ${hash}`)
+        config.throwError(parseError)
       },
       (msg) => {
         if (!config.trace) {
           // dump to stderr, so output graph might still be usable
-          console.error('TRACE:' + msg)
+          config.printError('TRACE:' + msg)
         }
       }
     )
@@ -198,7 +151,6 @@ async function _main (argv) {
     config.tp(`finishing parsing ${config.input} and transpiling with ${config.generator}`)
     config.tp(`got code len ${config.parsedCode.length}`)
   }
-  console.error(config.traces)
 }
 
 // terrible

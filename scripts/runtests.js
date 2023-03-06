@@ -8,59 +8,33 @@ import { diffChars, diffJson, diffLines } from 'diff'
 import * as path from 'path'
 import pixelmatch from 'pixelmatch'
 import PNGx from 'pngjs'
+import { configSupport } from '../js/configsupport.js'
 const PNG = PNGx.PNG
 
-const config = {
-  parallel: 12,
-  verbose: false,
-  trace: false,
-  traceProcess: false,
+const config = configSupport('runtests.js', {
   testInputPath: 'tests/test_inputs',
   currentTestRun: 'tests/testrun/current',
   previousStableRun: 'tests/testrun/previous',
-  testPatterns: []
-}
-
-function printError (msg) {
-  console.error(`${msg}`)
-}
-
-function traceProcess (msg) {
-  if (config.traceProcess) { console.error(`trace:${msg}`) }
-}
+  testPatterns: [],
+  printError: function (msg) {
+    console.error(msg)
+  },
+  tp: function (msg) {
+    if (this.traceProcess) {
+      this.printError(`${this.input}:${this.generator}:${process.hrtime.bigint()} runtests.js ${msg}\n`)
+    }
+  }
+})
 
 function _usage () {
-  console.log('USAGE: [parallel n] [verbose] [trace] [visualizer:testNameRegexPattern')
+  config.printError('USAGE: [verbose] [trace] [visualizer:testNameRegexPattern')
   process.exit(0)
 }
 
-let _collectParallel = false
-for (const m of process.argv.splice(2)) {
-  if (_collectParallel) {
-    _collectParallel = false
-    config.parallel = m.trim()
-    continue
-  }
-  switch (m.toLocaleLowerCase().trim()) {
-    case '-h':
-    case '--help':
-    case 'help':
-      _usage()
-      continue
-    case 'verbose':
-      config.verbose = true
-      continue
-    case 'trace':
-      config.trace = true
-      continue
-    case 'traceprocess':
-      config.traceProcess = true
-      continue
-    default:
-      console.log(m)
-      config.testPatterns.push(m.trim())
-  }
-}
+await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
+  config.printError(unknownCommandLineOption)
+  config.testPatterns.push(unknownCommandLineOption.trim())
+})
 
 function _countLineFeeds (str) {
   return str.split(/\r\n|\r|\n/).length
@@ -78,13 +52,13 @@ function _isJSON (a) {
 const failedTests = []
 function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCodeFile, /** @type {string} */currentGeneratedCode) {
   if (currentGeneratedCode.trim() === '') {
-    printError('Code from currentrun is EMPTY!')
+    config.printError('Code from currentrun is EMPTY!')
     return false
   }
   const previousRunCodePath = path.normalize(`${process.cwd()}/${previousRunCodeFile}`)
   if (!fs.existsSync(previousRunCodePath) || fs.statSync(previousRunCodePath).size === 0) {
     // probably a new test, new visualizer, new generator, reference code is missing
-    traceProcess(`Reference code file (${previousRunCodePath}) does not exist(or was empty), first run? Copying the parsed generated text over`)
+    config.tp(`Reference code file (${previousRunCodePath}) does not exist(or was empty), first run? Copying the parsed generated text over`)
     fs.writeFileSync(previousRunCodePath, currentGeneratedCode, 'utf8')
     return true
   }
@@ -105,7 +79,7 @@ function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCo
 
   // avoid printing perfect matches...
   if (differences.filter(p => p.added || p.removed).length === 0) {
-    traceProcess('No differences between current and old run')
+    config.tp('No differences between current and old run')
     return true
   }
 
@@ -125,7 +99,7 @@ function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCo
 
 async function diffImages (referenceImage, outputImage) {
   if (!fs.existsSync(referenceImage)) {
-    traceProcess(`Reference visualized graph file (${referenceImage}) does not exist, first run? Copy the current file over`)
+    config.tp(`Reference visualized graph file (${referenceImage}) does not exist, first run? Copy the current file over`)
     fs.renameSync(outputImage, referenceImage)
     return true
   }
@@ -136,14 +110,14 @@ async function diffImages (referenceImage, outputImage) {
   try {
     pixelmatch(img1.data, img2.data, diff.data, width, height, { threshold: 0.1 })
   } catch (ex) {
-    printError(ex)
+    config.printError(ex)
     return false
   }
   return true
 }
 
 async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
-  const cfg = Object.assign({}, getEmptyConfig())
+  const cfg = getEmptyConfig()
   cfg.verbose = config.verbose
   cfg.trace = config.trace
   cfg.dontRunVisualizer = webOnlyVisualizer
@@ -153,7 +127,7 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
   cfg.input = `${config.testInputPath}/${testFileName}.txt`
   cfg.visualizedGraph = `${config.currentTestRun}/${useVisualizer}/${testFileName}.png`
 
-  traceProcess(`lexParseAndVisualize ${testFileName}`)
+  config.tp(`lexParseAndVisualize ${testFileName}`)
   await lexParseAndVisualize(cfg, async (error) => {
     if (error && error !== 0) {
       throw Error(`eh...failed ${useVisualizer} ${testFileName}`)
@@ -178,12 +152,12 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
     }
     if (errors) {
       for (const error of errors) {
-        printError(`ERROR: ${error}`)
-        printError(' You can rerun this test:')
-        printError(`   scripts/runtests.js ${useVisualizer}:${testFileName}`)
-        printError(`   If you think new run is correct, just do: rm ${previouslyGeneratedCodeFile}`)
+        config.tp(`ERROR: ${error}`)
+        config.tp(' You can rerun this test:')
+        config.tp(`   scripts/runtests.js ${useVisualizer}:${testFileName}`)
+        config.tp(`   If you think new run is correct, just do: rm ${previouslyGeneratedCodeFile}`)
         if (cfg.traces !== '') {
-          printError(`   Full traces available in ${config.currentTestRun}/${useVisualizer}/${testFileName}.log`)
+          config.tp(`   Full traces available in ${config.currentTestRun}/${useVisualizer}/${testFileName}.log`)
           fs.writeFileSync(`${config.currentTestRun}/${useVisualizer}/${testFileName}.log`, cfg.traces)
         }
       }
@@ -260,14 +234,14 @@ for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
   }
 }
 
-traceProcess('Begin waiting all tests')
+config.tp('Begin waiting all tests')
 await Promise.all(waitTests)
-traceProcess('Done waiting for all tests')
+config.tp('Done waiting for all tests')
 if (failedTests.length > 0) {
-  console.error('#==================')
-  console.error('Some test failures:')
+  config.printError('#==================')
+  config.printError('Some test failures:')
   for (const test of failedTests) {
-    console.error(`  ${test}`)
+    config.printError(`  ${test}`)
   }
 } else {
   console.log('All good!')

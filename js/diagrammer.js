@@ -15,8 +15,8 @@ function startedAsCommandline () {
   return `${process.argv[1]}`.endsWith('diagrammer.js')
 }
 
-let traceProcess = (msg) => { }
 export function doParse (
+  config,
   /** @type {string} */diagrammerCode,
   /** @type {string} */generator,
   /** @type {[(resultLine:string)=>void]} */resultCallback,
@@ -26,6 +26,7 @@ export function doParse (
   diagrammerParser.yy.trace = traceCallback || ((msg) => {})
 
   diagrammerParser.yy.result = resultCallback || ((result) => {
+    config.parsedCode += `${result}\n`
     console.log(result)
   })
 
@@ -33,6 +34,7 @@ export function doParse (
   // parseError() in (generated) lexer, calls this.yy.parser.parseError() if available
   // TODO: MOVING TO GraphCanvas
   diagrammerParser.yy.parseError = parseErrorCallback || ((str, hash) => {
+    config.tp(`Parse error: ${str}`)
     throw new Error(str)
   })
   diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
@@ -40,9 +42,10 @@ export function doParse (
 }
 
 export function doLex (
+  config,
   /** @type {string} */diagrammerCode,
   /** @type {(token:string,codePart:any)=>void} */resultsCallback) {
-  traceProcess('Begin lex testing')
+  config.tp('Begin lex testing')
   const st = lexer.diagrammerLexer
   st.setInput(diagrammerCode)
   let h
@@ -62,21 +65,24 @@ async function _main (argv) {
     lex: false,
     input: '',
     gemerator: '',
-    code: ''
+    code: '',
+    traces: '',
+    parsedCode: ''
   }
 
-  traceProcess = (msg) => {
-    if (config.traceProcess) {
-      console.error(`trace:${msg}`)
-    }
-  }
   function _usage () {
-    console.log('USAGE: [trace] [verbose] [lex] [INPUT] [GENERATOR]')
+    console.error('USAGE: [trace] [verbose] [lex] [INPUT] [GENERATOR]')
     process.exit(0)
   }
 
   function beingPiped () {
     return !(process.stdin instanceof tty.ReadStream)
+  }
+  config.tp = (msg) => {
+    config.traces += `${config.input}:${config.generator}:${process.hrtime.bigint()} diagrammer.js ${msg}\n`
+    if (config.traceProcess) {
+      console.error(`trace:${msg}`)
+    }
   }
 
   for (const m of argv.splice(1)) {
@@ -94,7 +100,7 @@ async function _main (argv) {
         config.verbose = true
         continue
       case 'trace':
-        console.log("# If you didn't compile with DEBUG=1 make, deep tracing the grammar won't work")
+        console.error("# If you didn't compile with DEBUG=1 make, deep tracing the grammar won't work")
         config.trace = true
         continue
       case 'traceprocess':
@@ -112,7 +118,7 @@ async function _main (argv) {
     }
 
     if (!config.input && fs.existsSync(m.trim())) {
-      traceProcess('Read diagrammer code')
+      config.tp(`Read diagrammer code from ${m}`)
       config.input = m.trim()
       config.code = fs.readFileSync(config.input, 'utf8')
       continue
@@ -125,8 +131,16 @@ async function _main (argv) {
     config.generator = generator
   }
 
+  config.tp = (msg) => {
+    config.traces += `${config.input}:${config.generator}:${process.hrtime.bigint()} diagrammer.js ${msg}\n`
+    if (config.traceProcess) {
+      console.error(`trace:${msg}`)
+    }
+  }
+
   if (beingPiped() && config.input === '-') {
     // we're probably being piped!
+    config.tp('Reading from pipe')
     config.input = '-'
     config.code = await (() => {
       return new Promise(function (resolve, reject) {
@@ -145,7 +159,7 @@ async function _main (argv) {
 
   if (config.lex) {
     // export function doLex (/** @type {string} */diagrammerCode, /** @type {(token:string,codeSnippet:any)=>void} */resultsCallback) {
-    doLex(config.code, (token, codeSnippet) => {
+    doLex(config, config.code, (token, codeSnippet) => {
       if (config.trace || config.verbose) {
         // pass to stderr, so we can still use the stdout for actual graph (well depending)
         console.error('State:' + token + '(' + codeSnippet.yytext + ')')
@@ -155,14 +169,19 @@ async function _main (argv) {
     if (!config.generator) {
       _usage()
     }
-    doParse(config.code, config.generator,
+    doParse(config, config.code, config.generator,
       (resultLine) => {
+        config.tp(`Received result: (${resultLine.substring(0, 32)}... ...)`)
+        config.parsedCode += `${resultLine}\n`
+        // no difference, stdout gets lost
+        // process.stdout.write(resultLine)
         console.log(resultLine)
       },
       (parseError, hash) => {
-        console.log('Parsing error found:')
-        console.log(parseError)
-        console.log(hash)
+        config.tp(`Parsing error ${parseError} ${hash}`)
+        console.error('Parsing error found:')
+        console.error(parseError)
+        console.error(hash)
         throw new Error(parseError)
       },
       (msg) => {
@@ -172,11 +191,28 @@ async function _main (argv) {
         }
       }
     )
-    traceProcess('Parsing has been completed with no errrors')
   }
+  if (config.lex) {
+    config.tp(`finishing up lexing ${config.input}`)
+  } else {
+    config.tp(`finishing parsing ${config.input} and transpiling with ${config.generator}`)
+    config.tp(`got code len ${config.parsedCode.length}`)
+  }
+  console.error(config.traces)
 }
 
 // terrible
 if (startedAsCommandline()) {
+  // process.stdout.allowHalfOpen = true
+  // process.stdin.allowHalfOpen = true
   await _main(process.argv.splice(1))
+  // Something is seriously broken in node.js stdio! (Probably since they made it fully async)
+  // It often looses the written data, callbacks never called. Devs ignore all the whine
+  // cat whatever | tee whatever has worked for decades (make two node processes, pipe together, spawn..failure :) )
+  // TODO: Stop using lexer/parser as processes, make'em function calls
+  // Visualizer still needs to be a process.. This timeout MAKES SURE stdout gets flushes and read on t.js (sad..really sad)
+  await new Promise(resolve => setTimeout(resolve, 2000))
+  process.stdout.write('', process.exit)
+  // process.stdout.end()
+  // process.stderr.end()
 }

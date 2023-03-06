@@ -46,7 +46,7 @@ model/%.js : model/%.ts
 model: $(MODEL_JSS)
 web/%.js : web/%.ts
 web: $(WEB_JSS) model parser index.html
-web/visualizations/%.js : web/visualizations/%.ts
+web/visualizations/%.js : web/visualizations/%.ts generators
 web_visualizations: $(WEB_VISUALIZATION_JSS)
 index.html : index_template.html generators tests/test_inputs/*.txt web_visualizations
 	@echo "Create index.html (out of the template)"

@@ -4,7 +4,7 @@ import { lexParseAndVisualize, getEmptyConfig } from './t.js'
 // required for coloring diff output
 // eslint-disable-next-line no-unused-vars
 import color from 'colors'
-import { diffChars, diffJson, diffLines, diffSentences, diffWords } from 'diff'
+import { diffChars, diffJson, diffLines } from 'diff'
 import * as path from 'path'
 import pixelmatch from 'pixelmatch'
 import PNGx from 'pngjs'
@@ -57,6 +57,7 @@ for (const m of process.argv.splice(2)) {
       config.traceProcess = true
       continue
     default:
+      console.log(m)
       config.testPatterns.push(m.trim())
   }
 }
@@ -74,29 +75,40 @@ function _isJSON (a) {
   return true
 }
 
-function diff (originalFile, /** @type {string} */compareToText) {
-  const inputPath = path.normalize(`${process.cwd()}/${originalFile}`)
-  if (!fs.existsSync(inputPath)) {
+const failedTests = []
+function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCodeFile, /** @type {string} */currentGeneratedCode) {
+  if (currentGeneratedCode.trim() === '') {
+    printError('Code from currentrun is EMPTY!')
+    return false
+  }
+  const previousRunCodePath = path.normalize(`${process.cwd()}/${previousRunCodeFile}`)
+  if (!fs.existsSync(previousRunCodePath) || fs.statSync(previousRunCodePath).size === 0) {
     // probably a new test, new visualizer, new generator, reference code is missing
-    traceProcess(`Reference code file (${inputPath}) does not exist, first run? Copy the parsed generated text over`)
-    fs.writeFileSync(inputPath, compareToText, 'utf8')
+    traceProcess(`Reference code file (${previousRunCodePath}) does not exist(or was empty), first run? Copying the parsed generated text over`)
+    fs.writeFileSync(previousRunCodePath, currentGeneratedCode, 'utf8')
     return true
   }
 
-  const referenceCode = fs.readFileSync(inputPath, 'utf8')
-
+  const codeFromPreviousRun = fs.readFileSync(previousRunCodePath, 'utf8')
   // if outputs are one liners, no point comparing lines :)
   const opts = {
     ignoreWhitespace: true
   }
-  const differences = _isJSON(referenceCode)
-    ? diffJson(JSON.parse(referenceCode), JSON.parse(compareToText), opts)
+  const differences = (_isJSON(codeFromPreviousRun) && _isJSON(currentGeneratedCode))
+    ? diffJson(JSON.parse(codeFromPreviousRun), JSON.parse(currentGeneratedCode), opts)
     : (
-        _areOneLiners(referenceCode, compareToText)
-          ? diffChars(referenceCode, compareToText, opts)
-          : diffLines(referenceCode, compareToText, opts))
+        _areOneLiners(codeFromPreviousRun, currentGeneratedCode)
+          ? diffChars(codeFromPreviousRun, currentGeneratedCode, opts)
+          : diffLines(codeFromPreviousRun, currentGeneratedCode, opts))
 
   let filesSame = true
+
+  // avoid printing perfect matches...
+  if (differences.filter(p => p.added || p.removed).length === 0) {
+    traceProcess('No differences between current and old run')
+    return true
+  }
+
   differences.forEach((part) => {
     if (part.added || part.removed) {
       filesSame = false
@@ -146,11 +158,13 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
     if (error && error !== 0) {
       throw Error(`eh...failed ${useVisualizer} ${testFileName}`)
     }
-    const stableRunPath = `${config.previousStableRun}/${useVisualizer}`
-    const stableRunCodeFile = `${stableRunPath}/${testFileName}.txt`
+    const previousRunPath = `${config.previousStableRun}/${useVisualizer}`
+    const previouslyGeneratedCodeFile = `${previousRunPath}/${testFileName}.txt`
     const errors = []
-    if (!diff(stableRunCodeFile, cfg.parsedCode)) {
-      errors.push(`Using visualizer ${useVisualizer} on ${cfg.input} generated code differs from ${stableRunCodeFile}`)
+    if (!currentAndLastRunProduceSameResults(previouslyGeneratedCodeFile, cfg.parsedCode)) {
+      // TODO: store current run, so user can inspect better? Now current run is just kept in memory
+      errors.push(`Using visualizer ${useVisualizer}, transpiling ${cfg.input} generated differences compared to previous run ${previouslyGeneratedCodeFile}`)
+      failedTests.push(`${cfg.input} !== ${previouslyGeneratedCodeFile}, try: scripts/runtests.js ${useVisualizer}:${testFileName}`)
     }
 
     // TODO: Can't yet visualize web only renderers
@@ -159,6 +173,7 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
       const referenceImage = `${config.previousStableRun}/${useVisualizer}/${testFileName}.png`
       if (!await diffImages(referenceImage, cfg.visualizedGraph)) {
         errors.push(`Using visualizer ${useVisualizer} on ${testFileName}.txt generated graph visualizations differ`)
+        failedTests.push(`Visualized graph ${cfg.input} !== ${referenceImage}, try: scripts/runtests.js ${useVisualizer}:${testFileName}`)
       }
     }
     if (errors) {
@@ -166,6 +181,11 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
         printError(`ERROR: ${error}`)
         printError(' You can rerun this test:')
         printError(`   scripts/runtests.js ${useVisualizer}:${testFileName}`)
+        printError(`   If you think new run is correct, just do: rm ${previouslyGeneratedCodeFile}`)
+        if (cfg.traces !== '') {
+          printError(`   Full traces available in ${config.currentTestRun}/${useVisualizer}/${testFileName}.log`)
+          fs.writeFileSync(`${config.currentTestRun}/${useVisualizer}/${testFileName}.log`, cfg.traces)
+        }
       }
     }
   })
@@ -232,7 +252,7 @@ for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
     // make sure we don't accidentally run same test twice
     const d = `${visualizer}:${testFile}`
     if (v.includes(d)) {
-      throw new Error('THis is a test runner config error')
+      throw new Error('This is a test runner config error')
     }
     v.push(d)
     const webOnlyVisualizer = webOnlyVisualizers.includes(visualizer)
@@ -243,5 +263,13 @@ for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
 traceProcess('Begin waiting all tests')
 await Promise.all(waitTests)
 traceProcess('Done waiting for all tests')
-console.log('All good!')
+if (failedTests.length > 0) {
+  console.error('#==================')
+  console.error('Some test failures:')
+  for (const test of failedTests) {
+    console.error(`  ${test}`)
+  }
+} else {
+  console.log('All good!')
+}
 process.exit(0)

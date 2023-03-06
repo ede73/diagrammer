@@ -4,7 +4,7 @@ import { lexParseAndVisualize, getEmptyConfig } from './t.js'
 // required for coloring diff output
 // eslint-disable-next-line no-unused-vars
 import color from 'colors'
-import { diffLines } from 'diff'
+import { diffChars, diffJson, diffLines, diffSentences, diffWords } from 'diff'
 import * as path from 'path'
 import pixelmatch from 'pixelmatch'
 import PNGx from 'pngjs'
@@ -61,18 +61,40 @@ for (const m of process.argv.splice(2)) {
   }
 }
 
-function diff (originalFile, compareToText) {
+function _countLineFeeds (str) {
+  return str.split(/\r\n|\r|\n/).length
+}
+
+function _areOneLiners (a, b) {
+  return _countLineFeeds(a.trim()) <= 1 && _countLineFeeds(b.trim()) <= 1
+}
+
+function _isJSON (a) {
+  try { JSON.parse(a) } catch (e) { return false }
+  return true
+}
+
+function diff (originalFile, /** @type {string} */compareToText) {
   const inputPath = path.normalize(`${process.cwd()}/${originalFile}`)
   if (!fs.existsSync(inputPath)) {
     // probably a new test, new visualizer, new generator, reference code is missing
+    traceProcess(`Reference code file (${inputPath}) does not exist, first run? Copy the parsed generated text over`)
     fs.writeFileSync(inputPath, compareToText, 'utf8')
     return true
   }
 
   const referenceCode = fs.readFileSync(inputPath, 'utf8')
-  const differences = diffLines(referenceCode, compareToText, {
+
+  // if outputs are one liners, no point comparing lines :)
+  const opts = {
     ignoreWhitespace: true
-  })
+  }
+  const differences = _isJSON(referenceCode)
+    ? diffJson(JSON.parse(referenceCode), JSON.parse(compareToText), opts)
+    : (
+        _areOneLiners(referenceCode, compareToText)
+          ? diffChars(referenceCode, compareToText, opts)
+          : diffLines(referenceCode, compareToText, opts))
 
   let filesSame = true
   differences.forEach((part) => {
@@ -82,6 +104,8 @@ function diff (originalFile, compareToText) {
         ? 'green'
         : part.removed ? 'red' : 'grey'
       process.stderr.write(part.value[color])
+    } else {
+      process.stderr.write(part.value.grey)
     }
   })
   return filesSame
@@ -89,7 +113,7 @@ function diff (originalFile, compareToText) {
 
 async function diffImages (referenceImage, outputImage) {
   if (!fs.existsSync(referenceImage)) {
-    traceProcess(' REFERENCE IMAGE DOESNT EXIST...COPY OVER (but first try opening')
+    traceProcess(`Reference visualized graph file (${referenceImage}) does not exist, first run? Copy the current file over`)
     fs.renameSync(outputImage, referenceImage)
     return true
   }
@@ -117,7 +141,7 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
   cfg.input = `${config.testInputPath}/${testFileName}.txt`
   cfg.visualizedGraph = `${config.currentTestRun}/${useVisualizer}/${testFileName}.png`
 
-  traceProcess(`lexParseAndVisualzize ${testFileName}`)
+  traceProcess(`lexParseAndVisualize ${testFileName}`)
   await lexParseAndVisualize(cfg, async (error) => {
     if (error && error !== 0) {
       throw Error(`eh...failed ${useVisualizer} ${testFileName}`)
@@ -171,7 +195,7 @@ const onlyTheseTests = {
   dendrogram: ['dendrogram'],
   layerbands: ['layerbands'],
   sankey: ['sankey', 'sankey2'],
-  umlclass: ['umlclass', 'umlclass2']
+  umlclass: ['umlclass', 'umlclass2', 'umlclass_types']
 }
 
 const webOnlyVisualizers = [

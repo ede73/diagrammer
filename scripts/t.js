@@ -397,6 +397,9 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
   await _waitForProcesses(useConfig, _processes).then((x) => {
     // all done...
     traceProcess(` All processed related to ${useConfig.visualizedGraph} have been completed`)
+    if (useConfig.dontRunVisualizer) {
+      if (_parsingProcess) { visualizationisComplete(_parsingProcess.exitCode) }
+    }
   }, (rej) => {
     _exitError(`Failure ${rej}`)
   })

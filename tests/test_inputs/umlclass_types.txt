@@ -1,0 +1,42 @@
+generator umlclass
+
+// generalization - not filled triangle, continuous line
+{Person;Person - generalization
+}
+{Student;Student
+}
+Student>Person;open triangle\ncont line
+
+// realization - not filled triangle, dashed line
+{ISerializable;ISerializable - realization
+}
+Person->ISerializable;open triangle\ndashed line
+
+// composition - filled diamond, continuous line, "tail:head"? explanation
+{Folder;Folder - composition
+}
+{File;File
+}
+File>>"n:1:filled diamond\ncont line"Folder
+
+
+// Aggregation - not filled diamond, continuous line
+{Wheel;Wheel - Aggregation
+}
+{Car;Car
+}
+Car>>Wheel;open diamond\ncont line
+
+// dependency - open arrow, dashed line - "explanation"?
+{SurfaceHolder;android.view::SurfaceHolder - dependency
+}
+{Camera;android.hardware::Camera
+}
+Camera->SurfaceHolder;uses\nopen arrow\ndashed line
+
+{Course;Course - Association
+}
+{Student2;Student
+}
+// association(.) - open arrow, continous line
+Student2."*:1..*:takes\nassociation\nopen arrow\ncont line"Course

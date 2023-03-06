@@ -138,6 +138,7 @@
 <option value="test_inputs/two_linked_clusters_with_invisible_node.txt">two_linked_clusters_with_invisible_node.txt</option>
 <option value="test_inputs/umlclass.txt">umlclass.txt</option>
 <option value="test_inputs/umlclass2.txt">umlclass2.txt</option>
+<option value="test_inputs/umlclass_types.txt">umlclass_types.txt</option>
 <option value="test_inputs/url.txt">url.txt</option>
 		</select>
 		<label for="filename">Filename</label>
@@ -236,7 +237,7 @@
 
 		<table>
 			<tr>
-				<td>
+				<td valign=top>
 					<!-- first leftmost vertical menu strip -->
 					<div class="toolbar">
 						<ul class="toolbar">
@@ -252,7 +253,7 @@
 						</ul>
 					</div>
 				</td>
-				<td>
+				<td valign=top>
 					<!-- second middle vertical menu strip -->
 					<div class="toolbar">
 						<ul class="toolbar">
@@ -280,7 +281,7 @@
 						</ul>
 					</div>
 				</td>
-				<td>
+				<td valign=top>
 					<!-- third rightmost vertical menu strip -->
 					<div class="toolbar">
 						<ul class="toolbar">
@@ -310,7 +311,7 @@
 					<!-- ACE editor + resulting graphs (server/dynamic)-->
 					<table>
 						<tr>
-							<td class="tabbed">
+							<td class="tabbed" valign=top>
 								<input type="radio" id="tab1" name="css-tabs" checked>
 								<input type="radio" id="tab2" name="css-tabs">
 								<input type="radio" id="tab3" name="css-tabs">
@@ -330,7 +331,7 @@
 								<div class="tab-content" id="diagrammer-beautified">
 								</div>
 							</td>
-							<td>
+							<td valign=top>
 								<!-- Visualization results stored under here -->
 								<div id='diagrammer-graph' />
 							</td>

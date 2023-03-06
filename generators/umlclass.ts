@@ -30,7 +30,7 @@ export type UMLClassDocumentT = [
 
 export type ParameterTypeT = {
   name: string,
-  type: string
+  type?: string
 }
 
 export type MethodDeclarationT = {
@@ -186,19 +186,19 @@ export function umlclass(graphcanvas: GraphCanvas) {
               break
           }
           if (all.groups.parameters) {
-            ret.name = mangleName(method.name ?? '') + all.groups.parameters
+            // parameters something like (name:type,...) - what ever was types
+            // Wonder which is more likely to be optional, name or type?
+            const parameterList = all.groups.parameters.replace(/[()]/g, '').split(',')
+            console.log(parameterList)
+            ret.parameters = parameterList.map(p => {
+              const [name, type] = p.trim().split(':')
+              return { name: name?.trim(), type: type?.trim() } as ParameterTypeT
+            }).filter(p => p.name || p.type)
+            ret.name = mangleName(method.name ?? '') //+ all.groups.parameters
           }
           if (all.groups.return) {
             ret.type = all.groups.return
           }
-          // TODO:
-          // ret["parameters"] = [{name:???,type:???}];
-          // if (all[3]) {
-          // ret['type'] = all[3];
-          // }
-          // if (all[4]) {
-          // ret['default'] = all[4];
-          // }
         }
       }
       return ret

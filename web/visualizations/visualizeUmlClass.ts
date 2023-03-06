@@ -42,6 +42,7 @@ export function visualizeUmlClass(generatorResult: string) {
     }
   }
 
+  const methodAndPropertyFont = 'italic 10pt sans-serif'
   // the item template for properties
   const propertyTemplate =
     // sourceprop = PropertyDeclarationT
@@ -52,15 +53,15 @@ export function visualizeUmlClass(generatorResult: string) {
         new go.Binding('text', 'visibility', classVisibilityToHumanReadable)),
       // property name, underlined if scope=="class" to indicate static property
       $(go.TextBlock,
-        { isMultiline: false, editable: false },
-        new go.Binding('text', 'name').makeTwoWay(),
+        { isMultiline: false, editable: false, font: methodAndPropertyFont.replace('italic', 'bold') },
+        new go.Binding('text', 'name'),
         new go.Binding('isUnderline', 'scope', (isClassLevel: string) => { return isClassLevel[0] === 'c' })),
       // property type, if known
       $(go.TextBlock, '',
         new go.Binding('text', 'type', (hasType: string) => { return (hasType ? ': ' : '') })),
       $(go.TextBlock,
-        { isMultiline: false, editable: false },
-        new go.Binding('text', 'type').makeTwoWay()),
+        { row: 1, font: methodAndPropertyFont, stroke: '#0f5584' },
+        new go.Binding('text', 'type')),
       // property default value, if any
       $(go.TextBlock,
         { isMultiline: false, editable: false },
@@ -77,30 +78,32 @@ export function visualizeUmlClass(generatorResult: string) {
         new go.Binding('text', 'visibility', classVisibilityToHumanReadable)),
       // method name, underlined if scope=="class" to indicate static method
       $(go.TextBlock,
-        { isMultiline: false, editable: false },
+        { isMultiline: false, editable: false, font: methodAndPropertyFont.replace('italic', 'bold') },
         new go.Binding('text', 'name').makeTwoWay(),
         new go.Binding('isUnderline', 'scope', (isClassLevel: string) => { return isClassLevel[0] === 'c' })),
       // method parameters
-      $(go.TextBlock, '',
+      $(go.TextBlock, { row: 1, font: methodAndPropertyFont, stroke: '#847323' },
         // this does not permit adding/editing/removing of parameters via inplace edits
         new go.Binding('text', 'parameters', (parameters: ParameterTypeT[]) => {
           let s = '('
           for (let i = 0; i < parameters.length; i++) {
             const param = parameters[i]
             if (i > 0) s += ', '
-            s += `${param.name}: ${param.type}`
+            s += `${param.name}${param.type ? ': ' : ''}${param.type ?? ''}`
           }
           return s + ')'
         })),
       // method return type, if any
-      $(go.TextBlock, '',
+      $(go.TextBlock, { row: 1, font: methodAndPropertyFont, stroke: '#0f5584' },
         new go.Binding('text', 'type', function (hasType: string) { return (hasType ? ': ' : '') })),
       $(go.TextBlock,
-        { isMultiline: false, editable: false },
-        new go.Binding('text', 'type').makeTwoWay())
+        { isMultiline: false, editable: false, row: 1, font: methodAndPropertyFont, stroke: '#0f5584' },
+        new go.Binding('text', 'type'))
     )
 
   const background = 'lightblue'
+  const headerFont = 'bold 12pt sans-serif'
+
   myDiagram.nodeTemplate =
     $(go.Node, 'Auto',
       {
@@ -120,7 +123,7 @@ export function visualizeUmlClass(generatorResult: string) {
             columnSpan: 2,
             margin: 3,
             alignment: go.Spot.Center,
-            font: 'bold 12pt sans-serif',
+            font: headerFont,
             isMultiline: false,
             editable: false
           },
@@ -128,7 +131,7 @@ export function visualizeUmlClass(generatorResult: string) {
 
         // properties ----
         $(go.TextBlock, 'Properties',
-          { row: 1, font: 'italic 10pt sans-serif' },
+          { row: 1, font: methodAndPropertyFont },
           new go.Binding('visible', 'visible', (v: boolean) => { return !v }).ofObject('PROPERTIES')),
         $(go.Panel, 'Vertical', { name: 'PROPERTIES' },
           new go.Binding('itemArray', 'properties'),
@@ -147,7 +150,7 @@ export function visualizeUmlClass(generatorResult: string) {
 
         // methods -----
         $(go.TextBlock, 'Methods',
-          { row: 2, font: 'italic 10pt sans-serif' },
+          { row: 2, font: methodAndPropertyFont },
           new go.Binding('visible', 'visible', (v: boolean) => { return !v }).ofObject('METHODS')),
         $(go.Panel, 'Vertical', { name: 'METHODS' },
           new go.Binding('itemArray', 'methods'),
@@ -165,7 +168,6 @@ export function visualizeUmlClass(generatorResult: string) {
           new go.Binding('visible', 'methods', (arr: any[]) => { return arr.length > 0 }))
       )
     )
-
   function shouldLayoutVertically(r: RelationshipTypeT) {
     return true
     return ['generalization', 'composition'].includes(r)
@@ -221,6 +223,9 @@ export function visualizeUmlClass(generatorResult: string) {
     }
   }
 
+  const headTailEdgeLabelFont = 'bold 14px sans-serif'
+  const edgeLabelFont = 'italic 14px sans-serif'
+
   // new go.Binding("strokeDashArray", "dash")
   myDiagram.linkTemplate =
     $(go.Link,
@@ -238,7 +243,7 @@ export function visualizeUmlClass(generatorResult: string) {
 
       $(go.TextBlock, {
         textAlign: 'center',
-        font: 'italic 14px sans-serif',
+        font: edgeLabelFont,
         stroke: '#606060',
         isMultiline: true,
       },
@@ -247,7 +252,7 @@ export function visualizeUmlClass(generatorResult: string) {
           label ? label.split('\\n').join("\n") : ''),
       ), $(go.TextBlock, {
         textAlign: 'center',
-        font: 'bold 14px sans-serif',
+        font: headTailEdgeLabelFont,
         stroke: '#1967B3',
         segmentIndex: 0,
         segmentOffset: new go.Point(NaN, NaN),
@@ -257,7 +262,7 @@ export function visualizeUmlClass(generatorResult: string) {
       ),
       $(go.TextBlock, {
         textAlign: 'center',
-        font: 'bold 14px sans-serif',
+        font: headTailEdgeLabelFont,
         stroke: '#1967B3',
         segmentIndex: -1,
         segmentOffset: new go.Point(NaN, NaN),

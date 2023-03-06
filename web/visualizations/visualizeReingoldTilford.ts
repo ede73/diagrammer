@@ -7,7 +7,7 @@ visualizations.set('reingoldtilford', visualizeReingoldTilford)
 
 export function visualizeReingoldTilford(generatorResult: string) {
   const jsonData = JSON.parse(generatorResult)
-  const width = 400
+  const width = 600
   const height = 400
 
   const diameter = height * 0.75
@@ -42,6 +42,7 @@ export function visualizeReingoldTilford(generatorResult: string) {
   const node = svgimg.selectAll('g.node')
     .data(nodes)
     .enter().append('g')
+    .style('font', '18px sans-serif')
     .attr('class', 'node')
     .attr('transform', function (d) {
       return `rotate(${d.x * 180 / Math.PI - 90})` +
@@ -52,6 +53,7 @@ export function visualizeReingoldTilford(generatorResult: string) {
     .attr('r', 4.5)
 
   node.append('text')
+    .attr('fill', 'blue')
     .attr('dx', function (d) { return d.children ? -8 : 8 })
     .attr('dy', 3)
     .attr('text-anchor', function (d) { return d.children ? 'end' : 'start' })

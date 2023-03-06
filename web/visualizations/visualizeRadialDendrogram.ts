@@ -9,8 +9,8 @@ visualizations.set('radialdendrogram', visualizeRadialDendrogram)
 export function visualizeRadialDendrogram(generatorResult: string) {
   const jsonData = JSON.parse(generatorResult)
   const radius = 250
-  const width = 400
-  const height = 400
+  const width = 600
+  const height = 600
 
   const tree = d3.tree()
     .size([2 * Math.PI, radius])
@@ -41,6 +41,7 @@ export function visualizeRadialDendrogram(generatorResult: string) {
   const node = svgimg.selectAll('.node')
     .data(nodes)
     .enter().append('g')
+    .style('font', '18px sans-serif')
     .attr('class', 'node')
     .attr('transform', function (d) { return `rotate(${d.x - 90})translate(${d.y})` })
 
@@ -49,6 +50,7 @@ export function visualizeRadialDendrogram(generatorResult: string) {
 
   node.append('text')
     .attr('dy', '.31em')
+    .attr('fill', 'blue')
     .attr('text-anchor', function (d) { return d.x < 180 ? 'start' : 'end' })
     .attr('transform', function (d) { return d.x < 180 ? 'translate(8)' : 'rotate(180)translate(-8)' })
     .text(function (d) {

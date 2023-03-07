@@ -1,5 +1,5 @@
 // @ts-check
-import { type Page } from 'puppeteer'
+import { type Page, type HTTPRequest, type HTTPResponse } from 'puppeteer'
 // defines global.browser and global.page
 // import 'jest-environment-puppeteer'
 
@@ -44,37 +44,37 @@ export async function sleepABit(milliSeconds: number) {
   await new Promise(function (resolve) { setTimeout(resolve, milliSeconds) })
 }
 
-/**
- * @param elementId #IdHere, input[name=xx]
- * @returns Return element text(value)
- */
-export async function getElementText(page: Page, elementId: string) {
-  await assertElementExists(page, elementId)
-  return await page.$eval(elementId, element => {
-    return (element as HTMLInputElement).value
-  })
-}
+// /**
+//  * @param elementId #IdHere, input[name=xx]
+//  * @returns Return element text(value)
+//  */
+// export async function getElementText(page: Page, elementId: string) {
+//   await assertElementExists(page, elementId)
+//   return page.$eval(elementId, element => {
+//     return (element as HTMLInputElement).value
+//   })
+// }
 
-/**
- * @param elementId #IdHere, input[name=xx]
- * @returns Return element innerHTML(value)
- */
-export async function getElementInnerHtml(page: Page, elementId: string) {
-  await assertElementExists(page, elementId)
-  return await page.$eval(elementId, element => {
-    return element.innerHTML
-  })
-}
+// /**
+//  * @param elementId #IdHere, input[name=xx]
+//  * @returns Return element innerHTML(value)
+//  */
+// export async function getElementInnerHtml(page: Page, elementId: string) {
+//   await assertElementExists(page, elementId)
+//   return page.$eval(elementId, element => {
+//     return element.innerHTML
+//   })
+// }
 
-/**
- * @param elementId #IdHere, input[name=xx]
- */
-export async function setElementInnerHtml(page: Page, elementId: string, value: string) {
-  await assertElementExists(page, elementId)
-  return await page.$eval(elementId, (element, value) => {
-    element.innerHTML = value
-  }, value)
-}
+// /**
+//  * @param elementId #IdHere, input[name=xx]
+//  */
+// export async function setElementInnerHtml(page: Page, elementId: string, value: string) {
+//   await assertElementExists(page, elementId)
+//   return page.$eval(elementId, (element, value) => {
+//     element.innerHTML = value
+//   }, value)
+// }
 
 export async function writeToElement(page: Page, elementId: string, text: string) {
   await assertElementExists(page, elementId)
@@ -92,8 +92,14 @@ function consoleLogWithTime(msg: string) {
  */
 export async function captureBrowserLogs(page: Page) {
   page
-    .on('console', message => { consoleLogWithTime(`${message.type().substr(0, 3).toUpperCase()} ${message.text()} `) })
+    .on('console', message => {
+      consoleLogWithTime(`${(message.type() as string).substr(0, 3).toUpperCase()} ${message.text() as string} `)
+    })
     .on('pageerror', ({ message }) => { consoleLogWithTime(message) })
-    .on('response', response => { consoleLogWithTime(`${response.status()} ${response.url()} `) })
-    .on('requestfailed', request => { consoleLogWithTime(`${request.failure().errorText} ${request.url()} `) })
+    .on('response', (response: HTTPResponse) => {
+      consoleLogWithTime(`${response.status() as number} ${response.url() as string} `)
+    })
+    .on('requestfailed', (request: HTTPRequest) => {
+      consoleLogWithTime(`${request.failure()?.errorText as string} ${request.url() as string}`)
+    })
 }

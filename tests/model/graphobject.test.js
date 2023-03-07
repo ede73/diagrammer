@@ -1,6 +1,7 @@
 // @ts-check
 import { GraphObject } from '../../model/graphobject.js'
 import { GraphCanvas } from '../../model/graphcanvas.js'
+import { describe, expect, it } from '@jest/globals'
 
 describe('GraphObject tests', () => {
   const labelCandidates = {

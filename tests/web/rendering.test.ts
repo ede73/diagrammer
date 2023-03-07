@@ -41,6 +41,7 @@ describe('Diagrammer', () => {
       toMatchImageSnapshot
     })
     const image = await page.screenshot({ fullPage: true })
+    // @ts-expect-error yeah, it does dear linter, see above :)
     expect(image).toMatchImageSnapshot(setConfig('main_screen_just_loaded', 0.0001))
   })
 
@@ -125,6 +126,7 @@ describe('Diagrammer', () => {
     expect.extend({
       toMatchImageSnapshot
     })
+    // @ts-expect-error yeah, it does dear linter, see above :)
     expect(buffer).toMatchImageSnapshot(snapshotConfig)
   };
 

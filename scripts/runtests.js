@@ -97,9 +97,9 @@ function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCo
   return filesSame
 }
 
-async function diffImages (referenceImage, outputImage) {
+function diffImages (referenceImage, outputImage) {
   if (!fs.existsSync(referenceImage)) {
-    config.tp(`Reference visualized graph file (${referenceImage}) does not exist, first run? Copy the current file over`)
+    config.tp(`  Reference visualized graph file (${referenceImage}) does not exist, first run? Copy the current file over`)
     fs.renameSync(outputImage, referenceImage)
     return true
   }
@@ -145,7 +145,7 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
     if (!webOnlyVisualizer) {
       // compare visualization
       const referenceImage = `${config.previousStableRun}/${useVisualizer}/${testFileName}.png`
-      if (!await diffImages(referenceImage, cfg.visualizedGraph)) {
+      if (!diffImages(referenceImage, cfg.visualizedGraph)) {
         errors.push(`Using visualizer ${useVisualizer} on ${testFileName}.txt generated graph visualizations differ`)
         failedTests.push(`Visualized graph ${cfg.input} !== ${referenceImage}, try: scripts/runtests.js ${useVisualizer}:${testFileName}`)
       }
@@ -244,6 +244,6 @@ if (failedTests.length > 0) {
     config.printError(`  ${test}`)
   }
 } else {
-  console.log('All good!')
+  console.warn('All good!')
 }
 process.exit(0)

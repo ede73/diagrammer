@@ -25,7 +25,7 @@ export function setAttr(cl: GraphObject, attr: string, value: any) {
 
 declare global {
   interface String {
-    // format(): string;
+    // eslint-disable-next-line @typescript-eslint/method-signature-style
     formatArray(array: any[]): string
   }
 }
@@ -46,8 +46,9 @@ declare global {
  * Format a string with provided array of values
  * For example. "{2}{0}{1}".formatArray([2,3,1]) prints 123
  */
-// @ts-expect-error
+// eslint-disable-next-line no-extend-native
 String.prototype.formatArray = function (array: any[]) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
   let formatted = this
   for (let i = 0; i < array.length; i++) {
     formatted = formatted.replace(`{${i}}`, array[i])
@@ -67,7 +68,7 @@ String.prototype.formatArray = function (array: any[]) {
  */
 export function getAttribute(cl: GraphObject, attr: string) {
   const obtained = Object.getOwnPropertyDescriptor(cl, attr)
-  if (!obtained || !obtained.value || obtained.value === 0) { return undefined }
+  if (!obtained?.value || obtained.value === 0) { return undefined }
   return obtained?.value
 }
 
@@ -99,7 +100,7 @@ export function getAttributeAndFormat(
   const obtained = Object.getOwnPropertyDescriptor(cl, attributeNameOrNames)
   // Not gonna fly coz cl can be subclass of GraphObject and we're fetching ITS properies
   // const attrType = attr as keyof typeof GraphObject;
-  if (!obtained || !obtained.value || obtained.value === 0) {
+  if (!obtained?.value || obtained.value === 0) {
     return ''
   }
   const valStr: string = obtained.value
@@ -125,7 +126,7 @@ export function multiAttrFmt(obj: GraphObject, attrMap: Record<string, string>, 
   const attrMapFormatted = []
   for (const [key, value] of Object.entries(attrMap)) {
     const formattedValue = getAttributeAndFormat(obj, key, value)
-    if (formattedValue && formattedValue.trim()) {
+    if (formattedValue?.trim()) {
       attrMapFormatted.push(formattedValue)
     }
   }
@@ -157,7 +158,7 @@ export function output(graphcanvas: (boolean | GraphCanvas),
       prefix += '    '
     }
     if (graphcanvas.result) {
-      graphcanvas.result(`${prefix}${txt}`)
+      graphcanvas.result(`${prefix}${txt as string}`)
     }
   }
   if (indentOrDedent === true || graphcanvas === true || txt === true) {

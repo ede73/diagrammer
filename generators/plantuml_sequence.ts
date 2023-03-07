@@ -7,11 +7,12 @@ import { getAttributeAndFormat, iterateEdges, output, outputFormattedText } from
 import { _getVertexOrGroup } from '../model/model.js'
 import { type GraphContainer } from '../model/graphcontainer.js'
 import { debug } from '../model/debug.js'
-import { GraphEdgeLineType, GraphEdgeMeaningType } from '../model/graphedge.js'
+import { GraphEdgeLineType } from '../model/graphedge.js'
 
 // ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
 
 // TODO: Looks like all these have changed(broken), see https://plantuml.com/sequence-diagram
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const PlantUMLShapeMap = {
   default: 'box',
   invis: 'invis',
@@ -47,6 +48,8 @@ const PlantUMLShapeMap = {
 /**
  * node js/diagrammer.js verbose tests/test_inputs/events.txt plantuml_sequence | java -Xmx2048m -jar ext/plantuml.jar -tpng -pipe > output.png && open output.png
 */
+// TODO:
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function plantuml_sequence(graphcanvas: GraphCanvas) {
   const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
@@ -244,7 +247,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
           } else if (cond === 'endif') {
             cond = 'end'
           }
-          lout(cond + ' ' + maybeGroup.getLabel())
+          lout(cond + ' ' + (maybeGroup.getLabel() ?? ''))
         } else {
           cond = ''// cond = "ref";
         }

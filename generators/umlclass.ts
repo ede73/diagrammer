@@ -207,7 +207,8 @@ export function umlclass(graphcanvas: GraphCanvas) {
             // console.log(parameterList)
             ret.parameters = parameterList.map(p => {
               const [name, type] = p.trim().split(':')
-              return { name: name?.trim(), type: type?.trim() } as ParameterTypeT
+              const ret: ParameterTypeT = { name: name?.trim(), type: type?.trim() }
+              return ret
             }).filter(p => p.name || p.type)
             ret.name = mangleName(method.name ?? '') // + parsedMethods.parameters
           }
@@ -234,7 +235,7 @@ export function umlclass(graphcanvas: GraphCanvas) {
       })
     }
   })
-  debug(`${groupNameIdMap}`)
+  debug(`${String(groupNameIdMap)}`)
 
   graphcanvas.getEdges().forEach(edge => {
     const edgeRep: RelationshipT = {

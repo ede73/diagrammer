@@ -383,7 +383,7 @@ exit;exit node is also required
     const verticeNames = new Set(['entry', 'exit'])
 
     graphcanvas.getObjects().forEach(obj => {
-      const objectName: string = obj.getName() as string
+      const objectName: string = obj.getName()
       if (obj instanceof GraphConditional) {
         // TODO: grammar is buggy, there should be single vertex in, or none for no-vertices conditional
         // how ever 'then'/'else' is intepretex as one
@@ -473,7 +473,7 @@ exit;exit node is also required
     // verify all objects accounted for
     const vertices = new Set(['a', 'q', 'w', 'e'])
     graphcanvas.getObjects().forEach(vertex => {
-      vertices.delete(vertex.getName() as string)
+      vertices.delete(vertex.getName())
     })
     expect(vertices.size).toBe(0)
 
@@ -482,14 +482,14 @@ exit;exit node is also required
     const edges = new Set(['q', 'w', 'e'])
     graphcanvas.getEdges().forEach((edge, idx) => {
       expect(edge.getColor()).toBe(color)
-      expect(edge.getName()).toBe(undefined)
+      expect(edge.getName()).toBe('')
       expect(edge.lcompass).toBe(':nw')
       expect(edge.rcompass).toBe(':se')
       expect(edge.direction()).toBe(GraphEdgeDirectionType.RIGHT)
       expect(edge.lineType() === GraphEdgeLineType.DASHED).toBeTruthy()
       expect(edge.left.getName()).toBe('a')
 
-      edges.delete(edge.right.getName() as string)
+      edges.delete(edge.right.getName())
     })
     expect(edges.size).toBe(0)
   })

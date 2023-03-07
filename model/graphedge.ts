@@ -1,5 +1,4 @@
 // @ts-check
-import { debug } from '../model/debug.js'
 import { type DefaultSettingKey, type GraphContainer } from '../model/graphcontainer.js'
 import { GraphObject } from '../model/graphobject.js'
 import { type GraphConnectable } from './graphconnectable.js'
@@ -72,18 +71,18 @@ export class GraphEdge extends GraphObject {
     this.right = rhs
     if (!(lhs instanceof GraphVertex) && !(lhs instanceof GraphGroup) &&
       !(lhs instanceof GraphInner) && !(lhs instanceof GraphReference)) {
-      throw new Error(`LHS not a Vertex,Group nor a SubGraph(LHS=${lhs}) RHS=(${rhs})`)
+      throw new Error(`LHS not a Vertex,Group nor a SubGraph(LHS=${String(lhs)}) RHS=(${String(rhs)})`)
     }
     if (!(rhs instanceof GraphVertex) && !(rhs instanceof GraphGroup) &&
       !(rhs instanceof GraphInner) && !(rhs instanceof GraphReference)) {
-      throw new Error(`RHS not a Vertex,Group nor a SubGraph(LHS=${lhs}) RHS=(${rhs})`)
+      throw new Error(`RHS not a Vertex,Group nor a SubGraph(LHS=${String(lhs)}) RHS=(${String(rhs)})`)
     }
     if (!parent) {
       throw new Error('GraphEdge REQUIRES a parent container')
     }
     this.fetchAndSetContainerDefaults([
-      { attrName: 'edgecolor' as DefaultSettingKey, callback: color => this.color = color },
-      { attrName: 'edgetextcolor' as DefaultSettingKey, callback: color => this.textcolor = color }
+      { attrName: 'edgecolor' as DefaultSettingKey, callback: color => { this.color = color } },
+      { attrName: 'edgetextcolor' as DefaultSettingKey, callback: color => { this.textcolor = color } }
     ])
   }
 
@@ -185,6 +184,6 @@ export class GraphEdge extends GraphObject {
     if (this.rcompass) { fmt += `, rcompass: ${this.rcompass}` }
     if (this.color) { fmt += `, color: ${this.color}` }
     if (this.textcolor) { fmt += `, textcolor: ${this.textcolor}` }
-    return `GraphEdge (type:${this.edgeType} as L:${this.left.toString()}, R:${this.right.toString()}, parent=${this.parent?.getName()}, label=${this.getLabel()}${fmt}X)`
+    return `GraphEdge (type:${this.edgeType} as L:${this.left.toString()}, R:${this.right.toString()}, parent=${this.parent?.getName()}, label=${this.getLabel() ?? ''}${fmt}X)`
   }
 };

@@ -1,8 +1,6 @@
 // @ts-check
 
 import { generators, type GraphCanvas } from '../model/graphcanvas.js'
-import { GraphConditional } from '../model/graphconditional.js'
-import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphEdge } from '../model/graphedge.js'
 import { type GraphObject } from '../model/graphobject.js'
 import { GraphVertex } from '../model/graphvertex.js'
@@ -18,17 +16,14 @@ export function ast(graphcanvas: GraphCanvas) {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
-  const o = (msg: string, indent = undefined) => {
-    lout(msg, indent)
-  }
 
   const rvalue = (rvalue: any) => {
     if (typeof (rvalue) === 'number' || typeof (rvalue) === 'boolean') {
-      return `${rvalue}`
+      return `${String(rvalue)}`
     } else if (typeof (rvalue) === 'string') {
       return `"${rvalue.trim()}"`
     }
-    return rvalue === undefined ? 'null' : `"${rvalue}"`
+    return rvalue === undefined ? 'null' : `"${String(rvalue)}"`
   }
 
   const getIndent = (debugIndent: number) => {
@@ -48,7 +43,7 @@ export function ast(graphcanvas: GraphCanvas) {
 
   const specialHandling = (obj: any, level: number): string | undefined => {
     if (level > 50) {
-      return `"/* Stopping recursion, already ${level}s deep and going ${obj}*/"`
+      return `"/* Stopping recursion, already ${level}s deep and going ${String(obj)}*/"`
     }
     if (typeof (obj) === 'function') {
       return ''
@@ -74,9 +69,10 @@ export function ast(graphcanvas: GraphCanvas) {
         return '[]'
       case 1:
         return `[${items[0]}]`
-      default:
+      default: {
         const indent = getIndent(level - 1)
         return `[\n${join(level, items, ',\n')}${indent}]`
+      }
     }
   }
 
@@ -94,7 +90,7 @@ export function ast(graphcanvas: GraphCanvas) {
 
     const items: string[] = []
     level++
-    items.push(`"__PSEUDOTYPE": "${obj.constructor.name}"`)
+    items.push(`"__PSEUDOTYPE": "${(obj as GraphObject).constructor.name}"`)
     Object.entries(obj).forEach(([propname, value]) => {
       // skip empties..
       if (value === null || value === undefined ||
@@ -103,7 +99,7 @@ export function ast(graphcanvas: GraphCanvas) {
       if (propname === 'parent') {
         items.push(`"parent": "${value ? (value as GraphObject).getName() : 'CANVAS'}"`)
       } else if (propname === 'CURRENTCONTAINER') {
-        items.push(`"${propname}": "...${value}"`)
+        items.push(`"${propname}": "...${String(value)}"`)
       } else {
         const collect = dumpObject(value, level + 1)
         items.push(`"${propname}": ${collect}`)

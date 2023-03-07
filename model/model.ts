@@ -5,7 +5,7 @@ import { GraphEdge } from '../model/graphedge.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphInner } from '../model/graphinner.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { getAttribute, setAttr } from '../model/support.js'
+import { getAttribute } from '../model/support.js'
 import { GraphConnectable } from './graphconnectable.js'
 import { GraphReference } from './graphreference.js'
 import { hasOutwardEdge } from './traversal.js'
@@ -61,7 +61,7 @@ export function _getList(graphCanvas: GraphCanvas,
   rhs: GraphConnectable,
   rhsEdgeLabel?: string): (GraphConnectable | GraphConnectable[]) {
   if (lhs instanceof GraphVertex) {
-    debug(`_getList(vertex:${lhs},rhs:[${rhs}])`, true)
+    debug(`_getList(vertex:${String(lhs)},rhs:[${String(rhs)}])`, true)
     const lst: (GraphConnectable | GraphConnectable[]) = []
     lst.push(lhs)
     const rhsFound = _getVertexOrGroup(graphCanvas, rhs as GraphVertex)
@@ -69,10 +69,10 @@ export function _getList(graphCanvas: GraphCanvas,
       rhsFound._setEdgeLabel(rhsEdgeLabel)
     }
     lst.push(rhsFound)
-    debug(`return vertex:${lst}`, false)
+    debug(`return vertex:${String(lst)}`, false)
     return lst
   } else if (lhs instanceof GraphGroup) {
-    debug(`_getList(group:[${lhs}],rhs:${rhs})`, true)
+    debug(`_getList(group:[${String(lhs)}],rhs:${String(rhs)})`, true)
     const lst = []
     lst.push(lhs)
     if (!(rhs instanceof GraphContainer)) {
@@ -83,20 +83,20 @@ export function _getList(graphCanvas: GraphCanvas,
       grp._setEdgeLabel(rhsEdgeLabel)
     }
     lst.push(grp)
-    debug(`return group:${lst}`, false)
+    debug(`return group:${String(lst)}`, false)
     return lst
   }
   if (!(lhs instanceof Array)) {
     throw new Error('_getList requires LHS to be Vertex, Group or Array')
   }
-  debug(`_getList ((array)lhs:[${lhs}],rhs:${rhs}`, true)
+  debug(`_getList ((array)lhs:[${String(lhs)}],rhs:${String(rhs)}`, true)
   // LHS not a vertex..
   const rhsFound = _getVertexOrGroup(graphCanvas, rhs as GraphVertex)
   if (rhsEdgeLabel && (rhsFound instanceof GraphGroup || rhsFound instanceof GraphVertex)) {
     rhsFound._setEdgeLabel(rhsEdgeLabel)
   }
   lhs.push(rhsFound)
-  debug(`return [${lhs}]`, false)
+  debug(`return [${String(lhs)}]`, false)
   return lhs
 }
 
@@ -118,10 +118,10 @@ export function _getList(graphCanvas: GraphCanvas,
  * @param  [style] OPTIONAL if style given, update (only if name refers to vertex)
  */
 export function _getVertexOrGroup(graphCanvas: GraphCanvas, objOrName: (string | GraphVertex), style?: string): GraphConnectable {
-  debug(`_getVertexOrGroup (name:${objOrName}, style:${style})`, true)
+  debug(`_getVertexOrGroup (name:${String(objOrName)}, style:${String(style)})`, true)
 
   const node = findOrCreateVertex(graphCanvas, objOrName, style)
-  debug(`in _getVertexOrGroup got ${node} / ${node.getName()}/${node.constructor.name}`)
+  debug(`in _getVertexOrGroup got ${String(node)} / ${node.getName()}/${node.constructor.name}`)
   graphCanvas.lastSeenVertex = node
   if (graphCanvas._nextConnectableToExitEndIf && (node instanceof GraphConnectable)) {
     graphCanvas._nextConnectableToExitEndIf._conditionalExitEdge = node
@@ -218,18 +218,18 @@ export function _exitCurrentGraphInner(graphCanvas: GraphCanvas) {
     }
   })
 
-  debug(`exits ${exits}`)
+  debug(`exits ${String(exits)}`)
   if (lastVertex) {
     currentGraphInner._setExit(lastVertex)
   }
-  debug(`Exit innergraph ${currentGraphInner}`)
+  debug(`Exit innergraph ${String(currentGraphInner)}`)
   return graphCanvas._exitContainer()
 }
 
 // TODO: see if this could be done also at the end of the graph
 function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInner: GraphInner) {
   let edgeAndItsIndex: [GraphEdge, number] | undefined
-  debug(`relinkGraphInnerEntryAndExit ${currentGraphInner}`)
+  debug(`relinkGraphInnerEntryAndExit ${String(currentGraphInner)}`)
   // If there's an edge that (RHS) points to current inner inner graph AND the graph has
   // entrance connectable and this edge (LHS) points to entrance node, then relink
   // this edge:
@@ -240,7 +240,7 @@ function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInne
     if (candidateEdge.right.name === currentGraphInner.name &&
       currentGraphInner._entrance instanceof GraphConnectable &&
       candidateEdge.left.name === currentGraphInner._entrance.name) {
-      debug(`  Remove edge ${candidateEdge}`)
+      debug(`  Remove edge ${String(candidateEdge)}`)
       // remove this edge!
       const edgeIndex = graphCanvas.removeEdge(candidateEdge)
       // and then relink it to containers vertices that have no LEFT edges
@@ -260,7 +260,7 @@ function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInne
       vertex._noedges = undefined
       const newEdge = _getEdge(graphCanvas, edgeAndItsIndex[0].edgeType, currentGraphInner._entrance as (GraphConnectable | GraphConnectable[]), vertex, edgeAndItsIndex[0].label,
         undefined, undefined, undefined, undefined, true)
-      debug(`  Add new edge ${newEdge}`)
+      debug(`  Add new edge ${String(newEdge)}`)
       graphCanvas.insertEdge(edgeAndItsIndex[1]++, newEdge)
     }
   }
@@ -282,12 +282,12 @@ function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInne
  */
 export function _getGroupConditionalOrMakeNew(graphCanvas: GraphCanvas, type: string, label: string) {
   const currentContainer = graphCanvas._getCurrentContainer()
-  return new GraphConditional(graphCanvas, type, label, graphCanvas._getCurrentContainer())
+  return new GraphConditional(graphCanvas, type, label, currentContainer)
 }
 
 export function _getGroupLoopOrMakeNew(graphCanvas: GraphCanvas, type: string, label: string) {
   const currentContainer = graphCanvas._getCurrentContainer()
-  return new GraphLoop(graphCanvas, type, label, graphCanvas._getCurrentContainer())
+  return new GraphLoop(graphCanvas, type, label, currentContainer)
 }
 
 /**
@@ -303,7 +303,7 @@ export function _getGroupLoopOrMakeNew(graphCanvas: GraphCanvas, type: string, l
  */
 export function _getGroupOrMakeNew(graphCanvas: GraphCanvas, ref?: GraphContainer, name?: string): GraphContainer {
   if (ref instanceof GraphGroup) return ref
-  debug(`_getGroup() ref:${ref}`)
+  debug(`_getGroup() ref:${String(ref)}`)
   const currenContainer = graphCanvas._getCurrentContainer()
   const newGroup = new GraphGroup(name || String(graphCanvas.GROUPIDS++), currenContainer)
   return currenContainer.addObject(newGroup) as GraphContainer
@@ -342,7 +342,7 @@ export function _getEdge(graphCanvas: GraphCanvas,
   rcompass?: string,
   dontadd?: boolean): GraphEdge {
   const currentContainer = graphCanvas._getCurrentContainer()
-  debug(`_getEdge edgeType=${edgeType} lhs=${lhs}/${lhs.constructor.name} rhs=${rhs} inlineEdgeLabel=${inlineEdgeLabel} commonEdgeLabel=${commonEdgeLabel} edgeColor=${edgeColor} lcompass=${lcompass} rcompass=${rcompass} dontadd=${dontadd}`, true)
+  debug(`_getEdge edgeType=${edgeType} lhs=${String(lhs)}/${lhs.constructor.name} rhs=${String(rhs)} inlineEdgeLabel=${inlineEdgeLabel ?? ''} commonEdgeLabel=${commonEdgeLabel ?? ''} edgeColor=${edgeColor ?? ''} lcompass=${lcompass ?? ''} rcompass=${rcompass ?? ''} dontadd=${dontadd ? 'true' : 'false'}`, true)
   if (rhs instanceof GraphInner && !rhs._getEntrance()) {
     rhs._setEntrance(lhs)
   }
@@ -368,18 +368,18 @@ export function _getEdge(graphCanvas: GraphCanvas,
   // This will NEVER be undefined here, _getEdge always finds or makes an edge, just to satisfy typechecker
   let lastEdge: GraphEdge | undefined
   if (lhs instanceof Array) {
-    debug(`getEdge LHS array, type:${edgeType} l:[${lhs}] r:${rhs} inlineEdgeLabel:${inlineEdgeLabel} commonEdgeLabel: ${commonEdgeLabel} edgeColor:${edgeColor} lcompass:${lcompass} rcompass:${rcompass}`)
+    debug(`getEdge LHS array, type:${edgeType} l:[${String(lhs)}] r:${String(rhs)} inlineEdgeLabel:${inlineEdgeLabel ?? ''} commonEdgeLabel: ${commonEdgeLabel ?? ''} edgeColor:${edgeColor ?? ''} lcompass:${lcompass ?? ''} rcompass:${rcompass ?? ''}`)
     for (let i = 0; i < lhs.length; i++) {
-      debug(`    1Get edge ${lhs[i]}`)
+      debug(`    1Get edge ${String(lhs[i])}`)
       lastEdge = _getEdge(graphCanvas, edgeType, lhs[i], rhs, inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass)
     }
     debug(false)
     return lastEdge as GraphEdge
   }
   if (rhs instanceof Array) {
-    debug(`getEdge RHS array, type:${edgeType} l:${lhs} r:[${rhs}] inlineEdgeLabel:${inlineEdgeLabel} commonEdgeLabel: ${commonEdgeLabel} edgeColor:${edgeColor} lcompass:${lcompass} rcompass:${rcompass}`)
+    debug(`getEdge RHS array, type:${edgeType} l:${String(lhs)} r:[${String(rhs)}] inlineEdgeLabel:${inlineEdgeLabel ?? ''} commonEdgeLabel: ${commonEdgeLabel ?? ''} edgeColor:${edgeColor ?? ''} lcompass:${lcompass ?? ''} rcompass:${rcompass ?? ''}`)
     for (let i = 0; i < rhs.length; i++) {
-      debug(`    2Get edge ${rhs[i]}`)
+      debug(`    2Get edge ${String(rhs[i])}`)
       lastEdge = _getEdge(graphCanvas, edgeType, lhs, rhs[i], inlineEdgeLabel, commonEdgeLabel, edgeColor, lcompass, rcompass)
     }
     debug(false)
@@ -387,7 +387,7 @@ export function _getEdge(graphCanvas: GraphCanvas,
   }
 
   const edge = new GraphEdge(edgeType, currentContainer, lhs, rhs)
-  debug(`${edge}`)
+  debug(`${String(edge)}`)
   if (lcompass) edge.lcompass = lcompass
   else if (getAttribute(lhs, 'compass')) edge.lcompass = getAttribute(lhs, 'compass')
 
@@ -427,11 +427,11 @@ export function _getEdge(graphCanvas: GraphCanvas,
 function maybeRemoveFromRootVertices(currentContainer: GraphContainer, rhs: GraphVertex) {
   // if RHS has no edges (and is contained in a container) AND found from ROOTVERTICES, remove it from ROOTVERTICES
   if (rhs._noedges && currentContainer) {
-    // debug(`REMOVE ${rhs} from root vertices of the container ${currentContainer}`)
+    // debug(`REMOVE ${String(rhs)} from root vertices of the container ${currentContainer}`)
     const idx = currentContainer._ROOTVERTICES.indexOf(rhs)
     if (idx >= 0) {
       const removed = currentContainer._ROOTVERTICES.splice(idx, 1)
-      debug(`REMOVE ${removed} from ROOTVERTICES`)
+      debug(`REMOVE ${removed.join(', ')} from ROOTVERTICES`)
     }
   }
 }
@@ -453,7 +453,7 @@ function _maybePushToCurrentContainerAsReference(graphCanvas: GraphCanvas, refer
     return referred
   }
   debug(`  Add GraphReference(${referred.getName()}) to group (${currentContainer.getName()})`)
-  const ref = new GraphReference(referred.getName() as string, currentContainer)
+  const ref = new GraphReference(referred.getName(), currentContainer)
   currentContainer.addObject(ref)
   return ref
 }

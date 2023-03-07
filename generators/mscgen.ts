@@ -4,7 +4,7 @@ import { generators, type GraphCanvas } from '../model/graphcanvas.js'
 import { GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
+import { multiAttrFmt, output } from '../model/support.js'
 
 // ADD TO INDEX.HTML AS: <option value="mscgen">MSCGEN(cli)</option>
 

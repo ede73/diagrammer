@@ -4,7 +4,6 @@ import { GraphConnectable } from './graphconnectable.js'
 import { GraphReference } from './graphreference.js'
 import { type GraphVertex } from './graphvertex.js'
 import { type GraphObject } from './graphobject.js'
-import { GraphEdge } from './graphedge.js'
 
 export interface ALLOWED_DEFAULTS {
   edgecolor?: string
@@ -32,10 +31,6 @@ export class GraphContainer extends GraphConnectable {
   defaults: ALLOWED_DEFAULTS = {}
   private equal: GraphConnectable[] = []
   protected _OBJECTS: GraphObject[] = []
-
-  constructor(name: string, parent?: GraphContainer) {
-    super(name, parent)
-  }
 
   /**
    * Save EQUAL vertex ranking

@@ -64,7 +64,7 @@ export function nwdiag(graphcanvas: GraphCanvas) {
 
   graphcanvas.getEdges().forEach(edge => {
     if (!(edge.left instanceof GraphGroup || edge.right instanceof GraphGroup)) {
-      lout(`${edge.left.getName()} -- ${edge.right.getName()};`)
+      lout(`${edge.left.getName() ?? ''} -- ${edge.right.getName() ?? ''};`)
     }
   })
 
@@ -93,13 +93,13 @@ export function nwdiag(graphcanvas: GraphCanvas) {
       // split the label to two, NAME and address
       lout(`network ${obj.getName()} {`, true)
       if (obj.getLabel() !== '') {
-        lout(`address="${obj.getLabel()}"`)
+        lout(`address="${obj.getLabel() ?? ''}"`)
       }
       // TODO: bad, flatmatting the graph
       obj.getObjects(true).forEach(secondLvlObj => {
         if (secondLvlObj instanceof GraphReference) {
           // this is referred node
-          lout(`${secondLvlObj.getName()};`)
+          lout(`${secondLvlObj.getName() ?? ''};`)
           // return??
         }
 

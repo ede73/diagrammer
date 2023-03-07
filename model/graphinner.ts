@@ -23,7 +23,7 @@ export class GraphInner extends GraphGroup {
   }
 
   _setEntrance(entrance: (GraphConnectable | GraphConnectable[])) {
-    debug(`subgraph:Set entrance to ${entrance}`)
+    debug(`subgraph:Set entrance to ${String(entrance)}`)
     this._entrance = entrance
     return this
   }
@@ -33,7 +33,7 @@ export class GraphInner extends GraphGroup {
   }
 
   _setExit(exit: GraphConnectable) {
-    debug(`subgraph:Set exit to ${exit}`)
+    debug(`subgraph:Set exit to ${String(exit)}`)
     this._exit = exit
     return this
   }
@@ -47,11 +47,13 @@ export class GraphInner extends GraphGroup {
    */
   _setEdgeLabel(value: string) {
     throw new Error('EdgeLabel N/A')
+    // eslint-disable-next-line no-unreachable
     return this
   }
 
   _getEdgeLabel() {
     throw new Error('EdgeLabel N/A')
+    // eslint-disable-next-line no-unreachable
     return ''
   }
 
@@ -60,21 +62,23 @@ export class GraphInner extends GraphGroup {
    */
   setEqual(value: GraphVertex[]) {
     throw new Error('Equals N/A')
+    // eslint-disable-next-line no-unreachable
     return this
   }
 
   getEqual() {
     throw new Error('Equals N/A')
+    // eslint-disable-next-line no-unreachable
     return []
   }
 
   toString() {
     let fmt = ''
-    if (this._edgelabel) { fmt += `, edgelabel:${this._edgelabel}` }
-    if (this._entrance) { fmt += `, entrance:${this._entrance}` }
+    if (this._edgelabel) { fmt += `, edgelabel:${String(this._edgelabel)}` }
+    if (this._entrance) { fmt += `, entrance:${String(this._entrance)}` }
 
-    if (this._exit) { fmt += `, exit:${this._exit}` }
-    if (this._ROOTVERTICES) { fmt += `, rootvertices:${this._ROOTVERTICES.map(r => r.getName())}` }
+    if (this._exit) { fmt += `, exit:${String(this._exit)}` }
+    if (this._ROOTVERTICES) { fmt += `, rootvertices:${this._ROOTVERTICES.map(r => r.getName()).join(', ')}` }
     return `GraphInner (name:${this.name}${fmt})`
   };
 };

@@ -33,8 +33,8 @@ export class GraphVertex extends GraphConnectable {
     }
 
     this.fetchAndSetContainerDefaults([
-      { attrName: 'vertexcolor' as DefaultSettingKey, callback: color => this.color = color },
-      { attrName: 'vertextextcolor' as DefaultSettingKey, callback: color => this.textcolor = color }])
+      { attrName: 'vertexcolor' as DefaultSettingKey, callback: color => { this.color = color } },
+      { attrName: 'vertextextcolor' as DefaultSettingKey, callback: color => { this.textcolor = color } }])
   }
 
   _assertRegonizedShape(shape: string) {

@@ -12,7 +12,7 @@ export class TreeVertex {
   }
 
   toString() {
-    return `tree(${this.data},children=[${JSON.stringify(this.data)}])`
+    return `tree(${String(this.data)},children=[${JSON.stringify(this.data)}])`
   }
 };
 
@@ -68,7 +68,7 @@ export function traverseTree(root: TreeVertex,
   for (const [i, tn] of root.CHILDREN.entries()) {
     const isLeaf = tn.CHILDREN.length === 0
     const hasVertexSiblings = (i + 1) !== root.CHILDREN.length
-    debug(`vertex ${tn.data.name} is leaf?${isLeaf} hasSiblings${hasVertexSiblings} i=${i + 1}/`)
+    debug(`vertex ${String(tn.data.name)} is leaf?${isLeaf ? 'yeah' : 'nope'} hasSiblings${hasVertexSiblings ? 'yeah' : 'nope'} i=${i + 1}/`)
     callback(tn, isLeaf, hasVertexSiblings)
     if (tn.CHILDREN.length > 0) {
       traverseTree(tn,
@@ -79,7 +79,7 @@ export function traverseTree(root: TreeVertex,
     }
   }
   if (root.CHILDREN.length > 0) {
-    debug(`${root.data.name}has sibling`)
+    debug(`${String(root.data.name)}has sibling`)
     exit(root, hasSibling)
   }
 }

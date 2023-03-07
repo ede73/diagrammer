@@ -1,6 +1,5 @@
 // @ts-check
 
-import { debug } from './debug.js'
 import { type GraphCanvas } from './graphcanvas.js'
 import { type GraphContainer, type DefaultSettingKey } from './graphcontainer.js'
 
@@ -14,7 +13,7 @@ export class GraphObject {
    * That's how it can get linked.
    * "name" for display purposes may be a label instead
    */
-  readonly name?: string
+  readonly name: string
   /**
    * If provided, this will be used as visual name
    */
@@ -37,9 +36,7 @@ export class GraphObject {
    * Name of the object. Exception being edges, they don't have names
    */
   constructor(name: string, parent?/* TODO:Ugh..ugly */: any) {
-    if (name) {
-      this.name = name
-    }
+    this.name = name
     // if (!parent && !(this instanceof GraphCanvas)) {
     //   //throw new Error("Only GraphCanvas is allowed to NOT have a prent, since it is the root")
     // }
@@ -160,7 +157,6 @@ export class GraphObject {
   private getDefaultAttribute(container: GraphContainer,
     attrname: DefaultSettingKey,
     callback?: (defaultAttr: string) => void): string | undefined {
-    const loops = 0
     while (container) {
       const value = container.getDefault(attrname)
       if (value && callback) {

@@ -3,7 +3,6 @@
 import { type GraphCanvas } from './graphcanvas.js'
 import { type GraphContainer } from './graphcontainer.js'
 import { GraphGroup } from './graphgroup.js'
-import { _getGroupOrMakeNew } from './model.js'
 
 export class GraphLoop extends GraphGroup {
   private readonly canvas: GraphCanvas

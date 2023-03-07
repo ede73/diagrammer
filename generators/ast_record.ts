@@ -43,17 +43,18 @@ A-C-B-E
  * d; { <f0> GraphCanvas | {x|q} |{x|q} }
  * TO test: node js/diagrammer.js verbose tests/test_inputs/state5.txt ast_record
 */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function ast_record(graphcanvas: GraphCanvas) {
   const lout = (...args: any[]) => {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
 
-  // For a long text(list of words), try to split it at commas, trying to get at least min_line_length lines
-  // but at maximum max_line_length. If max_line_length reached, split, comma or not
-  const tryToSplit = (msg: string, max_line_length: number = 64, min_line_length: number = 32): string => {
-    if (msg.length > max_line_length) {
-      return `${msg.match(/.{${min_line_length},${max_line_length}}[,]/g)?.join('\\n')}`
+  // For a long text(list of words), try to split it at commas, trying to get at least minLineLength lines
+  // but at maximum maxLineLength. If max_line_length reached, split, comma or not
+  const tryToSplit = (msg: string, maxLineLength: number = 64, minLineLength: number = 32): string => {
+    if (msg.length > maxLineLength) {
+      return `${msg.match(/.{${minLineLength},${maxLineLength}}[,]/g)?.join('\\n') ?? ''}`
     }
     return msg
   }
@@ -64,9 +65,9 @@ export function ast_record(graphcanvas: GraphCanvas) {
     const collectJustNames = ['_OBJECTS', '_ROOTVERTICES', '_EDGES', 'equal']
     const collectJustName = ['left', 'right', 'container', 'parent', '_exit']
 
-    Object.entries(obj).forEach(([k, v], idx) => {
-      if (excludeSomeFields.includes(k) || v === undefined || v === null || typeof (v) === 'function') return
-      if (obj instanceof GraphInner && k === 'defaults') return
+    Object.entries(obj).forEach(([propNames, propValues], idx) => {
+      if (excludeSomeFields.includes(propNames) || propValues === undefined || propValues === null || typeof (propValues) === 'function') return
+      if (obj instanceof GraphInner && propNames === 'defaults') return
       function getName(obj: GraphObject) {
         if (obj instanceof GraphInner) {
           return 'GraphInner'
@@ -77,19 +78,19 @@ export function ast_record(graphcanvas: GraphCanvas) {
         return obj instanceof GraphEdge ? `${obj.left.getName()}-${obj.right.getName()}` : `${obj.getName()}`
       }
 
-      if (collectJustNames.includes(k)) {
-        const names = Object.values(v).map((l) => `${getName(l as GraphObject)}`).join(', ')
+      if (collectJustNames.includes(propNames)) {
+        const names = Object.values(propValues).map((l) => `${getName(l as GraphObject)}`).join(', ')
         // if list is longer than 64, try to break it at commas, but so that one block is atleast 32 chars long not exceeding 64
         // if not possible, then just break
         // also do not loose anything!
-        params[k] = tryToSplit(names, 64, 32)
-      } else if (collectJustName.includes(k)) {
-        params[k] = `${getName(v)}`
-      } else if (k === 'VARIABLES') {
-        const vars = Object.entries(v).map(([k, v]) => `${k}=${v}`).join(', ')
-        params[k] = `${vars}`
+        params[propNames] = tryToSplit(names, 64, 32)
+      } else if (collectJustName.includes(propNames)) {
+        params[propNames] = `${getName(propValues)}`
+      } else if (propNames === 'VARIABLES') {
+        const vars = Object.entries(propValues).map(([varName, varValue]) => `${varName}=${varValue as string}`).join(', ')
+        params[propNames] = `${vars}`
       } else {
-        params[k] = `${v}`
+        params[propNames] = `${String(propValues)}`
       }
     })
     return params

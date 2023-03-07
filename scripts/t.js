@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import * as fs from 'fs'
 import { spawn } from 'child_process'
-import * as tty from 'node:tty'
 import path from 'path'
 // required to populate generators/visualizations
 // eslint-disable-next-line no-unused-vars
@@ -15,7 +14,10 @@ import { singleElementScreenSnapshot } from '../tests/web/snapshot_single_elemen
 // web/parserInteractions.js
 // (naturally)
 // Alas, since they DO use console.log's... output gets messy
-import { clearGeneratorResults, clearGraph, clearParsingErrors, getDiagrammerCode, getParsingError, selectExampleCode, selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn } from '../tests/web/diagrammer_support.js'
+import {
+  clearGeneratorResults, clearParsingErrors, getParsingError,
+  selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn
+} from '../tests/web/diagrammer_support.js'
 import { configSupport } from '../js/configsupport.js'
 import { doLex, doParse } from '../js/diagrammer.js'
 
@@ -310,7 +312,6 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
       // Former, unknonw, latter, perhaps the fact the stream is opened async (even though i DID wait for it)
       // fs.createWriteStream(useConfig.visualizedGraph, { flags: 'w', autoClose: true })
       : fs.openSync(useConfig.visualizedGraph, 'w')
-
     if (useConfig.parsedCode === '') {
       useConfig.throwError('no parsed code')
     }
@@ -323,14 +324,6 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
 
     const visualizationProcess = _startVisualizer(useConfig, outputFileStream, cmd, undefined,
       (stdout) => useConfig.printError(String(stdout)))
-
-    visualizationProcess.on('exit', async () => {
-      useConfig.tp(' visualization EXIT')
-      if (visualizationProcess.exitCode !== 0) {
-        useConfig.tp(`Viz failed ${visualizationProcess.exitCode}`)
-      }
-      visualizationisComplete(visualizationProcess.exitCode)
-    })
 
     if (useConfig.isPipeMarker(useConfig.visualizedGraph) && !useConfig.buggyDiag) {
       useConfig.tp('pipe visualization output to this stdout')
@@ -347,6 +340,9 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     _processes.push(visualizationProcess)
 
     await _waitForProcesses(useConfig, _processes).then((x) => {
+      if (outputFileStream) {
+        fs.closeSync(outputFileStream)
+      }
       visualizationisComplete(visualizationProcess.exitCode)
     }, (rej) => {
       _exitError(`Failure ${rej}`)

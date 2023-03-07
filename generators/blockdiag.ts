@@ -107,7 +107,7 @@ export function blockdiag(graphcanvas: GraphCanvas) {
 
   const parseObjects = (obj: GraphConnectable) => {
     if (obj instanceof GraphGroup) {
-      lout(`group "${obj.getLabel()}"{`, true)
+      lout(`group "${obj.getLabel() ?? ''}"{`, true)
       lout(getAttributeAndFormat(obj, 'color', 'color="{0}"'))
       lout(getAttributeAndFormat(obj, 'label', 'label="{0}"'))
       if (lastNode && lastNode.trim() !== '') {

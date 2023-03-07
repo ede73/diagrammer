@@ -40,6 +40,8 @@ export const mapPropertyProperties = <T, K extends keyof T>(obj: T, mapPropertie
     }
     const result = /* (typeof (obj[m]) === 'function') ? obj[m]() : */ obj[m]
     if (result) {
+      // TODO: fix (but not as eslint suggest, breaks...)
+      // eslint-disable-next-line n/no-callback-literal
       cb(result as string, results, context)
     }
   }

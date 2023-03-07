@@ -13,8 +13,8 @@ import { hasOutwardEdge } from '../model/traversal.js'
 import { _getVertexOrGroup } from '../model/model.js'
 import { getAttributeAndFormat, output } from '../model/support.js'
 import { debug } from '../model/debug.js'
-import { GraphEdge, GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
-import { mapMethodProperties, mapPropertyProperties, mapMethodsOrProperties } from '../model/transforms.js'
+import { GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
+import { mapMethodsOrProperties } from '../model/transforms.js'
 
 // ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(www/cli)</option>
@@ -178,7 +178,7 @@ export function digraph(graphcanvas: GraphCanvas) {
   function getFirstLHSReferredNodeFromGroup(grp: GraphContainer) {
     // TODO: equal to hasOutwardEdge in model.js (except canvas, not yy)
     return graphcanvas.getEdges().find(allEdges =>
-      undefined != grp.getObjects().find(objectInGroup => objectInGroup === allEdges.left)
+      undefined !== grp.getObjects().find(objectInGroup => objectInGroup === allEdges.left)
     )?.left
   }
 
@@ -212,7 +212,7 @@ export function digraph(graphcanvas: GraphCanvas) {
     grp.getObjects().forEach(o => { ltraverseVertices(o) })
 
     const cond = grp.conditional
-    lout(`}//end of ${grp.getName()} ${cond}`, false)
+    lout(`}//end of ${grp.getName()} ${cond ?? ''}`, false)
 
     if (cond) {
       // IF.elseif..else construct...
@@ -226,13 +226,13 @@ export function digraph(graphcanvas: GraphCanvas) {
           lout(`${lastendif}->${_conditionalExitEdge.getName()};`)
         }
       } else {
-        const exitVertexInConditional = `conditional_${cond}_${grp.exitvertex}`
+        const exitVertexInConditional = `conditional_${cond}_${grp.exitvertex ?? ''}`
         if (!lastendif) {
-          lastendif = `conditional_endif_${grp.exitvertex}`
+          lastendif = `conditional_endif_${grp.exitvertex ?? ''}`
           lout(lastendif + '[ shape=circle, label="", width=0.01, height=0.01 ];')
         }
         // TODO:else does not need diamond
-        lout(`${exitVertexInConditional}[ shape=diamond, fixedsize=true, width=1, height=1, label="${grp.getLabel()}" ];`)
+        lout(`${exitVertexInConditional}[ shape=diamond, fixedsize=true, width=1, height=1, label="${grp.getLabel() ?? ''}" ];`)
         if (cond === 'if' && grp._conditionalEntryEdge) {
           lout(`${grp._conditionalEntryEdge.getName()}->${exitVertexInConditional};`)
         }
@@ -309,18 +309,17 @@ export function digraph(graphcanvas: GraphCanvas) {
           o.push('peripheries=2')
           const c = edge.getColor() ?? 'white'
           o.push(`color="${c}:${c}:invis"`)
-        } else if (p === GraphEdgeLineType.NORMAL) { }
+        }
       }],
       ['direction', (p, o, c) => {
         if (p === GraphEdgeDirectionType.BIDIRECTIONAL) { o.push('dir=both') } else if (p === GraphEdgeDirectionType.UNIDIRECTIONAL) { o.push('dir=none') } else if (p === GraphEdgeDirectionType.LEFT) {
           // Swap left hand side and right hand side, always using right pointing edges
           c[0] = c.splice(1, 1, c[0])[0]
-        } else if (p === GraphEdgeDirectionType.RIGHT) { }
+        }
       }]
-    ],
-    attrs, context)
+    ], attrs, context)
     let [lhs, rhs] = context
-    debug(`// link from ${lhs} to ${rhs}`)
+    debug(`// link from ${String(lhs)} to ${String(rhs)}`)
     if (rhs instanceof GraphGroup) {
       // just pick ONE Vertex from group and use lhead
       // TODO: Assuming it is Vertex (if Recursive groups implemented, it
@@ -343,7 +342,7 @@ export function digraph(graphcanvas: GraphCanvas) {
             exits.push(go)
           }
         })
-        // @ts-expect-error
+        // @ts-expect-error TODO: can't really be array (makes no sense, c>(a b c) may? should point to inner group)
         lhs = exits
       } else {
         if (lhs.isEmpty()) {
@@ -361,17 +360,17 @@ export function digraph(graphcanvas: GraphCanvas) {
 
     let t = ''
     if (attrs.length > 0) { t = `[ ${attrs.sort().join(', ')} ]` }
-    debug(`print lhs ${lhs}`)
-    debug(`print rhs ${rhs}`)
+    debug(`print lhs ${String(lhs)}`)
+    debug(`print rhs ${String(rhs)}`)
     if (lhs instanceof Array) {
-      lhs.forEach((element, index, array) => {
-        const rname = (Array.isArray(rhs) ? rhs[0].getName() : rhs.getName())
+      (lhs as GraphConnectable[]).forEach((element, index, array) => {
+        const rname = (Array.isArray(rhs) ? rhs[0].getName() as string : rhs.getName())
         lout(element.getName() +
           getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + '->' + rname +
           getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')
       })
     } else {
-      const rname = (Array.isArray(rhs) ? rhs[0].getName() : rhs.getName())
+      const rname = (Array.isArray(rhs) ? rhs[0].getName() as string : rhs.getName())
       lout(lhs.getName() +
         getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + '->' + rname +
         getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')

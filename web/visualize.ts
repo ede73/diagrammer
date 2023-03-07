@@ -24,7 +24,7 @@ function beautify(generatedCode: string) {
     data = JSON.parse(generatedCode)
   } catch (ex) {
     // too aggressive for the use... many generated code not actually JSON
-    console.error('Failed parsing generated code, perhaps not JSON(digraph etc)?')
+    console.warn('Failed parsing generated code, perhaps not JSON(digraph etc), thish is fine?')
     return
   }
   // Get DOM-element for inserting json-tree
@@ -39,7 +39,7 @@ export function clearBeautified() {
 }
 
 // TODO: move to editor (or elsewhere, but this really isn't parser thingy anymore)
-export async function visualize(visualizer: string) {
+export function visualize(visualizer: string) {
   const result = getInputElement('diagrammer-result')
   const generatedResult = result.value
 
@@ -62,7 +62,10 @@ export async function visualize(visualizer: string) {
       console.error(`O-o, could not find visualizer ${visualizer}`)
       return
     }
-    await f(generatedResult)
+    f(generatedResult).then(done => {
+    }).catch(err => {
+      console.error(`Failed visualizing ${String(err)}`)
+    })
   } else {
     // backend visualizer (unless if we want use Viz)
     const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
@@ -72,6 +75,6 @@ export async function visualize(visualizer: string) {
       },
       (statusCode, statusText, responseText) => {
         alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
-      })
+      }).catch(err => { console.error(`TODO: pointless dualism..error callback and error promise:${String(err)}`) })
   }
 }

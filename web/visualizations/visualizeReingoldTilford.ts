@@ -2,14 +2,14 @@
 import * as d3 from 'd3'
 import { makeSVG, removeOldVisualizations } from '../d3support'
 import { visualizations } from '../globals.js'
+import { type DendrogramDocument } from '../../generators/dendrogram'
 
 visualizations.set('reingoldtilford', visualizeReingoldTilford)
 
-export function visualizeReingoldTilford(generatorResult: string) {
-  const jsonData = JSON.parse(generatorResult)
+export async function visualizeReingoldTilford(generatorResult: string) {
+  const jsonData: DendrogramDocument = JSON.parse(generatorResult)
   const width = 600
   const height = 400
-
   const diameter = height * 0.75
   const radius = diameter / 2
   const tree = d3.tree()
@@ -25,14 +25,22 @@ export function visualizeReingoldTilford(generatorResult: string) {
   const svgimg = makeSVG(width, height)
     .attr('transform', `translate(${width / 2},${height / 2})`)
 
+  // not sure what this type is, but DEFINITELY not what ts suggests
+  // It is as =>
+  // h { children:[],data:{},depth,number,height,parent,x:number,y:number}
+  interface JooJoo {
+    x: number
+    y: number
+  }
   const links = root.links()
   svgimg.selectAll('path.link')
     .data(links)
     .enter().append('path')
     .attr('class', 'link')
+    // @ts-expect-error TODO: TS type detection is totally off here (perhaps I've mismatch with types/implementation)
     .attr('d', d3.linkRadial()
-      .angle(d => d.x)
-      .radius(d => d.y))
+      .angle(d => (d as unknown as JooJoo).x)
+      .radius(d => (d as unknown as JooJoo).x))
 
   const nodes = root.descendants()
   const node = svgimg.selectAll('g.node')

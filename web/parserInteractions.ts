@@ -17,7 +17,7 @@ function setupParser() {
     if (preferParsed && generator) {
       const useVisualizer = visualizer === 'undefined' ? undefined : visualizer
       setGenerator(generator, useVisualizer)
-      console.warn(`  .. changed generator to ${generator} and visualizer ${useVisualizer}`)
+      console.warn(`  .. changed generator to ${generator} and visualizer ${useVisualizer ?? ''}`)
     }
   }
 
@@ -38,11 +38,11 @@ function setupParser() {
   }
 
   /**
-   * @param {string} x
+   * @param {string} traceMsg
    */
-  // TODO: MOVING TO GraphCanvas
-  diagrammerParser.trace = function (x: string) {
-    console.warn(`TRACE:${x}`)
+  // @ts-expect-error trace will exist after this
+  diagrammerParser.trace = function (traceMsg: string) {
+    console.warn(`TRACE:${traceMsg}`)
   }
 }
 
@@ -56,7 +56,7 @@ export function parse(diagrammerCode: string, successCallback: (generator: strin
   const visualizer = getVisualizer()
 
   setupParser()
-  console.warn(`parse(${generator} ${visualizer} ${preferScriptSpecifiedGeneratorAndVisualizer})`)
+  console.warn(`parse(${generator} ${visualizer} ${preferScriptSpecifiedGeneratorAndVisualizer ? 'preferScriptSpecifiedGeneratorAndVisualizer' : ''})`)
   if (!generator) {
     throw new Error('Generator not defined')
   }
@@ -85,10 +85,10 @@ export function parse(diagrammerCode: string, successCallback: (generator: strin
     try {
       successCallback(getGenerator(), getVisualizer())
     } catch (ex) {
-      setError(`Parsing went ok, but visualization failed: ${getError()} and ${ex}`)
+      setError(`Parsing went ok, but visualization failed: ${getError()} and ${String(ex)}`)
     }
   } catch (ex) {
-    setError(`  ..parsed, and failed ${getError()} and ${ex}`)
+    setError(`  ..parsed, and failed ${getError()} and ${String(ex)}`)
     failureCallback(getError(), ex)
   } finally {
     parsingStarted = 0

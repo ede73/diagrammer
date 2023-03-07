@@ -1,2 +1,2 @@
 // @ts-check
-const VERBOSE: boolean = false
+// TODO: no longer any globals, remove...

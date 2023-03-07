@@ -7,6 +7,10 @@ export function getSavedGraphs(): Record<string, string> {
     return data
   }
   const graph = localStorage.getItem('graphs')
+  if (graph === null) {
+    return {}
+  }
+  /* eslint-disable no-eval */
   return eval(`(${graph})`)
 }
 

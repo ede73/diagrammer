@@ -4,7 +4,7 @@ import { makeHTTPGet, makeHTTPPost } from './ajax.js'
 import { setError } from './uiComponentAccess.js'
 
 export function exportGraphs() {
-  makeHTTPPost('web/saveExport.php',
+  return makeHTTPPost('web/saveExport.php',
     JSON.stringify(getSavedGraphs()),
     (msg) => {
       alert('Exported')
@@ -16,9 +16,9 @@ export function exportGraphs() {
     })
 }
 
-export function importGraphs() {
+export async function importGraphs() {
   // eslint-disable-next-line no-undef
-  makeHTTPGet('web/loadExport.php',
+  return await makeHTTPGet('web/loadExport.php',
     (msg) => {
       localStorage.setItem('graphs', JSON.stringify(msg))
       alert('Imported, reload the page!')

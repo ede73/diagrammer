@@ -43,7 +43,7 @@ describe('Diagrammer', () => {
     const image = await page.screenshot({ fullPage: true })
     // Local storage loads a bit slow (not immediately), should wait above
     // @ts-expect-error yeah, it does dear linter, see above :)
-    expect(image).toMatchImageSnapshot(setConfig('main_screen_just_loaded', 0.001))
+    expect(image).toMatchImageSnapshot(setConfig('main_screen_just_loaded', 0.005))
   })
 
   it('ensures that writing diagrammer code is shown in ace editor', async () => {

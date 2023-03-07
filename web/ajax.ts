@@ -1,12 +1,15 @@
 // @ts-check
 import 'jquery'
 
+// TODO: not sure how TS thinks $.ajax is async (doesnt return promise, it it indeed is)
+// though now we've promise and separate callbacks which defeates the purpose.
+// stop using jquery and replace this
 export function makeHTTPPost(
   url: string,
   data: string,
   successCallback: (result: string) => void,
   errorCallback: (statusCode: number, statusText: string, responseText: string) => void) {
-  $.ajax({
+  return $.ajax({
     type: 'POST',
     async: true,
     cache: false,
@@ -27,13 +30,13 @@ export function makeHTTPPost(
   })
 }
 
-export function makeHTTPGet(
+export async function makeHTTPGet(
   url: string,
   successCallback: (result: any) => void,
   errorCallback: (statusCode: number, statusText: string, responseText: string) => void,
   contentType?: string,
   dataType?: string) {
-  $.ajax({
+  return await $.ajax({
     type: 'GET',
     async: true,
     cache: false,

@@ -1,7 +1,7 @@
 // @ts-check
 import { getSavedGraphs } from './localStorage.js'
 import { parse } from './parserInteractions.js'
-import { getGenerator, getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js'
+import { getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js'
 import { makeHTTPGet } from './ajax.js'
 import { clearBeautified, visualize } from './visualize.js'
 // import 'ace' works for VScode (after setting deps), but it errors in webbrowser
@@ -133,7 +133,7 @@ function parseAndRegenerate(preferScriptSpecifiedGeneratorAndVisualizer = false)
   parse(code, (finalGenerator, finalVisualizer) => {
     console.warn(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`)
     visualize(finalVisualizer)
-  }, (error, ex) => {
+  }, (_error, _ex) => {
     clearBeautified()
     console.warn('  parseAndRegenerate() - Parsing failed :(')
   }, preferScriptSpecifiedGeneratorAndVisualizer)
@@ -165,7 +165,7 @@ export function exampleChanged() {
     },
     (stateCode, statusText, responseText) => {
       alert(`Failed fetching example tests/${doc} ${statusText} ${responseText}`)
-    })
+    }).catch(err => { console.error(`HTTP error ${String(err)}`) })
 }
 
 /**
@@ -200,8 +200,8 @@ function hookupToListenToManualGeneratorChanges(visualizeChangesAfterMillis: num
       visualizationTimerID = undefined
     }
     // same as above, js setTimeout, not NodeJs
-    visualizationTimerID = (setTimeout(async () => {
-      await visualize(getVisualizer())
+    visualizationTimerID = (setTimeout(() => {
+      visualize(getVisualizer())
     }, visualizeChangesAfterMillis) as any) as number
   }
 }

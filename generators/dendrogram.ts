@@ -12,6 +12,12 @@ import { debug } from '../model/debug.js'
 // ADD TO INDEX.HTML AS: <option value="dendrogram:reingoldtilford">Reingold-Tilford</option>
 // ADD TO INDEX.HTML AS: <option value="dendrogram:circlepacked">Circle packed(TBD)</option>
 
+export interface DendrogramDocument {
+  name: string
+  children: Array<ThisType<this>>
+  size?: number
+}
+
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/dendrogram.txt dendrogram
  * TODO: The class hierarchy is disconnected. Just using getObjects() doesn't allow proper graph traversal
@@ -51,10 +57,10 @@ export function dendrogram(graphcanvas: GraphCanvas) {
     if (!(lhs instanceof GraphVertex)) return
     const cl = findVertex(tree, lhs)
     if (!cl) {
-      throw new Error(`Left node (${lhs.name}) not found from tree`)
+      throw new Error(`Left node (${lhs.name ?? ''}) not found from tree`)
     }
     if (!findVertex(tree, rhs) && (rhs instanceof GraphVertex)) {
-      debug(`Add ${rhs.name} as child of ${cl.data.name}`)
+      debug(`Add ${rhs.name ?? ''} as child of ${cl.data.name as string}`)
       cl.CHILDREN.push(new TreeVertex(rhs))
     }
   }
@@ -75,10 +81,10 @@ export function dendrogram(graphcanvas: GraphCanvas) {
     if (isLeaf) {
       let comma = ''
       if (hasSibling) { comma = ',' }
-      lout(`{"name": "${t.data.name}", "size": 1}${comma}`)
+      lout(`{"name": "${t.data.name as string}", "size": 1}${comma}`)
     } else {
       lout('{', true)
-      lout(`"name": "${t.data.name}",`)
+      lout(`"name": "${t.data.name as string}",`)
     }
   }, (t) => {
     lout('"children": [', true)

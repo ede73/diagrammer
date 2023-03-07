@@ -175,8 +175,8 @@ if (startedAsCommandline()) {
   // cat whatever | tee whatever has worked for decades (make two node processes, pipe together, spawn..failure :) )
   // TODO: Stop using lexer/parser as processes, make'em function calls
   // Visualizer still needs to be a process.. This timeout MAKES SURE stdout gets flushes and read on t.js (sad..really sad)
-  await new Promise(resolve => setTimeout(resolve, 2000))
-  process.stdout.write('', process.exit)
+  // await new Promise(resolve => setTimeout(resolve, 2000))
+  // process.stdout.write('', process.exit)
   // process.stdout.end()
   // process.stderr.end()
 }

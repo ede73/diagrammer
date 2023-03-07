@@ -5,6 +5,7 @@
     "target": "ES2017",
     //"sourceMap": true,
     "allowJs": true,
+    "moduleResolution": "node",
     "removeComments": true,
     // not even this AND exclude PREVENT tsc going to node_modules
     // completely removing node_modules works, transpiles beautifully still! WTF?
@@ -22,6 +23,17 @@
   // "include": [
   //   "*.ts"
   // ],
+  "typeAcquisition": {
+    "enable": true,
+    "include": [
+      "model",
+      "node",
+      "vscode",
+      "jest",
+      "puppeteer",
+      "jest-puppeteer"
+    ]
+  },
   "exclude": [
     "tests/*",
     "*.js",

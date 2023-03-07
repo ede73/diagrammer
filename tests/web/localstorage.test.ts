@@ -1,8 +1,8 @@
 // @ts-check
 import { sleepABit, writeToElement } from './jest_puppeteer_support.js'
 import { getDiagrammerCode, setDiagrammerCode, getParsingError, clearParsingErrors } from './diagrammer_support.js'
-import { Page, HTTPRequest } from 'puppeteer'
-// import { jest } from '@jest/globals'
+import { type Page } from 'puppeteer'
+import { describe, expect, it } from '@jest/globals'
 
 // test saving, loading from local storage
 describe('Diagrammer', () => {
@@ -11,7 +11,7 @@ describe('Diagrammer', () => {
   const localStorageKey = 'graphs'
 
   beforeAll(async () => {
-    // @ts-ignore page = jest global
+    // @ts-expect-error page = jest global
     const p: Page = page
     await p.goto('http://localhost/~ede/diagrammer/')
     await p.setViewport({ width: 1800, height: 1800 })
@@ -27,7 +27,7 @@ describe('Diagrammer', () => {
   // Jest/Puppeteer annoyance, using globals
   let p: Page
   beforeEach(async () => {
-    // @ts-ignore page = jest global
+    // @ts-expect-error page = jest global
     p = page
   })
 

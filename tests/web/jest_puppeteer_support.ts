@@ -1,5 +1,7 @@
 // @ts-check
-import { Page, Puppeteer } from 'puppeteer'
+import { type Page } from 'puppeteer'
+// defines global.browser and global.page
+// import 'jest-environment-puppeteer'
 
 /**
  * Dump the whole page HTML (and return it)
@@ -90,11 +92,8 @@ function consoleLogWithTime(msg: string) {
  */
 export async function captureBrowserLogs(page: Page) {
   page
-    .on('console', message =>
-      consoleLogWithTime(`${message.type().substr(0, 3).toUpperCase()} ${message.text()} `))
-    .on('pageerror', ({ message }) => consoleLogWithTime(message))
-    .on('response', response =>
-      consoleLogWithTime(`${response.status()} ${response.url()} `))
-    .on('requestfailed', request =>
-      consoleLogWithTime(`${request.failure().errorText} ${request.url()} `))
+    .on('console', message => { consoleLogWithTime(`${message.type().substr(0, 3).toUpperCase()} ${message.text()} `) })
+    .on('pageerror', ({ message }) => { consoleLogWithTime(message) })
+    .on('response', response => { consoleLogWithTime(`${response.status()} ${response.url()} `) })
+    .on('requestfailed', request => { consoleLogWithTime(`${request.failure().errorText} ${request.url()} `) })
 }

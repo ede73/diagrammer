@@ -3,16 +3,13 @@
 import { diagrammerParser } from '../../build/diagrammer_parser.js'
 import { getParserYY } from '../../build/types/diagrammer_parser_types'
 import { generators, GraphCanvas } from '../../model/graphcanvas.js'
-import { GraphConnectable } from '../../model/graphconnectable.js'
 import { GraphContainer } from '../../model/graphcontainer.js'
 import { GraphGroup } from '../../model/graphgroup.js'
 import { GraphInner } from '../../model/graphinner.js'
 import { GraphVertex } from '../../model/graphvertex.js'
 import { GraphConditional } from '../../model/graphconditional.js'
 import { GraphEdgeDirectionType, GraphEdgeLineType } from '../../model/graphedge.js'
-// TODO: tests work perfectly, just VSCode & eslint don't know about jest
-//node_modules/@jest/globals/build/index.d.ts:export declare const expect: JestExpect;
-//import { describe, expect, test } from '@jest/globals'
+import { describe, expect, it } from '@jest/globals'
 
 // curried, canvas passed on call site
 const canvasHas = (prop: string, value: any) => {
@@ -42,22 +39,6 @@ const canvasHas = (prop: string, value: any) => {
 }
 
 // curried, canvas passed on call site
-const canvasContains = (callback: (vertex: GraphConnectable) => any, match: string[]) => {
-  return (canvas: GraphCanvas) => {
-    const res: string[] = []
-    canvas.getObjects().forEach(vertex => {
-      res.push(callback(vertex))
-    })
-    try {
-      expect(res).toStrictEqual(match)
-    } catch (ex) {
-      console.warn(canvas, res)
-    }
-    expect(res).toStrictEqual(match)
-  }
-}
-
-// curried, canvas passed on call site
 const canvasContainsAutoProps = (match: string[]) => {
   return (canvas: GraphCanvas) => {
     const res: string[] = []
@@ -68,10 +49,10 @@ const canvasContainsAutoProps = (match: string[]) => {
         return ''
       }
       if (container instanceof GraphGroup) {
-        return `:${container.getName()}`
+        return `:${container.getName() ?? ''}`
       }
       if (container instanceof GraphInner) {
-        return `:${container.getName()}`
+        return `:${container.getName() ?? ''}`
       }
       throw new Error('Unexpected container')
     }
@@ -86,7 +67,7 @@ const canvasContainsAutoProps = (match: string[]) => {
         collectIfDefined(containerProps, container.getColor())
         collectIfDefined(containerProps, container.getTextColor())
         res.push(containerProps.join(','))
-        connectable.getObjects().forEach(o => c(o))
+        connectable.getObjects().forEach(o => { c(o) })
         container = connectable
       } else {
         const vertexProps: string[] = []
@@ -242,8 +223,7 @@ const grammarTests = [
 
 describe('Parser/grammar rule tests', () => {
   // linter failure, it's used in beforeAll error handler
-  // eslint-disable-next-line no-unused-vars
-  let errors = 0
+  // definitely used, see below
   let graphcanvas: GraphCanvas
 
   beforeAll(async () => {
@@ -259,7 +239,6 @@ describe('Parser/grammar rule tests', () => {
       console.warn('Parsing error found:')
       console.warn(str)
       console.warn(hash)
-      errors = 1
       throw new Error(str)
     }
   })
@@ -271,7 +250,7 @@ describe('Parser/grammar rule tests', () => {
   function parseCode(code: string) {
     getParserYY().GRAPHCANVAS = new GraphCanvas()
     try {
-      // @ts-ignore diagrammerParser type missing, but parse() exists, else this would never work
+      // @ts-expect-error diagrammerParser type missing, but parse() exists, else this would never work
       diagrammerParser.parse(code)
     } catch (ex) {
       console.warn('=====failed parsing======')
@@ -292,11 +271,11 @@ describe('Parser/grammar rule tests', () => {
     it(`Grammar test ${t.g}`, async () => {
       const c = new GraphCanvas()
       getParserYY().GRAPHCANVAS = c
-      // @ts-ignore diagrammer parser type missing, but parse() exists, else this would never work
+      // @ts-expect-error diagrammer parser type missing, but parse() exists, else this would never work
       diagrammerParser.parse(`${t.g}\n`)
       if (t.f) {
         // dump the code (will be part of description, see TODO above)
-        //console.warn(t.g)
+        // console.warn(t.g)
         Object.entries(t.f).forEach((i) => {
           const [, assertion] = i
           assertion(c)
@@ -311,7 +290,7 @@ describe('Parser/grammar rule tests', () => {
 
   it('graphContent/VARIABLE/state 16', async () => {
     parseCode('$(variable:value) $(toinen:kolmas)')
-    const variables: Map<string, string> = new Map(Object.entries(Array(graphcanvas.VARIABLES)[0]))
+    const variables = new Map<string, string>(Object.entries(Array(graphcanvas.VARIABLES)[0]))
     expect(variables.has('variable')).toBeTruthy()
     expect(variables.has('toinen')).toBeTruthy()
     expect(variables.get('variable')).toMatch('value')
@@ -398,7 +377,7 @@ exit;exit node is also required
     expect(graphcanvas.getObjects().length).toBe(5)
     expect(graphcanvas._ROOTVERTICES.length).toBe(2)
     // in this case only all the objects and root vertices do match
-    //expect(graphcanvas.getObjects()).toMatchObject(graphcanvas._ROOTVERTICES)
+    // expect(graphcanvas.getObjects()).toMatchObject(graphcanvas._ROOTVERTICES)
 
     const conditionalGroups = new Set(['1', '2', '3'])
     const verticeNames = new Set(['entry', 'exit'])
@@ -416,18 +395,18 @@ exit;exit node is also required
             expect(obj.exitvertex).toBe(1)
             expect(obj.conditional).toBe('if')
             expect(obj._conditionalEntryEdge?.getName()).toBe('entry')
-            break;
+            break
           case '2':
             expect(obj.getLabel()).toBe('b')
             expect(obj.exitvertex).toBe(2)
             expect(obj.conditional).toBe('elseif')
-            break;
+            break
           case '3':
             expect(obj.getLabel()).toBe('endif')
             expect(obj.exitvertex).toBe(3)
             expect(obj.conditional).toBe('endif')
             expect(obj._conditionalExitEdge?.getName()).toBe('exit')
-            break;
+            break
         }
       } else if (obj instanceof GraphVertex) {
         verticeNames.delete(objectName)

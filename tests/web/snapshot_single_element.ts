@@ -1,5 +1,8 @@
 // @ts-check
-import { Page, Browser } from 'puppeteer'
+import { type Browser } from 'puppeteer'
+// import 'jest-puppeteer'
+// defines global.browser and global.page
+// import 'jest-environment-puppeteer'
 
 /**
  * @param elementHtml e.g. <svg..>..</svg>
@@ -10,5 +13,5 @@ export async function singleElementScreenSnapshot(browser: Browser, elementHtml:
   const page2 = await browser.newPage()
   await page2.setViewport({ width, height })
   await page2.setContent(elementHtml)
-  return await page2.screenshot({ fullPage: true })
+  return page2.screenshot({ fullPage: true })
 }

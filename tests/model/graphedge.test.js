@@ -2,6 +2,7 @@
 import { GraphEdge, GraphEdgeArrowType, GraphEdgeDirectionType, GraphEdgeLineType } from '../../model/graphedge.js'
 import { GraphCanvas } from '../../model/graphcanvas.js'
 import { GraphVertex } from '../../model/graphvertex.js'
+import { describe, expect, it } from '@jest/globals'
 
 describe('GraphEdge tests', () => {
   const rightArrows = [

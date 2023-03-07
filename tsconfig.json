@@ -1,6 +1,5 @@
 {
   "exclude": [
-    "tests/*",
     "*.js",
     "model/*.js",
     "**/*.js",

@@ -1,9 +1,15 @@
 // @ts-check
-import * as jis from 'jest-image-snapshot'
+import type * as jis from 'jest-image-snapshot'
 import { toMatchImageSnapshot } from 'jest-image-snapshot'
-import { Page } from 'puppeteer'
+// import { type Page } from 'puppeteer'
 import { clearGeneratorResults, clearGraph, clearParsingErrors, getDiagrammerCode, getParsingError, selectExampleCode, selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn } from './diagrammer_support.js'
 import { singleElementScreenSnapshot } from './snapshot_single_element.js'
+import { describe, expect, it } from '@jest/globals'
+// defines global.browser and global.page
+import 'jest-environment-puppeteer'
+import { type Page, type Browser } from 'puppeteer'
+
+// node_modules/jest-environment-puppeteer/lib/env.js:201:                this.global.browser = await puppeteer.connect({
 
 /**
  */
@@ -17,69 +23,64 @@ export function setConfig(filename: string, threshold: number = 0.0001): jis.Mat
   }
 }
 
+// jest-puppeteer adds shit to puppeteer Page (subtype)
+const getPage = (): Page => { return page as unknown as Page }
+
 describe('Diagrammer', () => {
   beforeAll(async () => {
-    // @ts-ignore Jest-puppeteer annoyance, using globals
-    const p: Page = page
-    await p.goto('http://localhost/~ede/diagrammer/?do_not_load_initial_example=1')
+    await page.goto('http://localhost/~ede/diagrammer/?do_not_load_initial_example=1')
     // Suddenly (after working for a long time!) started getting errors from here
     // Protocol error (Emulation.setDeviceMetricsOverride): Invalid parameters Failed to deserialize params.height
     // Usually if I close the chrome browser, this goes away, wtf? cache? out of memory?
-    await p.setViewport({ width: 1024, height: 800 })
+    await page.setViewport({ width: 1024, height: 800 })
     // await captureBrowserLogs(page);
-  })
-
-  let p: Page
-  beforeEach(async () => {
-    // @ts-ignore Jest-puppeteer annoyance, using globals
-    p = page
   })
 
   it('asserts against diagrammer main page regressions', async () => {
     expect.extend({
       toMatchImageSnapshot
     })
-    const image = await p.screenshot({ fullPage: true })
+    const image = await page.screenshot({ fullPage: true })
     expect(image).toMatchImageSnapshot(setConfig('main_screen_just_loaded', 0.0001))
   })
 
   it('ensures that writing diagrammer code is shown in ace editor', async () => {
-    await clearGeneratorResults(p)
-    await setDiagrammerCode(p, 'a>b>c')
-    await waitForGeneratorResults(p)
-    const graphText = await getDiagrammerCode(p)
+    await clearGeneratorResults(getPage())
+    await setDiagrammerCode(getPage(), 'a>b>c')
+    await waitForGeneratorResults(getPage())
+    const graphText = await getDiagrammerCode(getPage())
     await expect(graphText).toMatch('a>b>c')
   })
 
   it('ensures that parsing error is displayed correctly', async () => {
-    await clearGeneratorResults(p)
+    await clearGeneratorResults(getPage())
     // of course there isn't any pre-existing errors, but safer this way
-    await clearParsingErrors(p)
+    await clearParsingErrors(getPage())
     try {
-      await setDiagrammerCode(p, 'a>')
+      await setDiagrammerCode(getPage(), 'a>')
       expect(false)
     } catch {
       // Parsing must fail!
     }
 
-    const graphText = await getDiagrammerCode(p)
+    const graphText = await getDiagrammerCode(getPage())
     await expect(graphText).toMatch('a>')
 
-    const errorText = await getParsingError(p)
+    const errorText = await getParsingError(getPage())
     await expect(errorText).toMatch(/.*Parsing error:.+Parse error on line 1.+a&gt;/)
   })
 
   it('selects dendrogram example, verifies parsing succeeds and correct graph is visualized', async () => {
-    await clearGeneratorResults(p)
-    await clearGraph(p)
+    await clearGeneratorResults(getPage())
+    await clearGraph(getPage())
 
-    await selectExampleCode(p, 'test_inputs/dendrogram.txt')
-    await waitForGeneratorResults(p)
+    await selectExampleCode(getPage(), 'test_inputs/dendrogram.txt')
+    await waitForGeneratorResults(getPage())
 
-    const graphText = await getDiagrammerCode(p)
+    const graphText = await getDiagrammerCode(getPage())
     await expect(graphText).toMatch(/^generator dendrogram/)
 
-    await waitUntilGraphDrawn(p)
+    await waitUntilGraphDrawn(getPage())
   }, 200 /* it takes sometimes about 40ms to parse/generate the graph on my laptop (linux running in WSL2) */)
 
   /**
@@ -117,11 +118,10 @@ describe('Diagrammer', () => {
     const snapshotConfig = setConfig(filename, 1)
     const svg = await page.evaluate((selector: string) => document.querySelector(selector)?.outerHTML, selector)
     if (!svg) {
-      throw Error("Could not get SVG code")
+      throw Error('Could not get SVG code')
     }
-    // browser defined in jest globals
-    //@ts-ignore
-    const buffer = await singleElementScreenSnapshot(browser, svg, bbox?.width, bbox?.height)
+    // jest-puppeteer adds its own shit to browser and conflicts with puppeteer Browser (subtype)
+    const buffer = await singleElementScreenSnapshot(browser as unknown as Browser, svg, bbox?.width, bbox?.height)
     expect.extend({
       toMatchImageSnapshot
     })
@@ -130,16 +130,16 @@ describe('Diagrammer', () => {
 
   it('asserts reingold-tilford(dendrogram)(d3.js) visualization works', async () => {
     // flaky: main page loads (initializes with) AST visualization BEFORE our new selection overrides it. Not a TEST problem, but rather index loading default visualization problem
-    await testDynamicRendering(p, 'test_inputs/dendrogram.txt')
+    await testDynamicRendering(getPage(), 'test_inputs/dendrogram.txt')
   }, 1000)
 
   it('asserts radial dendrogram(d3.js) visualization works', async () => {
     // flaky: main page loads (initializes with) AST visualization BEFORE our new selection overrides it. Not a TEST problem, but rather index loading default visualization problem
-    await testDynamicRendering(p, 'test_inputs/dendrogram.txt', 'dendrogram:radialdendrogram')
+    await testDynamicRendering(getPage(), 'test_inputs/dendrogram.txt', 'dendrogram:radialdendrogram')
   }, 1000)
 
   it('asserts sankey(d3.js) visualization works', async () => {
-    await testDynamicRendering(p, 'test_inputs/sankey.txt')
+    await testDynamicRendering(getPage(), 'test_inputs/sankey.txt')
   }, 1000)
 
   it('asserts circlepackage(d3.js) visualization works', async () => {
@@ -147,14 +147,14 @@ describe('Diagrammer', () => {
   }, 1000)
 
   it('asserts umlclass2(GoJS) visualization works', async () => {
-    await testDynamicRendering(p, 'test_inputs/umlclass2.txt')
+    await testDynamicRendering(getPage(), 'test_inputs/umlclass2.txt')
   }, 1000)
 
   it('asserts layerbands(GoJS) visualization works', async () => {
-    await testDynamicRendering(p, 'test_inputs/layerbands.txt')
+    await testDynamicRendering(getPage(), 'test_inputs/layerbands.txt')
   }, 1000)
 
   it('asserts parsetree(GoJS) visualization works', async () => {
-    await testDynamicRendering(p, 'test_inputs/parsetree.txt')
+    await testDynamicRendering(getPage(), 'test_inputs/parsetree.txt')
   }, 1000)
 })

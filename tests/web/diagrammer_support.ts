@@ -1,5 +1,5 @@
 // @ts-check
-import { Page } from 'puppeteer'
+import { type Page } from 'puppeteer'
 import { setGraphText, generatorChanged, getGraphText } from '../../web/editorInteractions.js'
 
 function getAndAssertHTMLElement(selector: string): HTMLElement {
@@ -20,15 +20,15 @@ export async function clearGeneratorResults(page: Page) {
   })
 }
 
-/**
- * Return parsed generated result
- */
-export async function getGeneratorResult(page: Page) {
-  return await page.evaluate(() => {
-    // cannot refer to local functions, this is executed in the browser
-    return (document.querySelector('#diagrammer-result') as HTMLInputElement).value
-  })
-}
+// /**
+//  * Return parsed generated result
+//  */
+// export async function getGeneratorResult(page: Page) {
+//   return  page.evaluate(() => {
+//     // cannot refer to local functions, this is executed in the browser
+//     return (document.querySelector('#diagrammer-result') as HTMLInputElement).value
+//   })
+// }
 
 /**
  * Wait until diagrammer parser(generator) has completed parsing/generation job
@@ -51,7 +51,7 @@ export async function setDiagrammerCode(page: Page, code: string) {
  * Return what ever is in the diagrammer text editor
  */
 export async function getDiagrammerCode(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     return getGraphText()
   })
 }
@@ -60,7 +60,7 @@ export async function getDiagrammerCode(page: Page) {
  * Clear parsing errors
  */
 export async function clearParsingErrors(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     // cannot refer to local functions, this is executed in the browser
     (document.querySelector('div#diagrammer-error') as HTMLInputElement).innerHTML = ''
   })
@@ -70,7 +70,7 @@ export async function clearParsingErrors(page: Page) {
  * Return what ever parsing error
  */
 export async function getParsingError(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     // cannot refer to local functions, this is executed in the browser
     return (document.querySelector('div#diagrammer-error') as HTMLInputElement).innerHTML
   })
@@ -101,7 +101,7 @@ export async function selectGeneratorVisualizer(page: Page, genViz: string) {
 export async function clearGraph(page: Page) {
   await page.evaluate(() => {
     // cannot refer to local functions, this is executed in the browser
-    return (document.querySelector('#diagrammer-graph') as HTMLElement).innerHTML = ''
+    (document.querySelector('#diagrammer-graph') as HTMLElement).innerHTML = ''
   })
 }
 

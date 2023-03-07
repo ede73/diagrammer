@@ -4,4 +4,4 @@ generators/*.js
 web/*.js
 web/visualizations/*.js
 tests/web/*.js
-
+tests/parser/*.js

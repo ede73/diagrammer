@@ -7,6 +7,8 @@ import { GraphInner } from '../model/graphinner.js'
 import { output } from '../model/support.js'
 import { GraphReference } from '../model/graphreference.js'
 import { type GraphObject } from 'model/graphobject.js'
+import { GraphVertex } from '../model/graphvertex.js'
+import { GraphGroup } from '../model/graphgroup.js'
 
 // ADD TO INDEX.HTML AS: <option value="ast_record">Abstract Syntax Tree(Record)</option>
 
@@ -96,18 +98,26 @@ export function ast_record(graphcanvas: GraphCanvas) {
     return params
   }
 
-  function makeRecord(params: Record<string, string>) {
-    return Object.entries(params).map(([k, v], idx) => `{${k}|${v.replace(/"/g, "'")}}`).join('|')
+  function makeRecord(title: string, color: string, params: Record<string, string>) {
+    const ret: string[] = []
+    ret.push(`<table style="rounded" bgcolor="${color}" border='1' cellborder='0' cellspacing='0'>`)
+    ret.push(`<tr><td>${title}</td><td></td></tr>`)
+    const q = Object.entries(params).map(([k, v], idx) => `<tr><td>${k}</td><td>${v.replace(/"/g, "'")}</td></tr>`)
+    ret.push(...q)
+    ret.push('</table>')
+    return ret
   }
 
   lout('digraph {', true)
   lout('compound=true;')
   lout('rankdir=TD;')
-
+  lout('node[fontsize="9"];')
+  lout('edge[fontsize="9"];')
   lout('subgraph cluster_canvas {', true)
   lout('color=yellow;')
-  const label = `{ GraphCanvas | ${makeRecord(collectProperties(graphcanvas))} }`
-  lout(`GraphCanvas[shape=record, color=yellow, fillcolor=yellow, label="${label}"];`)
+
+  const canvas = makeRecord('GraphCanvas', 'magenta', collectProperties(graphcanvas))
+  lout(`GraphCanvas[shape=plaintext, label=<\n\t${canvas.join('\n\t\t')}\n\t>];`)
 
   graphcanvas.getObjects().forEach(function c(n) {
     function getName(obj: GraphObject) {
@@ -117,19 +127,20 @@ export function ast_record(graphcanvas: GraphCanvas) {
       return obj.getName()
     }
 
-    const props = makeRecord(collectProperties(n))
-    const label = `{ ${n.constructor.name} | ${props} }`
-
     if (n instanceof GraphContainer) {
+      const color = n instanceof GraphInner ? 'blue' : 'brown'
+      const groupProps = makeRecord(n.constructor.name, color, collectProperties(n))
       lout(`subgraph cluster_${n.getName()} {`, true)
       lout('color=blue;')
-      lout(`${n.getName()}[shape=record, color=blue, fillcolor=blue, label="${label}"];`)
+      lout(`${n.getName()}[shape=plaintext, label=<\n\t${groupProps.join('\n\t\t')}\t\n>];`)
       // group or inner
       n.getObjects(true).forEach(o => { c(o) })
       lout('}', false)
     } else {
+      const color = n instanceof GraphVertex ? 'maroon' : 'darkgreen'
+      const nodeProps = makeRecord(n.constructor.name, color, collectProperties(n))
       // Vertex (or ref)
-      lout(`${getName(n)}[shape=record, color=red, fillcolor=red, label="${label}"];`)
+      lout(`${getName(n)}[shape=plaintext, label=<\n\t${nodeProps.join('\n\t\t')}\t\n>];`)
     }
   }, true)
 

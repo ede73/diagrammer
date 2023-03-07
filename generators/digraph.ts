@@ -15,6 +15,7 @@ import { getAttributeAndFormat, output } from '../model/support.js'
 import { debug } from '../model/debug.js'
 import { GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
 import { mapMethodsOrProperties } from '../model/transforms.js'
+import { GraphReference } from '../model/graphreference.js'
 
 // ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(www/cli)</option>
@@ -112,7 +113,9 @@ export function digraph(graphcanvas: GraphCanvas) {
 
     getAttributeAndFormat(obj, 'image', 'image="icons{0}"', nattrs)
     getAttributeAndFormat(obj, 'textcolor', 'fontcolor="{0}"', nattrs)
-
+    if (((obj instanceof GraphVertex) || (obj instanceof GraphReference)) && obj.image) {
+      nattrs.push('penwidth=0')
+    }
     if (obj instanceof GraphVertex && obj.shape) {
       const currentShape = obj.shape as keyof typeof DigraphShapeMap
       if (obj.shape && !DigraphShapeMap[currentShape]) {

@@ -1,0 +1,49 @@
+#!bin/sh
+cat row1.dot |grep fixed|grep -v //|awk '{printf("echo \"digraph{%s}\"|dot -Tpng -ox%s.png\n",$0,$1)}'|sh -
+exit 0
+digraph {
+    compound=true;
+    rankdir=TD;
+    actor [ shape="cds"                    width=1 height=1  fixedsize=true color=blue style=filled];
+    // style=rounded
+    beginpoint [ shape="box" style=rounded width=1 height=1  fixedsize=true color=blue style=filled];
+    box [ shape="box" width=1              height=1  fixedsize=true color=blue style=filled];
+
+    circle [ shape="circle" width=1 height=1  fixedsize=true color=blue style=filled];
+
+    cloud [ shape="tripleoctagon" width=1 height=1  fixedsize=true color=blue style=filled];
+    condition [ shape="tripleoctagon" width=1 height=1  fixedsize=true color=blue style=filled];
+
+    database [ shape="cylinder" width=1 height=1  fixedsize=true color=blue style=filled];
+    default [ shape="Mcircle" width=1 height=1  fixedsize=true color=blue style=filled];
+    diamond [ shape="box" width=1 height=1  fixedsize=true color=blue style=filled];
+    dots [ shape="point" width=1 height=1  fixedsize=true color=blue style=filled];
+    doublecircle [ shape="doublecircle" width=1 height=1  fixedsize=true color=blue style=filled];
+
+    ellipse [ shape="ellipse" width=1 height=1  fixedsize=true color=blue style=filled];
+
+    endpoint [ shape="box" style=rounded width=1 height=1  fixedsize=true color=blue style=filled];
+
+    input [ shape="parallelogram" width=1 height=1  fixedsize=true color=blue style=filled];
+
+    loop [ shape="invtrapezium" width=1 height=1  fixedsize=true color=blue style=filled];
+    loopend [ shape="invhouse" width=1 height=1  fixedsize=true color=blue style=filled];
+    loopin [ shape="house" width=1 height=1  fixedsize=true color=blue style=filled];
+    loopout [ shape="invhouse" width=1 height=1  fixedsize=true color=blue style=filled];
+
+    mail [ shape="folder" width=1 height=1  fixedsize=true color=blue style=filled];
+
+    minidiamond [ shape="Mdiamond" width=1 height=1  fixedsize=true color=blue style=filled];
+    minisquare [ shape="Msquare" width=1 height=1  fixedsize=true color=blue style=filled];
+    note [ shape="note" width=1 height=1  fixedsize=true color=blue style=filled];
+    record [ shape="record" width=1 height=1  fixedsize=true color=blue style=filled];
+
+    rect [ shape="box" width=1 height=1  fixedsize=true color=blue style=filled];
+
+    // style=rounded
+    roundedbox [ shape="box" style=rounded  width=1 height=1  fixedsize=true color=blue style=filled];
+
+    square [ shape="square" width=1 height=1  fixedsize=true color=blue style=filled];
+
+    terminator [ shape="ellipse" width=1 height=1  fixedsize=true color=blue style=filled];
+}

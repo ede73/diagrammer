@@ -173,3 +173,10 @@ clean:
 	rm -f .error
 	rm -f build/types/*
 	rm -f generators/*.js generators/*.js.map model/*.js model/*.js.map web/visualizations/*.js web/visualizations/*.js.map
+
+watch:
+	# Alas each file is usually modified many times (even on one save) causing massive build burst
+	inotifywait -m -e modify --format '%w%f' --include ".*.ts$$" model generators web tests| while read path; do make;done &
+
+stopwatch:
+	killall -r [i]notifywait

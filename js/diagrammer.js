@@ -50,7 +50,7 @@ export function doLex (
   /** @type {string} */diagrammerCode,
   /** @type {(token:string,codePart:any)=>void} */resultsCallback) {
   if (!diagrammerCode.trim()) {
-    config.tp.throwError('No code to parser')
+    config.tp.throwError('No code to lexer')
   }
   config.tp('Begin lex testing')
   const st = lexer.diagrammerLexer

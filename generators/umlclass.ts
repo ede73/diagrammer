@@ -189,7 +189,9 @@ export function umlclass(graphcanvas: GraphCanvas) {
             // parameters something like (name:type,...) - what ever was types
             // Wonder which is more likely to be optional, name or type?
             const parameterList = all.groups.parameters.replace(/[()]/g, '').split(',')
-            console.log(parameterList)
+            // TODO: Make eslinter rule preventing console.log, constantly messes with diagrammer generation https://eslint.org/docs/latest/rules/no-console
+            // console.error is fine(i guess)
+            //console.log(parameterList)
             ret.parameters = parameterList.map(p => {
               const [name, type] = p.trim().split(':')
               return { name: name?.trim(), type: type?.trim() } as ParameterTypeT
@@ -254,7 +256,6 @@ export function umlclass(graphcanvas: GraphCanvas) {
     } else {
       if (assoc.length > 1) {
         console.error(`Ambiguous association type on ${edge.left.getName()}${edge.edgeType}${edge.right.getName()}, picking first`)
-        console.log(assoc)
       }
       edgeRep.relationship = assoc[0][0]
     }

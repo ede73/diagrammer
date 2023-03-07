@@ -9,9 +9,15 @@ import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { generators, visualizations } from '../model/graphcanvas.js'
 import puppeteer from 'puppeteer'
 import { singleElementScreenSnapshot } from '../tests/web/snapshot_single_element.js'
+// uh oh..this RUNS code in:
+// tests/web/diagrammer_support.js
+// web/editorInteractions.js
+// web/parserInteractions.js
+// (naturally)
+// Alas, since they DO use console.log's... output gets messy
 import { clearGeneratorResults, clearGraph, clearParsingErrors, getDiagrammerCode, getParsingError, selectExampleCode, selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn } from '../tests/web/diagrammer_support.js'
 import { configSupport } from '../js/configsupport.js'
-import { doLex } from '../js/diagrammer.js'
+import { doLex, doParse } from '../js/diagrammer.js'
 
 async function sshot (page) {
   const options = {
@@ -109,13 +115,16 @@ function _prepProcess (child, gotStdout, gotStdErr) {
   return child
 }
 
-function _startProcess (useConfig, args, gotStdout, gotStdErr, fd, inheritStdin) {
-  const options = { stdio: [inheritStdin ? 'inherit' : 'pipe', fd || 'pipe', 'pipe'], shell: true }
+function _startVisualizer (useConfig, fd, args, gotStdout, gotStdErr) {
+  useConfig.tp(`Start visualizer ${args}`)
+  const options = { stdio: ['pipe', fd || 'pipe', 'pipe'], shell: true }
   const cmd = args[0]
   const a = args.splice(1)
   useConfig.tp(`spawn ${cmd} with ${a} options ${JSON.stringify(options)}`)
   const proc = spawn(cmd, a, options)
-  return _prepProcess(proc, gotStdout, gotStdErr)
+  const v = _prepProcess(proc, gotStdout, gotStdErr)
+  v.title = 'VISUALIZER'
+  return v
 }
 
 // TODO: read dynamically
@@ -142,55 +151,12 @@ function _resolveGenerator (useConfig) {
   return generator
 }
 
-function _startParser (useConfig, gotStdout, gotStdErr) {
-  if (_isHackyWebVisualizer(useConfig.visualizer)) {
-    useConfig.throwError('No point parsing just webvisualizer code')
-  }
-  const args = ['js/diagrammer.js']
-  if (useConfig.verbose) {
-    args.push('verbose')
-  }
-  if (useConfig.trace) {
-    args.push('trace')
-  }
-  if (useConfig.traceProcess) {
-    args.push('traceprocess')
-  }
-  args.push(useConfig.input)
-  args.push(_resolveGenerator(useConfig))
-  const p = _startProcess(
-    useConfig,
-    args,
-    gotStdout,
-    gotStdErr,
-    undefined,
-    useConfig.isPipeMarker(useConfig.input))
-  p.title = 'PARSER'
-  return p
-}
-
-function _startVisualizer (useConfig, fd, args, gotStdout, gotStdErr) {
-  useConfig.tp(`Start visualizer ${args}`)
-  const v = _startProcess(useConfig, args, gotStdout, gotStdErr, fd)
-  v.title = 'VISUALIZER'
-  return v
-}
-
 const _waitForProcesses = (useConfig, processes) => {
   return new Promise((resolve, reject) => {
     let completed = 0
 
     const onExit = (process) => () => {
-      useConfig.tp(`  (Process ${process.title} exited with)`)
-      // There's never a BLIP in stdout if diagrammer.js exits quickly (and it does), stdout callback is NEVER called
-      // even if hundres of bytes of data written there (and we are PIPING)
-      // const x = process.stdout
-      // if (x) {
-      //   useConfig.tp(`readableLength ${x.readableLength}`)
-      //   useConfig.tp(`destroyed ${x.destroyed}`)
-      //   useConfig.tp(`closed ${x.closed}`)
-      //   useConfig.tp(`readableLength ${x.readableLength}`)
-      // }
+      useConfig.tp(`  (Process ${process.title} exited with ${process.exitCode})`)
       completed++
       if (completed === processes.length) {
         resolve()
@@ -201,6 +167,7 @@ const _waitForProcesses = (useConfig, processes) => {
       process.on('exit', onExit(process))
       process.on('error', (r) => {
         useConfig.printError(`Something went wrong with ${process.title} - ${r}`)
+        useConfig.dumpTraces()
         reject(r)
       })
     })
@@ -298,35 +265,43 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     process.exit(0)
   }
 
-  const _processes = []
+  useConfig.code = await useConfig.readFile(useConfig.input)
 
+  useConfig.tp(`Config: ${JSON.stringify(useConfig)}`)
   // use lexer (separate lexer test process) only during test runs
   if (useConfig.tests) {
     useConfig.tp('Prepare lexical tester')
-    useConfig.code = await useConfig.readFile(useConfig.input)
     doLex(useConfig, useConfig.code, (token, codePart) => {
       if (useConfig.trace) { useConfig.tp(`LEX: ${token} ${codePart}`) }
     })
   }
 
   useConfig.tp('Start parsing process')
-  const _parsingProcess = _startParser(useConfig,
-    (stdout) => {
-      useConfig.tp(`Received stdout ${stdout}`)
-      useConfig.parsedCode += stdout
-      if (useConfig.trace) useConfig.printError(`${stdout}`)
-    },
-    (stderr) => useConfig.tp(`PARSER: STDERR: ${stderr}`))
+  const _processes = []
 
-  _processes.push(_parsingProcess)
+  // TODO: temp, remove when web viz..finished
+  if (_isHackyWebVisualizer(useConfig.visualizer)) {
+    useConfig.throwError('No point parsing just webvisualizer code')
+  }
 
-  useConfig.tp(`Config: ${JSON.stringify(useConfig)}`)
-  let outputFileStream
+  doParse(
+    useConfig,
+    useConfig.code,
+    _resolveGenerator(useConfig),
+    (result) => {
+      useConfig.parsedCode += `${result}\n`
+    }, (parseError, hash) => {
+      useConfig.tp(`Parse error: ${parseError} ${hash}`)
+    }, (trace) => {
+      if (useConfig.trace) {
+        useConfig.tp(`parser trace: ${trace}`)
+      }
+    })
 
   if (!useConfig.dontRunVisualizer && !_isHackyWebVisualizer(useConfig)) {
     useConfig.tp('Going to run visualizer')
     // uh, nwdiag(all diags) use buggy PIL library opening R&W (seekable) access to pipe
-    outputFileStream = (useConfig.isPipeMarker(useConfig.visualizedGraph) || useConfig.buggyDiag)
+    const outputFileStream = (useConfig.isPipeMarker(useConfig.visualizedGraph) || useConfig.buggyDiag)
       ? undefined
       // something fishy with pipes
       //  https://stackoverflow.com/questions/61856264/node-piping-process-stdout-doesnt-drain-automatically
@@ -336,7 +311,11 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
       // fs.createWriteStream(useConfig.visualizedGraph, { flags: 'w', autoClose: true })
       : fs.openSync(useConfig.visualizedGraph, 'w')
 
+    if (useConfig.parsedCode === '') {
+      useConfig.throwError('no parsed code')
+    }
     const cmd = _getVisualizerCommand(useConfig)
+    // TODO: web viz hack... remove
     if (typeof (cmd) === 'function') {
       await cmd(useConfig.visualizer, 'a>b>c>d>e', useConfig.visualizedGraph)
       process.exit(0)
@@ -348,45 +327,33 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     visualizationProcess.on('exit', async () => {
       useConfig.tp(' visualization EXIT')
       if (visualizationProcess.exitCode !== 0) {
-        useConfig.tp(`${useConfig.parsedCode}`)
+        useConfig.tp(`Viz failed ${visualizationProcess.exitCode}`)
       }
       visualizationisComplete(visualizationProcess.exitCode)
     })
 
-    _parsingProcess.stdout.pipe(visualizationProcess.stdin).on('error', err =>
-      useConfig.printError(`mf! ${err}`)
-    )
-
     if (useConfig.isPipeMarker(useConfig.visualizedGraph) && !useConfig.buggyDiag) {
+      useConfig.tp('pipe visualization output to this stdout')
       visualizationProcess.stdout.pipe(process.stdout)
     }
+
+    visualizationProcess.stdin.on('error', (error) => {
+      useConfig.tp(`stdin error... ${error}`)
+      useConfig.dumpTraces()
+    })
+    visualizationProcess.stdin.setEncoding('utf-8')
+    visualizationProcess.stdin.write(useConfig.parsedCode)
+    visualizationProcess.stdin.end()
     _processes.push(visualizationProcess)
-  }
 
-  useConfig.tp(`Wait for all the processes (${_processes.length})`)
-  await _waitForProcesses(useConfig, _processes).then((x) => {
-    // all done...
-    if (useConfig.dontRunVisualizer) {
-      useConfig.tp('not running viz...so')
-      if (_parsingProcess) {
-        if (useConfig.parsedCode.trim() === '') {
-          useConfig.tp(`Fuck${useConfig.input}, we got empty result frmo process`)
-        }
-        visualizationisComplete(_parsingProcess.exitCode)
-      }
-    }
-  }, (rej) => {
-    _exitError(`Failure ${rej}`)
-  })
-
-  if (_parsingProcess.exitCode !== 0) {
-    const generator = visualizerToGenerator().get(useConfig.visualizer)
-    useConfig.throwError(`Transpiling diagrammer code with ${generator} failed ${_parsingProcess.exitCode}`)
-  }
-
-  // TODO: move to exit above..
-  if (_processes.length === 3 && _processes[2].exitCode !== 0) {
-    useConfig.throwError(`Visualizer ${useConfig.visualizer} failed processing ${useConfig.input} code=${_processes[2].exitCode}`)
+    await _waitForProcesses(useConfig, _processes).then((x) => {
+      visualizationisComplete(visualizationProcess.exitCode)
+    }, (rej) => {
+      _exitError(`Failure ${rej}`)
+    })
+  } else {
+    // not running visualization, so we're all done here
+    visualizationisComplete(0)
   }
 }
 

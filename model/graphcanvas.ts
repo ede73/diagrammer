@@ -1,23 +1,17 @@
 // @ts-check
 import { GraphEdge } from '../model/graphedge.js'
-import { GraphConnectable } from './graphconnectable.js'
+import { type GraphConnectable } from './graphconnectable.js'
 import { GraphGroup } from './graphgroup.js'
 import { GraphContainer } from './graphcontainer.js'
 
 export const generators = new Map()
 export const visualizations = new Map()
 
-interface IParseError {
-  (str: string, hash: string): void;
-}
+type IParseError = (str: string, hash: string) => void
 
-interface IResult {
-  (generatedCodeLine: string): void;
-}
+type IResult = (generatedCodeLine: string) => void
 
-interface IVariables {
-  [name: string]: string
-}
+type IVariables = Record<string, string>
 
 /**
 * Represents the graph canvas.
@@ -187,7 +181,7 @@ export class GraphCanvas extends GraphContainer {
   }
 
   removeEdge(edge: GraphEdge) {
-    const edgeIndex = this._OBJECTS.findIndex(p => p === edge);
+    const edgeIndex = this._OBJECTS.findIndex(p => p === edge)
     this._OBJECTS.splice(edgeIndex, 1)
     return edgeIndex
   }

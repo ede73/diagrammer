@@ -26,16 +26,12 @@ export function visualizeReingoldTilford(generatorResult: string) {
     .attr('transform', `translate(${width / 2},${height / 2})`)
 
   const links = root.links()
-  // eslint-disable-next-line no-unused-vars
-  const link = svgimg.selectAll('path.link')
+  svgimg.selectAll('path.link')
     .data(links)
     .enter().append('path')
     .attr('class', 'link')
-    // @ts-ignore
     .attr('d', d3.linkRadial()
-      // @ts-ignore
       .angle(d => d.x)
-      // @ts-ignore
       .radius(d => d.y))
 
   const nodes = root.descendants()
@@ -58,9 +54,9 @@ export function visualizeReingoldTilford(generatorResult: string) {
     .attr('dy', 3)
     .attr('text-anchor', function (d) { return d.children ? 'end' : 'start' })
     .text(function (d) {
-      // @ts-ignore
+      // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
       return d.data.name
     })
 
-  d3.select(self.frameElement).style('height', height + 'px')
+  d3.select(self.frameElement).style('height', `${height}px`)
 }

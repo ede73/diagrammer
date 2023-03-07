@@ -23,8 +23,7 @@ export function makeHTTPPost(
       }
     },
     // Type: Function( jqXHR jqXHR, String textStatus, String errorThrown )
-    error: (jqXHR, textStatus, errorThrown) =>
-      errorCallback(jqXHR.status, jqXHR.statusText, jqXHR.responseText)
+    error: (jqXHR, textStatus, errorThrown) => { errorCallback(jqXHR.status, jqXHR.statusText, jqXHR.responseText) }
   })
 }
 
@@ -42,9 +41,8 @@ export function makeHTTPGet(
     dataType,
     url,
     // Type: Function( Anything data, String textStatus, jqXHR jqXHR )
-    success: (data, textStatus, jqXHR) => successCallback(data),
+    success: (data, textStatus, jqXHR) => { successCallback(data) },
     // Type: Function( jqXHR jqXHR, String textStatus, String errorThrown )
-    error: (jqXHR, textStatus, errorThrown) =>
-      errorCallback(jqXHR.status, jqXHR.statusText, jqXHR.responseText)
+    error: (jqXHR, textStatus, errorThrown) => { errorCallback(jqXHR.status, jqXHR.statusText, jqXHR.responseText) }
   })
 }

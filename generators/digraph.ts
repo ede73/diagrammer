@@ -1,11 +1,11 @@
 // @ts-check
-import { generators, GraphCanvas, visualizations } from '../model/graphcanvas.js'
+import { generators, type GraphCanvas, visualizations } from '../model/graphcanvas.js'
 // used in typing
 // eslint-disable-next-line no-unused-vars
-import { GraphConnectable } from '../model/graphconnectable.js'
+import { type GraphConnectable } from '../model/graphconnectable.js'
 // used in typing
 // eslint-disable-next-line no-unused-vars
-import { GraphContainer } from '../model/graphcontainer.js'
+import { type GraphContainer } from '../model/graphcontainer.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphInner } from '../model/graphinner.js'
 import { GraphVertex } from '../model/graphvertex.js'
@@ -89,7 +89,7 @@ export function digraph(graphcanvas: GraphCanvas) {
     const styles: string[] = []
     if (obj.color) {
       nattrs.push(`fillcolor="${obj.color}"`)
-      styles.push(`filled`)
+      styles.push('filled')
     }
     getAttributeAndFormat(obj, 'style', '{0}', styles)
 
@@ -98,7 +98,7 @@ export function digraph(graphcanvas: GraphCanvas) {
       nattrs.push(`URL="${url}"`)
     }
     if (styles.length > 0) {
-      if (styles.join('').indexOf('singularity') !== -1) {
+      if (styles.join('').includes('singularity')) {
         // invis node is not singularity!, circle with minimal
         // width/height IS!
         nattrs.push('shape="circle"')
@@ -170,9 +170,9 @@ export function digraph(graphcanvas: GraphCanvas) {
         .setStyle('invis'))
       return
     }
-    (grp as GraphContainer).getObjects().forEach(o => fixgroup(o))
+    (grp as GraphContainer).getObjects().forEach(o => { fixgroup(o) })
   }
-  graphcanvas.getObjects().forEach(o => fixgroup(o))
+  graphcanvas.getObjects().forEach(o => { fixgroup(o) })
 
   // pick node from group that is FIRST pointed by edges left hand side
   function getFirstLHSReferredNodeFromGroup(grp: GraphContainer) {
@@ -202,14 +202,14 @@ export function digraph(graphcanvas: GraphCanvas) {
     // if (cond=="endif")continue;
     // Group name,OBJECTS,get/setEqual,toString
     mapMethodsOrProperties(grp, [
-      ['isInnerGraph', (p, o) => lout('graph[ style=invis ];')],
-      ['getLabel', (p, o) => lout(getAttributeAndFormat(grp, 'label', 'label="{0}";'))],
+      ['isInnerGraph', (p, o) => { lout('graph[ style=invis ];') }],
+      ['getLabel', (p, o) => { lout(getAttributeAndFormat(grp, 'label', 'label="{0}";')) }],
       ['getColor', (p, o, c) => {
         lout('style=filled;')
         lout(getAttributeAndFormat(grp, 'color', 'color="{0}";'))
       }]
     ])
-    grp.getObjects().forEach(o => ltraverseVertices(o))
+    grp.getObjects().forEach(o => { ltraverseVertices(o) })
 
     const cond = grp.conditional
     lout(`}//end of ${grp.getName()} ${cond}`, false)
@@ -221,7 +221,7 @@ export function digraph(graphcanvas: GraphCanvas) {
         // never reached
         const _conditionalExitEdge = grp._conditionalExitEdge
         if (_conditionalExitEdge) {
-          //lout(`${lastexit}->${_conditionalExitEdge.getName()}[ color=red ];`)
+          // lout(`${lastexit}->${_conditionalExitEdge.getName()}[ color=red ];`)
           lout(`${lastexit}->${lastendif}[ color=red ];`)
           lout(`${lastendif}->${_conditionalExitEdge.getName()};`)
         }
@@ -267,7 +267,7 @@ export function digraph(graphcanvas: GraphCanvas) {
       throw new Error('Not a node nor a group, NOT SUPPORTED')
     }
   }
-  graphcanvas.getObjects().forEach(o => ltraverseVertices(o))
+  graphcanvas.getObjects().forEach(o => { ltraverseVertices(o) })
 
   lout('//links start')
   graphcanvas.getEdges().forEach(edge => {
@@ -276,7 +276,7 @@ export function digraph(graphcanvas: GraphCanvas) {
     const context = [edge.left, edge.right]
     mapMethodsOrProperties(edge, [
       ['label', (p, o) => {
-        if (p.indexOf('::') !== -1) {
+        if (p.includes('::')) {
           const labels = p.split('::')
           o.push(`label="${labels[0].trim()}"`)
           o.push(`xlabel="${labels[1].trim()}"`)
@@ -288,44 +288,37 @@ export function digraph(graphcanvas: GraphCanvas) {
       ['color', (p, o) => o.push(`color="${p}"`)],
       ['textcolor', (p, o) => o.push(`fontcolor="${p}"`)],
       ['leftArrowType', (p, o) => {
-        if (p == "none()" || p == "normal(< or >)") return;
-        if (p == "double(<< or >>)") p = "diamond";
-        else if (p == "flat(|)") p = "tee";
-        const astyle = "arrowtail"//edge.direction() == GraphEdgeDirectionType.LEFT ? "arrowhead" : "arrowtail"
+        if (p === 'none()' || p === 'normal(< or >)') return
+        if (p === 'double(<< or >>)') p = 'diamond'
+        else if (p === 'flat(|)') p = 'tee'
+        const astyle = 'arrowtail'// edge.direction() === GraphEdgeDirectionType.LEFT ? "arrowhead" : "arrowtail"
         o.push(`${astyle}="${p}"`)
       }],
       ['rightArrowType', (p, o) => {
         //
-        if (p == "none()" || p == "normal(< or >)") return;
-        if (p == "double(<< or >>)") p = "diamond";
-        else if (p == "flat(|)") p = "tee";
-        const astyle = "arrowhead"//edge.direction() == GraphEdgeDirectionType.RIGHT ? "arrowhead" : "arrowtail"
+        if (p === 'none()' || p === 'normal(< or >)') return
+        if (p === 'double(<< or >>)') p = 'diamond'
+        else if (p === 'flat(|)') p = 'tee'
+        const astyle = 'arrowhead'// edge.direction() === GraphEdgeDirectionType.RIGHT ? "arrowhead" : "arrowtail"
         o.push(`${astyle}="${p}"`)
       }],
       ['lineType', (p, o) => {
-        if (p == GraphEdgeLineType.BROKEN) { o.push('arrowhead="tee"') }
-        else if (p == GraphEdgeLineType.DASHED) {
+        if (p === GraphEdgeLineType.BROKEN) { o.push('arrowhead="tee"') } else if (p === GraphEdgeLineType.DASHED) {
           o.push('style="dashed"')
-        }
-        else if (p == GraphEdgeLineType.DOTTED) { o.push('style="dotted"') }
-        else if (p == GraphEdgeLineType.DOUBLE) {
+        } else if (p === GraphEdgeLineType.DOTTED) { o.push('style="dotted"') } else if (p === GraphEdgeLineType.DOUBLE) {
           o.push('peripheries=2')
           const c = edge.getColor() ?? 'white'
           o.push(`color="${c}:${c}:invis"`)
-        }
-        else if (p == GraphEdgeLineType.NORMAL) { }
+        } else if (p === GraphEdgeLineType.NORMAL) { }
       }],
       ['direction', (p, o, c) => {
-        if (p == GraphEdgeDirectionType.BIDIRECTIONAL) { o.push('dir=both') }
-        else if (p == GraphEdgeDirectionType.UNIDIRECTIONAL) { o.push('dir=none') }
-        else if (p == GraphEdgeDirectionType.LEFT) {
+        if (p === GraphEdgeDirectionType.BIDIRECTIONAL) { o.push('dir=both') } else if (p === GraphEdgeDirectionType.UNIDIRECTIONAL) { o.push('dir=none') } else if (p === GraphEdgeDirectionType.LEFT) {
           // Swap left hand side and right hand side, always using right pointing edges
-          c[0] = c.splice(1, 1, c[0])[0];
-        }
-        else if (p == GraphEdgeDirectionType.RIGHT) { }
-      }],
+          c[0] = c.splice(1, 1, c[0])[0]
+        } else if (p === GraphEdgeDirectionType.RIGHT) { }
+      }]
     ],
-      attrs, context)
+    attrs, context)
     let [lhs, rhs] = context
     debug(`// link from ${lhs} to ${rhs}`)
     if (rhs instanceof GraphGroup) {
@@ -350,7 +343,7 @@ export function digraph(graphcanvas: GraphCanvas) {
             exits.push(go)
           }
         })
-        // @ts-ignore
+        // @ts-expect-error
         lhs = exits
       } else {
         if (lhs.isEmpty()) {
@@ -372,13 +365,13 @@ export function digraph(graphcanvas: GraphCanvas) {
     debug(`print rhs ${rhs}`)
     if (lhs instanceof Array) {
       lhs.forEach((element, index, array) => {
-        const rname = (Array.isArray(rhs) ? rhs[0].getName() : rhs.getName());
+        const rname = (Array.isArray(rhs) ? rhs[0].getName() : rhs.getName())
         lout(element.getName() +
           getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + '->' + rname +
           getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')
       })
     } else {
-      const rname = (Array.isArray(rhs) ? rhs[0].getName() : rhs.getName());
+      const rname = (Array.isArray(rhs) ? rhs[0].getName() : rhs.getName())
       lout(lhs.getName() +
         getAttributeAndFormat(edge, 'lcompass', '{0}').trim() + '->' + rname +
         getAttributeAndFormat(edge, 'rcompass', '{0}').trim() + t + ';')

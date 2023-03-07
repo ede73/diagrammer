@@ -1,0 +1,7 @@
+# Ignore transpiled JS - not much can be done there anymore
+model/*.js
+generators/*.js
+web/*.js
+web/visualizations/*.js
+tests/web/*.js
+

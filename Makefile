@@ -32,6 +32,7 @@ TRANSPILER=tsc
 TRANSPILEOPTIONS=--module es6 --esModuleInterop --target es2017 --allowJs --removeComments --strict --checkJs --skipLibCheck
 TRANSPILE=$(TRANSPILER) $(TRANSPILEOPTIONS)
 S=| grep -v -E "(Cannot write file)" || true
+ESLINT=eslint -f stylish --fix
 
 .PHONY: clean node_modules model
 
@@ -61,6 +62,17 @@ tests/model/%.js: tests/parser/$.ts
 modeltests: $(MODEL_TEST_JSS) model
 tests/generators/%.js: tests/parser/$.ts
 generatortests: $(GENERATORS_TEST_JSS) generators
+
+fixall:
+	# VSCode doesnt always run the linter (and fix issues) on save (or otherwise) even when specified
+	# This here just to ensure even on mistake we DO get the shit in line
+	# On modern multiCPU, parallelized eslints run tad faster
+	$(ESLINT) model & \
+	$(ESLINT) generators & \
+	$(ESLINT) web & \
+	$(ESLINT) tests & \
+	wait
+	make testrunner
 
 build/types/diagrammer_parser_types.js: js/diagrammer_parser_types.ts
 	@echo "Make diagrammer shared context type for jest tests"
@@ -144,9 +156,6 @@ export: parser js/diagrammer.js scripts/export.sh scripts/display_image.sh
 
 testrunner: ./scripts/runtests.js ./scripts/t.js model generators parser plantuml_jar node_modules
 	./scripts/runtests.js
-	@if [ -f .error ]; then\
-	  exit 100;\
-	fi
 
 checkapache:
 	@echo "Make sure apache is running for web tests"

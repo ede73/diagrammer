@@ -82,7 +82,7 @@ export async function writeToElement(page: Page, elementId: string, text: string
 }
 
 function consoleLogWithTime(msg: string) {
-  console.log(`${new Date().toISOString()}: ${msg} `)
+  console.warn(`${new Date().toISOString()}: ${msg} `)
 }
 /**
  * Setup capture trap for all browser 'chatter' and dump on console

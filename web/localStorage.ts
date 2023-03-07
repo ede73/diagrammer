@@ -1,6 +1,6 @@
 // @ts-check
 
-export function getSavedGraphs(): { [key: string]: string } {
+export function getSavedGraphs(): Record<string, string> {
   if (!localStorage.getItem('graphs')) {
     const data = {}
     localStorage.setItem('graphs', JSON.stringify(data))
@@ -28,6 +28,6 @@ export function saveCurrentGraph(filename: string, diagrammerCode: string) {
 export function loadGraph(filename: string) {
   const data = getSavedGraphs()
   if (data[filename]) {
-    return data[filename] as string
+    return data[filename]
   }
 }

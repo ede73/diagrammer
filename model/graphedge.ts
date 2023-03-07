@@ -1,8 +1,8 @@
 // @ts-check
 import { debug } from '../model/debug.js'
-import { DefaultSettingKey, GraphContainer } from '../model/graphcontainer.js'
+import { type DefaultSettingKey, type GraphContainer } from '../model/graphcontainer.js'
 import { GraphObject } from '../model/graphobject.js'
-import { GraphConnectable } from './graphconnectable.js'
+import { type GraphConnectable } from './graphconnectable.js'
 import { GraphGroup } from './graphgroup.js'
 import { GraphInner } from './graphinner.js'
 import { GraphReference } from './graphreference.js'
@@ -16,11 +16,11 @@ export enum GraphEdgeMeaningType {
   BROADCAST = 'broadcast'
 }
 export enum GraphEdgeLineType {
-  DOTTED = "dotted(.)",
-  DASHED = "dashed(-)",
-  NORMAL = "normal",
-  DOUBLE = "double(=)",
-  BROKEN = "broken(/)"
+  DOTTED = 'dotted(.)',
+  DASHED = 'dashed(-)',
+  NORMAL = 'normal',
+  DOUBLE = 'double(=)',
+  BROKEN = 'broken(/)'
 }
 
 export enum GraphEdgeArrowType {
@@ -141,7 +141,7 @@ export class GraphEdge extends GraphObject {
       const arrows = new Map(Object.entries({
         '<': GraphEdgeArrowType.NORMAL,
         '|': GraphEdgeArrowType.FLAT,
-        '<<': GraphEdgeArrowType.DOUBLE,
+        '<<': GraphEdgeArrowType.DOUBLE
       }))
       return arrows.get(left) ?? GraphEdgeArrowType.NONE
     }
@@ -155,7 +155,7 @@ export class GraphEdge extends GraphObject {
       const arrows = new Map(Object.entries({
         '>': GraphEdgeArrowType.NORMAL,
         '|': GraphEdgeArrowType.FLAT,
-        '>>': GraphEdgeArrowType.DOUBLE,
+        '>>': GraphEdgeArrowType.DOUBLE
       }))
       return arrows.get(right) ?? GraphEdgeArrowType.NONE
     }

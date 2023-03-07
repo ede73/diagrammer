@@ -10,6 +10,9 @@ import { GraphInner } from '../../model/graphinner.js'
 import { GraphVertex } from '../../model/graphvertex.js'
 import { GraphConditional } from '../../model/graphconditional.js'
 import { GraphEdgeDirectionType, GraphEdgeLineType } from '../../model/graphedge.js'
+// TODO: tests work perfectly, just VSCode & eslint don't know about jest
+//node_modules/@jest/globals/build/index.d.ts:export declare const expect: JestExpect;
+//import { describe, expect, test } from '@jest/globals'
 
 // curried, canvas passed on call site
 const canvasHas = (prop: string, value: any) => {
@@ -26,7 +29,7 @@ const canvasHas = (prop: string, value: any) => {
         expect(value1).toStrictEqual(value)
       }
     } catch (ex) {
-      console.log(canvas)
+      console.warn(canvas)
     }
     if (prop in canvas.defaults) {
       const value2 = canvas.defaults[prop as keyof GraphCanvas['defaults']]
@@ -48,7 +51,7 @@ const canvasContains = (callback: (vertex: GraphConnectable) => any, match: stri
     try {
       expect(res).toStrictEqual(match)
     } catch (ex) {
-      console.log(canvas, res)
+      console.warn(canvas, res)
     }
     expect(res).toStrictEqual(match)
   }
@@ -121,8 +124,8 @@ const canvasContainsAutoProps = (match: string[]) => {
     try {
       expect(res).toStrictEqual(match)
     } catch (ex) {
-      // console.log(canvas, res)
-      console.log(`[ "${res.join('","')}" ]`)
+      // console.warn(canvas, res)
+      console.warn(`[ "${res.join('","')}" ]`)
     }
     expect(res).toStrictEqual(match)
   }
@@ -131,7 +134,7 @@ const canvasContainsAutoProps = (match: string[]) => {
 // curried, canvas passed on call site
 const dumpCanvas = () => {
   return (canvas: GraphCanvas) => {
-    console.log(canvas)
+    console.warn(canvas)
     expect(false).toBeTruthy()
   }
 }
@@ -253,9 +256,9 @@ describe('Parser/grammar rule tests', () => {
     }
     getParserYY().USE_GENERATOR = 'abba'
     getParserYY().parseError = function (str: string, hash: string) {
-      console.log('Parsing error found:')
-      console.log(str)
-      console.log(hash)
+      console.warn('Parsing error found:')
+      console.warn(str)
+      console.warn(hash)
       errors = 1
       throw new Error(str)
     }
@@ -271,8 +274,8 @@ describe('Parser/grammar rule tests', () => {
       // @ts-ignore diagrammerParser type missing, but parse() exists, else this would never work
       diagrammerParser.parse(code)
     } catch (ex) {
-      console.log('=====failed parsing======')
-      console.log(code)
+      console.warn('=====failed parsing======')
+      console.warn(code)
       throw ex
     }
   }
@@ -293,7 +296,7 @@ describe('Parser/grammar rule tests', () => {
       diagrammerParser.parse(`${t.g}\n`)
       if (t.f) {
         // dump the code (will be part of description, see TODO above)
-        //console.log(t.g)
+        //console.warn(t.g)
         Object.entries(t.f).forEach((i) => {
           const [, assertion] = i
           assertion(c)
@@ -391,7 +394,7 @@ else c then
 endif
 exit;exit node is also required
         `)
-    // console.log(graphcanvas)
+    // console.warn(graphcanvas)
     expect(graphcanvas.getObjects().length).toBe(5)
     expect(graphcanvas._ROOTVERTICES.length).toBe(2)
     // in this case only all the objects and root vertices do match
@@ -504,7 +507,7 @@ exit;exit node is also required
       expect(edge.lcompass).toBe(':nw')
       expect(edge.rcompass).toBe(':se')
       expect(edge.direction()).toBe(GraphEdgeDirectionType.RIGHT)
-      expect(edge.lineType() == GraphEdgeLineType.DASHED).toBeTruthy()
+      expect(edge.lineType() === GraphEdgeLineType.DASHED).toBeTruthy()
       expect(edge.left.getName()).toBe('a')
 
       edges.delete(edge.right.getName() as string)

@@ -1,4 +1,8 @@
 {
+    "eslint.format.enable": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
     "files.exclude": {
         "**/*.js": {
             "when": "$(basename).ts"

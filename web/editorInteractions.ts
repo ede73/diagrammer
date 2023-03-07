@@ -8,7 +8,7 @@ import { clearBeautified, visualize } from './visualize.js'
 // and it will make jest tests fail. It fails accessing global[ns] where ns=ace in ace script (running jest) , globals is undefined, Window is undefiner
 // You can define those in Jest config (globals), but still it fails..
 // Some for of init/race condition. All because diagrammer-support required editorInteractions to import access functions :)
-//import 'ace'
+// import 'ace'
 // but this setup now seems to with with JSDoc type hint also, so I'll take that!
 // import { Editor } from '../ace/src-noconflict/ace.js';
 
@@ -18,7 +18,7 @@ const acemode: number = 1
 function getAceEditor() {
   // TODO: fix type acq..
   /** type {AceAjax.Editor} */
-  // @ts-ignore ignore missing ace (it ain't missing, loaded in index.jtml)
+  // @ts-expect-error ignore missing ace (it ain't missing, loaded in index.jtml)
   const editor = ace.edit('diagrammer-code')
   return editor
 }
@@ -28,7 +28,7 @@ export function getGraphText() {
   if (acemode) {
     return getAceEditor().getSession().getValue() as string
   } else {
-    return getInputElement('diagrammer-code').value as string
+    return getInputElement('diagrammer-code').value
   }
 }
 
@@ -131,11 +131,11 @@ export function generatorChanged() {
 function parseAndRegenerate(preferScriptSpecifiedGeneratorAndVisualizer = false) {
   const code = getGraphText() + '\n'
   parse(code, (finalGenerator, finalVisualizer) => {
-    console.log(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`)
+    console.warn(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`)
     visualize(finalVisualizer)
   }, (error, ex) => {
     clearBeautified()
-    console.log('  parseAndRegenerate() - Parsing failed :(')
+    console.warn('  parseAndRegenerate() - Parsing failed :(')
   }, preferScriptSpecifiedGeneratorAndVisualizer)
 }
 
@@ -148,7 +148,7 @@ export function savedChanged() {
   if (data[doc]) {
     setGraphText(data[doc])
     filename.value = doc
-    console.log('savedChanged..parse')
+    console.warn('savedChanged..parse')
     parseAndRegenerate()
   }
 }
@@ -157,7 +157,7 @@ export function exampleChanged() {
   // read the example...place to textArea(overwrite)
   const e = getSelectElement('diagrammer-example')
   const doc = e.options[e.selectedIndex].value
-  console.log(`exampleChanged(${doc})`)
+  console.warn(`exampleChanged(${doc})`)
   makeHTTPGet(`tests/${doc}`,
     (msg) => {
       setGraphText(String(msg))
@@ -212,8 +212,7 @@ try {
   hookupToListenToManualGeneratorChanges(500)
 } catch (ex) { }
 
-
-// @ts-ignore ignore missing ace (it ain't missing, loaded in index.jtml)
+// @ts-expect-error ignore missing ace (it ain't missing, loaded in index.jtml)
 if (acemode && typeof (ace) !== 'undefined') {
   // some init race condition, editor null on page load
   const editor = getAceEditor()

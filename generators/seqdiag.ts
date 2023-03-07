@@ -1,5 +1,5 @@
 // @ts-check
-import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { generators, type GraphCanvas } from '../model/graphcanvas.js'
 import { GraphEdgeLineType } from '../model/graphedge.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
@@ -20,7 +20,6 @@ export function seqdiag(graphcanvas: GraphCanvas) {
     const [textOrIndent, maybeIndent] = args
     output(graphcanvas, textOrIndent, maybeIndent)
   }
-
 
   lout('seqdiag {', true)
   lout('autonumber = True;')
@@ -60,9 +59,9 @@ export function seqdiag(graphcanvas: GraphCanvas) {
     if (color) {
       attrs.push(`color="${color}"`)
     }
-    let label = edge.label
+    const label = edge.label
     if (label) {
-      if (label.indexOf('::') !== -1) {
+      if (label.includes('::')) {
         const labels = label.split('::')
         attrs.push(`note="${labels[1].trim()}"`)
         attrs.push(`label="${labels[0].trim()}"`)
@@ -86,12 +85,12 @@ export function seqdiag(graphcanvas: GraphCanvas) {
     // For GRAPH all edges are type --
     // but we could SET arrow type if we'd like
     let rightName = rhs.getName()
-    const dot = edge.lineType() == GraphEdgeLineType.DOTTED
-    const dash = edge.lineType() == GraphEdgeLineType.DASHED
-    if (edge.lineType() == GraphEdgeLineType.BROKEN) {
+    const dot = edge.lineType() === GraphEdgeLineType.DOTTED
+    const dash = edge.lineType() === GraphEdgeLineType.DASHED
+    if (edge.lineType() === GraphEdgeLineType.BROKEN) {
       attrs.push('failed')
     }
-    if (edge.edgeType.indexOf('<') !== -1 && edge.edgeType.indexOf('>') !== -1) {
+    if (edge.edgeType.includes('<') && edge.edgeType.includes('>')) {
       // Broadcast type (<>)
       // Alas not supported...
       // HMh..since one could use the === as broadcast
@@ -104,10 +103,10 @@ export function seqdiag(graphcanvas: GraphCanvas) {
         return
       }
       edgeType = '=>'
-    } else if (edge.edgeType.indexOf('<') !== -1) {
+    } else if (edge.edgeType.includes('<')) {
       if (dot) { edgeType = '<--' } else if (dash) { edgeType = '<<--' } else { edgeType = '<-' }
       rightName = rhs.getName()
-    } else if (edge.edgeType.indexOf('>') !== -1) {
+    } else if (edge.edgeType.includes('>')) {
       if (dot) { edgeType = '-->' } else if (dash) { edgeType = '-->>' } else { edgeType = '->' }
     } else if (dot) {
       // dotted

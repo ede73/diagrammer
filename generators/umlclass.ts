@@ -1,12 +1,12 @@
 // @ts-check
 
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { generators, type GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { output } from '../model/support.js'
-import { GraphConnectable } from '../model/graphconnectable.js'
+import { type GraphConnectable } from '../model/graphconnectable.js'
 import { debug } from '../model/debug.js'
-import { GraphEdge, GraphEdgeArrowType, GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
+import { type GraphEdge, GraphEdgeArrowType, GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
 
 // ADD TO INDEX.HTML AS: <option value="umlclass">UMLClass(GoJS)</option>
 
@@ -21,67 +21,81 @@ import { GraphEdge, GraphEdgeArrowType, GraphEdgeDirectionType, GraphEdgeLineTyp
 // - generalization => class inheritance
 //  Example: child>parent
 // - realization => interface
-export type RelationshipTypeT = "association" | "dependency" | "generalization" | "realization" | "composition" | "aggregation"
+export type RelationshipTypeT = 'association' | 'dependency' | 'generalization' | 'realization' | 'composition' | 'aggregation'
 
 export type UMLClassDocumentT = [
   ClassDeclarationT[],
   RelationshipT[]
 ]
 
-export type ParameterTypeT = {
-  name: string,
+export interface ParameterTypeT {
+  name: string
   type?: string
 }
 
-export type MethodDeclarationT = {
-  name: string,
-  visibility: string,
-  type: string,
+export interface MethodDeclarationT {
+  name: string
+  visibility: string
+  type: string
   parameters?: ParameterTypeT[]
-  scope?: string, // c (class-level aka. static) underlines
+  scope?: string // c (class-level aka. static) underlines
 }
 
-export type PropertyDeclarationT = {
-  name: string,
-  visibility: string,
-  type: string,
-  default?: string, // if specified, has as a default value
-  scope?: string, // c (class-level aka. static) underlines
+export interface MemberDeclarationT {
+  name: string
+  visibility: string
+  type: string
+  default?: string // if specified, has as a default value
+  scope?: string // c (class-level aka. static) underlines
 }
 
-export type ClassDeclarationT = {
-  key: number,
-  name: string,
-  properties: PropertyDeclarationT[],
+export interface ClassDeclarationT {
+  key: number
+  name: string
+  properties: MemberDeclarationT[]
   methods: MethodDeclarationT[]
-};
+}
 
-export type RelationshipT = {
-  from: number,
-  to: number,
-  relationship: RelationshipTypeT,
-  label?: string,
-  headLabel?: string,
+export interface RelationshipT {
+  from: number
+  to: number
+  relationship: RelationshipTypeT
+  label?: string
+  headLabel?: string
   tailLabel?: string
 }
 
-type RegexMatchedClassMembersT = {
-  visibility: string,
-  name: string,
-  type: string,
-  default: string
-};
+interface RegexMatchedClassMembersT {
+  visibility?: string
+  name?: string
+  type?: string
+  default?: string
+}
+interface RegexMatchedClassMethodsT {
+  visibility?: string
+  name?: string
+  parameters?: string
+  return?: string
+}
 
 // Basically [+-#] [name:] [String] [=defaultValue]
-export function umlclassParseMember(member: string) {
+export function umlclassParseMember(member: string): RegexMatchedClassMembersT | undefined {
   const regex = /^(?<visibility>[+#-]|)(?<name>[^:]+(?=:)|)[:]{0,1}(?<type>[^=]+)[=]{0,1}(?<default>.+|)/
-  return member.match(regex)
+  const matches = member.match(regex)
+  if (matches?.groups) {
+    return matches.groups as RegexMatchedClassMembersT
+  }
+  return undefined
 }
 
 // Basically [+-#] [name] [(parameters)] [:[RETURNTYPE]]
-export function umlclassParseMethod(method: string) {
+export function umlclassParseMethod(method: string): RegexMatchedClassMethodsT | undefined {
   const regex = /^(?<visibility>[+#-]|)(?<name>[^(]+|)(?<parameters>[^)]+\)|)[:]{0,1}(?<return>.+|)/
-  return method.match(regex)
+  const matches = method.match(regex)
+  if (matches?.groups) {
+    return matches.groups as RegexMatchedClassMethodsT
+  }
+  return undefined
 }
 
 /**
@@ -110,26 +124,25 @@ export function umlclass(graphcanvas: GraphCanvas) {
     return name.replace(/_+$/, '').replace(/^_+/, '')
   }
 
-  const getProperties = (vertices: GraphConnectable[]): PropertyDeclarationT[] => {
+  const getMembers = (vertices: GraphConnectable[]): MemberDeclarationT[] => {
     // instead of array of names...{name:???,type=???,visibility=???,default=??}
     // Example:
     // NAME;LABEL
     // name;[+-#][name:]String[=defaultValue]
-    return [...vertices].filter(node => !nameAndLabel(node).includes(')')).map(property => {
-      const ret: PropertyDeclarationT = {
+    return [...vertices].filter(node => !nameAndLabel(node).includes(')')).map(member => {
+      const ret: MemberDeclarationT = {
         name: '',
         visibility: '',
         type: ''
       }
 
       // By default, name=name
-      ret.name = mangleName(property.name ?? '')
+      ret.name = mangleName(member.name ?? '')
 
       // If there's a label attached, parse that
-      if (property.label) {
-        const all = umlclassParseMember(property.label)
-        if (all?.groups) {
-          const parsedMembers: RegexMatchedClassMembersT = all.groups as RegexMatchedClassMembersT
+      if (member.label) {
+        const parsedMembers = umlclassParseMember(member.label)
+        if (parsedMembers) {
           switch (parsedMembers.visibility) {
             case '+':
               ret.visibility = 'public'
@@ -172,9 +185,9 @@ export function umlclass(graphcanvas: GraphCanvas) {
       }
       ret.name = mangleName(method.name ?? '')
       if (method.label) {
-        const all = umlclassParseMethod(method.label)
-        if (all?.groups) {
-          switch (all.groups.visibility) {
+        const parsedMethods = umlclassParseMethod(method.label)
+        if (parsedMethods) {
+          switch (parsedMethods.visibility) {
             case '+':
               ret.visibility = 'public'
               break
@@ -185,21 +198,21 @@ export function umlclass(graphcanvas: GraphCanvas) {
               ret.visibility = 'protected'
               break
           }
-          if (all.groups.parameters) {
+          if (parsedMethods.parameters) {
             // parameters something like (name:type,...) - what ever was types
             // Wonder which is more likely to be optional, name or type?
-            const parameterList = all.groups.parameters.replace(/[()]/g, '').split(',')
+            const parameterList = parsedMethods.parameters.replace(/[()]/g, '').split(',')
             // TODO: Make eslinter rule preventing console.log, constantly messes with diagrammer generation https://eslint.org/docs/latest/rules/no-console
             // console.error is fine(i guess)
-            //console.log(parameterList)
+            // console.log(parameterList)
             ret.parameters = parameterList.map(p => {
               const [name, type] = p.trim().split(':')
               return { name: name?.trim(), type: type?.trim() } as ParameterTypeT
             }).filter(p => p.name || p.type)
-            ret.name = mangleName(method.name ?? '') //+ all.groups.parameters
+            ret.name = mangleName(method.name ?? '') // + parsedMethods.parameters
           }
-          if (all.groups.return) {
-            ret.type = all.groups.return
+          if (parsedMethods.return) {
+            ret.type = parsedMethods.return
           }
         }
       }
@@ -216,7 +229,7 @@ export function umlclass(graphcanvas: GraphCanvas) {
       groups.push({
         key,
         name: nameAndLabel(node),
-        properties: getProperties(node.getObjects()),
+        properties: getMembers(node.getObjects()),
         methods: getMethods(node.getObjects())
       })
     }
@@ -228,7 +241,7 @@ export function umlclass(graphcanvas: GraphCanvas) {
       relationship: 'generalization',
       from: groupNameIdMap.get(edge.left.name),
       to: groupNameIdMap.get(edge.right.name),
-      label: edge.getLabel(),
+      label: edge.getLabel()
     }
     // bit simple check, but -> (or any dashed line type) limits to realization/dependecy, where realization class starts with I (interface)
     // NORMAL arrow (and not dashed line) limits to association/generalization
@@ -238,14 +251,14 @@ export function umlclass(graphcanvas: GraphCanvas) {
     const hasTailAndHeadLabels = (edge: GraphEdge) => (edge.getLabel()?.split(/:/)?.length ?? 0) >= 3
 
     // the first edgetype that is true wins
-    //[assocType in RelationshipTypeT]: boolean][]
-    const umlEdgeTypes: [RelationshipTypeT, boolean][] = [
+    // [assocType in RelationshipTypeT]: boolean][]
+    const umlEdgeTypes: Array<[RelationshipTypeT, boolean]> = [
       ['association', [GraphEdgeDirectionType.UNIDIRECTIONAL, GraphEdgeDirectionType.BIDIRECTIONAL].includes(edge.direction())],
-      ['dependency', edge.lineType() == GraphEdgeLineType.DASHED && !linksToInterface(edge)],
-      ['realization', edge.lineType() == GraphEdgeLineType.DASHED && linksToInterface(edge)],
-      ['generalization', edge.lineType() == GraphEdgeLineType.NORMAL && edge.rightArrowType() == GraphEdgeArrowType.NORMAL],
-      ['composition', edge.rightArrowType() == GraphEdgeArrowType.DOUBLE && hasTailAndHeadLabels(edge)],
-      ['aggregation', edge.rightArrowType() == GraphEdgeArrowType.DOUBLE && !hasTailAndHeadLabels(edge)],
+      ['dependency', edge.lineType() === GraphEdgeLineType.DASHED && !linksToInterface(edge)],
+      ['realization', edge.lineType() === GraphEdgeLineType.DASHED && linksToInterface(edge)],
+      ['generalization', edge.lineType() === GraphEdgeLineType.NORMAL && edge.rightArrowType() === GraphEdgeArrowType.NORMAL],
+      ['composition', edge.rightArrowType() === GraphEdgeArrowType.DOUBLE && hasTailAndHeadLabels(edge)],
+      ['aggregation', edge.rightArrowType() === GraphEdgeArrowType.DOUBLE && !hasTailAndHeadLabels(edge)]
     ]
 
     const assoc = umlEdgeTypes.filter(([relationship, matches]) => matches)

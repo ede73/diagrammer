@@ -1,7 +1,7 @@
 // @ts-check
-//import go from '../../node_modules/gojs/release/go-debug-module.js'
+// import go from '../../node_modules/gojs/release/go-debug-module.js'
 import go from 'gojs'
-//import * as go from 'go';
+// import * as go from 'go';
 import { removeOldVisualizations } from '../d3support.js'
 // Use in editor.. gets go.d.ts
 // import * as go from '../../js/go'
@@ -11,15 +11,13 @@ import { visualizations } from '../globals.js'
 visualizations.set('layerbands', visualizeLayerBands)
 
 // use ../manual_test_diagrams/layerbands.d
-export function visualizeLayerBands(generatorResult: string) {
+export async function visualizeLayerBands(generatorResult: string) {
   const jsonData = JSON.parse(generatorResult)
   const HORIZONTAL = true
   // Perform a TreeLayout where commitLayers is overridden to modify the background Part whose key is "_BANDS".
   class BandedTreeLayout extends go.TreeLayout {
     constructor() {
       super()
-      // Some contradiction with gojs modules...
-      // @ts-ignore 
       this.layerStyle = go.TreeLayout.LayerUniform // needed for straight layers
     }
 
@@ -30,16 +28,15 @@ export function visualizeLayerBands(generatorResult: string) {
     commitLayers(layerRects, offset) {
       // update the background object holding the visual "bands"
       // Some contradiction with gojs modules...
-      // @ts-ignore 
+      // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
       const bands = this.diagram.findPartForKey('_BANDS')
       if (!bands) {
         return
       }
       // Some contradiction with gojs modules...
-      // @ts-ignore 
+      // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
       const model = this.diagram.model
       // Some contradiction with gojs modules...
-      // @ts-ignore 
       bands.location = this.arrangementOrigin.copy().add(offset)
 
       // make each band visible or not, depending on whether there is a layer for it
@@ -104,26 +101,24 @@ export function visualizeLayerBands(generatorResult: string) {
           selectable: false,
           itemTemplate:
             $(go.Panel, HORIZONTAL ? 'Vertical' : 'Horizontal',
-              new go.Binding('position', 'bounds', function (b) { return b.position }),
+              new go.Binding('position', 'bounds', function (b: any) { return b.position }),
               $(go.TextBlock,
                 {
                   angle: HORIZONTAL ? 0 : 270,
                   textAlign: 'center',
                   wrap: go.TextBlock.None,
                   font: 'bold 11pt sans-serif',
-                  // @ts-ignore
                   background: $(go.Brush, 'Linear', { 0: 'aqua', 1: go.Brush.darken('aqua') })
                 },
                 new go.Binding('text'),
                 // always bind "width" because the angle does the rotation
-                new go.Binding('width', 'bounds', function (r) { return HORIZONTAL ? r.width : r.height })
+                new go.Binding('width', 'bounds', function (r: any) { return HORIZONTAL ? r.width : r.height })
               ),
               // option 1: rectangular bands
               $(go.Shape,
                 { stroke: null, strokeWidth: 0 },
-                new go.Binding('desiredSize', 'bounds', function (r) { return r.size }),
-                // @ts-ignore
-                new go.Binding('fill', 'itemIndex', function (i) { return i % 2 === 0 ? 'whitesmoke' : go.Brush.darken('whitesmoke') }).ofObject())
+                new go.Binding('desiredSize', 'bounds', function (r: any) { return r.size }),
+                new go.Binding('fill', 'itemIndex', function (i: any) { return i % 2 === 0 ? 'whitesmoke' : go.Brush.darken('whitesmoke') }).ofObject())
             )
         }
       ))
@@ -139,7 +134,7 @@ export function visualizeLayerBands(generatorResult: string) {
 
     const x = 0; const y = 0
     const printSize = new go.Size(300, 300)
-    const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize })
+    const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: printSize }) as SVGElement
     svgimg.appendChild(svg)
   }
   init()

@@ -18,10 +18,10 @@ export function setVerbose(verbose: boolean) {
  * @param indentOrDedent whether to indent or dedent
  */
 export function debug(msg: (string | boolean), indentOrDedent?: (boolean)) {
-  if (VERBOSE === true && msg !== false && msg !== true) {
+  if (VERBOSE && msg !== false && msg !== true) {
     let d = ''
     for (let i = 0; i < debugIndent; i++) d += '    '
-    console.log(`// ${d}${msg}`)
+    console.warn(`// ${d}${msg}`)
   }
   if (indentOrDedent === true || msg === true) {
     debugIndent++

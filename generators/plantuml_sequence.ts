@@ -1,11 +1,11 @@
 // @ts-check
-import { generators, GraphCanvas } from '../model/graphcanvas.js'
-import { GraphConnectable } from '../model/graphconnectable.js'
+import { generators, type GraphCanvas } from '../model/graphcanvas.js'
+import { type GraphConnectable } from '../model/graphconnectable.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { getAttributeAndFormat, iterateEdges, output, outputFormattedText } from '../model/support.js'
 import { _getVertexOrGroup } from '../model/model.js'
-import { GraphContainer } from '../model/graphcontainer.js'
+import { type GraphContainer } from '../model/graphcontainer.js'
 import { debug } from '../model/debug.js'
 import { GraphEdgeLineType, GraphEdgeMeaningType } from '../model/graphedge.js'
 
@@ -69,7 +69,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
 
     getAttributeAndFormat(obj, 'style', '{0}', styles)
     if (styles.length > 0) {
-      if (styles.join('').indexOf('singularity') !== -1) {
+      if (styles.join('').includes('singularity')) {
         // invis node is not singularity!, circle with minimal
         // width/height IS!
         nattrs.push('shape="circle"')
@@ -123,8 +123,8 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
       let note = ''
       let label = edge.label
       if (label) {
-        //if (edge.edgeMeaningType() == GraphEdgeMeaningType.EDGE_AND_NOTE) {}
-        if (label.indexOf('::') !== -1) {
+        // if (edge.edgeMeaningType() === GraphEdgeMeaningType.EDGE_AND_NOTE) {}
+        if (label.includes('::')) {
           const labels = label.split('::')
           note = labels[1].trim()
           label = labels[0].trim()
@@ -162,24 +162,24 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
       // TODO:Assuming producing DIGRAPH
       // For GRAPH all edges are type --
       // but we could SET arrow type if we'd like
-      if (edge.lineType() == GraphEdgeLineType.BROKEN) {
+      if (edge.lineType() === GraphEdgeLineType.BROKEN) {
         // TODO: Somehow denote better this "quite does not reach"
         // even though such an edge type MAKES NO SENSE in a graph
         // attrs.push('arrowhead="tee"');
         // TODO:
       }
-      const dot = edge.lineType() == GraphEdgeLineType.DOTTED
-      const dash = edge.lineType() == GraphEdgeLineType.DASHED
+      const dot = edge.lineType() === GraphEdgeLineType.DOTTED
+      const dash = edge.lineType() === GraphEdgeLineType.DASHED
       let swap = false
-      if (edge.edgeType.indexOf('<') !== -1 && edge.edgeType.indexOf('>') !== -1) {
+      if (edge.edgeType.includes('<') && edge.edgeType.includes('>')) {
         lt = (dot ? '-' : '') + '-' + color + '>'
         swap = true
-      } else if (edge.edgeType.indexOf('<') !== -1) {
+      } else if (edge.edgeType.includes('<')) {
         const tmp = lhs
         lhs = rhs
         rhs = tmp
         lt = (dot ? '-' : '') + '-' + color + '>'
-      } else if (edge.edgeType.indexOf('>') !== -1) {
+      } else if (edge.edgeType.includes('>')) {
         lt = (dot ? '-' : '') + '-' + color + '>'
       } else if (dot) {
         // dotted

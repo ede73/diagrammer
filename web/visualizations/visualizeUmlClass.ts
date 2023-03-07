@@ -2,12 +2,12 @@
 import go from 'gojs'
 import { removeOldVisualizations } from '../d3support.js'
 import { visualizations } from '../globals.js'
-import { RelationshipTypeT, UMLClassDocumentT, MethodDeclarationT, PropertyDeclarationT, RelationshipT, ParameterTypeT } from '../../generators/umlclass.js'
+import { type RelationshipTypeT, type UMLClassDocumentT, type ParameterTypeT } from '../../generators/umlclass.js'
 
 visualizations.set('umlclass', visualizeUmlClass)
 
 // use ../manual_test_diagrams/uml.d
-export function visualizeUmlClass(generatorResult: string) {
+export async function visualizeUmlClass(generatorResult: string) {
   const printSize = 900
   const jsonData = JSON.parse(generatorResult) as UMLClassDocumentT
   const $ = go.GraphObject.make
@@ -27,7 +27,8 @@ export function visualizeUmlClass(generatorResult: string) {
             setsChildPortSpot: false, // keep Spot.AllSides
             // nodes not connected by "generalization" links are laid out horizontally
             arrangement: go.TreeLayout.ArrangementHorizontal,
-            nodeSpacing: 100, layerSpacing: 100
+            nodeSpacing: 100,
+            layerSpacing: 100
           })
       })
 
@@ -109,8 +110,8 @@ export function visualizeUmlClass(generatorResult: string) {
       {
         locationSpot: go.Spot.Center,
         fromSpot: go.Spot.AllSides,
-        toSpot: go.Spot.AllSides,
-        //linkSpacing: 33,
+        toSpot: go.Spot.AllSides
+        // linkSpacing: 33,
       },
       $(go.Shape, { fill: background }),
 
@@ -140,7 +141,7 @@ export function visualizeUmlClass(generatorResult: string) {
             margin: 3,
             stretch: go.GraphObject.Fill,
             defaultAlignment: go.Spot.Left,
-            background: background,
+            background,
             itemTemplate: propertyTemplate
           }
         ),
@@ -159,7 +160,7 @@ export function visualizeUmlClass(generatorResult: string) {
             margin: 3,
             stretch: go.GraphObject.Fill,
             defaultAlignment: go.Spot.Left,
-            background: background,
+            background,
             itemTemplate: methodTemplate
           }
         ),
@@ -170,7 +171,6 @@ export function visualizeUmlClass(generatorResult: string) {
     )
   function shouldLayoutVertically(r: RelationshipTypeT) {
     return true
-    return ['generalization', 'composition'].includes(r)
   }
 
   function tailRelationShipToFillColor(r: RelationshipTypeT) {
@@ -211,11 +211,11 @@ export function visualizeUmlClass(generatorResult: string) {
     // OMG! UML is supposed to be standard, and there's massive massive deviation of association types
     // in, practise..no standard :)
     switch (r) {
-      case 'association': return ''     // open arrow, cont'd line OK .
-      case 'dependency': return 'Boomerang'      // open arrow, DASHED line ->
+      case 'association': return '' // open arrow, cont'd line OK .
+      case 'dependency': return 'Boomerang' // open arrow, DASHED line ->
 
-      case 'generalization': return 'Triangle'      // (inheritance) Triangle(TODO:not filled), cont'd line >
-      case 'realization': return 'Triangle'         // Triangle(TODO: not filled), DASHED line ->
+      case 'generalization': return 'Triangle' // (inheritance) Triangle(TODO:not filled), cont'd line >
+      case 'realization': return 'Triangle' // Triangle(TODO: not filled), DASHED line ->
 
       case 'composition': return 'Boomerang' // diamond (filled), cont'd line OK >>
       case 'aggregation': return 'Boomerang' // diamond (TODO:not filled) cont'd line >>
@@ -231,7 +231,7 @@ export function visualizeUmlClass(generatorResult: string) {
     $(go.Link,
       { routing: go.Link.Orthogonal },
       new go.Binding('isLayoutPositioned', 'relationship', shouldLayoutVertically),
-      $(go.Shape, new go.Binding("strokeDashArray", "relationship", getRelationshipStroke)),
+      $(go.Shape, new go.Binding('strokeDashArray', 'relationship', getRelationshipStroke)),
 
       $(go.Shape, { scale: 2 },
         new go.Binding('fill', 'relationship', tailRelationShipToFillColor),
@@ -245,11 +245,10 @@ export function visualizeUmlClass(generatorResult: string) {
         textAlign: 'center',
         font: edgeLabelFont,
         stroke: '#606060',
-        isMultiline: true,
+        isMultiline: true
       },
-        new go.Binding('text', 'label', (label: string) =>
-          // there's no replaceAll here
-          label ? label.split('\\n').join("\n") : ''),
+      new go.Binding('text', 'label', (label: string) =>
+        label ? label.split('\\n').join('\n') : '')
       ), $(go.TextBlock, {
         textAlign: 'center',
         font: headTailEdgeLabelFont,
@@ -258,7 +257,7 @@ export function visualizeUmlClass(generatorResult: string) {
         segmentOffset: new go.Point(NaN, NaN),
         segmentOrientation: go.Link.OrientPlus90
       },
-        new go.Binding('text', 'tailLabel', (tailLabel: string) => tailLabel ? tailLabel : ''),
+      new go.Binding('text', 'tailLabel', (tailLabel: string) => tailLabel || '')
       ),
       $(go.TextBlock, {
         textAlign: 'center',
@@ -268,13 +267,12 @@ export function visualizeUmlClass(generatorResult: string) {
         segmentOffset: new go.Point(NaN, NaN),
         segmentOrientation: go.Link.OrientPlus90
       },
-        new go.Binding('text', 'headLabel', (headLabel: string) => headLabel ? headLabel : ''))
+      new go.Binding('text', 'headLabel', (headLabel: string) => headLabel || ''))
     )
 
   // setup a few example class nodes and relationships
   const nodedata = jsonData[0]
   const linkdata = jsonData[1]
-  console.log(linkdata)
   myDiagram.model = $(go.GraphLinksModel,
     {
       copiesArrays: true,
@@ -286,6 +284,6 @@ export function visualizeUmlClass(generatorResult: string) {
   const x = 0
   const y = 0
   const u = new go.Size(printSize, printSize)
-  const svg = myDiagram.makeSvg({ position: new go.Point(x, y) })
+  const svg = myDiagram.makeSvg({ position: new go.Point(x, y) }) as SVGElement
   removeOldVisualizations().appendChild(svg)
 }

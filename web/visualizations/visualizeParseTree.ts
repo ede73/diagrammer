@@ -1,6 +1,6 @@
 // @ts-check
 import go from 'gojs'
-//import * as go from 'go';
+// import * as go from 'go';
 
 import { removeOldVisualizations } from '../d3support.js'
 import { visualizations } from '../globals.js'
@@ -8,7 +8,7 @@ import { visualizations } from '../globals.js'
 visualizations.set('parsetree', visualizeParseTree)
 
 // use ../manual_test_diagrams/parsetree.d
-export function visualizeParseTree(generatorResult: string) {
+export async function visualizeParseTree(generatorResult: string) {
   const jsonData = JSON.parse(generatorResult)
   const $ = go.GraphObject.make // for conciseness in defining templates
   const svgimg = removeOldVisualizations('PARSETREENODE')
@@ -22,7 +22,7 @@ export function visualizeParseTree(generatorResult: string) {
         allowMove: false,
         initialAutoScale: go.Diagram.Uniform,
         layout:
-          // @ts-ignore
+          // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
           $(FlatTreeLayout, // custom Layout, defined below
             {
               angle: 90,
@@ -60,7 +60,7 @@ export function visualizeParseTree(generatorResult: string) {
       { nodeDataArray })
   const x = 0; const y = 0; const printSize = 1200
   const u = new go.Size(printSize, printSize)
-  const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: u })
+  const svg = myDiagram.makeSvg({ scale: 1.0, position: new go.Point(x, y), size: u }) as SVGElement
   svgimg.appendChild(svg)
 }
 
@@ -68,22 +68,19 @@ export function visualizeParseTree(generatorResult: string) {
 function FlatTreeLayout() {
   go.TreeLayout.call(this) // call base constructor
 }
-// @ts-ignore
 go.Diagram.inherit(FlatTreeLayout, go.TreeLayout)
 
 // This assumes the TreeLayout.angle is 90 -- growing downward
 FlatTreeLayout.prototype.commitLayout = function () {
-  // @ts-ignore
+  // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
   go.TreeLayout.prototype.commitLayout.call(this) // call base method first
   // find maximum Y position of all Nodes
   let y = -Infinity
   // network is definitely
-  // @ts-ignore
   this.network.vertexes.each(function (v) {
     y = Math.max(y, v.node.position.y)
   })
   // move down all leaf nodes to that Y position, but keeping their X position
-  // @ts-ignore
   this.network.vertexes.each(function (v) {
     if (v.destinationEdges.count === 0) {
       // shift the node down to Y

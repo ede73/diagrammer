@@ -1,10 +1,10 @@
 // @ts-check
-import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { generators, type GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphReference } from '../model/graphreference.js'
 import { output, getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { GraphConnectable } from '../model/graphconnectable.js'
+import { type GraphConnectable } from '../model/graphconnectable.js'
 
 // ADD TO INDEX.HTML AS: <option value="nwdiag">Network Diagram(cli)</option>
 
@@ -68,7 +68,6 @@ export function nwdiag(graphcanvas: GraphCanvas) {
     }
   })
 
-
   function getMappedShape(obj: GraphConnectable) {
     if (obj instanceof GraphVertex) {
       const objShape = obj.shape as keyof typeof NetworkDiagShapeMap
@@ -101,7 +100,7 @@ export function nwdiag(graphcanvas: GraphCanvas) {
         if (secondLvlObj instanceof GraphReference) {
           // this is referred node
           lout(`${secondLvlObj.getName()};`)
-          //return??
+          // return??
         }
 
         const mappedShape = getNodeAttrs(secondLvlObj, getMappedShape(secondLvlObj))

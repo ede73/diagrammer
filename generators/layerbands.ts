@@ -1,7 +1,7 @@
 // @ts-check
 
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { generators, type GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { output } from '../model/support.js'
 
@@ -16,7 +16,7 @@ export function layerbands(graphcanvas: GraphCanvas) {
     output(graphcanvas, textOrIndent, maybeIndent)
   }
 
-  const groups: { key: string, category: string, itemArray: { text: string }[] } = {
+  const groups: { key: string, category: string, itemArray: Array<{ text: string }> } = {
     key: '_BANDS',
     category: 'Bands',
     itemArray: []

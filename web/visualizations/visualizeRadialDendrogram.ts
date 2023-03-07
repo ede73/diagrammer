@@ -6,7 +6,7 @@ import { visualizations } from '../globals.js'
 visualizations.set('radialdendrogram', visualizeRadialDendrogram)
 
 // https://medium.com/analytics-vidhya/creating-a-radial-tree-using-d3-js-for-javascript-be943e23b74e
-export function visualizeRadialDendrogram(generatorResult: string) {
+export async function visualizeRadialDendrogram(generatorResult: string) {
   const jsonData = JSON.parse(generatorResult)
   const radius = 250
   const width = 600
@@ -26,16 +26,15 @@ export function visualizeRadialDendrogram(generatorResult: string) {
   const svgimg = makeSVG(width, height)
     .attr('transform', `translate(${width / 2},${height / 2})`)
 
-  // eslint-disable-next-line no-unused-vars
-  const link = svgimg.selectAll('.link')
+  svgimg.selectAll('.link')
     .data(links)
     .join('path')
     .attr('class', 'link')
-    // @ts-ignore
+    // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
     .attr('d', d3.linkRadial()
-      // @ts-ignore
+      // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
       .angle(d => d.x)
-      // @ts-ignore
+      // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
       .radius(d => d.y))
 
   const node = svgimg.selectAll('.node')
@@ -54,7 +53,7 @@ export function visualizeRadialDendrogram(generatorResult: string) {
     .attr('text-anchor', function (d) { return d.x < 180 ? 'start' : 'end' })
     .attr('transform', function (d) { return d.x < 180 ? 'translate(8)' : 'rotate(180)translate(-8)' })
     .text(function (d) {
-      // @ts-ignore
+      // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
       return d.data.name
     })
 }

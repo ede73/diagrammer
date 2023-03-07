@@ -1,6 +1,6 @@
 // @ts-check
 import { GraphCanvas } from './graphcanvas.js'
-import { GraphObject } from './graphobject.js'
+import { type GraphObject } from './graphobject.js'
 import { debug } from './debug.js'
 
 /**
@@ -19,13 +19,13 @@ export function setAttr(cl: GraphObject, attr: string, value: any) {
     writable: true,
     enumerable: true
   })
-  //cl[attr] = value
+  // cl[attr] = value
   return cl
 }
 
 declare global {
   interface String {
-    //format(): string;
+    // format(): string;
     formatArray(array: any[]): string
   }
 }
@@ -46,7 +46,7 @@ declare global {
  * Format a string with provided array of values
  * For example. "{2}{0}{1}".formatArray([2,3,1]) prints 123
  */
-// @ts-ignore
+// @ts-expect-error
 String.prototype.formatArray = function (array: any[]) {
   let formatted = this
   for (let i = 0; i < array.length; i++) {
@@ -58,15 +58,15 @@ String.prototype.formatArray = function (array: any[]) {
 /**
  * Return attribute like prefix="ATTRHERE" with padding at both sides or "" if 0
  * or undefined
- * 
+ *
  * TODO: This is ugly, difficult to maintain, confusing in TypeScript. Make this a property map
- * 
+ *
  * @param cl GraphObject(or any of its subclasses) to scan
  * @param attr Name of the attribute index to return
  * @return Return the attribute
  */
 export function getAttribute(cl: GraphObject, attr: string) {
-  const obtained = Object.getOwnPropertyDescriptor(cl, attr);
+  const obtained = Object.getOwnPropertyDescriptor(cl, attr)
   if (!obtained || !obtained.value || obtained.value === 0) { return undefined }
   return obtained?.value
 }
@@ -84,7 +84,6 @@ export function getAttributeAndFormat(
   cl: GraphObject,
   attributeNameOrNames: (string | string[]),
   fmt: string, resultarray?: string[]): string {
-
   if (attributeNameOrNames instanceof Array) {
     for (const attrName of attributeNameOrNames) {
       const tmp = getAttributeAndFormat(cl, attrName, fmt, resultarray)
@@ -97,7 +96,7 @@ export function getAttributeAndFormat(
   }
 
   // TODO:
-  const obtained = Object.getOwnPropertyDescriptor(cl, attributeNameOrNames);
+  const obtained = Object.getOwnPropertyDescriptor(cl, attributeNameOrNames)
   // Not gonna fly coz cl can be subclass of GraphObject and we're fetching ITS properies
   // const attrType = attr as keyof typeof GraphObject;
   if (!obtained || !obtained.value || obtained.value === 0) {
@@ -122,7 +121,7 @@ export function getAttributeAndFormat(
  * @param extras Anything here will be appended to the result map
  * @return Return all successfully fetched and formatted properties joined with extras as a comma separared parameter list SORTED and enclosed in [] or '' if no attributes resulted
  */
-export function multiAttrFmt(obj: GraphObject, attrMap: { [key: string]: string }, extras: string[] = []) {
+export function multiAttrFmt(obj: GraphObject, attrMap: Record<string, string>, extras: string[] = []) {
   const attrMapFormatted = []
   for (const [key, value] of Object.entries(attrMap)) {
     const formattedValue = getAttributeAndFormat(obj, key, value)
@@ -185,7 +184,7 @@ export function outputFormattedText(graphcanvas: GraphCanvas, txt: string, array
 /**
  * Iterate edges
  */
-export function* iterateEdges(graphcanvas: GraphCanvas) {
+export function * iterateEdges(graphcanvas: GraphCanvas) {
   for (const edge of graphcanvas.getEdges()) {
     yield edge
   }

@@ -1,5 +1,5 @@
 // @ts-check
-import { GraphCanvas } from '../model/graphcanvas.js'
+import { type GraphCanvas } from '../model/graphcanvas.js'
 import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphEdge } from '../model/graphedge.js'
 import { GraphGroup } from '../model/graphgroup.js'
@@ -32,7 +32,7 @@ export function _processVariable(graphCanvas: GraphCanvas, variable: string) {
   // refer variable
   // $(NAME)
   const vari = variable.slice(2, -1)
-  if (vari.indexOf(':') !== -1) {
+  if (vari.includes(':')) {
     // Assignment
     const tmp = vari.split(':')
     graphCanvas.VARIABLES[tmp[0]] = tmp[1]
@@ -60,7 +60,6 @@ export function _getList(graphCanvas: GraphCanvas,
   lhs: (GraphConnectable | GraphConnectable[]),
   rhs: GraphConnectable,
   rhsEdgeLabel?: string): (GraphConnectable | GraphConnectable[]) {
-
   if (lhs instanceof GraphVertex) {
     debug(`_getList(vertex:${lhs},rhs:[${rhs}])`, true)
     const lst: (GraphConnectable | GraphConnectable[]) = []
@@ -77,7 +76,7 @@ export function _getList(graphCanvas: GraphCanvas,
     const lst = []
     lst.push(lhs)
     if (!(rhs instanceof GraphContainer)) {
-      throw new Error("RHS must be container");
+      throw new Error('RHS must be container')
     }
     const grp = _getGroupOrMakeNew(graphCanvas, rhs)
     if (rhsEdgeLabel) {
@@ -133,7 +132,7 @@ export function _getVertexOrGroup(graphCanvas: GraphCanvas, objOrName: (string |
 }
 
 function locateVertex(container: GraphContainer, rhsObjectName: string): GraphVertex | GraphGroup | undefined {
-  if (container instanceof GraphGroup && container.getName() == rhsObjectName) {
+  if (container instanceof GraphGroup && container.getName() === rhsObjectName) {
     return container
   }
   for (const node of container.getObjects()) {
@@ -270,14 +269,14 @@ function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInne
 /**
  * Placeholder for making a true GraphConditional
  * ie. if/elseif/elseif.../else/endif
- * 
+ *
  * Will replace ^(if|elseif|else|endif) and then$ with ''
- * 
+ *
  * Every container returned is current container, and before making a new container here, current one is EXITED.
  * Exception being if, it's the first one, not exiting current container, and endif, it's the last, it will return the
  * container before entering the if
  * TODO: GraphConditional has to be a container of containers actually, ie. each section if/elseif../else are own groups
- * 
+ *
  * @param type if/elseif/else
  * @param label Anything between ^(if|elseif|else|endif) and then$
  */
@@ -306,7 +305,7 @@ export function _getGroupOrMakeNew(graphCanvas: GraphCanvas, ref?: GraphContaine
   if (ref instanceof GraphGroup) return ref
   debug(`_getGroup() ref:${ref}`)
   const currenContainer = graphCanvas._getCurrentContainer()
-  const newGroup = new GraphGroup(name ? name : String(graphCanvas.GROUPIDS++), currenContainer)
+  const newGroup = new GraphGroup(name || String(graphCanvas.GROUPIDS++), currenContainer)
   return currenContainer.addObject(newGroup) as GraphContainer
 }
 
@@ -342,7 +341,6 @@ export function _getEdge(graphCanvas: GraphCanvas,
   lcompass?: string,
   rcompass?: string,
   dontadd?: boolean): GraphEdge {
-
   const currentContainer = graphCanvas._getCurrentContainer()
   debug(`_getEdge edgeType=${edgeType} lhs=${lhs}/${lhs.constructor.name} rhs=${rhs} inlineEdgeLabel=${inlineEdgeLabel} commonEdgeLabel=${commonEdgeLabel} edgeColor=${edgeColor} lcompass=${lcompass} rcompass=${rcompass} dontadd=${dontadd}`, true)
   if (rhs instanceof GraphInner && !rhs._getEntrance()) {
@@ -429,7 +427,7 @@ export function _getEdge(graphCanvas: GraphCanvas,
 function maybeRemoveFromRootVertices(currentContainer: GraphContainer, rhs: GraphVertex) {
   // if RHS has no edges (and is contained in a container) AND found from ROOTVERTICES, remove it from ROOTVERTICES
   if (rhs._noedges && currentContainer) {
-    //debug(`REMOVE ${rhs} from root vertices of the container ${currentContainer}`)
+    // debug(`REMOVE ${rhs} from root vertices of the container ${currentContainer}`)
     const idx = currentContainer._ROOTVERTICES.indexOf(rhs)
     if (idx >= 0) {
       const removed = currentContainer._ROOTVERTICES.splice(idx, 1)
@@ -437,7 +435,6 @@ function maybeRemoveFromRootVertices(currentContainer: GraphContainer, rhs: Grap
     }
   }
 }
-
 
 // =====================================
 // only model.js
@@ -460,4 +457,3 @@ function _maybePushToCurrentContainerAsReference(graphCanvas: GraphCanvas, refer
   currentContainer.addObject(ref)
   return ref
 }
-

@@ -1,10 +1,10 @@
 // @ts-check
 
-import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { generators, type GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
-import { GraphConnectable } from '../model/graphconnectable.js'
+import { type GraphConnectable } from '../model/graphconnectable.js'
 import { GraphEdgeLineType } from '../model/graphedge.js'
 
 // ADD TO INDEX.HTML AS: <option value="blockdiag">Block Diagram(cli)</option>
@@ -123,7 +123,7 @@ export function blockdiag(graphcanvas: GraphCanvas) {
             const mappedShape = BlockDiagShapeMap[currentShape] ? BlockDiagShapeMap[currentShape] : BlockDiagShapeMap.default
             return [`shape=${mappedShape}`]
           }
-        })(obj);
+        })(obj)
 
         const tmp = multiAttrFmt(obj, {
           color: 'color="{0}"',
@@ -137,7 +137,7 @@ export function blockdiag(graphcanvas: GraphCanvas) {
       // NOT invis,bold,rounded,diagonals
       // ICON does not work, using background
       let style = getAttributeAndFormat(obj, 'style', ', style="{0}"')
-      if (style !== '' && style.match(/(dotted|dashed|solid)/) == null) {
+      if (style !== '' && style.match(/(dotted|dashed|solid)/) === null) {
         style = ''
       }
       const currentShape = (obj as GraphVertex).shape as keyof typeof BlockDiagShapeMap
@@ -156,7 +156,7 @@ export function blockdiag(graphcanvas: GraphCanvas) {
     }
   }
 
-  graphcanvas.getObjects().forEach(o => parseObjects(o))
+  graphcanvas.getObjects().forEach(o => { parseObjects(o) })
 
   graphcanvas.getEdges().forEach(edge => {
     let s = ''

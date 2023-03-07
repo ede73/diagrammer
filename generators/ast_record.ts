@@ -6,7 +6,7 @@ import { GraphEdge } from '../model/graphedge.js'
 import { GraphInner } from '../model/graphinner.js'
 import { output } from '../model/support.js'
 import { GraphReference } from '../model/graphreference.js'
-import { GraphObject } from 'model/graphobject.js'
+import { type GraphObject } from 'model/graphobject.js'
 
 // ADD TO INDEX.HTML AS: <option value="ast_record">Abstract Syntax Tree(Record)</option>
 
@@ -59,14 +59,14 @@ export function ast_record(graphcanvas: GraphCanvas) {
   }
 
   const collectProperties = (obj: GraphObject) => {
-    const params: { [key: string]: string } = {}
+    const params: Record<string, string> = {}
     const excludeSomeFields = ['ALLOWED_DEFAULTS', 'CURRENTCONTAINER', '_nextConnectableToExitEndIf', 'lastSeenVertex']
     const collectJustNames = ['_OBJECTS', '_ROOTVERTICES', '_EDGES', 'equal']
     const collectJustName = ['left', 'right', 'container', 'parent', '_exit']
 
     Object.entries(obj).forEach(([k, v], idx) => {
       if (excludeSomeFields.includes(k) || v === undefined || v === null || typeof (v) === 'function') return
-      if (obj instanceof GraphInner && k == 'defaults') return
+      if (obj instanceof GraphInner && k === 'defaults') return
       function getName(obj: GraphObject) {
         if (obj instanceof GraphInner) {
           return 'GraphInner'
@@ -95,7 +95,7 @@ export function ast_record(graphcanvas: GraphCanvas) {
     return params
   }
 
-  function makeRecord(params: { [key: string]: string }) {
+  function makeRecord(params: Record<string, string>) {
     return Object.entries(params).map(([k, v], idx) => `{${k}|${v.replace(/"/g, "'")}}`).join('|')
   }
 
@@ -124,7 +124,7 @@ export function ast_record(graphcanvas: GraphCanvas) {
       lout('color=blue;')
       lout(`${n.getName()}[shape=record, color=blue, fillcolor=blue, label="${label}"];`)
       // group or inner
-      n.getObjects(true).forEach(o => c(o))
+      n.getObjects(true).forEach(o => { c(o) })
       lout('}', false)
     } else {
       // Vertex (or ref)

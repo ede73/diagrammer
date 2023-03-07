@@ -1,13 +1,12 @@
 // @ts-check
 
-import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { generators, type GraphCanvas } from '../model/graphcanvas.js'
 import { GraphConditional } from '../model/graphconditional.js'
 import { GraphConnectable } from '../model/graphconnectable.js'
 import { GraphEdge } from '../model/graphedge.js'
-import { GraphObject } from '../model/graphobject.js'
+import { type GraphObject } from '../model/graphobject.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { output } from '../model/support.js'
-
 
 // ADD TO INDEX.HTML AS: <option value="ast">Abstract Syntax Tree</option>
 
@@ -112,11 +111,11 @@ export function ast(graphcanvas: GraphCanvas) {
     })
     level--
     if (items.length === 0) {
-      return `{}`
+      return '{}'
     } else if (items.length === 1) {
       return `{ ${items[0]} }`
     }
-    return `{${items.length > 0 ? "\n" : ""}${join(level + 1, items, ',\n')}\n${sindent}}`
+    return `{${items.length > 0 ? '\n' : ''}${join(level + 1, items, ',\n')}\n${sindent}}`
   }
   const dump = dumpObject(graphcanvas)
   lout(dump)

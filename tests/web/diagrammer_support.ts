@@ -112,6 +112,6 @@ export async function waitUntilGraphDrawn(page: Page) {
   // Uhh...UI side is so slow to pick up changes..
   // around 5s image is still old, after 6 we see the radial dendrogram!
   await page.waitForSelector('#diagrammer-graph:not(:empty)')
-  // console.log(await page.evaluate(() => document.querySelector('#diagrammer-graph').innerHTML));
+  // console.warn(await page.evaluate(() => document.querySelector('#diagrammer-graph').innerHTML));
   // await sleepABit(200);
 }

@@ -27,37 +27,36 @@ import { Shapes } from './shapes.js'
  * Hierarchy-wise this could be GraphObject, but since ALL contained objects are to be GraphConnectables, so will be this
  */
 export class GraphReference extends GraphConnectable {
-    shape?: string
-    image?: string = undefined
+  shape?: string
+  image?: string = undefined
 
-    // TODO: combine with GraphVertex and move up a notch, or to a trait/mixin
-    setShape(shape: string) {
-        if (shape) {
-            this._assertRegonizedShape(shape)
-            this.shape = shape.toLowerCase()
-        }
-        return this
+  // TODO: combine with GraphVertex and move up a notch, or to a trait/mixin
+  setShape(shape: string) {
+    if (shape) {
+      this._assertRegonizedShape(shape)
+      this.shape = shape.toLowerCase()
     }
+    return this
+  }
 
-    getShape() {
-        return this.shape
+  getShape() {
+    return this.shape
+  }
+
+  setImage(image: string) {
+    if (image) {
+      this.image = image
     }
+    return this
+  }
 
-    setImage(image: string) {
-        if (image) {
-            this.image = image
-        }
-        return this
+  getImage() {
+    return this.image
+  }
+
+  _assertRegonizedShape(shape: string) {
+    if (!Object.prototype.hasOwnProperty.call(Shapes, shape.toLowerCase())) {
+      throw new Error(`Trying to set unrecognized shape ${shape}`)
     }
-
-    getImage() {
-        return this.image
-    }
-
-    _assertRegonizedShape(shape: string) {
-        if (!Object.prototype.hasOwnProperty.call(Shapes, shape.toLowerCase())) {
-            throw new Error(`Trying to set unrecognized shape ${shape}`)
-        }
-    }
-
+  }
 };

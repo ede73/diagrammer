@@ -1,9 +1,9 @@
 // @ts-check
 
-import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { generators, type GraphCanvas } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { getAttributeAndFormat, output, multiAttrFmt } from '../model/support.js'
-import { GraphConnectable } from '../model/graphconnectable.js'
+import { type GraphConnectable } from '../model/graphconnectable.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { GraphEdgeLineType } from '../model/graphedge.js'
 
@@ -84,7 +84,7 @@ export function actdiag(graphcanvas: GraphCanvas) {
             const mappedShape = ActDiagShapeMap[currentShape] ? ActDiagShapeMap[currentShape] : ActDiagShapeMap.default
             return [`shape=${mappedShape}`]
           }
-        })(obj);
+        })(obj)
 
         const colorShapeLabel = multiAttrFmt(obj, {
           color: 'color="{0}"',
@@ -98,7 +98,7 @@ export function actdiag(graphcanvas: GraphCanvas) {
       // NOT invis,bold,rounded,diagonals
       // ICON does not work, using background
       let style = getAttributeAndFormat(obj, 'style', ', style="{0}"')
-      if (style !== '' && style.match(/(dotted|dashed|solid)/) == null) {
+      if (style !== '' && style.match(/(dotted|dashed|solid)/) === null) {
         style = ''
       }
 
@@ -112,7 +112,7 @@ export function actdiag(graphcanvas: GraphCanvas) {
           const mappedShape = ActDiagShapeMap[currentShape] ? ActDiagShapeMap[currentShape] : ActDiagShapeMap.default
           return [`shape=${mappedShape}`]
         }
-      })(obj);
+      })(obj)
 
       // ICON does not work, using background
       const colorIconShapeLabel = multiAttrFmt(obj, {
@@ -123,13 +123,13 @@ export function actdiag(graphcanvas: GraphCanvas) {
       lout(`${obj.getName()}${colorIconShapeLabel};`)
     }
   }
-  graphcanvas.getObjects().forEach(o => parseObjects(o))
+  graphcanvas.getObjects().forEach(o => { parseObjects(o) })
 
   graphcanvas.getEdges().forEach((edge) => {
     let s = ''
-    if (edge.lineType() == GraphEdgeLineType.DOTTED) {
+    if (edge.lineType() === GraphEdgeLineType.DOTTED) {
       s += 'style="dotted"'
-    } else if (edge.lineType() == GraphEdgeLineType.DASHED) {
+    } else if (edge.lineType() === GraphEdgeLineType.DASHED) {
       s += 'style="dashed"'
     }
     const t = multiAttrFmt(edge, {

@@ -1,7 +1,7 @@
 // @ts-check
 
-import { GraphCanvas } from '../model/graphcanvas.js'
-import { GraphConnectable } from './graphconnectable.js'
+import { type GraphCanvas } from '../model/graphcanvas.js'
+import { type GraphConnectable } from './graphconnectable.js'
 
 // =====================================
 // exposed to generators also

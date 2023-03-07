@@ -38,7 +38,7 @@ export class GraphConnectable extends GraphObject {
         Resetting edge label breaks:
           a>"A2B"b,"A2C"c
           r>"R2C"c
-  
+
           where edge a>b is named A2B, a>c A2c
           and r>c R2C
         */

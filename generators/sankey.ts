@@ -1,8 +1,8 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators, GraphCanvas } from '../model/graphcanvas.js'
-import { GraphEdge, GraphEdgeDirectionType } from '../model/graphedge.js'
+import { generators, type GraphCanvas } from '../model/graphcanvas.js'
+import { type GraphEdge, GraphEdgeDirectionType } from '../model/graphedge.js'
 import { output } from '../model/support.js'
-import { GraphConnectable } from '../model/graphconnectable.js'
+import { type GraphConnectable } from '../model/graphconnectable.js'
 
 // ADD TO INDEX.HTML AS: <option value="sankey">Sankey</option>
 
@@ -37,21 +37,21 @@ export function sankey(graphcanvas: GraphCanvas) {
   }
 
   function getPrecedingNode(edge: GraphEdge) {
-    return edge.direction() == GraphEdgeDirectionType.RIGHT ? edge.left : edge.right
+    return edge.direction() === GraphEdgeDirectionType.RIGHT ? edge.left : edge.right
   }
 
   /*
    * Return ALL edges immediately left of given node (ie. all edges right pointing to this node)
    * Recursive sum of all lefts of lefts of... will be the value of the 'node'
    * And once that is known, outoing percentage can be calculated
-   * 
+   *
    * No cyclic protection here...
    */
   function returnEdgesLeadingTo(thisNode: GraphConnectable) {
     const edgesLeadingToGivenNode: GraphEdge[] = []
     graphcanvas.getEdges().forEach(e => {
-      if ((e.direction() == GraphEdgeDirectionType.RIGHT && e.right === thisNode)
-        || (e.direction() == GraphEdgeDirectionType.LEFT && e.left === thisNode)) {
+      if ((e.direction() === GraphEdgeDirectionType.RIGHT && e.right === thisNode) ||
+        (e.direction() === GraphEdgeDirectionType.LEFT && e.left === thisNode)) {
         edgesLeadingToGivenNode.push(e)
       }
     })
@@ -59,7 +59,7 @@ export function sankey(graphcanvas: GraphCanvas) {
   }
 
   function dumpEdge(edge: GraphEdge) {
-    if (edge.direction() == GraphEdgeDirectionType.RIGHT) {
+    if (edge.direction() === GraphEdgeDirectionType.RIGHT) {
       return `(${edge.left.getName()} ${edge.edgeType} ${edge.right.getName()} with label(${edge.getLabel() ?? ''})`
     } else {
       return `(${edge.right.getName()} r(${edge.edgeType}) ${edge.left.getName()} with label(${edge.getLabel() ?? ''})`
@@ -73,7 +73,6 @@ export function sankey(graphcanvas: GraphCanvas) {
    * Link z>f is resolves to 10% * 40% * 1000 (ie. 0.1 * 0.4 * 1000) = 40
    */
   function getEdgeValue(edge: GraphEdge): number {
-
     // TODO: Alas currently this will not work, as edge is disjoint association
     // between GraphConnectable and GraphEdges, we cannot traverse to Edge from Connectable
     // const lvalue = getEdgeValue(edge.left)
@@ -95,7 +94,7 @@ export function sankey(graphcanvas: GraphCanvas) {
       const values = ipn.map(n => {
         return (value * valueForThisEdge(n)) / 100
       })
-      return values.reduce((pv, cv) => pv + cv, 0);
+      return values.reduce((pv, cv) => pv + cv, 0)
     }
     return valueForThisEdge(edge)
   }
@@ -123,7 +122,7 @@ export function sankey(graphcanvas: GraphCanvas) {
     const name = vertex.getName()
     const label = vertex.getLabel()
     vertexIndexes.set(name, index++)
-    lout(`${comma}{"name":"${label ? label : name}"}`)
+    lout(`${comma}{"name":"${label || name}"}`)
     comma = ','
   })
   lout('],', false)
@@ -139,7 +138,7 @@ export function sankey(graphcanvas: GraphCanvas) {
     const amount = getEdgeValue(edge)
     const left = vertexIndexes.get(edge.left.name)
     const right = vertexIndexes.get(edge.right.name)
-    if (edge.direction() == GraphEdgeDirectionType.RIGHT) {
+    if (edge.direction() === GraphEdgeDirectionType.RIGHT) {
       lout(`${comma}{"source":${left},"target":${right},"value":${amount}}`)
     } else {
       lout(`${comma}{"source":${right},"target":${left},"value":${amount}}`)

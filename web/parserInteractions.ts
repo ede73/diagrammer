@@ -9,17 +9,15 @@ function setupParser() {
   // TODO: MOVING TO GraphCanvas
   diagrammerParser.yy.parseError = (str: string, hash: string) => {
     const pe = `Parsing error:\n${str}\n${hash}`
-    console.log('pe')
     setError(pe)
     throw new Error(str)
   }
 
   diagrammerParser.yy.parsedGeneratorAndVisualizer = (generator: string, visualizer: string, preferParsed: boolean) => {
-    console.log(`  ..script suggests using generator ${generator} and visualizer ${visualizer} and prefer ${preferParsed}`)
     if (preferParsed && generator) {
       const useVisualizer = visualizer === 'undefined' ? undefined : visualizer
       setGenerator(generator, useVisualizer)
-      console.log(`  .. changed generator to ${generator} and visualizer ${useVisualizer}`)
+      console.warn(`  .. changed generator to ${generator} and visualizer ${useVisualizer}`)
     }
   }
 
@@ -33,7 +31,6 @@ function setupParser() {
     const result = getInputElement('diagrammer-result')
 
     if (parsingStarted === 1) {
-      console.log('  ...parsing results start coming in...')
       result.value = ''
     }
     parsingStarted++
@@ -44,9 +41,8 @@ function setupParser() {
    * @param {string} x
    */
   // TODO: MOVING TO GraphCanvas
-  // @ts-ignore
-  diagrammerParser.trace = function (x) {
-    console.log(`TRACE:${x}`)
+  diagrammerParser.trace = function (x: string) {
+    console.warn(`TRACE:${x}`)
   }
 }
 
@@ -60,7 +56,7 @@ export function parse(diagrammerCode: string, successCallback: (generator: strin
   const visualizer = getVisualizer()
 
   setupParser()
-  console.log(`parse(${generator} ${visualizer} ${preferScriptSpecifiedGeneratorAndVisualizer})`)
+  console.warn(`parse(${generator} ${visualizer} ${preferScriptSpecifiedGeneratorAndVisualizer})`)
   if (!generator) {
     throw new Error('Generator not defined')
   }
@@ -69,7 +65,7 @@ export function parse(diagrammerCode: string, successCallback: (generator: strin
   }
   // not atomic, but good enuf for UI
   if (parsingStarted >= 1) {
-    console.log('We already have a parsing underway, bail out!')
+    console.error('We already have a parsing underway, bail out!')
   }
   parsingStarted = 1
   setError('')
@@ -83,9 +79,8 @@ export function parse(diagrammerCode: string, successCallback: (generator: strin
     // used while loading new examples...
     diagrammerParser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer
     diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
-    // @ts-ignore
+    // @ts-expect-error TODO: type mismatch node vs vscode vs browser
     diagrammerParser.parse(diagrammerCode)
-    console.log(`  ..parsed, calling it a success with ${getGenerator()} and ${getVisualizer()}`)
 
     try {
       successCallback(getGenerator(), getVisualizer())

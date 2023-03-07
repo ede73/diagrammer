@@ -1,7 +1,7 @@
 // @ts-check
 import { GraphContainer } from '../model/graphcontainer.js'
-import { GraphConnectable } from './graphconnectable.js'
-import { DefaultSettingKey } from '../model/graphcontainer.js'
+import { type GraphConnectable } from './graphconnectable.js'
+import { type DefaultSettingKey } from '../model/graphcontainer.js'
 
 /**
  * Represents a container
@@ -26,7 +26,7 @@ export class GraphGroup extends GraphContainer {
 
   /**
    * Only used if this group(set) was created due if then/elseif/else construct
-   * 
+   *
    * TODO: Drop close to GraphConditional(and perhaps GraphLoop)
    */
   conditional?: string = undefined

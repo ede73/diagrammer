@@ -19,7 +19,7 @@ describe('Diagrammer', () => {
       localStorage.clear()
     }, localStorageKey)
     p.on('dialog', async dialog => {
-      // console.log(`Alert dialog displayed(${dialog.message()}), dismiss it`)
+      // console.warn(`Alert dialog displayed(${dialog.message()}), dismiss it`)
       await dialog.dismiss()
     })
   })

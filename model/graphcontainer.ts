@@ -2,19 +2,19 @@
 
 import { GraphConnectable } from './graphconnectable.js'
 import { GraphReference } from './graphreference.js'
-import { GraphVertex } from './graphvertex.js'
-import { GraphObject } from './graphobject.js'
+import { type GraphVertex } from './graphvertex.js'
+import { type GraphObject } from './graphobject.js'
 import { GraphEdge } from './graphedge.js'
 
-export type ALLOWED_DEFAULTS = {
-  edgecolor?: string,
-  groupcolor?: string,
-  vertexcolor?: string,
-  vertextextcolor?: string,
+export interface ALLOWED_DEFAULTS {
+  edgecolor?: string
+  groupcolor?: string
+  vertexcolor?: string
+  vertextextcolor?: string
   edgetextcolor?: string
 }
 
-export type DefaultSettingKey = keyof ALLOWED_DEFAULTS;
+export type DefaultSettingKey = keyof ALLOWED_DEFAULTS
 
 // Common 'subclass' for GraphInner, GraphGroup, GraphCanvas
 export class GraphContainer extends GraphConnectable {
@@ -82,7 +82,7 @@ export class GraphContainer extends GraphConnectable {
    * currentContainer first
    */
   setDefault(key: keyof ALLOWED_DEFAULTS, value: string) {
-    //debug(`****Set defaylt attribute ${key}=${value} for container ${this.getName()}`)
+    // debug(`****Set defaylt attribute ${key}=${value} for container ${this.getName()}`)
     this.defaults[key] = value
   }
 

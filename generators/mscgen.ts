@@ -1,6 +1,6 @@
 // @ts-check
 
-import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { generators, type GraphCanvas } from '../model/graphcanvas.js'
 import { GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
@@ -10,7 +10,7 @@ import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js
 
 /**
  * https://www.mcternan.me.uk/mscgen/
- * 
+ *
  * To test: node js/diagrammer.js verbose tests/test_inputs/state_sequence.txt mscgen
  */
 export function mscgen(graphcanvas: GraphCanvas) {
@@ -26,7 +26,7 @@ export function mscgen(graphcanvas: GraphCanvas) {
   // print out all node declarations FIRST (if any)
   graphcanvas.getObjects().forEach(obj => {
     if (obj instanceof GraphGroup) {
-      //vertices.push(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/')
+      // vertices.push(' /*' + obj.getName() + getAttributeAndFormat(obj, 'label', ' {0}') + '*/')
       obj.getObjects().forEach(z => {
         const tmp = multiAttrFmt(z, {
           color: 'color="{0}"',
@@ -63,7 +63,7 @@ export function mscgen(graphcanvas: GraphCanvas) {
 
     '>': '=>', // method call or function call *continuous line, bold arrow*
     '<': '<=', //  method call or function call
-    '<>': '<=>',//
+    '<>': '<=>', //
 
     '.>': '=>>', // callback *continuous line, small arrow*
     '<.': '<<=', // callback
@@ -81,7 +81,7 @@ export function mscgen(graphcanvas: GraphCanvas) {
 
     '=>': ':>', // Emphazised message *double arrow, bold arrow*
     '<=': '<:', // Emphazised message
-    '<=>': '<:>', // Emphazised message
+    '<=>': '<:>' // Emphazised message
 
     // '': '|||', // extra space between rows
 
@@ -96,12 +96,11 @@ export function mscgen(graphcanvas: GraphCanvas) {
 
   // node attrs: label, URL, ID, IDURL, arcskip, linecolor, textcolor, arclinecolor, arctextcolor, arxtextbgcolor
 
-
   let id = 1
   graphcanvas.getEdges().forEach(edge => {
     let edgeType = ''
     let rhs = edge.right
-    let lhs = edge.left
+    const lhs = edge.left
 
     if (rhs instanceof GraphGroup) {
       // just pick ONE Vertex from group and use lhead
@@ -129,7 +128,7 @@ export function mscgen(graphcanvas: GraphCanvas) {
       attrs.push(`linecolor="${edge.color}"`)
     }
     if (edge.label) {
-      if (edge.label.indexOf('::') !== -1) {
+      if (edge.label.includes('::')) {
         const labels = edge.label.split('::')
         note = labels[1].trim()
         attrs.push(`label="${labels[0].trim()}"`)
@@ -138,7 +137,6 @@ export function mscgen(graphcanvas: GraphCanvas) {
       }
     }
     attrs.push(`id="${id++}"`)
-
 
     const dir = edge.direction()
     const line = edge.lineType()
@@ -160,14 +158,14 @@ export function mscgen(graphcanvas: GraphCanvas) {
       rightName = rhs.getName()
     } else if (dir === GraphEdgeDirectionType.RIGHT) {
       edgeType = mscEdgeMapping[edge.edgeType]
-    } else if (line == GraphEdgeLineType.DOTTED) {
+    } else if (line === GraphEdgeLineType.DOTTED) {
       // dotted
       if (edge.color) {
         attrs.push(`textcolor="${edge.color}"`)
       }
       lout(`... [ ${attrs.sort().join(',')} ];`)
       return
-    } else if (line == GraphEdgeLineType.DASHED) {
+    } else if (line === GraphEdgeLineType.DASHED) {
       // dashed
       if (edge.color) {
         attrs.push(`textcolor="${edge.color}"`)

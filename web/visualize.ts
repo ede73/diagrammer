@@ -14,8 +14,8 @@ function _makeNewImageHolder(pngBase64: string) {
   // auto adjusts
   img.style.height = 'auto'
   img.src = `data:image/png;base64,${pngBase64}`
-  img.onclick = () => openImage(`${pngBase64}`)
-  getHTMLElement('diagrammer-graph')!.appendChild(img)
+  img.onclick = () => { openImage(`${pngBase64}`) }
+  getHTMLElement('diagrammer-graph')?.appendChild(img)
 }
 
 function beautify(generatedCode: string) {
@@ -24,14 +24,13 @@ function beautify(generatedCode: string) {
     data = JSON.parse(generatedCode)
   } catch (ex) {
     // too aggressive for the use... many generated code not actually JSON
-    console.log('Failed parsing generated code, perhaps not JSON(digraph etc)?')
+    console.error('Failed parsing generated code, perhaps not JSON(digraph etc)?')
     return
   }
   // Get DOM-element for inserting json-tree
-  const wrapper = document.getElementById('diagrammer-beautified')
-  // @ts-ignore
-  // eslint-disable-next-line no-undef, no-unused-vars
-  const tree = jsonTree.create(data, wrapper)
+  const wrapper = document.getElementById('diagrammer-beautified') as HTMLElement
+  // @ts-expect-error TODO: typing
+  jsonTree.create(data, wrapper)
 }
 
 export function clearBeautified() {
@@ -58,9 +57,12 @@ export async function visualize(visualizer: string) {
 
   if (visualizations.has(visualizer)) {
     // this is web only visualization
-    console.log(`Visualize using ${visualizer}`)
-    visualizations.get(visualizer)!(generatedResult)
-    console.log(`Finished visualizing ${visualizer}`)
+    const f = visualizations.get(visualizer)
+    if (!f) {
+      console.error(`O-o, could not find visualizer ${visualizer}`)
+      return
+    }
+    await f(generatedResult)
   } else {
     // backend visualizer (unless if we want use Viz)
     const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`

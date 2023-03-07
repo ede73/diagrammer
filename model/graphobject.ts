@@ -1,10 +1,10 @@
 // @ts-check
 
 import { debug } from './debug.js'
-import { GraphCanvas } from './graphcanvas.js'
-import { GraphContainer, DefaultSettingKey } from './graphcontainer.js'
+import { type GraphCanvas } from './graphcanvas.js'
+import { type GraphContainer, type DefaultSettingKey } from './graphcontainer.js'
 
-type DefaultAndCallback = { attrName: DefaultSettingKey, callback: (value: string) => void }
+interface DefaultAndCallback { attrName: DefaultSettingKey, callback: (value: string) => void }
 /**
  * GraphObject: Anything that is represented in a graph (diagram/visualization)
  */
@@ -36,7 +36,7 @@ export class GraphObject {
   /**
    * Name of the object. Exception being edges, they don't have names
    */
-  constructor(name: string, parent?/*TODO:Ugh..ugly*/: any) {
+  constructor(name: string, parent?/* TODO:Ugh..ugly */: any) {
     if (name) {
       this.name = name
     }
@@ -46,7 +46,7 @@ export class GraphObject {
     if (!parent && this.constructor.name !== 'GraphCanvas') {
       throw new Error(`All objects require a parent - EXCEPTION being canvas ${this.constructor.name}`)
     }
-    this.parent = parent;
+    this.parent = parent
   }
 
   getName() {
@@ -57,7 +57,7 @@ export class GraphObject {
    * Set color
    */
   setColor(color: string) {
-    //debug(`===Set color ${color} to ${this.getName()}`)
+    // debug(`===Set color ${color} to ${this.getName()}`)
     // Grammar uses call chaining, and doesn't check so it may ..setColor(OptionalColotThatIsUndefinedIeLeftOut..)
     if (color) {
       this.color = color.trim()
@@ -145,7 +145,7 @@ export class GraphObject {
     if (this.parent) {
       setup.forEach(check => {
         this.getDefaultAttribute(this.parent as GraphContainer, check.attrName, check.callback)
-      });
+      })
     }
   }
 
@@ -160,10 +160,9 @@ export class GraphObject {
   private getDefaultAttribute(container: GraphContainer,
     attrname: DefaultSettingKey,
     callback?: (defaultAttr: string) => void): string | undefined {
-
-    let loops = 0
+    const loops = 0
     while (container) {
-      const value = container.getDefault(attrname);
+      const value = container.getDefault(attrname)
       if (value && callback) {
         callback(value)
         return value
@@ -171,11 +170,10 @@ export class GraphObject {
       if (container.parent) {
         container = container.parent as GraphContainer
       } else {
-        break;
+        break
       }
     }
   }
-
 
   toString() {
     return 'GraphObject'

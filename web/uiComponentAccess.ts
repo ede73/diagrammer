@@ -4,10 +4,9 @@
 // Provide type safe access here
 
 export function getHTMLElement(name: string) {
-  // @ts-ignore
-  const element = document.getElementById(name)
+  const element = document.getElementById(name) as HTMLElement
   if (!element) {
-    console.log(`Trying to load HTML Element named ${name} but one isn't found!`)
+    console.error(`Trying to load HTML Element named ${name} but one isn't found!`)
   }
   return element
 }
@@ -18,7 +17,6 @@ export function getHTMLElement(name: string) {
  */
 export function setGenerator(generator: string, visualizer?: string) {
   const genViz = generator + (visualizer ? ':' + visualizer : '')
-  console.log(`setGenerator(${generator}:${visualizer}) ie. '${genViz}'`)
   // Change the generator via UI
   const select: HTMLInputElement = document.querySelector('#diagrammer-generator') as HTMLInputElement
   select.value = genViz
@@ -30,7 +28,6 @@ export function setGenerator(generator: string, visualizer?: string) {
       console.error(`Somewhy visualizer change did not go thru, we wanted ${visualizer} and have ${getVisualizer()}`)
     }
   }
-  console.log(` final result is generator=${getGenerator()} visualizer=${getVisualizer()}`)
 }
 
 /**
@@ -55,15 +52,16 @@ export function getCurrentFilename() {
  * Set error on UI
  */
 export function setError(text: string) {
-  const element = document.getElementById('diagrammer-error')
-  element!.innerText = text
+  const element = document.getElementById('diagrammer-error') as HTMLElement
+  console.error(text)
+  element.innerText = text
 }
 
 /**
  * @returns Return parse error(if any)
  */
 export function getError() {
-  return document.getElementById('diagrammer-error')!.innerText
+  return document.getElementById('diagrammer-error')?.innerText ?? ''
 }
 
 export function openImage(imageBase64: string) {
@@ -80,17 +78,15 @@ export function openImage(imageBase64: string) {
   }, 0)
 }
 
-let win
 export function openPicWindow() {
-  // TODO:
-  win = window.open('web/result.png', 'extpic')
+  window.open('web/result.png', 'extpic') as Window
 }
 
 // Get currently selected generator
 export function getGenerator() {
   const e = getSelectElement('diagrammer-generator')
   const gen = e.options[e.selectedIndex].value
-  if (gen.indexOf(':') > -1) {
+  if (gen.includes(':')) {
     return gen.split(':')[0]
   }
   return gen
@@ -99,7 +95,7 @@ export function getGenerator() {
 export function getVisualizer() {
   const e = getSelectElement('diagrammer-generator')
   const gen = e.options[e.selectedIndex].value
-  if (gen.indexOf(':') > -1) {
+  if (gen.includes(':')) {
     return gen.split(':')[1]
   }
   return gen

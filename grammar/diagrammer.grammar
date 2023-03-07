@@ -71,7 +71,7 @@ S
 			  graphcanvas.setVisualizer(yy.USE_VISUALIZER);
 			} else if (!graphcanvas.getVisualizer()) {
 			  const visualizer = graphcanvas.getVisualizer();
-			  if (visualizer == "digraph") {
+			  if (visualizer === "digraph") {
 			    graphcanvas.setVisualizer("dot");
 			  } else if (graphcanvas.getGenerator()){
 			    graphcanvas.setVisualizer(graphcanvas.getGenerator());

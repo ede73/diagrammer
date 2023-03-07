@@ -1,18 +1,18 @@
 // @ts-check
 import { debug } from './debug.js'
-import { GraphConnectable } from './graphconnectable.js'
-import { GraphContainer } from './graphcontainer'
+import { type GraphConnectable } from './graphconnectable.js'
+import { type GraphContainer } from './graphcontainer'
 import { GraphGroup } from '../model/graphgroup.js'
-import { GraphVertex } from './graphvertex.js'
+import { type GraphVertex } from './graphvertex.js'
 
 /**
  * An inner graph, where outside is linked to all the Vertices in side, like
  * outerVertex > ( LinkedToInnerVertex AndThese>Inner>VerticesAlso)
  */
 export class GraphInner extends GraphGroup {
-
   _exit?: GraphConnectable = undefined
-  _entrance?: (GraphConnectable | GraphConnectable[]) = undefined
+  // TODO: Obviously [] not intended here (maybe from b>(a b c) ?, but then it should be the GraphInner, but the vertices inside)
+  _entrance?: GraphConnectable | GraphConnectable[] = undefined
 
   constructor(name: string, parent: GraphContainer) {
     super(name, parent)

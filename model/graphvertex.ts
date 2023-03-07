@@ -1,6 +1,6 @@
 // @ts-check
 import { GraphConnectable } from './graphconnectable.js'
-import { GraphContainer, DefaultSettingKey } from './graphcontainer.js'
+import { type GraphContainer, type DefaultSettingKey } from './graphcontainer.js'
 import { Shapes } from './shapes.js'
 
 /**

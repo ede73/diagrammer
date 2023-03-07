@@ -246,9 +246,7 @@ export async function visualizeUmlClass(generatorResult: string) {
         font: edgeLabelFont,
         stroke: '#606060',
         isMultiline: true
-      },
-      new go.Binding('text', 'label', (label: string) =>
-        label ? label.split('\\n').join('\n') : '')
+      }, new go.Binding('text', 'label', (label: string) => label ? label.split('\\n').join('\n') : '')
       ), $(go.TextBlock, {
         textAlign: 'center',
         font: headTailEdgeLabelFont,
@@ -256,8 +254,7 @@ export async function visualizeUmlClass(generatorResult: string) {
         segmentIndex: 0,
         segmentOffset: new go.Point(NaN, NaN),
         segmentOrientation: go.Link.OrientPlus90
-      },
-      new go.Binding('text', 'tailLabel', (tailLabel: string) => tailLabel || '')
+      }, new go.Binding('text', 'tailLabel', (tailLabel: string) => tailLabel || '')
       ),
       $(go.TextBlock, {
         textAlign: 'center',
@@ -266,8 +263,7 @@ export async function visualizeUmlClass(generatorResult: string) {
         segmentIndex: -1,
         segmentOffset: new go.Point(NaN, NaN),
         segmentOrientation: go.Link.OrientPlus90
-      },
-      new go.Binding('text', 'headLabel', (headLabel: string) => headLabel || ''))
+      }, new go.Binding('text', 'headLabel', (headLabel: string) => headLabel || ''))
     )
 
   // setup a few example class nodes and relationships
@@ -284,6 +280,6 @@ export async function visualizeUmlClass(generatorResult: string) {
   const x = 0
   const y = 0
   const u = new go.Size(printSize, printSize)
-  const svg = myDiagram.makeSvg({ position: new go.Point(x, y) }) as SVGElement
+  const svg = myDiagram.makeSvg({ position: new go.Point(x, y), size: u }) as SVGElement
   removeOldVisualizations().appendChild(svg)
 }

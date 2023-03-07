@@ -53,7 +53,9 @@ export function getCurrentFilename() {
  */
 export function setError(text: string) {
   const element = document.getElementById('diagrammer-error') as HTMLElement
-  console.error(text)
+  if (text) {
+    console.error(text)
+  }
   element.innerText = text
 }
 

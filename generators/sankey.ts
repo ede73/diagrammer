@@ -6,13 +6,26 @@ import { type GraphConnectable } from '../model/graphconnectable.js'
 
 // ADD TO INDEX.HTML AS: <option value="sankey">Sankey</option>
 
+export interface SankeyNodeT {
+  name: string
+}
+export interface SankeyLinkT {
+  source: number
+  target: number
+  value: number
+}
+export interface SankeyDocumentT {
+  nodes: SankeyNodeT[]
+  links: SankeyLinkT[]
+}
+
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/sankey.txt sankey
  */
 export function sankey(graphcanvas: GraphCanvas) {
-  const lout = (...args: any[]) => {
-    const [textOrIndent, maybeIndent] = args
-    output(graphcanvas, textOrIndent, maybeIndent)
+  const sankeyDoc: SankeyDocumentT = {
+    nodes: [],
+    links: []
   }
 
   function getValueAndPercentage(edge: GraphEdge): [value: number, hasValue: boolean, isPercentage: boolean] {
@@ -24,16 +37,6 @@ export function sankey(graphcanvas: GraphCanvas) {
       }
     }
     return [Number.NaN, false, false]
-  }
-
-  function isPureValue(edge: GraphEdge) {
-    const [value, hasValue, isPercentage] = getValueAndPercentage(edge)
-    return hasValue && !isPercentage
-  }
-
-  function isPercent(edge: GraphEdge) {
-    const [value, hasValue, isPercentage] = getValueAndPercentage(edge)
-    return hasValue && isPercentage
   }
 
   function getPrecedingNode(edge: GraphEdge) {
@@ -56,14 +59,6 @@ export function sankey(graphcanvas: GraphCanvas) {
       }
     })
     return edgesLeadingToGivenNode
-  }
-
-  function dumpEdge(edge: GraphEdge) {
-    if (edge.direction() === GraphEdgeDirectionType.RIGHT) {
-      return `(${edge.left.getName()} ${edge.edgeType} ${edge.right.getName()} with label(${edge.getLabel() ?? ''})`
-    } else {
-      return `(${edge.right.getName()} r(${edge.edgeType}) ${edge.left.getName()} with label(${edge.getLabel() ?? ''})`
-    }
   }
 
   /*
@@ -99,36 +94,15 @@ export function sankey(graphcanvas: GraphCanvas) {
     return valueForThisEdge(edge)
   }
 
-  // /**
-  //  * @param {GraphVertex} vertex
-  //  * @param {number} size
-  //  */
-  // function addSize (vertex, size) {
-  //   if (vertex.size) {
-  //     vertex.size += size
-  //   } else {
-  //     vertex.size = size
-  //   }
-  // }
-
-  lout('{', true)
-
-  let comma = ''
-
-  lout('"nodes":[', true)
   const vertexIndexes = new Map()
   let index = 0
   graphcanvas.getObjects().forEach(vertex => {
     const name = vertex.getName()
     const label = vertex.getLabel()
     vertexIndexes.set(name, index++)
-    lout(`${comma}{"name":"${label || name}"}`)
-    comma = ','
+    const node: SankeyNodeT = { name: `${(label || name) ?? ''}` }
+    sankeyDoc.nodes.push(node)
   })
-  lout('],', false)
-
-  lout('"links":[', true)
-  comma = ''
 
   /**
    * For a dendrogram we're not interested in vertices
@@ -138,14 +112,11 @@ export function sankey(graphcanvas: GraphCanvas) {
     const amount = getEdgeValue(edge)
     const left = vertexIndexes.get(edge.left.name)
     const right = vertexIndexes.get(edge.right.name)
-    if (edge.direction() === GraphEdgeDirectionType.RIGHT) {
-      lout(`${comma}{"source":${left},"target":${right},"value":${amount}}`)
-    } else {
-      lout(`${comma}{"source":${right},"target":${left},"value":${amount}}`)
-    }
-    comma = ','
+    const link: SankeyLinkT = (edge.direction() === GraphEdgeDirectionType.RIGHT)
+      ? { source: left, target: right, value: amount }
+      : { source: right, target: left, value: amount }
+    sankeyDoc.links.push(link)
   })
-  lout(']', false)
-  lout('}', false)
+  output(graphcanvas, JSON.stringify(sankeyDoc))
 }
 generators.set('sankey', sankey)

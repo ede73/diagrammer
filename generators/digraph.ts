@@ -16,6 +16,7 @@ import { debug } from '../model/debug.js'
 import { GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
 import { mapMethodsOrProperties } from '../model/transforms.js'
 import { GraphReference } from '../model/graphreference.js'
+import { type Shapes } from '../model/shapes.js'
 
 // ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(www/cli)</option>
@@ -25,7 +26,7 @@ import { GraphReference } from '../model/graphreference.js'
 // ADD TO INDEX.HTML AS: <option value="digraph:sfdp">Graphviz - sfdp(cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:twopi">Graphviz - twopi(www/cli)</option>
 
-const DigraphShapeMap = {
+const DigraphShapeMap: Shapes = {
   actor: 'cds',
   beginpoint: 'circle',
   box: 'box',
@@ -40,7 +41,7 @@ const DigraphShapeMap = {
   ellipse: 'ellipse',
   endpoint: 'doublecircle',
   input: 'parallelogram',
-  invis: 'invis',
+  // invis: 'invis',
   loop: 'house',
   loopend: 'invhouse',
   loopin: 'house',
@@ -117,7 +118,7 @@ export function digraph(graphcanvas: GraphCanvas) {
       nattrs.push('penwidth=0')
     }
     if (obj instanceof GraphVertex && obj.shape) {
-      const currentShape = obj.shape as keyof typeof DigraphShapeMap
+      const currentShape = obj.shape
       if (obj.shape && !DigraphShapeMap[currentShape]) {
         throw new Error('Missing shape mapping')
       }

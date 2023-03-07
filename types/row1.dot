@@ -15,8 +15,8 @@ digraph {
     condition [ shape="tripleoctagon" width=1 height=1  fixedsize=true color=blue style=filled];
 
     database [ shape="cylinder" width=1 height=1  fixedsize=true color=blue style=filled];
-    default [ shape="Mcircle" width=1 height=1  fixedsize=true color=blue style=filled];
-    diamond [ shape="box" width=1 height=1  fixedsize=true color=blue style=filled];
+    default [ shape="box" width=1 height=1  fixedsize=true color=blue style=filled];
+    diamond [ shape="diamond" width=1 height=1  fixedsize=true color=blue style=filled];
     dots [ shape="point" width=1 height=1  fixedsize=true color=blue style=filled];
     doublecircle [ shape="doublecircle" width=1 height=1  fixedsize=true color=blue style=filled];
 
@@ -25,11 +25,13 @@ digraph {
     endpoint [ shape="box" style=rounded width=1 height=1  fixedsize=true color=blue style=filled];
 
     input [ shape="parallelogram" width=1 height=1  fixedsize=true color=blue style=filled];
+    invis [ shape="invis" width=1 height=1  fixedsize=true color=blue style=filled];
 
     loop [ shape="invtrapezium" width=1 height=1  fixedsize=true color=blue style=filled];
     loopend [ shape="invhouse" width=1 height=1  fixedsize=true color=blue style=filled];
     loopin [ shape="house" width=1 height=1  fixedsize=true color=blue style=filled];
     loopout [ shape="invhouse" width=1 height=1  fixedsize=true color=blue style=filled];
+    loopstart [ shape="house" width=1 height=1  fixedsize=true color=blue style=filled];
 
     mail [ shape="folder" width=1 height=1  fixedsize=true color=blue style=filled];
 
@@ -39,6 +41,7 @@ digraph {
     record [ shape="record" width=1 height=1  fixedsize=true color=blue style=filled];
 
     rect [ shape="box" width=1 height=1  fixedsize=true color=blue style=filled];
+    rectangle [ shape="box" width=1 height=1  fixedsize=true color=blue style=filled];
 
     // style=rounded
     roundedbox [ shape="box" style=rounded  width=1 height=1  fixedsize=true color=blue style=filled];

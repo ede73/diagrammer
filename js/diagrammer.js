@@ -31,7 +31,8 @@ export function doParse (
   diagrammerParser.yy.result = resultCallback || ((result) => {
     // default callback unless overridden
     config.parsedCode += `${result}\n`
-    console.log(result)
+    // eslint-disable-next-line no-console
+    console.log(result) // ok
   })
 
   // {text: this.lexer.match, token: this.terminals_[symbol] || symbol, line: this.lexer.yylineno, loc: yyloc, expected: expected});
@@ -142,7 +143,8 @@ async function _main (argv) {
         config.parsedCode += `${resultLine}\n`
         // no difference, stdout gets lost
         // process.stdout.write(resultLine)
-        console.log(resultLine)
+        // eslint-disable-next-line no-console
+        console.log(resultLine) // ok
       },
       (parseError, hash) => {
         config.tp(`Parsing error ${parseError} ${hash}`)

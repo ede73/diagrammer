@@ -6,12 +6,12 @@ import { GraphVertex } from '../model/graphvertex.js'
 import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js'
 import { type GraphConnectable } from '../model/graphconnectable.js'
 import { GraphEdgeLineType } from '../model/graphedge.js'
+import { type Shapes } from '../model/shapes.js'
 
 // ADD TO INDEX.HTML AS: <option value="blockdiag">Block Diagram(cli)</option>
-
-const BlockDiagShapeMap = {
+const BlockDiagShapeMap: Shapes = {
   default: 'box',
-  invis: 'invis',
+  // invis: 'invis',
   record: 'box',
   doublecircle: 'endpoint',
   box: 'box',

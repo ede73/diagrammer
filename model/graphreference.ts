@@ -1,6 +1,5 @@
 // @ts-check
 import { GraphConnectable } from './graphconnectable.js'
-import { Shapes } from './shapes.js'
 
 /**
  * Represent a hidden placeholder to keep the language precise
@@ -52,11 +51,5 @@ export class GraphReference extends GraphConnectable {
 
   getImage() {
     return this.image
-  }
-
-  _assertRegonizedShape(shape: string) {
-    if (!Object.prototype.hasOwnProperty.call(Shapes, shape.toLowerCase())) {
-      throw new Error(`Trying to set unrecognized shape ${shape}`)
-    }
   }
 };

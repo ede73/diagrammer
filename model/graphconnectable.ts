@@ -1,6 +1,7 @@
 // @ts-check
 
 import { GraphObject } from '../model/graphobject.js'
+import { ShapeKeys } from './shapes.js'
 
 /**
  * Represents an entity that can be connected to/from/between by GraphEdge
@@ -40,5 +41,11 @@ export class GraphConnectable extends GraphObject {
         */
     this._edgelabel = undefined
     return tmp
+  }
+
+  _assertRegonizedShape(shape: string) {
+    if (!ShapeKeys.includes(shape.toLocaleLowerCase())) {
+      throw new Error(`Trying to set unrecognized shape ${shape}`)
+    }
   }
 };

@@ -1,7 +1,6 @@
 // @ts-check
 import { GraphConnectable } from './graphconnectable.js'
 import { type GraphContainer, type DefaultSettingKey } from './graphcontainer.js'
-import { Shapes } from './shapes.js'
 
 /**
  * Represents a Vertex in a visualization
@@ -35,12 +34,6 @@ export class GraphVertex extends GraphConnectable {
     this.fetchAndSetContainerDefaults([
       { attrName: 'vertexcolor' as DefaultSettingKey, callback: color => { this.color = color } },
       { attrName: 'vertextextcolor' as DefaultSettingKey, callback: color => { this.textcolor = color } }])
-  }
-
-  _assertRegonizedShape(shape: string) {
-    if (!Object.prototype.hasOwnProperty.call(Shapes, shape.toLowerCase())) {
-      throw new Error(`Trying to set unrecognized shape ${shape}`)
-    }
   }
 
   setShape(shape: string) {

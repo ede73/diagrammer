@@ -6,13 +6,14 @@ import { getAttributeAndFormat, output, multiAttrFmt } from '../model/support.js
 import { type GraphConnectable } from '../model/graphconnectable.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { GraphEdgeLineType } from '../model/graphedge.js'
+import { type Shapes } from '../model/shapes.js'
 
 // ADD TO INDEX.HTML AS: <option value="actdiag">Activity Diagram(cli)</option>
 
-const ActDiagShapeMap =
+const ActDiagShapeMap: Shapes =
 {
   default: 'box',
-  invis: 'invis',
+  // invis: 'invis',
   record: 'box',
   doublecircle: 'endpoint',
   box: 'box',

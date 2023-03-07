@@ -8,7 +8,6 @@ import { output } from '../model/support.js'
 import { GraphReference } from '../model/graphreference.js'
 import { type GraphObject } from 'model/graphobject.js'
 import { GraphVertex } from '../model/graphvertex.js'
-import { GraphGroup } from '../model/graphgroup.js'
 
 // ADD TO INDEX.HTML AS: <option value="ast_record">Abstract Syntax Tree(Record)</option>
 

@@ -129,7 +129,7 @@ build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators 
 	@#sed -i "1 i\import * as model from '../model/model.js';" $@
 	@sed -i "1 i\import {_enterNewGraphInner, _exitCurrentGraphInner, _getList, _getEdge, _getVertexOrGroup, _getGroupConditionalOrMakeNew, _getGroupOrMakeNew, _processVariable, _getGroupLoopOrMakeNew} from '../model/model.js';" $@
 	@sed -i "1 i\import {traverseTree, findVertex, TreeVertex} from '../model/tree.js';" $@
-	@sed -i "1 i\import {Shapes} from '../model/shapes.js';" $@
+	@sed -i "1 i\import {ShapeKeys} from '../model/shapes.js';" $@
 	@sed -i "1 i\import {debug} from '../model/debug.js';" $@
 	@sed -i "1 i\import {iterateEdges, outputFormattedText, getAttributeAndFormat, output, getAttribute, setAttr } from '../model/support.js';" $@
 	@sed -i "1 i\import {GraphInner} from '../model/graphinner.js';" $@

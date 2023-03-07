@@ -5,13 +5,14 @@ import { GraphReference } from '../model/graphreference.js'
 import { output, getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { type GraphConnectable } from '../model/graphconnectable.js'
+import { type Shapes } from '../model/shapes.js'
 
 // ADD TO INDEX.HTML AS: <option value="nwdiag">Network Diagram(cli)</option>
 
-const NetworkDiagShapeMap =
+const NetworkDiagShapeMap: Shapes =
 {
   default: 'box',
-  invis: 'invis',
+  // invis: 'invis',
   record: 'box',
   doublecircle: 'endpoint',
   box: 'box',

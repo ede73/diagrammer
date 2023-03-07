@@ -14,6 +14,7 @@
     // Disabling lib check helps (or if puppeteer, jest, babel type errors get fixed)
     //"skipLibCheck": true
     //"checkJs": true
+    "strictNullChecks": true
   },
   // "include": [
   //   "*.ts"

@@ -6,5 +6,13 @@
         "**/**.js": {
             "when": "$(basename).tsx"
         }
-    }
+    },
+    "eslint.validate": [
+        "vue",
+        "html",
+        "javascript",
+        "typescript",
+        "javascriptreact",
+        "typescriptreact"
+    ]
 }

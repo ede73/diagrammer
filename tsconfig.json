@@ -30,7 +30,6 @@
     "target": "es2017",
     "module": "ES6",
     "sourceMap": true,
-    "allowJs": true,
     "baseUrl": ".",
     "paths": {
       "https://cdn.jsdelivr.net/npm/d3@7/+esm": [
@@ -39,6 +38,20 @@
       "//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js": [
         "./node_modules/@types/jquery"
       ]
-    }
+    },
+    "allowJs": true,
+    "removeComments": true,
+    // not even this AND exclude PREVENT tsc going to node_modules
+    // completely removing node_modules works, transpiles beautifully still! WTF?
+    //"noImplicitAny": false,
+    // tsc is "TOTALLY" nuts,i've echo > support.ts, + this config, tsc runs thru node_modules :)
+    // Disabling lib check helps (or if puppeteer, jest, babel type errors get fixed)
+    "skipLibCheck": true,
+    // Be as strict as possible
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "strictNullChecks": true
   }
 }

@@ -176,6 +176,8 @@ clean:
 
 watch:
 	# Alas each file is usually modified many times (even on one save) causing massive build burst
+	# TODO: uh oh, new bug..concurrent builds break build process
+	# should 'eat the notifications before starting a build' to avoid concurrency (parallelism with makefile ok, multiple makes..nope)
 	inotifywait -m -e modify --format '%w%f' --include ".*.ts$$" model generators web tests| while read path; do make;done &
 
 stopwatch:

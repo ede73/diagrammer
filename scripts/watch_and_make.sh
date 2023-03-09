@@ -52,7 +52,7 @@ isBuildNeeded() {
 #if isBuildNeeded; then echo build needed; fi
 #if ! isBuildNeeded; then echo build not needed; fi
 
-inotifywait -m -e modify --format '%w%f' --include ".*.ts$" model generators web tests |
+inotifywait -m -e modify --format '%w%f' --include "(.*.html|.*.ts)$" index_template.html model generators web tests |
     while read path; do
         touch "$WATCHED_FILES_CHANGED"
         #maybeBuild

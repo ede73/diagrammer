@@ -9,7 +9,6 @@ function setupParser() {
   // TODO: MOVING TO GraphCanvas
   diagrammerParser.yy.parseError = (str: string, hash: string) => {
     const pe = `Parsing error:\n${str}\n${hash}`
-    setError(pe)
     throw new Error(str)
   }
 

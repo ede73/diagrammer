@@ -2,51 +2,33 @@
 cat row1.dot |grep fixed|grep -v //|awk '{printf("echo \"digraph{%s}\"|dot -Tpng -ox%s.png\n",$0,$1)}'|sh -
 exit 0
 digraph {
-    compound=true;
-    rankdir=TD;
-    actor [ shape="cds"                    width=1 height=1  fixedsize=true color=blue style=filled];
-    // style=rounded
-    beginpoint [ shape="box" style=rounded width=1 height=1  fixedsize=true color=blue style=filled];
-    box [ shape="box" width=1              height=1  fixedsize=true color=blue style=filled];
-
-    circle [ shape="circle" width=1 height=1  fixedsize=true color=blue style=filled];
-
-    cloud [ shape="tripleoctagon" width=1 height=1  fixedsize=true color=blue style=filled];
-    condition [ shape="tripleoctagon" width=1 height=1  fixedsize=true color=blue style=filled];
-
-    database [ shape="cylinder" width=1 height=1  fixedsize=true color=blue style=filled];
-    default [ shape="box" width=1 height=1  fixedsize=true color=blue style=filled];
-    diamond [ shape="diamond" width=1 height=1  fixedsize=true color=blue style=filled];
-    dots [ shape="point" width=1 height=1  fixedsize=true color=blue style=filled];
-    doublecircle [ shape="doublecircle" width=1 height=1  fixedsize=true color=blue style=filled];
-
-    ellipse [ shape="ellipse" width=1 height=1  fixedsize=true color=blue style=filled];
-
-    endpoint [ shape="box" style=rounded width=1 height=1  fixedsize=true color=blue style=filled];
-
-    input [ shape="parallelogram" width=1 height=1  fixedsize=true color=blue style=filled];
-    invis [ shape="invis" width=1 height=1  fixedsize=true color=blue style=filled];
-
-    loop [ shape="invtrapezium" width=1 height=1  fixedsize=true color=blue style=filled];
-    loopend [ shape="invhouse" width=1 height=1  fixedsize=true color=blue style=filled];
-    loopin [ shape="house" width=1 height=1  fixedsize=true color=blue style=filled];
-    loopout [ shape="invhouse" width=1 height=1  fixedsize=true color=blue style=filled];
-    loopstart [ shape="house" width=1 height=1  fixedsize=true color=blue style=filled];
-
-    mail [ shape="folder" width=1 height=1  fixedsize=true color=blue style=filled];
-
-    minidiamond [ shape="Mdiamond" width=1 height=1  fixedsize=true color=blue style=filled];
-    minisquare [ shape="Msquare" width=1 height=1  fixedsize=true color=blue style=filled];
-    note [ shape="note" width=1 height=1  fixedsize=true color=blue style=filled];
-    record [ shape="record" width=1 height=1  fixedsize=true color=blue style=filled];
-
-    rect [ shape="box" width=1 height=1  fixedsize=true color=blue style=filled];
-    rectangle [ shape="box" width=1 height=1  fixedsize=true color=blue style=filled];
-
-    // style=rounded
-    roundedbox [ shape="box" style=rounded  width=1 height=1  fixedsize=true color=blue style=filled];
-
-    square [ shape="square" width=1 height=1  fixedsize=true color=blue style=filled];
-
-    terminator [ shape="ellipse" width=1 height=1  fixedsize=true color=blue style=filled];
+    actor [ shape="cds"                    	width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    beginpoint [ shape="box" style=rounded 	width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    circle [ shape="circle" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    cloud [ shape="tripleoctagon" 		width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    condition [ shape="tripleoctagon" 		width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    database [ shape="cylinder" 		width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    default [ shape="box" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    diamond [ shape="diamond" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    dots [ shape="point" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    doublecircle [ shape="doublecircle" 	width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    ellipse [ shape="ellipse" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    endpoint [ shape="box" style=rounded 	width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    folder [ shape="folder" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    input [ shape="parallelogram" 		width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    left [ shape="house",orientation=90,	width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    loop [ shape="invtrapezium" 		width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    loopin [ shape="house" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    loopout [ shape="invhouse" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    mail [ shape="folder" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    document [ shape="Mdiamond" 		width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    display [ shape="Msquare" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    note [ shape="note" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    preparation [ shape="polygon" sides=6	width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    record [ shape="record" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    rect [ shape="box" 				width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    right [ shape="house",orientation=-90,	width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    roundedbox [ shape="box" style=rounded  	width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    square [ shape="square" 			width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
+    subroutine [ shape="box"	 		width=1   fixedsize=true color=blue style=filled fontcolor=yellow];
 }

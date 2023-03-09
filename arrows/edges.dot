@@ -1,0 +1,18 @@
+cat edges.dot |grep -v digraph|grep -v }|grep -v exit|awk '{x=match($0,/[ ]+([ab0-9]+)/,q); printf("echo \"digraph{%s}\"|dot -Tpng -o%s.png\n",$0,q[0])}'|sh -
+exit 0
+digraph {
+    a1->b1;
+    a2->b2[ style="dashed" ];
+    a3->b3[ style="dotted" ];
+    a11->b11[ arrowhead="diamond" ];
+    a12->b12[ arrowhead="tee", style="dashed" ];
+    a4->b4[ dir=both ];
+    a5->b5[ dir=both, style="dashed" ];
+    a6->b6[ dir=both, style="dotted" ];
+    a13->b13[ arrowhead="diamond", arrowtail="diamond", dir=both ];
+    a14->b14[ arrowhead="tee", arrowtail="tee", dir=both ];
+    a7->b7[ dir=none, style="dashed" ];
+    a8->b8[ dir=none, style="dotted" ];
+    b9->a9[ arrowhead="tee" ];
+    a10->b10[ arrowhead="tee" ];
+}

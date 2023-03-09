@@ -33,14 +33,23 @@ TRANSPILEOPTIONS=--module es6 --esModuleInterop --target es2017 --allowJs --remo
 TRANSPILE=$(TRANSPILER) $(TRANSPILEOPTIONS)
 S=| grep -v -E "(Cannot write file)" || true
 ESLINT=eslint -f stylish --fix
+LOCK_FILE=.lock
+BUILD_STARTED_FILE=.build_started
 
 .PHONY: clean node_modules model
 
-all:; @$(MAKE) -j$(CORES) _all 
+all:
+	@touch $(LOCK_FILE)
+	@touch $(BUILD_STARTED_FILE)
+	@$(MAKE) -j$(CORES) _all
 _all: active_project_deps jest_test_deps parser
-	@echo Make ALL
+	@echo Built all
+	@rm -f $(LOCK_FILE)
+
+DELETE_ON_ERROR: $(LOCK_FILE)
 
 active_project_deps: model generators web web_visualizations index.html
+	@echo 'Build all active project dependencies'
 generators/%.js : generators/%.ts
 generators: $(GENERATOR_JSS) model
 model/%.js : model/%.ts
@@ -54,6 +63,7 @@ index.html : index_template.html generators tests/test_inputs/*.txt web_visualiz
 	@awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs/*.txt | sort |sed 's,^tests/test_inputs/,,g'" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations/*.ts | sort" | getline var) {tsjs=var;gsub("[.]ts",".js",tsjs);printf("<script type=\"module\" src=\"%s\"></script>\n",tsjs);}next}/{REPLACE_WITH_GENERATORS}/{ while ("grep \"ADD TO INDEX.HTML AS:\" generators/*.ts|sort|cut -d: -f3-|sort" | getline var) printf("%s\n",var,var);next}{print $0}' $< >$@
 
 jest_test_deps: parsertests webtests modeltests generatortests
+	@echo 'Build all Jest test dependencies'
 tests/parser/%.js: tests/parser/$.ts
 parsertests: $(PARSER_TEST_JSS) model parser faketypes
 tests/web/%.js: tests/parser/$.ts
@@ -75,7 +85,7 @@ fixall:
 	make testrunner
 
 build/types/diagrammer_parser_types.js: js/diagrammer_parser_types.ts
-	@echo "Make diagrammer shared context type for jest tests"
+	@echo "  Make diagrammer shared context type for jest tests"
 	@cp js/diagrammer_parser_types.ts build/types
 	@echo '{"type":"module"}' > build/types/package.json
 	@(cd build/types; rm -f diagrammer_parser_types.js;$(TRANSPILE) diagrammer_parser_types.ts $(S))
@@ -95,7 +105,7 @@ plantuml_jar:
 
 # Not actively used, but you can build and test just the lexer while developing
 build/diagrammer_lexer.js: grammar/diagrammer.lex
-	@echo "Build Lexer"
+	@echo "  Build Lexer"
 	@mkdir -p build
 	node_modules/.bin/jison-lex $< -o $@ >/dev/null
 	@echo "exports.diagrammerLexer=diagrammerLexer;" >> $@
@@ -105,15 +115,16 @@ just_lexer: build/diagrammer_lexer.js
 
 # Jison considers lexer/parser separate, we combine to one file
 build/diagrammer.all: $(GRAMMAR_FILES)
-	@echo "Concatenate all grammar files"
+	@echo "  Concatenate all grammar files"
 	@mkdir -p build
 	@echo Compile build/diagrammer.all
 	@cat $^ >$@
 # nicer to carry around than build target
 lexer_and_grammar: build/diagrammer.all
+	echo 'Build lexer and grammar'
 
 build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators model js/*.js
-	@echo "Construct parser utility, add all imports"
+	@echo "  Construct parser utility, add all imports"
 	@mkdir -p build
 	@echo make parser
 	@if [ "${DEBUG}" != "" ]; then \
@@ -175,10 +186,7 @@ clean:
 	rm -f generators/*.js generators/*.js.map model/*.js model/*.js.map web/visualizations/*.js web/visualizations/*.js.map
 
 watch:
-	# Alas each file is usually modified many times (even on one save) causing massive build burst
-	# TODO: uh oh, new bug..concurrent builds break build process
-	# should 'eat the notifications before starting a build' to avoid concurrency (parallelism with makefile ok, multiple makes..nope)
-	inotifywait -m -e modify --format '%w%f' --include ".*.ts$$" model generators web tests| while read path; do make;done &
+	scripts/watch_and_make.sh &
 
 stopwatch:
-	killall -r [i]notifywait
+	killall -r ".*watch_and_make.*"

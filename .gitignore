@@ -1,5 +1,8 @@
 ./*.png
 ./*.out
+.build_started
+.request_build
+.lock
 node_modules
 web/post.txt
 web/result.txt

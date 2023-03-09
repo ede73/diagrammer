@@ -57,6 +57,7 @@ export const configSupport = (scriptName, cfg) => {
   }
   cfg.parseCommandLine = async function (args, _usage, unknownCommandLineOption) {
     for (const m of args) {
+      cfg.tp(`Parsing (${m})`)
       switch (m.toLocaleLowerCase().trim()) {
         case '-h':
         case '--help':
@@ -74,13 +75,15 @@ export const configSupport = (scriptName, cfg) => {
           continue
       }
       if (this.isPipeMarker(m)) {
-      // we're told we're being piped
+        cfg.tp('piped')
+        // we're told we're being piped
         if (!this.beingPiped()) {
           this.throwError('Expecting piped input')
         }
         this.input = this.pipeMarker
         continue
       }
+      cfg.tp(`pass unknown ${m}`)
       await unknownCommandLineOption(m.trim())
     }
   }

@@ -1,4 +1,4 @@
-cat edges.dot |grep -v digraph|grep -v }|grep -v exit|awk '{x=match($0,/[ ]+([ab0-9]+)/,q); printf("echo \"digraph{%s}\"|dot -Tpng -o%s.png\n",$0,q[0])}'|sh -
+cat edges.dot |grep -v digraph|grep -v }|grep -v exit|awk '{x=match($0,/[ ]+([ab0-9]+)/,q); printf("echo \"digraph{ bgcolor=\"transparent\"; edge[color=white];node[style=filled, color=white]; %s}\"|dot -Tpng -o%s.png\n",$0,q[0])}'|sh -
 exit 0
 digraph {
     a1->b1;

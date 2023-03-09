@@ -24,16 +24,15 @@
 
 .htoolbar ul li {
     width: 30px;
-    background-color: rgba(0, 127, 255, .5);
+    background-color: rgba(15,47,20,0.9);
     color: white;
-    padding: 8px;
-    margin: 8px;
-    border-radius: 8px;
+    padding: 0px;
+    margin: 4px;
+    border-radius: 22px;
     /*font-family: Helvetica;*/
     font-family: 'Droid Sans Mono';
     font-size: 12px;
     display: table-cell;
-
 
     list-style-type: none;
     vertical-align: middle;
@@ -132,4 +131,26 @@ label {
 .tabbed [type="radio"]:nth-of-type(4):checked ~ .tab-content:nth-of-type(4)
 {
 	display: block;
+}
+
+/* toolbar node icons */
+img.nodeicon {
+    height: auto; 
+    width: 64px;
+    max-width: 64px; 
+    max-height: 64px;
+}
+
+img.edgeicon {
+    height: auto; 
+    width: 32px;
+    max-width: 32px; 
+    max-height: 64px;
+}
+
+img.iconicon {
+    height: auto; 
+    width: 32px;
+    max-width: 32px; 
+    max-height: 64px;
 }

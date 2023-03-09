@@ -42,7 +42,7 @@ A-C-B-E
 /**
  * SHAPE record
  * d; { <f0> GraphCanvas | {x|q} |{x|q} }
- * TO test: node js/diagrammer.js verbose tests/test_inputs/state5.txt ast_record
+ * TO test: node js/generate.js verbose tests/test_inputs/state5.txt ast_record
 */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function ast_record(graphcanvas: GraphCanvas) {

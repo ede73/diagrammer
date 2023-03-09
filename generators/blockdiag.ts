@@ -94,7 +94,7 @@ const extraShapeAttrs: { [k in keyof Shapes]: Record<string, string | number | b
  *   thick
  *   fontsize=11
  *
- * To test: node js/diagrammer.js tests/test_inputs/events.txt blockdiag |blockdiag3 -Tpng -o a.png - && open a.png
+ * To test: node js/generate.js tests/test_inputs/events.txt blockdiag |blockdiag3 -Tpng -o a.png - && open a.png
  */
 export function blockdiag(graphcanvas: GraphCanvas) {
   const lout = (...args: any[]) => {

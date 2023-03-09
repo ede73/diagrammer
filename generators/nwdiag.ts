@@ -51,7 +51,7 @@ const extraShapeAttrs: { [k in keyof Shapes]: Record<string, string | number | b
 
 /**
  * http://blockdiag.com/en/nwdiag/
- * To test: node js/diagrammer.js tests/test_inputs/state13.txt nwdiag |nwdiag3 -Tpng -o a.png - && open a.png
+ * To test: node js/generate.js tests/test_inputs/state13.txt nwdiag |nwdiag3 -Tpng -o a.png - && open a.png
  */
 export function nwdiag(graphcanvas: GraphCanvas) {
   const lout = (...args: any[]) => {

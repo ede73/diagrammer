@@ -87,7 +87,7 @@ getgenerator() {
 }
 
 echo Using generator $(getgenerator $generator)
-node --max-old-space-size=4096 "$MYPATH/js/diagrammer.js" "$input" "$(getgenerator $generator)" "$verbose" >"$OUT"
+node --max-old-space-size=4096 "$MYPATH/js/generate.js" "$input" "$(getgenerator $generator)" "$verbose" >"$OUT"
 [ $text -ne 0 ] && cat "$OUT"
 
 rc=$?

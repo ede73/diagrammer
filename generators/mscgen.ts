@@ -11,7 +11,7 @@ import { multiAttrFmt, output } from '../model/support.js'
 /**
  * https://www.mcternan.me.uk/mscgen/
  *
- * To test: node js/diagrammer.js verbose tests/test_inputs/state_sequence.txt mscgen
+ * To test: node js/generate.js verbose tests/test_inputs/state_sequence.txt mscgen
  */
 export function mscgen(graphcanvas: GraphCanvas) {
   const lout = (...args: any[]) => {

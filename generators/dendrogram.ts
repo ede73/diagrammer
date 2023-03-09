@@ -19,7 +19,7 @@ export interface DendrogramDocument {
 }
 
 /**
- * To test: node js/diagrammer.js verbose tests/test_inputs/dendrogram.txt dendrogram
+ * To test: node js/generate.js verbose tests/test_inputs/dendrogram.txt dendrogram
  * TODO: The class hierarchy is disconnected. Just using getObjects() doesn't allow proper graph traversal
  *
  * There's nothing wrong with the model - all are recorded (check ast/ast_record) but especially for dendrogram

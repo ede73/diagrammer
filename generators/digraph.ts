@@ -76,7 +76,7 @@ const extraShapeAttrs: { [k in keyof Shapes]: Record<string, string | number | b
 }
 
 /**
- * To test: node js/diagrammer.js verbose tests/test_inputs/state1.txt digraph
+ * To test: node js/generate.js verbose tests/test_inputs/state1.txt digraph
  */
 export function digraph(graphcanvas: GraphCanvas) {
   // TODO: See splines control

@@ -14,7 +14,7 @@ This makes export broken. Export previously produced ONE javascript file to pars
 And now it's broken, though command line works nice from the source folder, so who cares.
 
 exit 10
-for m in js/diagrammer.js build/diagrammer_parser.js build/diagrammer_lexer.js; do
+for m in js/generate.js build/diagrammer_parser.js build/diagrammer_lexer.js; do
   uglifyjs $m -o $OUT/$(basename $m) -c -m
   sed -i -e 's,build/diagrammer_lexer.js,diagrammer_lexer.js,g' -e 's,build/diagrammer_parser.js,diagrammer_parser.js,g' $OUT/$(basename $m) 
 done

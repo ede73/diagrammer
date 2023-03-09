@@ -8,7 +8,7 @@ import { output } from '../model/support.js'
 // ADD TO INDEX.HTML AS: <option value="layerbands">LayerBands(GoJS)</option>
 
 /**
- * To test: node js/diagrammer.js verbose tests/test_inputs/layerbands.txt layerbands
+ * To test: node js/generate.js verbose tests/test_inputs/layerbands.txt layerbands
 */
 export function layerbands(graphcanvas: GraphCanvas) {
   const lout = (...args: any[]) => {

@@ -46,7 +46,7 @@ const PlantUMLShapeMap = {
   loopend: 'invhouse'
 }
 /**
- * node js/diagrammer.js verbose tests/test_inputs/events.txt plantuml_sequence | java -Xmx2048m -jar ext/plantuml.jar -tpng -pipe > output.png && open output.png
+ * node js/generate.js verbose tests/test_inputs/events.txt plantuml_sequence | java -Xmx2048m -jar ext/plantuml.jar -tpng -pipe > output.png && open output.png
 */
 // TODO:
 // eslint-disable-next-line @typescript-eslint/naming-convention

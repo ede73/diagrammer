@@ -154,7 +154,7 @@ build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators 
 # nicer to carry around than build target
 parser: build/diagrammer_parser.js
 
-export: parser js/diagrammer.js scripts/export.sh scripts/display_image.sh
+export: parser js/diagrammer.js js/generate.js scripts/export.sh scripts/display_image.sh
 	@./scripts/export.sh
 	@echo 'Add alias depict="~/{EXPORT_DIR_HERE}/t.js silent " to your profile/bashrc etc.\nYou need (depending) visualizers graphviz,mscgen,plantuml_jar.jar,nwdiag,blockdiag,actdiag.\nplantuml requires java\nblockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html\nPlantuml from http://plantuml.sourceforge.net/\n' >export/README.txt
 

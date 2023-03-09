@@ -52,7 +52,7 @@ const extraShapeAttrs: { [k in keyof Shapes]: Record<string, string | number | b
 
 /**
  *
- * To test: node js/diagrammer.js tests/test_inputs/events.txt actdiag |actdiag -Tpng -o a.png - && open a.png
+ * To test: node js/generate.js tests/test_inputs/events.txt actdiag |actdiag -Tpng -o a.png - && open a.png
  * http://blockdiag.com/en/actdiag/
  *
  * Actual grammar is vague (probably as with blockdiag, check there):

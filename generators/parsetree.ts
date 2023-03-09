@@ -10,7 +10,7 @@ import { debug } from '../model/debug.js'
 
 /**
  * Only one root supported!
- * To test: node js/diagrammer.js tests/test_inputs/parsetree.txt parsetree
+ * To test: node js/generate.js tests/test_inputs/parsetree.txt parsetree
  */
 export function parsetree(graphcanvas: GraphCanvas) {
   const lout = (...args: any[]) => {

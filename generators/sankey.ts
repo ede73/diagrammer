@@ -20,7 +20,7 @@ export interface SankeyDocumentT {
 }
 
 /**
- * To test: node js/diagrammer.js verbose tests/test_inputs/sankey.txt sankey
+ * To test: node js/generate.js verbose tests/test_inputs/sankey.txt sankey
  */
 export function sankey(graphcanvas: GraphCanvas) {
   const sankeyDoc: SankeyDocumentT = {

@@ -9,7 +9,7 @@ import { output } from '../model/support.js'
 // ADD TO INDEX.HTML AS: <option value="ast">Abstract Syntax Tree</option>
 
 /**
- * TO test: node js/diagrammer.js verbose tests/test_inputs/ast.txt ast
+ * TO test: node js/generate.js verbose tests/test_inputs/ast.txt ast
 */
 export function ast(graphcanvas: GraphCanvas) {
   const lout = (...args: any[]) => {

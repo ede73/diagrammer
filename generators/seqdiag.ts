@@ -13,7 +13,7 @@ import { getAttributeAndFormat, multiAttrFmt, output } from '../model/support.js
  * Actual grammar unknown (check actdiag, blockdiag)
  * http://blockdiag.com/en/seqdiag/examples.html#diagram-attributes
  *
- * To test: node js/diagrammer.js tests/test_inputs/state13.txt seqdiag |seqdiag3 -Tpng -o a.png - && open a.png
+ * To test: node js/generate.js tests/test_inputs/state13.txt seqdiag |seqdiag3 -Tpng -o a.png - && open a.png
  */
 export function seqdiag(graphcanvas: GraphCanvas) {
   const lout = (...args: any[]) => {

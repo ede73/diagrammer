@@ -99,7 +99,7 @@ export function umlclassParseMethod(method: string): RegexMatchedClassMethodsT |
 }
 
 /**
- * Test: node js/diagrammer.js tests/test_inputs/umlclass2.txt umlclass
+ * Test: node js/generate.js tests/test_inputs/umlclass2.txt umlclass
  */
 export function umlclass(graphcanvas: GraphCanvas) {
   const lout = (...args: any[]) => {

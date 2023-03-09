@@ -84,11 +84,15 @@ export async function writeToElement(page: Page, elementId: string, text: string
 }
 
 function consoleLogWithTime(msg: string) {
-  console.warn(`${new Date().toISOString()}: ${msg} `)
+  // eslint-disable-next-line no-console
+  console.log(`${new Date().toISOString()}: ${msg} `) // ok
 }
 /**
  * Setup capture trap for all browser 'chatter' and dump on console
  * Useful while debugging tests - since browser runs headless..
+ *
+ * npm test tests/web/localstorage.test -- --verbose  --silent=false
+ * Cannot use -t match pattern here..
  */
 export async function captureBrowserLogs(page: Page) {
   page

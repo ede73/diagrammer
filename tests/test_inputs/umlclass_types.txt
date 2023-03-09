@@ -13,11 +13,11 @@ Student>Person;open triangle\ncont line
 Person->ISerializable;open triangle\ndashed line
 
 // composition - filled diamond, continuous line, "tail:head"? explanation
-{Folder;Folder - composition
+{Direcrtory;Folder - composition
 }
 {File;File
 }
-File>>"n:1:filled diamond\ncont line"Folder
+File>>"n:1:filled diamond\ncont line"Directory
 
 
 // Aggregation - not filled diamond, continuous line

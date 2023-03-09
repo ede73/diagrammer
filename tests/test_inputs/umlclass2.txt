@@ -40,8 +40,8 @@ generator umlclass
 
 {GraphEdge;GraphEdge
   edgeType;+string
-  left;+GraphConnectable
-  rigth;+GraphConnectable
+  xleft;+GraphConnectable
+  xrigth;+GraphConnectable
   lcompass;+string
   rcompass;+string
   edgetextcolor;+string

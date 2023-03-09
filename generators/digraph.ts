@@ -26,39 +26,54 @@ import { type Shapes } from '../model/shapes.js'
 // ADD TO INDEX.HTML AS: <option value="digraph:sfdp">Graphviz - sfdp(cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:twopi">Graphviz - twopi(www/cli)</option>
 
+// replace diamond
+//
+//
 const DigraphShapeMap: Shapes = {
+  // invis: 'invis',
   actor: 'cds',
-  beginpoint: 'circle',
-  box: 'box',
+  beginpoint: 'box',
   circle: 'circle',
   cloud: 'tripleoctagon',
-  condition: 'MDiamond',
-  database: 'Mcircle',
+  condition: 'Mdiamond',
+  database: 'cylinder',
   default: 'box',
   diamond: 'diamond',
   dots: 'point',
   doublecircle: 'doublecircle',
   ellipse: 'ellipse',
-  endpoint: 'doublecircle',
+  endpoint: 'box',
+  folder: 'folder',
   input: 'parallelogram',
-  // invis: 'invis',
-  loop: 'house',
-  loopend: 'invhouse',
+  left: 'house',
+  loop: 'invtrapezium',
   loopin: 'house',
   loopout: 'invhouse',
-  loopstart: 'house',
   mail: 'tab',
-  minidiamond: 'Mdiamond',
-  minisquare: 'Msquare',
+  document: 'polygon',
+  display: 'egg',
   note: 'note',
+  preparation: 'polygon',
   record: 'record',
   rect: 'box',
-  rectangle: 'box',
+  right: 'house',
   roundedbox: 'box',
   square: 'square',
-  terminator: 'ellipse'
+  subroutine: 'rect'
 }
 
+const extraShapeAttrs: { [k in keyof Shapes]: Record<string, string | number | boolean> } =
+{
+  beginpoint: { style: 'rounded' },
+  endpoint: { style: 'rounded' },
+  preparation: { shape: 'polygon', sides: 6 },
+  left: { orientation: 90 },
+  right: { orientation: -90 },
+  roundedbox: { style: 'rounded' },
+  document: { style: 'diagonals', peripheries: 3, skew: -0.5, distortion: -0.9, sides: 4 },
+  display: { width: 2, peripheries: 1, orientation: 90 },
+  subroutine: { peripheries: 2 }
+}
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/state1.txt digraph
  */
@@ -118,12 +133,16 @@ export function digraph(graphcanvas: GraphCanvas) {
       nattrs.push('penwidth=0')
     }
     if (obj instanceof GraphVertex && obj.shape) {
-      const currentShape = obj.shape
+      const currentShape = obj.shape as keyof typeof DigraphShapeMap
       if (obj.shape && !DigraphShapeMap[currentShape]) {
         throw new Error('Missing shape mapping')
       }
       const mappedShape = DigraphShapeMap[currentShape] ? DigraphShapeMap[currentShape] : DigraphShapeMap.default
       const r = `shape="${mappedShape}"`
+      if (extraShapeAttrs[currentShape]) {
+        const v = extraShapeAttrs[currentShape]
+        Object.entries(v).forEach(([k, v]) => nattrs.push(`${k}="${String(v)}"`))
+      }
       nattrs.push(r)
     }
     getAttributeAndFormat(obj, 'label', 'label="{0}"', nattrs)

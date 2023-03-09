@@ -165,7 +165,7 @@ export function exampleChanged() {
     },
     (stateCode, statusText, responseText) => {
       alert(`Failed fetching example tests/${doc} ${statusText} ${responseText}`)
-    }).catch(err => { console.error(`HTTP error ${String(err)}`) })
+    })
 }
 
 /**

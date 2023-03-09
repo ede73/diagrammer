@@ -56,7 +56,10 @@ LABEL	";"[^\n]+(\n)
 GLABEL	";"[^\n]+
 LISTSEP ","
 IMAGE	"/"[A-Za-z0-9]+".png"
-SHAPES "actor"|"beginpoint"|"box"|"circle"|"cloud"|"condition"|"database"|"default"|"diamond"|"dots"|"doublecircle"|"ellipse"|"endpoint"|"input"|"loopin"|"loopout"|"mail"|"minidiamond"|"minisquare"|"note"|"record"|"roundedbox"|"square"|"terminator"|"loop"|"loopend"|"loopstart"|"rect"|"rectangle"
+SHAPES "actor"|"beginpoint"|"right"|"circle"|"cloud"|"condition"|"database"|\
+"default"|"diamond"|"dots"|"doublecircle"|"ellipse"|"endpoint"|"input"|"loopin"|\
+"loopout"|"mail"|"document"|"display"|"note"|"record"|"roundedbox"|"square"|\
+"left"|"loop"|"subroutine"|"preparation"|"rect"|"folder"
 STYLES "dotted"|"dashed"|"solid"|"bold"|"rounded"|"diagonals"|"invis"|"singularity"
 /*wedged,striped..filled...*/
 OPAREN "("

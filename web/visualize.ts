@@ -63,8 +63,6 @@ export function visualize(visualizer: string) {
       return
     }
     f(generatedResult).then(done => {
-    }).catch(err => {
-      console.error(`Failed visualizing ${String(err)}`)
     })
   } else {
     // backend visualizer (unless if we want use Viz)
@@ -75,6 +73,6 @@ export function visualize(visualizer: string) {
       },
       (statusCode, statusText, responseText) => {
         alert(`Visualize failed, error: ${responseText} status: ${statusText}`)
-      }).catch(err => { console.error(`TODO: pointless dualism..error callback and error promise:${String(err)}`) })
+      })
   }
 }

@@ -53,7 +53,9 @@ async function visualizeGraphviz(generatedResult: string, visualizer: string) {
         { path: 'icons/sim.png', width: '64', height: '64' },
         { path: 'icons/timer.png', width: '64', height: '64' },
         { path: 'icons/usbmemory.png', width: '64', height: '64' },
-        { path: 'icons/wifi.png', width: '64', height: '64' }]
+        { path: 'icons/wifi.png', width: '64', height: '64' },
+        { path: 'icons/modem.png', width: '64', height: '64' },
+        { path: 'icons/rack.png', width: '64', height: '64' }]
     })
     const vizContainer = getHTMLElement(anchor)
     removeAllChildNodes(vizContainer)

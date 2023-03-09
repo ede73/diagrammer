@@ -5,7 +5,7 @@ $(red:#ff0000)
 $(blue:#0000ff)
 $(yellow:#ffff00)
  
-shape box
+shape rect
 closed$(red);CLOSED
 closed_end$(red);closed\nBack to start
 listen$(yellow);LISTEN

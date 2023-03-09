@@ -9,7 +9,9 @@ export function makeHTTPPost(
   data: string,
   successCallback: (result: string) => void,
   errorCallback: (statusCode: number, statusText: string, responseText: string) => void) {
-  return $.ajax({
+  // at least on my jquery version this does NOT return a promise (in fact promisifying breaks)
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  $.ajax({
     type: 'POST',
     async: true,
     cache: false,
@@ -30,13 +32,15 @@ export function makeHTTPPost(
   })
 }
 
-export async function makeHTTPGet(
+export function makeHTTPGet(
   url: string,
   successCallback: (result: any) => void,
   errorCallback: (statusCode: number, statusText: string, responseText: string) => void,
   contentType?: string,
   dataType?: string) {
-  return await $.ajax({
+  // at least on my jquery version this does NOT return a promise (in fact promisifying breaks)
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  $.ajax({
     type: 'GET',
     async: true,
     cache: false,
@@ -46,6 +50,6 @@ export async function makeHTTPGet(
     // Type: Function( Anything data, String textStatus, jqXHR jqXHR )
     success: (data, textStatus, jqXHR) => { successCallback(data) },
     // Type: Function( jqXHR jqXHR, String textStatus, String errorThrown )
-    error: (jqXHR, textStatus, errorThrown) => { errorCallback(jqXHR.status, jqXHR.statusText, jqXHR.responseText) }
+    error: (jqXHR, textStatus, _errorThrown) => { errorCallback(jqXHR.status, jqXHR.statusText, jqXHR.responseText) }
   })
 }

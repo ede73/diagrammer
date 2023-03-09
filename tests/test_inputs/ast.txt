@@ -36,8 +36,8 @@ $(par:#ccccff)
 
 { Link;Link:GraphObject
   linkType
-  left
-  right
+  xleft
+  xright
 }
 
 edge color #0000ff
@@ -47,10 +47,10 @@ GraphObject.>xGroup;extends(GraphObject->xGroup)
 GraphObject.>Link;extends::extends(GraphObject->Link)
 
 edge color #00ff00
-left<->"links"GNode
-left<->"links"xGroup
-right<->"links"xGroup
-right<->"links"GNode
+xleft<->"links"GNode
+xleft<->"links"xGroup
+xright<->"links"xGroup
+xright<->"links"GNode
 
 edge color #ff0000
 OBJECTS1>"contains"GNode

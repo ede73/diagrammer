@@ -9,6 +9,7 @@ import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { generators, GraphCanvas } from '../model/graphcanvas.js'
 import { setVerbose } from '../model/debug.js'
 import { configSupport } from '../js/configsupport.js'
+import { createPatch } from 'diff'
 
 function startedAsCommandline () {
   // terrible
@@ -43,7 +44,12 @@ export function doParse (
     config.throwError(str)
   })
   diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
-  diagrammerParser.parse(diagrammerCode)
+  try {
+    diagrammerParser.parse(diagrammerCode)
+  } catch (ex) {
+    // wow, something went down
+    diagrammerParser.yy.parseError(String(ex), 'Caught Exception')
+  }
 }
 
 export function doLex (

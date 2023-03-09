@@ -114,9 +114,9 @@ shapeOrVariable
 	: VARIABLE {
 			parser.trace('VARIABLE2 :'+$1)
 			$$=_processVariable(yy.GRAPHCANVAS, $1).trim().toLowerCase();
-			if (["actor", "beginpoint", "box", "circle", "cloud", "condition", "database", "default", "diamond", "dots", "doublecircle",
-				 "ellipse", "endpoint", "input", "loopin", "loopout", "mail", "minidiamond", "minisquare", "note", "record", "roundedbox",
-				 "square", "terminator", "loop", "loopend", "loopstart", "rect", "rectangle"].indexOf($$)==-1){
+			if (["actor", "beginpoint", "right", "circle", "cloud", "condition", "database", "default", "diamond", "dots", "doublecircle",
+				 "ellipse", "endpoint", "input", "loopin", "loopout", "mail", "document", "display", "note", "record", "roundedbox",
+				 "square", "left", "loop", "subroutine", "preparation", "rect", "folder"].indexOf($$)==-1){
 				throw new Error("Must use declared shape");
 			}
 	}

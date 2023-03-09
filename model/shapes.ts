@@ -4,33 +4,36 @@
 // for run time testing
 export const ShapeKeys = [
   'actor',
-  'condition',
-  'doublecircle',
-  'loopend',
-  'loopout',
-  'record',
   'beginpoint',
-  'box',
   'circle',
   'cloud',
+  'condition',
   'database',
   'default',
   'diamond',
   'dots',
+  'doublecircle',
   'ellipse',
   'endpoint',
+  'folder',
   'input',
+  'left',
   'loop',
   'loopin',
-  'loopstart',
+  'loopout',
   'mail',
-  'minidiamond',
-  'minisquare',
+  'document',
+  'display',
   'note',
+  'preparation',
+  'record',
   'rect',
-  'rectangle',
+  'right',
   'roundedbox',
   'square',
-  'terminator']
+  'subroutine'
+] as const
+
+// export type Shapes = Record<keyof typeof ShapeKeys, string>
 
 export type Shapes = Record<typeof ShapeKeys[number], string>

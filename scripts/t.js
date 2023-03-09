@@ -286,6 +286,7 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     useConfig.throwError('No point parsing just webvisualizer code')
   }
 
+  let errors = 0
   doParse(
     useConfig,
     useConfig.code,
@@ -294,12 +295,17 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
       useConfig.parsedCode += `${result}\n`
     }, (parseError, hash) => {
       useConfig.tp(`Parse error: ${parseError} ${hash}`)
+      errors++
     }, (trace) => {
       if (useConfig.trace) {
         useConfig.tp(`parser trace: ${trace}`)
       }
     })
 
+  if (errors) {
+    visualizationisComplete(666)
+    return
+  }
   if (!useConfig.dontRunVisualizer && !_isHackyWebVisualizer(useConfig)) {
     useConfig.tp('Going to run visualizer')
     // uh, nwdiag(all diags) use buggy PIL library opening R&W (seekable) access to pipe

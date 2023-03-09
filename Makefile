@@ -49,7 +49,6 @@ _all: active_project_deps jest_test_deps parser
 DELETE_ON_ERROR: $(LOCK_FILE)
 
 active_project_deps: model generators web web_visualizations index.html
-	@echo 'Build all active project dependencies'
 generators/%.js : generators/%.ts
 generators: $(GENERATOR_JSS) model
 model/%.js : model/%.ts
@@ -59,11 +58,9 @@ web: $(WEB_JSS) model parser index.html
 web/visualizations/%.js : web/visualizations/%.ts generators
 web_visualizations: $(WEB_VISUALIZATION_JSS)
 index.html : index_template.html generators tests/test_inputs/*.txt web_visualizations
-	@echo "Create index.html (out of the template)"
 	@awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs/*.txt | sort |sed 's,^tests/test_inputs/,,g'" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations/*.ts | sort" | getline var) {tsjs=var;gsub("[.]ts",".js",tsjs);printf("<script type=\"module\" src=\"%s\"></script>\n",tsjs);}next}/{REPLACE_WITH_GENERATORS}/{ while ("grep \"ADD TO INDEX.HTML AS:\" generators/*.ts|sort|cut -d: -f3-|sort" | getline var) printf("%s\n",var,var);next}{print $0}' $< >$@
 
 jest_test_deps: parsertests webtests modeltests generatortests
-	@echo 'Build all Jest test dependencies'
 tests/parser/%.js: tests/parser/$.ts
 parsertests: $(PARSER_TEST_JSS) model parser faketypes
 tests/web/%.js: tests/parser/$.ts
@@ -85,7 +82,6 @@ fixall:
 	make testrunner
 
 build/types/diagrammer_parser_types.js: js/diagrammer_parser_types.ts
-	@echo "  Make diagrammer shared context type for jest tests"
 	@cp js/diagrammer_parser_types.ts build/types
 	@echo '{"type":"module"}' > build/types/package.json
 	@(cd build/types; rm -f diagrammer_parser_types.js;$(TRANSPILE) diagrammer_parser_types.ts $(S))
@@ -115,7 +111,6 @@ just_lexer: build/diagrammer_lexer.js
 
 # Jison considers lexer/parser separate, we combine to one file
 build/diagrammer.all: $(GRAMMAR_FILES)
-	@echo "  Concatenate all grammar files"
 	@mkdir -p build
 	@echo Compile build/diagrammer.all
 	@cat $^ >$@
@@ -124,9 +119,7 @@ lexer_and_grammar: build/diagrammer.all
 	echo 'Build lexer and grammar'
 
 build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators model js/*.js
-	@echo "  Construct parser utility, add all imports"
 	@mkdir -p build
-	@echo make parser
 	@if [ "${DEBUG}" != "" ]; then \
 	node_modules/.bin/jison -t $< -o $@ >/dev/null; \
 	else \

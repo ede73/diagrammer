@@ -215,7 +215,7 @@ function _getVisualizerCommand (useConfig) {
         return [
           'sh',
           '-c',
-                  `cat -| /usr/bin/${useConfig.visualizer}3 -a -T${useConfig.format} -o${useConfig.visualizedGraph} /dev/stdin`]
+                  `cat -| /usr/bin/${useConfig.visualizer}3 -a -T${useConfig.format} -f/usr/share/fonts/truetype/dejavu//DejaVuSans-Bold.ttf -o${useConfig.visualizedGraph} /dev/stdin`]
       }
     case 'plantuml_sequence':
       // piping works
@@ -226,6 +226,8 @@ function _getVisualizerCommand (useConfig) {
         '-jar',
         plantUmlJar,
         `-t${useConfig.format.toLocaleLowerCase()}`,
+        // '-nbthread auto', no effect
+        // '-darkmode', odd...some versions had this, latest on ubuntu not
         '-p']
     case 'mscgen':
       // piping works

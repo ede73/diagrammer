@@ -74,7 +74,8 @@ describe('Diagrammer', () => {
     const storedGraphs = await p.evaluate((localStorageKey) => {
       return localStorage.getItem(localStorageKey)
     }, localStorageKey)
-    expect(storedGraphs).toMatch('{"joo":"a>b>c>d\\n"}')
+    // we have import now (ie. external changes imported over to local ones)
+    expect(storedGraphs).toMatch('{"localstorage1":"this>is>localstorage>test","joo":"a>b>c>d\\n"}')
   })
 
   // Only way to know export worked (in RL) would be to change smthg, export, import

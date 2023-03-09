@@ -74,6 +74,7 @@ const extraShapeAttrs: { [k in keyof Shapes]: Record<string, string | number | b
   display: { width: 2, peripheries: 1, orientation: 90 },
   subroutine: { peripheries: 2 }
 }
+
 /**
  * To test: node js/diagrammer.js verbose tests/test_inputs/state1.txt digraph
  */

@@ -13,7 +13,7 @@ import { type Shapes } from '../model/shapes.js'
 const ActDiagShapeMap: Shapes = {
   // invis: 'invis',
   actor: 'actor',
-  beginpoint: 'flowchart.beginpoint',
+  beginpoint: 'beginpoint',
   circle: 'circle',
   cloud: 'cloud',
   condition: 'flowchart.condition',
@@ -21,26 +21,33 @@ const ActDiagShapeMap: Shapes = {
   default: 'box',
   diamond: 'diamond',
   dots: 'dots',
-  doublecircle: 'endpoint',
+  doublecircle: 'circle',
   ellipse: 'ellipse',
-  endpoint: 'flowchart.endpoint',
+  endpoint: 'endpoint',
   folder: 'box',
   input: 'flowchart.input',
-  left: 'flowchart.terminator',
-  loop: 'flowchart.loop',
+  left: 'flowchart.loopin', // rotate=90
+  loop: 'flowchart.loopin',
   loopin: 'flowchart.loopin',
   loopout: 'flowchart.loopout',
   mail: 'mail',
-  document: 'minidiamond',
-  display: 'minidiamond',
+  document: 'note',
+  display: 'ellipse',
   note: 'note',
-  preparation: 'flowchart.loopin',
+  preparation: 'roundedbox',
   record: 'box',
   rect: 'box',
-  right: 'box',
-  roundedbox: 'roundedbox',
-  square: 'square',
-  subroutine: 'flowchart.loopout'
+  right: 'flowchart.loopout', // rotate=90
+  roundedbox: 'box', // style=rounded
+  square: 'box',
+  subroutine: 'roundedbox'
+}
+
+const extraShapeAttrs: { [k in keyof Shapes]: Record<string, string | number | boolean> } =
+{
+  left: { rotate: 90 },
+  right: { rotate: 90 },
+  roundedbox: { style: 'rounded' }
 }
 
 /**
@@ -82,7 +89,13 @@ export function actdiag(graphcanvas: GraphCanvas) {
               throw new Error('Missing shape mapping')
             }
             const mappedShape = ActDiagShapeMap[currentShape] ? ActDiagShapeMap[currentShape] : ActDiagShapeMap.default
-            return [`shape=${mappedShape}`]
+            const nattrs: string[] = []
+            nattrs.push(`shape=${mappedShape}`)
+            if (extraShapeAttrs[currentShape]) {
+              const v = extraShapeAttrs[currentShape]
+              Object.entries(v).forEach(([k, v]) => nattrs.push(`${k}="${String(v)}"`))
+            }
+            return nattrs
           }
         })(obj)
 

@@ -13,7 +13,7 @@ const NetworkDiagShapeMap: Shapes =
 {
   // invis: 'invis',
   actor: 'actor',
-  beginpoint: 'flowchart.beginpoint',
+  beginpoint: 'beginpoint',
   circle: 'circle',
   cloud: 'cloud',
   condition: 'flowchart.condition',
@@ -21,26 +21,32 @@ const NetworkDiagShapeMap: Shapes =
   default: 'box',
   diamond: 'diamond',
   dots: 'dots',
-  doublecircle: 'endpoint',
+  doublecircle: 'circle',
   ellipse: 'ellipse',
-  endpoint: 'flowchart.endpoint',
+  endpoint: 'endpoint',
   folder: 'box',
   input: 'flowchart.input',
-  left: 'flowchart.terminator',
-  loop: 'flowchart.loop',
+  left: 'flowchart.loopin', // rotate=90
+  loop: 'flowchart.loopin',
   loopin: 'flowchart.loopin',
   loopout: 'flowchart.loopout',
   mail: 'mail',
-  document: 'minidiamond',
-  display: 'minidiamond',
+  document: 'note',
+  display: 'ellipse',
   note: 'note',
-  preparation: 'flowchart.loopin',
+  preparation: 'roundedbox',
   record: 'box',
   rect: 'box',
-  right: 'box',
-  roundedbox: 'roundedbox',
-  square: 'square',
-  subroutine: 'flowchart.loopout'
+  right: 'flowchart.loopout', // rotate=90
+  roundedbox: 'box', // style=rounded
+  square: 'box',
+  subroutine: 'roundedbox'
+}
+
+const extraShapeAttrs: { [k in keyof Shapes]: Record<string, string | number | boolean> } =
+{
+  left: { rotate: 90 },
+  right: { rotate: 90 }
 }
 
 /**
@@ -71,12 +77,18 @@ export function nwdiag(graphcanvas: GraphCanvas) {
 
   function getMappedShape(obj: GraphConnectable) {
     if (obj instanceof GraphVertex) {
-      const objShape = obj.shape as keyof typeof NetworkDiagShapeMap
-      if (obj.shape && !NetworkDiagShapeMap[objShape]) {
+      const currentShape = obj.shape as keyof typeof NetworkDiagShapeMap
+      if (obj.shape && !NetworkDiagShapeMap[currentShape]) {
         throw new Error('Missing shape mapping')
       }
-      const mappedShape = NetworkDiagShapeMap[objShape] ? NetworkDiagShapeMap[objShape] : NetworkDiagShapeMap.default
-      return [`shape=${mappedShape}`]
+      const mappedShape = NetworkDiagShapeMap[currentShape] ? NetworkDiagShapeMap[currentShape] : NetworkDiagShapeMap.default
+      const nattrs: string[] = []
+      nattrs.push(`shape=${mappedShape}`)
+      if (extraShapeAttrs[currentShape]) {
+        const v = extraShapeAttrs[currentShape]
+        Object.entries(v).forEach(([k, v]) => nattrs.push(`${k}="${String(v)}"`))
+      }
+      return nattrs
     }
     return []
   }

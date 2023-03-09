@@ -130,7 +130,8 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
   config.tp(`lexParseAndVisualize ${testFileName}`)
   await lexParseAndVisualize(cfg, async (error) => {
     if (error && error !== 0) {
-      throw Error(`eh...failed ${useVisualizer} ${testFileName}`)
+      cfg.dumpTraces()
+      throw Error(`eh...failed ${useVisualizer} ${cfg.input}`)
     }
     const previousRunPath = `${config.previousStableRun}/${useVisualizer}`
     const previouslyGeneratedCodeFile = `${previousRunPath}/${testFileName}.txt`
@@ -243,6 +244,7 @@ if (failedTests.length > 0) {
   for (const test of failedTests) {
     config.printError(`  ${test}`)
   }
+  process.exit(10)
 } else {
   console.warn('All good!')
 }

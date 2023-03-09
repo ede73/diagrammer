@@ -100,7 +100,7 @@ ace.define('ace/mode/state_highlight_rules', ['require', 'exports', 'module', 'a
       ('generator|visualizer|group|landscape|horizontal|portrait|vertical|equal|shape|start|if|else|then|while').split('|')
     )
     const attributes = lang.arrayToMap(
-      ('dotted|dashed|solid|bold|rounded|diagonals|invis|singularity|actor|beginpoint|box|circle|cloud|condition|database|default|diamond|dots|doublecircle|ellipse|endpoint|input|loopin|loopout|mail|minidiamond|minisquare|note|record|roundedbox|square|terminator|loop|loopend|loopstart|rect|rectangle').split('|')
+      ('actor|beginpoint|right|circle|cloud|condition|database|default|diamond|dots|doublecircle|ellipse|endpoint|input|loopin|loopout|mail|document|display|note|record|roundedbox|square|left|loop|subroutine|preparation|rect|folder|dotted|dashed|solid|bold|rounded|diagonals|invis|singularity').split('|')
     )
     const edges = lang.arrayToMap(
       ('<<>> << >> <=> <.> <-> <> |-| |-| |=| |. |- |= .| -| =| </ />  <- <. <= < => -> .> > = - .').split(' ')

@@ -37,7 +37,7 @@ export const configSupport = (scriptName, cfg) => {
     if (filePath === '-') {
       this.tp('Reading from stdin..')
       if (!cfg.beingPiped()) {
-        this.tp('Failure imminent, reading piped input and not being piped')
+        this.throwError('Failure imminent, reading piped input and not being piped')
       }
       return await (() => {
         return new Promise(function (resolve, reject) {

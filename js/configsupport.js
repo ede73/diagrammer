@@ -8,6 +8,7 @@ export const configSupport = (scriptName, cfg) => {
   cfg.traceProcess = false
   cfg.input = ''
   cfg.traces = ''
+  cfg.redirectingDiag = true // I've a patched version
   cfg.tp = function (msg) {
     this.traces += `${this.input}:${this.visualizer}:${process.hrtime.bigint()} ${scriptName} ${msg}\n`
     if (this.traceProcess) {
@@ -64,6 +65,10 @@ export const configSupport = (scriptName, cfg) => {
         case 'help':
           _usage()
           continue
+        case 'brokendiag':
+          // TODO: remove if merged, See https://github.com/ede73/blockdiag
+          this.redirectingDiag = false
+          continue
         case 'verbose':
           this.verbose = true
           continue
@@ -83,7 +88,7 @@ export const configSupport = (scriptName, cfg) => {
         this.input = this.pipeMarker
         continue
       }
-      cfg.tp(`pass unknown ${m}`)
+      cfg.tp(`pass unknown CLI option (${m}) to child`)
       await unknownCommandLineOption(m.trim())
     }
   }

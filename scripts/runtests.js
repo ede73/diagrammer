@@ -15,15 +15,7 @@ const config = configSupport('runtests.js', {
   testInputPath: 'tests/test_inputs',
   currentTestRun: 'tests/testrun/current',
   previousStableRun: 'tests/testrun/previous',
-  testPatterns: [],
-  printError: function (msg) {
-    console.error(msg)
-  },
-  tp: function (msg) {
-    if (this.traceProcess) {
-      this.printError(`${this.input}:${this.generator}:${process.hrtime.bigint()} runtests.js ${msg}\n`)
-    }
-  }
+  testPatterns: []
 })
 
 function _usage () {
@@ -200,6 +192,7 @@ const webOnlyVisualizers = [
 const waitTests = []
 const v = []
 for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
+  config.tp(`Tests for visualizer (${visualizer})`)
   fs.mkdirSync(`${config.currentTestRun}/${visualizer}`, { recursive: true })
   fs.mkdirSync(`${config.previousStableRun}/${visualizer}`, { recursive: true })
   for (const testFile of testFiles) {

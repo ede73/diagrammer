@@ -6,7 +6,8 @@ import path from 'path'
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { generators, visualizations } from '../model/graphcanvas.js'
 import { configSupport } from '../js/configsupport.js'
-import { doLex, doParse, doVisualize, _getWebVisualizers } from '../js/diagrammer.js'
+import { doLex, doParse, doVisualize } from '../js/diagrammer.js'
+import { _getWebVisualizers } from '../js/webvisualize.js'
 
 function visualizerToGenerator () {
   const visualiserToGenerator = new Map()
@@ -28,17 +29,12 @@ export function getEmptyConfig () {
     dontRunVisualizer: false,
     visualizer: '',
     visualizedGraph: '-',
-    buggyDiag: false,
     parsedCode: '',
     written: 0
   })
 }
 
-function _exitError (useConfig, msg) {
-  useConfig.printError(msg)
-  process.exit(10)
-}
-
+// TODO: refactor away
 function _isHackyWebVisualizer (config, overrideVisualizer) {
   // TODO: test runner support pending
   if (config.tests) {
@@ -46,6 +42,11 @@ function _isHackyWebVisualizer (config, overrideVisualizer) {
   }
   const searchVisualizer = overrideVisualizer || config.visualizer
   return _getWebVisualizers().includes(searchVisualizer)
+}
+
+function _exitError (useConfig, msg) {
+  useConfig.printError(msg)
+  process.exit(10)
 }
 
 function _resolveGenerator (useConfig) {
@@ -81,7 +82,7 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
 
   // TODO: temp, remove when web viz..finished
   if (_isHackyWebVisualizer(useConfig.visualizer)) {
-    useConfig.throwError('No point parsing just webvisualizer code')
+    throw new Error('TODO: No support running web visualizers yet')
   }
 
   let errors = 0
@@ -105,7 +106,7 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     return
   }
 
-  if (!useConfig.dontRunVisualizer && !_isHackyWebVisualizer(useConfig)) {
+  if (!useConfig.dontRunVisualizer) {
     await doVisualize(useConfig, useConfig.parsedCode, useConfig.visualizer, (exitCode) => {
       visualizationisComplete(exitCode)
     })

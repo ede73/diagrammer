@@ -20,6 +20,7 @@ let _collectOutput = false
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
   if (_collectOutput) {
     _collectOutput = false
+    config.tp(`Asked to collect output: got (${unknownCommandLineOption})`)
     config.visualizedGraph = unknownCommandLineOption.trim()
     return
   }
@@ -34,6 +35,7 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
       config.format = 'svg'
       return
   }
+  config.tp(`Must be visualizer directive (${unknownCommandLineOption})`)
   config.visualizer = unknownCommandLineOption
 })
 

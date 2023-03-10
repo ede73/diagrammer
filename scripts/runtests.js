@@ -41,6 +41,11 @@ function _isJSON (a) {
   return true
 }
 
+// TODO: uh..right now some web visualiziers have a name generator:visualizer (since both use the same gen)
+// That doesn't sit well under windows WSL (:), convert that to _ in path names
+function sanitizePaths (path) {
+  return path.replace(/:/g, '_')
+}
 const failedTests = []
 function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCodeFile, /** @type {string} */currentGeneratedCode) {
   if (currentGeneratedCode.trim() === '') {
@@ -112,12 +117,13 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
   const cfg = getEmptyConfig()
   cfg.verbose = config.verbose
   cfg.trace = config.trace
-  cfg.dontRunVisualizer = webOnlyVisualizer
   cfg.visualizer = useVisualizer
   cfg.traceProcess = config.traceProcess
   cfg.tests = true
   cfg.input = `${config.testInputPath}/${testFileName}.txt`
-  cfg.visualizedGraph = `${config.currentTestRun}/${useVisualizer}/${testFileName}.png`
+  const prevRunPath = `${config.previousStableRun}/${sanitizePaths(useVisualizer)}`
+  const currentRunPath = `${config.currentTestRun}/${sanitizePaths(useVisualizer)}`
+  cfg.visualizedGraph = `${currentRunPath}/${testFileName}.png`
 
   config.tp(`lexParseAndVisualize ${testFileName}`)
   await lexParseAndVisualize(cfg, async (error) => {
@@ -125,7 +131,7 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
       cfg.dumpTraces()
       throw Error(`eh...failed ${useVisualizer} ${cfg.input}`)
     }
-    const previousRunPath = `${config.previousStableRun}/${useVisualizer}`
+    const previousRunPath = `${prevRunPath}`
     const previouslyGeneratedCodeFile = `${previousRunPath}/${testFileName}.txt`
     const errors = []
     if (!currentAndLastRunProduceSameResults(previouslyGeneratedCodeFile, cfg.parsedCode)) {
@@ -137,7 +143,7 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
     // TODO: Can't yet visualize web only renderers
     if (!webOnlyVisualizer) {
       // compare visualization
-      const referenceImage = `${config.previousStableRun}/${useVisualizer}/${testFileName}.png`
+      const referenceImage = `${prevRunPath}/${testFileName}.png`
       if (!diffImages(referenceImage, cfg.visualizedGraph)) {
         errors.push(`Using visualizer ${useVisualizer} on ${testFileName}.txt generated graph visualizations differ`)
         failedTests.push(`Visualized graph ${cfg.input} !== ${referenceImage}, try: scripts/runtests.js ${useVisualizer}:${testFileName}`)
@@ -150,8 +156,8 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
         config.tp(`   scripts/runtests.js ${useVisualizer}:${testFileName}`)
         config.tp(`   If you think new run is correct, just do: rm ${previouslyGeneratedCodeFile}`)
         if (cfg.traces !== '') {
-          config.tp(`   Full traces available in ${config.currentTestRun}/${useVisualizer}/${testFileName}.log`)
-          fs.writeFileSync(`${config.currentTestRun}/${useVisualizer}/${testFileName}.log`, cfg.traces)
+          config.tp(`   Full traces available in ${currentRunPath}/${testFileName}.log`)
+          fs.writeFileSync(`${currentRunPath}/${testFileName}.log`, cfg.traces)
         }
       }
     }
@@ -179,22 +185,26 @@ const onlyTheseTests = {
   ast: ['ast'],
   ast_record: ['ast'],
   // make these dynamic
-  dendrogram: ['dendrogram'],
+  'dendrogram:radialdendrogram': ['dendrogram'],
+  'dendrogram:reingoldtilford': ['dendrogram'],
   layerbands: ['layerbands'],
+  parsetree: ['parsetree'],
   sankey: ['sankey', 'sankey2'],
   umlclass: ['umlclass', 'umlclass2', 'umlclass_types']
 }
 
 const webOnlyVisualizers = [
-  'dendrogram', 'layerbands', 'sankey', 'umlclass'
+  'dendrogram:radialdendrogram', 'dendrogram:reingoldtilford', 'layerbands', 'parsetree', 'sankey', 'umlclass'
 ]
 
 const waitTests = []
 const v = []
 for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
   config.tp(`Tests for visualizer (${visualizer})`)
-  fs.mkdirSync(`${config.currentTestRun}/${visualizer}`, { recursive: true })
-  fs.mkdirSync(`${config.previousStableRun}/${visualizer}`, { recursive: true })
+  let runIfTestsRun = () => {
+    fs.mkdirSync(`${config.currentTestRun}/${sanitizePaths(visualizer)}`, { recursive: true })
+    fs.mkdirSync(`${config.previousStableRun}/${sanitizePaths(visualizer)}`, { recursive: true })
+  }
   for (const testFile of testFiles) {
     if (config.testPatterns.length > 0) {
       const testMatch = `${visualizer}:${testFile}`
@@ -223,6 +233,10 @@ for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
       throw new Error('This is a test runner config error')
     }
     v.push(d)
+    if (runIfTestsRun) {
+      runIfTestsRun()
+      runIfTestsRun = undefined
+    }
     const webOnlyVisualizer = webOnlyVisualizers.includes(visualizer)
     waitTests.push(runATest(visualizer, webOnlyVisualizer, testFile))
   }

@@ -76,6 +76,6 @@ export async function doVisualize (
     // TODO: oddity for momentarily, expecting diagrammer, not parser language..will change
     await doCliVisualize(useConfig, generatedGraphCode, visualizer, finished)
   } else {
-    await doWebVisualize(useConfig, generatedGraphCode, visualizer, finished)
+    await doWebVisualize(useConfig, useConfig.code, visualizer, finished)
   }
 }

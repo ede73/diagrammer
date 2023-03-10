@@ -9,11 +9,12 @@ import { configSupport } from '../js/configsupport.js'
 import { doLex, doParse, doVisualize } from '../js/diagrammer.js'
 import { _getWebVisualizers } from '../js/webvisualize.js'
 
-function visualizerToGenerator () {
+function visualizersToGenerators () {
   const visualiserToGenerator = new Map()
   visualizations.forEach((visualizers, generator) => {
     visualizers.forEach((visualizer, index) => {
       visualiserToGenerator.set(visualizer, generator)
+      visualiserToGenerator.set(`${generator}:${visualizer}`, generator)
     })
   })
 
@@ -26,7 +27,6 @@ export function getEmptyConfig () {
     tests: false,
     text: false,
     format: 'png',
-    dontRunVisualizer: false,
     visualizer: '',
     visualizedGraph: '-',
     parsedCode: '',
@@ -50,7 +50,7 @@ function _exitError (useConfig, msg) {
 }
 
 function _resolveGenerator (useConfig) {
-  const generator = visualizerToGenerator().get(useConfig.visualizer)
+  const generator = visualizersToGenerators().get(useConfig.visualizer)
   if (!generator) {
     throw Error(`Cannot map visualizer (${useConfig.visualizer}) to a generator`)
   }
@@ -106,20 +106,15 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     return
   }
 
-  if (!useConfig.dontRunVisualizer) {
-    await doVisualize(useConfig, useConfig.parsedCode, useConfig.visualizer, (exitCode) => {
-      visualizationisComplete(exitCode)
-    })
-  } else {
-    // not running visualization, so we're all done here
-    visualizationisComplete(0)
-  }
+  await doVisualize(useConfig, useConfig.parsedCode, useConfig.visualizer, (exitCode) => {
+    visualizationisComplete(exitCode)
+  })
 }
 
 async function _main (argv) {
   const config = getEmptyConfig()
   function _usage () {
-    const visualizers = Array.from(visualizerToGenerator().keys())
+    const visualizers = Array.from(visualizersToGenerators().keys())
     config.printError(`USAGE: [silent] [dont_run_visualizer] [tests] [verbose] [text] [svg] [output file] [INPUT] [${visualizers.join(', ')}]`)
     config.printError('Each visualizer will get converted to proper generator')
     config.printError(`Experimental: Web only renderers: [${_getWebVisualizers().join(', ')}]`)
@@ -163,7 +158,7 @@ async function _main (argv) {
     }
     // must be visualizer?
     const visualizer = unknownCommandLineOption.toLocaleLowerCase()
-    const v = visualizerToGenerator()
+    const v = visualizersToGenerators()
     if (v.has(visualizer) || _isHackyWebVisualizer(config, visualizer)) {
       config.visualizer = visualizer
     }

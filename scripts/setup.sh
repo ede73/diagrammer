@@ -8,6 +8,7 @@
 
   BOOTDIR=/tmp/stable_ubuntu
   DIAGRAMMER_SOURCE=selftest
+  TEST_USER=testuser
 
   [ ! -d "${DIAGRAMMER_SOURCE}" ] && {
     git clone git@github.com:ede73/diagrammer.git "${DIAGRAMMER_SOURCE}"
@@ -27,14 +28,14 @@
   # Trouble getting puppeteer running headless chrome, a LOT of unmet dependencies
   chroot "${BOOTDIR}" apt install -y libgtk-3-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 chromium-common chromium
   # Oh boy, really need to go the LONG route here...~root jest/puppeteer just wont work as root
-  chroot "${BOOTDIR}" sh -c "echo -e '\n\n\n' | adduser --disabled-password --quiet ede"
-  chroot "${BOOTDIR}" sh -c "echo 'ede ALL=(ALL) NOPASSWD: ALL' |tee /etc/sudoers.d/ede"
+  chroot "${BOOTDIR}" sh -c "echo -e '\n\n\n' | adduser --disabled-password --quiet $TEST_USER"
+  chroot "${BOOTDIR}" sh -c "echo '$TEST_USER ALL=(ALL) NOPASSWD: ALL' |tee /etc/sudoers.d/$TEST_USER"
 
-  mkdir "${BOOTDIR}/home/ede/diagrammer"
-  mount --bind "${DIAGRAMMER_SOURCE}" "${BOOTDIR}/home/ede/diagrammer"
-  chroot "${BOOTDIR}" "chown -R ede:ede /home/ede/"
+  mkdir "${BOOTDIR}/home/$TEST_USER/diagrammer"
+  mount --bind "${DIAGRAMMER_SOURCE}" "${BOOTDIR}/home/$TEST_USER/diagrammer"
+  chroot "${BOOTDIR}" "chown -R $TEST_USER:$TEST_USER /home/$TEST_USER/"
   # Also puppeteer/chromium doesnt support running as root with sandbox
-  cat >"${BOOTDIR}/home/ede/diagrammer/jest-puppeteer.config.cjs" <<EOF
+  cat >"${BOOTDIR}/home/$TEST_USER/diagrammer/jest-puppeteer.config.cjs" <<EOF
 module.exports = {
   launch: {
     dumpio: false,
@@ -43,17 +44,17 @@ module.exports = {
   }
 };
 EOF
-  chroot "${BOOTDIR}" sh -c "su -c 'cd /home/ede/diagrammer;scripts/setup.sh YES_TO_ALL' - ede"
+  chroot "${BOOTDIR}" sh -c "su -c 'cd /home/$TEST_USER/diagrammer;scripts/setup.sh YES_TO_ALL' - $TEST_USER"
   RC=$?
   if [ $RC -eq 0 ]; then
     umount "${BOOTDIR}/proc"
-    umount "${BOOTDIR}/home/ede/diagrammer"
+    umount "${BOOTDIR}/home/$TEST_USER/diagrammer"
     rm -fR "${BOOTDIR}"
     echo "Tests completed, all changes removed"
     exit 0
   else
     echo "Something went wrong while testing"
-    echo "chroot ${BOOTDIR} su - ede"
+    echo "chroot ${BOOTDIR} su - $TEST_USER"
     echo "JEST_PUPPETEER_CONFIG=jest-puppeteer.config.cjs npm test"
     exit 10
   fi

@@ -82,6 +82,7 @@ fixall:
 	make testrunner
 
 build/types/diagrammer_parser_types.js: js/diagrammer_parser_types.ts
+	@mkdir -p build/types
 	@cp js/diagrammer_parser_types.ts build/types
 	@echo '{"type":"module"}' > build/types/package.json
 	@(cd build/types; rm -f diagrammer_parser_types.js;$(TRANSPILE) diagrammer_parser_types.ts $(S))
@@ -179,7 +180,9 @@ clean:
 	@find build -type f -delete
 	rm -f .error
 	rm -f build/types/*
-	rm -f generators/*.js generators/*.js.map model/*.js model/*.js.map web/visualizations/*.js web/visualizations/*.js.map
+	find {generators,js,model,web,tests} -name "*.map"
+	# TODO: Careful with this, not all typescripted
+	find {generators,web,model} -name "*.js"
 
 watch:
 	scripts/watch_and_make.sh &

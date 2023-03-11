@@ -3,6 +3,7 @@ import * as d3 from 'd3'
 import { makeSVG, removeOldVisualizations } from '../d3support'
 import { visualizations } from '../globals.js'
 import { type DendrogramDocument } from '../../generators/dendrogram'
+import { Link, L } from 'd3-shape'
 
 visualizations.set('reingoldtilford', visualizeReingoldTilford)
 
@@ -12,6 +13,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
   const height = 400
   const diameter = height * 0.75
   const radius = diameter / 2
+
   const tree = d3.tree()
     .size([2 * Math.PI, radius])
     .separation(function (a, b) {
@@ -19,43 +21,44 @@ export async function visualizeReingoldTilford(generatorResult: string) {
     })
 
   const data = d3.hierarchy(jsonData)
-  const root = tree(data)
+  const treeData = tree(data)
+
+  const links = treeData.links()
+  const nodes = treeData.descendants()
 
   removeOldVisualizations()
   const svgimg = makeSVG(width, height)
     .attr('transform', `translate(${width / 2},${height / 2})`)
 
-  // not sure what this type is, but DEFINITELY not what ts suggests
-  // It is as =>
-  // h { children:[],data:{},depth,number,height,parent,x:number,y:number}
-  interface JooJoo {
-    x: number
-    y: number
-  }
-  const links = root.links()
-  svgimg.selectAll('path.link')
+  // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path
+  svgimg.selectAll('.link')
     .data(links)
-    .enter().append('path')
+    .join('path')
     .attr('class', 'link')
-    // @ts-expect-error TODO: TS type detection is totally off here (perhaps I've mismatch with types/implementation)
+    // https://github.com/d3/d3-shape#curves
+    // https://observablehq.com/@d3/d3-lineradial
+    // @ts-expect-error odd issue with studio
     .attr('d', d3.linkRadial()
-      .angle(d => (d as unknown as JooJoo).x)
-      .radius(d => (d as unknown as JooJoo).x))
+      .angle((d, i) => d.x)
+      .radius((d, i) => d.y))
 
-  const nodes = root.descendants()
+  // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g
   const node = svgimg.selectAll('g.node')
     .data(nodes)
     .enter().append('g')
     .style('font', '18px sans-serif')
     .attr('class', 'node')
     .attr('transform', function (d) {
-      return `rotate(${d.x * 180 / Math.PI - 90})` +
-        `translate(${d.y}, 0)`
+      // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
+      // ${d.x * 180 / Math.PI - 90}
+      return `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y})`
     })
 
+  // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle
   node.append('circle')
     .attr('r', 4.5)
 
+  // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
   node.append('text')
     .attr('fill', 'blue')
     .attr('dx', function (d) { return d.children ? -8 : 8 })

@@ -4,7 +4,7 @@ import { getInputElement, setError } from './uiComponentAccess.js'
 import { getSavedGraphs, getSavedFilesAsOptionList } from './localStorage.js'
 
 export function exportGraphs() {
-  makeHTTPPost('http://localhost:8000/saveExport',
+  makeHTTPPost('/saveExport',
     JSON.stringify(getSavedGraphs()),
     (msg) => {
       alert('Exported')
@@ -18,7 +18,7 @@ export function exportGraphs() {
 
 export function importGraphs() {
   // eslint-disable-next-line no-undef
-  makeHTTPGet('http://localhost:8000/loadExport',
+  makeHTTPGet('/loadExport',
     (importedGraphs: Record<string, string>) => {
       let overwritten = false
       const merge = (mergeFrom: Record<string, string>, mergeInto: Record<string, string>) => {

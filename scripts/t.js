@@ -146,9 +146,6 @@ async function _main (argv) {
       case 'svg':
         config.format = 'svg'
         return
-      case 'dont_run_visualizer':
-        config.dontRunVisualizer = true
-        return
     }
     // Allow using absolute and relative paths! (currently abs.paths dont work)
     // ALSO detect piping/redirection and make 'em work

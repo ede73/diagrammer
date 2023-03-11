@@ -141,13 +141,11 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
     }
 
     // TODO: Can't yet visualize web only renderers
-    if (!webOnlyVisualizer) {
-      // compare visualization
-      const referenceImage = `${prevRunPath}/${testFileName}.png`
-      if (!diffImages(referenceImage, cfg.visualizedGraph)) {
-        errors.push(`Using visualizer ${useVisualizer} on ${testFileName}.txt generated graph visualizations differ`)
-        failedTests.push(`Visualized graph ${cfg.input} !== ${referenceImage}, try: scripts/runtests.js ${useVisualizer}:${testFileName}`)
-      }
+    // compare visualization
+    const referenceImage = `${prevRunPath}/${testFileName}.png`
+    if (!diffImages(referenceImage, cfg.visualizedGraph)) {
+      errors.push(`Using visualizer ${useVisualizer} on ${testFileName}.txt generated graph visualizations differ`)
+      failedTests.push(`Visualized graph ${cfg.input} !== ${referenceImage}, try: scripts/runtests.js ${useVisualizer}:${testFileName}`)
     }
     if (errors) {
       for (const error of errors) {

@@ -216,13 +216,10 @@ run_tests() {
   # Something changes in the ubuntu setup since last run (few weeks ago :( )
   # OK, this works, specifying the chromium sandbox specifically
   export CHROME_DEVEL_SANDBOX=$(dpkg -L chromium-sandbox | grep chrome-sandbox)
-  # TODO: allow miniserver to have it's own local port (easy heare, but need to change the web/backend and web/visualize + tests)
-  # all have hardcoded localhost:8000
   make
-  node web/miniserver.js &
   set -e
   JEST_PUPPETEER_CONFIG=jest-puppeteer.config.cjs make test
-  pkill -f miniserver
+  pkill -f miniserver || true
 }
 
 install_typescript() {

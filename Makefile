@@ -182,4 +182,5 @@ watch:
 	scripts/watch_and_make.sh &
 
 stopwatch:
-	killall -r ".*watch_and_make.*"
+	pkill -f watch_and_make
+	pkill -f "inotifywai.*generators"

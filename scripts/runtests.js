@@ -15,7 +15,8 @@ const config = configSupport('runtests.js', {
   testInputPath: 'tests/test_inputs',
   currentTestRun: 'tests/testrun/current',
   previousStableRun: 'tests/testrun/previous',
-  testPatterns: []
+  testPatterns: [],
+  webPort: 8001
 })
 
 function _usage () {
@@ -23,7 +24,18 @@ function _usage () {
   process.exit(0)
 }
 
+let _collectPort = false
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
+  if (_collectPort) {
+    _collectPort = false
+    config.webPort = Number(unknownCommandLineOption)
+    return
+  }
+  switch (unknownCommandLineOption.toLocaleLowerCase().trim()) {
+    case 'webport':
+      _collectPort = true
+      return
+  }
   config.printError(unknownCommandLineOption)
   config.testPatterns.push(unknownCommandLineOption.trim())
 })
@@ -46,6 +58,7 @@ function _isJSON (a) {
 function sanitizePaths (path) {
   return path.replace(/:/g, '_')
 }
+
 const failedTests = []
 function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCodeFile, /** @type {string} */currentGeneratedCode) {
   if (currentGeneratedCode.trim() === '') {
@@ -68,9 +81,9 @@ function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCo
   const differences = (_isJSON(codeFromPreviousRun) && _isJSON(currentGeneratedCode))
     ? diffJson(JSON.parse(codeFromPreviousRun), JSON.parse(currentGeneratedCode), opts)
     : (
-        _areOneLiners(codeFromPreviousRun, currentGeneratedCode)
-          ? diffChars(codeFromPreviousRun, currentGeneratedCode, opts)
-          : diffLines(codeFromPreviousRun, currentGeneratedCode, opts))
+      _areOneLiners(codeFromPreviousRun, currentGeneratedCode)
+        ? diffChars(codeFromPreviousRun, currentGeneratedCode, opts)
+        : diffLines(codeFromPreviousRun, currentGeneratedCode, opts))
 
   let filesSame = true
 
@@ -120,6 +133,7 @@ async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
   cfg.visualizer = useVisualizer
   cfg.traceProcess = config.traceProcess
   cfg.tests = true
+  cfg.webPort = config.webPort
   cfg.input = `${config.testInputPath}/${testFileName}.txt`
   const prevRunPath = `${config.previousStableRun}/${sanitizePaths(useVisualizer)}`
   const currentRunPath = `${config.currentTestRun}/${sanitizePaths(useVisualizer)}`

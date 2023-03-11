@@ -7,7 +7,7 @@
 # $^ list of dependencies on the target
 # $< first dependency on the list
 
-CORES = 
+CORES =
 
 GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.grammar
 
@@ -160,7 +160,9 @@ export: parser js/diagrammer.js js/generate.js scripts/export.sh scripts/display
 	@echo 'Add alias depict="~/{EXPORT_DIR_HERE}/t.js silent " to your profile/bashrc etc.\nYou need (depending) visualizers graphviz,mscgen,plantuml_jar.jar,nwdiag,blockdiag,actdiag.\nplantuml requires java\nblockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html\nPlantuml from http://plantuml.sourceforge.net/\n' >export/README.txt
 
 testrunner: ./scripts/runtests.js ./scripts/t.js model generators parser plantuml_jar
-	./scripts/runtests.js
+	@./web/miniserver.js 8777 &
+	@./scripts/runtests.js webport 8777
+	@-pkill -f "miniserver.js 8777" || true
 
 checkminiserver:
 	@/bin/echo -e "Make sure miniserver is running for web tests\nYou can start it with: node web/miniserver.js"
@@ -169,8 +171,12 @@ startminiserver:
 	node web/miniserver.js&
 
 jesttests: checkminiserver jest_test_deps
+	# It is possible to hook this to jest.config or even into the tearup/down of the actual test
+	# but this is path of least resistance
+	@./web/miniserver.js 8999 &
 	@mkdir -p tests/test_outputs
-	npm test
+	@MINISERVER_TEST_PORT=8999 npm test
+	@-pkill -f "miniserver.js 8999" || true
 
 test: testrunner jesttests
 

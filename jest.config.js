@@ -3,6 +3,9 @@ export default {
   // https://jestjs.io/docs/code-transformation
   transform: {},
   preset: 'jest-puppeteer',
+  setupFiles: [
+    "<rootDir>/tests/web/setEnvVars.js"
+  ],
   moduleNameMapper: {
     '^jquery$': '<rootDir>/node_modules/jquery/dist/jquery.min.js'
   },
@@ -11,3 +14,6 @@ export default {
   // Also the transform sounds like overengineered machine
   testMatch: [ "**/__tests__/**/*.js?(x)", "**/?(*.)+(spec|test).js?(x)" ]
 }
+
+// also possible
+// process.env = Object.assign(process.env, {MINISERVER_TEST_PORT:8001 })

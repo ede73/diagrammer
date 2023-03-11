@@ -3,7 +3,7 @@ import { sleepABit, writeToElement } from './jest_puppeteer_support.js'
 import { getDiagrammerCode, setDiagrammerCode, getParsingError, clearParsingErrors } from './diagrammer_support.js'
 import { type Page } from 'puppeteer'
 import { describe, expect, it } from '@jest/globals'
-import { captureBrowserLogs } from './jest_puppeteer_support.js'
+
 // test saving, loading from local storage
 describe('Diagrammer', () => {
   const localStorageFilename = 'localstorage1'
@@ -13,8 +13,7 @@ describe('Diagrammer', () => {
   beforeAll(async () => {
     // @ts-expect-error page = jest global
     const p: Page = page
-    // await p.goto('http://localhost/~ede/diagrammer/')
-    await p.goto('http://localhost:8000')
+    await p.goto(`http://localhost:${process.env.MINISERVER_TEST_PORT ?? ''}`)
     await p.setViewport({ width: 1800, height: 1800 })
     p.on('dialog', async dialog => {
       // console.warn(`Alert dialog displayed(${dialog.message()}), dismiss it`)

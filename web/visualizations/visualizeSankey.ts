@@ -64,7 +64,16 @@ export async function visualizeSankey(generatorResult: string) {
   const format = (d: any) => `${f(d)}`
 
   const _color = d4.scaleOrdinal(d4.schemeCategory10)
-  const color = (name: any) => _color('red')
+  const colors = new Map<string, string>()
+  const color = (name: any) => {
+    // console.log(_color('red'))
+    // return _color('red')
+    if (!colors.has(name)) {
+      const randomColor = Math.floor(Math.random() * 16777215).toString(16)
+      colors.set(name, `#${randomColor}`)
+    }
+    return _color(colors.get(name) as string)
+  }
 
   removeOldVisualizations()
   const svgimg = makeSVG(width, height)
@@ -73,7 +82,7 @@ export async function visualizeSankey(generatorResult: string) {
     const { nodes, links } = sankey(jsonData)
 
     svgimg.append('g')
-      .attr('stroke', '#000')
+      .attr('stroke', '#000000')
       .selectAll('rect')
       .data(nodes)
       .join('rect')
@@ -116,9 +125,11 @@ export async function visualizeSankey(generatorResult: string) {
           .attr('x2', d =>
             d.target.x0)
 
-        gradient.append('stop')
+        // TODO: looks great, but in dark mode...waay waay too dark
+        // tried playing with colors/gradient offsets/opacity, but nothing really pops
+        gradient.append('start')
           .attr('offset', '0%')
-          .attr('stop-color', d =>
+          .attr('start-color', d =>
             color(d.source.name))
 
         gradient.append('stop')
@@ -146,6 +157,7 @@ export async function visualizeSankey(generatorResult: string) {
       .selectAll('text')
       .data(nodes)
       .join('text')
+      .attr('fill', 'blue')
       .attr('x', d =>
         (d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6))
       .attr('y', d =>

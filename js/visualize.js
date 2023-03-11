@@ -10,7 +10,8 @@ const config = configSupport('visualize.js', {
   code: '',
   visualizedGraph: '-',
   web: false,
-  format: 'png'
+  format: 'png',
+  webPort: 8000
 })
 
 function _usage () {
@@ -20,7 +21,13 @@ function _usage () {
 }
 
 let _collectOutput = false
+let _collectPort = false
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
+  if (_collectPort) {
+    config.webPort = Number(unknownCommandLineOption)
+    _collectPort = false
+    return
+  }
   if (_collectOutput) {
     _collectOutput = false
     config.tp(`Asked to collect output: got (${unknownCommandLineOption})`)
@@ -36,6 +43,9 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
       return
     case 'svg':
       config.format = 'svg'
+      return
+    case 'webport':
+      _collectPort = true
       return
   }
   if (!config.input && fs.existsSync(unknownCommandLineOption)) {

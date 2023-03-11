@@ -29,8 +29,10 @@ async function _webRender (useConfig, visualizer, diagrammerCode, outputShot) {
   useConfig.tp(`Web render using ${visualizer} saving output to ${outputShot}`)
   const browser = await puppeteer.launch()
   const page = await browser.newPage()
-  //await page.goto('http://localhost/~ede/diagrammer/?do_not_load_initial_example=1')
-  await page.goto('http://localhost:8000/?do_not_load_initial_example=1')
+  if (!useConfig.webPort) {
+    useConfig.throwError('Missing webPort from config, cannot render')
+  }
+  await page.goto(`http://localhost:${useConfig.webPort}/?do_not_load_initial_example=1`)
   await page.setViewport({ width: 1024, height: 800 })
 
   await selectGeneratorVisualizer(page, visualizer)

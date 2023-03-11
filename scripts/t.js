@@ -30,7 +30,8 @@ export function getEmptyConfig () {
     visualizer: '',
     visualizedGraph: '-',
     parsedCode: '',
-    written: 0
+    written: 0,
+    webPort: 8000
   })
 }
 
@@ -122,7 +123,13 @@ async function _main (argv) {
   }
 
   let _collectOutput = false
+  let _collectPort = false
   await config.parseCommandLine(argv.splice(1), _usage, async (unknownCommandLineOption) => {
+    if (_collectPort) {
+      _collectOutput = false
+      config.webPort = Number(unknownCommandLineOption)
+      return
+    }
     if (_collectOutput) {
       _collectOutput = false
       config.visualizedGraph = unknownCommandLineOption.trim()
@@ -131,6 +138,9 @@ async function _main (argv) {
     switch (unknownCommandLineOption.toLocaleLowerCase().trim()) {
       case 'output':
         _collectOutput = true
+        return
+      case 'webport':
+        _collectPort = true
         return
       // TODO:
       case 'skipparsermake':

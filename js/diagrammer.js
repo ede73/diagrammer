@@ -17,7 +17,7 @@ export function doParse (
     config.tp.throwError('No code to parser')
   }
   diagrammerParser.yy.USE_GENERATOR = generator
-  diagrammerParser.yy.trace = traceCallback || ((msg) => {})
+  diagrammerParser.yy.trace = traceCallback || ((msg) => { })
 
   // default callback unless overridden
   diagrammerParser.yy.result = resultCallback || ((result) => {
@@ -76,6 +76,9 @@ export async function doVisualize (
     // TODO: oddity for momentarily, expecting diagrammer, not parser language..will change
     await doCliVisualize(useConfig, generatedGraphCode, visualizer, finished)
   } else {
+    if (!useConfig.webPort) {
+      useConfig.throwError('Webport missing, cannot render')
+    }
     await doWebVisualize(useConfig, useConfig.code, visualizer, finished)
   }
 }

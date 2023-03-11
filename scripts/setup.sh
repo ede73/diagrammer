@@ -27,11 +27,11 @@
     sudo debootstrap stable "${BOOTDIR}"
   }
   sudo mount --bind /proc "${BOOTDIR}/proc"
-  sudo chroot "${BOOTDIR}" apt-get install -y sudo curl
+  sudo chroot "${BOOTDIR}" sh -c "apt-get update; apt-get install -y sudo curl"
   # On Ubuntu, node versions are always ANCIENT, get modern one! (nodejs installed later with make in general setup)
   sudo chroot "${BOOTDIR}" sh -c "curl -fsSL https://deb.nodesource.com/setup_18.x | bash -"
   # Trouble getting puppeteer running headless chrome, a LOT of unmet dependencies (this'll take a moment)
-  sudo chroot "${BOOTDIR}" apt install -y pip libgtk-3-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 chromium-common chromium
+  sudo chroot "${BOOTDIR}" apt -qq install -y pip libgtk-3-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 chromium-common chromium
   # Oh boy, really need to go the LONG route here...~root jest/puppeteer just wont work as root
   sudo chroot "${BOOTDIR}" sh -c "echo -e '\n\n\n' | adduser --disabled-password --quiet $TEST_USER"
   sudo chroot "${BOOTDIR}" sh -c "echo '$TEST_USER ALL=(ALL) NOPASSWD: ALL' |tee /etc/sudoers.d/$TEST_USER"
@@ -133,8 +133,7 @@ install() {
     brew install $*
     ;;
   linux*)
-    sudo apt update
-    sudo apt -y install $*
+    sudo apt -qq -y install $*
     ;;
   *)
     error "Unknown architecture ($OSTYPE) - no package install command"

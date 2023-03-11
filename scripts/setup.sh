@@ -188,7 +188,10 @@ install_mscgen() {
 }
 
 npm_install() {
-  npm i
+  (
+    cd ~/diagrammer
+    npm i
+  )
 }
 
 install_nodejs() {

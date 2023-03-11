@@ -103,12 +103,12 @@ export async function visualizeSankey(generatorResult: string) {
       })
 
     const link = svgimg.append('g')
-      .attr('fill', 'none')
+      // .attr('fill', 'none')
       .attr('stroke-opacity', 0.5)
       .selectAll('g')
       .data(links)
       .join('g')
-      .style('mix-blend-mode', 'multiply')
+      .style('mix-blend-mode', 'hard-light')
 
     function update() {
       if (edgeColor === 'path') {

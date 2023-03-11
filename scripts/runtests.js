@@ -11,6 +11,8 @@ import PNGx from 'pngjs'
 import { configSupport } from '../js/configsupport.js'
 const PNG = PNGx.PNG
 
+// TODO: Convert to TypeScript
+
 const config = configSupport('runtests.js', {
   testInputPath: 'tests/test_inputs',
   currentTestRun: 'tests/testrun/current',

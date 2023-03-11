@@ -9,6 +9,8 @@ import { configSupport } from '../js/configsupport.js'
 import { doLex, doParse, doVisualize } from '../js/diagrammer.js'
 import { _getWebVisualizers } from '../js/webvisualize.js'
 
+// TODO: Convert to TypeScript
+
 function visualizersToGenerators () {
   const visualiserToGenerator = new Map()
   visualizations.forEach((visualizers, generator) => {

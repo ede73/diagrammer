@@ -3,6 +3,8 @@ import { GraphObject } from '../../model/graphobject.js'
 import { GraphCanvas } from '../../model/graphcanvas.js'
 import { describe, expect, it } from '@jest/globals'
 
+// TODO: Convert to TypeScript
+
 describe('GraphObject tests', () => {
   const labelCandidates = {
     // quote would mess up parsing

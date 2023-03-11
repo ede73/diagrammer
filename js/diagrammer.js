@@ -6,6 +6,8 @@ import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { doWebVisualize } from './webvisualize.js'
 import { doCliVisualize, isCliVisualizer } from './clivisualize.js'
 
+// TODO: Convert to TypeScript
+
 export function doParse (
   config,
   /** @type {string} */diagrammerCode,

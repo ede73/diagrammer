@@ -1,6 +1,8 @@
 import * as tty from 'node:tty'
 import * as fs from 'fs'
 
+// TODO: Convert to TypeScript
+
 // augment config object literal with some commonly shared utility functions
 export const configSupport = (scriptName, cfg) => {
   cfg.verbose = false

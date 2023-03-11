@@ -1,17 +1,19 @@
 import { diagrammerParser } from '../diagrammer_parser.js'
-import { GraphCanvas } from '../../model/graphcanvas.js'
+import { type GraphCanvas } from '../../model/graphcanvas.js'
+
+// TODO: Convert to TypeScript
 
 // This 'type export' file will be placed in build/types directory along with module package.json
 // And make will tsc this
-export type DiagrammerParserYY = {
-  GRAPHCANVAS: GraphCanvas;
-  PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER: boolean,
-  USE_GENERATOR: string;
-  USE_VISUALIZATOR: string;
-  parseError: (str: string, hash: string) => void;
+export interface DiagrammerParserYY {
+  GRAPHCANVAS: GraphCanvas
+  PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER: boolean
+  USE_GENERATOR: string
+  USE_VISUALIZATOR: string
+  parseError: (str: string, hash: string) => void
   parsedGeneratorAndVisualizer: (generator: string, visualizer: string, preferParsed: boolean) => void
-  result: (codeLine: string) => void;
-};
+  result: (codeLine: string) => void
+}
 
 export function getParserYY(): DiagrammerParserYY {
   return diagrammerParser.yy as DiagrammerParserYY

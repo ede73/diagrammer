@@ -9,6 +9,8 @@ import {
   selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn
 } from '../tests/web/diagrammer_support.js'
 
+// TODO: Convert to TypeScript
+
 // just a test code
 async function _sshot (page) {
   const options = {

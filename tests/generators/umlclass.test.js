@@ -1,6 +1,8 @@
 import { umlclassParseMethod, umlclassParseMember } from '../../generators/umlclass.js'
 import { expect, test } from '@jest/globals'
 
+// TODO: Convert to TypeScript
+
 // Basically [+-#][name(...):]RETURNTYPE
 const /** @type { input: string, expect: RegexMatchedClassMethodsT][]} */ methodTests = [
   { input: 'justname()', expect: { visibility: '', name: 'justname', parameters: '()', return: '' } },

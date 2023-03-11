@@ -5,6 +5,8 @@ import { doVisualize } from '../js/diagrammer.js'
 import { _getWebVisualizers } from './webvisualize.js'
 import * as fs from 'fs'
 
+// TODO: Convert to TypeScript
+
 const config = configSupport('visualize.js', {
   visualizer: '',
   code: '',

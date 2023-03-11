@@ -4,6 +4,8 @@ import * as fs from 'fs'
 import { configSupport } from '../js/configsupport.js'
 import { doLex } from '../js/diagrammer.js'
 
+// TODO: Convert to TypeScript
+
 const config = configSupport('lex.js', {
   lex: true,
   code: ''

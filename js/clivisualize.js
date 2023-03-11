@@ -5,6 +5,8 @@ import { spawn } from 'child_process'
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { _getWebVisualizers } from './webvisualize.js'
 
+// TODO: Convert to TypeScript
+
 function _startVisualizer (useConfig, optionalOutputFS, args) {
   const cmd = args[0]
   const aa = args.splice(1)

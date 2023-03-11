@@ -6,6 +6,8 @@ import { setVerbose } from '../model/debug.js'
 import { configSupport } from '../js/configsupport.js'
 import { doParse } from './diagrammer.js'
 
+// TODO: Convert to TypeScript
+
 const config = configSupport('generate.js', {
   gemerator: '',
   code: '',

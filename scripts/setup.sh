@@ -6,7 +6,7 @@
     exit 10
   }
 
-  BOOTDIR=/tmp/stable_ubuntu
+  BOOTDIR=${2:-/tmp/diagrammer_selftest_chroot_$$}
   DIAGRAMMER_SOURCE=selftest
   TEST_USER=testuser
 
@@ -63,7 +63,7 @@ EOF
   #JEST_PUPPETEER_CONFIG=jest-puppeteer.config.cjs npm test tests/model/graphedge.test.js
   # find . -type d | xargs -L1 -Ixx chmod 755 xx;find . -type f -perm /u+x | xargs -L1 -Ixx chmod 755 xx;find . -type f -not -perm /u+x | xargs -L1 -Ixx chmod 644 xx
   # also just installing the chrome
-  #sudo mount --bind /proc /tmp/stable_ubuntu/proc
+  #sudo mount --bind /proc $BOOTDIR/proc
   #module.exports = {
   #launch: {
   #  dumpio: false,

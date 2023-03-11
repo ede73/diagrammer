@@ -161,10 +161,13 @@ export: parser js/diagrammer.js js/generate.js scripts/export.sh scripts/display
 testrunner: ./scripts/runtests.js ./scripts/t.js model generators parser plantuml_jar
 	./scripts/runtests.js
 
-checkapache:
-	@echo "Make sure apache is running for web tests"
+checkminiserver:
+	@/bin/echo -e "Make sure miniserver is running for web tests\nYou can start it with: node web/miniserver.js"
 
-jesttests: checkapache jest_test_deps
+startminiserver:
+	node web/miniserver.js&
+
+jesttests: checkminiserver jest_test_deps
 	@mkdir -p tests/test_outputs
 	npm test
 

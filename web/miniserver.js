@@ -169,7 +169,6 @@ const saveExport = (
 const requestListener = (
     /** @type {http.IncomingMessage} */req,
      /**@type {http.ServerResponse}*/res) => {
-    console.error(`MITA ${req.url} ${req.method}`)
     switch (req.method) {
         case 'OPTIONS':
             // related to CORS

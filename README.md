@@ -64,7 +64,7 @@ Plenty of examples (also used in tests)
 
 <img width=200 src="https://user-images.githubusercontent.com/1845554/216885127-25ba26bb-194d-4c92-b610-e33999ea005c.png">
 
-You can use brower's localstorage to save the diagrams (and load them). You can also export/import then to the 'backend' if needed (requires apache/php)
+You can use brower's localstorage to save the diagrams (and load them). You can also export/import then to the 'backend' if needed (requires webserver, one available in web/miniserver.js)
 
 <img width=200 src="https://user-images.githubusercontent.com/1845554/216885227-edf5800a-0585-4df1-b8c9-f022f459d670.png">
 
@@ -410,10 +410,7 @@ traverseTree(root, (vertex, isLeaf, hasSiblings) => {
 Totally at your own risk!
 I've run this on Linux/Mac, but most recedntly on windows via its awesomely magnificient linux sub WSL2, which also integrates beautifully with Visual Studio Code! Just enter the linux subsystem, pull the repo, type "code ." and You've VSStudio available.
 
-Run scripts/setup.sh (or check it and run by hand). It installs required modules, apache2, php. Latter two are NOT required if you don't need the Web UI.
-
-For me, apache2 config went all the way nicely, userdirectories where available, just had to enable PHP in userdirs, by commenting out few lines in php configs.
-
+Run scripts/setup.sh (or check it and run by hand). It installs required modules.
 
 ```
 cd ~/diagrammer

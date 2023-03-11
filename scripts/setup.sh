@@ -6,14 +6,13 @@
     exit 10
   }
 
-  # shut down local apache (so it will not mess with the tests)
-  apache2ctl stop
-
   BOOTDIR=/tmp/stable_ubuntu
   DIAGRAMMER_SOURCE=selftest
 
   [ ! -d "${DIAGRAMMER_SOURCE}" ] && {
-    git clone git@github.com:ede73/diagrammer.git diagrammer.git "${DIAGRAMMER_SOURCE}"
+    git clone git@github.com:ede73/diagrammer.git "${DIAGRAMMER_SOURCE}"
+    # TODO: need also a mount point
+    #git clone git@github.com:ede73/blockdiag.git blockdiag
   }
 
   [ ! -d "${BOOTDIR}" ] && {
@@ -27,7 +26,7 @@
   chroot "${BOOTDIR}" sh -c "curl -fsSL https://deb.nodesource.com/setup_18.x | bash -"
   # Trouble getting puppeteer running headless chrome, a LOT of unmet dependencies
   chroot "${BOOTDIR}" apt install -y libgtk-3-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 chromium-common chromium
-  # Oh boy, really need to go the LONG route here...~root with apache not good and jest/puppeteer just wont work as root
+  # Oh boy, really need to go the LONG route here...~root jest/puppeteer just wont work as root
   chroot "${BOOTDIR}" sh -c "echo -e '\n\n\n' | adduser --disabled-password --quiet ede"
   chroot "${BOOTDIR}" sh -c "echo 'ede ALL=(ALL) NOPASSWD: ALL' |tee /etc/sudoers.d/ede"
 
@@ -47,12 +46,10 @@ EOF
   chroot "${BOOTDIR}" sh -c "su -c 'cd /home/ede/diagrammer;scripts/setup.sh YES_TO_ALL' - ede"
   RC=$?
   if [ $RC -eq 0 ]; then
-    chroot "${BOOTDIR}" /etc/init.d/apachd2 stop
     umount "${BOOTDIR}/proc"
     umount "${BOOTDIR}/home/ede/diagrammer"
     rm -fR "${BOOTDIR}"
     echo "Tests completed, all changes removed"
-    apache2ctl start
     exit 0
   else
     echo "Something went wrong while testing"
@@ -130,98 +127,10 @@ install() {
   esac
 }
 
-install_apache_php() {
-  get_www_user() {
-    case $OSTYPE in
-    darwin*)
-      echo "www"
-      ;;
-    linux*)
-      echo "www-data"
-      ;;
-    *)
-      error "Unknown unsupported OS $(uname)"
-      exit 10
-      ;;
-    esac
-  }
-
-  make_www_dir() {
-    case $OSTYPE in
-    darwin*)
-      mkdir -p ~/Sites
-      ;;
-    linux*)
-      mkdir -p ~/public_html
-      ;;
-    esac
-  }
-
-  get_apache_and_php_module() {
-    case $OSTYPE in
-    darwin*)
-      warning "# Alas PHP is gone from Macs, there is a way to install, but too complicated for this simple setup"
-      ;;
-    linux*)
-      echo apache2 libapache2-mod-php
-      ;;
-    esac
-  }
-
-  apache_enable_mod() {
-    case $OSTYPE in
-    darwin*)
-      warning "You need to manually enable $*"
-      return 0
-      ;;
-    linux*)
-      [ -x /usr/sbin/a2enmod ] && {
-        sudo /usr/sbin/a2enmod $*
-        return 0
-      }
-      ;;
-    *)
-      error "Unknown architecture ($OSTYPE) - no a2enmod command"
-      ;;
-    esac
-  }
-
-  prepare_file() {
-    touch $1
-    sudo chown :$WWWUSER $1
-    sudo chmod 775 $1
-  }
-
-  WWWUSER=$(get_www_user)
-
-  install "$(get_apache_and_php_module)"
-
-  apache_enable_mod userdir
-  # either succeeds
-  PHP_VERSION=$(dpkg-query -W -f '${Version}\n' libapache2-mod-php | sed -r 's/2:([0-9.]+).*/\1/g')
-  apache_enable_mod php$PHP_VERSION
-  make_www_dir
-
-  # Exported graphs
-  for file in $(find web/exported -name "*.json"); do
-    prepare_file $file
-  done
-
-  sudo apache2ctl restart
-
-  echo "You need to make /home/$USER executable (chmod +x /home/$USER)"
-  echo "You may need to ENABLE PHP in userdirs manually(check mods-enabled/php?.?.conf)"
-
-  ln -s ~/diagrammer ~/public_html/diagrammer
-  (
-    cd web
-    ln -s ../icons icons
-  )
-}
-
 install_diags() {
   case $OSTYPE in
   linux*)
+    # TODO: Pull and install from my repo (these dont support stdout redirect!)
     install python3-nwdiag python3-blockdiag python3-actdiag python3-seqdiag
     ;;
   *)
@@ -281,9 +190,9 @@ install_typescript() {
 cat <<EOF
 NOTICE!
 
-If you plan to use the WWW frontend, you need a web server! Any will do. This setup script can install apache. No need for PHP.
+If you plan to use the WWW frontend, you need a web server! Any will do. There's web/miniserver.js.
 
-How ever, some renderers require backend rendering even with WWW front (plantuml sequence, mscgen, [act|block|nw|seq]diags), and for that You do need PHP. (Although it would be a minimal job to implement backend rendering in some other style, it is just calling a binary to produce the graph and pipe it as response)
+Some renderers require backend rendering even with WWW front (plantuml sequence, [act|block|nw|seq]diags).
 
 On the other hand, if you only plan to use the command line rendering capabilities, there's no need to webserver. Depending on your graphing needs, you may still require those renderers!
 
@@ -295,7 +204,6 @@ Command line rendering required NodeJS, but WWW relies on many rendering package
 EOF
 
 confirm install_graphviz "[OPTIONAL!] Install graphviz?"
-confirm install_apache_php "[OPTIONAL!] Do you want to install and preconfigure Apache/PHP?"
 confirm install_diags "[OPTIONAL!] Do you want to install nwdiag, blockdiag, actdiag, seqdiag?"
 confirm install_mscgen "[OPTIONAL!] Do you want to install mscgen?"
 confirm install_plantuml "[OPTIONAL!] Do you want to install plantuml?"

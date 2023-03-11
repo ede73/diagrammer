@@ -163,6 +163,7 @@ install_diags() {
 }
 
 install_plantuml() {
+  cd ~/diagrammer
   install plantuml
 
   PLANT_JAR=$(dpkg -L plantuml | grep .jar)

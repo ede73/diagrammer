@@ -134,30 +134,30 @@ describe('Diagrammer', () => {
   it('asserts reingold-tilford(dendrogram)(d3.js) visualization works', async () => {
     // flaky: main page loads (initializes with) AST visualization BEFORE our new selection overrides it. Not a TEST problem, but rather index loading default visualization problem
     await testDynamicRendering(getPage(), 'test_inputs/dendrogram.txt')
-  }, 1000)
+  })
 
   it('asserts radial dendrogram(d3.js) visualization works', async () => {
     // flaky: main page loads (initializes with) AST visualization BEFORE our new selection overrides it. Not a TEST problem, but rather index loading default visualization problem
     await testDynamicRendering(getPage(), 'test_inputs/dendrogram.txt', 'dendrogram:radialdendrogram')
-  }, 1000)
+  })
 
   it('asserts sankey(d3.js) visualization works', async () => {
     await testDynamicRendering(getPage(), 'test_inputs/sankey.txt')
-  }, 1000)
+  })
 
   it('asserts circlepackage(d3.js) visualization works', async () => {
     // TODO:
-  }, 1000)
+  })
 
   it('asserts umlclass2(GoJS) visualization works', async () => {
     await testDynamicRendering(getPage(), 'test_inputs/umlclass2.txt')
-  }, 1000)
+  })
 
   it('asserts layerbands(GoJS) visualization works', async () => {
     await testDynamicRendering(getPage(), 'test_inputs/layerbands.txt')
-  }, 1000)
+  })
 
   it('asserts parsetree(GoJS) visualization works', async () => {
     await testDynamicRendering(getPage(), 'test_inputs/parsetree.txt')
-  }, 1000)
+  })
 })

@@ -178,7 +178,10 @@ jesttests: checkminiserver jest_test_deps
 	@MINISERVER_TEST_PORT=8999 npm test
 	@-pkill -f "miniserver.js 8999" || true
 
-test: testrunner jesttests
+_test: testrunner jesttests
+
+test:
+	@$(MAKE) -j2 _test
 
 tests: test
 

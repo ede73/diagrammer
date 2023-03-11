@@ -1,8 +1,8 @@
 // @ts-check
 import * as d3 from 'd3'
-import { makeSVG, removeOldVisualizations } from '../d3support'
+import { makeSVG, removeOldVisualizations } from '../d3support.js'
 import { visualizations } from '../globals.js'
-import { type DendrogramDocument } from '../../generators/dendrogram'
+import { type DendrogramDocument } from '../../generators/dendrogram.js'
 import { Link, L } from 'd3-shape'
 
 visualizations.set('reingoldtilford', visualizeReingoldTilford)

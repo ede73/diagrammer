@@ -1,6 +1,6 @@
 // @ts-check
 import * as d3 from 'd3'
-import { makeSVG, removeOldVisualizations } from '../d3support'
+import { makeSVG, removeOldVisualizations } from '../d3support.js'
 import { visualizations } from '../globals.js'
 
 visualizations.set('radialdendrogram', visualizeRadialDendrogram)

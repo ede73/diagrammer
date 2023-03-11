@@ -101,7 +101,7 @@ function _getVisualizerCommand (useConfig) {
       return [`${useConfig.visualizer}`,
         '-i-',
         '-o-',
-        `-T${useConfig.format}`]
+      `-T${useConfig.format}`]
     case 'neato':
     case 'twopi':
     case 'circo':
@@ -112,7 +112,7 @@ function _getVisualizerCommand (useConfig) {
       // piping works
       return [`${useConfig.visualizer}`,
         '-q',
-        `-T${useConfig.format}`]
+      `-T${useConfig.format}`]
     default:
       return undefined
   }
@@ -142,7 +142,7 @@ export async function doCliVisualize (
   }
   const isRedirectingDiagRun = () => {
     return useConfig.isPipeMarker(useConfig.visualizedGraph) &&
-    ['nwdiag', 'seqdiag', 'actdiag', 'blockdiag'].includes(useConfig.visualizer) && useConfig.redirectingDiag
+      ['nwdiag', 'seqdiag', 'actdiag', 'blockdiag'].includes(useConfig.visualizer) && useConfig.redirectingDiag
   }
 
   const outputFileStream = (useConfig.isPipeMarker(useConfig.visualizedGraph) || isRedirectingDiagRun())
@@ -157,8 +157,27 @@ export async function doCliVisualize (
   useConfig.tp(`output ${useConfig.visualizedGraph}`)
   // TODO: until *diag stdio fix is merged
   if (!outputFileStream) {
-    useConfig.tp('pipe visualization output to this stdout')
-    visualizationProcess.stdout.pipe(process.stdout)
+    if (useConfig?.returnImage) {
+      useConfig.tp('Collect the image for miniserver')
+      visualizationProcess.stdout.setEncoding('latin1')
+      visualizationProcess.stdout.on('data', (stdout) => {
+        useConfig.outputImage += stdout
+      })
+      // visualizationProcess.stdout.on('end', (stdout) => {
+      //   console.warn('STDOUT DATA IS NOW READY')
+      //   fs.writeFileSync('/tmp/c.png', useConfig.outputImage)
+      // })
+      // no matter what, node.js is reading shit..not actual data
+      // visualizationProcess.stdout.on('readable', () => {
+      //   let chunk
+      //   while ((chunk = visualizationProcess.stdout.read()) !== null) {
+      //     useConfig.outputImage += chunk
+      //   }
+      // })
+    } else {
+      useConfig.tp('pipe visualization output to this stdout')
+      visualizationProcess.stdout.pipe(process.stdout)
+    }
   }
 
   visualizationProcess.stdin.on('error', (error) => {

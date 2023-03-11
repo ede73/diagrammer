@@ -17,6 +17,9 @@ export function makeHTTPPost(
     cache: false,
     url,
     data,
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    },
     contentType: 'application/json; charset=utf-8',
     // Type: Function( Anything data, String textStatus, jqXHR jqXHR )
     success: (data, textStatus, jqXHR) => {

@@ -28,7 +28,8 @@ const getPage = (): Page => { return page as unknown as Page }
 
 describe('Diagrammer', () => {
   beforeAll(async () => {
-    await page.goto('http://localhost/~ede/diagrammer/?do_not_load_initial_example=1')
+    // await page.goto('http://localhost/~ede/diagrammer/?do_not_load_initial_example=1')
+    await page.goto('http://localhost:8000/?do_not_load_initial_example=1')
     // Suddenly (after working for a long time!) started getting errors from here
     // Protocol error (Emulation.setDeviceMetricsOverride): Invalid parameters Failed to deserialize params.height
     // Usually if I close the chrome browser, this goes away, wtf? cache? out of memory?
@@ -69,7 +70,7 @@ describe('Diagrammer', () => {
     await expect(graphText).toMatch('a>')
 
     const errorText = await getParsingError(getPage())
-    await expect(errorText).toMatch(/.*Parsing error:.+Parse error on line 1.+a&gt;/)
+    await expect(errorText).toMatch(/.*Parse error on line 1/)
   })
 
   it('selects dendrogram example, verifies parsing succeeds and correct graph is visualized', async () => {

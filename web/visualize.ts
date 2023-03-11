@@ -66,7 +66,7 @@ export function visualize(visualizer: string) {
     })
   } else {
     // backend visualizer (unless if we want use Viz)
-    const visualizeUrl = `web/visualize.php?visualizer=${visualizer}`
+    const visualizeUrl = `http://localhost:8000/visualize?visualizer=${visualizer}`
     makeHTTPPost(visualizeUrl, generatedResult,
       (pngBase64) => {
         _makeNewImageHolder(pngBase64)

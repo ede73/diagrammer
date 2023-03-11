@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as http from 'http'
 import * as fs from 'fs'
 import * as qs from 'querystring'
@@ -5,9 +7,11 @@ import { doCliVisualize } from '../js/clivisualize.js'
 import { configSupport } from '../js/configsupport.js'
 import * as url from 'url'
 
+const maybePort = process.argv[2]
+
 const host = 'localhost'
 // TODO: Would love to make configurable,  (see setup.sh) tests web/backend.. web/visualize
-const port = 8000
+const port = maybePort ? Number(maybePort) : 8000
 
 // TODO: CORS MIGHT NOT WORK YET FULLY
 

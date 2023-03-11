@@ -426,6 +426,12 @@ And you should be ready to go.
 
 There's also scripts/export.sh that makes a minimal 'distribution' you can copy someplace and use the t.sh to render the graphs.
 
+## Testing
+You can install and test evething in a bootstrapped chroot jail - no changes done to host system
+```
+scripts/setup.sh SELFTEST
+```
+
 # External project references:
 - https://github.com/ajaxorg/ace-builds
   - Source of js/viz.js, you'll see the web page drawing graphviz graphs in "real time"
@@ -435,5 +441,5 @@ There's also scripts/export.sh that makes a minimal 'distribution' you can copy 
   - Not necessary for command line use 
   - Base ACE editor included in ace/src-noconflict folder
 - https://github.com/zaach/jison
-  - Parser maker for Javascript  
+  - Parser maker for Javascript
 

@@ -6,7 +6,7 @@ import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { multiAttrFmt, output } from '../model/support.js'
 
-// ADD TO INDEX.HTML AS: <option value="mscgen">MSCGEN(cli)</option>
+// ADD TO INDEX.HTML AS: <option value="mscgen">MSCGEN(www/cli)</option>
 
 /**
  * https://www.mcternan.me.uk/mscgen/

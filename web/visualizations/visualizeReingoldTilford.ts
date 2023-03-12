@@ -15,7 +15,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
   const radius = diameter
 
   const tree = d3.tree()
-    .size([2 * Math.PI, radius / 2])
+    .size([2 * Math.PI, radius])
     .separation(function (a, b) {
       return (a.parent === b.parent ? 1 : 2) / a.depth
     })

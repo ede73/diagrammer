@@ -200,7 +200,7 @@ const onlyTheseTests = {
   ast_record: ['ast'],
   // make these dynamic
   'dendrogram:radialdendrogram': ['dendrogram'],
-  'dendrogram:reingoldtilford': ['dendrogram'],
+  'dendrogram:reingoldtilford': ['dendrogram', 'dendrogram_spec'],
   layerbands: ['layerbands'],
   parsetree: ['parsetree'],
   sankey: ['sankey', 'sankey2'],

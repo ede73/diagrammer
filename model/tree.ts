@@ -4,13 +4,14 @@ import { type GraphConnectable } from './graphconnectable.js'
 import { GraphContainer } from './graphcontainer.js'
 import { type GraphCanvas } from './graphcanvas.js'
 import { GraphEdgeDirectionType } from './graphedge.js'
+import { type GraphObject } from './graphobject.js'
 /**
  * Tree representration
  */
 export class TreeVertex {
   CHILDREN: TreeVertex[] = []
-  data: any
-  constructor(data: any) {
+  data: GraphObject
+  constructor(data: GraphObject) {
     this.data = data
   }
 
@@ -44,47 +45,80 @@ export function findVertex(subTree: TreeVertex, findData: any): TreeVertex | und
 }
 
 /**
- * Traverse the tree, calling callbacks as iteration progresses
+ * Traverse the tree, calling callbacks as iteration progresses.
+ *
+ * Traverses tree In-Order (*). Root of the subtree is processed first, then all of it's children, recursively. Each node is visited ONCE to avoid loops.
+ * This restriction may also cause some problems.
+ * For instance on a tree a>b>c>b only a,b,c are visited, in that order
+ * A tree a>b>c>b>b like wise, only nodes a,b,c as visited. Alas for c we 'lie' saying it has siblings (which it indeed has ie. b), but "that instance" b is never visited, since it was already processed earlier
+ *
+ * Since callbacks are activated as traversal progresses, we cannot fix that siblingness issue. It was used as a convenience for the generator to get commas right in the list
+ * Same problem could occur with !isLeaf (having children, but then not processing them)
+ * (*) The AST of the whole graph is constructed as it occurs, nodes may precede edges, graph may contain multiple trees
+ * and edges do not have to be in any particular order, than they can go in which ever ditection. Nodes can be actual nodes or backward references to them.
+ * The AST is made to a tree by some rules unbeknownst to this function, so that may affect the processing
+ *
+ * To support cyclical trees, algorithm visits a vertex once!
  *
  * @param root
- * @param callback Called for each vertex, boolean is this is leaf (no children) and boolean if this vertex has siblings (same level)
- * @param exit the TreeVertex, boolean value if this vertex has siblings (same level)
- * @param level Just used internally, omit
- * @param hasSibling Just used internally, omit
- * @param parent Just used internally, omit
+ * @param visitNode Called once for each tree node, hasSiblings is true if node has a sibling. NOTE! On cyclical graphs it is possible siblings WILL NOT be visited.
+ * @param beginListingChildren Called once before beginning listing child nodes
+ * @param finishedListingChildren Called once after listing the child nodes
  */
 export function traverseTree(root: TreeVertex,
-  callback: (node: TreeVertex, isLeaf: boolean, hasSiblings: boolean) => void,
-  enter: (node: TreeVertex) => void,
-  exit: (node: TreeVertex, hasSiblings: boolean) => void,
-  level?: number,
-  hasSibling?: boolean,
-  parent?: TreeVertex) {
-  if (!level) level = 0
-  if (!hasSibling) hasSibling = false
-  if (level === 0) {
-    callback(root, root.CHILDREN.length === 0, false)
-  }
-  if (root.CHILDREN.length > 0) {
-    enter(root)
-  }
-  for (const [i, tn] of root.CHILDREN.entries()) {
-    const isLeaf = tn.CHILDREN.length === 0
-    const hasVertexSiblings = (i + 1) !== root.CHILDREN.length
-    debug(`vertex ${String(tn.data.name)} is leaf?${isLeaf ? 'yeah' : 'nope'} hasSiblings${hasVertexSiblings ? 'yeah' : 'nope'} i=${i + 1}/`)
-    callback(tn, isLeaf, hasVertexSiblings)
-    if (tn.CHILDREN.length > 0) {
-      traverseTree(tn,
-        callback, enter, exit,
-        level + 1,
-        hasVertexSiblings,
-        root)
+  visitNode: (node: TreeVertex, isLeaf: boolean, hasSiblings: boolean, nThNodeOnTheLevel: boolean) => void,
+  beginListingChildren: (node: TreeVertex) => void,
+  finishedListingChildren: (node: TreeVertex, hasSiblings: boolean) => void) {
+  const visited = new Set<TreeVertex>()
+  const _traverseTree = (root: TreeVertex,
+    visitNode: (node: TreeVertex, isLeaf: boolean, hasSiblings: boolean, nThNodeOnTheLevel: boolean) => void,
+    beginListingChildren: (node: TreeVertex) => void,
+    finishedListingChildren: (node: TreeVertex, hasSiblings: boolean) => void,
+    level: number = 0,
+    hasSibling: boolean = false,
+    parent?: TreeVertex) => {
+    if (visited.has(root)) {
+      debug(`Alas node ${root.data.getName()} already visited`)
+      return
+    }
+    debug(`add visited (${root.data.getName()}/${root.data.constructor.name})`)
+    visited.add(root)
+    if (level === 0) {
+      debug(`VISITNODE(root has no siblings) ${root.data.getName()}/${root.data.constructor.name}}`)
+      visitNode(root, root.CHILDREN.length === 0, false, false)
+    }
+    if (root.CHILDREN.length > 0) {
+      debug(`BEGINLISTINGCHILDREN ${root.data.getName()}/${root.data.constructor.name}`, true)
+      beginListingChildren(root)
+    }
+
+    // helps generator track need for commas statelessly
+    let nThNodeOnTheLevel = false
+    for (const [i, tn] of root.CHILDREN.entries()) {
+      const isLeaf = tn.CHILDREN.length === 0
+      // indicative, doesn't mean we'll VISIT the code (it might have already been visited on cyclical tree)
+      const nodeHasSiblings = (i + 1) !== root.CHILDREN.length
+      debug(`VISITNODE ${String(tn.data.name)}/${root.data.constructor.name} is leaf?${isLeaf ? 'yeah' : 'nope'} hasSiblings${nodeHasSiblings ? 'yeah' : 'nope'} i=${i + 1}/`, true)
+      if (!visited.has(tn)) {
+        visitNode(tn, isLeaf, nodeHasSiblings, nThNodeOnTheLevel)
+        nThNodeOnTheLevel = true
+      }
+      if (tn.CHILDREN.length > 0) {
+        _traverseTree(tn,
+          visitNode, beginListingChildren, finishedListingChildren,
+          level + 1,
+          nodeHasSiblings,
+          root)
+      }
+      debug(false)
+    }
+    if (root.CHILDREN.length > 0) {
+      debug(`FINISHEDLISTINGCHILDREN ${root.data.getName()}/${root.data.constructor.name}`, false)
+      finishedListingChildren(root, hasSibling)
     }
   }
-  if (root.CHILDREN.length > 0) {
-    debug(`${String(root.data.name)}has sibling`)
-    exit(root, hasSibling)
-  }
+  debug(true)
+  _traverseTree(root, visitNode, beginListingChildren, finishedListingChildren)
 }
 
 /**
@@ -114,9 +148,16 @@ export function makeEdgeslessTree(node: GraphConnectable, allowReferences: boole
  *
  * Currently collects all directional or non-directional edges. Left/Right make perfect one way directions
  * Bidirectional will be pointing back and forth and so will unidirectional
+ *
+ * Supports cyclical trees as well. Root detection has no vertex precedence, it must be clear root.
+ * Tree a>b>a doesn't have a root (according to this algorithm, even though visually you could say "a" is the root)
+ *
+ * TODO: In ambiguous cases, add a order precedence to the tree, first vertex defined in the canvas will be the root. Fixes a>b>a
+ * TODO: Utilize start node property, so in case of a>b>a what ever is said start node would be the root. Would also help if graph has multiple trees
+ *
  * @param canvas
  * @param allowReferences if true, allows GraphReferences handled separately
- * @returns Return all the roots of the connected tree. Notice! Does not support cyclical trees
+ * @returns Return all the roots of the connected tree
  */
 export function makeConnectedTree(canvas: GraphCanvas, allowReferences: boolean = false): TreeVertex[] {
   const trees: TreeVertex[] = []

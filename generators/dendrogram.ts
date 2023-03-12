@@ -30,6 +30,9 @@ export function dendrogram(graphcanvas: GraphCanvas) {
   if (!tree) {
     throw new Error('No tree')
   }
+
+  // TODO: use start vertex (is specified)?
+  // TODO: use first vertex in the canvas as root
   if (tree.length !== 1) {
     tree.forEach(element => {
       console.warn(element.toString())
@@ -37,25 +40,26 @@ export function dendrogram(graphcanvas: GraphCanvas) {
     throw new Error('Sorry, dendrogram must have exactly one root, no more, no less ')
   }
 
-  traverseTree(tree[0], (t, isLeaf, hasSibling) => {
+  const treeOutput: any[] = []
+  traverseTree(tree[0], (t, isLeaf, hasSibling, nThNodeOnTheLevel) => {
+    if (nThNodeOnTheLevel) {
+      // this is at least 2nd node on the same level (we have list of nodes), so comma separate the previous one
+      const [what, ever] = treeOutput[treeOutput.length - 1]
+      treeOutput[treeOutput.length - 1] = [`${what as string},`, ever]
+    }
     if (isLeaf) {
-      let comma = ''
-      if (hasSibling) { comma = ',' }
-      lout(`{"name": "${t.data.name as string}", "size": 1}${comma}`)
+      treeOutput.push([`{"name": "${t.data.name}", "size": 1}`])
     } else {
-      lout('{', true)
-      lout(`"name": "${t.data.name as string}",`)
+      treeOutput.push(['{', true])
+      treeOutput.push([`"name": "${t.data.name}",`])
     }
   }, (t) => {
-    lout('"children": [', true)
+    treeOutput.push(['"children": [', true])
   }, (t, hasNextSibling) => {
-    lout(']', false)
-    if (hasNextSibling) {
-      lout('},', false)
-    } else {
-      lout('}', false)
-    }
+    treeOutput.push([']', false])
+    treeOutput.push(['}', false])
   })
+  treeOutput.forEach(p => { output(graphcanvas, ...p) })
 }
 generators.set('dendrogram', dendrogram)
 visualizations.set('dendrogram', ['radialdendrogram', 'circlepacked', 'reingoldtilford'])

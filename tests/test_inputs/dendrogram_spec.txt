@@ -75,7 +75,7 @@ protoindouralic > (
                 dardic > kashmiri > pashayi > shina
                 magadhi > easnindic > (
                     assamese > bengali > chittagonian > oriya > halbi
-                    bihari > bhojpuri > magadhi > maithili
+                    bihari > bhojpuri > magahi > maithili
                 )
                 maharahstri > southnindic > konkani > marathi
                 eluprakrit > insularindic > dhivehi > sinhalese > vedda

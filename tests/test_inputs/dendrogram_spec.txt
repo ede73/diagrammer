@@ -1,177 +1,229 @@
 generator dendrogram
 visualizer reingoldtilford
 
-indoeuropean > (
-    anatolian  > (
-        luwian > lycian
-        hittite
-        carian > lydian > palaic > pisidian
-    )
-    hellenic > (
-        dorian
-        mycenaean
-        aeolic > aegean > beotian > thessalian
-    )
-    indoiranian > (
-        indoaryan > (
-            vedicsanskrit > sanskrit
-            gandhari > niya > paisaci > pali
-            shauraseni > (
-                nwnindic > lahnda > potwari > punjabi > sindhi
-                westernindic > bhil > domari > gujarati > rajasthani > romani
-                centralindic
-            )
-            dardic > kashmiri > pashayi > shina
-            magadhi > easnindic > (
-                assamese > bengali > chittagonian > oriya > halbi
-                bihari > bhojpuri > magadhi > maithili
-            )
-            maharahstri > southnindic > konkani > marathi
-            eluprakrit > insularindic > dhivehi > sinhalese > vedda
-            pahari > (
-                dogri
-                westernpahari > garhwali > kumaoni
-                easternpahari > nepali > palpa
+// https://brill.com/display/book/edcoll/9789004409354/BP000001.xml
+// https://en.wikipedia.org/wiki/Proto-Indo-European_language
+// https://en.wikipedia.org/wiki/Indo-Uralic_languages
+protoindouralic > (
+    uralic > (
+        finnovolgaic > (
+            mordvinic > (
+                erzya
+                moksha
             )
         )
-        nuristani > kamkatavari > askunu > waigali
-        iraninan > (
-            easterniranian > (
-                easterniraniansouth > (
-                    pamiri > sarikoli > (
-                        vanji > yighda
-                        shugni > yazgulami
-                    )
-                    pashto > waziri
+        finnougric > (
+            finnopermic > (
+                mari
+                permic > (
+                    komi
+                    udmurt
                 )
-                easterniraniannorth > (
-                    scythian > ossetian > saka > sarmatian
-                    bactrian > khotanese > khwarezmian
-                    sogdian > yaghnobi
+                samic > (
+                    northernsami
+                    inarisami
+                )
+                finnic > (
+                    northernfinnic > (
+                        meankieli
+                        kven
+                        karelian
+                        ingrian
+                        veps
+                        ludic
+                        finnish
+                    )
+                    southernfinnic > (
+                        livonian
+                        votic
+                        estonian
+                        voro
+                    )
+                    meryan
                 )
             )
-            avestan
-            westerniranian > (
-                westerniraniansouth > (
-                    oldpersian > (
-                        middepersian > bukhori > dari > (
-                            persian > hazaragi > tajik
-                            tat > juhuru
+            ugric > (
+                obugric > (
+                    khanty
+                    mansi
+                )
+                hungarian
+            )
+        )
+        samoyedic
+    )
+    protoindoeuropean > (
+        anatolian  > (
+            luwian > lycian
+            hittite
+            carian > lydian > palaic > pisidian
+        )
+        hellenic > (
+            dorian
+            mycenaean
+            aeolic > aegean > beotian > thessalian
+        )
+        indoiranian > (
+            indoaryan > (
+                vedicsanskrit > sanskrit
+                gandhari > niya > paisaci > pali
+                shauraseni > (
+                    nwnindic > lahnda > potwari > punjabi > sindhi
+                    westernindic > bhil > domari > gujarati > rajasthani > romani
+                    centralindic
+                )
+                dardic > kashmiri > pashayi > shina
+                magadhi > easnindic > (
+                    assamese > bengali > chittagonian > oriya > halbi
+                    bihari > bhojpuri > magadhi > maithili
+                )
+                maharahstri > southnindic > konkani > marathi
+                eluprakrit > insularindic > dhivehi > sinhalese > vedda
+                pahari > (
+                    dogri
+                    westernpahari > garhwali > kumaoni
+                    easternpahari > nepali > palpa
+                )
+            )
+            nuristani > kamkatavari > askunu > waigali
+            iraninan > (
+                easterniranian > (
+                    easterniraniansouth > (
+                        pamiri > sarikoli > (
+                            vanji > yighda
+                            shugni > yazgulami
                         )
-                        lurish > bakhtiari > kumzari
+                        pashto > waziri
+                    )
+                    easterniraniannorth > (
+                        scythian > ossetian > saka > sarmatian
+                        bactrian > khotanese > khwarezmian
+                        sogdian > yaghnobi
                     )
                 )
-                westerniraniannorth > (
-                    caspian > deilami > gilaki > mazanderani > shahmirzadi > talysh
-                    median > (
-                        parthian > balochi > kurdish
-                        zazagorani > gorani > zazaki
+                avestan
+                westerniranian > (
+                    westerniraniansouth > (
+                        oldpersian > (
+                            middepersian > bukhori > dari > (
+                                persian > hazaragi > tajik
+                                tat > juhuru
+                            )
+                            lurish > bakhtiari > kumzari
+                        )
+                    )
+                    westerniraniannorth > (
+                        caspian > deilami > gilaki > mazanderani > shahmirzadi > talysh
+                        median > (
+                            parthian > balochi > kurdish
+                            zazagorani > gorani > zazaki
+                        )
                     )
                 )
             )
         )
-    )
-    italic > (
-        latinofaliscan > faliscan > latin > (
-            classiclatin > ecclesiasticallatin
-            vulgarlatin > romance > (
-                sardinian > logudorse > campidanase
-                easternromance > aromanian > istroromanian > meglenoromanian > romanian
-                italowestern > (
-                    italodalmatian > corsican > dalmatian > istriot > italian > neapolitan > saccarese > sicilian
-                    galloiberian > (
-                        iberian > (
-                            aragonese > (
-                                asturleonese > asturian > extremaduran > leonese > mirandese
-                                galicianportuguese > (
-                                    eonavian > fala > galician > portuguese
-                                    mozarabic > oldspanish > ladino > spanish
+        italic > (
+            latinofaliscan > faliscan > latin > (
+                classiclatin > ecclesiasticallatin
+                vulgarlatin > romance > (
+                    sardinian > logudorse > campidanase
+                    easternromance > aromanian > istroromanian > meglenoromanian > romanian
+                    italowestern > (
+                        italodalmatian > corsican > dalmatian > istriot > italian > neapolitan > saccarese > sicilian
+                        galloiberian > (
+                            iberian > (
+                                aragonese > (
+                                    asturleonese > asturian > extremaduran > leonese > mirandese
+                                    galicianportuguese > (
+                                        eonavian > fala > galician > portuguese
+                                        mozarabic > oldspanish > ladino > spanish
+                                    )
                                 )
                             )
-                        )
-                        gallic > (
-                            cisalpine > emilian > ligurian > lombard > piedmontese > venetian
-                            languedoil > french > gallo > norman > walloon
-                            occitan > catalan > modernoccitan
-                            rhaetian > friulian > ladin > romansh
-                        )
-                    )
-                )
-            )
-        )
-        sabellic > oscan > umbrian > aequian > marsian > volscian
-    )
-    celtic > (
-        continental > celtiberian > galatian > gaulish > lepontic > noric
-        insular > (
-            goidelic > irish > manx > scottishgaelic
-            brythonic > commonbritonic > ivernic > pictish
-        )
-    )
-    germanic > (
-        oldnorse > (
-            oldwestnorse > faroese > greenlandicnorse > icelandic > norn > norwegian
-            oldeastnorse > danish > swedish
-            elfdalian > oldgutnish
-        )
-        westgermanic > (
-            lowfranconian > (
-                eastfranconian > oldloweastfranconian > limburgish
-                westfranconian > olddutch > dutch > (
-                    afrikaans
-                    flemish
-                )
-            )
-            oldhighgerman > (
-                yiddish
-                centralgerman > (
-                    luxembourgish > ripuarian > thuringian
-                    standardgerman
-                )
-                uppergerman > alemannic>(
-                    swissgerman
-                    austrobavarian > cimbrian
-                )
-            )
-            angrofrisian > (
-                oldfrisian > northfrisian > saterlandfrisian > westfrisian
-                oldenglish > english > scots > yola
-            )
-            oldsaxon
-        )
-        eastgermanic > burgundian > crimeangothic > gothic > vandalic
-    )
-    tocharian > kuchean> turfanian
-    baltoslavic > (
-        baltic > (
-            westbaltic > galindan > prussian > sudovian
-            eastbaltic > latvian > lithuanian > selonian > semigallian
-        )
-        slavic > (
-            eastslavic > (
-                oldnovgorod
-                oldeastslavic > russian
-                ruthenian > belorussian > rusyn > ukraininan
-            )
-            westslavic > (
-                oldwestslavic > (
-                    lechitic > (
-                        oldpolish > (
-                            polabian > pomeraninan
-                            polish > silesian
+                            gallic > (
+                                cisalpine > emilian > ligurian > lombard > piedmontese > venetian
+                                languedoil > french > gallo > norman > walloon
+                                occitan > catalan > modernoccitan
+                                rhaetian > friulian > ladin > romansh
+                            )
                         )
                     )
-                    czechslovak > knaanic > sorbian
                 )
             )
-            southslavic > (
-                westernsouthslavic > (
-                    slovene
-                    serbocroatian > bosnian > croatian > serbian
-                )
-                eastsouthslavic > oldchurchslavonic > bulgarian > churchslavonic > macedonian
+            sabellic > oscan > umbrian > aequian > marsian > volscian
+        )
+        celtic > (
+            continental > celtiberian > galatian > gaulish > lepontic > noric
+            insular > (
+                goidelic > irish > manx > scottishgaelic
+                brythonic > commonbritonic > ivernic > pictish
             )
         )
+        germanic > (
+            oldnorse > (
+                oldwestnorse > faroese > greenlandicnorse > icelandic > norn > norwegian
+                oldeastnorse > danish > swedish
+                elfdalian > oldgutnish
+            )
+            westgermanic > (
+                lowfranconian > (
+                    eastfranconian > oldloweastfranconian > limburgish
+                    westfranconian > olddutch > dutch > (
+                        afrikaans
+                        flemish
+                    )
+                )
+                oldhighgerman > (
+                    yiddish
+                    centralgerman > (
+                        luxembourgish > ripuarian > thuringian
+                        standardgerman
+                    )
+                    uppergerman > alemannic>(
+                        swissgerman
+                        austrobavarian > cimbrian
+                    )
+                )
+                angrofrisian > (
+                    oldfrisian > northfrisian > saterlandfrisian > westfrisian
+                    oldenglish > english > scots > yola
+                )
+                oldsaxon
+            )
+            eastgermanic > burgundian > crimeangothic > gothic > vandalic
+        )
+        tocharian > kuchean> turfanian
+        baltoslavic > (
+            baltic > (
+                westbaltic > galindan > prussian > sudovian
+                eastbaltic > latvian > lithuanian > selonian > semigallian
+            )
+            slavic > (
+                eastslavic > (
+                    oldnovgorod
+                    oldeastslavic > russian
+                    ruthenian > belorussian > rusyn > ukraininan
+                )
+                westslavic > (
+                    oldwestslavic > (
+                        lechitic > (
+                            oldpolish > (
+                                polabian > pomeraninan
+                                polish > silesian
+                            )
+                        )
+                        czechslovak > knaanic > sorbian
+                    )
+                )
+                southslavic > (
+                    westernsouthslavic > (
+                        slovene
+                        serbocroatian > bosnian > croatian > serbian
+                    )
+                    eastsouthslavic > oldchurchslavonic > bulgarian > churchslavonic > macedonian
+                )
+            )
+        )
+        albanian > modernalbanian
     )
-    albanian > modernalbanian
 )

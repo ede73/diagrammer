@@ -9,13 +9,13 @@ visualizations.set('reingoldtilford', visualizeReingoldTilford)
 
 export async function visualizeReingoldTilford(generatorResult: string) {
   const jsonData: DendrogramDocument = JSON.parse(generatorResult)
-  const width = 600
-  const height = 400
-  const diameter = height * 0.75
-  const radius = diameter / 2
+  const width = 1200
+  const height = 1200
+  const diameter = height
+  const radius = diameter
 
   const tree = d3.tree()
-    .size([2 * Math.PI, radius])
+    .size([2 * Math.PI, radius / 2])
     .separation(function (a, b) {
       return (a.parent === b.parent ? 1 : 2) / a.depth
     })
@@ -64,6 +64,11 @@ export async function visualizeReingoldTilford(generatorResult: string) {
     .attr('dx', function (d) { return d.children ? -8 : 8 })
     .attr('dy', 3)
     .attr('text-anchor', function (d) { return d.children ? 'end' : 'start' })
+    .attr('transform', function (d) {
+      // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
+      // ${d.x * 180 / Math.PI - 90}
+      return `rotate(-${d.x * 180 / Math.PI - 90})`
+    })
     .text(function (d) {
       // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
       return d.data.name

@@ -18,5 +18,6 @@
         "typescript",
         "javascriptreact",
         "typescriptreact"
-    ]
+    ],
+    "editor.guides.indentation": false
 }

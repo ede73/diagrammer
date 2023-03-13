@@ -19,6 +19,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
   const diameter = height
   const radius = diameter
 
+  // TODO: add autoresize
   const tree = d3.tree()
     .size([2 * Math.PI, radius])
     .separation(function (a, b) {

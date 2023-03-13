@@ -8,6 +8,11 @@ import { Link, L } from 'd3-shape'
 visualizations.set('reingoldtilford', visualizeReingoldTilford)
 
 export async function visualizeReingoldTilford(generatorResult: string) {
+  try {
+    JSON.parse(generatorResult)
+  } catch (e) {
+    console.error(e, generatorResult)
+  }
   const jsonData: DendrogramDocument = JSON.parse(generatorResult)
   const width = 1200
   const height = 1200
@@ -40,7 +45,8 @@ export async function visualizeReingoldTilford(generatorResult: string) {
     // @ts-expect-error odd issue with studio
     .attr('d', d3.linkRadial()
       .angle((d, i) => d.x)
-      .radius((d, i) => d.y))
+      .radius((d, i) => d.y)
+    )
 
   // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g
   const node = svgimg.selectAll('g.node')
@@ -60,17 +66,29 @@ export async function visualizeReingoldTilford(generatorResult: string) {
 
   // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
   node.append('text')
-    .attr('fill', 'blue')
-    .attr('dx', function (d) { return d.children ? -8 : 8 })
+    .attr('fill', (d) => {
+      if (d.data.nodecolor) {
+        return d.data.nodecolor
+      }
+      return 'blue'
+    })
+    .attr('dx', (d) => {
+      return d.children ? -8 : 8
+    })
     .attr('dy', 3)
-    .attr('text-anchor', function (d) { return d.children ? 'end' : 'start' })
-    .attr('transform', function (d) {
+    .attr('text-anchor', (d) => {
+      return d.children ? 'end' : 'start'
+    })
+    .attr('transform', (d) => {
       // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
       // ${d.x * 180 / Math.PI - 90}
-      return `rotate(-${d.x * 180 / Math.PI - 90})`
+      return `rotate(${-(d.x * 180 / Math.PI - 90)})`
     })
-    .text(function (d) {
+    .text((d) => {
       // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
+      if (d.data.label) {
+        return d.data.label
+      }
       return d.data.name
     })
 

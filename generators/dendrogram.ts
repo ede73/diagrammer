@@ -2,6 +2,9 @@
 
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
 import { generators, type GraphCanvas, visualizations } from '../model/graphcanvas.js'
+import { type GraphObject } from '../model/graphobject.js'
+import { GraphReference } from '../model/graphreference.js'
+import { GraphVertex } from '../model/graphvertex.js'
 import { output } from '../model/support.js'
 import { makeConnectedTree, traverseTree } from '../model/tree.js'
 
@@ -13,17 +16,15 @@ export interface DendrogramDocument {
   name: string
   children: Array<ThisType<this>>
   size?: number
+  nodecolor?: string
+  nodeshape?: string
+  nodelabel?: string
 }
 
 /**
  * To test: node js/generate.js verbose tests/test_inputs/dendrogram.txt dendrogram
  */
 export function dendrogram(graphcanvas: GraphCanvas) {
-  const lout = (...args: any[]) => {
-    const [textOrIndent, maybeIndent] = args
-    output(graphcanvas, textOrIndent, maybeIndent)
-  }
-
   const tree = makeConnectedTree(graphcanvas)
 
   // just for the linter
@@ -47,11 +48,31 @@ export function dendrogram(graphcanvas: GraphCanvas) {
       const [what, ever] = treeOutput[treeOutput.length - 1]
       treeOutput[treeOutput.length - 1] = [`${what as string},`, ever]
     }
+
+    const getExtras = (node: GraphObject) => {
+      if (t.data instanceof GraphVertex || t.data instanceof GraphReference) {
+        let ret = ''
+        if (t.data.getShape()) {
+          ret += ` "nodeshape": "${t.data.getShape() ?? ''}"`
+        }
+        if (t.data.getColor()) {
+          ret += ` "nodecolor": "${t.data.getColor() ?? ''}"`
+        }
+        if (t.data.getLabel()) {
+          // TODO: quoting
+          ret += ` "nodelabel": "${t.data.getLabel() ?? ''}"`
+        }
+        return ret ? `,${ret}` : ''
+      }
+      return ''
+    }
+
+    const extras = getExtras(t.data)
     if (isLeaf) {
-      treeOutput.push([`{"name": "${t.data.name}", "size": 1}`])
+      treeOutput.push([`{"name": "${t.data.name}", "size": 1${extras}}`])
     } else {
       treeOutput.push(['{', true])
-      treeOutput.push([`"name": "${t.data.name}",`])
+      treeOutput.push([`"name": "${t.data.name}"${extras},`])
     }
   }, (t) => {
     treeOutput.push(['"children": [', true])

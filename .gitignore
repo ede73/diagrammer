@@ -32,3 +32,5 @@ web/visualizations/*.js
 tests/parser/*.js
 tests/web/*.js
 **/*.map
+
+tests/**/*.js

@@ -177,7 +177,7 @@ jesttests: checkminiserver jest_test_deps
 	# but this is path of least resistance
 	@chmod u+x ./web/miniserver.js
 	@./web/miniserver.js 8999 &
-	@mkdir -p tests/test_outputs
+	@mkdir -p tests/testrun
 	@MINISERVER_TEST_PORT=8999 npm test
 	@-pkill -f "miniserver.js 8999" || true
 
@@ -192,11 +192,11 @@ clean:
 	@find build -type f -delete
 	rm -f .error
 	rm -f build/types/*
-	find generators -name "*.map" -or -name "*.js" -delete
 	find js -name "*.map" -delete
+	find generators -name "*.map" -or -name "*.js" -delete
 	find model -name "*.map" -or -name "*.js" -delete
 	find web -name "*.map" -or -name "*.js" -delete
-	find tests -name "*.map" -delete
+	find tests -name "*.map" -or -name "*.js" -delete
 
 watch:
 	scripts/watch_and_make.sh &

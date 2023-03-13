@@ -68,7 +68,7 @@ export function findVertex(subTree: TreeVertex, findData: any): TreeVertex | und
  * @param finishedListingChildren Called once after listing the child nodes
  */
 export function traverseTree(root: TreeVertex,
-  visitNode: (node: TreeVertex, isLeaf: boolean, hasSiblings: boolean, nThNodeOnTheLevel: boolean) => void,
+  visitNode: (node: TreeVertex, isLeaf: boolean, hasSiblings: boolean, nThNodeOnTheLevel: boolean, edge?: GraphEdge) => void,
   beginListingChildren: (node: TreeVertex) => void,
   finishedListingChildren: (node: TreeVertex, hasSiblings: boolean) => void) {
   const visited = new Set<TreeVertex>()
@@ -102,7 +102,7 @@ export function traverseTree(root: TreeVertex,
       const nodeHasSiblings = (i + 1) !== root.CHILDREN.length
       debug(`VISITNODE ${String(tn.data.name)}/${root.data.constructor.name} is leaf?${isLeaf ? 'yeah' : 'nope'} hasSiblings${nodeHasSiblings ? 'yeah' : 'nope'} i=${i + 1}/`, true)
       if (!visited.has(tn)) {
-        visitNode(tn, isLeaf, nodeHasSiblings, nThNodeOnTheLevel)
+        visitNode(tn, isLeaf, nodeHasSiblings, nThNodeOnTheLevel, root.EDGES[i])
         nThNodeOnTheLevel = true
       }
       if (tn.CHILDREN.length > 0) {
@@ -181,25 +181,31 @@ export function makeConnectedTree(canvas: GraphCanvas, allowReferences: boolean 
       case GraphEdgeDirectionType.LEFT: {
         const r = makeSubTree(edge.right)
         r.CHILDREN.push(makeSubTree(edge.left))
+        r.EDGES.push(edge)
       }
         break
       case GraphEdgeDirectionType.RIGHT: {
         const r = makeSubTree(edge.left)
         r.CHILDREN.push(makeSubTree(edge.right))
+        r.EDGES.push(edge)
       }
         break
       case GraphEdgeDirectionType.BIDIRECTIONAL: {
         const r1 = makeSubTree(edge.left)
         r1.CHILDREN.push(makeSubTree(edge.right))
+        r1.EDGES.push(edge)
         const r2 = makeSubTree(edge.right)
         r2.CHILDREN.push(makeSubTree(edge.left))
+        r2.EDGES.push(edge)
       }
         break
       case GraphEdgeDirectionType.UNIDIRECTIONAL: {
         const r1 = makeSubTree(edge.left)
         r1.CHILDREN.push(makeSubTree(edge.right))
+        r1.EDGES.push(edge)
         const r2 = makeSubTree(edge.right)
         r2.CHILDREN.push(makeSubTree(edge.left))
+        r2.EDGES.push(edge)
       }
         break
     }

@@ -8,9 +8,16 @@ visualizations.set('radialdendrogram', visualizeRadialDendrogram)
 // https://medium.com/analytics-vidhya/creating-a-radial-tree-using-d3-js-for-javascript-be943e23b74e
 export async function visualizeRadialDendrogram(generatorResult: string) {
   const jsonData = JSON.parse(generatorResult)
-  const radius = 250
-  const width = 600
-  const height = 600
+
+  removeOldVisualizations()
+  const svgimg = makeSVG()
+  const svgelement = svgimg.node().parentNode as SVGSVGElement
+  const width = Number(svgelement.width.baseVal.valueAsString)
+  const height = Number(svgelement.height.baseVal.valueAsString)
+  // start from the middle
+  svgimg.attr('transform', `translate(${width / 2},${height / 2})`)
+
+  const radius = width / 2
 
   const tree = d3.tree()
     .size([2 * Math.PI, radius])
@@ -22,10 +29,6 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
 
   const nodes = treeData.descendants()
   const links = treeData.links()
-
-  removeOldVisualizations()
-  const svgimg = makeSVG(width, height)
-    .attr('transform', `translate(${width / 2},${height / 2})`)
 
   // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path
   svgimg.selectAll('.link')

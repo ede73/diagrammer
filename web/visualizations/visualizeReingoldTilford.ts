@@ -14,10 +14,14 @@ export async function visualizeReingoldTilford(generatorResult: string) {
     console.error(e, generatorResult)
   }
   const jsonData: DendrogramDocument = JSON.parse(generatorResult)
-  const width = 1200
-  const height = 1200
-  const diameter = height
-  const radius = diameter
+
+  removeOldVisualizations()
+  const svgimg = makeSVG()
+  const svgelement = svgimg.node().parentNode as SVGSVGElement
+  const width = Number(svgelement.width.baseVal.valueAsString)
+  const height = Number(svgelement.height.baseVal.valueAsString)// svgimg.node()?.parentNode.attr('height')
+  svgimg.attr('transform', `translate(${width / 2},${height / 2})`)
+  const radius = Math.min(width, height) / 2
 
   // TODO: Add autoresize
   const tree = d3.tree()
@@ -31,10 +35,6 @@ export async function visualizeReingoldTilford(generatorResult: string) {
 
   const links = treeData.links()
   const nodes = treeData.descendants()
-
-  removeOldVisualizations()
-  const svgimg = makeSVG(width, height)
-    .attr('transform', `translate(${width / 2},${height / 2})`)
 
   // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path
   svgimg.selectAll('.link')

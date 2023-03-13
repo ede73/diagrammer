@@ -3,7 +3,7 @@
 import { getHTMLElement } from './uiComponentAccess.js'
 import * as d3 from 'd3'
 
-export function makeSVG(width: number, height: number) {
+export function makeSVG(width?: number, height?: number) {
   if (!width) {
     width = 800
   }

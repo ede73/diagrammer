@@ -230,7 +230,8 @@ export function _exitCurrentGraphInner(graphCanvas: GraphCanvas) {
 function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInner: GraphInner) {
   let edgeAndItsIndex: [GraphEdge, number] | undefined
   debug(`relinkGraphInnerEntryAndExit ${String(currentGraphInner)}`)
-  // If there's an edge that (RHS) points to current inner inner graph AND the graph has
+
+  // If there's an edge that (RHS) points to current inner (GraphInner) AND the graph has
   // entrance connectable and this edge (LHS) points to entrance node, then relink
   // this edge:
   // a>b>(c d>e f>g h)>(s>k)
@@ -258,8 +259,17 @@ function relinkGraphInnerEntryAndExit(graphCanvas: GraphCanvas, currentGraphInne
         currentGraphInner._entrance._noedges = undefined
       }
       vertex._noedges = undefined
-      const newEdge = _getEdge(graphCanvas, edgeAndItsIndex[0].edgeType, currentGraphInner._entrance as (GraphConnectable | GraphConnectable[]), vertex, edgeAndItsIndex[0].label,
-        undefined, undefined, undefined, undefined, true)
+      const newEdge = _getEdge(
+        graphCanvas,
+        edgeAndItsIndex[0].edgeType,
+        currentGraphInner._entrance as (GraphConnectable | GraphConnectable[]),
+        vertex,
+        edgeAndItsIndex[0].label,
+        undefined,
+        edgeAndItsIndex[0].color,
+        edgeAndItsIndex[0].lcompass,
+        edgeAndItsIndex[0].rcompass,
+        true)
       debug(`  Add new edge ${String(newEdge)}`)
       graphCanvas.insertEdge(edgeAndItsIndex[1]++, newEdge)
     }

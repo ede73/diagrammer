@@ -160,6 +160,7 @@ export: parser js/diagrammer.js js/generate.js scripts/export.sh scripts/display
 	@echo 'Add alias depict="~/{EXPORT_DIR_HERE}/t.js silent " to your profile/bashrc etc.\nYou need (depending) visualizers graphviz,mscgen,plantuml_jar.jar,nwdiag,blockdiag,actdiag.\nplantuml requires java\nblockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html\nPlantuml from http://plantuml.sourceforge.net/\n' >export/README.txt
 
 testrunner: ./scripts/runtests.js ./scripts/t.js model generators parser plantuml_jar
+	@chmod u+x ./web/miniserver.js
 	@./web/miniserver.js 8777 &
 	@./scripts/runtests.js webport 8777
 	@-pkill -f "miniserver.js 8777" || true
@@ -168,11 +169,13 @@ checkminiserver:
 	@/bin/echo -e "Make sure miniserver is running for web tests\nYou can start it with: node web/miniserver.js"
 
 startminiserver:
+	@chmod u+x ./web/miniserver.js
 	node web/miniserver.js&
 
 jesttests: checkminiserver jest_test_deps
 	# It is possible to hook this to jest.config or even into the tearup/down of the actual test
 	# but this is path of least resistance
+	@chmod u+x ./web/miniserver.js
 	@./web/miniserver.js 8999 &
 	@mkdir -p tests/test_outputs
 	@MINISERVER_TEST_PORT=8999 npm test
@@ -189,9 +192,11 @@ clean:
 	@find build -type f -delete
 	rm -f .error
 	rm -f build/types/*
-	find {generators,js,model,web,tests} -name "*.map"
-	# TODO: Careful with this, not all typescripted
-	find {generators,web,model} -name "*.js"
+	find generators -name "*.map" -or -name "*.js" -delete
+	find js -name "*.map" -delete
+	find model -name "*.map" -or -name "*.js" -delete
+	find web -name "*.map" -or -name "*.js" -delete
+	find tests -name "*.map" -delete
 
 watch:
 	scripts/watch_and_make.sh &

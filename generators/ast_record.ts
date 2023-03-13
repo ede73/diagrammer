@@ -68,7 +68,7 @@ export function ast_record(graphcanvas: GraphCanvas) {
 
     Object.entries(obj).forEach(([propNames, propValues], idx) => {
       if (excludeSomeFields.includes(propNames) || propValues === undefined || propValues === null || typeof (propValues) === 'function') return
-      if (obj instanceof GraphInner && propNames === 'defaults') return
+      // if (obj instanceof GraphInner && propNames === 'defaults') return
       function getName(obj: GraphObject) {
         if (obj instanceof GraphInner) {
           return 'GraphInner'
@@ -87,11 +87,11 @@ export function ast_record(graphcanvas: GraphCanvas) {
         params[propNames] = tryToSplit(names, 64, 32)
       } else if (collectJustName.includes(propNames)) {
         params[propNames] = `${getName(propValues)}`
-      } else if (propNames === 'VARIABLES') {
+      } else if (propNames === 'VARIABLES' || propNames === 'defaults') {
         const vars = Object.entries(propValues).map(([varName, varValue]) => `${varName}=${varValue as string}`).join(', ')
         params[propNames] = `${vars}`
       } else {
-        params[propNames] = `${String(propValues)}`
+        params[propNames] = `${propValues}`
       }
     })
     return params

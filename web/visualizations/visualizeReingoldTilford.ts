@@ -16,12 +16,13 @@ export async function visualizeReingoldTilford(generatorResult: string) {
   const jsonData: DendrogramDocument = JSON.parse(generatorResult)
 
   removeOldVisualizations()
+  // TODO: pull the zoom out
   const svgimg = makeSVG()
   const svgelement = svgimg.node().parentNode as SVGSVGElement
   const width = Number(svgelement.width.baseVal.valueAsString)
   const height = Number(svgelement.height.baseVal.valueAsString)// svgimg.node()?.parentNode.attr('height')
   svgimg.attr('transform', `translate(${width / 2},${height / 2})`)
-  const radius = Math.min(width, height) / 2
+  const radius = Math.min(width, height) // / 2
 
   // TODO: Add autoresize
   const tree = d3.tree()
@@ -62,7 +63,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
   const node = svgimg.selectAll('g.node')
     .data(nodes)
     .enter().append('g')
-    .style('font', '18px sans-serif')
+    .style('font', '10px sans-serif')
     .attr('class', 'node')
     .attr('transform', function (d) {
       // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform

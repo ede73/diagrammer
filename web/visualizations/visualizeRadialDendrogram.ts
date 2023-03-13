@@ -46,7 +46,7 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
   const node = svgimg.selectAll('g.node')
     .data(nodes)
     .enter().append('g')
-    .style('font', '18px sans-serif')
+    .style('font', '10px sans-serif')
     .attr('class', 'node')
     .attr('transform', function (d) {
       // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform

@@ -42,7 +42,7 @@ describe('GraphObject tests', () => {
     const obj = new GraphObject('', c)
     obj.setLabel(label)
 
-    it(`Verify that GraphObject with label (${label}) is parsed as textcolor=${verifications[0]} label=${verifications[1]} url=${verifications[2]}`, async () => {
+    it(`Verify that GraphObject with label (${label}) is parsed as textcolor=${verifications[0] ?? 'undefined'} label=${verifications[1] ?? 'undefined'} url=${verifications[2] ?? 'undefined'}`, async () => {
       // Bug in jest? Requires strings?
       expect(String(obj.getTextColor())).toMatch(String(verifications[0]))
       expect(String(obj.getLabel())).toMatch(String(verifications[1]))

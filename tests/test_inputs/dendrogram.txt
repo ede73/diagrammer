@@ -26,3 +26,5 @@ A>D
 //Preferably return root A, then
 // node B, and its vertices e,f,g
 // node C, and its vertices h,j,k
+
+A;Node A::https://www.google.com/

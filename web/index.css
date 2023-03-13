@@ -176,3 +176,24 @@ img.iconicon {
     max-width: 32px; 
     max-height: 64px;
 }
+
+
+/* TODO: SVG link coloring doesnt work from CSS */
+@namespace svg url(http://www.w3.org/2000/svg);
+svg|a:link,
+svg|a:visited {
+  cursor: pointer;
+}
+
+svg|a text,
+text svg|a {
+  fill: red; /* Even for text, SVG uses fill over color */
+  text-decoration: underline;
+}
+
+
+
+svg|a:hover,
+svg|a:active {
+  outline: dotted 1px blue;
+}

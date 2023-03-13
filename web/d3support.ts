@@ -20,10 +20,10 @@ export function makeSVG(width?: number, height?: number) {
   // https://www.upgradecrb.net/@d3/zoom-canvas-rescaled?_=%2F%40d3%2Fzoom-canvas-rescaled%232NMjB6UohcKJ%2FFYIA1uADNI3R35Qp1Dr
   const zoom = d3.zoom()
     .on('zoom', (e) => {
-      console.log(e)
+      // console.log(e)
       // svgElement.attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ') scale(' + d3.event.scale + ')')
 
-      console.log(`translate(${e.transform.x}, ${e.transform.y}) scale(${e.transform.k})`)
+      // console.log(`translate(${e.transform.x}, ${e.transform.y}) scale(${e.transform.k})`)
       d3.select('svg g')
         //   .attr('transform', e.transform)
         // TODO: offload to caller, centering only works for radials (that we've translated 50% wid/height)

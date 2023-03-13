@@ -21,7 +21,7 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
 
   const tree = d3.tree()
     .size([2 * Math.PI, radius])
-    .separation(function (a, b) {
+    .separation((a, b) => {
       return (a.parent === b.parent ? 1 : 2) / a.depth
     })
   const data = d3.hierarchy(jsonData)
@@ -48,7 +48,7 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
     .enter().append('g')
     .style('font', '10px sans-serif')
     .attr('class', 'node')
-    .attr('transform', function (d) {
+    .attr('transform', (d) => {
       // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
       return `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y})`
     })
@@ -61,10 +61,39 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
   node.append('text')
     .attr('fill', 'blue')
     .attr('dy', '.31em')
-    .attr('text-anchor', function (d) { return d.x < 180 ? 'start' : 'end' })
-    .attr('transform', function (d) { return d.x < 180 ? 'translate(8)' : 'rotate(180) translate(-8)' })
-    .text(function (d) {
+    .attr('text-anchor', (d) => {
+      return d.x < 180 ? 'start' : 'end'
+    })
+    .attr('transform', (d) => {
+      return d.x < 180 ? 'translate(8)' : 'rotate(180) translate(-8)'
+    })
+    .append('a')
+    // Could not get link color changed in CSS. SVG A is its own element(?)
+    // See end of index.css at SVG namespace. Remove once fixed
+    .attr('fill', (d) => {
+      if (d.data.nodecolor) {
+        return d.data.nodecolor
+      }
+      return 'blue'
+    })
+    .attr('href', (d) => {
+      const label = d.data.nodelabel
+      if (label && label.includes('::')) {
+        const [_head, url] = label.split('::')
+        return url
+      }
+    })
+    .attr('target', '_blank')
+    .text((d) => {
       // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
+      const label = d.data.nodelabel
+      if (label && label.includes('::')) {
+        const [head, _url] = label.split('::')
+        return head
+      }
+      if (label) {
+        return label
+      }
       return d.data.name
     })
 }

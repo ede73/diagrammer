@@ -27,7 +27,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
   // TODO: Add autoresize
   const tree = d3.tree()
     .size([2 * Math.PI, radius])
-    .separation(function (a, b) {
+    .separation((a, b) => {
       return (a.parent === b.parent ? 1 : 2) / a.depth
     })
 
@@ -65,7 +65,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
     .enter().append('g')
     .style('font', '10px sans-serif')
     .attr('class', 'node')
-    .attr('transform', function (d) {
+    .attr('transform', (d) => {
       // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
       // ${d.x * 180 / Math.PI - 90}
       return `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y})`
@@ -95,10 +95,32 @@ export async function visualizeReingoldTilford(generatorResult: string) {
       // ${d.x * 180 / Math.PI - 90}
       return `rotate(${-(d.x * 180 / Math.PI - 90)})`
     })
+    .append('a')
+    // Could not get link color changed in CSS. SVG A is its own element(?)
+    // See end of index.css at SVG namespace. Remove once fixed
+    .attr('fill', (d) => {
+      if (d.data.nodecolor) {
+        return d.data.nodecolor
+      }
+      return 'blue'
+    })
+    .attr('href', (d) => {
+      const label = d.data.nodelabel
+      if (label && label.includes('::')) {
+        const [_head, url] = label.split('::')
+        return url
+      }
+    })
+    .attr('target', '_blank')
     .text((d) => {
       // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
-      if (d.data.label) {
-        return d.data.label
+      const label = d.data.nodelabel
+      if (label && label.includes('::')) {
+        const [head, _url] = label.split('::')
+        return head
+      }
+      if (label) {
+        return label
       }
       return d.data.name
     })

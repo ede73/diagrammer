@@ -1,6 +1,7 @@
 generator dendrogram
 visualizer reingoldtilford
-$(ProtoLanguage:#FFFFFF)
+// Dark reader + links mess this up
+$(ProtoLanguage:#a16a6a)
 $(Living:#00FF00)
 $(Dead:#FF00FF)
 
@@ -271,3 +272,51 @@ protoindouralic$(ProtoLanguage) > (
         protoalbanian$(ProtoLanguage) > albanian$(Living)
     )
 )
+
+finnish;Finnish::https://en.wikipedia.org/wiki/Finnish_language
+moksha;Moksha::https://en.wikipedia.org/wiki/Finnish_language
+ludic;::https://en.wikipedia.org/wiki/Ludic_language
+veps;::https://en.wikipedia.org/wiki/Veps_language
+ingrian;Ingrian::https://en.wikipedia.org/wiki/Ingrian_language
+kven;Kven::https://en.wikipedia.org/wiki/Kven_language
+meankieli;Meänkieli::https://en.wikipedia.org/wiki/Me%C3%A4nkieli
+karelian;::https://en.wikipedia.org/wiki/Karelian_language
+finnic;::https://en.wikipedia.org/wiki/Proto-Finnic_language
+komi;Komi::https://en.wikipedia.org/wiki/Komi_language
+udmurt;Udmurt::https://en.wikipedia.org/wiki/Udmurt_language
+erzya;Erzya::https://en.wikipedia.org/wiki/Erzya_language
+northernsami;Northern Sami::https://en.wikipedia.org/wiki/Northern_S%C3%A1mi
+inarisami;Inari Sami::https://en.wikipedia.org/wiki/Inari_S%C3%A1mi
+votic;::https://en.wikipedia.org/wiki/Votic_language
+voro;Voro::https://en.wikipedia.org/wiki/V%C3%B5ro_language
+mansi;Mansi::https://en.wikipedia.org/wiki/Mansi_language
+khanty;Khanty::https://en.wikipedia.org/wiki/Khanty_language
+hungarian;Hungarian::https://en.wikipedia.org/wiki/Hungarian_language
+moksha;Moksha::https://en.wikipedia.org/wiki/Moksha_language
+estonian;Estonian::https://en.wikipedia.org/wiki/Estonian_language
+livonian;Livonian::https://en.wikipedia.org/wiki/Livonian_language
+samic;Samic Protolanguage::https://en.wikipedia.org/wiki/Proto-Samic_language
+permic;Permic::https://en.wikipedia.org/wiki/Permic_languages
+finnougric;Finno-Ugric::https://en.wikipedia.org/wiki/Finno-Ugric_languages
+mordvinic;Mordvinic::https://en.wikipedia.org/wiki/Mordvinic_languages
+finnovolgaic;Finno-Volgaic::https://en.wikipedia.org/wiki/Finno-Volgaic_languages
+uralic;Uralic::https://en.wikipedia.org/wiki/Uralic_languages
+protoindouralic;Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-Uralic_languages
+ugric;Ugric::https://en.wikipedia.org/wiki/Ugric_languages
+obugric;Ob-Ugric::https://en.wikipedia.org/wiki/Ob-Ugric_languages
+protoindoeuropean;Proto Indo-European::https://en.wikipedia.org/wiki/Proto-Indo-European_language
+
+indoiranian;Indo-Iranian::https://en.wikipedia.org/wiki/Indo-Iranian_languages
+romance;Romance::https://en.wikipedia.org/wiki/Romance_languages
+
+italic;Italic::https://en.wikipedia.org/wiki/Italic_languages
+celtic;Celtic::https://en.wikipedia.org/wiki/Celtic_languages
+
+hellenic;Hellenic::https://en.wikipedia.org/wiki/Hellenic_languages
+anatolian;Anatolian::https://en.wikipedia.org/wiki/Anatolian_languages
+iraninan;Iranian::https://en.wikipedia.org/wiki/Iranian_languages
+indoaryan;Indo-Aryan::https://en.wikipedia.org/wiki/Indo-Aryan_languages
+germanic;Germanic::https://en.wikipedia.org/wiki/Germanic_languages
+baltoslavic;Balto-Slavic::https://en.wikipedia.org/wiki/Balto-Slavic_languages
+
+

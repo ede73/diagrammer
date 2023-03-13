@@ -1,30 +1,40 @@
 generator dendrogram
 visualizer reingoldtilford
+$(ProtoLanguage:#FFFFFF)
+$(Living:#00FF00)
+$(Dead:#FF00FF)
 
 // https://brill.com/display/book/edcoll/9789004409354/BP000001.xml
 // https://en.wikipedia.org/wiki/Proto-Indo-European_language
 // https://en.wikipedia.org/wiki/Indo-Uralic_languages
-protoindouralic > (
-    uralic > (
+
+// By default - dead languages
+vertex color $(Dead)
+
+protoindouralic$(ProtoLanguage) > (
+    uralic$(ProtoLanguage) > (
         edge color #ff0000
-        finnovolgaic > (
-            mordvinic > (
-                erzya
-                moksha
+        finnovolgaic$(ProtoLanguage) > (
+            mordvinic$(ProtoLanguage) > (
+                erzya$(Living)
+                moksha$(Living)
             )
         )
-        finnougric > (
-            finnopermic > (
-                mari
-                permic > (
+        finnougric$(ProtoLanguage) > (
+            finnopermic$(ProtoLanguage) > (
+                mari$(Living)
+                permic$(ProtoLanguage) > (
+                    vertex color $(Living)
                     komi
                     udmurt
                 )
-                samic > (
+                samic$(ProtoLanguage) > (
+                    vertex color $(Living)
                     northernsami
                     inarisami
                 )
-                finnic > (
+                finnic$(ProtoLanguage) > (
+                    vertex color $(Living)
                     northernfinnic > (
                         meankieli
                         kven
@@ -34,7 +44,7 @@ protoindouralic > (
                         ludic
                         finnish
                     )
-                    southernfinnic > (
+                    southernfinnic$(ProtoLanguage) > (
                         livonian
                         votic
                         estonian
@@ -43,54 +53,69 @@ protoindouralic > (
                     meryan
                 )
             )
-            ugric > (
-                obugric > (
-                    khanty
+            ugric$(ProtoLanguage) > (
+                obugric$(ProtoLanguage) > (
+                    vertex color $(Living)
+                    khanty  
                     mansi
                 )
-                hungarian
+                hungarian$(Living)
             )
         )
-        samoyedic
+        samoyedic$(ProtoLanguage)
     )
-    protoindoeuropean > (
-        anatolian > (
+    protoindoeuropean$(ProtoLanguage) > (
+        anatolian$(ProtoLanguage) > (
             edge color #ff3388
             luwian > lycian
             hittite
             carian > lydian > palaic > pisidian
         )
-        hellenic > (
+        hellenic$(ProtoLanguage) > (
             edge color #22ff99
-            dorian
-            mycenaean
-            aeolic > aegean > beotian > thessalian
+            dorian$(ProtoLanguage) > doric > (
+                tsakonian$(Living)
+                northwestgreek
+            )
+            mycenaean > (
+                attic > (
+                    ionic
+                    epicgreek
+                    classicalgreek > greek$(Living)
+                    koinegreek
+                )
+                achaean$(ProtoLanguage) > arcado > cypriot
+            )
+            aeolic$(ProtoLanguage) > aegean > beotian > thessalian
         )
-        indoiranian > (
+        indoiranian$(ProtoLanguage) > (
             edge color #ffff00
-            indoaryan > (
-                vedicsanskrit > sanskrit
-                gandhari > niya > paisaci > pali
+            indoaryan$(ProtoLanguage) > (
+                vedicsanskrit > sanskrit$(Living)
+                gandhari > niya > paisaci > pali$(Living)
                 shauraseni > (
-                    nwnindic > lahnda > potwari > punjabi > sindhi
-                    westernindic > bhil > domari > gujarati > rajasthani > romani
-                    centralindic
+                    vertex color $(Living)
+                    nwnindic$(ProtoLanguage) > lahnda > potwari > punjabi > sindhi
+                    westernindic$(ProtoLanguage) > bhil > domari > gujarati > rajasthani > romani
+                    centralindic$(ProtoLanguage)
                 )
-                dardic > kashmiri > pashayi > shina
-                magadhi > easnindic > (
+                dardic$(ProtoLanguage) > kashmiri$(Living) > pashayi$(Living) > shina$(Living)
+                magadhi > easnindic$(ProtoLanguage) > (
+                    vertex color $(Living)
                     assamese > bengali > chittagonian > oriya > halbi
-                    bihari > bhojpuri > magahi > maithili
+                    bihari$(ProtoLanguage) > bhojpuri > magahi > maithili
                 )
-                maharahstri > southnindic > konkani > marathi
-                eluprakrit > insularindic > dhivehi > sinhalese > vedda
-                pahari > (
+                maharahstri > southnindic$(ProtoLanguage) > konkani > marathi
+                eluprakrit > insularindic$(ProtoLanguage) > dhivehi > sinhalese > vedda
+                pahari$(ProtoLanguage) > (
+                    vertex color $(Living)
                     dogri
-                    westernpahari > garhwali > kumaoni
-                    easternpahari > nepali > palpa
+                    westernpahari$(ProtoLanguage) > garhwali > kumaoni
+                    easternpahari$(ProtoLanguage) > nepali > palpa
                 )
             )
-            nuristani > kamkatavari > askunu > waigali
-            iraninan > (
+            nuristani$(ProtoLanguage) > kamkatavari$(Living) > askunu$(Living) > waigali$(Living)
+            iraninan$(ProtoLanguage) > (
                 easterniranian > (
                     easterniraniansouth > (
                         pamiri > sarikoli > (
@@ -100,138 +125,149 @@ protoindouralic > (
                         pashto > waziri
                     )
                     easterniraniannorth > (
-                        scythian > ossetian > saka > sarmatian
+                        scythian > ossetian$(Living) > saka > sarmatian
                         bactrian > khotanese > khwarezmian
-                        sogdian > yaghnobi
+                        sogdian > yaghnobi$(Living)
                     )
                 )
                 avestan
-                westerniranian > (
-                    westerniraniansouth > (
+                westerniranian$(ProtoLanguage) > (
+                    westerniraniansouth$(ProtoLanguage) > (
                         oldpersian > (
-                            middepersian > bukhori > dari > (
+                            middepersian > bukhori$(Living) > dari$(Living) > (
+                                vertex color $(Living)
                                 persian > hazaragi > tajik
                                 tat > juhuru
                             )
                             lurish > bakhtiari > kumzari
                         )
                     )
-                    westerniraniannorth > (
-                        caspian > deilami > gilaki > mazanderani > shahmirzadi > talysh
+                    westerniraniannorth$(ProtoLanguage) > (
+                        caspian$(ProtoLanguage) > deilami$(Living) > gilaki$(Living) > mazanderani$(Living) > shahmirzadi > talysh$(Living)
                         median > (
-                            parthian > balochi > kurdish
-                            zazagorani > gorani > zazaki
+                            parthian > balochi$(Living) > kurdish$(Living)
+                            zazagorani > gorani$(Living) > zazaki$(Living)
                         )
                     )
                 )
             )
         )
-        italic > (
+        italic$(ProtoLanguage) > (
             edge color #0000ff
-            latinofaliscan > faliscan > latin > (
-                classiclatin > ecclesiasticallatin
-                vulgarlatin > romance > (
-                    sardinian > logudorse > campidanase
-                    easternromance > aromanian > istroromanian > meglenoromanian > romanian
-                    italowestern > (
-                        italodalmatian > corsican > dalmatian > istriot > italian > neapolitan > saccarese > sicilian
-                        galloiberian > (
-                            iberian > (
-                                aragonese > (
-                                    asturleonese > asturian > extremaduran > leonese > mirandese
+            latinofaliscan$(ProtoLanguage) > faliscan > latin > (
+                classiclatin > ecclesiasticallatin$(Living)
+                vulgarlatin > romance$(ProtoLanguage) > (
+                    sardinian$(Living) > logudorse$(Living) > campidanase$(Living)
+                    easternromance$(ProtoLanguage) > aromanian$(Living) > istroromanian$(Living) > meglenoromanian$(Living) > romanian$(Living)
+                    italowestern$(ProtoLanguage) > (
+                        italodalmatian$(ProtoLanguage) > corsican$(Living) > dalmatian > istriot$(Living) > italian$(Living) > neapolitan$(Living) > saccarese$(Living) > sicilian$(Living)
+                        galloiberian$(ProtoLanguage) > (
+                            iberian$(ProtoLanguage) > (
+                                aragonese$(Living) > (
+                                    asturleonese > asturian$(Living) > extremaduran$(Living) > leonese$(Living) > mirandese$(Living)
                                     galicianportuguese > (
+                                        vertex color $(Living)
                                         eonavian > fala > galician > portuguese
-                                        mozarabic > oldspanish > ladino > spanish
+                                        mozarabic$(Dead) > oldspanish$(Dead) > ladino > spanish
                                     )
                                 )
                             )
-                            gallic > (
-                                cisalpine > emilian > ligurian > lombard > piedmontese > venetian
-                                languedoil > french > gallo > norman > walloon
-                                occitan > catalan > modernoccitan
-                                rhaetian > friulian > ladin > romansh
+                            gallic$(ProtoLanguage) > (
+                                vertex color $(Living)
+                                cisalpine$(ProtoLanguage) > emilian > ligurian > lombard > piedmontese > venetian
+                                languedoil$(ProtoLanguage) > french > gallo > norman > walloon
+                                protooccitan$(ProtoLanguage) > catalan > occitan
+                                rhaetian$(Dead) > friulian > ladin > romansh
                             )
                         )
                     )
                 )
             )
-            sabellic > oscan > umbrian > aequian > marsian > volscian
+            sabellic$(ProtoLanguage) > oscan > umbrian > aequian > marsian > volscian
         )
-        celtic > (
+        celtic$(ProtoLanguage) > (
             edge color #ff00ff
-            continental > celtiberian > galatian > gaulish > lepontic > noric
-            insular > (
-                goidelic > irish > manx > scottishgaelic
-                brythonic > commonbritonic > ivernic > pictish
+            continental$(ProtoLanguage) > celtiberian > galatian > gaulish > lepontic > noric
+            insular$(ProtoLanguage) > (
+                goidelic$(ProtoLanguage) > irish$(Living) > manx$(Living) > scottishgaelic$(Living)
+                brythonic$(ProtoLanguage) > (
+                    commonbritonic > breton$(Living) > cornish$(Living) > cumbric > welsh$(Living)
+                    ivernic
+                    pictish
+                )
             )
         )
-        germanic > (
+        germanic$(ProtoLanguage) > (
             edge color #00ffff
             oldnorse > (
-                oldwestnorse > faroese > greenlandicnorse > icelandic > norn > norwegian
-                oldeastnorse > danish > swedish
-                elfdalian > oldgutnish
+                oldwestnorse > faroese$(Living) > greenlandicnorse > icelandic$(Living) > norn > norwegian$(Living)
+                oldeastnorse > danish$(Living) > swedish$(Living)
+                elfdalian$(Living) > oldgutnish
             )
-            westgermanic > (
-                lowfranconian > (
-                    eastfranconian > oldloweastfranconian > limburgish
-                    westfranconian > olddutch > dutch > (
-                        afrikaans
-                        flemish
+            westgermanic$(ProtoLanguage) > (
+                lowfranconian$(ProtoLanguage) > (
+                    eastfranconian$(ProtoLanguage) > oldloweastfranconian > limburgish$(Living)
+                    westfranconian$(ProtoLanguage) > olddutch > dutch$(Living) > (
+                        afrikaans$(Living)
+                        flemish$(Living)
                     )
                 )
                 oldhighgerman > (
-                    yiddish
+                    yiddish$(Living)
                     centralgerman > (
+                        vertex color $(Living)
                         luxembourgish > ripuarian > thuringian
                         standardgerman
                     )
-                    uppergerman > alemannic>(
+                    uppergerman$(ProtoLanguage) > alemannic$(Living) > (
+                        vertex color $(Living)
                         swissgerman
                         austrobavarian > cimbrian
                     )
                 )
-                angrofrisian > (
-                    oldfrisian > northfrisian > saterlandfrisian > westfrisian
-                    oldenglish > english > scots > yola
+                anglofrisian > (
+                    vertex color $(Living)
+                    oldfrisian$(Dead) > northfrisian > saterlandfrisian > westfrisian
+                    oldenglish$(Dead) > english > scots > yola
                 )
-                oldsaxon
+                oldsaxon>lowgerman$(Living)
             )
-            eastgermanic > burgundian > crimeangothic > gothic > vandalic
+            eastgermanic$(ProtoLanguage) > burgundian > crimeangothic > gothic > vandalic
         )
-        tocharian > kuchean> turfanian
-        baltoslavic > (
+        tocharian$(ProtoLanguage) > kuchean> turfanian
+        baltoslavic$(ProtoLanguage) > (
             edge color #777777
-            baltic > (
-                westbaltic > galindan > prussian > sudovian
-                eastbaltic > latvian > lithuanian > selonian > semigallian
+            baltic$(ProtoLanguage) > (
+                westbaltic$(ProtoLanguage) > galindan > prussian > sudovian
+                eastbaltic$(ProtoLanguage) > latvian$(Living) > lithuanian$(Living) > selonian > semigallian
             )
-            slavic > (
-                eastslavic > (
+            slavic$(ProtoLanguage) > (
+                eastslavic$(ProtoLanguage) > (
                     oldnovgorod
-                    oldeastslavic > russian
-                    ruthenian > belorussian > rusyn > ukraininan
+                    oldeastslavic > russian$(Living)
+                    ruthenian > belorussian$(Living) > rusyn > ukraininan$(Living)
                 )
-                westslavic > (
+                westslavic$(ProtoLanguage) > (
                     oldwestslavic > (
-                        lechitic > (
+                        lechitic$(ProtoLanguage) > (
                             oldpolish > (
                                 polabian > pomeraninan
-                                polish > silesian
+                                polish$(Living) > silesian$(Living)
                             )
                         )
-                        czechslovak > knaanic > sorbian
+                        czechslovak > knaanic > sorbian$(Living)
                     )
                 )
-                southslavic > (
-                    westernsouthslavic > (
+                southslavic$(ProtoLanguage) > (
+                    westernsouthslavic$(ProtoLanguage) > (
+                        vertex color $(Living)
                         slovene
                         serbocroatian > bosnian > croatian > serbian
                     )
-                    eastsouthslavic > oldchurchslavonic > bulgarian > churchslavonic > macedonian
+                    eastsouthslavic$(ProtoLanguage) > oldchurchslavonic > bulgarian$(Living) > churchslavonic$(Living) > macedonian$(Living)
                 )
             )
         )
-        albanian > modernalbanian
+        protoalbanian$(ProtoLanguage) > albanian$(Living)
     )
 )

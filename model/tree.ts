@@ -3,13 +3,15 @@ import { debug } from './debug.js'
 import { type GraphConnectable } from './graphconnectable.js'
 import { GraphContainer } from './graphcontainer.js'
 import { type GraphCanvas } from './graphcanvas.js'
-import { GraphEdgeDirectionType } from './graphedge.js'
+import { type GraphEdge, GraphEdgeDirectionType } from './graphedge.js'
 import { type GraphObject } from './graphobject.js'
 /**
  * Tree representration
  */
 export class TreeVertex {
   CHILDREN: TreeVertex[] = []
+  // Store edges, so we can get the edge properties between this tree root and its children
+  EDGES: GraphEdge[] = []
   data: GraphObject
   constructor(data: GraphObject) {
     this.data = data

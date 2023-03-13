@@ -2,7 +2,7 @@
 
 import { generators, type GraphCanvas } from '../model/graphcanvas.js'
 import { GraphEdge } from '../model/graphedge.js'
-import { type GraphObject } from '../model/graphobject.js'
+import { GraphObject } from '../model/graphobject.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { output } from '../model/support.js'
 
@@ -90,7 +90,9 @@ export function ast(graphcanvas: GraphCanvas) {
 
     const items: string[] = []
     level++
-    items.push(`"__PSEUDOTYPE": "${(obj as GraphObject).constructor.name}"`)
+    if (obj instanceof GraphObject) {
+      items.push(`"__PSEUDOTYPE": "${obj.constructor.name}"`)
+    }
     Object.entries(obj).forEach(([propname, value]) => {
       // skip empties..
       if (value === null || value === undefined ||

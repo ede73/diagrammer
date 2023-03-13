@@ -5,8 +5,8 @@ visualizer reingoldtilford
 // https://en.wikipedia.org/wiki/Proto-Indo-European_language
 // https://en.wikipedia.org/wiki/Indo-Uralic_languages
 protoindouralic > (
-    uralic#ff0000 > (
-        vertex color #ff0000
+    uralic > (
+        edge color #ff0000
         finnovolgaic > (
             mordvinic > (
                 erzya
@@ -54,20 +54,20 @@ protoindouralic > (
         samoyedic
     )
     protoindoeuropean > (
-        anatolian#ff3388  > (
-            vertex color #ff3388
+        anatolian > (
+            edge color #ff3388
             luwian > lycian
             hittite
             carian > lydian > palaic > pisidian
         )
-        hellenic#22ff99 > (
-            vertex color #22ff99
+        hellenic > (
+            edge color #22ff99
             dorian
             mycenaean
             aeolic > aegean > beotian > thessalian
         )
-        indoiranian#ffff00 > (
-            vertex color #ffff00
+        indoiranian > (
+            edge color #ffff00
             indoaryan > (
                 vedicsanskrit > sanskrit
                 gandhari > niya > paisaci > pali
@@ -126,8 +126,8 @@ protoindouralic > (
                 )
             )
         )
-        italic#0000ff > (
-            vertex color #0000ff
+        italic > (
+            edge color #0000ff
             latinofaliscan > faliscan > latin > (
                 classiclatin > ecclesiasticallatin
                 vulgarlatin > romance > (
@@ -157,16 +157,16 @@ protoindouralic > (
             )
             sabellic > oscan > umbrian > aequian > marsian > volscian
         )
-        celtic#ff00ff > (
-            vertex color #ff00ff
+        celtic > (
+            edge color #ff00ff
             continental > celtiberian > galatian > gaulish > lepontic > noric
             insular > (
                 goidelic > irish > manx > scottishgaelic
                 brythonic > commonbritonic > ivernic > pictish
             )
         )
-        germanic#00ffff > (
-            vertex color #00ffff
+        germanic > (
+            edge color #00ffff
             oldnorse > (
                 oldwestnorse > faroese > greenlandicnorse > icelandic > norn > norwegian
                 oldeastnorse > danish > swedish
@@ -200,8 +200,8 @@ protoindouralic > (
             eastgermanic > burgundian > crimeangothic > gothic > vandalic
         )
         tocharian > kuchean> turfanian
-        baltoslavic#777777 > (
-            vertex color #777777
+        baltoslavic > (
+            edge color #777777
             baltic > (
                 westbaltic > galindan > prussian > sudovian
                 eastbaltic > latvian > lithuanian > selonian > semigallian

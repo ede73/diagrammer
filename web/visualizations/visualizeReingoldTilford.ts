@@ -37,6 +37,11 @@ export async function visualizeReingoldTilford(generatorResult: string) {
   const links = treeData.links()
   const nodes = treeData.descendants()
 
+  const getRadial = (d) => {
+    // from 100 to 800 it goes
+    return d.y
+  }
+
   // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path
   svgimg.selectAll('.link')
     .data(links)
@@ -56,7 +61,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
     // @ts-expect-error odd issue with studio
     .attr('d', d3.linkRadial()
       .angle((d, i) => d.x)
-      .radius((d, i) => d.y)
+      .radius((d, i) => getRadial(d))
     )
 
   // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g
@@ -68,7 +73,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
     .attr('transform', (d) => {
       // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
       // ${d.x * 180 / Math.PI - 90}
-      return `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y})`
+      return `rotate(${d.x * 180 / Math.PI - 90}) translate(${getRadial(d)})`
     })
 
   // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle

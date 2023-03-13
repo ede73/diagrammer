@@ -21,6 +21,7 @@ export interface DendrogramDocument {
   nodeshape?: string
   nodelabel?: string
   edgecolor?: string
+  radial?: number
 }
 
 /**

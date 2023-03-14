@@ -35,6 +35,15 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
     .data(links)
     .join('path')
     .attr('class', 'link')
+    .attr('stroke', d => {
+      if (d.source.data.edgecolor) {
+        return d.source.data.edgecolor
+      }
+      if (d.target.data.edgecolor) {
+        return d.target.data.edgecolor
+      }
+      return 'yellow'
+    })
     // https://github.com/d3/d3-shape#curves
     // https://observablehq.com/@d3/d3-lineradial
     // @ts-expect-error odd issue with studio

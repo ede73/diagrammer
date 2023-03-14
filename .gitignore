@@ -35,3 +35,5 @@ tests/web/*.js
 
 tests/**/*.js
 js/*.js
+scripts/*.js
+

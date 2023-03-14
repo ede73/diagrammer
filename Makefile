@@ -52,7 +52,7 @@ _all: active_project_deps jest_test_deps parser
 
 DELETE_ON_ERROR: $(LOCK_FILE)
 
-active_project_deps: model generators web web_visualizations js index.html
+active_project_deps: model generators web web_visualizations js scripts index.html
 generators/%.js : generators/%.ts
 generators: $(GENERATOR_JSS) model
 model/%.js : model/%.ts
@@ -200,13 +200,15 @@ tests: test
 
 clean:
 	@find build -type f -delete
-	rm -f .error
-	rm -f build/types/*
-	find js -name "*.map" -delete
-	find generators -name "*.map" -or -name "*.js" -delete
-	find model -name "*.map" -or -name "*.js" -delete
-	find web -name "*.map" -or -name "*.js" -delete
-	find tests -name "*.map" -or -name "*.js" -delete
+	@rm -f .error
+	@rm -f build/types/*
+	@find js -name "*.map" -delete
+	@find js -regextype posix-extended -maxdepth 1 -name "*.js" -and -not -iregex "js/(go|viz|full).*" -delete
+	@find scripts -name "*.map" -or -name "*.js" -delete
+	@find generators -name "*.map" -or -name "*.js" -delete
+	@find model -name "*.map" -or -name "*.js" -delete
+	@find web -name "*.map" -or -name "*.js" -delete
+	@find tests -name "*.map" -or -name "*.js" -delete
 
 watch:
 	scripts/watch_and_make.sh &

@@ -73,7 +73,7 @@ export function traverseTree(root: TreeVertex,
   finishedListingChildren: (node: TreeVertex, hasSiblings: boolean) => void) {
   const visited = new Set<TreeVertex>()
   const _traverseTree = (root: TreeVertex,
-    visitNode: (node: TreeVertex, isLeaf: boolean, hasSiblings: boolean, nThNodeOnTheLevel: boolean) => void,
+    visitNode: (node: TreeVertex, isLeaf: boolean, hasSiblings: boolean, nThNodeOnTheLevel: boolean, edge?: GraphEdge) => void,
     beginListingChildren: (node: TreeVertex) => void,
     finishedListingChildren: (node: TreeVertex, hasSiblings: boolean) => void,
     level: number = 0,

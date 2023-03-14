@@ -34,3 +34,4 @@ tests/web/*.js
 **/*.map
 
 tests/**/*.js
+js/*.js

@@ -2,30 +2,43 @@
 import * as fs from 'fs'
 import path from 'path'
 // required to populate generators/visualizations
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { generators, visualizations } from '../model/graphcanvas.js'
-import { configSupport } from '../js/configsupport.js'
+import { configSupport, type ConfigType } from '../js/configsupport.js'
 import { doLex, doParse, doVisualize } from '../js/diagrammer.js'
 import { _getWebVisualizers } from '../js/webvisualize.js'
+import { type LexConfigType } from '../js/lex.js'
+import { type VisualizeConfigType } from '../js/visualizeConfigType.js'
 
-// TODO: Convert to TypeScript
+interface TestRunnerConfig extends ConfigType {
+  tests: boolean
+  text: boolean
+  format: string
+  visualizer: string
+  visualizedGraph: string
+  parsedCode: string
+  written: number
+  webPort: number
+  code: string
 
-function visualizersToGenerators () {
-  const visualiserToGenerator = new Map()
-  visualizations.forEach((visualizers, generator) => {
-    visualizers.forEach((visualizer, index) => {
+}
+function visualizersToGenerators() {
+  const visualiserToGenerator = new Map<string, string>()
+  visualizations.forEach((visualizers, generator: string) => {
+    visualizers.forEach((visualizer: string, index) => {
       visualiserToGenerator.set(visualizer, generator)
       visualiserToGenerator.set(`${generator}:${visualizer}`, generator)
     })
   })
 
   const g = Array.from(generators.keys()).map(k => [k, k])
+  // @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
   return new Map([...visualiserToGenerator, ...g])
 }
 
-export function getEmptyConfig () {
-  return configSupport('t.js', {
+export function getEmptyConfig() {
+  return configSupport<TestRunnerConfig>('t.js', {
     tests: false,
     text: false,
     format: 'png',
@@ -38,7 +51,7 @@ export function getEmptyConfig () {
 }
 
 // TODO: refactor away
-function _isHackyWebVisualizer (config, overrideVisualizer) {
+function _isHackyWebVisualizer(config: TestRunnerConfig, overrideVisualizer?: string) {
   // TODO: test runner support pending
   if (config.tests) {
     return false
@@ -47,12 +60,12 @@ function _isHackyWebVisualizer (config, overrideVisualizer) {
   return _getWebVisualizers().includes(searchVisualizer)
 }
 
-function _exitError (useConfig, msg) {
+function _exitError(useConfig, msg) {
   useConfig.printError(msg)
   process.exit(10)
 }
 
-function _resolveGenerator (useConfig) {
+function _resolveGenerator(useConfig: TestRunnerConfig) {
   const generator = visualizersToGenerators().get(useConfig.visualizer)
   if (!generator) {
     throw Error(`Cannot map visualizer (${useConfig.visualizer}) to a generator`)
@@ -60,7 +73,7 @@ function _resolveGenerator (useConfig) {
   return generator
 }
 
-export async function lexParseAndVisualize (useConfig, visualizationisComplete) {
+export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualizationisComplete) {
   if (useConfig.isPipeMarker(useConfig.input) && !useConfig.beingPiped()) {
     _exitError(useConfig, 'Supposed to receive graph via pipe, but not being piped!')
   } else if (!useConfig.isPipeMarker(useConfig.input) && !fs.existsSync(useConfig.input)) {
@@ -76,7 +89,7 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
   // use lexer (separate lexer test process) only during test runs
   if (useConfig.tests) {
     useConfig.tp('Prepare lexical tester')
-    doLex(useConfig, useConfig.code, (token, codePart) => {
+    doLex(useConfig as LexConfigType, useConfig.code, (token, codePart: string) => {
       if (useConfig.trace) { useConfig.tp(`LEX: ${token} ${codePart}`) }
     })
   }
@@ -84,13 +97,13 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
   useConfig.tp('Start parsing process')
 
   // TODO: temp, remove when web viz..finished
-  if (_isHackyWebVisualizer(useConfig.visualizer)) {
+  if (_isHackyWebVisualizer(useConfig, useConfig.visualizer)) {
     throw new Error('TODO: No support running web visualizers yet')
   }
 
   let errors = 0
   doParse(
-    useConfig,
+    useConfig as LexConfigType,
     useConfig.code,
     _resolveGenerator(useConfig),
     (result) => {
@@ -109,14 +122,14 @@ export async function lexParseAndVisualize (useConfig, visualizationisComplete) 
     return
   }
 
-  await doVisualize(useConfig, useConfig.parsedCode, useConfig.visualizer, (exitCode) => {
+  await doVisualize(useConfig as VisualizeConfigType, useConfig.parsedCode, useConfig.visualizer, (exitCode) => {
     visualizationisComplete(exitCode)
   })
 }
 
-async function _main (argv) {
+async function _main(argv) {
   const config = getEmptyConfig()
-  function _usage () {
+  function _usage() {
     const visualizers = Array.from(visualizersToGenerators().keys())
     config.printError(`USAGE: [silent] [dont_run_visualizer] [tests] [verbose] [text] [svg] [output file] [INPUT] [${visualizers.join(', ')}]`)
     config.printError('Each visualizer will get converted to proper generator')
@@ -143,10 +156,6 @@ async function _main (argv) {
         return
       case 'webport':
         _collectPort = true
-        return
-      // TODO:
-      case 'skipparsermake':
-        config.skipparsermake = true
         return
       case 'tests':
         config.tests = true
@@ -188,5 +197,6 @@ async function _main (argv) {
 if (`${process.argv[1]}`.endsWith('t.js')) {
   // this script sits in js, so going one path level up is expected
   process.chdir(path.join(path.dirname(process.argv[1]), '..'))
+  // @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
   await _main(process.argv.splice(1))
 }

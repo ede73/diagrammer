@@ -1,19 +1,26 @@
 #!/usr/bin/env node
 import * as fs from 'fs'
 import { lexParseAndVisualize, getEmptyConfig } from './t.js'
-// required for coloring diff output
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import color from 'colors'
-import { diffChars, diffJson, diffLines } from 'diff'
+import { type LinesOptions, diffChars, diffJson, diffLines } from 'diff'
 import * as path from 'path'
 import pixelmatch from 'pixelmatch'
 import PNGx from 'pngjs'
-import { configSupport } from '../js/configsupport.js'
+import { configSupport, type ConfigType } from '../js/configsupport.js'
 const PNG = PNGx.PNG
 
-// TODO: Convert to TypeScript
+interface TestSuiteConfig extends ConfigType {
+  testInputPath: string
+  currentTestRun: string
+  previousStableRun: string
+  testPatterns: string[]
+  webPort: number
+  tests: boolean
+  visulizer: string
+}
 
-const config = configSupport('runtests.js', {
+const config = configSupport<TestSuiteConfig>('runtests.js', {
   testInputPath: 'tests/test_inputs',
   currentTestRun: 'tests/testrun/current',
   previousStableRun: 'tests/testrun/previous',
@@ -21,12 +28,13 @@ const config = configSupport('runtests.js', {
   webPort: 8001
 })
 
-function _usage () {
+function _usage() {
   config.printError('USAGE: [verbose] [trace] [visualizer:testNameRegexPattern')
   process.exit(0)
 }
 
 let _collectPort = false
+// @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
   if (_collectPort) {
     _collectPort = false
@@ -42,27 +50,27 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
   config.testPatterns.push(unknownCommandLineOption.trim())
 })
 
-function _countLineFeeds (str) {
+function _countLineFeeds(str) {
   return str.split(/\r\n|\r|\n/).length
 }
 
-function _areOneLiners (a, b) {
+function _areOneLiners(a, b) {
   return _countLineFeeds(a.trim()) <= 1 && _countLineFeeds(b.trim()) <= 1
 }
 
-function _isJSON (a) {
+function _isJSON(a) {
   try { JSON.parse(a) } catch (e) { return false }
   return true
 }
 
 // TODO: uh..right now some web visualiziers have a name generator:visualizer (since both use the same gen)
 // That doesn't sit well under windows WSL (:), convert that to _ in path names
-function sanitizePaths (path) {
+function sanitizePaths(path: string) {
   return path.replace(/:/g, '_')
 }
 
-const failedTests = []
-function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCodeFile, /** @type {string} */currentGeneratedCode) {
+const failedTests: string[] = []
+function currentAndLastRunProduceSameResults(previousRunCodeFile: string, currentGeneratedCode: string) {
   if (currentGeneratedCode.trim() === '') {
     config.printError('Code from currentrun is EMPTY!')
     return false
@@ -77,16 +85,16 @@ function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCo
 
   const codeFromPreviousRun = fs.readFileSync(previousRunCodePath, 'utf8')
   // if outputs are one liners, no point comparing lines :)
-  const opts = {
+  const opts: LinesOptions = {
     ignoreWhitespace: true
   }
   // fucking hell this indent woe
   const differences = (_isJSON(codeFromPreviousRun) && _isJSON(currentGeneratedCode))
     ? diffJson(JSON.parse(codeFromPreviousRun), JSON.parse(currentGeneratedCode), opts)
     : (_areOneLiners(codeFromPreviousRun, currentGeneratedCode)
-      // eslint-disable-next-line indent
+      // eslint-disable-next-line indent, @typescript-eslint/indent
       ? diffChars(codeFromPreviousRun, currentGeneratedCode, opts)
-      // eslint-disable-next-line indent
+      // eslint-disable-next-line indent, @typescript-eslint/indent
       : diffLines(codeFromPreviousRun, currentGeneratedCode, opts))
 
   let filesSame = true
@@ -111,7 +119,7 @@ function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCo
   return filesSame
 }
 
-function diffImages (referenceImage, outputImage) {
+function diffImages(referenceImage: string, outputImage) {
   if (!fs.existsSync(referenceImage)) {
     config.tp(`  Reference visualized graph file (${referenceImage}) does not exist, first run? Copy the current file over`)
     fs.renameSync(outputImage, referenceImage)
@@ -130,7 +138,7 @@ function diffImages (referenceImage, outputImage) {
   return true
 }
 
-async function runATest (useVisualizer, webOnlyVisualizer, testFileName) {
+async function runATest(useVisualizer: string, webOnlyVisualizer: boolean, testFileName: string) {
   const cfg = getEmptyConfig()
   cfg.verbose = config.verbose
   cfg.trace = config.trace
@@ -186,7 +194,7 @@ const testFiles = fs.readdirSync(testsPath).map(f => f.replace('.txt', ''))
 const testVisualizers = ['dot', 'mscgen', 'plantuml_sequence', 'actdiag', 'blockdiag', 'nwdiag', 'seqdiag']
 
 // Some diagrams cant be converted (might be generator limitation or just too expressive diagram)
-const exclusions = {
+const exclusions: Record<string, string[]> = {
   dot: ['dendrogram', 'dendrogram_spec']
 }
 
@@ -213,7 +221,7 @@ const webOnlyVisualizers = [
   'dendrogram:radialdendrogram', 'dendrogram:reingoldtilford', 'layerbands', 'parsetree', 'sankey', 'umlclass'
 ]
 
-const waitTests = []
+const waitTests: Array<Promise<void>> = []
 const v = []
 for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
   config.tp(`Tests for visualizer (${visualizer})`)
@@ -235,7 +243,7 @@ for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
       if (!matches) continue
     }
 
-    if (exclusions[visualizer] && exclusions[visualizer].includes(testFile)) {
+    if (exclusions[visualizer]?.includes(testFile)) {
       continue
     }
     if (onlyTheseTests[visualizer] && !onlyTheseTests[visualizer].includes(testFile)) {
@@ -259,6 +267,7 @@ for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
 }
 
 config.tp('Begin waiting all tests')
+// @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
 await Promise.all(waitTests)
 config.tp('Done waiting for all tests')
 if (failedTests.length > 0) {

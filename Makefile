@@ -29,6 +29,8 @@ WEB_TEST_TSS=$(shell find tests/web -maxdepth 1 -iname "*.ts")
 WEB_TEST_JSS:=$(WEB_TEST_TSS:.ts=.js)
 JS_TSS=$(shell find js -maxdepth 1 -iname "*.ts" -and -not -name "go.d.ts")
 JS_JSS:=$(JS_TSS:.ts=.js)
+SCRIPTS_TSS=$(shell find scripts -maxdepth 1 -iname "*.ts")
+SCRIPTS_JSS:=$(SCRIPTS_TSS:.ts=.js)
 
 TRANSPILER=tsc
 TRANSPILEOPTIONS=--module es6 --esModuleInterop --target es2017 --allowJs --removeComments --strict --checkJs --skipLibCheck
@@ -59,6 +61,9 @@ web/%.js : web/%.ts
 web: $(WEB_JSS) model parser index.html
 web/visualizations/%.js : web/visualizations/%.ts generators
 web_visualizations: $(WEB_VISUALIZATION_JSS)
+scripts/%.js : scripts/%.ts
+scripts: $(SCRIPTS_JSS)
+	chmod u+x $^
 js/%.js : js/%.ts
 js: $(JS_JSS)
 	chmod u+x js/lex.js js/visualize.js js/generate.js

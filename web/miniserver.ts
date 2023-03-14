@@ -6,6 +6,7 @@ import * as qs from 'querystring'
 import { doCliVisualize } from '../js/clivisualize.js'
 import { configSupport } from '../js/configsupport.js'
 import * as url from 'url'
+import { type VisualizeConfigType } from '../js/visualizeConfigType.js'
 
 const maybePort = process.argv[2]
 
@@ -52,6 +53,10 @@ const readPost = (
   })
 }
 
+interface MiniServerConfigType extends VisualizeConfigType {
+  parsedCode: string
+}
+
 const visualize = (
   req: http.IncomingMessage,
   res: http.ServerResponse) => {
@@ -62,7 +67,7 @@ const visualize = (
     return
   }
   readPost(req, (body) => {
-    const useConfig = configSupport('miniserver.js', {
+    const useConfig = configSupport<MiniServerConfigType>('miniserver.js', {
       format: 'png',
       visualizer: '',
       visualizedGraph: '-',
@@ -72,7 +77,7 @@ const visualize = (
       redirectingDiag: true
     })
 
-    useConfig.visualizer = qp.visualizer
+    useConfig.visualizer = qp.visualizer as string
     doCliVisualize(useConfig, body, qp.visualizer as string, (finished) => {
       res.writeHead(200, {
         'Content-Type': 'image/png',

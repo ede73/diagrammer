@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
-import { configSupport } from '../js/configsupport.js'
-import { doVisualize } from '../js/diagrammer.js'
+import { configSupport } from './configsupport.js'
+import { doVisualize } from './diagrammer.js'
 import { _getWebVisualizers } from './webvisualize.js'
 import * as fs from 'fs'
+import { type VisualizeConfigType } from './visualizeConfigType.js'
 
-// TODO: Convert to TypeScript
-
-const config = configSupport('visualize.js', {
+const config = configSupport<VisualizeConfigType>('visualize.js', {
   visualizer: '',
   code: '',
   visualizedGraph: '-',
@@ -16,7 +15,7 @@ const config = configSupport('visualize.js', {
   webPort: 8000
 })
 
-function _usage () {
+function _usage() {
   const visualizers = _getWebVisualizers()
   config.printError(`USAGE: [verbose] [INPUT] ${visualizers.join('|')}]`)
   process.exit(0)
@@ -24,6 +23,7 @@ function _usage () {
 
 let _collectOutput = false
 let _collectPort = false
+// @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
   if (_collectPort) {
     config.webPort = Number(unknownCommandLineOption)
@@ -67,6 +67,7 @@ if (config.beingPiped()) {
   // we're probably being piped!
   config.tp('Reading from pipe')
   config.input = config.pipeMarker
+  // @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
   config.code = await config.readFile(config.input)
 }
 if (!config.input) {
@@ -77,6 +78,7 @@ if (!config.code) {
   config.throwError('Failed reading code to parse')
 }
 
-doVisualize(config, config.code, config.visualizer, (exitCode) => {
+// @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
+await doVisualize(config, config.code, config.visualizer, (exitCode) => {
   console.error('done')
 })

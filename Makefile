@@ -27,6 +27,8 @@ PARSER_TEST_TSS=$(shell find tests/parser -maxdepth 1 -iname "*.ts")
 PARSER_TEST_JSS:=$(PARSER_TEST_FILES:.ts=.js)
 WEB_TEST_TSS=$(shell find tests/web -maxdepth 1 -iname "*.ts")
 WEB_TEST_JSS:=$(WEB_TEST_TSS:.ts=.js)
+JS_TSS=$(shell find js -maxdepth 1 -iname "*.ts" -and -not -name "go.d.ts")
+JS_JSS:=$(JS_TSS:.ts=.js)
 
 TRANSPILER=tsc
 TRANSPILEOPTIONS=--module es6 --esModuleInterop --target es2017 --allowJs --removeComments --strict --checkJs --skipLibCheck
@@ -48,7 +50,7 @@ _all: active_project_deps jest_test_deps parser
 
 DELETE_ON_ERROR: $(LOCK_FILE)
 
-active_project_deps: model generators web web_visualizations index.html
+active_project_deps: model generators web web_visualizations js index.html
 generators/%.js : generators/%.ts
 generators: $(GENERATOR_JSS) model
 model/%.js : model/%.ts
@@ -57,6 +59,9 @@ web/%.js : web/%.ts
 web: $(WEB_JSS) model parser index.html
 web/visualizations/%.js : web/visualizations/%.ts generators
 web_visualizations: $(WEB_VISUALIZATION_JSS)
+js/%.js : js/%.ts
+js: $(JS_JSS)
+	chmod u+x js/lex.js js/visualize.js js/generate.js
 index.html : index_template.html generators tests/test_inputs/*.txt web_visualizations
 	@awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs/*.txt | sort |sed 's,^tests/test_inputs/,,g'" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations/*.ts | sort" | getline var) {tsjs=var;gsub("[.]ts",".js",tsjs);printf("<script type=\"module\" src=\"%s\"></script>\n",tsjs);}next}/{REPLACE_WITH_GENERATORS}/{ while ("grep \"ADD TO INDEX.HTML AS:\" generators/*.ts|sort|cut -d: -f3-|sort" | getline var) printf("%s\n",var,var);next}{print $0}' $< >$@
 

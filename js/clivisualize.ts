@@ -1,13 +1,13 @@
 import * as fs from 'fs'
-import { spawn } from 'child_process'
+import { spawn, type ChildProcess } from 'child_process'
 // required to populate generators/visualizations
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { _getWebVisualizers } from './webvisualize.js'
+import { type ConfigType } from './configsupport.js'
+import { type VisualizeConfigType } from './visualizeConfigType.js'
 
-// TODO: Convert to TypeScript
-
-function _startVisualizer (useConfig, optionalOutputFS, args) {
+function _startVisualizer(useConfig: VisualizeConfigType, optionalOutputFS: number | undefined, args: string[]) {
   const cmd = args[0]
   const aa = args.splice(1)
 
@@ -21,12 +21,13 @@ function _startVisualizer (useConfig, optionalOutputFS, args) {
         'pipe'],
       shell: true
     })
-  proc.stderr.on('data', (stderr) => useConfig.printError(String(stderr)))
+  proc.stderr?.on('data', (stderr) => { useConfig.printError(String(stderr)) })
+  // @ts-expect-error Title exists
   proc.title = 'VISUALIZER'
   return proc
 }
 
-export function _isHackyWebVisualizer (config, overrideVisualizer) {
+export function _isHackyWebVisualizer(config: VisualizeConfigType, overrideVisualizer: string) {
   // TODO: test runner support pending
   if (config.tests) {
     return false
@@ -35,21 +36,23 @@ export function _isHackyWebVisualizer (config, overrideVisualizer) {
   return _getWebVisualizers().includes(searchVisualizer)
 }
 
-const _waitForProcesses = (useConfig, processes) => {
-  return new Promise((resolve, reject) => {
+const _waitForProcesses = async (useConfig: ConfigType, processes: ChildProcess[]) => {
+  return await new Promise((resolve, reject) => {
     let completed = 0
 
-    const onExit = (process) => () => {
-      useConfig.tp(`  (Process ${process.title} exited with ${process.exitCode})`)
+    const onExit = (process: ChildProcess) => () => {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      useConfig.tp(`  (Process ${process.title} exited with ${process.exitCode as number})`)
       completed++
       if (completed === processes.length) {
-        resolve()
+        resolve(0)
       }
     }
 
     processes.forEach((process) => {
       process.on('exit', onExit(process))
-      process.on('error', (r) => {
+      process.on('error', (r: Error) => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         useConfig.printError(`Something went wrong with ${process.title} - ${r}`)
         useConfig.dumpTraces()
         reject(r)
@@ -58,7 +61,7 @@ const _waitForProcesses = (useConfig, processes) => {
   })
 }
 
-function _getVisualizerCommand (useConfig) {
+function _getVisualizerCommand(useConfig: VisualizeConfigType) {
   const plantUmlJar = 'ext/plantuml.jar'
 
   switch (useConfig.visualizer) {
@@ -120,7 +123,7 @@ function _getVisualizerCommand (useConfig) {
   }
 }
 
-function _exitError (useConfig, msg) {
+function _exitError(useConfig: ConfigType, msg: string) {
   useConfig.printError(msg)
   process.exit(10)
 }
@@ -128,15 +131,15 @@ function _exitError (useConfig, msg) {
 /**
  * @returns  {boolean} true if this is cli visualizer
  */
-export function isCliVisualizer (useConfig) {
+export function isCliVisualizer(useConfig: VisualizeConfigType) {
   return _getVisualizerCommand(useConfig)
 }
 
-export async function doCliVisualize (
-  useConfig,
-  /** @type {string} */generatedGraphCode,
-  /** @type {string} */visualizer,
-  /** @type {(exitcode:number)=>void]} */finished) {
+export async function doCliVisualize(
+  useConfig: VisualizeConfigType,
+  generatedGraphCode: string,
+  visualizer: string,
+  finished: (exitcode: number) => void) {
   useConfig.tp('Going to run visualizer')
   const cmd = _getVisualizerCommand(useConfig)
   if (!cmd) {
@@ -161,8 +164,8 @@ export async function doCliVisualize (
   if (!outputFileStream) {
     if (useConfig?.returnImage) {
       useConfig.tp('Collect the image for miniserver')
-      visualizationProcess.stdout.setEncoding('latin1')
-      visualizationProcess.stdout.on('data', (stdout) => {
+      visualizationProcess.stdout?.setEncoding('latin1')
+      visualizationProcess.stdout?.on('data', (stdout) => {
         useConfig.outputImage += stdout
       })
       // visualizationProcess.stdout.on('end', (stdout) => {
@@ -178,25 +181,29 @@ export async function doCliVisualize (
       // })
     } else {
       useConfig.tp('pipe visualization output to this stdout')
-      visualizationProcess.stdout.pipe(process.stdout)
+      visualizationProcess.stdout?.pipe(process.stdout)
     }
   }
 
-  visualizationProcess.stdin.on('error', (error) => {
+  visualizationProcess.stdin?.on('error', (error) => {
+    // error could be anything really
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     useConfig.tp(`stdin error... ${error}`)
     useConfig.dumpTraces()
   })
-  visualizationProcess.stdin.setEncoding('utf-8')
-  visualizationProcess.stdin.write(generatedGraphCode)
+  visualizationProcess.stdin?.setEncoding('utf-8')
+  visualizationProcess.stdin?.write(generatedGraphCode)
   const _processes = [visualizationProcess]
-  visualizationProcess.stdin.end()
+  visualizationProcess.stdin?.end()
 
   await _waitForProcesses(useConfig, _processes).then((x) => {
     if (outputFileStream) {
       fs.closeSync(outputFileStream)
     }
-    finished(visualizationProcess.exitCode)
+    finished(visualizationProcess.exitCode as number)
   }, (rej) => {
-    _exitError(`Failure ${rej}`)
+    // rej could be anything really
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    _exitError(useConfig, `Failure ${rej}`)
   })
 }

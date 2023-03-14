@@ -3,22 +3,27 @@
 import * as fs from 'fs'
 import { generators } from '../model/graphcanvas.js'
 import { setVerbose } from '../model/debug.js'
-import { configSupport } from '../js/configsupport.js'
+import { configSupport, type ConfigType } from './configsupport.js'
 import { doParse } from './diagrammer.js'
 
-// TODO: Convert to TypeScript
+export interface GenerateConfigType extends ConfigType {
+  generator: string
+  code: string
+  parsedCode: string
+}
 
-const config = configSupport('generate.js', {
-  gemerator: '',
+const config: GenerateConfigType = configSupport<GenerateConfigType>('generate.js', {
+  generator: '',
   code: '',
   parsedCode: ''
 })
 
-function _usage () {
+function _usage() {
   config.printError('USAGE: [trace] [verbose] [INPUT] [GENERATOR]')
   process.exit(0)
 }
 
+// @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
   if (!config.input && fs.existsSync(unknownCommandLineOption)) {
     if (config.code) {
@@ -47,6 +52,7 @@ if (config.beingPiped()) {
   // we're probably being piped!
   config.tp('Reading from pipe')
   config.input = config.pipeMarker
+  // @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
   config.code = await config.readFile(config.pipeMarker)
 }
 if (!config.input) {
@@ -61,7 +67,7 @@ if (!config.generator) {
 }
 
 doParse(config, config.code, config.generator,
-  (resultLine) => {
+  (resultLine: string) => {
     config.tp(`Received result: (${resultLine.substring(0, 32)}... ...)`)
     config.parsedCode += `${resultLine}\n`
     // no difference, stdout gets lost
@@ -69,12 +75,12 @@ doParse(config, config.code, config.generator,
     // eslint-disable-next-line no-console
     console.log(resultLine) // ok
   },
-  (parseError, hash) => {
+  (parseError: string, hash: string) => {
     config.tp(`Parsing error ${parseError} ${hash}`)
     config.printError(`Parsing error found: ${parseError} ${hash}`)
     config.throwError(parseError)
   },
-  (msg) => {
+  (msg: string) => {
     if (!config.trace) {
       // dump to stderr, so output graph might still be usable
       config.printError('TRACE:' + msg)

@@ -1,48 +1,67 @@
 import * as tty from 'node:tty'
 import * as fs from 'fs'
 
-// TODO: Convert to TypeScript
+export interface ConfigType {
+  verbose: boolean
+  trace: boolean
+  traceProcess: boolean
+  input: string
+  traces: string
+  redirectingDiag: boolean
+  tp: (msg: string) => void
+  pipeMarker: string
+  isPipeMarker: (inputFile: string) => boolean
+  dumpTraces: () => void
+  printError: (msg: string) => void
+  beingPiped: () => boolean
+  throwError: (err: string) => void
+  readFile: (filePath: string) => Promise<string>
+  parseCommandLine: (args: string[], _usage: () => void, processUnknownCommand: (arg: string) => Promise<void>) => Promise<void>
+}
 
 // augment config object literal with some commonly shared utility functions
-export const configSupport = (scriptName, cfg) => {
+export const configSupport = <SubConfigType extends ConfigType>(scriptName: string, icfg: Partial<SubConfigType>): SubConfigType => {
+  const cfg: SubConfigType = icfg as SubConfigType
   cfg.verbose = false
   cfg.trace = false
   cfg.traceProcess = false
   cfg.input = ''
   cfg.traces = ''
   cfg.redirectingDiag = true // I've a patched version
-  cfg.tp = function (msg) {
-    this.traces += `${this.input}:${this.visualizer}:${process.hrtime.bigint()} ${scriptName} ${msg}\n`
+  cfg.tp = function (msg: string) {
+    const c = this as SubConfigType
+    // TODO: probably missing visualizer (e.g./generate.js)
+    c.traces += `${c.input}:${c.visualizer}:${process.hrtime.bigint()} ${scriptName} ${msg}\n`
     if (this.traceProcess) {
       this.printError(`trace:${msg}`)
     }
   }
   cfg.pipeMarker = '-'
-  cfg.isPipeMarker = function (inputFile) {
+  cfg.isPipeMarker = function (inputFile: string) {
     return inputFile === cfg.pipeMarker
   }
   cfg.dumpTraces = function () {
     this.printError(this.traces)
   }
-  cfg.printError = function (msg) {
+  cfg.printError = function (msg: string) {
     console.error(`${msg}`)
   }
   cfg.beingPiped = function () {
     return !(process.stdin instanceof tty.ReadStream)
   }
-  cfg.throwError = function (msg) {
+  cfg.throwError = function (msg: string) {
     this.tp(msg)
     this.dumpTraces()
     throw new Error(msg)
   }
-  cfg.readFile = async function (filePath) {
+  cfg.readFile = async function (filePath: string): Promise<string> {
     if (filePath === '-') {
       this.tp('Reading from stdin..')
       if (!cfg.beingPiped()) {
         this.throwError('Failure imminent, reading piped input and not being piped')
       }
-      return await (() => {
-        return new Promise(function (resolve, reject) {
+      return await (async () => {
+        return await new Promise(function (resolve, reject) {
           const stdin = process.stdin
           let data = ''
           stdin.setEncoding('utf8')
@@ -50,7 +69,8 @@ export const configSupport = (scriptName, cfg) => {
           stdin.on('end', function () { resolve(data) })
           stdin.on('error', reject)
         })
-      })().catch(rejected => {
+      })().catch((rejected: any) => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         this.tp(`Failure ${rejected}`)
         this.dumpTraces()
       })
@@ -58,7 +78,7 @@ export const configSupport = (scriptName, cfg) => {
       return fs.readFileSync(filePath, 'utf8')
     }
   }
-  cfg.parseCommandLine = async function (args, _usage, unknownCommandLineOption) {
+  cfg.parseCommandLine = async function (args: string[], _usage: () => void, processUnknownCommand: (arg: string) => Promise<void>) {
     for (const m of args) {
       cfg.tp(`Parsing (${m})`)
       switch (m.toLocaleLowerCase().trim()) {
@@ -91,7 +111,7 @@ export const configSupport = (scriptName, cfg) => {
         continue
       }
       cfg.tp(`pass unknown CLI option (${m}) to child`)
-      await unknownCommandLineOption(m.trim())
+      await processUnknownCommand(m.trim())
     }
   }
   return cfg

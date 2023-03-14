@@ -1,18 +1,18 @@
 import * as fs from 'fs'
 // required to populate generators/visualizations
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 import { diagrammerParser } from '../build/diagrammer_parser.js'
-import puppeteer from 'puppeteer'
+import * as puppeteer from 'puppeteer'
+import { type Page } from 'puppeteer'
 import { singleElementScreenSnapshot } from '../tests/web/snapshot_single_element.js'
 import {
   clearGeneratorResults, clearParsingErrors, getParsingError,
   selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn
 } from '../tests/web/diagrammer_support.js'
-
-// TODO: Convert to TypeScript
+import { type VisualizeConfigType } from './visualizeConfigType.js'
 
 // just a test code
-async function _sshot (page) {
+async function _sshot(page: Page) {
   const options = {
     path: 'sshot.png',
     fullPage: false,
@@ -27,7 +27,7 @@ async function _sshot (page) {
 }
 
 // TODO: oddity for momentarily, expecting diagrammer, not parser language..will change
-async function _webRender (useConfig, visualizer, diagrammerCode, outputShot) {
+async function _webRender(useConfig: VisualizeConfigType, visualizer: string, diagrammerCode: string, outputShot: string) {
   useConfig.tp(`Web render using ${visualizer} saving output to ${outputShot}`)
   const browser = await puppeteer.launch()
   const page = await browser.newPage()
@@ -57,7 +57,7 @@ async function _webRender (useConfig, visualizer, diagrammerCode, outputShot) {
     useConfig.throwError(`Could not find element ${selector}`)
   }
   // BBox, getBoundingClientRect
-  const bbox = await elementHandle.boundingBox()
+  const bbox = await elementHandle?.boundingBox()
   const svg = await page.evaluate((selector) => document.querySelector(selector).outerHTML, selector)
   if (!svg) {
     useConfig.throwError('Could not get SVG code')
@@ -76,18 +76,18 @@ async function _webRender (useConfig, visualizer, diagrammerCode, outputShot) {
 }
 
 // TODO: read dynamically
-export function _getWebVisualizers () {
+export function _getWebVisualizers() {
   return ['dendrogram:circlepacked', 'dendrogram:radialdendrogram', 'dendrogram:reingoldtilford',
     'digraph:circo', 'digraph:dot', 'digraph:fdp', 'digraph:neato', 'digraph:osage',
     'digraph:sfdp', 'digraph:twopi', 'layerbands', 'parsetree', 'sankey', 'umlclass']
 }
 
 // TODO: oddity for momentarily, expecting diagrammer, not parser language..will change
-export async function doWebVisualize (
-  useConfig,
-  /** @type {string} */generatedGraphCode,
-  /** @type {string} */visualizer,
-  /** @type {(exitcode:number)=>void]} */finished) {
+export async function doWebVisualize(
+  useConfig: VisualizeConfigType,
+  generatedGraphCode: string,
+  visualizer: string,
+  finished: (exitcode: number) => void) {
   await _webRender(useConfig, useConfig.visualizer, generatedGraphCode, useConfig.visualizedGraph)
   finished(0)
 }

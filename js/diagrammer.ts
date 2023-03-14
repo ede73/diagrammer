@@ -5,49 +5,53 @@ import { GraphCanvas } from '../model/graphcanvas.js'
 import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { doWebVisualize } from './webvisualize.js'
 import { doCliVisualize, isCliVisualizer } from './clivisualize.js'
+import { type VisualizeConfigType } from './visualizeConfigType.js'
+import { type LexConfigType } from './lex.js'
+import { type GenerateConfigType } from './generate.js'
+import { getParserYY } from '../build/types/diagrammer_parser_types.js'
 
-// TODO: Convert to TypeScript
-
-export function doParse (
-  config,
-  /** @type {string} */diagrammerCode,
-  /** @type {string} */generator,
-  /** @type {[(resultLine:string)=>void]} */resultCallback,
-  /** @type {[(parseError:string, hash:string)=>void]} */parseErrorCallback,
-  /** @type {[(msg:string)=>void]} */traceCallback) {
+export function doParse(
+  config: GenerateConfigType,
+  diagrammerCode: string,
+  generator: string,
+  resultCallback?: (resultLine: string) => void,
+  parseErrorCallback?: (parseError: string, hash: string) => void,
+  traceCallback?: (msg: string) => void) {
   if (!diagrammerCode.trim()) {
-    config.tp.throwError('No code to parser')
+    config.throwError('No code to parser')
   }
-  diagrammerParser.yy.USE_GENERATOR = generator
-  diagrammerParser.yy.trace = traceCallback || ((msg) => { })
+  const parserYY = getParserYY()
+  parserYY.USE_GENERATOR = generator
+  parserYY.trace = traceCallback || ((msg: string) => { })
 
   // default callback unless overridden
-  diagrammerParser.yy.result = resultCallback || ((result) => {
+  parserYY.result = resultCallback || ((result: string) => {
     config.parsedCode += `${result}\n`
     // eslint-disable-next-line no-console
     console.log(result) // ok
   })
 
   // TODO: MOVING TO GraphCanvas
-  diagrammerParser.yy.parseError = parseErrorCallback || ((str, hash) => {
+  parserYY.parseError = parseErrorCallback || ((str: string, hash: string) => {
     config.tp(`Parse error: ${str}`)
     config.throwError(str)
   })
-  diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
+  parserYY.GRAPHCANVAS = new GraphCanvas()
   try {
+    // @ts-expect-error parse is there, just not typed
     diagrammerParser.parse(diagrammerCode)
   } catch (ex) {
     // wow, something went down
-    diagrammerParser.yy.parseError(String(ex), 'Caught Exception')
+    parserYY.parseError(String(ex), 'Caught Exception')
   }
 }
 
-export function doLex (
-  config,
-  /** @type {string} */diagrammerCode,
-  /** @type {(token:string,codePart:any)=>void} */resultsCallback) {
+export function doLex(
+  config: LexConfigType,
+  diagrammerCode: string,
+  resultsCallback: (token: string, codePart: any) => void) {
   if (!diagrammerCode.trim()) {
-    config.tp.throwError('No code to lexer')
+    config.throwError('No code to lexer')
   }
   config.tp('Begin lex testing')
   const st = lexer.diagrammerLexer
@@ -57,6 +61,8 @@ export function doLex (
     try {
       h = st.lex()
     } catch (ex) {
+      // ex could be anything really
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       config.tp(`${ex}`)
       throw ex
     }
@@ -66,11 +72,11 @@ export function doLex (
   }
 }
 
-export async function doVisualize (
-  useConfig,
-  /** @type {string} */generatedGraphCode,
-  /** @type {string} */visualizer,
-  /** @type {(exitcode:number)=>void]} */finished) {
+export async function doVisualize(
+  useConfig: VisualizeConfigType,
+  generatedGraphCode: string,
+  visualizer: string,
+  finished: (exitcode: number) => void) {
   if (generatedGraphCode === '') {
     useConfig.throwError('no parsed code')
   }

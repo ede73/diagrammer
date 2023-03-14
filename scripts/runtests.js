@@ -80,12 +80,14 @@ function currentAndLastRunProduceSameResults (/** @type {string} */previousRunCo
   const opts = {
     ignoreWhitespace: true
   }
+  // fucking hell this indent woe
   const differences = (_isJSON(codeFromPreviousRun) && _isJSON(currentGeneratedCode))
     ? diffJson(JSON.parse(codeFromPreviousRun), JSON.parse(currentGeneratedCode), opts)
-    : (
-      _areOneLiners(codeFromPreviousRun, currentGeneratedCode)
-        ? diffChars(codeFromPreviousRun, currentGeneratedCode, opts)
-        : diffLines(codeFromPreviousRun, currentGeneratedCode, opts))
+    : (_areOneLiners(codeFromPreviousRun, currentGeneratedCode)
+      // eslint-disable-next-line indent
+      ? diffChars(codeFromPreviousRun, currentGeneratedCode, opts)
+      // eslint-disable-next-line indent
+      : diffLines(codeFromPreviousRun, currentGeneratedCode, opts))
 
   let filesSame = true
 

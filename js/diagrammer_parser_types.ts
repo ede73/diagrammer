@@ -1,8 +1,6 @@
 import { diagrammerParser } from '../diagrammer_parser.js'
 import { type GraphCanvas } from '../../model/graphcanvas.js'
 
-// TODO: Convert to TypeScript
-
 // This 'type export' file will be placed in build/types directory along with module package.json
 // And make will tsc this
 export interface DiagrammerParserYY {
@@ -13,6 +11,7 @@ export interface DiagrammerParserYY {
   parseError: (str: string, hash: string) => void
   parsedGeneratorAndVisualizer: (generator: string, visualizer: string, preferParsed: boolean) => void
   result: (codeLine: string) => void
+  trace: (msg: string) => void
 }
 
 export function getParserYY(): DiagrammerParserYY {

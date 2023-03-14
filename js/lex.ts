@@ -1,22 +1,25 @@
 #!/usr/bin/env node
 
 import * as fs from 'fs'
-import { configSupport } from '../js/configsupport.js'
-import { doLex } from '../js/diagrammer.js'
+import { configSupport, type ConfigType } from './configsupport.js'
+import { doLex } from './diagrammer.js'
 
-// TODO: Convert to TypeScript
+export interface LexConfigType extends ConfigType {
+  lex: boolean
+  code: string
+}
 
-const config = configSupport('lex.js', {
+const config = configSupport<LexConfigType>('lex.js', {
   lex: true,
   code: ''
 })
 
-function _usage () {
+function _usage() {
   config.printError('USAGE: [trace] [verbose] [INPUT]')
   process.exit(0)
 }
 
-// 2 or 1?
+// @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
   switch (unknownCommandLineOption.toLocaleLowerCase()) {
     case 'lex':
@@ -41,6 +44,7 @@ if (config.beingPiped()) {
   // we're probably being piped!
   config.tp('Reading from pipe')
   config.input = config.pipeMarker
+  // @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
   config.code = await config.readFile(config.pipeMarker)
 }
 if (!config.input) {
@@ -53,5 +57,5 @@ if (!config.code) {
 
 doLex(config, config.code, (token, codeSnippet) => {
   // pass to stderr, so we can still use the stdout for actual graph (well depending)
-  config.printError('State:' + token + '(' + codeSnippet.yytext + ')')
+  config.printError(`State: ${token} (${codeSnippet.yytext as string})`)
 })

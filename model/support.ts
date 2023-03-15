@@ -31,18 +31,6 @@ declare global {
 }
 
 /**
- * Create a string formatter.
- * Format string according to format rules with positional arguments like xxx={0} zzz={1}
- */
-// String.prototype.format = function () {
-//   let formatted = this
-//   for (const arg in arguments) {
-//     formatted = formatted.replace(`{${arg}}`, arguments[arg])
-//   }
-//   return formatted
-// }
-
-/**
  * Format a string with provided array of values
  * For example. "{2}{0}{1}".formatArray([2,3,1]) prints 123
  */

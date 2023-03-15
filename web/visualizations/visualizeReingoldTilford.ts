@@ -18,7 +18,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
   removeOldVisualizations()
   // TODO: pull the zoom out
   const svgimg = makeSVG()
-  const svgelement = svgimg.node().parentNode as SVGSVGElement
+  const svgelement = svgimg.node()?.parentNode as SVGSVGElement
   const width = Number(svgelement.width.baseVal.valueAsString)
   const height = Number(svgelement.height.baseVal.valueAsString)// svgimg.node()?.parentNode.attr('height')
   svgimg.attr('transform', `translate(${width / 2},${height / 2})`)

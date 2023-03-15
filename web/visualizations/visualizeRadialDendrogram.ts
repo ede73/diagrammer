@@ -2,6 +2,7 @@
 import * as d3 from 'd3'
 import { makeSVG, removeOldVisualizations } from '../d3support.js'
 import { visualizations } from '../globals.js'
+import { type DendrogramDocument } from '../../generators/dendrogram.js'
 
 visualizations.set('radialdendrogram', visualizeRadialDendrogram)
 
@@ -11,7 +12,7 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
 
   removeOldVisualizations()
   const svgimg = makeSVG()
-  const svgelement = svgimg.node().parentNode as SVGSVGElement
+  const svgelement = svgimg.node()?.parentNode as SVGSVGElement
   const width = Number(svgelement.width.baseVal.valueAsString)
   const height = Number(svgelement.height.baseVal.valueAsString)
   // start from the middle

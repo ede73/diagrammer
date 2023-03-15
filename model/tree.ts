@@ -12,10 +12,8 @@ export class TreeVertex {
   CHILDREN: TreeVertex[] = []
   // Store edges, so we can get the edge properties between this tree root and its children
   EDGES: GraphEdge[] = []
-  data: GraphObject
-  constructor(data: GraphObject) {
-    this.data = data
-  }
+
+  constructor(public data: GraphObject) { }
 
   toString() {
     return `tree(${this.data.getName()}, children=[${this.CHILDREN.map(c => c.data.getName()).join(', ')}])`
@@ -83,14 +81,14 @@ export function traverseTree(root: TreeVertex,
       debug(`Alas node ${root.data.getName()} already visited`)
       return
     }
-    debug(`add visited (${root.data.getName()}/${root.data.constructor.name})`)
+    debug(`add visited (${root.data.getName()} / ${root.data.constructor.name})`)
     visited.add(root)
     if (level === 0) {
-      debug(`VISITNODE(root has no siblings) ${root.data.getName()}/${root.data.constructor.name}}`)
+      debug(`VISITNODE(root has no siblings) ${root.data.getName()} / ${root.data.constructor.name}}`)
       visitNode(root, root.CHILDREN.length === 0, false, false)
     }
     if (root.CHILDREN.length > 0) {
-      debug(`BEGINLISTINGCHILDREN ${root.data.getName()}/${root.data.constructor.name}`, true)
+      debug(`BEGINLISTINGCHILDREN ${root.data.getName()} / ${root.data.constructor.name}`, true)
       beginListingChildren(root)
     }
 
@@ -166,9 +164,9 @@ export function makeConnectedTree(canvas: GraphCanvas, allowReferences: boolean 
 
   // make a new or find a TreeVertex that contains node
   function makeSubTree(node: GraphConnectable): TreeVertex {
-    const found = trees.find((p) => p.data === node)
-    if (found) {
-      return found
+    const nodeFound = trees.find((p) => p.data === node)
+    if (nodeFound) {
+      return nodeFound
     }
     const newVertex = new TreeVertex(node)
     trees.push((newVertex))
@@ -185,9 +183,9 @@ export function makeConnectedTree(canvas: GraphCanvas, allowReferences: boolean 
       }
         break
       case GraphEdgeDirectionType.RIGHT: {
-        const r = makeSubTree(edge.left)
-        r.CHILDREN.push(makeSubTree(edge.right))
-        r.EDGES.push(edge)
+        const l = makeSubTree(edge.left)
+        l.CHILDREN.push(makeSubTree(edge.right))
+        l.EDGES.push(edge)
       }
         break
       case GraphEdgeDirectionType.BIDIRECTIONAL: {

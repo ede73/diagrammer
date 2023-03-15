@@ -31,6 +31,11 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
   const nodes = treeData.descendants()
   const links = treeData.links()
 
+  const getRadial = (d): number => {
+    // from 100 to 800 it goes
+    return d.y
+  }
+
   // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path
   svgimg.selectAll('.link')
     .data(links)
@@ -50,7 +55,7 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
     // @ts-expect-error odd issue with studio
     .attr('d', d3.linkRadial()
       .angle(d => d.x)
-      .radius(d => d.y))
+      .radius(d => getRadial(d)))
 
   // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g
   const node = svgimg.selectAll('g.node')
@@ -60,7 +65,7 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
     .attr('class', 'node')
     .attr('transform', (d) => {
       // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
-      return `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y})`
+      return `rotate(${d.x * 180 / Math.PI - 90}) translate(${getRadial(d)})`
     })
 
   // https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle

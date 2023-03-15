@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import { makeSVG, removeOldVisualizations } from '../d3support.js'
 import { visualizations } from '../globals.js'
 import { type DendrogramDocument } from '../../generators/dendrogram.js'
-import { Link, L } from 'd3-shape'
+import { type HierarchyPointNode, type HierarchyPointLink } from 'd3'
 
 visualizations.set('reingoldtilford', visualizeReingoldTilford)
 
@@ -25,7 +25,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
   const radius = Math.min(width, height) // / 2
 
   // TODO: Add autoresize
-  const tree = d3.tree()
+  const tree = d3.tree<DendrogramDocument>()
     .size([2 * Math.PI, radius])
     .separation((a, b) => {
       return (a.parent === b.parent ? 1 : 2) / a.depth
@@ -37,7 +37,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
   const links = treeData.links()
   const nodes = treeData.descendants()
 
-  const getRadial = (d) => {
+  const getRadial = (d: HierarchyPointNode<DendrogramDocument>): number => {
     // from 100 to 800 it goes
     return d.y
   }
@@ -58,8 +58,7 @@ export async function visualizeReingoldTilford(generatorResult: string) {
     })
     // https://github.com/d3/d3-shape#curves
     // https://observablehq.com/@d3/d3-lineradial
-    // @ts-expect-error odd issue with studio
-    .attr('d', d3.linkRadial()
+    .attr('d', d3.linkRadial<HierarchyPointLink<DendrogramDocument>, HierarchyPointNode<DendrogramDocument>>()
       .angle((d, i) => d.x)
       .radius((d, i) => getRadial(d))
     )
@@ -111,17 +110,17 @@ export async function visualizeReingoldTilford(generatorResult: string) {
     })
     .attr('href', (d) => {
       const label = d.data.nodelabel
-      if (label && label.includes('::')) {
-        const [_head, url] = label.split('::')
+      if (label?.includes('::')) {
+        const [, url] = label.split('::')
         return url
       }
+      return ''
     })
     .attr('target', '_blank')
     .text((d) => {
-      // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
       const label = d.data.nodelabel
-      if (label && label.includes('::')) {
-        const [head, _url] = label.split('::')
+      if (label?.includes('::')) {
+        const [head] = label.split('::')
         return head
       }
       if (label) {

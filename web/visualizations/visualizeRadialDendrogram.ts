@@ -3,6 +3,7 @@ import * as d3 from 'd3'
 import { makeSVG, removeOldVisualizations } from '../d3support.js'
 import { visualizations } from '../globals.js'
 import { type DendrogramDocument } from '../../generators/dendrogram.js'
+import { type HierarchyPointNode, type HierarchyPointLink } from 'd3'
 
 visualizations.set('radialdendrogram', visualizeRadialDendrogram)
 
@@ -25,13 +26,13 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
     .separation((a, b) => {
       return (a.parent === b.parent ? 1 : 2) / a.depth
     })
-  const data = d3.hierarchy(jsonData)
+  const data = d3.hierarchy<DendrogramDocument>(jsonData)
   const treeData = tree(data)
 
-  const nodes = treeData.descendants()
-  const links = treeData.links()
+  const nodes: Array<HierarchyPointNode<DendrogramDocument>> = treeData.descendants() as Array<HierarchyPointNode<DendrogramDocument>>
+  const links: Array<HierarchyPointLink<DendrogramDocument>> = treeData.links() as Array<HierarchyPointLink<DendrogramDocument>>
 
-  const getRadial = (d): number => {
+  const getRadial = (d: HierarchyPointNode<DendrogramDocument>): number => {
     // from 100 to 800 it goes
     return d.y
   }
@@ -52,8 +53,7 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
     })
     // https://github.com/d3/d3-shape#curves
     // https://observablehq.com/@d3/d3-lineradial
-    // @ts-expect-error odd issue with studio
-    .attr('d', d3.linkRadial()
+    .attr('d', d3.linkRadial<HierarchyPointLink<DendrogramDocument>, HierarchyPointNode<DendrogramDocument>>()
       .angle(d => d.x)
       .radius(d => getRadial(d)))
 
@@ -93,17 +93,17 @@ export async function visualizeRadialDendrogram(generatorResult: string) {
     })
     .attr('href', (d) => {
       const label = d.data.nodelabel
-      if (label && label.includes('::')) {
-        const [_head, url] = label.split('::')
+      if (label?.includes('::')) {
+        const [, url] = label.split('::')
         return url
       }
+      return ''
     })
     .attr('target', '_blank')
     .text((d) => {
-      // @ts-expect-error TODO: just import conflict node vs. browser vs. VSCode, will resolve eventually
       const label = d.data.nodelabel
-      if (label && label.includes('::')) {
-        const [head, _url] = label.split('::')
+      if (label?.includes('::')) {
+        const [head] = label.split('::')
         return head
       }
       if (label) {

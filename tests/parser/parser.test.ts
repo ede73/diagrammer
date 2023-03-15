@@ -1,7 +1,7 @@
 // @ts-check
 
 import { diagrammerParser } from '../../build/diagrammer_parser.js'
-import { getParserYY } from '../../build/types/diagrammer_parser_types'
+import { getParserYY } from '../../build/types/diagrammer_parser_types.js'
 import { generators, GraphCanvas } from '../../model/graphcanvas.js'
 import { GraphContainer } from '../../model/graphcontainer.js'
 import { GraphGroup } from '../../model/graphgroup.js'
@@ -13,18 +13,19 @@ import { describe, expect, it } from '@jest/globals'
 import { type ParsingContext } from '../../model/parsingcontext.js'
 
 // curried, canvas passed on call site
-const canvasHas = (prop: string, value: any) => {
+const defaultsHas = (prop: keyof GraphCanvas['defaults'], value: any) => {
   // Moved away from setting 'defaults' directly as dynamic properties of canvas, they're now in 'defaults' type
   return (canvas: GraphCanvas) => {
-    if (prop in canvas.defaults) {
-      const value2 = canvas.defaults[prop as keyof GraphCanvas['defaults']]
-      expect(value2).toStrictEqual(value)
-    } else if (prop as keyof GraphCanvas) {
-      const value1 = canvas[prop as keyof GraphCanvas]
-      expect(value1).toStrictEqual(value)
-    } else {
-      throw new Error(`Expected property "${prop}" does not exist in GraphCanvas nor its "defaults". Moved? Renamed?`)
-    }
+    const value2 = canvas.defaults[prop]
+    expect(value2).toStrictEqual(value)
+  }
+}
+
+const canvasHas = (prop: keyof GraphCanvas, value: any) => {
+  // Moved away from setting 'defaults' directly as dynamic properties of canvas, they're now in 'defaults' type
+  return (canvas: GraphCanvas) => {
+    const value1 = canvas[prop]
+    expect(value1).toStrictEqual(value)
   }
 }
 
@@ -126,17 +127,17 @@ const grammarTests = [
   { g: 'start a', f: [canvasHas('start', 'a')] },
   { g: 'shape cloud', f: [canvasHas('shape', 'cloud')] },
   { g: 'equal a,b,c', f: [canvasContainsAutoProps(['a', 'b', 'c'])] },
-  { g: 'edge color #0000ff', f: [canvasHas('edgecolor', '#0000ff')] },
-  { g: 'group color #0000ff', f: [canvasHas('groupcolor', '#0000ff')] },
-  { g: 'vertex color #0000ff', f: [canvasHas('vertexcolor', '#0000ff')] },
-  { g: 'vertex text color #0000ff', f: [canvasHas('vertextextcolor', '#0000ff')] },
-  { g: 'edge text color #0000ff', f: [canvasHas('edgetextcolor', '#0000ff')] },
+  { g: 'edge color #0000ff', f: [defaultsHas('edgecolor', '#0000ff')] },
+  { g: 'group color #0000ff', f: [defaultsHas('groupcolor', '#0000ff')] },
+  { g: 'vertex color #0000ff', f: [defaultsHas('vertexcolor', '#0000ff')] },
+  { g: 'vertex text color #0000ff', f: [defaultsHas('vertextextcolor', '#0000ff')] },
+  { g: 'edge text color #0000ff', f: [defaultsHas('edgetextcolor', '#0000ff')] },
   { g: '$(c:#badede)', f: [parsingContextHas('VARIABLES', { c: '#badede' })] },
   {
     g: '$(c:#badede)\nedge color $(c)',
     f: [
       parsingContextHas('VARIABLES', { c: '#badede' }),
-      canvasHas('edgecolor', '#badede')]
+      defaultsHas('edgecolor', '#badede')]
   },
   { g: 'node', f: [canvasContainsAutoProps(['node'])] },
   {

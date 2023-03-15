@@ -43,8 +43,8 @@ export class GraphConnectable extends GraphObject {
     return tmp
   }
 
-  _assertRegonizedShape(shape: string) {
-    if (!ShapeKeys.includes(shape.toLocaleLowerCase())) {
+  protected _assertRegonizedShape(shape: string) {
+    if (!ShapeKeys.includes(shape)) {
       throw new Error(`Trying to set unrecognized shape ${shape}`)
     }
   }

@@ -32,8 +32,6 @@ export const ShapeKeys = [
   'roundedbox',
   'square',
   'subroutine'
-] as const
-
-// export type Shapes = Record<keyof typeof ShapeKeys, string>
+]
 
 export type Shapes = Record<typeof ShapeKeys[number], string>

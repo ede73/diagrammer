@@ -26,7 +26,7 @@ interface TestRunnerConfig extends ConfigType {
 function visualizersToGenerators() {
   const visualiserToGenerator = new Map<string, string>()
   visualizations.forEach((visualizers, generator: string) => {
-    visualizers.forEach((visualizer: string, index) => {
+    visualizers.forEach((visualizer: string) => {
       visualiserToGenerator.set(visualizer, generator)
       visualiserToGenerator.set(`${generator}:${visualizer}`, generator)
     })
@@ -60,7 +60,7 @@ function _isHackyWebVisualizer(config: TestRunnerConfig, overrideVisualizer?: st
   return _getWebVisualizers().includes(searchVisualizer)
 }
 
-function _exitError(useConfig, msg) {
+function _exitError(useConfig, msg: string) {
   useConfig.printError(msg)
   process.exit(10)
 }
@@ -197,6 +197,5 @@ async function _main(argv) {
 if (`${process.argv[1]}`.endsWith('t.js')) {
   // this script sits in js, so going one path level up is expected
   process.chdir(path.join(path.dirname(process.argv[1]), '..'))
-  // @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
   await _main(process.argv.splice(1))
 }

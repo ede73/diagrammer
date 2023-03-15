@@ -23,7 +23,6 @@ function _usage() {
   process.exit(0)
 }
 
-// @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
   if (!config.input && fs.existsSync(unknownCommandLineOption)) {
     if (config.code) {
@@ -52,7 +51,6 @@ if (config.beingPiped()) {
   // we're probably being piped!
   config.tp('Reading from pipe')
   config.input = config.pipeMarker
-  // @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
   config.code = await config.readFile(config.pipeMarker)
 }
 if (!config.input) {

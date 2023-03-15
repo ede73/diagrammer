@@ -23,7 +23,6 @@ function _usage() {
 
 let _collectOutput = false
 let _collectPort = false
-// @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
   if (_collectPort) {
     config.webPort = Number(unknownCommandLineOption)
@@ -67,7 +66,6 @@ if (config.beingPiped()) {
   // we're probably being piped!
   config.tp('Reading from pipe')
   config.input = config.pipeMarker
-  // @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
   config.code = await config.readFile(config.input)
 }
 if (!config.input) {
@@ -78,7 +76,6 @@ if (!config.code) {
   config.throwError('Failed reading code to parse')
 }
 
-// @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
 await doVisualize(config, config.code, config.visualizer, (exitCode) => {
   console.error('done')
 })

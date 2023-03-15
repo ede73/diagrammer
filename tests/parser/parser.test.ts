@@ -1,6 +1,6 @@
 // @ts-check
 
-import { diagrammerParser } from '../../build/diagrammer_parser.js'
+import { parse as diagrammerParse } from '../../build/diagrammer_parser.js'
 import { getParserYY } from '../../build/types/diagrammer_parser_types.js'
 import { generators, GraphCanvas } from '../../model/graphcanvas.js'
 import { GraphContainer } from '../../model/graphcontainer.js'
@@ -250,7 +250,7 @@ describe('Parser/grammar rule tests', () => {
   function parseCode(code: string) {
     getParserYY().GRAPHCANVAS = new GraphCanvas()
     try {
-      diagrammerParser.parse(code)
+      diagrammerParse(code)
     } catch (ex) {
       console.warn('=====failed parsing======')
       console.warn(code)
@@ -270,7 +270,7 @@ describe('Parser/grammar rule tests', () => {
     it(`Grammar test ${t.g}`, async () => {
       const c = new GraphCanvas()
       getParserYY().GRAPHCANVAS = c
-      diagrammerParser.parse(`${t.g}\n`)
+      diagrammerParse(`${t.g}\n`)
       if (t.f) {
         // dump the code (will be part of description, see TODO above)
         // console.warn(t.g)

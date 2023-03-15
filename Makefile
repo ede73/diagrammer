@@ -160,8 +160,10 @@ build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators 
 	@#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 	@echo '{"type":"module"}' > build/package.json
 	@sed -i 's/^var diagrammer_parser/export var diagrammerParser/g' $@
+	@sed -i 's/diagrammer_parser/diagrammerParser/g' $@
 	@sed -i 's/exports.diagrammerLexer=diagrammerLexer;//g' build/diagrammer_lexer.js
 	@sed -i 's/^var diagrammer_lexer/export var diagrammerLexer/g' build/diagrammer_lexer.js
+	@echo 'export const parse = function () { return diagrammerParser.parse.apply(diagrammerParser, arguments) }' >> $@
 # nicer to carry around than build target
 parser: build/diagrammer_parser.js
 

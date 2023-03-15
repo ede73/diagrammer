@@ -134,7 +134,7 @@ export function digraph(graphcanvas: GraphCanvas) {
       nattrs.push('penwidth=0')
     }
     if (obj instanceof GraphVertex && obj.shape) {
-      const currentShape = obj.shape as keyof typeof DigraphShapeMap
+      const currentShape = obj.shape // as keyof typeof DigraphShapeMap
       if (obj.shape && !DigraphShapeMap[currentShape]) {
         throw new Error('Missing shape mapping')
       }

@@ -1,7 +1,7 @@
 // @ts-check
 import { sleepABit, writeToElement } from './jest_puppeteer_support.js'
 import { getDiagrammerCode, setDiagrammerCode, getParsingError, clearParsingErrors } from './diagrammer_support.js'
-import { type Page, type HTTPRequest, type HTTPResponse } from 'puppeteer'
+import { type Page, type HTTPRequest } from 'puppeteer'
 import { describe, expect, it } from '@jest/globals'
 
 // test saving, loading from local storage

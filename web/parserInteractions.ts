@@ -1,18 +1,19 @@
 // @ts-check
-import { diagrammerParser } from '../build/diagrammer_parser.js'
+import { parse as diagrammerParse } from '../build/diagrammer_parser.js'
 import { GraphCanvas } from '../model/graphcanvas.js'
 import { getGenerator, getError, getInputElement, getVisualizer, setError, setGenerator } from './uiComponentAccess.js'
+import { getParserYY } from '../build/types/diagrammer_parser_types.js'
 
 let parsingStarted: number
 
 function setupParser() {
   // TODO: MOVING TO GraphCanvas
-  diagrammerParser.yy.parseError = (str: string, hash: string) => {
+  getParserYY().parseError = (str: string, hash: string) => {
     const pe = `Parsing error:\n${str}\n${hash}`
     throw new Error(pe)
   }
 
-  diagrammerParser.yy.parsedGeneratorAndVisualizer = (generator: string, visualizer: string, preferParsed: boolean) => {
+  getParserYY().parsedGeneratorAndVisualizer = (generator: string, visualizer: string, preferParsed: boolean) => {
     if (preferParsed && generator) {
       const useVisualizer = visualizer === 'undefined' ? undefined : visualizer
       setGenerator(generator, useVisualizer)
@@ -26,7 +27,7 @@ function setupParser() {
    */
   // called line by line...
   // TODO: MOVING TO GraphCanvas
-  diagrammerParser.yy.result = (line: string): void => {
+  getParserYY().result = (line: string): void => {
     const result = getInputElement('diagrammer-result')
 
     if (parsingStarted === 1) {
@@ -39,10 +40,9 @@ function setupParser() {
   /**
    * @param {string} traceMsg
    */
-  // @ts-expect-error trace will exist after this
-  diagrammerParser.trace = function (traceMsg: string) {
-    console.warn(`TRACE:${traceMsg}`)
-  }
+  // diagrammerParser.trace = function (traceMsg: string) {
+  //   console.warn(`TRACE:${traceMsg}`)
+  // }
 }
 
 /**
@@ -69,17 +69,16 @@ export function parse(diagrammerCode: string, successCallback: (generator: strin
   parsingStarted = 1
   setError('')
   try {
-    delete (diagrammerParser.yy.GRAPHCANVAS)
+    const yy = getParserYY()
     // TODO: MOVING TO GraphCanvas
-    diagrammerParser.yy.USE_GENERATOR = generator
+    yy.USE_GENERATOR = generator
     // TODO: MOVING TO GraphCanvas
-    diagrammerParser.yy.USE_VISUALIZER = visualizer
+    yy.USE_VISUALIZER = visualizer
     // If true, actually prefer generator/visualizer from loaded script IF specified
     // used while loading new examples...
-    diagrammerParser.yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer
-    diagrammerParser.yy.GRAPHCANVAS = new GraphCanvas()
-    // @ts-expect-error TODO: type mismatch node vs vscode vs browser
-    diagrammerParser.parse(diagrammerCode)
+    yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer
+    yy.GRAPHCANVAS = new GraphCanvas()
+    diagrammerParse(diagrammerCode)
 
     try {
       successCallback(getGenerator(), getVisualizer())

@@ -2,12 +2,14 @@
 <link rel="stylesheet" type="text/css" href="css/textarea.css" />
 <!-- canviz support start-->
 <!-- <link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz.css" />-->
+<!--  used to be https://unpkg.com/d3-sankey@0 but no just endless redirects, changed to local copy as d3sankey-->
 <script type="importmap">
 {
   "imports": {
     "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm",
     "gojs": "./node_modules/gojs/release/go-debug-module.js",
-    "jquery": "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
+    "jquery": "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js",
+    "generators/": "/generators/"
  }
 }
 </script>
@@ -27,31 +29,18 @@
 <script type="module" src="web/backendInteractions.js"></script>
 <script type="module" src="web/localStorage.js"></script>
 <script type="module" src="web/d3support.js"></script>
-<!--<script type="text/javascript" src="js/mscgen.js"></script>-->
 
-<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="js/canviz-0.1/canviz-ie6.css" /><![endif]-->
-<!--[if IE]><script type="text/javascript" src="js/canviz-0.1/excanvas/excanvas.js"></script><![endif]-->
-<!--<script type="text/javascript" src="js/canviz-0.1/prototype/prototype.js"></script>-->
-<!--     <script src="//ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js"></script>
-	<script type="text/javascript" src="js/canviz-0.1/path/path.js"></script>
-	<script type="text/javascript" src="js/canviz-0.1/canviz.js"></script>
-	<script type="text/javascript" src="js/canviz-0.1/x11colors.js"></script>
-	<script type="text/javascript" src="js/canviz-0.1/graphs/graphlist.js"></script>
-	<script type="text/javascript" src="js/canviz-0.1/graphs/layoutlist.js"></script>
--->
-<!-- canviz support end-->
 
-<!-- <script type="module" src="js/d3-sankey.js"></script> -->
 <!-- Only way to get d3-sankey up and running, neither comply with importmapt or ES6 imports/exports -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script type="module" src="https://unpkg.com/d3-sankey@0"></script>
+<script src="https://unpkg.com/d3-sankey@0"></script>
 <script src="node_modules/mscgenjs/dist/bundle/index.min.js"></script>
 
 <body>
-	<!-- top menu strip - horizontal -->
-	<form name="contact" action="">
-		<label for="generator">Generator</label>
-		<select id="diagrammer-generator" name="generator" onChange="generatorChanged()">
+  <!-- top menu strip - horizontal -->
+  <form name="contact" action="">
+    <label for="generator">Generator</label>
+    <select id="diagrammer-generator" name="generator" onChange="generatorChanged()">
  <option value="actdiag">Activity Diagram(cli)</option>
  <option value="ast">Abstract Syntax Tree</option>
  <option value="ast_record">Abstract Syntax Tree(Record)</option>
@@ -74,19 +63,19 @@
  <option value="sankey">Sankey</option>
  <option value="seqdiag">Sequence Diagram(cli)</option>
  <option value="umlclass">UMLClass(GoJS)</option>
-			<!-- https://gojs.net/latest/samples/familytree.html -->
-			<option value="familytree">FamilyTree(GoJS)</option>
-			<!--  https://gojs.net/latest/samples/genogram.html -->
-			<option value="genogram">Genogram(GoJS)</option>
-			<!--  https://gojs.net/latest/samples/tLayout.html -->
-			<option value="treelayout">TreeLayout(GoJS)</option>
-			<!--  https://gojs.net/latest/samples/sequencediagram.html -->
-			<option value="sequencediagram">SequenceDiagram(GoJS)</option>
-		</select>
-		<!-- handling examples -->
-		<label for="example">Examples:</label>
-		<select id="diagrammer-example" name="example" onChange="exampleChanged()">
-			<!--ls tests/test_inputs/*txt|awk -F/ '{print "<option value=\""$2"\">"$2"</option>"}'-->
+      <!-- https://gojs.net/latest/samples/familytree.html -->
+      <option value="familytree">FamilyTree(GoJS)</option>
+      <!--  https://gojs.net/latest/samples/genogram.html -->
+      <option value="genogram">Genogram(GoJS)</option>
+      <!--  https://gojs.net/latest/samples/tLayout.html -->
+      <option value="treelayout">TreeLayout(GoJS)</option>
+      <!--  https://gojs.net/latest/samples/sequencediagram.html -->
+      <option value="sequencediagram">SequenceDiagram(GoJS)</option>
+    </select>
+    <!-- handling examples -->
+    <label for="example">Examples:</label>
+    <select id="diagrammer-example" name="example" onChange="exampleChanged()">
+      <!--ls tests/test_inputs/*txt|awk -F/ '{print "<option value=\""$2"\">"$2"</option>"}'-->
 <option value="test_inputs/arrow_types.txt">arrow_types.txt</option>
 <option value="test_inputs/ast.txt">ast.txt</option>
 <option value="test_inputs/colors.txt">colors.txt</option>
@@ -140,321 +129,281 @@
 <option value="test_inputs/umlclass2.txt">umlclass2.txt</option>
 <option value="test_inputs/umlclass_types.txt">umlclass_types.txt</option>
 <option value="test_inputs/url.txt">url.txt</option>
-		</select>
-		<label for="filename">Filename</label>
-		<input type="text" id="diagrammer-filename" name="filename" value="output" />
-		<button id="diagrammer-savefile"
-			onclick="saveCurrentGraph(getCurrentFilename(), getGraphText());return false;">Save</button>
-		<button id="diagrammer-loadfile"
-			onclick="setGraphText(loadGraph(getCurrentFilename()));return false;">Load</button>
-		<button id="diagrammer-import" onclick="importGraphs();return false;">Import</button>
-		<button id="diagrammer-export" onclick="exportGraphs();return false;">Export</button>
-		<!-- saved combobox and handlers -->
-		<label for="saved">Saved graphs</label> <select id="diagrammer-saved" name="saved"
-			onChange="savedChanged()"></select>
-		<button onclick="visualize(getVisualizer());return false;">Visualize</button>
-		<br />
+    </select>
+    <label for="filename">Filename</label>
+    <input type="text" id="diagrammer-filename" name="filename" value="output" />
+    <button id="diagrammer-savefile"
+      onclick="saveCurrentGraph(getCurrentFilename(), getGraphText());return false;">Save</button>
+    <button id="diagrammer-loadfile" onclick="setGraphText(loadGraph(getCurrentFilename()));return false;">Load</button>
+    <button id="diagrammer-import" onclick="importGraphs();return false;">Import</button>
+    <button id="diagrammer-export" onclick="exportGraphs();return false;">Export</button>
+    <!-- saved combobox and handlers -->
+    <label for="saved">Saved graphs</label> <select id="diagrammer-saved" name="saved"
+      onChange="savedChanged()"></select>
+    <button onclick="visualize(getVisualizer());return false;">Visualize</button>
+    <br />
 
-		<div id="diagrammer-error"></div>
-		<link rel="stylesheet" href="web/index.css">
+    <div id="diagrammer-error"></div>
+    <link rel="stylesheet" href="web/index.css">
 
-		<!-- first horizontal toolbar icon strip -->
-		<div class="htoolbar">
-			<ul>
-				<li tooltip="actor" onclick="addLine('actor nodeName1');"><img class="nodeicon"
-						src="types/xactor.png" />
-				</li>
-				<li tooltip="beginpoint" onclick="addLine('beginpoint nodeName2');"><img class="nodeicon"
-						src="types/xbeginpoint.png" /></li>
-				<li tooltip="circle" onclick="addLine('circle nodeName4');"><img class="nodeicon"
-						src="types/xcircle.png" />
-				</li>
-				<li tooltip="cloud" onclick="addLine('cloud nodeName5');"><img class="nodeicon"
-						src="types/xcloud.png" />
-				</li>
-				<li tooltip="condition" onclick="addLine('condition nodeName6');"><img class="nodeicon"
-						src="types/xcondition.png" /></li>
-				<li tooltip="database" onclick="addLine('database nodeName7');"><img class="nodeicon"
-						src="types/xdatabase.png" /></li>
-				<li tooltip="default" onclick="addLine('default nodeName8');"><img class="nodeicon"
-						src="types/xdefault.png" /></li>
-				<li tooltip="diamond" onclick="addLine('diamond nodeName9');"><img class="nodeicon"
-						src="types/xdiamond.png" /></li>
-				<li tooltip="display" onclick="addLine('display nodeName21');"><img class="nodeicon"
-						src="types/xdisplay.png" />
-				</li>
-				<li tooltip="document" onclick="addLine('document nodeName20');"><img class="nodeicon"
-						src="types/xdocument.png" /></li>
-				<li tooltip="dots" onclick="addLine('dots nodeName10');"><img class="nodeicon" src="types/xdots.png" />
-				</li>
-				<li tooltip="doublecircle" onclick="addLine('doublecircle nodeName11');"><img class="nodeicon"
-						src="types/xdoublecircle.png" /></li>
-				<li tooltip="ellipse" onclick="addLine('ellipse nodeName12');"><img class="nodeicon"
-						src="types/xellipse.png" /></li>
-				<li tooltip="endpoint" onclick="addLine('endpoint nodeName13');"><img class="nodeicon"
-						src="types/xendpoint.png" /></li>
-				<li tooltip="folder" onclick="addLine('folder nodeName14');"><img class="nodeicon"
-						src="types/xfolder.png" />
-				</li>
-			</ul>
-		</div>
+    <!-- first horizontal toolbar icon strip -->
+    <div class="htoolbar">
+      <ul>
+        <li tooltip="actor" onclick="addLine('actor nodeName1');"><img class="nodeicon" src="types/xactor.png" />
+        </li>
+        <li tooltip="beginpoint" onclick="addLine('beginpoint nodeName2');"><img class="nodeicon"
+            src="types/xbeginpoint.png" /></li>
+        <li tooltip="circle" onclick="addLine('circle nodeName4');"><img class="nodeicon" src="types/xcircle.png" />
+        </li>
+        <li tooltip="cloud" onclick="addLine('cloud nodeName5');"><img class="nodeicon" src="types/xcloud.png" />
+        </li>
+        <li tooltip="condition" onclick="addLine('condition nodeName6');"><img class="nodeicon"
+            src="types/xcondition.png" /></li>
+        <li tooltip="database" onclick="addLine('database nodeName7');"><img class="nodeicon"
+            src="types/xdatabase.png" /></li>
+        <li tooltip="default" onclick="addLine('default nodeName8');"><img class="nodeicon" src="types/xdefault.png" />
+        </li>
+        <li tooltip="diamond" onclick="addLine('diamond nodeName9');"><img class="nodeicon" src="types/xdiamond.png" />
+        </li>
+        <li tooltip="display" onclick="addLine('display nodeName21');"><img class="nodeicon" src="types/xdisplay.png" />
+        </li>
+        <li tooltip="document" onclick="addLine('document nodeName20');"><img class="nodeicon"
+            src="types/xdocument.png" /></li>
+        <li tooltip="dots" onclick="addLine('dots nodeName10');"><img class="nodeicon" src="types/xdots.png" />
+        </li>
+        <li tooltip="doublecircle" onclick="addLine('doublecircle nodeName11');"><img class="nodeicon"
+            src="types/xdoublecircle.png" /></li>
+        <li tooltip="ellipse" onclick="addLine('ellipse nodeName12');"><img class="nodeicon" src="types/xellipse.png" />
+        </li>
+        <li tooltip="endpoint" onclick="addLine('endpoint nodeName13');"><img class="nodeicon"
+            src="types/xendpoint.png" /></li>
+        <li tooltip="folder" onclick="addLine('folder nodeName14');"><img class="nodeicon" src="types/xfolder.png" />
+        </li>
+      </ul>
+    </div>
 
-		<!-- second horizontal toolbar icon strip -->
-		<div class="htoolbar">
-			<ul>
-				<li tooltip="input" onclick="addLine('input nodeName15');"><img class="nodeicon"
-						src="types/xinput.png" />
-				</li>
-				<li tooltip="left" onclick="addLine('left nodeName29');"><img class="nodeicon" src="types/xleft.png" />
-				</li>
-				<li tooltip="loop" onclick="addLine('loop nodeName16');"><img class="nodeicon" src="types/xloop.png" />
-				</li>
-				<li tooltip="loopin" onclick="addLine('loopin nodeName17');"><img class="nodeicon"
-						src="types/xloopin.png" />
-				<li tooltip="loopout" onclick="addLine('loopout nodeName18');"><img class="nodeicon"
-						src="types/xloopout.png" /></li>
-				<li tooltip="mail" onclick="addLine('mail nodeName19');"><img class="nodeicon" src="types/xmail.png" />
-				</li>
-				<li tooltip="note" onclick="addLine('note nodeName22');"><img class="nodeicon" src="types/xnote.png" />
-				</li>
-				<li tooltip="preparation" onclick="addLine('preparation nodeName23');"><img class="nodeicon"
-						src="types/xpreparation.png" />
-				</li>
-				<li tooltip="record" onclick="addLine('record nodeName24');"><img class="nodeicon"
-						src="types/xrecord.png" />
-				</li>
-				<li tooltip="rect" onclick="addLine('rect nodeName25');"><img class="nodeicon" src="types/xrect.png" />
-				</li>
-				<li tooltip="right" onclick="addLine('right nodeName3');"><img class="nodeicon"
-						src="types/xright.png" />
-				</li>
-				<li tooltip="roundedbox" onclick="addLine('roundedbox nodeName26');"><img class="nodeicon"
-						src="types/xroundedbox.png" /></li>
-				<li tooltip="square" onclick="addLine('square nodeName27');"><img class="nodeicon"
-						src="types/xsquare.png" />
-				</li>
-				<li tooltip="subroutine" onclick="addLine('subroutine nodeName28');"><img class="nodeicon"
-						src="types/xsubroutine.png" />
-				</li>
-			</ul>
-		</div>
+    <!-- second horizontal toolbar icon strip -->
+    <div class="htoolbar">
+      <ul>
+        <li tooltip="input" onclick="addLine('input nodeName15');"><img class="nodeicon" src="types/xinput.png" />
+        </li>
+        <li tooltip="left" onclick="addLine('left nodeName29');"><img class="nodeicon" src="types/xleft.png" />
+        </li>
+        <li tooltip="loop" onclick="addLine('loop nodeName16');"><img class="nodeicon" src="types/xloop.png" />
+        </li>
+        <li tooltip="loopin" onclick="addLine('loopin nodeName17');"><img class="nodeicon" src="types/xloopin.png" />
+        <li tooltip="loopout" onclick="addLine('loopout nodeName18');"><img class="nodeicon" src="types/xloopout.png" />
+        </li>
+        <li tooltip="mail" onclick="addLine('mail nodeName19');"><img class="nodeicon" src="types/xmail.png" />
+        </li>
+        <li tooltip="note" onclick="addLine('note nodeName22');"><img class="nodeicon" src="types/xnote.png" />
+        </li>
+        <li tooltip="preparation" onclick="addLine('preparation nodeName23');"><img class="nodeicon"
+            src="types/xpreparation.png" />
+        </li>
+        <li tooltip="record" onclick="addLine('record nodeName24');"><img class="nodeicon" src="types/xrecord.png" />
+        </li>
+        <li tooltip="rect" onclick="addLine('rect nodeName25');"><img class="nodeicon" src="types/xrect.png" />
+        </li>
+        <li tooltip="right" onclick="addLine('right nodeName3');"><img class="nodeicon" src="types/xright.png" />
+        </li>
+        <li tooltip="roundedbox" onclick="addLine('roundedbox nodeName26');"><img class="nodeicon"
+            src="types/xroundedbox.png" /></li>
+        <li tooltip="square" onclick="addLine('square nodeName27');"><img class="nodeicon" src="types/xsquare.png" />
+        </li>
+        <li tooltip="subroutine" onclick="addLine('subroutine nodeName28');"><img class="nodeicon"
+            src="types/xsubroutine.png" />
+        </li>
+      </ul>
+    </div>
 
-		<!-- third horizontal toolbar icon strip -->
-		<div class="htoolbar">
-			<ul>
-				<li tooltip="normal_dir" onclick="addLine('a1>b1');"><img class="edgeicon" src="arrows/a1.png" /></li>
-				<li tooltip="dashed_dir" onclick="addLine('a2->b2');"><img class="edgeicon" src="arrows/a2.png" /></li>
-				<li tooltip="dotted_dir" onclick="addLine('a3.>b3');"><img class="edgeicon" src="arrows/a3.png" /></li>
-				<li tooltip="normal_both" onclick="addLine('a4<>b4');"><img class="edgeicon" src="arrows/a4.png" />
-				</li>
-				<li tooltip="dashed_both" onclick="addLine('a5<->b5');"><img class="edgeicon" src="arrows/a5.png" />
-				</li>
-				<li tooltip="dotted_both" onclick="addLine('a6<.>b6');"><img class="edgeicon" src="arrows/a6.png" />
-				</li>
-				<li tooltip="dashed_none" onclick="addLine('a7-b7');"><img class="edgeicon" src="arrows/a7.png" />
-				</li>
-				<li tooltip="dotted_none" onclick="addLine('a8.b8');"><img class="edgeicon" src="arrows/a8.png" />
-				</li>
-				<li tooltip="broken_l" onclick="addLine('a9</b9');"><img class="edgeicon" src="arrows/b9.png" /></li>
-				<li tooltip="broker_r" onclick="addLine('a10/>b10');"><img class="edgeicon" src="arrows/a10.png" /></li>
-				<li tooltip="big_r" onclick="addLine('a11>>b11');"><img class="edgeicon" src="arrows/a11.png" /></li>
-				<li tooltip="flat_r" onclick="addLine('a12-|b12');"><img class="edgeicon" src="arrows/a12.png" /></li>
-				<li tooltip="big_both" onclick="addLine('a13<<>>b13');"><img class="edgeicon" src="arrows/a13.png" />
-				</li>
-				<li tooltip="flat_uni" onclick="addLine('a14||b14');"><img class="edgeicon" src="arrows/a14.png" /></li>
-				<li> <input type="button" value="Open Window" onclick="openPicWindow();"></li>
-			</ul>
-		</div>
+    <!-- third horizontal toolbar icon strip -->
+    <div class="htoolbar">
+      <ul>
+        <li tooltip="normal_dir" onclick="addLine('a1>b1');"><img class="edgeicon" src="arrows/a1.png" /></li>
+        <li tooltip="dashed_dir" onclick="addLine('a2->b2');"><img class="edgeicon" src="arrows/a2.png" /></li>
+        <li tooltip="dotted_dir" onclick="addLine('a3.>b3');"><img class="edgeicon" src="arrows/a3.png" /></li>
+        <li tooltip="normal_both" onclick="addLine('a4<>b4');"><img class="edgeicon" src="arrows/a4.png" />
+        </li>
+        <li tooltip="dashed_both" onclick="addLine('a5<->b5');"><img class="edgeicon" src="arrows/a5.png" />
+        </li>
+        <li tooltip="dotted_both" onclick="addLine('a6<.>b6');"><img class="edgeicon" src="arrows/a6.png" />
+        </li>
+        <li tooltip="dashed_none" onclick="addLine('a7-b7');"><img class="edgeicon" src="arrows/a7.png" />
+        </li>
+        <li tooltip="dotted_none" onclick="addLine('a8.b8');"><img class="edgeicon" src="arrows/a8.png" />
+        </li>
+        <li tooltip="broken_l" onclick="addLine('a9</b9');"><img class="edgeicon" src="arrows/b9.png" /></li>
+        <li tooltip="broker_r" onclick="addLine('a10/>b10');"><img class="edgeicon" src="arrows/a10.png" /></li>
+        <li tooltip="big_r" onclick="addLine('a11>>b11');"><img class="edgeicon" src="arrows/a11.png" /></li>
+        <li tooltip="flat_r" onclick="addLine('a12-|b12');"><img class="edgeicon" src="arrows/a12.png" /></li>
+        <li tooltip="big_both" onclick="addLine('a13<<>>b13');"><img class="edgeicon" src="arrows/a13.png" />
+        </li>
+        <li tooltip="flat_uni" onclick="addLine('a14||b14');"><img class="edgeicon" src="arrows/a14.png" /></li>
+        <li> <input type="button" value="Open Window" onclick="openPicWindow();"></li>
+      </ul>
+    </div>
 
-		<table>
-			<tr>
-				<td valign=top>
-					<!-- first leftmost vertical menu strip -->
-					<div class="toolbarw">
-						<ul>
-							<li onclick="addLine(1);">Colored vertex with label</li>
-							<li onclick="addLine(2);">A Group</li>
-							<li onclick="addLine(3);">Connected vertex pair</li>
-							<li onclick="addLine(4);">Many connected vertices</li>
-							<li onclick="addLine(5);">Start vertex</li>
-							<li onclick="addLine(6);">Shape the reminder</li>
-							<li onclick="addLine(7);">Add equals</li>
-							<li onclick="addLine(8);">Variable color</li>
-							<li onclick="addLine(9);">Conditional</li>
-						</ul>
-					</div>
-				</td>
-				<td valign=top>
-					<!-- second middle vertical menu strip -->
-					<div class="toolbar">
-						<ul>
-							<li onclick="addLine('NodeName/actor1.png');"><img class="iconicon"
-									src="icons/actor1.png" />
-							</li>
-							<li onclick="addLine('NodeName/actor2.png');"><img class="iconicon"
-									src="icons/actor2.png" />
-							</li>
-							<li onclick="addLine('NodeName/actor3.png');"><img class="iconicon"
-									src="icons/actor3.png" />
-							</li>
-							<li onclick="addLine('NodeName/barcode.png');"><img class="iconicon"
-									src="icons/barcode.png" />
-							</li>
-							<li onclick="addLine('NodeName/camera.png');"><img class="iconicon"
-									src="icons/camera.png" />
-							</li>
-							<li onclick="addLine('NodeName/harddisk.png');"><img class="iconicon"
-									src="icons/harddisk.png" />
-							</li>
-							<li onclick="addLine('NodeName/laser.png');"><img class="iconicon" src="icons/laser.png" />
-							</li>
-							<li onclick="addLine('NodeName/phone.png');"><img class="iconicon" src="icons/phone.png" />
-							</li>
-							<li onclick="addLine('NodeName/satellite.png');"><img class="iconicon"
-									src="icons/satellite.png" /></li>
-							<li onclick="addLine('NodeName/usbmemory.png');"><img class="iconicon"
-									src="icons/usbmemory.png" /></li>
-							<li onclick="addLine('NodeName/basestation.png');"><img class="iconicon"
-									src="icons/basestation.png" /></li>
-							<li onclick="addLine('NodeName/cpu.png');"><img class="iconicon" src="icons/cpu.png" /></li>
-							<li onclick="addLine('NodeName/modem.png');"><img class="iconicon" src="icons/modem.png" />
-							</li>
-						</ul>
-					</div>
-				</td>
-				<td valign=top>
-					<!-- third rightmost vertical menu strip -->
-					<div class="toolbar">
-						<ul>
-							<li onclick="addLine('NodeName/keyboard.png');"><img class="iconicon"
-									src="icons/keyboard.png" />
-							</li>
-							<li onclick="addLine('NodeName/monitor.png');"><img class="iconicon"
-									src="icons/monitor.png" />
-							</li>
-							<li onclick="addLine('NodeName/printer.png');"><img class="iconicon"
-									src="icons/printer.png" />
-							</li>
-							<li onclick="addLine('NodeName/scanner.png');"><img class="iconicon"
-									src="icons/scanner.png" />
-							</li>
-							<li onclick="addLine('NodeName/wifi.png');"><img class="iconicon" src="icons/wifi.png" />
-							</li>
-							<li onclick="addLine('NodeName/battery.png');"><img class="iconicon"
-									src="icons/battery.png" />
-							</li>
-							<li onclick="addLine('NodeName/documents.png');"><img class="iconicon"
-									src="icons/documents.png" /></li>
-							<li onclick="addLine('NodeName/laptop.png');"><img class="iconicon"
-									src="icons/laptop.png" />
-							</li>
-							<li onclick="addLine('NodeName/mouse.png');"><img class="iconicon" src="icons/mouse.png" />
-							</li>
-							<li onclick="addLine('NodeName/ram.png');"><img class="iconicon" src="icons/ram.png" /></li>
-							<li onclick="addLine('NodeName/sim.png');"><img class="iconicon" src="icons/sim.png" /></li>
-							<li onclick="addLine('NodeName/timer.png');"><img class="iconicon" src="icons/timer.png" />
-							</li>
-							<li onclick="addLine('NodeName/rack.png');"><img class="iconicon" src="icons/rack.png" />
-							</li>
-						</ul>
-					</div>
-				</td>
-				<td>
-					<!-- ACE editor + resulting graphs (server/dynamic)-->
-					<table>
-						<tr>
-							<td class="tabbed" valign=top>
-								<input type="radio" id="tab1" name="css-tabs" checked>
-								<input type="radio" id="tab2" name="css-tabs">
-								<input type="radio" id="tab3" name="css-tabs">
+    <table>
+      <tr>
+        <td valign=top>
+          <!-- first leftmost vertical menu strip -->
+          <div class="toolbarw">
+            <ul>
+              <li onclick="addLine(1);">Colored vertex with label</li>
+              <li onclick="addLine(2);">A Group</li>
+              <li onclick="addLine(3);">Connected vertex pair</li>
+              <li onclick="addLine(4);">Many connected vertices</li>
+              <li onclick="addLine(5);">Start vertex</li>
+              <li onclick="addLine(6);">Shape the reminder</li>
+              <li onclick="addLine(7);">Add equals</li>
+              <li onclick="addLine(8);">Variable color</li>
+              <li onclick="addLine(9);">Conditional</li>
+            </ul>
+          </div>
+        </td>
+        <td valign=top>
+          <!-- second middle vertical menu strip -->
+          <div class="toolbar">
+            <ul>
+              <li onclick="addLine('NodeName/actor1.png');"><img class="iconicon" src="icons/actor1.png" />
+              </li>
+              <li onclick="addLine('NodeName/actor2.png');"><img class="iconicon" src="icons/actor2.png" />
+              </li>
+              <li onclick="addLine('NodeName/actor3.png');"><img class="iconicon" src="icons/actor3.png" />
+              </li>
+              <li onclick="addLine('NodeName/barcode.png');"><img class="iconicon" src="icons/barcode.png" />
+              </li>
+              <li onclick="addLine('NodeName/camera.png');"><img class="iconicon" src="icons/camera.png" />
+              </li>
+              <li onclick="addLine('NodeName/harddisk.png');"><img class="iconicon" src="icons/harddisk.png" />
+              </li>
+              <li onclick="addLine('NodeName/laser.png');"><img class="iconicon" src="icons/laser.png" />
+              </li>
+              <li onclick="addLine('NodeName/phone.png');"><img class="iconicon" src="icons/phone.png" />
+              </li>
+              <li onclick="addLine('NodeName/satellite.png');"><img class="iconicon" src="icons/satellite.png" /></li>
+              <li onclick="addLine('NodeName/usbmemory.png');"><img class="iconicon" src="icons/usbmemory.png" /></li>
+              <li onclick="addLine('NodeName/basestation.png');"><img class="iconicon" src="icons/basestation.png" />
+              </li>
+              <li onclick="addLine('NodeName/cpu.png');"><img class="iconicon" src="icons/cpu.png" /></li>
+              <li onclick="addLine('NodeName/modem.png');"><img class="iconicon" src="icons/modem.png" />
+              </li>
+            </ul>
+          </div>
+        </td>
+        <td valign=top>
+          <!-- third rightmost vertical menu strip -->
+          <div class="toolbar">
+            <ul>
+              <li onclick="addLine('NodeName/keyboard.png');"><img class="iconicon" src="icons/keyboard.png" />
+              </li>
+              <li onclick="addLine('NodeName/monitor.png');"><img class="iconicon" src="icons/monitor.png" />
+              </li>
+              <li onclick="addLine('NodeName/printer.png');"><img class="iconicon" src="icons/printer.png" />
+              </li>
+              <li onclick="addLine('NodeName/scanner.png');"><img class="iconicon" src="icons/scanner.png" />
+              </li>
+              <li onclick="addLine('NodeName/wifi.png');"><img class="iconicon" src="icons/wifi.png" />
+              </li>
+              <li onclick="addLine('NodeName/battery.png');"><img class="iconicon" src="icons/battery.png" />
+              </li>
+              <li onclick="addLine('NodeName/documents.png');"><img class="iconicon" src="icons/documents.png" /></li>
+              <li onclick="addLine('NodeName/laptop.png');"><img class="iconicon" src="icons/laptop.png" />
+              </li>
+              <li onclick="addLine('NodeName/mouse.png');"><img class="iconicon" src="icons/mouse.png" />
+              </li>
+              <li onclick="addLine('NodeName/ram.png');"><img class="iconicon" src="icons/ram.png" /></li>
+              <li onclick="addLine('NodeName/sim.png');"><img class="iconicon" src="icons/sim.png" /></li>
+              <li onclick="addLine('NodeName/timer.png');"><img class="iconicon" src="icons/timer.png" />
+              </li>
+              <li onclick="addLine('NodeName/rack.png');"><img class="iconicon" src="icons/rack.png" />
+              </li>
+            </ul>
+          </div>
+        </td>
+        <td>
+          <!-- ACE editor + resulting graphs (server/dynamic)-->
+          <table>
+            <tr>
+              <td class="tabbed" valign=top>
+                <input type="radio" id="tab1" name="css-tabs" checked>
+                <input type="radio" id="tab2" name="css-tabs">
+                <input type="radio" id="tab3" name="css-tabs">
 
-								<ul class="tabs">
-									<li class="tab"><label for="tab1">Code</label></li>
-									<li class="tab"><label for="tab2">Generated result</label></li>
-									<li class="tab"><label for="tab3">Generated result (beautified)</label></li>
-								</ul>
-								<div class="tab-content">
-									<pre id="diagrammer-code" align="top"
-										style="margin:0;left:0;height:600px;float:left"></pre>
-								</div>
-								<div class="tab-content">
-									<textarea id="diagrammer-result" rows="40" cols="10"></textarea>
-								</div>
-								<div class="tab-content" id="diagrammer-beautified">
-								</div>
-							</td>
-							<td valign=top>
-								<!-- Visualization results stored under here -->
-								<div id='diagrammer-graph' />
-							</td>
-						</tr>
-					</table>
-				</td>
-			</tr>
-		</table>
+                <ul class="tabs">
+                  <li class="tab"><label for="tab1">Code</label></li>
+                  <li class="tab"><label for="tab2">Generated result</label></li>
+                  <li class="tab"><label for="tab3">Generated result (beautified)</label></li>
+                </ul>
+                <div class="tab-content">
+                  <pre id="diagrammer-code" align="top" style="margin:0;left:0;height:600px;float:left"></pre>
+                </div>
+                <div class="tab-content">
+                  <textarea id="diagrammer-result" rows="40" cols="10"></textarea>
+                </div>
+                <div class="tab-content" id="diagrammer-beautified">
+                </div>
+              </td>
+              <td valign=top>
+                <!-- Visualization results stored under here -->
+                <div id='diagrammer-graph' />
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
 
-		<!-- <script module="mscgenjs"></script> -->
-		<link href="js/jsonTree/jsonTree.css" rel="stylesheet" />
-		<script src="js/jsonTree/jsonTree.js"></script>
-		<!-- <script src="js/viz.js"></script> -->
-		<!-- <script src="js/full.render.js"></script> -->
-		<!-- <svg id='chart' xmlns="http://www.w3.org/2000/svg"></svg> -->
-		<!-- resulting data of grammar parser/ast generator -->
-		<p>Javascript generated(dot only)</p>
-		<div id="viz_container" style="border-width: 2px; border-style: dotted;" align="top"></div>
-
-		<!-- <p>Viz.js</p>
-		<div id="viz_container"></div> -->
-		<p>CanViZ</p>
-		<div id="canviz_container"></div>
-		<div id="diagrammer-debug"></div>
-	</form>
+    <!-- <script module="mscgenjs"></script> -->
+    <link href="web/js/jsonTree/jsonTree.css" rel="stylesheet" />
+    <script src="web/js/jsonTree/jsonTree.js"></script>
+  </form>
 </body>
 
-<!-- <script src="js/viz.js"></script> -->
-<script module="js/viz.es.js"></script>
-<script src="js/full.render.js"></script>
+<script module="web/js/viz.es.js"></script>
+<script src="web/js/full.render.js"></script>
 <script type="module" src="web/parserInteractions.js"></script>
 <script type="module" src="web/editorInteractions.js"></script>
 <script src="ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script type="module">
-	const editor = ace.edit("diagrammer-code");
-	//editor.setTheme("ace/theme/kr");
-	editor.getSession().setMode("ace/mode/state");
+  const editor = ace.edit("diagrammer-code");
+  //editor.setTheme("ace/theme/kr");
+  editor.getSession().setMode("ace/mode/state");
 
-	import { addLine, generatorChanged, exampleChanged, savedChanged, getGraphText, setGraphText } from "./web/editorInteractions.js";
-	window.exampleChanged = exampleChanged;
-	window.generatorChanged = generatorChanged;
-	window.addLine = addLine;
-	window.savedChanged = savedChanged;
-	window.getVisualizer = getVisualizer;
-	window.getGraphText = getGraphText;
-	window.setGraphText = setGraphText;
+  import { addLine, generatorChanged, exampleChanged, savedChanged, getGraphText, setGraphText } from "./web/editorInteractions.js";
+  window.exampleChanged = exampleChanged;
+  window.generatorChanged = generatorChanged;
+  window.addLine = addLine;
+  window.savedChanged = savedChanged;
+  window.getVisualizer = getVisualizer;
+  window.getGraphText = getGraphText;
+  window.setGraphText = setGraphText;
 
-	import { getCurrentFilename, openPicWindow, getVisualizer, getInputElement, setGenerator } from './web/uiComponentAccess.js';
-	window.getCurrentFilename = getCurrentFilename;
-	window.openPicWindow = openPicWindow;
+  import { getCurrentFilename, openPicWindow, getVisualizer, getInputElement, setGenerator } from './web/uiComponentAccess.js';
+  window.getCurrentFilename = getCurrentFilename;
+  window.openPicWindow = openPicWindow;
 
-	import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList } from "./web/localStorage.js";
-	window.saveCurrentGraph = saveCurrentGraph;
-	window.loadGraph = loadGraph;
+  import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList } from "./web/localStorage.js";
+  window.saveCurrentGraph = saveCurrentGraph;
+  window.loadGraph = loadGraph;
 
-	import { importGraphs, exportGraphs } from "./web/backendInteractions.js";
-	window.importGraphs = importGraphs;
-	window.exportGraphs = exportGraphs;
+  import { importGraphs, exportGraphs } from "./web/backendInteractions.js";
+  window.importGraphs = importGraphs;
+  window.exportGraphs = exportGraphs;
 
-	import { visualize } from "./web/visualize.js";
-	window.visualize = visualize;
+  import { visualize } from "./web/visualize.js";
+  window.visualize = visualize;
 
-	const e = getInputElement('diagrammer-saved')
-	e.innerHTML = getSavedFilesAsOptionList()
+  const e = getInputElement('diagrammer-saved')
+  e.innerHTML = getSavedFilesAsOptionList()
 
-	const params = new URLSearchParams(window.location.search)
-	if (!params.has('do_not_load_initial_example')) {
-		// select ast.txt example
-		document.querySelector('select#diagrammer-example>option[value="test_inputs/ast.txt"').selected = true
-		exampleChanged()
-	}
+  const params = new URLSearchParams(window.location.search)
+  if (!params.has('do_not_load_initial_example')) {
+    // select ast.txt example
+    document.querySelector('select#diagrammer-example>option[value="test_inputs/ast.txt"').selected = true
+    exampleChanged()
+  }
 </script>
 <script type="text/javascript">
 	//_MscParse("a>b");

@@ -1,7 +1,7 @@
 // @ts-check
 
 import { visualizations } from '../globals.js'
-import Viz from '../../js/viz.es.js'
+import Viz from '../js/viz.es.js'
 import { getHTMLElement } from '../uiComponentAccess.js'
 import { removeAllChildNodes } from '../d3support.js'
 
@@ -22,7 +22,7 @@ visualizations.set('twopi', visualizeTwopi)
 async function visualizeGraphviz(generatedResult: string, visualizer: string) {
   // https://github.com/mdaines/viz.js/wiki/Usage
   try {
-    const workerURL = 'js/full.render.js'
+    const workerURL = 'web/js/full.render.js'
     const viz = new Viz({ workerURL })
     const anchor = 'diagrammer-graph' // viz_container
 

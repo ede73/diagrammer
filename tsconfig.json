@@ -8,7 +8,11 @@
     // No idea why, but this config causes tsc to think diagrammer_parser is a target and complains about overwriting it (even if it is just imported, not generated, not even a typescript file)
     "build/diagrammer_parser.js",
     "diagrammer_parser.js",
-    "**/diagrammer_parser.js"
+    "**/diagrammer_parser.js",
+    "build/diagrammer_lexer.js",
+    "/home/ede/diagrammer/build/diagrammer_lexer.js",
+    "build/**",
+    "**/build/**",
   ],
   "typeAcquisition": {
     "enable": true,
@@ -36,6 +40,9 @@
       ],
       "//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js": [
         "./node_modules/@types/jquery"
+      ],
+      "@generators/*": [
+        "generators/*"
       ]
     },
     "allowJs": true,

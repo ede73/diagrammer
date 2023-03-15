@@ -73,7 +73,7 @@ function _resolveGenerator(useConfig: TestRunnerConfig) {
   return generator
 }
 
-export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualizationisComplete) {
+export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualizationisComplete: (exitCode: number) => void) {
   if (useConfig.isPipeMarker(useConfig.input) && !useConfig.beingPiped()) {
     _exitError(useConfig, 'Supposed to receive graph via pipe, but not being piped!')
   } else if (!useConfig.isPipeMarker(useConfig.input) && !fs.existsSync(useConfig.input)) {

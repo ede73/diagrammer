@@ -14,7 +14,13 @@
     // Disabling lib check helps (or if puppeteer, jest, babel type errors get fixed)
     //"skipLibCheck": true
     //"checkJs": true
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "baseUrl": "../..",
+    "paths": {
+      "@generators/*": [
+        "generators/*"
+      ]
+    },
   },
   // "include": [
   //   "*.ts"

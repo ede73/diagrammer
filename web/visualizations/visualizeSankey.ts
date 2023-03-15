@@ -5,7 +5,7 @@ import { visualizations } from '../globals.js'
 // this local (typed) import does not have d3-sankey
 // so..import typed d3 as d4 for now, d3 is loaded in index.html
 import * as d4 from 'd3'
-import { type SankeyNodeT, type SankeyLinkT, type SankeyDocumentT } from '../../generators/sankey.js'
+import { type SankeyNodeT, type SankeyLinkT, type SankeyDocumentT } from 'generators/sankey.js'
 
 visualizations.set('sankey', visualizeSankey)
 

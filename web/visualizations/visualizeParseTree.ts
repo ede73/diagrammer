@@ -1,7 +1,6 @@
 // @ts-check
 import go from 'gojs'
 // import * as go from 'go';
-
 import { removeOldVisualizations } from '../d3support.js'
 import { visualizations } from '../globals.js'
 

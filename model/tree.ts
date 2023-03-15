@@ -12,10 +12,8 @@ export class TreeVertex {
   CHILDREN: TreeVertex[] = []
   // Store edges, so we can get the edge properties between this tree root and its children
   EDGES: GraphEdge[] = []
-  data: GraphObject
-  constructor(data: GraphObject) {
-    this.data = data
-  }
+
+  constructor(public data: GraphObject) { }
 
   toString() {
     return `tree(${this.data.getName()}, children=[${this.CHILDREN.map(c => c.data.getName()).join(', ')}])`
@@ -166,9 +164,9 @@ export function makeConnectedTree(canvas: GraphCanvas, allowReferences: boolean 
 
   // make a new or find a TreeVertex that contains node
   function makeSubTree(node: GraphConnectable): TreeVertex {
-    const found = trees.find((p) => p.data === node)
-    if (found) {
-      return found
+    const nodeFound = trees.find((p) => p.data === node)
+    if (nodeFound) {
+      return nodeFound
     }
     const newVertex = new TreeVertex(node)
     trees.push((newVertex))

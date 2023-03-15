@@ -7,7 +7,7 @@ import { type GraphObject } from '../model/graphobject.js'
 import { GraphReference } from '../model/graphreference.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { output } from '../model/support.js'
-import { makeConnectedTree, traverseTree } from '../model/tree.js'
+import { makeConnectedTree, traverseTree, type TreeVertex } from '../model/tree.js'
 
 // ADD TO INDEX.HTML AS: <option value="dendrogram:radialdendrogram">Radial Dendrogram</option>
 // ADD TO INDEX.HTML AS: <option value="dendrogram:reingoldtilford">Reingold-Tilford</option>
@@ -52,8 +52,9 @@ export function dendrogram(graphcanvas: GraphCanvas) {
       treeOutput[treeOutput.length - 1] = [`${what as string},`, ever]
     }
 
-    const getExtras = (node: GraphObject, edge?: GraphEdge) => {
+    const getExtras = (t: TreeVertex, edge?: GraphEdge) => {
       const ret: string[] = []
+      const node: GraphObject = t.data
       if (edge?.getColor()) {
         ret.push(` "edgecolor": "${edge.getColor() ?? ''}"`)
       }
@@ -75,7 +76,7 @@ export function dendrogram(graphcanvas: GraphCanvas) {
       return ''
     }
 
-    const extras = getExtras(t.data, edge)
+    const extras = getExtras(t, edge)
     if (isLeaf) {
       treeOutput.push([`{"name": "${t.data.name}", "size": 1${extras}}`])
     } else {

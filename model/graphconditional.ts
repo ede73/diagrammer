@@ -12,26 +12,26 @@ export class GraphConditional extends GraphGroup {
     // is obviously this GraphConditional (ie. previous statement), so we will use the parent
     // IN THE FUTURE, TODO: Make GraphConditional a NEW parent group for the WHOLE conditional section
     // is GraphConditional(If,elseif..else..endif)
-    super(String(canvas.GROUPIDS++), (type === 'if' ? parent : parent.parent) as GraphContainer)
+    super(String(canvas.parsingContext.GROUPIDS++), (type === 'if' ? parent : parent.parent) as GraphContainer)
     this.canvas = this.getCanvas()
 
     if (type === 'if') {
-      this._conditionalEntryEdge = this.canvas.lastSeenVertex
+      this._conditionalEntryEdge = this.canvas.parsingContext.lastSeenVertex
     } else {
-      this.canvas._exitContainer()
+      this.canvas.parsingContext._exitContainer()
     }
     (this.parent as GraphContainer).addObject(this)
     this.setLabel(label.trim().replace(/(^(if|elseif|endif)\s*|(\s*then$))/g, '').trim())
     this.conditional = type
-    this.canvas._enterContainer(this)
+    this.canvas.parsingContext._enterContainer(this)
 
     if (type === 'endif') {
-      this.canvas._nextConnectableToExitEndIf = this
+      this.canvas.parsingContext._nextConnectableToExitEndIf = this
       // TODO: currently no 'label/info' on endif..
       this.label = 'endif'
-      this.canvas._exitContainer()
+      this.canvas.parsingContext._exitContainer()
       // TODO: Make invisble pseudo exit node...?? This would work for graphviz, but...
-      if (this.canvas._getCurrentContainer() instanceof GraphConditional) {
+      if (this.canvas.parsingContext._getCurrentContainer() instanceof GraphConditional) {
         throw new Error('effinf puffin2')
       }
     }

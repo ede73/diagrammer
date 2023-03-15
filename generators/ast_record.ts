@@ -91,6 +91,7 @@ export function ast_record(graphcanvas: GraphCanvas) {
         const vars = Object.entries(propValues).map(([varName, varValue]) => `${varName}=${varValue as string}`).join(', ')
         params[propNames] = `${vars}`
       } else {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         params[propNames] = `${propValues}`
       }
     })

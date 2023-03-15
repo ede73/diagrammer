@@ -1,7 +1,7 @@
 // @ts-check
 import { sleepABit, writeToElement } from './jest_puppeteer_support.js'
 import { getDiagrammerCode, setDiagrammerCode, getParsingError, clearParsingErrors } from './diagrammer_support.js'
-import { type Page } from 'puppeteer'
+import { type Page, type HTTPRequest, type HTTPResponse } from 'puppeteer'
 import { describe, expect, it } from '@jest/globals'
 
 // test saving, loading from local storage
@@ -26,13 +26,13 @@ describe('Diagrammer', () => {
   beforeEach(async () => {
     // @ts-expect-error page = jest global
     p = page
-    await p.evaluate((localStorageKey) => {
+    await p.evaluate((localStorageKey: string) => {
       localStorage.clear()
     }, localStorageKey)
   })
 
   it('Edit code, save it to local storage', async () => {
-    await p.evaluate((localStorageKey) => {
+    await p.evaluate((localStorageKey: string) => {
       localStorage.clear()
     }, localStorageKey)
     await setDiagrammerCode(p, 'this>is>localstorage>test')
@@ -40,14 +40,14 @@ describe('Diagrammer', () => {
 
     // CSS selector for puppeteer
     await p.click('form[name="contact"]>button#diagrammer-savefile')
-    const storedGraphs = await p.evaluate((localStorageKey) => {
+    const storedGraphs = await p.evaluate((localStorageKey: string) => {
       return localStorage.getItem(localStorageKey)
     }, localStorageKey)
     expect(storedGraphs).toMatch('{"localstorage1":"this>is>localstorage>test"}')
   })
 
   it('Load code from local storage', async () => {
-    await p.evaluate((localStorageKey) => {
+    await p.evaluate((localStorageKey: string) => {
       localStorage.setItem('graphs', '{"localstorage1":"this>is>localstorage>test"}')
     }, localStorageKey)
     await setDiagrammerCode(p, '')
@@ -61,12 +61,12 @@ describe('Diagrammer', () => {
 
   // Initially wanted these to be in separare file, but tests executed in paraller, so messing up local storage (between these two tests)
   it('Import from external storage (mocked)', async () => {
-    await p.evaluate((localStorageKey) => {
+    await p.evaluate((localStorageKey: string) => {
       localStorage.setItem('graphs', '{"localstorage1":"this>is>localstorage>test"}')
     }, localStorageKey)
     // mock the import
     await p.setRequestInterception(true)
-    p.on('request', request => {
+    p.on('request', (request: HTTPRequest) => {
       if (request.url().includes('/loadExport')) {
         request.respond({
           contentType: 'application/json',
@@ -95,7 +95,7 @@ describe('Diagrammer', () => {
     // mock the import
     await clearParsingErrors(p)
     await p.setRequestInterception(true)
-    p.on('request', interceptedRequest => {
+    p.on('request', (interceptedRequest: HTTPRequest) => {
       if (interceptedRequest.url().includes('/saveExport')) {
         interceptedRequest.respond({
           contentType: 'text/plain',

@@ -104,7 +104,7 @@ export class GraphObject {
    */
   setLabel(label: string) {
     // Destructure all variables in the label
-    for (const [variable, value] of Object.entries(this.getCanvas().VARIABLES)) {
+    for (const [variable, value] of Object.entries(this.getCanvas().parsingContext.VARIABLES)) {
       label = label.replace(new RegExp(`\\$\\(${variable}\\)`, 'g'), value)
     }
 

@@ -192,7 +192,7 @@ graphContent
 	}
 	| EQUAL vertexGroupListOrAttrs {
 		parser.trace('EQUAL vertexGroupListOrAttrs :'+$2);
-		$$=yy.GRAPHCANVAS._getCurrentContainer().setEqual($2 instanceof GraphVertex?new Array($2):$2);
+		$$=yy.GRAPHCANVAS.parsingContext._getCurrentContainer().setEqual($2 instanceof GraphVertex?new Array($2):$2);
 	}
 	| SHAPE NAME {throw new Error("Expecting one of the shapes, got ("+$2+")");}
 	| LANDSCAPE		    {
@@ -217,23 +217,23 @@ graphContent
 	}
 	| VERTEX_COLOR colorOrVariable	   {
 		parser.trace('VERTEX_COLOR :'+$2);
-		$$=yy.GRAPHCANVAS._getCurrentContainer().setDefault('vertexcolor'    ,$2=="default"?undefined:$2)
+		$$=yy.GRAPHCANVAS.parsingContext._getCurrentContainer().setDefault('vertexcolor'    ,$2=="default"?undefined:$2)
 	}
 	| VERTEXTEXT_COLOR colorOrVariable {
 		parser.trace('VERTEXTEXT_COLOR :'+$2);
-		$$=yy.GRAPHCANVAS._getCurrentContainer().setDefault('vertextextcolor',$2=="default"?undefined:$2)
+		$$=yy.GRAPHCANVAS.parsingContext._getCurrentContainer().setDefault('vertextextcolor',$2=="default"?undefined:$2)
 	}
 	| EDGE_COLOR colorOrVariable	   {
 		parser.trace('EDGE_COLOR :'+$2);
-		$$=yy.GRAPHCANVAS._getCurrentContainer().setDefault('edgecolor'      ,$2=="default"?undefined:$2)
+		$$=yy.GRAPHCANVAS.parsingContext._getCurrentContainer().setDefault('edgecolor'      ,$2=="default"?undefined:$2)
 	}
 	| EDGETEXT_COLOR colorOrVariable   {
 		parser.trace('EDGETEXT_COLOR :'+$2);
-		$$=yy.GRAPHCANVAS._getCurrentContainer().setDefault('edgetextcolor'  ,$2=="default"?undefined:$2)
+		$$=yy.GRAPHCANVAS.parsingContext._getCurrentContainer().setDefault('edgetextcolor'  ,$2=="default"?undefined:$2)
 	}
 	| GROUP_COLOR colorOrVariable	   {
 		parser.trace('GROUP_COLOR :'+$2);
-		$$=yy.GRAPHCANVAS._getCurrentContainer().setDefault('groupcolor'     ,$2=="default"?undefined:$2)
+		$$=yy.GRAPHCANVAS.parsingContext._getCurrentContainer().setDefault('groupcolor'     ,$2=="default"?undefined:$2)
 	}
 	| DO	{
 		parser.trace('DO :'+$DO);
@@ -243,8 +243,8 @@ graphContent
 	| UNTIL {
 		parser.trace('UNTIL :'+$UNTIL);
 		// TODO: hmm..how should we highlight the until condition here?
-		yy.GRAPHCANVAS._getCurrentContainer().setLabel($UNTIL)
-		$$=yy.GRAPHCANVAS._exitContainer()
+		yy.GRAPHCANVAS.parsingContext._getCurrentContainer().setLabel($UNTIL)
+		$$=yy.GRAPHCANVAS.parsingContext._exitContainer()
 	}
 	| WHILE	{
 		parser.trace('WHILE :'+$WHILE);
@@ -253,7 +253,7 @@ graphContent
 	}
 	| ENDWHILE {
 		parser.trace('ENDWHILE :'+$ENDWHILE);
-		$$=yy.GRAPHCANVAS._exitContainer()
+		$$=yy.GRAPHCANVAS.parsingContext._exitContainer()
 	}
 	| IF {
 		parser.trace('IF :'+$IF);
@@ -274,11 +274,11 @@ graphContent
 	/* A GROUP declaration: GROUP [NAME] [COLOR] [LABEL] */
 	| GROUP GROUPNAME? colorOrVariable? LABEL? GROUP_DECLARATION_END {
 		parser.trace('GROUP : name='+$2+", color="+$3+", label="+$4);
-		$$=yy.GRAPHCANVAS._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS, undefined, $2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
+		$$=yy.GRAPHCANVAS.parsingContext._enterContainer(_getGroupOrMakeNew(yy.GRAPHCANVAS, undefined, $2).setColor($3).setLabel($4==undefined?undefined:$4.substring(1)))
 	}
 	| GROUP_END  {
 		parser.trace('GROUP_END :'+$GROUP_END);
-		$$=yy.GRAPHCANVAS._exitContainer()
+		$$=yy.GRAPHCANVAS.parsingContext._exitContainer()
 	}
 	| START NAME {
 		parser.trace('START :'+$NAME);

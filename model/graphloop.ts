@@ -12,7 +12,7 @@ export class GraphLoop extends GraphGroup {
     // is obviously this GraphConditional (ie. previous statement), so we will use the parent
     // IN THE FUTURE, TODO: Make GraphConditional a NEW parent group for the WHOLE conditional section
     // is GraphConditional(If,elseif..else..endif)
-    super(String(canvas.GROUPIDS++), parent)
+    super(String(canvas.parsingContext.GROUPIDS++), parent)
     this.canvas = this.getCanvas();
 
     (parent).addObject(this)
@@ -20,6 +20,6 @@ export class GraphLoop extends GraphGroup {
     // TODO: right now, digraph generator assumes conditional means if/else.. neeed revamping
     // this.conditional = type
 
-    this.canvas._enterContainer(this)
+    this.canvas.parsingContext._enterContainer(this)
   }
 };

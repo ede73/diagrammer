@@ -10,31 +10,30 @@ import { GraphVertex } from '../../model/graphvertex.js'
 import { GraphConditional } from '../../model/graphconditional.js'
 import { GraphEdgeDirectionType, GraphEdgeLineType } from '../../model/graphedge.js'
 import { describe, expect, it } from '@jest/globals'
+import { type ParsingContext } from '../../model/parsingcontext.js'
 
 // curried, canvas passed on call site
 const canvasHas = (prop: string, value: any) => {
   // Moved away from setting 'defaults' directly as dynamic properties of canvas, they're now in 'defaults' type
   return (canvas: GraphCanvas) => {
-    // just to allow dumping helper debug (see TODO at Run all tests..will go away)
-    try {
-      // Actual canvas properties! vs
-      if (prop in canvas.defaults) {
-        const value2 = canvas.defaults[prop as keyof GraphCanvas['defaults']]
-        expect(value2).toStrictEqual(value)
-      } else if (prop in GraphCanvas) {
-        const value1 = canvas[prop as keyof GraphCanvas]
-        expect(value1).toStrictEqual(value)
-      }
-    } catch (ex) {
-      console.warn(canvas)
-    }
     if (prop in canvas.defaults) {
       const value2 = canvas.defaults[prop as keyof GraphCanvas['defaults']]
       expect(value2).toStrictEqual(value)
-    } else if (prop in GraphCanvas) {
+    } else if (prop as keyof GraphCanvas) {
       const value1 = canvas[prop as keyof GraphCanvas]
       expect(value1).toStrictEqual(value)
+    } else {
+      throw new Error(`Expected property "${prop}" does not exist in GraphCanvas nor its "defaults". Moved? Renamed?`)
     }
+  }
+}
+
+const parsingContextHas = (prop: keyof ParsingContext, value: any) => {
+  // Moved away from setting 'defaults' directly as dynamic properties of canvas, they're now in 'defaults' type
+  return (canvas: GraphCanvas) => {
+    const parsingContext = canvas.parsingContext
+    const value1 = parsingContext[prop]
+    expect(value1).toStrictEqual(value)
   }
 }
 
@@ -132,11 +131,11 @@ const grammarTests = [
   { g: 'vertex color #0000ff', f: [canvasHas('vertexcolor', '#0000ff')] },
   { g: 'vertex text color #0000ff', f: [canvasHas('vertextextcolor', '#0000ff')] },
   { g: 'edge text color #0000ff', f: [canvasHas('edgetextcolor', '#0000ff')] },
-  { g: '$(c:#badede)', f: [canvasHas('VARIABLES', { c: '#badede' })] },
+  { g: '$(c:#badede)', f: [parsingContextHas('VARIABLES', { c: '#badede' })] },
   {
     g: '$(c:#badede)\nedge color $(c)',
     f: [
-      canvasHas('VARIABLES', { c: '#badede' }),
+      parsingContextHas('VARIABLES', { c: '#badede' }),
       canvasHas('edgecolor', '#badede')]
   },
   { g: 'node', f: [canvasContainsAutoProps(['node'])] },
@@ -250,7 +249,6 @@ describe('Parser/grammar rule tests', () => {
   function parseCode(code: string) {
     getParserYY().GRAPHCANVAS = new GraphCanvas()
     try {
-      // @ts-expect-error diagrammerParser type missing, but parse() exists, else this would never work
       diagrammerParser.parse(code)
     } catch (ex) {
       console.warn('=====failed parsing======')
@@ -271,7 +269,6 @@ describe('Parser/grammar rule tests', () => {
     it(`Grammar test ${t.g}`, async () => {
       const c = new GraphCanvas()
       getParserYY().GRAPHCANVAS = c
-      // @ts-expect-error diagrammer parser type missing, but parse() exists, else this would never work
       diagrammerParser.parse(`${t.g}\n`)
       if (t.f) {
         // dump the code (will be part of description, see TODO above)
@@ -290,7 +287,7 @@ describe('Parser/grammar rule tests', () => {
 
   it('graphContent/VARIABLE/state 16', async () => {
     parseCode('$(variable:value) $(toinen:kolmas)')
-    const variables = new Map<string, string>(Object.entries(Array(graphcanvas.VARIABLES)[0]))
+    const variables = new Map<string, string>(Object.entries(Array(graphcanvas.parsingContext.VARIABLES)[0]))
     expect(variables.has('variable')).toBeTruthy()
     expect(variables.has('toinen')).toBeTruthy()
     expect(variables.get('variable')).toMatch('value')
@@ -477,7 +474,7 @@ exit;exit node is also required
     })
     expect(vertices.size).toBe(0)
 
-    expect(graphcanvas.lastSeenVertex?.getName()).toBe('e')
+    expect(graphcanvas.parsingContext.lastSeenVertex?.getName()).toBe('e')
 
     const edges = new Set(['q', 'w', 'e'])
     graphcanvas.getEdges().forEach((edge, idx) => {

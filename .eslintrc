@@ -29,7 +29,9 @@
     // I have strickNullChecks on, but eslint keeps whining
     "@typescript-eslint/prefer-nullish-coalescing":0,
     // alas my vscode ts style disagrees
-    "@typescript-eslint/space-before-function-paren":0
+    "@typescript-eslint/space-before-function-paren":0,
+    // conflicts with VSCode, turn off
+    "generator-star-spacing": 0
   },
   "plugins": [
     "@typescript-eslint"

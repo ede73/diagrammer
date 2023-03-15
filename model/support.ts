@@ -185,7 +185,7 @@ export function outputFormattedText(graphcanvas: GraphCanvas, txt: string, array
 /**
  * Iterate edges
  */
-export function * iterateEdges(graphcanvas: GraphCanvas) {
+export function* iterateEdges(graphcanvas: GraphCanvas) {
   for (const edge of graphcanvas.getEdges()) {
     yield edge
   }

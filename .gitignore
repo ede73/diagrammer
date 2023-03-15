@@ -9,7 +9,7 @@ web/result.txt
 web/error.txt
 web/icons
 web/exported
-tests/web/snapshots/__diff_output__/
+tests/web/snapshots/
 tests/test_outputs/*.png
 tests/test_outputs/*.out
 tests/testrun/**

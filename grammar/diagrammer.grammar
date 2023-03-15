@@ -77,9 +77,7 @@ S
 			    graphcanvas.setVisualizer(graphcanvas.getGenerator());
 			  }
 			}
-			graphcanvas.parseError = yy.parseError;
 			graphcanvas.result = yy.result;
-			//graphcanvas.yy = yy;
 			
 			// Locate the generator, else just use digraph
 			const usegen = generators.get(graphcanvas.getGenerator());

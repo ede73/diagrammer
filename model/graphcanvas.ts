@@ -6,8 +6,6 @@ import { ParsingContext } from './parsingcontext.js'
 export const generators = new Map()
 export const visualizations = new Map()
 
-type IParseError = (str: string, hash: string) => void
-
 type IResult = (generatedCodeLine: string) => void
 
 /**
@@ -31,7 +29,6 @@ export class GraphCanvas extends GraphContainer {
    * Output the generated result
    */
   result?: IResult = undefined
-  parseError?: IParseError = undefined
   generator?: string = undefined
   visualizer?: string = undefined
   shape?: string = undefined

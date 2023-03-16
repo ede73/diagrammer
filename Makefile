@@ -204,13 +204,12 @@ clean:
 	@find build -type f -delete
 	@rm -f .error
 	@rm -f build/types/*
-	@find js -name "*.map" -delete
-	@find js -regextype posix-extended -maxdepth 1 -name "*.js" -and -not -iregex "js/(go|viz|full).*" -delete
-	@find scripts -name "*.map" -or -name "*.js" -delete
+	@find js         -name "*.map" -or -name "*.js" -delete
+	@find scripts    -name "*.map" -or -name "*.js" -delete
 	@find generators -name "*.map" -or -name "*.js" -delete
-	@find model -name "*.map" -or -name "*.js" -delete
-	@find web -name "*.map" -or -name "*.js" -delete
-	@find tests -name "*.map" -or -name "*.js" -delete
+	@find model      -name "*.map" -or -name "*.js" -delete
+	@find tests      -name "*.map" -or -name "*.js" -delete
+	@find web        -name "*.map" -or -name "*.js" -not -path "web/js/*" -delete
 
 watch:
 	scripts/watch_and_make.sh &

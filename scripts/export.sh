@@ -26,6 +26,6 @@ cp scripts/display_image.sh "$OUT"
 #  uglifyjs $m -o $OUT/$m
 #done
 
-sed '/EXPORTREMOVE/{n;d;}' scripts/t.js >$OUT/t.js
+sed '/EXPORTREMOVE/{n;d;}' js/t.js >$OUT/t.js
 sed -i -e 's,scripts/display_image,display_image,g' $OUT/t.js
 cp LICENSE.txt $OUT

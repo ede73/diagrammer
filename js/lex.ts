@@ -5,12 +5,10 @@ import { configSupport, type ConfigType } from './configsupport.js'
 import { doLex } from './diagrammer.js'
 
 export interface LexConfigType extends ConfigType {
-  lex: boolean
   code: string
 }
 
 const config = configSupport<LexConfigType>('lex.js', {
-  lex: true,
   code: ''
 })
 
@@ -20,11 +18,8 @@ function _usage() {
 }
 
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
-  switch (unknownCommandLineOption.toLocaleLowerCase()) {
-    case 'lex':
-      config.lex = true
-      return
-  }
+  // switch (unknownCommandLineOption.toLocaleLowerCase()) {
+  // }
   if (!config.input && fs.existsSync(unknownCommandLineOption)) {
     if (config.code) {
       config.throwError('Something is wrong, going to read the code twice')

@@ -30,8 +30,9 @@ export const configSupport = <SubConfigType extends ConfigType>(scriptName: stri
   cfg.redirectingDiag = true // I've a patched version
   cfg.tp = function (msg: string) {
     const c = this as SubConfigType
+    const visualizer = (c as any).visualizer ? (c as any).visualizer as string : ''
     // TODO: probably missing visualizer (e.g./generate.js)
-    c.traces += `${c.input}:${c.visualizer}:${process.hrtime.bigint()} ${scriptName} ${msg}\n`
+    c.traces += `${c.input}:${visualizer}:${process.hrtime.bigint()} ${scriptName} ${msg}\n`
     if (this.traceProcess) {
       this.printError(`trace:${msg}`)
     }
@@ -60,20 +61,15 @@ export const configSupport = <SubConfigType extends ConfigType>(scriptName: stri
       if (!cfg.beingPiped()) {
         this.throwError('Failure imminent, reading piped input and not being piped')
       }
-      return await (async () => {
-        return await new Promise(function (resolve, reject) {
-          const stdin = process.stdin
-          let data = ''
-          stdin.setEncoding('utf8')
-          stdin.on('data', function (chunk) { data += chunk })
-          stdin.on('end', function () { resolve(data) })
-          stdin.on('error', reject)
-        })
-      })().catch((rejected: any) => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        this.tp(`Failure ${rejected}`)
-        this.dumpTraces()
-      })
+
+      const stdin = process.stdin
+      stdin.setEncoding('utf8')
+      async function read() {
+        const chunks = []
+        for await (const chunk of stdin) chunks.push(chunk)
+        return Buffer.concat(chunks).toString('utf8')
+      }
+      return await read()
     } else {
       return fs.readFileSync(filePath, 'utf8')
     }

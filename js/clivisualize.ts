@@ -22,8 +22,7 @@ function _startVisualizer(useConfig: VisualizeConfigType, optionalOutputFS: numb
       shell: true
     })
   proc.stderr?.on('data', (stderr) => { useConfig.printError(String(stderr)) })
-  // @ts-expect-error Title exists
-  proc.title = 'VISUALIZER'
+  // proc.title = 'VISUALIZER' // title exists, but not on this type :(
   return proc
 }
 
@@ -42,7 +41,7 @@ const _waitForProcesses = async (useConfig: ConfigType, processes: ChildProcess[
 
     const onExit = (process: ChildProcess) => () => {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      useConfig.tp(`  (Process ${process.title} exited with ${process.exitCode as number})`)
+      useConfig.tp(`  (Visualizer exited with ${process.exitCode as number})`)
       completed++
       if (completed === processes.length) {
         resolve(0)
@@ -53,7 +52,7 @@ const _waitForProcesses = async (useConfig: ConfigType, processes: ChildProcess[
       process.on('exit', onExit(process))
       process.on('error', (r: Error) => {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        useConfig.printError(`Something went wrong with ${process.title} - ${r}`)
+        useConfig.printError(`Something went wrong with visualizer - ${r}`)
         useConfig.dumpTraces()
         reject(r)
       })
@@ -165,8 +164,9 @@ export async function doCliVisualize(
     if (useConfig?.returnImage) {
       useConfig.tp('Collect the image for miniserver')
       visualizationProcess.stdout?.setEncoding('latin1')
-      visualizationProcess.stdout?.on('data', (stdout) => {
-        useConfig.outputImage += stdout
+      useConfig.outputImage = ''
+      visualizationProcess.stdout?.on('data', (stdout: string) => {
+        (useConfig.outputImage as string) += stdout
       })
       // visualizationProcess.stdout.on('end', (stdout) => {
       //   console.warn('STDOUT DATA IS NOW READY')
@@ -191,7 +191,7 @@ export async function doCliVisualize(
     useConfig.tp(`stdin error... ${error}`)
     useConfig.dumpTraces()
   })
-  visualizationProcess.stdin?.setEncoding('utf-8')
+  // visualizationProcess.stdin?.setEncoding('utf-8')
   visualizationProcess.stdin?.write(generatedGraphCode)
   const _processes = [visualizationProcess]
   visualizationProcess.stdin?.end()

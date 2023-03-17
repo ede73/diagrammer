@@ -10,7 +10,6 @@ const config = configSupport<VisualizeConfigType>('visualize.js', {
   visualizer: '',
   code: '',
   visualizedGraph: '-',
-  web: false,
   format: 'png',
   webPort: 8000
 })
@@ -38,9 +37,6 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
   switch (unknownCommandLineOption.toLocaleLowerCase()) {
     case 'output':
       _collectOutput = true
-      return
-    case 'web':
-      config.useWebVisualizer = true
       return
     case 'svg':
       config.format = 'svg'

@@ -10,6 +10,7 @@ import { doLex, doParse, doVisualize } from '../js/diagrammer.js'
 import { _getWebVisualizers } from '../js/webvisualize.js'
 import { type LexConfigType } from '../js/lex.js'
 import { type VisualizeConfigType } from '../js/visualizeConfigType.js'
+import { type GenerateConfigType } from './generate.js'
 
 interface TestRunnerConfig extends ConfigType {
   tests: boolean
@@ -23,7 +24,7 @@ interface TestRunnerConfig extends ConfigType {
   code: string
 
 }
-function visualizersToGenerators() {
+function visualizersToGenerators(): Map<string, string> {
   const visualiserToGenerator = new Map<string, string>()
   visualizations.forEach((visualizers, generator: string) => {
     visualizers.forEach((visualizer: string) => {
@@ -73,7 +74,7 @@ function _resolveGenerator(useConfig: TestRunnerConfig) {
   return generator
 }
 
-export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualizationisComplete: (exitCode: number) => void) {
+export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualizationisComplete: (exitCode: number) => Promise<void>) {
   if (useConfig.isPipeMarker(useConfig.input) && !useConfig.beingPiped()) {
     _exitError(useConfig, 'Supposed to receive graph via pipe, but not being piped!')
   } else if (!useConfig.isPipeMarker(useConfig.input) && !fs.existsSync(useConfig.input)) {
@@ -103,7 +104,7 @@ export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualiz
 
   let errors = 0
   doParse(
-    useConfig as LexConfigType,
+    useConfig as unknown as GenerateConfigType,
     useConfig.code,
     _resolveGenerator(useConfig),
     (result) => {
@@ -118,11 +119,13 @@ export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualiz
     })
 
   if (errors) {
-    visualizationisComplete(666)
+    await visualizationisComplete(666)
     return
   }
 
-  await doVisualize(useConfig as VisualizeConfigType, useConfig.parsedCode, useConfig.visualizer, (exitCode) => {
+  // interesting, testRunnerConfig has set:
+  // web, returnImage=false here
+  await doVisualize(useConfig as unknown as VisualizeConfigType, useConfig.parsedCode, useConfig.visualizer, (exitCode) => {
     visualizationisComplete(exitCode)
   })
 }
@@ -189,7 +192,7 @@ async function _main(argv) {
     config.input = config.pipeMarker
   }
   config.tp('Begin lexParseAndVisualize')
-  await lexParseAndVisualize(config, () => {
+  await lexParseAndVisualize(config, async (): Promise<void> => {
     config.tp('Visualization has been completed')
   })
 }

@@ -34,7 +34,6 @@ function _usage() {
 }
 
 let _collectPort = false
-// @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
   if (_collectPort) {
     _collectPort = false
@@ -267,7 +266,6 @@ for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
 }
 
 config.tp('Begin waiting all tests')
-// @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
 await Promise.all(waitTests)
 config.tp('Done waiting for all tests')
 if (failedTests.length > 0) {

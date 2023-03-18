@@ -77,7 +77,7 @@ export function nwdiag(graphcanvas: GraphCanvas) {
 
   function getMappedShape(obj: GraphConnectable) {
     if (obj instanceof GraphVertex) {
-      const currentShape = obj.shape as keyof typeof NetworkDiagShapeMap
+      const currentShape = obj.shape // as keyof typeof NetworkDiagShapeMap
       if (obj.shape && !NetworkDiagShapeMap[currentShape]) {
         throw new Error('Missing shape mapping')
       }

@@ -119,7 +119,7 @@ export function mscgen(graphcanvas: GraphCanvas) {
     // but we could SET arrow type if we'd like
     let rightName = rhs.getName()
 
-    const attrs = []
+    const attrs: string[] = []
     let note = ''
     if (edge.url) {
       attrs.push(`URL="${edge.url}"`)

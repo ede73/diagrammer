@@ -123,10 +123,8 @@ export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualiz
     return
   }
 
-  // interesting, testRunnerConfig has set:
-  // web, returnImage=false here
   await doVisualize(useConfig as unknown as VisualizeConfigType, useConfig.parsedCode, useConfig.visualizer, (exitCode) => {
-    visualizationisComplete(exitCode)
+    visualizationisComplete(exitCode).catch(r => { })
   })
 }
 

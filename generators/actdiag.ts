@@ -84,7 +84,7 @@ export function actdiag(graphcanvas: GraphCanvas) {
       obj.getObjects().forEach((obj: GraphConnectable) => {
         const mappedShape = (obj => {
           if (obj instanceof GraphVertex) {
-            const currentShape = obj.shape as keyof typeof ActDiagShapeMap
+            const currentShape = obj.shape // as keyof typeof ActDiagShapeMap
             if (obj.shape && !ActDiagShapeMap[currentShape]) {
               throw new Error('Missing shape mapping')
             }
@@ -117,7 +117,7 @@ export function actdiag(graphcanvas: GraphCanvas) {
 
       const mappedShape = (obj => {
         if (obj instanceof GraphVertex) {
-          const currentShape = obj.shape as keyof typeof ActDiagShapeMap
+          const currentShape = obj.shape
 
           if (obj.shape && !ActDiagShapeMap[currentShape]) {
             throw new Error('Missing shape mapping')

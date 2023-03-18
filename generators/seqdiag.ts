@@ -50,7 +50,7 @@ export function seqdiag(graphcanvas: GraphCanvas) {
   })
 
   graphcanvas.getEdges().forEach(edge => {
-    const attrs = []
+    const attrs: string[] = []
     let edgeType = ''
     let rhs = edge.right
     const lhs = edge.left

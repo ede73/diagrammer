@@ -158,7 +158,7 @@ async function runATest(useVisualizer: string, webOnlyVisualizer: boolean, testF
     }
     const previousRunPath = `${prevRunPath}`
     const previouslyGeneratedCodeFile = `${previousRunPath}/${testFileName}.txt`
-    const errors = []
+    const errors: string[] = []
     if (!currentAndLastRunProduceSameResults(previouslyGeneratedCodeFile, cfg.parsedCode)) {
       // TODO: store current run, so user can inspect better? Now current run is just kept in memory
       errors.push(`Using visualizer ${useVisualizer}, transpiling ${cfg.input} generated differences compared to previous run ${previouslyGeneratedCodeFile}`)

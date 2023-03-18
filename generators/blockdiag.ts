@@ -123,7 +123,7 @@ export function blockdiag(graphcanvas: GraphCanvas) {
       obj.getObjects().forEach(obj => {
         const mappedShape = (obj => {
           if (obj instanceof GraphVertex) {
-            const currentShape = obj.shape as keyof typeof BlockDiagShapeMap
+            const currentShape = obj.shape // as keyof typeof BlockDiagShapeMap
             if (obj.shape && !BlockDiagShapeMap[currentShape]) {
               throw new Error('Missing shape mapping')
             }
@@ -153,7 +153,7 @@ export function blockdiag(graphcanvas: GraphCanvas) {
       if (style !== '' && style.match(/(dotted|dashed|solid)/) === null) {
         style = ''
       }
-      const currentShape = (obj as GraphVertex).shape as keyof typeof BlockDiagShapeMap
+      const currentShape = (obj as GraphVertex).shape
       if ((obj as GraphVertex).shape && !BlockDiagShapeMap[currentShape]) {
         throw new Error('Missing shape mapping')
       }

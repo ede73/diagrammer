@@ -134,7 +134,7 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
         }
       }
       const color = getAttributeAndFormat(edge, 'color', '[{0}]').trim()
-      let lt
+      let linkType: string
       let rhs = edge.right
       let lhs = edge.left
 
@@ -175,15 +175,15 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
       const dash = edge.lineType() === GraphEdgeLineType.DASHED
       let swap = false
       if (edge.edgeType.includes('<') && edge.edgeType.includes('>')) {
-        lt = (dot ? '-' : '') + '-' + color + '>'
+        linkType = (dot ? '-' : '') + '-' + color + '>'
         swap = true
       } else if (edge.edgeType.includes('<')) {
         const tmp = lhs
         lhs = rhs
         rhs = tmp
-        lt = (dot ? '-' : '') + '-' + color + '>'
+        linkType = (dot ? '-' : '') + '-' + color + '>'
       } else if (edge.edgeType.includes('>')) {
-        lt = (dot ? '-' : '') + '-' + color + '>'
+        linkType = (dot ? '-' : '') + '-' + color + '>'
       } else if (dot) {
         // dotted
         lout(getAttributeAndFormat(edge, 'label', '...{0}...'))
@@ -194,12 +194,12 @@ export function plantuml_sequence(graphcanvas: GraphCanvas) {
         continue
       } else {
         // is dotted or dashed no direction
-        lt = `-${color}>`
+        linkType = `-${color}>`
       }
       const t = ''
       if (label) { label = `:${label}` } else { label = '' }
-      lout(lhs.getName() + lt + rhs.getName() + t + label)
-      if (swap) { lout(rhs.getName() + lt + lhs.getName() + t + label) }
+      lout(lhs.getName() + linkType + rhs.getName() + t + label)
+      if (swap) { lout(rhs.getName() + linkType + lhs.getName() + t + label) }
       if (isSubGraph) {
         if (!rhs.active) {
           lout(`activate ${rhs.getName()}`, true)

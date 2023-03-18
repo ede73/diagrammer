@@ -41,7 +41,7 @@ const _waitForProcesses = async (useConfig: ConfigType, processes: ChildProcess[
 
     const onExit = (process: ChildProcess) => () => {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      useConfig.tp(`  (Visualizer exited with ${process.exitCode as number})`)
+      useConfig.tp(`  (Visualizer exited with ${process.exitCode})`)
       completed++
       if (completed === processes.length) {
         resolve(0)
@@ -166,7 +166,7 @@ export async function doCliVisualize(
       visualizationProcess.stdout?.setEncoding('latin1')
       useConfig.outputImage = ''
       visualizationProcess.stdout?.on('data', (stdout: string) => {
-        (useConfig.outputImage as string) += stdout
+        useConfig.outputImage += stdout
       })
       // visualizationProcess.stdout.on('end', (stdout) => {
       //   console.warn('STDOUT DATA IS NOW READY')
@@ -200,7 +200,7 @@ export async function doCliVisualize(
     if (outputFileStream) {
       fs.closeSync(outputFileStream)
     }
-    finished(visualizationProcess.exitCode as number)
+    finished(visualizationProcess.exitCode)
   }, (rej) => {
     // rej could be anything really
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

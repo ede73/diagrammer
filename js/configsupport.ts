@@ -58,20 +58,24 @@ export const configSupport = <SubConfigType extends ConfigType>(scriptName: stri
   cfg.readFile = async function (filePath: string): Promise<string> {
     if (filePath === '-') {
       this.tp('Reading from stdin..')
+
       if (!cfg.beingPiped()) {
         this.throwError('Failure imminent, reading piped input and not being piped')
       }
 
       const stdin = process.stdin
       stdin.setEncoding('utf8')
-      async function read() {
-        const chunks = []
-        for await (const chunk of stdin) chunks.push(chunk)
-        return Buffer.concat(chunks).toString('utf8')
+
+      const chunks = []
+
+      for await (const chunk of stdin) {
+        chunks.push(chunk)
       }
-      return await read()
+
+      return chunks.join('')
     } else {
-      return fs.readFileSync(filePath, 'utf8')
+      const fileContent = await fs.promises.readFile(filePath, { encoding: 'utf8' })
+      return fileContent
     }
   }
   cfg.parseCommandLine = async function (args: string[], _usage: () => void, processUnknownCommand: (arg: string) => Promise<void>) {

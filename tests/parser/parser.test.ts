@@ -11,6 +11,7 @@ import { GraphConditional } from '../../model/graphconditional.js'
 import { GraphEdgeDirectionType, GraphEdgeLineType } from '../../model/graphedge.js'
 import { describe, expect, it } from '@jest/globals'
 import { type ParsingContext } from '../../model/parsingcontext.js'
+import { Generator } from '../../generators/generator.js'
 
 // curried, canvas passed on call site
 const defaultsHas = (prop: keyof GraphCanvas['defaults'], value: any) => {
@@ -228,9 +229,15 @@ describe('Parser/grammar rule tests', () => {
 
   beforeAll(async () => {
     // Copied over to sharedstate
-    generators.set('abba', (gv: GraphCanvas) => {
-      graphcanvas = gv
-    })
+    // generators.set('abba', (gv: GraphCanvas) => {
+    //   graphcanvas = gv
+    // })
+    class FakeGenerator extends Generator {
+      generate() {
+        graphcanvas = this.graphCanvas
+      }
+    }
+    generators.set('abba', FakeGenerator)
     getParserYY().result = function (result: string) {
       throw new Error('Setup failure')
     }

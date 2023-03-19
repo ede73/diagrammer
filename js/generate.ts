@@ -34,11 +34,11 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
     return
   }
   // must be generator
-  const generator = unknownCommandLineOption.toLocaleLowerCase()
-  if (!generators.has(generator)) {
-    config.throwError(`Unknown generator (${generator})`)
+  const generatorName = unknownCommandLineOption.toLocaleLowerCase()
+  if (!generators.has(generatorName)) {
+    config.throwError(`Unknown generator (${generatorName})`)
   }
-  config.generator = generator
+  config.generator = generatorName
 })
 
 if (config.verbose) {

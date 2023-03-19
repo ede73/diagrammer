@@ -17,7 +17,7 @@ S
 		{
 			/*	- caller can ALWAYS specify the generator
 				- caller can ALWAYS specify the visualizer
-				- only graphviz has multiple visualizer (currently it 
+				- only graphviz has multiple visualizer (currently it
 				  only draws digraphs, but those can be visualized with dot, neato.circo etc)
 				- generator/visualizer(since different grammars)
 					- mscgen=mscgen
@@ -35,22 +35,22 @@ S
 
 			// Generator can be defined by the caller(user) or suggested by the graph
 			const graphcanvas = yy.GRAPHCANVAS;
-			const parsedGenerator = graphcanvas.getGenerator();
+			const parsedGeneratorName = graphcanvas.getGenerator();
 			const parsedVisualizer = graphcanvas.getVisualizer();
 			// TODO: Simplify, pass back to the caller, let it do decision what to use
 			// THIS special feature is only used with web UI, so makes more sense than complicated BL here..
 			if (yy.parsedGeneratorAndVisualizer) {
-			  yy.parsedGeneratorAndVisualizer(parsedGenerator, parsedVisualizer, yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER);
+			  yy.parsedGeneratorAndVisualizer(parsedGeneratorName, parsedVisualizer, yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER);
 			}
 
 			if (yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER) {
 			  debug('Called wants to prefer generator/parser from the script');
-			  if (parsedGenerator) {
-			    const foundGeneratorFunc = generators.get(parsedGenerator);
-			    if (foundGeneratorFunc) {
+			  if (parsedGeneratorName) {
+			    const generatorClassName = generators.get(parsedGeneratorName);
+			    if (generatorClassName) {
 			      // We're asked to prefer script generator and such generator exists
-			      yy.USE_GENERATOR = parsedGenerator;
-			      debug(`Using found and recognized parsed generator (${parsedGenerator})`);
+			      yy.USE_GENERATOR = parsedGeneratorName;
+			      debug(`Using found and recognized parsed generator (${parsedGeneratorName})`);
 			    }
 			  }
 			  if (parsedVisualizer) {
@@ -78,11 +78,11 @@ S
 			  }
 			}
 			graphcanvas.result = yy.result;
-			
+
 			// Locate the generator, else just use digraph
-			const usegen = generators.get(graphcanvas.getGenerator());
-			if (usegen) {
-				usegen(graphcanvas);
+			const generatorClass = generators.get(graphcanvas.getGenerator());
+			if (generatorClass) {
+				(new generatorClass(graphcanvas)).generate();
 			} else {
 				console.log("Available generators:");
 				for (const key of generators.keys()) {
@@ -140,7 +140,7 @@ This means _getVertexOrGroup MUST be able to return a Group as well! If name mat
 left recursive
   X=[STYLES] [SHAPES] NAME [IMAGE|COLOR]
   X ([ LISTSEP X]*)
-See Cris Dodds good explanation of right recursion 
+See Cris Dodds good explanation of right recursion
 http://stackoverflow.com/questions/12715961/grammar-spec-resolving-shift-reduce-conflicts
 And even better thorough explanation from IBM
 http://publib.boulder.ibm.com/infocenter/zvm/v5r4/index.jsp?topic=/com.ibm.zvm.v54.dmsp4/hcsp4b10120.htm
@@ -286,4 +286,4 @@ graphContent
 		parser.trace('readEvents3 :'+$readEvents)
 	}
 	;
-%% 
+%%

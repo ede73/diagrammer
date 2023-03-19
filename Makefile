@@ -135,7 +135,7 @@ build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators 
 	fi
 	@sed -i "1 i\\\\" $@
 	@for generator in generators/*.js; do \
-	  genfunc="$$(basename $$generator | cut -d. -f1)"; \
+	  genfunc="$$(grep 'export class' $$generator | cut -d' ' -f3)"; \
 	  sed -i "1 i\import {$$genfunc} from '../$$generator';" $@ \
 	;done
 	@#sed -i "1 i\import * as model from '../model/model.js';" $@

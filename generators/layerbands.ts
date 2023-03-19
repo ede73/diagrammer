@@ -1,44 +1,41 @@
 // @ts-check
 
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators, type GraphCanvas } from '../model/graphcanvas.js'
+import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
-import { output } from '../model/support.js'
+import { Generator } from './generator.js'
 
 // ADD TO INDEX.HTML AS: <option value="layerbands">LayerBands(GoJS)</option>
 
 /**
  * To test: node js/generate.js verbose tests/test_inputs/layerbands.txt layerbands
 */
-export function layerbands(graphcanvas: GraphCanvas) {
-  const lout = (...args: any[]) => {
-    const [textOrIndent, maybeIndent] = args
-    output(graphcanvas, textOrIndent, maybeIndent)
-  }
-
-  const groups: { key: string, category: string, itemArray: Array<{ text: string }> } = {
-    key: '_BANDS',
-    category: 'Bands',
-    itemArray: []
-  }
-  const linkedVertices: any[] = [
-    groups
-  ]
-
-  graphcanvas.getObjects().forEach(obj => {
-    if (obj instanceof GraphGroup) {
-      groups.itemArray.push({ text: obj.name ?? '' })
+export class LayerBands extends Generator {
+  generate() {
+    const groups: { key: string, category: string, itemArray: Array<{ text: string }> } = {
+      key: '_BANDS',
+      category: 'Bands',
+      itemArray: []
     }
-  })
+    const linkedVertices: any[] = [
+      groups
+    ]
 
-  graphcanvas.getEdges().forEach(edge => {
-    if (!edge.left) {
-      // probably our root
-      // linkedVertexs.push({key: l.right.name});
-    } else {
-      linkedVertices.push({ key: edge.right.name, parent: edge.left.name })
-    }
-  })
-  lout(JSON.stringify(linkedVertices))
+    this.graphCanvas.getObjects().forEach(obj => {
+      if (obj instanceof GraphGroup) {
+        groups.itemArray.push({ text: obj.name ?? '' })
+      }
+    })
+
+    this.graphCanvas.getEdges().forEach(edge => {
+      if (!edge.left) {
+        // probably our root
+        // linkedVertexs.push({key: l.right.name});
+      } else {
+        linkedVertices.push({ key: edge.right.name, parent: edge.left.name })
+      }
+    })
+    this.lout(JSON.stringify(linkedVertices))
+  }
 }
-generators.set('layerbands', layerbands)
+generators.set('layerbands', LayerBands)

@@ -13,7 +13,7 @@ import { getParserYY } from '../build/types/diagrammer_parser_types.js'
 export function doParse(
   config: GenerateConfigType,
   diagrammerCode: string,
-  generator: string,
+  generatorName: string,
   resultCallback?: (resultLine: string) => void,
   parseErrorCallback?: (parseError: string, hash: string) => void,
   traceCallback?: (msg: string) => void) {
@@ -21,7 +21,7 @@ export function doParse(
     config.throwError('No code to parser')
   }
   const parserYY = getParserYY()
-  parserYY.USE_GENERATOR = generator
+  parserYY.USE_GENERATOR = generatorName
   parserYY.trace = traceCallback || ((msg: string) => { })
 
   // default callback unless overridden
@@ -42,6 +42,7 @@ export function doParse(
   } catch (ex) {
     // wow, something went down
     parserYY.parseError(String(ex), 'Caught Exception')
+    throw ex
   }
 }
 

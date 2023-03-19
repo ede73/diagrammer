@@ -72,13 +72,6 @@ async function _webRender(useConfig: VisualizeConfigType, visualizer: string, di
   await browser.close()
 }
 
-// TODO: read dynamically(SOON!)
-export function _getWebVisualizers() {
-  return ['circlepacked', 'radialdendrogram', 'reingoldtilford',
-    'circo', 'dot', 'fdp', 'neato', 'osage',
-    'sfdp', 'twopi', 'layerbands', 'parsetree', 'sankey', 'umlclass']
-}
-
 // TODO: oddity for momentarily, expecting diagrammer, not parser language..will change
 export async function doWebVisualize(
   useConfig: VisualizeConfigType,

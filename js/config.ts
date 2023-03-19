@@ -25,7 +25,10 @@ import { visualizeSankey } from '../web/visualizations/visualizeSankey.js'
 import { visualizeUmlClass } from '../web/visualizations/visualizeUmlClass.js'
 
 export class Visualization {
-  constructor(public name: string, public menuName: string, public generator: typeof Generator, public visualization?: (generatedResult: string) => Promise<void>) { }
+  public webVisualizer: boolean
+  constructor(public name: string, public menuName: string, public generator: typeof Generator, public visualization?: (generatedResult: string) => Promise<void>) {
+    this.webVisualizer = visualization !== undefined
+  }
 }
 const _visualizations: Visualization[] = [
   new Visualization('actdiag', 'Activity Diagram(cli)', ActDiag),

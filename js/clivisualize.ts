@@ -1,6 +1,5 @@
 import * as fs from 'fs'
 import { spawn, type ChildProcess } from 'child_process'
-import { _getWebVisualizers } from './webvisualize.js'
 import { type ConfigType } from './configsupport.js'
 import { type VisualizeConfigType } from './visualizeConfigType.js'
 
@@ -21,15 +20,6 @@ function _startVisualizer(useConfig: VisualizeConfigType, optionalOutputFS: numb
   proc.stderr?.on('data', (stderr) => { useConfig.printError(String(stderr)) })
   // proc.title = 'VISUALIZER' // title exists, but not on this type :(
   return proc
-}
-
-export function _isHackyWebVisualizer(config: VisualizeConfigType, overrideVisualizer: string) {
-  // TODO: test runner support pending
-  if (config.tests) {
-    return false
-  }
-  const searchVisualizer = overrideVisualizer || config.visualizer
-  return _getWebVisualizers().includes(searchVisualizer)
 }
 
 const _waitForProcesses = async (useConfig: ConfigType, processes: ChildProcess[]) => {
@@ -198,7 +188,7 @@ export async function doCliVisualize(
     if (outputFileStream) {
       fs.closeSync(outputFileStream)
     }
-    finished(visualizationProcess.exitCode)
+    finished(visualizationProcess.exitCode ?? -1)
   }, (rej) => {
     // rej could be anything really
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

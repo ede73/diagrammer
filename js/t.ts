@@ -3,11 +3,10 @@ import * as fs from 'fs'
 import path from 'path'
 import { configSupport, type ConfigType } from '../js/configsupport.js'
 import { doLex, doParse, doVisualize } from '../js/diagrammer.js'
-import { _getWebVisualizers } from '../js/webvisualize.js'
 import { type LexConfigType } from '../js/lex.js'
 import { type VisualizeConfigType } from '../js/visualizeConfigType.js'
 import { type GenerateConfigType } from './generate.js'
-import { findGeneratorForVisualization, hasVisualizer, visualizationsToGenerators } from './config.js'
+import { findGeneratorForVisualization, hasVisualizer, visualizations, visualizationsToGenerators } from './config.js'
 
 interface TestRunnerConfig extends ConfigType {
   tests: boolean
@@ -42,7 +41,8 @@ function _isHackyWebVisualizer(config: TestRunnerConfig, overrideVisualizer?: st
     return false
   }
   const searchVisualizer = overrideVisualizer || config.visualizer
-  return _getWebVisualizers().includes(searchVisualizer)
+  const s = visualizations.find(p => p.name === searchVisualizer)
+  return s?.webVisualizer
 }
 
 function _exitError(useConfig, msg: string) {
@@ -102,10 +102,11 @@ export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualiz
 async function _main(argv: any[]) {
   const config = getEmptyConfig()
   function _usage() {
-    const visualizers = Array.from(visualizationsToGenerators().keys())
+    const visualizers = visualizations.map(p => p.name)
+    const webVisualizers = visualizations.filter(p => p.webVisualizer).map(p => p.name)
     config.printError(`USAGE: [silent] [dont_run_visualizer] [tests] [verbose] [text] [svg] [output file] [INPUT] [${visualizers.join(', ')}]`)
     config.printError('Each visualizer will get converted to proper generator')
-    config.printError(`Experimental: Web only renderers: [${_getWebVisualizers().join(', ')}]`)
+    config.printError(`Experimental: Web only renderers: [${webVisualizers.join(', ')}]`)
     process.exit(0)
   }
 

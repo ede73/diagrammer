@@ -2,9 +2,9 @@
 
 import { configSupport } from './configsupport.js'
 import { doVisualize } from './diagrammer.js'
-import { _getWebVisualizers } from './webvisualize.js'
 import * as fs from 'fs'
 import { type VisualizeConfigType } from './visualizeConfigType.js'
+import { visualizations } from './config.js'
 
 const config = configSupport<VisualizeConfigType>('visualize.js', {
   visualizer: '',
@@ -15,7 +15,7 @@ const config = configSupport<VisualizeConfigType>('visualize.js', {
 })
 
 function _usage() {
-  const visualizers = _getWebVisualizers()
+  const visualizers = visualizations.filter(p => p.webVisualizer).map(p => p.name)
   config.printError(`USAGE: [verbose] [INPUT] ${visualizers.join('|')}]`)
   process.exit(0)
 }

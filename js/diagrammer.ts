@@ -2,7 +2,7 @@ import * as lexer from '../build/diagrammer_lexer.js'
 import { GraphCanvas } from '../model/graphcanvas.js'
 import { parse as diagrammerParse } from '../build/diagrammer_parser.js'
 import { doWebVisualize } from './webvisualize.js'
-import { doCliVisualize, isCliVisualizer } from './clivisualize.js'
+import { doCliVisualize, supportsCliVisualization } from './clivisualize.js'
 import { type VisualizeConfigType } from './visualizeConfigType.js'
 import { type LexConfigType } from './lex.js'
 import { type GenerateConfigType } from './generate.js'
@@ -78,7 +78,7 @@ export async function doVisualize(
   if (generatedGraphCode === '') {
     useConfig.throwError('no parsed code')
   }
-  if (isCliVisualizer(useConfig)) {
+  if (supportsCliVisualization(useConfig)) {
     // TODO: oddity for momentarily, expecting diagrammer, not parser language..will change
     await doCliVisualize(useConfig, generatedGraphCode, visualizer, finished)
   } else {

@@ -24,45 +24,113 @@ import { visualizeReingoldTilford } from '../web/visualizations/visualizeReingol
 import { visualizeSankey } from '../web/visualizations/visualizeSankey.js'
 import { visualizeUmlClass } from '../web/visualizations/visualizeUmlClass.js'
 
+type ICommandLine = (format: string, outputFile?: string) => string[]
+
 export class Visualization {
   public webVisualizer: boolean
-  constructor(public name: string, public menuName: string, public generator: typeof Generator, public visualization?: (generatedResult: string) => Promise<void>) {
+  constructor(public name: string,
+    public menuName: string,
+    public generator: typeof Generator,
+    public visualization?: (generatedResult: string) => Promise<void>,
+    public cli?: ICommandLine) {
     this.webVisualizer = visualization !== undefined
   }
 }
+
+const buggyDiags = (command: string, format: string, outputFile: string) => {
+  const font = '/usr/share/fonts/truetype/dejavu//DejaVuSans-Bold.ttf'
+  const redirectingDiag = true
+  if (redirectingDiag) {
+    return [
+      `${command}`,
+      '-a',
+      `-T${format}`,
+      '-f',
+      font,
+      '-',
+      `-o${outputFile}`]
+  } else {
+    return [
+      // piping works if running as cat file|nwdiag3 -o/dev/stdout -o/dev/stdin
+      // of course node.js spawn doesn't provide /dev/stdout nor /dev/stdin
+      // https://github.com/nodejs/node/issues/21941
+      'sh',
+      '-c',
+      `cat -| /usr/bin/${command}3 -a -T${format} -f${font} -o/dev/stdout /dev/stdin|cat`]
+  }
+}
+
 const _visualizations: Visualization[] = [
-  new Visualization('actdiag', 'Activity Diagram(cli)', ActDiag),
+  new Visualization('actdiag', 'Activity Diagram(cli)', ActDiag,
+    undefined, (format: string, outputFile?: string) => buggyDiags('actdiag', format, outputFile ?? '-')),
   new Visualization('ast', 'AST(JSON only)', AST),
   new Visualization('ast_record', 'Abstract Syntax Tree(Record)', ASTRecord, async (g) => {
     await visualizeGraphviz(g, 'dot')
   }),
-  new Visualization('blockdiag', 'Block Diagram(cli)', BlockDiag),
+  new Visualization('blockdiag', 'Block Diagram(cli)', BlockDiag, undefined, (format: string, outputFile?: string) => buggyDiags('blockdiag', format, outputFile ?? '-')),
   new Visualization('dot', 'Graphviz - dot(www/cli)', DiGraph, async (g) => {
     await visualizeGraphviz(g, 'dot')
-  }),
+  }, (format: string) => [
+    'dot',
+    '-q',
+    `-T${format}`
+  ]),
   new Visualization('fdp', 'Graphviz - fdp(www/cli)', DiGraph, async (g) => {
     await visualizeGraphviz(g, 'fdp')
-  }),
+  }, (format: string) => [
+    'fdp',
+    '-q',
+    `-T${format}`
+  ]),
   new Visualization('neato', 'Graphviz - neato(www/cli)', DiGraph, async (g) => {
     await visualizeGraphviz(g, 'neato')
-  }),
+  }, (format: string) => [
+    'neato',
+    '-q',
+    `-T${format}`
+  ]),
   new Visualization('osage', 'Graphviz - osage(www/cli)', DiGraph, async (g) => {
     await visualizeGraphviz(g, 'osage')
-  }),
+  }, (format: string) => [
+    'osage',
+    '-q',
+    `-T${format}`
+  ]),
   new Visualization('twopi', 'Graphviz - twopi(www/cli)', DiGraph, async (g) => {
     await visualizeGraphviz(g, 'twopi')
-  }),
-  new Visualization('sfdp', 'Graphviz - sfdp(cli)', DiGraph),
+  }, (format: string) => [
+    'twopi',
+    '-q',
+    `-T${format}`
+  ]),
+  new Visualization('sfdp', 'Graphviz - sfdp(cli)', DiGraph, undefined, (format: string) => [
+    'sfdp',
+    '-q',
+    `-T${format}`
+  ]),
   new Visualization('layerbands', 'LayerBands(GoJS)', LayerBands, visualizeLayerBands),
-  new Visualization('mscgen', 'MSCGen(www/cli)', MSCGen, visualizeMscGen),
-  new Visualization('nwdiag', 'Network Diagram(cli)', NWDiag),
+  new Visualization('mscgen', 'MSCGen(www/cli)', MSCGen, visualizeMscGen, (format: string) => [
+    'mscgen',
+    '-i-',
+    '-o-',
+    `-T${format}`
+  ]),
+  new Visualization('nwdiag', 'Network Diagram(cli)', NWDiag, undefined, (format: string, outputFile?: string) => buggyDiags('nwdiag', format, outputFile ?? '-')),
   new Visualization('parsetree', 'ParseTree(GoJS)', ParseTree, visualizeParseTree),
   new Visualization('circlepacked', 'Circle packed', Dendrogram, visualizeCirclePacked),
   new Visualization('radialdendrogram', 'Radial Dendrogram', Dendrogram, visualizeRadialDendrogram),
   new Visualization('reingoldtilford', 'Reingold-Tilford', Dendrogram, visualizeReingoldTilford),
-  new Visualization('plantuml_sequence', 'PlantUML Sequence Diagram(cli)', PlantUMLSequence),
+  new Visualization('plantuml_sequence', 'PlantUML Sequence Diagram(cli)', PlantUMLSequence, undefined, (format: string) => [
+    'java',
+    '-Djava.awt.headless=true',
+    '-Xmx2048m',
+    '-jar',
+    'ext/plantuml.jar',
+    `-t${format.toLocaleLowerCase()}`,
+    '-p'
+  ]),
   new Visualization('sankey', 'Sankey', Sankey, visualizeSankey),
-  new Visualization('seqdiag', 'Sequence Diagram(cli)', SeqDiag),
+  new Visualization('seqdiag', 'Sequence Diagram(cli)', SeqDiag, undefined, (format: string, outputFile?: string) => buggyDiags('seqdiag', format, outputFile ?? '-')),
   new Visualization('umlclass', 'UMLClass(GoJS)', UMLClass, visualizeUmlClass)
 ]
 

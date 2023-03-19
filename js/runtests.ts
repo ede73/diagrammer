@@ -190,7 +190,7 @@ async function runATest(useVisualizer: string, webOnlyVisualizer: boolean, testF
 const testsPath = path.join(process.cwd(), config.testInputPath)
 const testFiles = fs.readdirSync(testsPath).map(f => f.replace('.txt', ''))
 
-const testVisualizers = ['dot', 'mscgen', 'plantumlsequence', 'actdiag', 'blockdiag', 'nwdiag', 'seqdiag']
+const testVisualizers = ['dot', 'mscgen', 'plantuml_sequence', 'actdiag', 'blockdiag', 'nwdiag', 'seqdiag']
 
 // Some diagrams cant be converted (might be generator limitation or just too expressive diagram)
 const exclusions: Record<string, string[]> = {
@@ -202,7 +202,7 @@ const onlyTheseTests = {
   nwdiag: ['nwdiag', 'nwdiag2', 'nwdiag3', 'nwdiag5', 'nwdiag_multiple_ips'],
   mscgen: ['events', 'state_conditionals', 'state_sequence', 'state_sequence2'],
   seqdiag: ['events', 'state_conditionals', 'state_sequence', 'state_sequence2'],
-  plantumlsequence: ['events', 'state_conditionals', 'state_sequence', 'state_sequence2', 'plantuml_context', 'plantuml_context2'],
+  plantuml_sequence: ['events', 'state_conditionals', 'state_sequence', 'state_sequence2', 'plantuml_context', 'plantuml_context2'],
   actdiag: ['ast', 'state_group', 'group_group_link'],
   blockdiag: ['ast', 'state_group', 'group_group_link'],
   ast: ['ast'],

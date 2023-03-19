@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import { spawn, type ChildProcess } from 'child_process'
 import { type ConfigType } from './configsupport.js'
 import { type VisualizeConfigType } from './visualizeConfigType.js'
+import { visualizations } from './config.js'
 
 function _startVisualizer(useConfig: VisualizeConfigType, optionalOutputFS: number | undefined, args: string[]) {
   const cmd = args[0]
@@ -47,69 +48,6 @@ const _waitForProcesses = async (useConfig: ConfigType, processes: ChildProcess[
   })
 }
 
-function _getVisualizerCommand(useConfig: VisualizeConfigType) {
-  const plantUmlJar = 'ext/plantuml.jar'
-
-  switch (useConfig.visualizer) {
-    case 'nwdiag':
-    case 'seqdiag':
-    case 'actdiag':
-    case 'blockdiag': {
-      const font = '/usr/share/fonts/truetype/dejavu//DejaVuSans-Bold.ttf'
-      if (useConfig.redirectingDiag) {
-        return [
-          `${useConfig.visualizer}`,
-          '-a',
-          `-T${useConfig.format}`,
-          '-f',
-          font,
-          '-',
-          `-o${useConfig.visualizedGraph}`]
-      } else {
-        return [
-          // piping works if running as cat file|nwdiag3 -o/dev/stdout -o/dev/stdin
-          // of course node.js spawn doesn't provide /dev/stdout nor /dev/stdin
-          // https://github.com/nodejs/node/issues/21941
-          'sh',
-          '-c',
-          `cat -| /usr/bin/${useConfig.visualizer}3 -a -T${useConfig.format} -f/usr/share/fonts/truetype/dejavu//DejaVuSans-Bold.ttf -o/dev/stdout /dev/stdin|cat`]
-      }
-    }
-    case 'plantumlsequence':
-    case 'plantuml_sequence':
-      // piping works
-      return [
-        'java',
-        '-Djava.awt.headless=true',
-        '-Xmx2048m',
-        '-jar',
-        plantUmlJar,
-        `-t${useConfig.format.toLocaleLowerCase()}`,
-        // '-nbthread auto', no effect
-        // '-darkmode', odd...some versions had this, latest on ubuntu not
-        '-p']
-    case 'mscgen':
-      // piping works
-      return [`${useConfig.visualizer}`,
-        '-i-',
-        '-o-',
-      `-T${useConfig.format}`]
-    case 'neato':
-    case 'twopi':
-    case 'circo':
-    case 'fdp':
-    case 'sfdp':
-    case 'dot':
-    case 'osage':
-      // piping works
-      return [`${useConfig.visualizer}`,
-        '-q',
-      `-T${useConfig.format}`]
-    default:
-      return undefined
-  }
-}
-
 function _exitError(useConfig: ConfigType, msg: string) {
   useConfig.printError(msg)
   process.exit(10)
@@ -118,8 +56,9 @@ function _exitError(useConfig: ConfigType, msg: string) {
 /**
  * @returns  {boolean} true if this is cli visualizer
  */
-export function isCliVisualizer(useConfig: VisualizeConfigType) {
-  return _getVisualizerCommand(useConfig)
+export function supportsCliVisualization(useConfig: VisualizeConfigType) {
+  const v = visualizations.find(p => p.name == useConfig.visualizer)
+  return v?.cli
 }
 
 export async function doCliVisualize(
@@ -128,10 +67,11 @@ export async function doCliVisualize(
   visualizer: string,
   finished: (exitcode: number) => void) {
   useConfig.tp('Going to run visualizer')
-  const cmd = _getVisualizerCommand(useConfig)
-  if (!cmd) {
+  const cliCmd = visualizations.find(p => p.name === useConfig.visualizer)?.cli
+  if (!cliCmd) {
     throw new Error(`Could not figure out visualizer command for ${visualizer}`)
   }
+  const args = cliCmd(useConfig.format)
   const isRedirectingDiagRun = () => {
     return useConfig.isPipeMarker(useConfig.visualizedGraph) &&
       ['nwdiag', 'seqdiag', 'actdiag', 'blockdiag'].includes(useConfig.visualizer) && useConfig.redirectingDiag
@@ -144,7 +84,7 @@ export async function doCliVisualize(
     : fs.openSync(useConfig.visualizedGraph, 'w')
 
   const visualizationProcess = _startVisualizer(useConfig,
-    outputFileStream, cmd)
+    outputFileStream, args)
 
   useConfig.tp(`output ${useConfig.visualizedGraph}`)
   // TODO: until *diag stdio fix is merged

@@ -1,7 +1,7 @@
 // @ts-check
 import { getSavedGraphs } from './localStorage.js'
 import { parse } from './parserInteractions.js'
-import { getInputElement, getSelectElement, getVisualizer } from './uiComponentAccess.js'
+import { getInputElement, getSelectElement, getSelectedVisualizer } from './uiComponentAccess.js'
 import { makeHTTPGet } from './ajax.js'
 import { clearBeautified, visualize } from './visualize.js'
 // import 'ace' works for VScode (after setting deps), but it errors in webbrowser
@@ -201,7 +201,7 @@ function hookupToListenToManualGeneratorChanges(visualizeChangesAfterMillis: num
     }
     // same as above, js setTimeout, not NodeJs
     visualizationTimerID = (setTimeout(() => {
-      visualize(getVisualizer())
+      visualize(getSelectedVisualizer())
     }, visualizeChangesAfterMillis) as any) as number
   }
 }

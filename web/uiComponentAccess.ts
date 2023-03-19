@@ -1,5 +1,7 @@
 // @ts-check
 
+import { findGeneratorForVisualization, visualizations } from '../js/config.js'
+
 // Various modules operate on UI
 // Provide type safe access here
 
@@ -16,16 +18,27 @@ export function getHTMLElement(name: string) {
  * it was just parsed AND it had a 'generator' directive
  */
 export function setGenerator(generator: string, visualizer?: string) {
-  const genViz = generator + (visualizer ? ':' + visualizer : '')
+  console.warn('TODO: Stop using setGenerator, it makes no sense on visualizing WEB UI, just use visualizer (ast maybe exception)')
   // Change the generator via UI
   const select: HTMLInputElement = document.querySelector('#diagrammer-generator') as HTMLInputElement
-  select.value = genViz
-  if (getGenerator() !== generator) {
-    console.error(`Somewhy generator change did not go thru, we wanted ${generator} and have ${getGenerator()}`)
+  if (visualizer) {
+    // ok, we know EXACTLY what to select!
+    select.value = visualizer
+  } else {
+    console.warn('TODO: Remove the use of generator from WEB UI, it makes no sense (mostly, ast maybe only exception). We visualize, and that determines the generator')
+    // ok, we're given a generator, but no visualizer, so we pick the first one
+    const firstMatchingViz = visualizations.find(p => p.generator.name.toLocaleLowerCase() === generator.toLocaleLowerCase().replace('_', ''))
+    if (!firstMatchingViz) {
+      throw Error(`Cannot find visualization for generator (${generator})`)
+    }
+    select.value = firstMatchingViz.name
+  }
+  if (getSelectedGenerator() !== generator.toLocaleLowerCase().replace('_', '')) {
+    console.error(`Somewhy generator change did not go thru, we wanted ${generator} and have ${getSelectedGenerator()}`)
   }
   if (visualizer) {
-    if (getVisualizer() !== visualizer) {
-      console.error(`Somewhy visualizer change did not go thru, we wanted ${visualizer} and have ${getVisualizer()}`)
+    if (getSelectedVisualizer() !== visualizer) {
+      console.error(`Somewhy visualizer change did not go thru, we wanted ${visualizer} and have ${getSelectedVisualizer()}`)
     }
   }
 }
@@ -85,16 +98,13 @@ export function openPicWindow() {
 }
 
 // Get currently selected generator
-export function getGenerator() {
+export function getSelectedGenerator() {
   const e = getSelectElement('diagrammer-generator')
-  const gen = e.options[e.selectedIndex].value
-  if (gen.includes(':')) {
-    return gen.split(':')[0]
-  }
-  return gen
+  const viz = e.options[e.selectedIndex].value
+  return findGeneratorForVisualization(viz)
 }
 
-export function getVisualizer() {
+export function getSelectedVisualizer() {
   const e = getSelectElement('diagrammer-generator')
   const gen = e.options[e.selectedIndex].value
   if (gen.includes(':')) {

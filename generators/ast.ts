@@ -1,6 +1,5 @@
 // @ts-check
 
-import { generators } from '../model/graphcanvas.js'
 import { GraphEdge } from '../model/graphedge.js'
 import { GraphObject } from '../model/graphobject.js'
 import { GraphVertex } from '../model/graphvertex.js'
@@ -115,4 +114,3 @@ export class AST extends Generator {
     this.lout(dump)
   }
 }
-generators.set('ast', AST)

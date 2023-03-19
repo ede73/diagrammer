@@ -87,7 +87,7 @@ export async function selectExampleCode(page: Page, testname: string) {
 }
 
 /**
- * @param genViz eg. dendrogram:radialdendrogram
+ * @param genViz eg. radialdendrogram
  */
 export async function selectGeneratorVisualizer(page: Page, genViz: string) {
   // assert such a test exists in index.html example dropdown, will throw if doesn't

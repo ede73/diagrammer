@@ -1,5 +1,4 @@
 // @ts-check
-import { generators } from '../model/graphcanvas.js'
 import { GraphEdgeLineType } from '../model/graphedge.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
@@ -125,4 +124,3 @@ export class SeqDiag extends Generator {
     this.lout('}', false)
   }
 }
-generators.set('seqdiag', SeqDiag)

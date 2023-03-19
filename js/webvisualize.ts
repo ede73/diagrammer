@@ -1,7 +1,4 @@
 import * as fs from 'fs'
-// required to populate generators/visualizations
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-import { diagrammerParser } from '../build/diagrammer_parser.js'
 import * as puppeteer from 'puppeteer'
 import { type Page } from 'puppeteer'
 import { singleElementScreenSnapshot } from '../tests/web/snapshot_single_element.js'
@@ -75,11 +72,11 @@ async function _webRender(useConfig: VisualizeConfigType, visualizer: string, di
   await browser.close()
 }
 
-// TODO: read dynamically
+// TODO: read dynamically(SOON!)
 export function _getWebVisualizers() {
-  return ['dendrogram:circlepacked', 'dendrogram:radialdendrogram', 'dendrogram:reingoldtilford',
-    'digraph:circo', 'digraph:dot', 'digraph:fdp', 'digraph:neato', 'digraph:osage',
-    'digraph:sfdp', 'digraph:twopi', 'layerbands', 'parsetree', 'sankey', 'umlclass']
+  return ['circlepacked', 'radialdendrogram', 'reingoldtilford',
+    'circo', 'dot', 'fdp', 'neato', 'osage',
+    'sfdp', 'twopi', 'layerbands', 'parsetree', 'sankey', 'umlclass']
 }
 
 // TODO: oddity for momentarily, expecting diagrammer, not parser language..will change

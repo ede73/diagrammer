@@ -1,13 +1,10 @@
 // @ts-check
 
-import { generators } from '../model/graphcanvas.js'
 import { GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { multiAttrFmt } from '../model/support.js'
 import { Generator } from './generator.js'
-
-// ADD TO INDEX.HTML AS: <option value="mscgen">MSCGEN(www/cli)</option>
 
 /**
  * https://www.mcternan.me.uk/mscgen/
@@ -181,4 +178,3 @@ export class MSCGen extends Generator {
     this.lout('}', false)
   }
 }
-generators.set('mscgen', MSCGen)

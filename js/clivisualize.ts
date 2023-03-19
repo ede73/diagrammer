@@ -1,8 +1,5 @@
 import * as fs from 'fs'
 import { spawn, type ChildProcess } from 'child_process'
-// required to populate generators/visualizations
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-import { diagrammerParser } from '../build/diagrammer_parser.js'
 import { _getWebVisualizers } from './webvisualize.js'
 import { type ConfigType } from './configsupport.js'
 import { type VisualizeConfigType } from './visualizeConfigType.js'
@@ -88,6 +85,7 @@ function _getVisualizerCommand(useConfig: VisualizeConfigType) {
           `cat -| /usr/bin/${useConfig.visualizer}3 -a -T${useConfig.format} -f/usr/share/fonts/truetype/dejavu//DejaVuSans-Bold.ttf -o/dev/stdout /dev/stdin|cat`]
       }
     }
+    case 'plantumlsequence':
     case 'plantuml_sequence':
       // piping works
       return [

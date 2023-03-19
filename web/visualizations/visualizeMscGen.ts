@@ -1,9 +1,5 @@
 // @ts-check
 
-import { visualizations } from '../globals.js'
-
-visualizations.set('mscgen', visualizeMscGen)
-
 export async function visualizeMscGen(generatorResult: string) {
   const anchor: string = 'diagrammer-graph'
   // xu,mscgenny,json

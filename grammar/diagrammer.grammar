@@ -46,15 +46,14 @@ S
 			if (yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER) {
 			  debug('Called wants to prefer generator/parser from the script');
 			  if (parsedGeneratorName) {
-			    const generatorClassName = generators.get(parsedGeneratorName);
-			    if (generatorClassName) {
+			    if (hasGenerator(parsedGeneratorName)) {
 			      // We're asked to prefer script generator and such generator exists
 			      yy.USE_GENERATOR = parsedGeneratorName;
 			      debug(`Using found and recognized parsed generator (${parsedGeneratorName})`);
 			    }
 			  }
 			  if (parsedVisualizer) {
-			    const useVisualizerFunc = visualizations.get(parsedVisualizer);
+			    const useVisualizerFunc = visualizations.find(p => p.name === parsedVisualizer);
 			    if (useVisualizerFunc) {
 			      // Found visualizer and recognized it
 			      // TODO: NO support for this yet...
@@ -80,15 +79,12 @@ S
 			graphcanvas.result = yy.result;
 
 			// Locate the generator, else just use digraph
-			const generatorClass = generators.get(graphcanvas.getGenerator());
-			if (generatorClass) {
-				(new generatorClass(graphcanvas)).generate();
+			const visualization = visualizations.find(p => p.generator.name.toLowerCase() === graphcanvas.getGenerator().toLowerCase().replace('_', ''));
+			if (visualization) {
+				(new visualization.generator(graphcanvas)).generate();
 			} else {
-				console.log("Available generators:");
-				for (const key of generators.keys()) {
-  					console.log(key);
-				}
-				throw new Error(`Unknown generator ${graphcanvas.getGenerator()}`);
+				console.warn(`Cannot find generator (${graphcanvas.getGenerator()}), available generators:`);
+				throw new Error(`Unknown generator "${graphcanvas.getGenerator()}"`);
 			}
 			return $1;
 		}

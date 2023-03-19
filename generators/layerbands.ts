@@ -1,11 +1,8 @@
 // @ts-check
 
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { Generator } from './generator.js'
-
-// ADD TO INDEX.HTML AS: <option value="layerbands">LayerBands(GoJS)</option>
 
 /**
  * To test: node js/generate.js verbose tests/test_inputs/layerbands.txt layerbands
@@ -38,4 +35,3 @@ export class LayerBands extends Generator {
     this.lout(JSON.stringify(linkedVertices))
   }
 }
-generators.set('layerbands', LayerBands)

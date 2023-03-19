@@ -49,15 +49,15 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
   config.testPatterns.push(unknownCommandLineOption.trim())
 })
 
-function _countLineFeeds(str) {
+function _countLineFeeds(str: string) {
   return str.split(/\r\n|\r|\n/).length
 }
 
-function _areOneLiners(a, b) {
+function _areOneLiners(a: string, b: string) {
   return _countLineFeeds(a.trim()) <= 1 && _countLineFeeds(b.trim()) <= 1
 }
 
-function _isJSON(a) {
+function _isJSON(a: string) {
   try { JSON.parse(a) } catch (e) { return false }
   return true
 }
@@ -190,7 +190,7 @@ async function runATest(useVisualizer: string, webOnlyVisualizer: boolean, testF
 const testsPath = path.join(process.cwd(), config.testInputPath)
 const testFiles = fs.readdirSync(testsPath).map(f => f.replace('.txt', ''))
 
-const testVisualizers = ['dot', 'mscgen', 'plantuml_sequence', 'actdiag', 'blockdiag', 'nwdiag', 'seqdiag']
+const testVisualizers = ['dot', 'mscgen', 'plantumlsequence', 'actdiag', 'blockdiag', 'nwdiag', 'seqdiag']
 
 // Some diagrams cant be converted (might be generator limitation or just too expressive diagram)
 const exclusions: Record<string, string[]> = {
@@ -202,14 +202,14 @@ const onlyTheseTests = {
   nwdiag: ['nwdiag', 'nwdiag2', 'nwdiag3', 'nwdiag5', 'nwdiag_multiple_ips'],
   mscgen: ['events', 'state_conditionals', 'state_sequence', 'state_sequence2'],
   seqdiag: ['events', 'state_conditionals', 'state_sequence', 'state_sequence2'],
-  plantuml_sequence: ['events', 'state_conditionals', 'state_sequence', 'state_sequence2', 'plantuml_context', 'plantuml_context2'],
+  plantumlsequence: ['events', 'state_conditionals', 'state_sequence', 'state_sequence2', 'plantuml_context', 'plantuml_context2'],
   actdiag: ['ast', 'state_group', 'group_group_link'],
   blockdiag: ['ast', 'state_group', 'group_group_link'],
   ast: ['ast'],
   ast_record: ['ast'],
   // make these dynamic
-  'dendrogram:radialdendrogram': ['dendrogram'],
-  'dendrogram:reingoldtilford': ['dendrogram', 'dendrogram_spec'],
+  radialdendrogram: ['dendrogram'],
+  reingoldtilford: ['dendrogram', 'dendrogram_spec'],
   layerbands: ['layerbands'],
   parsetree: ['parsetree'],
   sankey: ['sankey', 'sankey2'],
@@ -217,11 +217,11 @@ const onlyTheseTests = {
 }
 
 const webOnlyVisualizers = [
-  'dendrogram:radialdendrogram', 'dendrogram:reingoldtilford', 'layerbands', 'parsetree', 'sankey', 'umlclass'
+  'radialdendrogram', 'reingoldtilford', 'layerbands', 'parsetree', 'sankey', 'umlclass'
 ]
 
 const waitTests: Array<Promise<void>> = []
-const v = []
+const v: string[] = []
 for (const visualizer of [...testVisualizers, ...webOnlyVisualizers]) {
   config.tp(`Tests for visualizer (${visualizer})`)
   let runIfTestsRun = () => {

@@ -1,7 +1,7 @@
 // @ts-check
 import { removeAllChildNodes, removeOldVisualizations } from './d3support.js'
 import { getHTMLElement, getInputElement, openImage } from './uiComponentAccess.js'
-import { visualizations } from './globals.js'
+import { visualizations } from '../js/config.js'
 import { makeHTTPPost } from './ajax.js'
 
 function _makeNewImageHolder(pngBase64: string) {
@@ -50,20 +50,14 @@ export function visualize(visualizer: string) {
   }
   removeOldVisualizations()
 
-  // TODO: let generator decide visualizer
-  if (visualizer === 'ast_record') {
-    visualizer = 'dot'
+  const vizClass = visualizations.find(p => p.name === visualizer)
+  if (!vizClass) {
+    console.error(`O-o, could not find visualizer ${visualizer}`)
+    return
   }
-
-  if (visualizations.has(visualizer)) {
+  if (vizClass.visualization) {
     // this is web only visualization
-    const f = visualizations.get(visualizer)
-    if (!f) {
-      console.error(`O-o, could not find visualizer ${visualizer}`)
-      return
-    }
-    f(generatedResult).then(done => {
-    })
+    vizClass.visualization(generatedResult).catch(rej => { })
   } else {
     // backend visualizer (unless if we want use Viz)
     const visualizeUrl = `/visualize?visualizer=${visualizer}`

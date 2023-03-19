@@ -1,7 +1,5 @@
 import * as lexer from '../build/diagrammer_lexer.js'
 import { GraphCanvas } from '../model/graphcanvas.js'
-// required to populate generators/visualizations
-// eslint-disable-next-line no-unused-vars
 import { parse as diagrammerParse } from '../build/diagrammer_parser.js'
 import { doWebVisualize } from './webvisualize.js'
 import { doCliVisualize, isCliVisualizer } from './clivisualize.js'

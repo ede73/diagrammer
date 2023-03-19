@@ -1,6 +1,5 @@
 // @ts-check
 
-import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
@@ -186,4 +185,3 @@ export class BlockDiag extends Generator {
     this.lout('}', false)
   }
 }
-generators.set('blockdiag', BlockDiag)

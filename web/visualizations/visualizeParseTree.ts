@@ -2,9 +2,6 @@
 import go from 'gojs'
 // import * as go from 'go';
 import { removeOldVisualizations } from '../d3support.js'
-import { visualizations } from '../globals.js'
-
-visualizations.set('parsetree', visualizeParseTree)
 
 // use ../manual_test_diagrams/parsetree.d
 export async function visualizeParseTree(generatorResult: string) {

@@ -1,12 +1,9 @@
 // @ts-check
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators } from '../model/graphcanvas.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { type GraphConnectable } from '../model/graphconnectable.js'
 import { debug } from '../model/debug.js'
 import { Generator } from './generator.js'
-
-// ADD TO INDEX.HTML AS: <option value="parsetree">ParseTree(GoJS)</option>
 
 /**
  * Only one root supported!
@@ -49,4 +46,4 @@ export class ParseTree extends Generator {
     })
     this.lout(JSON.stringify(nodeList, null, 3))
   }
-} generators.set('parsetree', ParseTree)
+}

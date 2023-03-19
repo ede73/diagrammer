@@ -9,7 +9,8 @@
     "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm",
     "gojs": "./node_modules/gojs/release/go-debug-module.js",
     "jquery": "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js",
-    "generators/": "/generators/"
+    "generators/": "/generators/",
+    "js/": "/js/"
  }
 }
 </script>
@@ -20,6 +21,8 @@
 <script type="module" src="web/backendInteractions.js"></script>
 <script type="module" src="web/localStorage.js"></script>
 <script type="module" src="web/d3support.js"></script>
+<script type="module" src="js/config.js"></script>
+
 
 
 <!-- Only way to get d3-sankey up and running, neither comply with importmapt or ES6 imports/exports -->
@@ -31,16 +34,8 @@
   <!-- top menu strip - horizontal -->
   <form name="contact" action="">
     <label for="generator">Generator</label>
+    <!-- Dynamically filled -->
     <select id="diagrammer-generator" name="generator" onChange="generatorChanged()">
-      {REPLACE_WITH_GENERATORS}
-      <!-- https://gojs.net/latest/samples/familytree.html -->
-      <option value="familytree">FamilyTree(GoJS)</option>
-      <!--  https://gojs.net/latest/samples/genogram.html -->
-      <option value="genogram">Genogram(GoJS)</option>
-      <!--  https://gojs.net/latest/samples/tLayout.html -->
-      <option value="treelayout">TreeLayout(GoJS)</option>
-      <!--  https://gojs.net/latest/samples/sequencediagram.html -->
-      <option value="sequencediagram">SequenceDiagram(GoJS)</option>
     </select>
     <!-- handling examples -->
     <label for="example">Examples:</label>
@@ -58,7 +53,7 @@
     <!-- saved combobox and handlers -->
     <label for="saved">Saved graphs</label> <select id="diagrammer-saved" name="saved"
       onChange="savedChanged()"></select>
-    <button onclick="visualize(getVisualizer());return false;">Visualize</button>
+    <button onclick="visualize(getSelectedVisualizer());return false;">Visualize</button>
     <br />
 
     <div id="diagrammer-error"></div>
@@ -285,22 +280,34 @@
 <script type="module" src="web/editorInteractions.js"></script>
 <script src="ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script type="module">
+  import { visualizations } from '../js/config.js'
+  const el = document.getElementById('diagrammer-generator')
+  el.disabled = true
+  visualizations.forEach(p => {
+    //<option value="sequencediagram">SequenceDiagram(GoJS)</option>
+    const opt = document.createElement("option")
+    opt.value = p.name
+    opt.innerHTML = `${p.menuName}`
+    el.appendChild(opt)
+  })
+  setGenerator('ast_record')
+  el.disabled = false
   const editor = ace.edit("diagrammer-code");
   //editor.setTheme("ace/theme/kr");
   editor.getSession().setMode("ace/mode/state");
 
   import { addLine, generatorChanged, exampleChanged, savedChanged, getGraphText, setGraphText } from "./web/editorInteractions.js";
-  window.exampleChanged = exampleChanged;
-  window.generatorChanged = generatorChanged;
   window.addLine = addLine;
+  window.generatorChanged = generatorChanged;
+  window.exampleChanged = exampleChanged;
   window.savedChanged = savedChanged;
-  window.getVisualizer = getVisualizer;
   window.getGraphText = getGraphText;
   window.setGraphText = setGraphText;
 
-  import { getCurrentFilename, openPicWindow, getVisualizer, getInputElement, setGenerator } from './web/uiComponentAccess.js';
+  import { getCurrentFilename, openPicWindow, getSelectedVisualizer, getInputElement, setGenerator } from './web/uiComponentAccess.js';
   window.getCurrentFilename = getCurrentFilename;
   window.openPicWindow = openPicWindow;
+  window.getSelectedVisualizer = getSelectedVisualizer
 
   import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList } from "./web/localStorage.js";
   window.saveCurrentGraph = saveCurrentGraph;

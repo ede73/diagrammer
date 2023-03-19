@@ -1,5 +1,4 @@
 // @ts-check
-import { generators } from '../model/graphcanvas.js'
 import { type GraphConnectable } from '../model/graphconnectable.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphVertex } from '../model/graphvertex.js'
@@ -268,4 +267,4 @@ export class PlantUMLSequence extends Generator {
     output(false)
     this.lout('@enduml')
   }
-} generators.set('plantuml_sequence', PlantUMLSequence)
+}

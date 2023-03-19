@@ -138,7 +138,7 @@ describe('Diagrammer', () => {
 
   it('asserts radial dendrogram(d3.js) visualization works', async () => {
     // flaky: main page loads (initializes with) AST visualization BEFORE our new selection overrides it. Not a TEST problem, but rather index loading default visualization problem
-    await testDynamicRendering(getPage(), 'test_inputs/dendrogram.txt', 'dendrogram:radialdendrogram')
+    await testDynamicRendering(getPage(), 'test_inputs/dendrogram.txt', 'radialdendrogram')
   })
 
   it('asserts sankey(d3.js) visualization works', async () => {

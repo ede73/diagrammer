@@ -1,7 +1,6 @@
 // @ts-check
 
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators, visualizations } from '../model/graphcanvas.js'
 import { type GraphEdge } from '../model/graphedge.js'
 import { type GraphObject } from '../model/graphobject.js'
 import { GraphReference } from '../model/graphreference.js'
@@ -9,10 +8,6 @@ import { GraphVertex } from '../model/graphvertex.js'
 import { output } from '../model/support.js'
 import { makeConnectedTree, traverseTree, type TreeVertex } from '../model/tree.js'
 import { Generator } from './generator.js'
-
-// ADD TO INDEX.HTML AS: <option value="dendrogram:radialdendrogram">Radial Dendrogram</option>
-// ADD TO INDEX.HTML AS: <option value="dendrogram:reingoldtilford">Reingold-Tilford</option>
-// ADD TO INDEX.HTML AS: <option value="dendrogram:circlepacked">Circle packed(TBD)</option>
 
 export interface DendrogramDocument {
   name: string
@@ -94,5 +89,3 @@ export class Dendrogram extends Generator {
     treeOutput.forEach(p => { output(this.graphCanvas, ...p) })
   }
 }
-generators.set('dendrogram', Dendrogram)
-visualizations.set('dendrogram', ['radialdendrogram', 'circlepacked', 'reingoldtilford'])

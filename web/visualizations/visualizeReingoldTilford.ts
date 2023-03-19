@@ -1,11 +1,8 @@
 // @ts-check
 import * as d3 from 'd3'
 import { makeSVG, removeOldVisualizations } from '../d3support.js'
-import { visualizations } from '../globals.js'
 import { type DendrogramDocument } from 'generators/dendrogram.js'
 import { type HierarchyPointNode, type HierarchyPointLink } from 'd3'
-
-visualizations.set('reingoldtilford', visualizeReingoldTilford)
 
 export async function visualizeReingoldTilford(generatorResult: string) {
   try {

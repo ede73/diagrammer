@@ -1,10 +1,7 @@
 // @ts-check
 import go from 'gojs'
 import { removeOldVisualizations } from '../d3support.js'
-import { visualizations } from '../globals.js'
 import { type RelationshipTypeT, type UMLClassDocumentT, type ParameterTypeT } from 'generators/umlclass.js'
-
-visualizations.set('umlclass', visualizeUmlClass)
 
 // use ../manual_test_diagrams/uml.d
 export async function visualizeUmlClass(generatorResult: string) {

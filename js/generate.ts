@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as fs from 'fs'
-import { generators } from '../model/graphcanvas.js'
+import { hasGenerator } from '../js/config.js'
 import { setVerbose } from '../model/debug.js'
 import { configSupport, type ConfigType } from './configsupport.js'
 import { doParse } from './diagrammer.js'
@@ -35,7 +35,7 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
   }
   // must be generator
   const generatorName = unknownCommandLineOption.toLocaleLowerCase()
-  if (!generators.has(generatorName)) {
+  if (!hasGenerator(generatorName)) {
     config.throwError(`Unknown generator (${generatorName})`)
   }
   config.generator = generatorName

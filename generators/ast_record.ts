@@ -1,6 +1,6 @@
 // @ts-check
 
-import { generators, GraphCanvas } from '../model/graphcanvas.js'
+import { GraphCanvas } from '../model/graphcanvas.js'
 import { GraphContainer } from '../model/graphcontainer.js'
 import { GraphEdge } from '../model/graphedge.js'
 import { GraphInner } from '../model/graphinner.js'
@@ -8,8 +8,6 @@ import { GraphReference } from '../model/graphreference.js'
 import { type GraphObject } from 'model/graphobject.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { Generator } from './generator.js'
-
-// ADD TO INDEX.HTML AS: <option value="ast_record">Abstract Syntax Tree(Record)</option>
 
 /*
 =========================================
@@ -115,6 +113,8 @@ export class ASTRecord extends Generator {
     const canvas = makeRecord('GraphCanvas', 'magenta', collectProperties(this.graphCanvas))
     this.lout(`GraphCanvas[shape=plaintext, label=<\n\t${canvas.join('\n\t\t')}\n\t>];`)
 
+    // hmh, TS doesn't apply thisArg
+    const self = this
     this.graphCanvas.getObjects().forEach(function c(n) {
       function getName(obj: GraphObject) {
         if (obj instanceof GraphReference) {
@@ -126,19 +126,19 @@ export class ASTRecord extends Generator {
       if (n instanceof GraphContainer) {
         const color = n instanceof GraphInner ? 'blue' : 'brown'
         const groupProps = makeRecord(n.constructor.name, color, collectProperties(n))
-        this.lout(`subgraph cluster_${n.getName()} {`, true)
-        this.lout('color=blue;')
-        this.lout(`${n.getName()}[shape=plaintext, label=<\n\t${groupProps.join('\n\t\t')}\t\n>];`)
+        self.lout(`subgraph cluster_${n.getName()} {`, true)
+        self.lout('color=blue;')
+        self.lout(`${n.getName()}[shape=plaintext, label=<\n\t${groupProps.join('\n\t\t')}\t\n>];`)
         // group or inner
         n.getObjects(true).forEach(o => { c(o) })
-        this.lout('}', false)
+        self.lout('}', false)
       } else {
         const color = n instanceof GraphVertex ? 'maroon' : 'darkgreen'
         const nodeProps = makeRecord(n.constructor.name, color, collectProperties(n))
         // Vertex (or ref)
-        this.lout(`${getName(n)}[shape=plaintext, label=<\n\t${nodeProps.join('\n\t\t')}\t\n>];`)
+        self.lout(`${getName(n)}[shape=plaintext, label=<\n\t${nodeProps.join('\n\t\t')}\t\n>];`)
       }
-    }, this)
+    } /* sorry, not on typeScript : this */)
 
     this.graphCanvas.getEdges().forEach(e => {
       // TODO: Add default edgetype (flip if flipped) report in label
@@ -151,4 +151,3 @@ export class ASTRecord extends Generator {
     this.lout('}', false)
   }
 }
-generators.set('ast_record', ASTRecord)

@@ -6,10 +6,6 @@ import { removeOldVisualizations } from '../d3support.js'
 // Use in editor.. gets go.d.ts
 // import * as go from '../../js/go'
 
-import { visualizations } from '../globals.js'
-
-visualizations.set('layerbands', visualizeLayerBands)
-
 // use ../manual_test_diagrams/layerbands.d
 export async function visualizeLayerBands(generatorResult: string) {
   const jsonData = JSON.parse(generatorResult)

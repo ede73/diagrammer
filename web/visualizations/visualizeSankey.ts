@@ -1,13 +1,10 @@
 // @ts-check
 import { makeSVG, removeOldVisualizations } from '../d3support.js'
-import { visualizations } from '../globals.js'
 // d3 is loaded directly in index.html as well as d3-sankey
 // this local (typed) import does not have d3-sankey
 // so..import typed d3 as d4 for now, d3 is loaded in index.html
 import * as d4 from 'd3'
 import { type SankeyNodeT, type SankeyLinkT, type SankeyDocumentT } from 'generators/sankey.js'
-
-visualizations.set('sankey', visualizeSankey)
 
 // https://github.com/ricklupton/d3-sankey-diagram or
 // https://github.com/d3/d3-sankey/blob/master/README.md

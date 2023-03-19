@@ -1,25 +1,10 @@
 // @ts-check
 
-import { visualizations } from '../globals.js'
 import Viz from '../js/viz.es.js'
 import { getHTMLElement } from '../uiComponentAccess.js'
 import { removeAllChildNodes } from '../d3support.js'
 
-export async function visualizeCirco(generatedResult: string) { await visualizeGraphviz(generatedResult, 'circo') }
-export async function visualizeDot(generatedResult: string) { await visualizeGraphviz(generatedResult, 'dot') }
-export async function visualizeFdp(generatedResult: string) { await visualizeGraphviz(generatedResult, 'fdp') }
-export async function visualizeNeato(generatedResult: string) { await visualizeGraphviz(generatedResult, 'neato') }
-export async function visualizeOsage(generatedResult: string) { await visualizeGraphviz(generatedResult, 'osage') }
-export async function visualizeTwopi(generatedResult: string) { await visualizeGraphviz(generatedResult, 'twopi') }
-
-visualizations.set('circo', visualizeCirco)
-visualizations.set('dot', visualizeDot)
-visualizations.set('fdp', visualizeFdp)
-visualizations.set('neato', visualizeNeato)
-visualizations.set('osage', visualizeOsage)
-visualizations.set('twopi', visualizeTwopi)
-
-async function visualizeGraphviz(generatedResult: string, visualizer: string) {
+export async function visualizeGraphviz(generatedResult: string, visualizer: string) {
   // https://github.com/mdaines/viz.js/wiki/Usage
   try {
     const workerURL = 'web/js/full.render.js'

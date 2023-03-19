@@ -1,5 +1,4 @@
 // @ts-check
-import { generators, visualizations } from '../model/graphcanvas.js'
 // used in typing
 // eslint-disable-next-line no-unused-vars
 import { type GraphConnectable } from '../model/graphconnectable.js'
@@ -19,13 +18,7 @@ import { GraphReference } from '../model/graphreference.js'
 import { type Shapes } from '../model/shapes.js'
 import { Generator } from './generator.js'
 
-// ADD TO INDEX.HTML AS: <option value="digraph:dot">Graphviz - dot(www/cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:circo">Graphviz - circo(www/cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:fdp">Graphviz - fdp(www/cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:neato">Graphviz - neato(www/cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:osage">Graphviz - osage(www/cli)</option>
 // ADD TO INDEX.HTML AS: <option value="digraph:sfdp">Graphviz - sfdp(cli)</option>
-// ADD TO INDEX.HTML AS: <option value="digraph:twopi">Graphviz - twopi(www/cli)</option>
 
 // replace diamond
 //
@@ -400,5 +393,3 @@ export class DiGraph extends Generator {
     this.lout('}', false)
   }
 }
-generators.set('digraph', DiGraph)
-visualizations.set('digraph', ['dot', 'circo', 'twopi', 'neato', 'fdp', 'sfpd', 'osage'])

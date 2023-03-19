@@ -1,14 +1,11 @@
 // @ts-check
 
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { type GraphConnectable } from '../model/graphconnectable.js'
 import { debug } from '../model/debug.js'
 import { type GraphEdge, GraphEdgeArrowType, GraphEdgeDirectionType, GraphEdgeLineType } from '../model/graphedge.js'
 import { Generator } from './generator.js'
-
-// ADD TO INDEX.HTML AS: <option value="umlclass">UMLClass(GoJS)</option>
 
 // - association = [aggretation | composition]
 //    - association => implicit|ordered|changeable|addOnly|frozen|reflexive|directed|
@@ -283,4 +280,3 @@ export class UMLClass extends Generator {
     this.lout(JSON.stringify(umlClass))
   }
 }
-generators.set('umlclass', UMLClass)

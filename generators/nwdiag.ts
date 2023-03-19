@@ -1,5 +1,4 @@
 // @ts-check
-import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { GraphReference } from '../model/graphreference.js'
 import { getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
@@ -137,4 +136,3 @@ export class NWDiag extends Generator {
     this.lout('}', false)
   }
 }
-generators.set('nwdiag', NWDiag)

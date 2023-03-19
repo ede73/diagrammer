@@ -3,9 +3,6 @@ import { GraphEdge } from '../model/graphedge.js'
 import { GraphContainer } from './graphcontainer.js'
 import { ParsingContext } from './parsingcontext.js'
 
-export const generators = new Map()
-export const visualizations = new Map()
-
 type IResult = (generatedCodeLine: string) => void
 
 /**

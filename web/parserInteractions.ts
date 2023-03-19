@@ -1,7 +1,7 @@
 // @ts-check
 import { parse as diagrammerParse } from '../build/diagrammer_parser.js'
 import { GraphCanvas } from '../model/graphcanvas.js'
-import { getGenerator, getError, getInputElement, getVisualizer, setError, setGenerator } from './uiComponentAccess.js'
+import { getSelectedGenerator, getError, getInputElement, getSelectedVisualizer, setError, setGenerator } from './uiComponentAccess.js'
 import { getParserYY } from '../build/types/diagrammer_parser_types.js'
 
 let parsingStarted: number
@@ -51,8 +51,8 @@ function setupParser() {
  * @param failureCallback passing error as string, exception as Exception
  */
 export function parse(diagrammerCode: string, successCallback: (generator: string, visualizer: string) => void, failureCallback: (error: string, exception: DOMException) => void, preferScriptSpecifiedGeneratorAndVisualizer = false) {
-  const generator = getGenerator()
-  const visualizer = getVisualizer()
+  const generator = getSelectedGenerator()
+  const visualizer = getSelectedVisualizer()
 
   setupParser()
   console.warn(`parse(${generator} ${visualizer} ${preferScriptSpecifiedGeneratorAndVisualizer ? 'preferScriptSpecifiedGeneratorAndVisualizer' : ''})`)
@@ -81,7 +81,7 @@ export function parse(diagrammerCode: string, successCallback: (generator: strin
     diagrammerParse(diagrammerCode)
 
     try {
-      successCallback(getGenerator(), getVisualizer())
+      successCallback(getSelectedGenerator(), getSelectedVisualizer())
     } catch (ex) {
       setError(`Parsing went ok, but visualization failed: ${getError()} and ${String(ex)}`)
     }

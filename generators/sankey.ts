@@ -1,11 +1,8 @@
 // WEB VISUALIZER ONLY -- DO NOT REMOVE - USE IN AUTOMATED TEST RECOGNITION
-import { generators } from '../model/graphcanvas.js'
 import { type GraphEdge, GraphEdgeDirectionType } from '../model/graphedge.js'
 import { output } from '../model/support.js'
 import { type GraphConnectable } from '../model/graphconnectable.js'
 import { Generator } from './generator.js'
-
-// ADD TO INDEX.HTML AS: <option value="sankey">Sankey</option>
 
 export interface SankeyNodeT {
   name: string
@@ -121,4 +118,4 @@ export class Sankey extends Generator {
     })
     output(this.graphCanvas, JSON.stringify(sankeyDoc))
   }
-} generators.set('sankey', Sankey)
+}

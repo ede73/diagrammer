@@ -1,8 +1,7 @@
 // @ts-check
-
 import { parse as diagrammerParse } from '../../build/diagrammer_parser.js'
 import { getParserYY } from '../../build/types/diagrammer_parser_types.js'
-import { generators, GraphCanvas } from '../../model/graphcanvas.js'
+import { GraphCanvas } from '../../model/graphcanvas.js'
 import { GraphContainer } from '../../model/graphcontainer.js'
 import { GraphGroup } from '../../model/graphgroup.js'
 import { GraphInner } from '../../model/graphinner.js'
@@ -12,6 +11,7 @@ import { GraphEdgeDirectionType, GraphEdgeLineType } from '../../model/graphedge
 import { describe, expect, it } from '@jest/globals'
 import { type ParsingContext } from '../../model/parsingcontext.js'
 import { Generator } from '../../generators/generator.js'
+import { Visualization, resetVisualizationsForTests, setVisualizationsForTests } from '../../js/config.js'
 
 // curried, canvas passed on call site
 const defaultsHas = (prop: keyof GraphCanvas['defaults'], value: any) => {
@@ -200,8 +200,8 @@ const grammarTests = [
   }`,
     f: [canvasContainsAutoProps([':NamedGroupWithColor,AndItsMandatoryLabel,#ff00ff'])]
   },
-  { g: 'visualizer ast_record', f: [canvasHas('visualizer', 'ast_record')] },
-  { g: 'generator ast', f: [canvasHas('generator', 'abba')] }, // TODO: hmm..think we need to pass request to use grammar defined generators
+  { g: 'visualizer fakevisualizer', f: [canvasHas('visualizer', 'fakevisualizer')] },
+  { g: 'generator FakeGenerator', f: [canvasHas('generator', 'fakegenerator')] }, // TODO: hmm..think we need to pass request to use grammar defined generators
   {
     g: `cloud inet-router {
       router web01 web02
@@ -228,20 +228,19 @@ describe('Parser/grammar rule tests', () => {
   let graphcanvas: GraphCanvas
 
   beforeAll(async () => {
-    // Copied over to sharedstate
-    // generators.set('abba', (gv: GraphCanvas) => {
-    //   graphcanvas = gv
-    // })
+    resetVisualizationsForTests()
     class FakeGenerator extends Generator {
       generate() {
         graphcanvas = this.graphCanvas
       }
     }
-    generators.set('abba', FakeGenerator)
+    setVisualizationsForTests([
+      new Visualization('fakevisualizer', 'NoOp visualization for test use', FakeGenerator)
+    ])
     getParserYY().result = function (result: string) {
       throw new Error('Setup failure')
     }
-    getParserYY().USE_GENERATOR = 'abba'
+    getParserYY().USE_GENERATOR = 'fakegenerator'
     getParserYY().parseError = function (str: string, hash: string) {
       console.warn('Parsing error found:')
       console.warn(str)
@@ -322,7 +321,7 @@ describe('Parser/grammar rule tests', () => {
   // Can't test since we've FORCED a generator..
   // it(`graphContent/generator/state 21`, async () => {
   //     parseCode("generator xx\n");
-  //     expect(graphcanvas.getGenerator()).toMatch('xx');
+  //     expect(graphcanvas.getSelectedGenerator()).toMatch('xx');
   // });
 
   it('graphContent/visualizer/state 22', async () => {

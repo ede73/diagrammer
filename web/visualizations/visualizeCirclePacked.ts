@@ -1,9 +1,5 @@
 // @ts-check
 
-import { visualizations } from '../globals.js'
-
-visualizations.set('circlepacked', visualizeCirclePacked)
-
 // https://observablehq.com/@d3/circle-packing
 export async function visualizeCirclePacked(generatorResult: string) {
   // const jsonData = JSON.parse(generatorResult)

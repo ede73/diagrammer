@@ -1,16 +1,13 @@
 #!/usr/bin/env node
 import * as fs from 'fs'
 import path from 'path'
-// required to populate generators/visualizations
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-import { diagrammerParser } from '../build/diagrammer_parser.js'
-import { generators, visualizations } from '../model/graphcanvas.js'
 import { configSupport, type ConfigType } from '../js/configsupport.js'
 import { doLex, doParse, doVisualize } from '../js/diagrammer.js'
 import { _getWebVisualizers } from '../js/webvisualize.js'
 import { type LexConfigType } from '../js/lex.js'
 import { type VisualizeConfigType } from '../js/visualizeConfigType.js'
 import { type GenerateConfigType } from './generate.js'
+import { findGeneratorForVisualization, hasVisualizer, visualizationsToGenerators } from './config.js'
 
 interface TestRunnerConfig extends ConfigType {
   tests: boolean
@@ -23,19 +20,6 @@ interface TestRunnerConfig extends ConfigType {
   webPort: number
   code: string
 
-}
-function visualizersToGenerators(): Map<string, string> {
-  const visualiserToGenerator = new Map<string, string>()
-  visualizations.forEach((visualizers, generator: string) => {
-    visualizers.forEach((visualizer: string) => {
-      visualiserToGenerator.set(visualizer, generator)
-      visualiserToGenerator.set(`${generator}:${visualizer}`, generator)
-    })
-  })
-
-  const g = Array.from(generators.keys()).map(k => [k, k])
-  // @ts-expect-error eslinter reads rootdir/tsconfig, but this is a subproject all module/target requirements are satisfied
-  return new Map([...visualiserToGenerator, ...g])
 }
 
 export function getEmptyConfig() {
@@ -66,14 +50,6 @@ function _exitError(useConfig, msg: string) {
   process.exit(10)
 }
 
-function _resolveGenerator(useConfig: TestRunnerConfig) {
-  const generator = visualizersToGenerators().get(useConfig.visualizer)
-  if (!generator) {
-    throw Error(`Cannot map visualizer (${useConfig.visualizer}) to a generator`)
-  }
-  return generator
-}
-
 export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualizationisComplete: (exitCode: number) => Promise<void>) {
   if (useConfig.isPipeMarker(useConfig.input) && !useConfig.beingPiped()) {
     _exitError(useConfig, 'Supposed to receive graph via pipe, but not being piped!')
@@ -97,16 +73,11 @@ export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualiz
 
   useConfig.tp('Start parsing process')
 
-  // TODO: temp, remove when web viz..finished
-  if (_isHackyWebVisualizer(useConfig, useConfig.visualizer)) {
-    throw new Error('TODO: No support running web visualizers yet')
-  }
-
   let errors = 0
   doParse(
     useConfig as unknown as GenerateConfigType,
     useConfig.code,
-    _resolveGenerator(useConfig),
+    findGeneratorForVisualization(useConfig.visualizer),
     (result) => {
       useConfig.parsedCode += `${result}\n`
     }, (parseError, hash) => {
@@ -128,10 +99,10 @@ export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualiz
   })
 }
 
-async function _main(argv) {
+async function _main(argv: any[]) {
   const config = getEmptyConfig()
   function _usage() {
-    const visualizers = Array.from(visualizersToGenerators().keys())
+    const visualizers = Array.from(visualizationsToGenerators().keys())
     config.printError(`USAGE: [silent] [dont_run_visualizer] [tests] [verbose] [text] [svg] [output file] [INPUT] [${visualizers.join(', ')}]`)
     config.printError('Each visualizer will get converted to proper generator')
     config.printError(`Experimental: Web only renderers: [${_getWebVisualizers().join(', ')}]`)
@@ -177,12 +148,11 @@ async function _main(argv) {
     }
     // must be visualizer?
     const visualizer = unknownCommandLineOption.toLocaleLowerCase()
-    const v = visualizersToGenerators()
-    if (v.has(visualizer) || _isHackyWebVisualizer(config, visualizer)) {
+    if (hasVisualizer(visualizer) || _isHackyWebVisualizer(config, visualizer)) {
       config.visualizer = visualizer
     }
-    if (!_isHackyWebVisualizer(config) && (!config.visualizer || !_resolveGenerator(config))) {
-      config.throwError(`Could not determine visualizer (${visualizer}) (nor its generator)`)
+    if (!_isHackyWebVisualizer(config) && (!config.visualizer || !hasVisualizer(config.visualizer))) {
+      config.throwError(`Could not determine visualizer (${config.visualizer}) (nor its generator)`)
     }
   })
 

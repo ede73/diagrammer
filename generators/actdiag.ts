@@ -1,6 +1,5 @@
 // @ts-check
 
-import { generators } from '../model/graphcanvas.js'
 import { GraphGroup } from '../model/graphgroup.js'
 import { getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
 import { type GraphConnectable } from '../model/graphconnectable.js'
@@ -152,4 +151,3 @@ export class ActDiag extends Generator {
     this.lout('}', false)
   }
 }
-generators.set('actdiag', ActDiag)

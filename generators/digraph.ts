@@ -18,11 +18,7 @@ import { GraphReference } from '../model/graphreference.js'
 import { type Shapes } from '../model/shapes.js'
 import { Generator } from './generator.js'
 
-// ADD TO INDEX.HTML AS: <option value="digraph:sfdp">Graphviz - sfdp(cli)</option>
-
 // replace diamond
-//
-//
 const DigraphShapeMap: Shapes = {
   // invis: 'invis',
   actor: 'cds',

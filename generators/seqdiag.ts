@@ -5,8 +5,6 @@ import { GraphVertex } from '../model/graphvertex.js'
 import { getAttributeAndFormat, multiAttrFmt } from '../model/support.js'
 import { Generator } from './generator.js'
 
-// ADD TO INDEX.HTML AS: <option value="seqdiag">Sequence Diagram(cli)</option>
-
 /**
  * http://blockdiag.com/en/seqdiag/index.html
  *

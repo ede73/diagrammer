@@ -7,8 +7,6 @@ import { type GraphConnectable } from '../model/graphconnectable.js'
 import { type Shapes } from '../model/shapes.js'
 import { Generator } from './generator.js'
 
-// ADD TO INDEX.HTML AS: <option value="nwdiag">Network Diagram(cli)</option>
-
 const NetworkDiagShapeMap: Shapes =
 {
   // invis: 'invis',

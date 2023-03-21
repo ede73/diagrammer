@@ -8,7 +8,6 @@ import { GraphEdgeLineType } from '../model/graphedge.js'
 import { type Shapes } from '../model/shapes.js'
 import { Generator } from './generator.js'
 
-// ADD TO INDEX.HTML AS: <option value="blockdiag">Block Diagram(cli)</option>
 const BlockDiagShapeMap: Shapes = {
   // invis: 'invis',
   actor: 'actor',

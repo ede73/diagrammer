@@ -5,8 +5,6 @@ import { GraphObject } from '../model/graphobject.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { Generator } from './generator.js'
 
-// ADD TO INDEX.HTML AS: <option value="ast">Abstract Syntax Tree</option>
-
 /**
  * TO test: node js/generate.js verbose tests/test_inputs/ast.txt ast
 */

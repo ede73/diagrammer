@@ -9,8 +9,6 @@ import { debug } from '../model/debug.js'
 import { GraphEdgeLineType } from '../model/graphedge.js'
 import { Generator } from './generator.js'
 
-// ADD TO INDEX.HTML AS: <option value="plantuml_sequence">PlantUML - Sequence(cli)</option>
-
 // TODO: Looks like all these have changed(broken), see https://plantuml.com/sequence-diagram
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const PlantUMLShapeMap = {

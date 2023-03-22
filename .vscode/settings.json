@@ -19,5 +19,6 @@
         "javascriptreact",
         "typescriptreact"
     ],
-    "editor.guides.indentation": false
+    "editor.guides.indentation": false,
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

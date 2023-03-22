@@ -2,6 +2,7 @@
 import { GraphEdge } from '../model/graphedge.js'
 import { GraphContainer } from './graphcontainer.js'
 import { ParsingContext } from './parsingcontext.js'
+import { debugMethod } from './debug.js'
 
 type IResult = (generatedCodeLine: string) => void
 
@@ -94,6 +95,7 @@ export class GraphCanvas extends GraphContainer {
     return this._OBJECTS.filter(p => (p instanceof GraphEdge)) as GraphEdge[] // OK
   }
 
+  @debugMethod
   addEdge(edge: GraphEdge) {
     this._OBJECTS.push(edge)
     return edge

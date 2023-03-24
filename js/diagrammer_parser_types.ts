@@ -5,11 +5,10 @@ import { type GraphCanvas } from '../../model/graphcanvas.js'
 // And make will tsc this
 export interface DiagrammerParserYY {
   GRAPHCANVAS: GraphCanvas
-  PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER: boolean
-  USE_GENERATOR: string
+  PREFER_VISUALIZER_FROM_DIAGRAMMER: boolean
   USE_VISUALIZER: string
   parseError: (str: string, hash: string) => void
-  parsedGeneratorAndVisualizer: (generator: string, visualizer: string, preferParsed: boolean) => void
+  parsedVisualizer: (visualizer: string, preferParsed: boolean) => void
   result: (codeLine: string) => void
   trace: (msg: string) => void
 }

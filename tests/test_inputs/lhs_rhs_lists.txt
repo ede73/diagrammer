@@ -1,4 +1,3 @@
-GENERATOR digraph
 VISUALIZER circo
 
 q1#ffff00>#3333ffz1#0000ff,z2#555555,z3,z4;Multiple RHS lists

@@ -1,25 +1,25 @@
 #!/usr/bin/env node
 
 import * as fs from 'fs'
-import { hasGenerator } from '../js/config.js'
+import { findGeneratorForVisualization, hasGenerator, hasVisualizer } from '../js/config.js'
 import { setVerbose } from '../model/debug.js'
 import { configSupport, type ConfigType } from './configsupport.js'
 import { doParse } from './diagrammer.js'
 
 export interface GenerateConfigType extends ConfigType {
-  generator: string
+  visualizer: string
   code: string
   parsedCode: string
 }
 
 const config: GenerateConfigType = configSupport<GenerateConfigType>('generate.js', {
-  generator: '',
+  visualizer: '',
   code: '',
   parsedCode: ''
 })
 
 function _usage() {
-  config.printError('USAGE: [trace] [verbose] [INPUT] [GENERATOR]')
+  config.printError('USAGE: [trace] [verbose] [INPUT] [VISUALIZER]')
   process.exit(0)
 }
 
@@ -34,11 +34,11 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
     return
   }
   // must be generator
-  const generatorName = unknownCommandLineOption.toLocaleLowerCase()
-  if (!hasGenerator(generatorName)) {
-    config.throwError(`Unknown generator (${generatorName})`)
+  const visualizerName = unknownCommandLineOption.toLocaleLowerCase()
+  if (!hasVisualizer(visualizerName)) {
+    config.throwError(`Unknown visualizer (${visualizerName})`)
   }
-  config.generator = generatorName
+  config.visualizer = visualizerName
 })
 
 if (config.verbose) {
@@ -60,11 +60,11 @@ if (!config.input) {
 if (!config.code) {
   config.throwError('Failed reading code to parse')
 }
-if (!config.generator) {
+if (!config.visualizer) {
   _usage()
 }
 
-doParse(config, config.code, config.generator,
+doParse(config, config.code, config.visualizer,
   (resultLine: string) => {
     config.tp(`Received result: (${resultLine.substring(0, 32)}... ...)`)
     config.parsedCode += `${resultLine}\n`
@@ -86,5 +86,5 @@ doParse(config, config.code, config.generator,
   }
 )
 
-config.tp(`finishing parsing ${config.input} and transpiling with ${config.generator}`)
+config.tp(`finishing parsing ${config.input} and transpiling with ${config.visualizer}`)
 config.tp(`got code len ${config.parsedCode.length}`)

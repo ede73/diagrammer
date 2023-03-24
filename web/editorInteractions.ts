@@ -128,15 +128,15 @@ export function generatorChanged() {
   parseAndRegenerate()
 }
 
-function parseAndRegenerate(preferScriptSpecifiedGeneratorAndVisualizer = false) {
+function parseAndRegenerate(preferScriptSpecifiedVisualizer = false) {
   const code = getGraphText() + '\n'
-  parse(code, (finalGenerator, finalVisualizer) => {
+  parse(code, (finalVisualizer) => {
     console.warn(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`)
     visualize(finalVisualizer)
   }, (_error, _ex) => {
     clearBeautified()
     console.warn('  parseAndRegenerate() - Parsing failed :(')
-  }, preferScriptSpecifiedGeneratorAndVisualizer)
+  }, preferScriptSpecifiedVisualizer)
 }
 
 export function savedChanged() {

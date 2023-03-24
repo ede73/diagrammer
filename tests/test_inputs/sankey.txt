@@ -1,4 +1,4 @@
-generator sankey
+visualizer sankey
 
 enter;Customer\nenter
 linkclick;Link on external website

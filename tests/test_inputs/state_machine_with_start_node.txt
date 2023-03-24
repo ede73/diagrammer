@@ -1,4 +1,3 @@
-generator digraph
 visualizer dot
 
 START LR_0

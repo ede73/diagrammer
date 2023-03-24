@@ -353,7 +353,7 @@
     opt.innerHTML = `${p.menuName}`
     el.appendChild(opt)
   })
-  setGenerator('ast_record')
+  setVisualizer('ast_record')
   el.disabled = false
   const editor = ace.edit("diagrammer-code");
   //editor.setTheme("ace/theme/kr");
@@ -367,7 +367,7 @@
   window.getGraphText = getGraphText;
   window.setGraphText = setGraphText;
 
-  import { getCurrentFilename, openPicWindow, getSelectedVisualizer, getInputElement, setGenerator } from './web/uiComponentAccess.js';
+  import { getCurrentFilename, openPicWindow, getSelectedVisualizer, getInputElement, setVisualizer } from './web/uiComponentAccess.js';
   window.getCurrentFilename = getCurrentFilename;
   window.openPicWindow = openPicWindow;
   window.getSelectedVisualizer = getSelectedVisualizer

@@ -15,76 +15,65 @@ S
 	| S graphContent		-> $S + $graphContent
 	| S EOF
 		{
-			/*	- caller can ALWAYS specify the generator
-				- caller can ALWAYS specify the visualizer
-				- only graphviz has multiple visualizer (currently it
-				  only draws digraphs, but those can be visualized with dot, neato.circo etc)
-				- generator/visualizer(since different grammars)
-					- mscgen=mscgen
-					- seqdiag=seqdiag
-					- blockdiag=blockdiag
-					- nwdiag=nwdiag
-					- ast=ast
-					- plantuml_sequence=plantuml_sequence
-
-					PlantUML MIGHT BE plantuml/[sequence|activty etc.]
-				- If visualizer given, RECORD it, do not use...
-				- Caller can then (willingly) check for LANGUAGE given visualizer(or generator) and
+			/*
+				- caller can ALWAYS specify the visualizer (which mandates generator)
+				- If visualizer by diagrammer lanaguge, RECORD it, do not force the use
+				- Caller can then (willingly) check for given visualizer(or generator) and
 				  override those or obey to those. Those would be suggested tools to use...
+
+        - GraphCanvas.getVisualizer() returns what ever visualizer the diagrammer code specified
+        - yy.parsedVisualizer is a callback we tell the caller the above (whether script had one or not)
+        - yy.PREFER_VISUALIZER_FROM_DIAGRAMMER(p) if true, caller tells to use the one specified by the diagrammer code
+        - yy.USE_VISUALIZER(u) is specified, caller tells to use THIS ONE
+          - note specifying PREFER_VISUALIZER_FROM_DIAGRAMMER and USE_VISUALIZER creates a conflicts
+          p u d f (- means not set, s means set, d=diagrammer code, f=final result, p,u as above)
+          T - - - (throws)
+          F - - - (throws)
+          T s - u(s)
+          F s - u(s)
+          F s s u(s)
+          F - s d(s)
+          T - s d(s)
+          T s s d(s)
+          Finally we DO check if such a visualizer(generator) is available, if not, throws
 			*/
 
 			// Generator can be defined by the caller(user) or suggested by the graph
 			const graphcanvas = yy.GRAPHCANVAS;
-			const parsedGeneratorName = graphcanvas.getGenerator();
-			const parsedVisualizer = graphcanvas.getVisualizer();
-			// TODO: Simplify, pass back to the caller, let it do decision what to use
-			// THIS special feature is only used with web UI, so makes more sense than complicated BL here..
-			if (yy.parsedGeneratorAndVisualizer) {
-			  yy.parsedGeneratorAndVisualizer(parsedGeneratorName, parsedVisualizer, yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER);
+			if (yy.parsedVisualizer) {
+        // Tell back to caller what visualizer the code suggested (via VISUALIZER command)
+			  yy.parsedVisualizer(graphcanvas.getVisualizer(), yy.PREFER_VISUALIZER_FROM_DIAGRAMMER);
+        // Still has last chance to switch
 			}
 
-			if (yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER) {
-			  debug('Called wants to prefer generator/parser from the script');
-			  if (parsedGeneratorName) {
-			    if (hasGenerator(parsedGeneratorName)) {
-			      // We're asked to prefer script generator and such generator exists
-			      yy.USE_GENERATOR = parsedGeneratorName;
-			      debug(`Using found and recognized parsed generator (${parsedGeneratorName})`);
-			    }
-			  }
-			  if (parsedVisualizer) {
-			    const useVisualizerFunc = visualizations.find(p => p.name === parsedVisualizer);
-			    if (useVisualizerFunc) {
-			      // Found visualizer and recognized it
-			      // TODO: NO support for this yet...
-			    }
-			  }
-			}
+      function determineVisualizer() {
+        const d = graphcanvas.getVisualizer()
+        const u = yy.USE_VISUALIZER
+        const p = yy.PREFER_VISUALIZER_FROM_DIAGRAMMER
+        if (!d && !u && !p) {
+          throw new Error(`Dear caller, the diagrammer code specified no visualizer, neither did you. Use yy.USE_VISUALIZER to pass some default, otherwise I cannot call the generator with AST`)
+        }
+        if (d && ( p || (!p && !u) ) ) {
+          // diagrammer language has a visualizer and we want or need to use it
+          return d
+        }
+        // we can skip two top sections from truth table above, since we'll anyway
+        // try to find the generator for the visualizer, if we fail, we thro
+        return u
+      }
 
-			if (yy.USE_GENERATOR) {
-			  graphcanvas.setGenerator(yy.USE_GENERATOR);
-			}
-
-			// Visualizer can be defined by the caller(user) or suggested by the graph
-			if (yy.USE_VISUALIZER) {
-			  graphcanvas.setVisualizer(yy.USE_VISUALIZER);
-			} else if (!graphcanvas.getVisualizer()) {
-			  const visualizer = graphcanvas.getVisualizer();
-			  if (visualizer === "digraph") {
-			    graphcanvas.setVisualizer("dot");
-			  } else if (graphcanvas.getGenerator()){
-			    graphcanvas.setVisualizer(graphcanvas.getGenerator());
-			  }
-			}
+			const useVisualizer = determineVisualizer();
+      // record what ever we conclude here!
+      graphcanvas.setVisualizer(useVisualizer);
 			graphcanvas.result = yy.result;
 
 			// Locate the generator, else just use digraph
-			const visualization = visualizations.find(p => p.generator.name.toLowerCase() === graphcanvas.getGenerator().toLowerCase().replace('_', ''));
-			if (visualization) {
-				(new visualization.generator(graphcanvas)).generate();
+			const generator = makeGenerator(useVisualizer, graphcanvas);
+			if (generator) {
+				generator.generate();
 			} else {
-				console.warn(`Cannot find generator (${graphcanvas.getGenerator()}), available generators:`);
-				throw new Error(`Unknown generator "${graphcanvas.getGenerator()}"`);
+				console.warn(`Cannot find generator for visualizer (${useVisualizer})`);
+				throw new Error(`Cannot find generator for visualizer "${useVisualizer}"`);
 			}
 			return $1;
 		}
@@ -192,10 +181,6 @@ graphContent
 	| LANDSCAPE		    {
 		parser.trace('LANDSCAPE');
 		$$=yy.GRAPHCANVAS.setDirection("landscape")
-	}
-	| GENERATOR NAME	{
-		parser.trace('GENERATOR :'+$NAME);
-		$$=yy.GRAPHCANVAS.setGenerator($NAME)
 	}
 	| VISUALIZER NAME	{
 		parser.trace('VISUALIZER :'+$NAME);

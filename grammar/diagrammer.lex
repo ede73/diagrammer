@@ -1,5 +1,5 @@
 %lex
-/* https://github.com/zaach/jison/wiki/Deviations-From-Flex-Bison 
+/* https://github.com/zaach/jison/wiki/Deviations-From-Flex-Bison
 Remember:
 non-grouping brackets (?:PATTERN),
 positive lookahead (?=PATTERN) and
@@ -139,11 +139,9 @@ Special arrow is /> and </ that denotes a broken signal...
 "equal"		return 'EQUAL';
 "shape"		return 'SHAPE';
 "group end"|"}"	return 'GROUP_END';
-"group"|"{"		{ this.begin('GROUP');return 'GROUP';} 
+"group"|"{"		{ this.begin('GROUP');return 'GROUP';}
 /*"group"|"{"		return 'GROUP';*/
 "start"		return 'START';
-/* hint about visualizer*/
-"generator"	return 'GENERATOR';
 "visualizer"	return 'VISUALIZER';
 ([<][<]|[<]|[|])[.=/-]{0,1}([>][>]|[>]|[|]){0,1}|([<][<]|[<]|[|]){0,1}[.=/-]{0,1}([>][>]|[>]|[|])|([.=/-])	return 'EVENT';
 {IMAGE}		return 'IMAGE';

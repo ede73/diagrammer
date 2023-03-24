@@ -1,4 +1,4 @@
-generator plantuml_sequence
+visualizer plantuml_sequence
 
 x>y
 q<w

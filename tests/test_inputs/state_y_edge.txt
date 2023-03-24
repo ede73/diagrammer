@@ -1,4 +1,3 @@
-generator digraph
 visualizer dot
 
 r>singularity y>splita,splitb

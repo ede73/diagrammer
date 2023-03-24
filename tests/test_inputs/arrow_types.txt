@@ -1,4 +1,3 @@
-generator digraph
 visualizer dot
 
 a1>"normal/normal/a>b1"b1

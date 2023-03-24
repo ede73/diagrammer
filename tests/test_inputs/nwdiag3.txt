@@ -1,4 +1,4 @@
-generator nwdiag
+visualizer nwdiag
 
 group color #33FF33
 vertex color #ffff00

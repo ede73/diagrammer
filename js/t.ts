@@ -77,7 +77,7 @@ export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualiz
   doParse(
     useConfig as unknown as GenerateConfigType,
     useConfig.code,
-    findGeneratorForVisualization(useConfig.visualizer),
+    useConfig.visualizer,
     (result) => {
       useConfig.parsedCode += `${result}\n`
     }, (parseError, hash) => {

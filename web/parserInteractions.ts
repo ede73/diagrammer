@@ -1,7 +1,7 @@
 // @ts-check
 import { parse as diagrammerParse } from '../build/diagrammer_parser.js'
 import { GraphCanvas } from '../model/graphcanvas.js'
-import { getSelectedGenerator, getError, getInputElement, getSelectedVisualizer, setError, setGenerator } from './uiComponentAccess.js'
+import { getError, getInputElement, getSelectedVisualizer, setError, setVisualizer } from './uiComponentAccess.js'
 import { getParserYY } from '../build/types/diagrammer_parser_types.js'
 
 let parsingStarted: number
@@ -13,11 +13,10 @@ function setupParser() {
     throw new Error(pe)
   }
 
-  getParserYY().parsedGeneratorAndVisualizer = (generator: string, visualizer: string, preferParsed: boolean) => {
-    if (preferParsed && generator) {
-      const useVisualizer = visualizer === 'undefined' ? undefined : visualizer
-      setGenerator(generator, useVisualizer)
-      console.warn(`  .. changed generator to ${generator} and visualizer ${useVisualizer ?? ''}`)
+  getParserYY().parsedVisualizer = (visualizer: string, preferParsed: boolean) => {
+    if (preferParsed && visualizer) {
+      setVisualizer(visualizer)
+      console.warn(`  .. changed visualizer ${visualizer ?? ''}`)
     }
   }
 
@@ -50,15 +49,11 @@ function setupParser() {
  * @param successCallback Passing final generator, visualizer
  * @param failureCallback passing error as string, exception as Exception
  */
-export function parse(diagrammerCode: string, successCallback: (generator: string, visualizer: string) => void, failureCallback: (error: string, exception: DOMException) => void, preferScriptSpecifiedGeneratorAndVisualizer = false) {
-  const generator = getSelectedGenerator()
+export function parse(diagrammerCode: string, successCallback: (visualizer: string) => void, failureCallback: (error: string, exception: DOMException) => void, preferScriptSpecifiedVisualizer = false) {
   const visualizer = getSelectedVisualizer()
 
   setupParser()
-  console.warn(`parse(${generator} ${visualizer} ${preferScriptSpecifiedGeneratorAndVisualizer ? 'preferScriptSpecifiedGeneratorAndVisualizer' : ''})`)
-  if (!generator) {
-    throw new Error('Generator not defined')
-  }
+  console.warn(`parse(${visualizer} ${preferScriptSpecifiedVisualizer ? 'preferScriptSpecifiedVisualizer' : ''})`)
   if (!visualizer) {
     throw new Error('Visualizer not defined')
   }
@@ -71,22 +66,20 @@ export function parse(diagrammerCode: string, successCallback: (generator: strin
   try {
     const yy = getParserYY()
     // TODO: MOVING TO GraphCanvas
-    yy.USE_GENERATOR = generator
-    // TODO: MOVING TO GraphCanvas
     yy.USE_VISUALIZER = visualizer
     // If true, actually prefer generator/visualizer from loaded script IF specified
     // used while loading new examples...
-    yy.PREFER_GENERATOR_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedGeneratorAndVisualizer
+    yy.PREFER_VISUALIZER_FROM_DIAGRAMMER = preferScriptSpecifiedVisualizer
     yy.GRAPHCANVAS = new GraphCanvas()
     diagrammerParse(diagrammerCode)
 
     try {
-      successCallback(getSelectedGenerator(), getSelectedVisualizer())
+      successCallback(getSelectedVisualizer())
     } catch (ex) {
       setError(`Parsing went ok, but visualization failed: ${getError()} and ${String(ex)}`)
     }
   } catch (ex) {
-    setError(`  ..parsed, and failed ${getError()} and ${String(ex)}`)
+    setError(`  ..parsed, and failed ${getError()} and ${String(ex)}`, ex)
     failureCallback(getError(), ex)
   } finally {
     parsingStarted = 0

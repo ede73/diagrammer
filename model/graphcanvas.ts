@@ -27,7 +27,6 @@ export class GraphCanvas extends GraphContainer {
    * Output the generated result
    */
   result?: IResult = undefined
-  generator?: string = undefined
   visualizer?: string = undefined
   shape?: string = undefined
   direction?: string = undefined
@@ -39,15 +38,6 @@ export class GraphCanvas extends GraphContainer {
   constructor() {
     super('', undefined) // Canvas has no name
     this.parsingContext = new ParsingContext(this)
-  }
-
-  setGenerator(value: string): GraphCanvas {
-    this.generator = value.toLowerCase()
-    return this
-  }
-
-  getGenerator() {
-    return this.generator
   }
 
   setVisualizer(value: string): GraphCanvas {

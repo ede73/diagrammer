@@ -14,32 +14,18 @@ export function getHTMLElement(name: string) {
 }
 
 /**
- * Set a generator, only if loaded neweb/uiComponentAccess.tsw content (storage, example)
- * it was just parsed AND it had a 'generator' directive
+ * Set a visualizer, only if loaded neweb/uiComponentAccess.tsw content (storage, example)
+ * it was just parsed AND it had a 'visualizer' directive
  */
-export function setGenerator(generator: string, visualizer?: string) {
-  console.warn('TODO: Stop using setGenerator, it makes no sense on visualizing WEB UI, just use visualizer (ast maybe exception)')
+export function setVisualizer(visualizer: string) {
   // Change the generator via UI
   const select: HTMLInputElement = document.querySelector('#diagrammer-generator') as HTMLInputElement
   if (visualizer) {
     // ok, we know EXACTLY what to select!
     select.value = visualizer
-  } else {
-    console.warn('TODO: Remove the use of generator from WEB UI, it makes no sense (mostly, ast maybe only exception). We visualize, and that determines the generator')
-    // ok, we're given a generator, but no visualizer, so we pick the first one
-    const firstMatchingViz = visualizations.find(p => p.generator.name.toLocaleLowerCase() === generator.toLocaleLowerCase().replace('_', ''))
-    if (!firstMatchingViz) {
-      throw Error(`Cannot find visualization for generator (${generator})`)
-    }
-    select.value = firstMatchingViz.name
   }
-  if (getSelectedGenerator() !== generator.toLocaleLowerCase().replace('_', '')) {
-    console.error(`Somewhy generator change did not go thru, we wanted ${generator} and have ${getSelectedGenerator()}`)
-  }
-  if (visualizer) {
-    if (getSelectedVisualizer() !== visualizer) {
-      console.error(`Somewhy visualizer change did not go thru, we wanted ${visualizer} and have ${getSelectedVisualizer()}`)
-    }
+  if (getSelectedVisualizer() !== visualizer) {
+    console.error(`Somewhy visualizer change did not go thru, we wanted ${visualizer} and have ${getSelectedVisualizer()}`)
   }
 }
 
@@ -64,10 +50,13 @@ export function getCurrentFilename() {
 /**
  * Set error on UI
  */
-export function setError(text: string) {
+export function setError(text: string, exception?: any) {
   const element = document.getElementById('diagrammer-error') as HTMLElement
   if (text) {
     console.error(text)
+    if (exception) {
+      console.error(exception)
+    }
   }
   element.innerText = text
 }

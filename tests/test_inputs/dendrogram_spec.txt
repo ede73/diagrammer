@@ -1,4 +1,3 @@
-generator dendrogram
 visualizer reingoldtilford
 // Dark reader + links mess this up
 $(ProtoLanguage:#a16a6a)

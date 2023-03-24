@@ -201,7 +201,6 @@ const grammarTests = [
     f: [canvasContainsAutoProps([':NamedGroupWithColor,AndItsMandatoryLabel,#ff00ff'])]
   },
   { g: 'visualizer fakevisualizer', f: [canvasHas('visualizer', 'fakevisualizer')] },
-  { g: 'generator FakeGenerator', f: [canvasHas('generator', 'fakegenerator')] }, // TODO: hmm..think we need to pass request to use grammar defined generators
   {
     g: `cloud inet-router {
       router web01 web02
@@ -240,7 +239,7 @@ describe('Parser/grammar rule tests', () => {
     getParserYY().result = function (result: string) {
       throw new Error('Setup failure')
     }
-    getParserYY().USE_GENERATOR = 'fakegenerator'
+    getParserYY().USE_VISUALIZER = 'fakegenerator'
     getParserYY().parseError = function (str: string, hash: string) {
       console.warn('Parsing error found:')
       console.warn(str)
@@ -255,6 +254,9 @@ describe('Parser/grammar rule tests', () => {
    */
   function parseCode(code: string) {
     getParserYY().GRAPHCANVAS = new GraphCanvas()
+    // in order to parse the code, we need a visualizer (well not exactly true, AST is still being built, but
+    // for the purpose of usability, a generator is required that converts AST to something visible)
+    getParserYY().USE_VISUALIZER = 'fakevisualizer'
     try {
       diagrammerParse(code)
     } catch (ex) {
@@ -270,12 +272,12 @@ describe('Parser/grammar rule tests', () => {
     return '#' + ('000000' + rgb.toString(16)).substr(-6)
   }
 
-  // describe.each(contentarray)("xxx")
   // TODO: there was a generator pattern for JESTs, so could 'feed' tests in here...
   grammarTests.forEach((t) => {
     it(`Grammar test ${t.g}`, async () => {
       const c = new GraphCanvas()
       getParserYY().GRAPHCANVAS = c
+      getParserYY().USE_VISUALIZER = 'fakevisualizer'
       diagrammerParse(`${t.g}\n`)
       if (t.f) {
         // dump the code (will be part of description, see TODO above)
@@ -325,8 +327,8 @@ describe('Parser/grammar rule tests', () => {
   // });
 
   it('graphContent/visualizer/state 22', async () => {
-    parseCode('visualizer xx\n')
-    expect(graphcanvas.getVisualizer()).toMatch('xx')
+    parseCode('visualizer FakeVisualizeR\n')
+    expect(graphcanvas.getVisualizer()).toMatch('fakevisualizer')
   })
 
   it('graphContent/PORTRAIT/state 23', async () => {

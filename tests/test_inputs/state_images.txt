@@ -1,5 +1,4 @@
-generator digraph
-visualizer dot
+ovisualizer dot
 
 a/barcode.png,b/basestation.png,c/battery.png>d/camera.png,e/cpu.png,f/documents.png
 a1/harddisk.png,b1/keyboard.png,c1/laptop.png>d1/laser.png,e1/monitor.png,f1/mouse.png

@@ -23,6 +23,7 @@ import { visualizeRadialDendrogram } from '../web/visualizations/visualizeRadial
 import { visualizeReingoldTilford } from '../web/visualizations/visualizeReingoldTilford.js'
 import { visualizeSankey } from '../web/visualizations/visualizeSankey.js'
 import { visualizeUmlClass } from '../web/visualizations/visualizeUmlClass.js'
+import { type GraphCanvas } from '../model/graphcanvas.js'
 
 type ICommandLine = (format: string, outputFile?: string) => string[]
 
@@ -155,6 +156,15 @@ export function findGeneratorForVisualization(visualization: string) {
     throw Error(`Cannot map visualizer (${visualization}) to a generator`)
   }
   return generator
+}
+
+export function makeGenerator(useVisualization: string, graphCanvas: GraphCanvas): Generator | undefined {
+  const visualization = visualizations.find(p => p.name.toLowerCase() === useVisualization.toLowerCase())
+  if (!visualization) {
+    return undefined
+  }
+  // @ts-expect-error not an abstract class
+  return new visualization.generator(graphCanvas)
 }
 
 export function hasGenerator(generator: string) {

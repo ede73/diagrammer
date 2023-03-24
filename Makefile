@@ -149,7 +149,7 @@ build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators 
 	@sed -i "1 i\import {GraphConnectable} from '../model/graphconnectable.js';" $@
 	@sed -i "1 i\import {GraphContainer} from '../model/graphcontainer.js';" $@
 	@sed -i "1 i\import {GraphCanvas} from '../model/graphcanvas.js';" $@
-	@sed -i "1 i\import {hasGenerator, visualizations} from '../js/config.js';" $@
+	@sed -i "1 i\import {hasGenerator, visualizations, makeGenerator} from '../js/config.js';" $@
 	@sed -i "1 i\import {GraphGroup} from '../model/graphgroup.js';" $@
 	@sed -i "1 i\import {GraphVertex} from '../model/graphvertex.js';" $@
 	@sed -i "1 i\import {GraphReference} from '../model/graphreference.js';" $@

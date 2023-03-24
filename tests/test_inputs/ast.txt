@@ -1,4 +1,4 @@
-generator ast_record
+visualizer ast_record
 
 vertical
 $(gen:#ccffcc)

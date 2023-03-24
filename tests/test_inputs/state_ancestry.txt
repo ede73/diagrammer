@@ -1,4 +1,3 @@
-generator digraph
 visualizer dot
 
 hominoidea>hominidae,hylobatidae

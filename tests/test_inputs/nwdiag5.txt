@@ -1,4 +1,4 @@
-generator nwdiag
+visualizer nwdiag
 
 { dmz;y
 	web01 web02

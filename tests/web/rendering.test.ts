@@ -80,7 +80,7 @@ describe('Diagrammer', () => {
     await waitForGeneratorResults(getPage())
 
     const graphText = await getDiagrammerCode(getPage())
-    await expect(graphText).toMatch(/^generator dendrogram/)
+    await expect(graphText).toMatch(/^visualizer reingoldtilford/)
 
     await waitUntilGraphDrawn(getPage())
   }, 200 /* it takes sometimes about 40ms to parse/generate the graph on my laptop (linux running in WSL2) */)

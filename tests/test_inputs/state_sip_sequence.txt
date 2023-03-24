@@ -1,4 +1,4 @@
-generator mscgen
+visualizer mscgen
 
 Alice$(alice:#ff0000)>"INVITE"P1$(proxy:#00ff00)>"100 Trying" Alice
 P1>"INVITE"P2$(proxy)>"100 Trying"P1

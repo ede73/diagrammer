@@ -1,4 +1,3 @@
-generator dendrogram
 visualizer reingoldtilford
 
 //zA>zB>(ze zf zg),zC>(zh zj zk),zD>(zz zx zc)

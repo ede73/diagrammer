@@ -408,19 +408,20 @@ traverseTree(root, (vertex, isLeaf, hasSiblings) => {
 
 # Installation
 Totally at your own risk!
-I've run this on Linux/Mac, but most recedntly on windows via its awesomely magnificient linux sub WSL2, which also integrates beautifully with Visual Studio Code! Just enter the linux subsystem, pull the repo, type "code ." and You've VSStudio available.
+I've run this on Linux/Mac, but most recently on windows via its awesomely magnificient linux sub WSL2, which also integrates beautifully with Visual Studio Code! Just enter the linux subsystem, pull the repo, type "code ." and You've VSStudio available.
 
 Run scripts/setup.sh (or check it and run by hand). It installs required modules.
 
 ```
 cd ~/diagrammer
-ln -s diagrammer ~/public_html/ # or ~/Sites on mac
+ln -s ~/diagrammer ~/public_html/ # or ~/Sites on mac
+npm install
 make all
 # You need plantuml.jar in ext/ to run all the tests successfully
 # make test
 ```
 
-Then go to http://localhost/~USERNAMEHERE/diagrammer
+Then go to http://localhost/~USERNAMEHERE/diagrammer # of course assuming you've setup your apache/what not
 
 And you should be ready to go.
 

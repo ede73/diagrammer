@@ -30,8 +30,17 @@ PARSER_TEST_TSS=$(shell find tests/parser -maxdepth 1 -iname "*.ts")
 PARSER_TEST_JSS:=$(PARSER_TEST_TSS:.ts=.js)
 WEB_TEST_TSS=$(shell find tests/web -maxdepth 1 -iname "*.ts")
 WEB_TEST_JSS:=$(WEB_TEST_TSS:.ts=.js)
+INFIX=
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	INFIX =
+endif
+ifeq ($(UNAME_S),Darwin)
+	INFIX = ''
+endif
 
 
+export PATH := $(CURDIR)/node_modules/.bin:$(PATH)
 TRANSPILER=tsc
 TRANSPILEOPTIONS=--module es6 --esModuleInterop --target es2017 --allowJs --removeComments --strict --checkJs --skipLibCheck
 TRANSPILE=$(TRANSPILER) $(TRANSPILEOPTIONS)
@@ -46,6 +55,7 @@ all:
 	@touch $(LOCK_FILE)
 	@touch $(BUILD_STARTED_FILE)
 	@$(MAKE) -j$(CORES) _all
+
 _all: active_project_deps jest_test_deps parser
 	@echo Built all
 	@rm -f $(LOCK_FILE)
@@ -133,34 +143,34 @@ build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators 
 	else \
 	node_modules/.bin/jison $< -o $@ >/dev/null; \
 	fi
-	@sed -i "1 i\\\\" $@
+	@sed -i ${INFIX} '1 s/^/\n/' $@
 	@for generator in generators/*.js; do \
 	  genfunc="$$(grep 'export class' $$generator | cut -d' ' -f3)"; \
-	  sed -i "1 i\import {$$genfunc} from '../$$generator';" $@ \
+	  sed -i ${INFIX} "1 s@^@import {$$genfunc} from '../$$generator';\n@" $@ \
 	;done
 	@#sed -i "1 i\import * as model from '../model/model.js';" $@
-	@sed -i "1 i\import {_enterNewGraphInner, _exitCurrentGraphInner, _getList, _getEdge, _getVertexOrGroup, _getGroupConditionalOrMakeNew, _getGroupOrMakeNew, _processVariable, _getGroupLoopOrMakeNew} from '../model/model.js';" $@
-	@sed -i "1 i\import {traverseTree, findVertex, TreeVertex} from '../model/tree.js';" $@
-	@sed -i "1 i\import {ShapeKeys} from '../model/shapes.js';" $@
-	@sed -i "1 i\import {debug} from '../model/debug.js';" $@
-	@sed -i "1 i\import {iterateEdges, outputFormattedText, getAttributeAndFormat, output, getAttribute, setAttr } from '../model/support.js';" $@
-	@sed -i "1 i\import {GraphInner} from '../model/graphinner.js';" $@
-	@sed -i "1 i\import {GraphEdge} from '../model/graphedge.js';" $@
-	@sed -i "1 i\import {GraphConnectable} from '../model/graphconnectable.js';" $@
-	@sed -i "1 i\import {GraphContainer} from '../model/graphcontainer.js';" $@
-	@sed -i "1 i\import {GraphCanvas} from '../model/graphcanvas.js';" $@
-	@sed -i "1 i\import {hasGenerator, visualizations, makeGenerator} from '../js/config.js';" $@
-	@sed -i "1 i\import {GraphGroup} from '../model/graphgroup.js';" $@
-	@sed -i "1 i\import {GraphVertex} from '../model/graphvertex.js';" $@
-	@sed -i "1 i\import {GraphReference} from '../model/graphreference.js';" $@
-	@sed -i "1 i\import {GraphObject} from '../model/graphobject.js';" $@
-	@sed -i "1 i\\\\" $@
+	@sed -i ${INFIX}  "1 s@^@import {_enterNewGraphInner, _exitCurrentGraphInner, _getList, _getEdge, _getVertexOrGroup, _getGroupConditionalOrMakeNew, _getGroupOrMakeNew, _processVariable, _getGroupLoopOrMakeNew} from '../model/model.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {traverseTree, findVertex, TreeVertex} from '../model/tree.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {ShapeKeys} from '../model/shapes.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {debug} from '../model/debug.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {iterateEdges, outputFormattedText, getAttributeAndFormat, output, getAttribute, setAttr } from '../model/support.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {GraphInner} from '../model/graphinner.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {GraphEdge} from '../model/graphedge.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {GraphConnectable} from '../model/graphconnectable.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {GraphContainer} from '../model/graphcontainer.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {GraphCanvas} from '../model/graphcanvas.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {hasGenerator, visualizations, makeGenerator} from '../js/config.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {GraphGroup} from '../model/graphgroup.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {GraphVertex} from '../model/graphvertex.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {GraphReference} from '../model/graphreference.js';\n@" $@
+	@sed -i ${INFIX}  "1 s@^@import {GraphObject} from '../model/graphobject.js';\n@" $@
+	@sed -i ${INFIX} '1 s/^/\n/' $@
 	@#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
 	@echo '{"type":"module"}' > build/package.json
-	@sed -i 's/^var diagrammer_parser/export var diagrammerParser/g' $@
-	@sed -i 's/diagrammer_parser/diagrammerParser/g' $@
-	@sed -i 's/exports.diagrammerLexer=diagrammerLexer;//g' build/diagrammer_lexer.js
-	@sed -i 's/^var diagrammer_lexer/export var diagrammerLexer/g' build/diagrammer_lexer.js
+	@sed -i ${INFIX}  's/^var diagrammer_parser/export var diagrammerParser/g' $@
+	@sed -i ${INFIX}  's/diagrammer_parser/diagrammerParser/g' $@
+	@sed -i ${INFIX}  's/exports.diagrammerLexer=diagrammerLexer;//g' build/diagrammer_lexer.js
+	@sed -i ${INFIX}  's/^var diagrammer_lexer/export var diagrammerLexer/g' build/diagrammer_lexer.js
 	@echo 'export const parse = function () { return diagrammerParser.parse.apply(diagrammerParser, arguments) }' >> $@
 # nicer to carry around than build target
 parser: build/diagrammer_parser.js

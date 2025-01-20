@@ -20,14 +20,6 @@ WEB_VISUALIZATION_JSS:=$(WEB_VISUALIZATION_TSS:.ts=.js)
 JS_TSS=$(shell find js -maxdepth 1 -iname "*.ts" -and -not -name "go.d.ts")
 JS_JSS:=$(JS_TSS:.ts=.js)
 
-GENERATORS_TEST_TSS=$(shell find tests/generators -maxdepth 1 -iname "*.ts")
-GENERATORS_TEST_JSS:=$(GENERATORS_TEST_TSS:.ts=.js)
-MODEL_TEST_TSS=$(shell find tests/model -maxdepth 1 -iname "*.ts")
-MODEL_TEST_JSS:=$(MODEL_TEST_TSS:.ts=.js)
-PARSER_TEST_TSS=$(shell find tests/parser -maxdepth 1 -iname "*.ts")
-PARSER_TEST_JSS:=$(PARSER_TEST_TSS:.ts=.js)
-WEB_TEST_TSS=$(shell find tests/web -maxdepth 1 -iname "*.ts")
-WEB_TEST_JSS:=$(WEB_TEST_TSS:.ts=.js)
 INFIX=
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -47,9 +39,9 @@ ESLINT=eslint -f stylish --fix
 LOCK_FILE=.lock
 BUILD_STARTED_FILE=.build_started
 
-.PHONY: clean node_modules model sub_grammar sub_grammar_just_lexer
+.PHONY: clean node_modules model sub_grammar sub_grammar_just_lexer sub_tests
 
-all:
+all: _all
 	@touch $(LOCK_FILE)
 	@touch $(BUILD_STARTED_FILE)
 	@$(MAKE) -j$(CORES) _all
@@ -58,10 +50,10 @@ all:
 sub_grammar:
 	$(MAKE) -C grammar
 
-# sub_grammar_just_lexer:
-# 	$(MAKE) -C grammar just_lexer
+sub_tests:
+	$(MAKE) -C tests
 
-_all: sub_grammar active_project_deps jest_test_deps parser
+_all: sub_grammar active_project_deps jest_test_deps parser faketypes
 	@echo Built all
 	@rm -f $(LOCK_FILE)
 
@@ -82,16 +74,6 @@ js: $(JS_JSS)
 index.html : index_template.html generators tests/test_inputs/*.txt web_visualizations
 	@awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs/*.txt | sort |sed 's,^tests/test_inputs/,,g'" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations/*.ts | sort" | getline var) {tsjs=var;gsub("[.]ts",".js",tsjs);printf("<script type=\"module\" src=\"%s\"></script>\n",tsjs);}next}{print $0}' $< >$@
 
-jest_test_deps: parsertests webtests modeltests generatortests
-tests/parser/%.js: tests/parser/$.ts
-parsertests: $(PARSER_TEST_JSS) model parser faketypes
-tests/web/%.js: tests/parser/$.ts
-webtests: $(WEB_TEST_JSS) web/editorInteractions.js index.html
-tests/model/%.js: tests/parser/$.ts
-modeltests: $(MODEL_TEST_JSS) model
-tests/generators/%.js: tests/parser/$.ts
-generatortests: $(GENERATORS_TEST_JSS) generators
-
 fixall:
 	# VSCode doesnt always run the linter (and fix issues) on save (or otherwise) even when specified
 	# This here just to ensure even on mistake we DO get the shit in line
@@ -101,7 +83,7 @@ fixall:
 	$(ESLINT) web & \
 	$(ESLINT) tests & \
 	wait
-	make testrunner
+	make -C tests testrunner
 
 build/types/diagrammer_parser_types.js: js/diagrammer_parser_types.ts
 	@mkdir -p build/types
@@ -166,34 +148,9 @@ export: parser js/diagrammer.js js/generate.js scripts/export.sh scripts/display
 	@./scripts/export.sh
 	@echo 'Add alias depict="~/{EXPORT_DIR_HERE}/t.js silent " to your profile/bashrc etc.\nYou need (depending) visualizers graphviz,mscgen,plantuml_jar.jar,nwdiag,blockdiag,actdiag.\nplantuml requires java\nblockdiag etc. in http://blockdiag.com/en/blockdiag/introduction.html\nPlantuml from http://plantuml.sourceforge.net/\n' >export/README.txt
 
-testrunner: ./js/runtests.js ./js/t.js model generators parser plantuml_jar
-	@chmod u+x ./web/miniserver.js
-	@./web/miniserver.js 8777 &
-	@./js/runtests.js webport 8777
-	@-pkill -f "miniserver.js 8777" || true
-
-checkminiserver:
-	@/bin/echo -e "Make sure miniserver is running for web tests\nYou can start it with: node web/miniserver.js"
-
-startminiserver:
-	@chmod u+x ./web/miniserver.js
-	node web/miniserver.js&
-
-jesttests: checkminiserver jest_test_deps
-	# It is possible to hook this to jest.config or even into the tearup/down of the actual test
-	# but this is path of least resistance
-	@chmod u+x ./web/miniserver.js
-	@./web/miniserver.js 8999 &
-	@mkdir -p tests/testrun
-	@MINISERVER_TEST_PORT=8999 npm test
-	@-pkill -f "miniserver.js 8999" || true
-
-_test: testrunner jesttests
-
-test:
-	@$(MAKE) -j2 _test
-
-tests: test
+tests: ./js/runtests.js ./js/t.js model generators parser faketypes plantuml_jar web/editorInteractions.js index.html
+	echo begin tests
+	make -C tests
 
 clean:
 	@find build -type f -delete
@@ -203,9 +160,21 @@ clean:
 	@find scripts    -name "*.map" -or -name "*.js" -delete
 	@find generators -name "*.map" -or -name "*.js" -delete
 	@find model      -name "*.map" -or -name "*.js" -delete
-	@find tests      -name "*.map" -or -name "*.js" -delete
 	@find web        -name "*.map" -or -name "*.js" -not -path "web/js/*" -delete
 	@make -C grammar clean
+	@make -C tests clean
+
+
+# relay to tests
+startminiserver:
+	make -C tests $@
+checkminiserver:
+	make -C tests $@
+jest_test_deps:
+	make -C tests $@
+test: all
+	@chmod u+x ./js/runtests.js
+	make -C tests
 
 watch:
 	scripts/watch_and_make.sh &

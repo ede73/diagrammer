@@ -9,8 +9,6 @@
 
 CORES =
 
-GRAMMAR_FILES = grammar/diagrammer.lex grammar/lexmarker.txt grammar/diagrammer.grammar
-
 GENERATOR_TSS=$(shell find generators -maxdepth 1 -iname "*.ts")
 GENERATOR_JSS:=$(GENERATOR_TSS:.ts=.js)
 MODEL_TSS=$(shell find model -maxdepth 1 -iname "*.ts")
@@ -49,14 +47,21 @@ ESLINT=eslint -f stylish --fix
 LOCK_FILE=.lock
 BUILD_STARTED_FILE=.build_started
 
-.PHONY: clean node_modules model
+.PHONY: clean node_modules model sub_grammar sub_grammar_just_lexer
 
 all:
 	@touch $(LOCK_FILE)
 	@touch $(BUILD_STARTED_FILE)
 	@$(MAKE) -j$(CORES) _all
 
-_all: active_project_deps jest_test_deps parser
+
+sub_grammar:
+	$(MAKE) -C grammar
+
+# sub_grammar_just_lexer:
+# 	$(MAKE) -C grammar just_lexer
+
+_all: sub_grammar active_project_deps jest_test_deps parser
 	@echo Built all
 	@rm -f $(LOCK_FILE)
 
@@ -117,26 +122,7 @@ plantuml_jar:
 	  exit 10; \
 	fi
 
-# Not actively used, but you can build and test just the lexer while developing
-build/diagrammer_lexer.js: grammar/diagrammer.lex
-	@echo "  Build Lexer"
-	@mkdir -p build
-	node_modules/.bin/jison-lex $< -o $@ >/dev/null
-	@echo "exports.diagrammerLexer=diagrammerLexer;" >> $@
-	@#@mv $@ a;uglifyjs a -c -m -o $@;rm a|grep -v WARN
-# nicer to carry around than build target
-just_lexer: build/diagrammer_lexer.js
-
-# Jison considers lexer/parser separate, we combine to one file
-build/diagrammer.all: $(GRAMMAR_FILES)
-	@mkdir -p build
-	@echo Compile build/diagrammer.all
-	@cat $^ >$@
-# nicer to carry around than build target
-lexer_and_grammar: build/diagrammer.all
-	echo 'Build lexer and grammar'
-
-build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators model js/*.js
+build/diagrammer_parser.js: build/diagrammer.all sub_grammar Makefile generators model js/*.js
 	@mkdir -p build
 	@if [ "${DEBUG}" != "" ]; then \
 	node_modules/.bin/jison -t $< -o $@ >/dev/null; \
@@ -172,6 +158,7 @@ build/diagrammer_parser.js: build/diagrammer.all just_lexer Makefile generators 
 	@sed -i ${INFIX}  's/exports.diagrammerLexer=diagrammerLexer;//g' build/diagrammer_lexer.js
 	@sed -i ${INFIX}  's/^var diagrammer_lexer/export var diagrammerLexer/g' build/diagrammer_lexer.js
 	@echo 'export const parse = function () { return diagrammerParser.parse.apply(diagrammerParser, arguments) }' >> $@
+
 # nicer to carry around than build target
 parser: build/diagrammer_parser.js
 
@@ -218,6 +205,7 @@ clean:
 	@find model      -name "*.map" -or -name "*.js" -delete
 	@find tests      -name "*.map" -or -name "*.js" -delete
 	@find web        -name "*.map" -or -name "*.js" -not -path "web/js/*" -delete
+	@make -C grammar clean
 
 watch:
 	scripts/watch_and_make.sh &

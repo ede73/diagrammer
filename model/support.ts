@@ -34,7 +34,7 @@ declare global {
  * Format a string with provided array of values
  * For example. "{2}{0}{1}".formatArray([2,3,1]) prints 123
  */
-// eslint-disable-next-line no-extend-native
+// @ts-expect-error eslint-disable-next-line no-extend-native
 String.prototype.formatArray = function (array: any[]) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   let formatted = this

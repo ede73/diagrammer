@@ -1,0 +1,7 @@
+TRANSPILER=tsc
+TRANSPILEOPTIONS=--module es6 --esModuleInterop --target es2017 --allowJs --removeComments --strict --checkJs --skipLibCheck
+TRANSPILE=$(TRANSPILER) $(TRANSPILEOPTIONS)
+export TRANSPILE
+S=| grep -v -E "(Cannot write file)" || true
+ESLINT=eslint -f stylish --fix
+export ESLINT

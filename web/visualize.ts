@@ -18,13 +18,13 @@ function _makeNewImageHolder(pngBase64: string) {
   getHTMLElement('diagrammer-graph')?.appendChild(img)
 }
 
-function beautify(generatedCode: string) {
+function beautifyJSON(generatedCode: string) {
   let data
   try {
     data = JSON.parse(generatedCode)
   } catch (ex) {
     // too aggressive for the use... many generated code not actually JSON
-    console.warn('Failed parsing generated code, perhaps not JSON(digraph etc), thish is fine?')
+    console.warn('Failed beautifying generated code JSON(perhaps digraph etc?)', ex)
     return
   }
   // Get DOM-element for inserting json-tree
@@ -43,7 +43,8 @@ export function visualize(visualizer: string) {
   const result = getInputElement('diagrammer-result')
   const generatedResult = result.value
 
-  beautify(generatedResult)
+  // try, just in case, we've JSON, to beautify it
+  beautifyJSON(generatedResult)
 
   if (!visualizer) {
     throw new Error('Visualizer not defined')

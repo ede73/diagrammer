@@ -107,9 +107,9 @@ plantuml_jar:
 build/diagrammer_parser.js: build/diagrammer.all sub_grammar Makefile generators model js/*.js
 	@mkdir -p build
 	@if [ "${DEBUG}" != "" ]; then \
-	node_modules/.bin/jison -t $< -o $@ >/dev/null; \
+	jison -t $< -o $@ >/dev/null; \
 	else \
-	node_modules/.bin/jison $< -o $@ >/dev/null; \
+	jison $< -o $@ >/dev/null; \
 	fi
 	@sed -i ${INFIX} '1 s/^/\n/' $@
 	@for generator in generators/*.js; do \

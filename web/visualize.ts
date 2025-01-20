@@ -24,7 +24,7 @@ function beautifyJSON(generatedCode: string) {
     data = JSON.parse(generatedCode)
   } catch (ex) {
     // too aggressive for the use... many generated code not actually JSON
-    console.warn('Failed beautifying generated code JSON(perhaps digraph etc?)', ex)
+    console.debug('Failed beautifying generated code JSON(perhaps digraph etc?)', ex)
     return
   }
   // Get DOM-element for inserting json-tree

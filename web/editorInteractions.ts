@@ -131,11 +131,11 @@ export function generatorChanged() {
 function parseAndRegenerate(preferScriptSpecifiedVisualizer = false) {
   const code = getGraphText() + '\n'
   parse(code, (finalVisualizer) => {
-    console.warn(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`)
+    console.debug(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`)
     visualize(finalVisualizer)
   }, (_error, _ex) => {
     clearBeautified()
-    console.warn('  parseAndRegenerate() - Parsing failed :(')
+    console.warn(`  parseAndRegenerate() - Parsing failed :( ${_error}`)
   }, preferScriptSpecifiedVisualizer)
 }
 
@@ -148,7 +148,7 @@ export function savedChanged() {
   if (data[doc]) {
     setGraphText(data[doc])
     filename.value = doc
-    console.warn('savedChanged..parse')
+    console.debug('savedChanged..parse')
     parseAndRegenerate()
   }
 }
@@ -157,7 +157,7 @@ export function exampleChanged() {
   // read the example...place to textArea(overwrite)
   const e = getSelectElement('diagrammer-example')
   const doc = e.options[e.selectedIndex].value
-  console.warn(`exampleChanged(${doc})`)
+  console.debug(`exampleChanged(${doc})`)
   makeHTTPGet(`tests/${doc}`,
     (msg) => {
       setGraphText(String(msg))

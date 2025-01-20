@@ -16,7 +16,7 @@ function setupParser() {
   getParserYY().parsedVisualizer = (visualizer: string, preferParsed: boolean) => {
     if (preferParsed && visualizer) {
       setVisualizer(visualizer)
-      console.warn(`  .. changed visualizer ${visualizer ?? ''}`)
+      console.debug(`  .. changed visualizer ${visualizer ?? ''}`)
     }
   }
 
@@ -53,7 +53,7 @@ export function parse(diagrammerCode: string, successCallback: (visualizer: stri
   const visualizer = getSelectedVisualizer()
 
   setupParser()
-  console.warn(`parse(${visualizer} ${preferScriptSpecifiedVisualizer ? 'preferScriptSpecifiedVisualizer' : ''})`)
+  console.debug(`parse(${visualizer} ${preferScriptSpecifiedVisualizer ? 'preferScriptSpecifiedVisualizer' : ''})`)
   if (!visualizer) {
     throw new Error('Visualizer not defined')
   }

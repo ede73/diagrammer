@@ -18,4 +18,4 @@ web: $(WEB_JSS)
 	@$(TRANSPILE) $< $(S)
 
 clean:
-	@find ../web -name "*.map" -or -name "*.js" -delete
+	@find ../web -name "*.map" -or -name "*.js" -delete -maxdepth 1

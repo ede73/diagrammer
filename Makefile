@@ -87,7 +87,7 @@ plantuml_jar:
 	  exit 10; \
 	fi
 
-build/diagrammer_parser.js: build/diagrammer.all sub_grammar Makefile generators model js/*.js
+build/diagrammer_parser.js: build/diagrammer.all sub_grammar Makefile generators model js_scripts
 	@mkdir -p build
 	@if [ "${DEBUG}" != "" ]; then \
 	jison -t $< -o $@ >/dev/null; \
@@ -134,16 +134,17 @@ tests: js model generators parser faketypes plantuml_jar web/editorInteractions.
 	make -C tests
 
 clean:
-	@find build -type f -delete
 	@rm -f .error
-	@rm -f build/types/*
-	@find js         -name "*.map" -or -name "*.js" -delete
+	@rm -fR build
 	@find scripts    -name "*.map" -or -name "*.js" -delete
-	@find generators -name "*.map" -or -name "*.js" -delete
-	@find model      -name "*.map" -or -name "*.js" -delete
-	@find web        -name "*.map" -or -name "*.js" -not -path "web/js/*" -delete
+	@make -C export clean
+	@make -C generators clean
 	@make -C grammar clean
+	@make -C js clean
+	@make -C model clean
 	@make -C tests clean
+	@make -C web clean
+	@make -C web/visualizations clean
 
 
 # relay to tests

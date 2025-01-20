@@ -41,4 +41,4 @@ lexer_and_grammar: $(OUTDIR)/diagrammer.all just_lexer
 	echo 'Build lexer and grammar'
 
 clean:
-	@find $(OUTDIR) -type f -delete
+	@find ../generators -name "*.map" -or -name "*.js" -delete

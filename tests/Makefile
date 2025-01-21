@@ -20,7 +20,7 @@ S=| grep -v -E "(Cannot write file)" || true
 
 all: _test
 
-jest_test_deps: parsertests webtests modeltests generatortests
+jest_test_deps: parsertests webtests modeltests generatortests CE.js
 parser/%.js: parser/$.ts
 parsertests: $(PARSER_TEST_JSS)
 web/%.js: parser/$.ts

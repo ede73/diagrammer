@@ -3,6 +3,7 @@ export default {
   // https://jestjs.io/docs/code-transformation
   transform: {},
   preset: 'jest-puppeteer',
+  testEnvironment: './tests/CE.js',
   setupFiles: [
     "<rootDir>/tests/web/setEnvVars.js"
   ],

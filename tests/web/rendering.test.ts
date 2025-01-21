@@ -1,15 +1,12 @@
 // @ts-check
 import type * as jis from 'jest-image-snapshot'
 import { toMatchImageSnapshot } from 'jest-image-snapshot'
-// import { type Page } from 'puppeteer'
-import { clearGeneratorResults, clearGraph, clearParsingErrors, getDiagrammerCode, getParsingError, selectExampleCode, selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn } from './diagrammer_support.js'
 import { singleElementScreenSnapshot } from './snapshot_single_element.js'
+import { clearGeneratorResults, clearGraph, clearParsingErrors, getDiagrammerCode, getParsingError, selectExampleCode, selectGeneratorVisualizer, setDiagrammerCode, waitForGeneratorResults, waitUntilGraphDrawn } from './diagrammer_support.js'
 import { describe, expect, it } from '@jest/globals'
 // defines global.browser and global.page
 import 'jest-environment-puppeteer'
 import { type Page, type Browser } from 'puppeteer'
-
-// node_modules/jest-environment-puppeteer/lib/env.js:201:                this.global.browser = await puppeteer.connect({
 
 /**
  */
@@ -40,7 +37,8 @@ describe('Diagrammer', () => {
     expect.extend({
       toMatchImageSnapshot
     })
-    const image = await page.screenshot({ fullPage: true })
+    const screenshot = await page.screenshot({ type: 'png', fullPage: true })
+    const image = Buffer.from(screenshot)
     // Local storage loads a bit slow (not immediately), should wait above
     // @ts-expect-error yeah, it does dear linter, see above :)
     expect(image).toMatchImageSnapshot(setConfig('main_screen_just_loaded', 0.005))

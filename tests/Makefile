@@ -29,6 +29,7 @@ model/%.js: parser/$.ts
 modeltests: $(MODEL_TEST_JSS)
 generators/%.js: parser/$.ts
 generatortests: $(GENERATORS_TEST_JSS)
+CE.js: CE.ts
 
  %.js: %.ts
 	@$(TRANSPILE) $< $(S)

@@ -396,12 +396,12 @@ traverseTree(root, (vertex, isLeaf, hasSiblings) => {
 - icons - Some copyleft icons for UI
 - index.html - Web UI main
 - js - The diagrammer parser (also transpiled mscgen, graphviz)
-  - mscgen / graphviz visualize the graphs in the Web UI in realtime without any backend support, but not required. I was hoping to build backendless visualization, all in browser. And that's what it does, but had I wanted to go all the way..PlantUML, python3 nwdiag/actdiag..etc. uh. 
+  - mscgen / graphviz visualize the graphs in the Web UI in realtime without any backend support, but not required. I was hoping to build backendless visualization, all in browser. And that's what it does, but had I wanted to go all the way..PlantUML, python3 nwdiag/actdiag..etc. uh.
 - manual_test_diagrams - some diagrammer tests during development, not tied to tests
 - model - Diagrammer parser converts diagrammer language to this AST model comprising of GraphVertex, GraphEdge, shapes, GraphInner (, graphobject, graphcanvas, tree, support)
 - scripts - Some utility scripts for building, testing, exporting
 - setup - setup related
-- tests - All the test files, diagrammer language inputs, reference renderings, transpiled outputs. 
+- tests - All the test files, diagrammer language inputs, reference renderings, transpiled outputs.
   - Test generates all the test files using all the (related) visualizations, and then does output text + output graph comparison. Super useful if you need to change the grammar, ensures the ever used to work, still does :)
 - types - web UI icons for adding vertex shapes
 - web - PHP Web Backend, provides access to backend renderers like PlantUml, mscgen (the C version), Python3 *diags, etc. Also provides import/export. Not needed for comman line use
@@ -413,6 +413,21 @@ I've run this on Linux/Mac, but most recently on windows via its awesomely magni
 Run scripts/setup.sh (or check it and run by hand). It installs required modules.
 
 ```
+# Install NVM https://github.com/nvm-sh/nvm
+nvm install 18
+nvm use 18
+# If you want to run all the tests (and or use WEB interface with local render)
+# Install: graphviz mscgen
+# For nwdiag blockdiag actdiag seqdiag, check scripts/setup.sh (linux only)
+#  mkdir tmp;cd tmp
+#  git clone git@github.com:ede73/blockdiag.git
+#  for diag in act nw seq; do git clone https://github.com/blockdiag/${diag}diag.git ; done
+#  for diag in act nw seq; do cd ${diag}diag; python3 setup.py build ; cd .. ; done
+# Either install or make available in PATH somehow...
+#  mkdir ~/diags
+#  for diag in act nw seq; do cd ${diag}diag; pip3 install --target=$HOME/diags . ; cd .. ; done
+# export PYTHONPATH=$HOME/diags/lib/python3.X/site-packages:$PYTHONPATH
+
 cd ~/diagrammer
 ln -s ~/diagrammer ~/public_html/ # or ~/Sites on mac
 npm install
@@ -436,10 +451,10 @@ scripts/setup.sh SELFTEST
 # External project references:
 - https://github.com/ajaxorg/ace-builds
   - Source of js/viz.js, you'll see the web page drawing graphviz graphs in "real time"
-  - Not necessary to use diagrammer 
+  - Not necessary to use diagrammer
 - https://github.com/ajaxorg/ace-builds
   - Highlighting editor - if you use the web interface
-  - Not necessary for command line use 
+  - Not necessary for command line use
   - Base ACE editor included in ace/src-noconflict folder
 - https://github.com/zaach/jison
   - Parser maker for Javascript

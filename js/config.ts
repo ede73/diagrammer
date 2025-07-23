@@ -11,6 +11,7 @@ import { MSCGen } from '../generators/mscgen.js'
 import { NWDiag } from '../generators/nwdiag.js'
 import { ParseTree } from '../generators/parsetree.js'
 import { PlantUMLSequence } from '../generators/plantuml_sequence.js'
+import { MermaidSequence } from '../generators/mermaid_sequence.js'
 import { Sankey } from '../generators/sankey.js'
 import { SeqDiag } from '../generators/seqdiag.js'
 import { UMLClass } from '../generators/umlclass.js'
@@ -129,6 +130,12 @@ const _visualizations: Visualization[] = [
     'ext/plantuml.jar',
     `-t${format.toLocaleLowerCase()}`,
     '-p'
+  ]),
+  new Visualization('mermaid_sequence', 'Mermain Sequence Diagram(cli)', MermaidSequence, undefined, (format: string) => [
+    'mmdc',
+    `-e png`,
+    '-i-',
+    '-o-'
   ]),
   new Visualization('sankey', 'Sankey', Sankey, visualizeSankey),
   new Visualization('seqdiag', 'Sequence Diagram(cli)', SeqDiag, undefined, (format: string, outputFile?: string) => buggyDiags('seqdiag', format, outputFile ?? '-')),

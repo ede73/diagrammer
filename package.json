@@ -42,6 +42,7 @@
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest"
   },
   "dependencies": {
+    "@mermaid-js/mermaid-cli": "^11.6.0",
     "@types/viz.js": "^2.1.2",
     "colors": "^1.4.0",
     "devtools-protocol": "^0.0.1107588",

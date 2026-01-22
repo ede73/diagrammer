@@ -31,7 +31,7 @@
     "jison": "^0.4.18",
     "jison-lex": "^0.3.4",
     "jquery": "^3.6.3",
-    "mscgenjs": "^6.0.2",
+    "mscgenjs": "^8.0.0",
     "puppeteer": "^23.0.1",
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",

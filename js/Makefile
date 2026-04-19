@@ -5,7 +5,7 @@ CORES =
 JS_TSS=$(shell find ../js -maxdepth 1 -iname "*.ts" -and -not -name "go.d.ts")
 JS_JSS:=$(JS_TSS:.ts=.js)
 
-export PATH := $(CURDIR)/node_modules/.bin:$(PATH)
+export PATH := $(CURDIR)/../node_modules/.bin:$(PATH)
 
 .PHONY: clean
 

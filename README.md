@@ -448,6 +448,12 @@ You can install and test evething in a bootstrapped chroot jail - no changes don
 scripts/setup.sh SELFTEST
 ```
 
+## Developer docs
+This repository also includes:
+- `AGENTS.md` — repo entry points, build/run/test commands, and quick navigation guidance
+- `TESTING.md` — test workflows, runnable commands, and regression runner details
+- `DEVELOPMENT.md` — development setup, build rules, CLI/web workflows, and recommended flow
+
 # External project references:
 - https://github.com/ajaxorg/ace-builds
   - Source of js/viz.js, you'll see the web page drawing graphviz graphs in "real time"

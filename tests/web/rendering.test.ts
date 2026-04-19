@@ -25,7 +25,9 @@ const getPage = (): Page => { return page as unknown as Page }
 
 describe('Diagrammer', () => {
   beforeAll(async () => {
-    await page.goto(`http://localhost:${process.env.MINISERVER_TEST_PORT ?? ''}/?do_not_load_initial_example=1`)
+    await page.goto(`http://localhost:${process.env.MINISERVER_TEST_PORT ?? ''}/?do_not_load_initial_example=1`, {
+      waitUntil: 'load'
+    });
     // Suddenly (after working for a long time!) started getting errors from here
     // Protocol error (Emulation.setDeviceMetricsOverride): Invalid parameters Failed to deserialize params.height
     // Usually if I close the chrome browser, this goes away, wtf? cache? out of memory?

@@ -1,4 +1,4 @@
-import * as fs from 'fs'
+//import * as fs from 'fs'
 import * as puppeteer from 'puppeteer'
 import { type Page } from 'puppeteer'
 import { singleElementScreenSnapshot } from '../tests/web/snapshot_single_element.js'
@@ -60,7 +60,7 @@ async function _webRender(useConfig: VisualizeConfigType, visualizer: string, di
     useConfig.throwError('Could not get SVG code')
   }
   const buffer = await singleElementScreenSnapshot(browser, svg, bbox?.width, bbox?.height)
-
+  const fs = (await import('fs')).default;
   if (useConfig.isPipeMarker(outputShot)) {
     // TODO: yeah..doesnt work
     process.stdout.write(buffer)

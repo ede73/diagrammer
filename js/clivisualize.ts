@@ -1,4 +1,4 @@
-import * as fs from 'fs'
+//import * as fs from 'fs'
 import { spawn, type ChildProcess } from 'child_process'
 import { type ConfigType } from './configsupport.js'
 import { type VisualizeConfigType } from './visualizeConfigType.js'
@@ -77,6 +77,7 @@ export async function doCliVisualize(
       ['nwdiag', 'seqdiag', 'actdiag', 'blockdiag'].includes(useConfig.visualizer) && useConfig.redirectingDiag
   }
 
+  const fs = (await import('fs')).default;
   const outputFileStream = (useConfig.isPipeMarker(useConfig.visualizedGraph) || isRedirectingDiagRun())
     ? undefined
     // uh, nwdiag(all diags) use buggy PIL library opening R&W (seekable) access to pipe - rending piping broken

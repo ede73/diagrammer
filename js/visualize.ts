@@ -2,7 +2,6 @@
 
 import { configSupport } from './configsupport.js'
 import { doVisualize } from './diagrammer.js'
-import * as fs from 'fs'
 import { type VisualizeConfigType } from './visualizeConfigType.js'
 import { visualizations } from './config.js'
 
@@ -45,6 +44,7 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
       _collectPort = true
       return
   }
+  const fs = (await import('fs')).default;
   if (!config.input && fs.existsSync(unknownCommandLineOption)) {
     if (config.code) {
       config.throwError('Something is wrong, going to read the code twice')

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import * as fs from 'fs'
+//import * as fs from 'fs'
 import path from 'path'
 import { configSupport, type ConfigType } from '../js/configsupport.js'
 import { doLex, doParse, doVisualize } from '../js/diagrammer.js'
@@ -51,6 +51,7 @@ function _exitError(useConfig, msg: string) {
 }
 
 export async function lexParseAndVisualize(useConfig: TestRunnerConfig, visualizationisComplete: (exitCode: number) => Promise<void>) {
+  const fs = (await import('fs')).default;
   if (useConfig.isPipeMarker(useConfig.input) && !useConfig.beingPiped()) {
     _exitError(useConfig, 'Supposed to receive graph via pipe, but not being piped!')
   } else if (!useConfig.isPipeMarker(useConfig.input) && !fs.existsSync(useConfig.input)) {
@@ -141,6 +142,7 @@ async function _main(argv: any[]) {
         config.format = 'svg'
         return
     }
+    const fs = (await import('fs')).default;
     // Allow using absolute and relative paths! (currently abs.paths dont work)
     // ALSO detect piping/redirection and make 'em work
     if (!config.input && fs.existsSync(unknownCommandLineOption)) {

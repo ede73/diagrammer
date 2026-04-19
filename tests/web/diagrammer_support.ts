@@ -1,6 +1,6 @@
 // @ts-check
 import { type Page } from 'puppeteer'
-import { setGraphText, generatorChanged, getGraphText } from '../../web/editorInteractions.js'
+//import { setGraphText, generatorChanged, getGraphText } from '../../web/editorInteractions.js'
 
 function getAndAssertHTMLElement(selector: string): HTMLElement {
   return document.querySelector(selector) as HTMLElement
@@ -41,6 +41,31 @@ export async function waitForGeneratorResults(page: Page) {
  * Set diagrammer code and launch the parser
  */
 export async function setDiagrammerCode(page: Page, code: string) {
+  console.log('Testing page URL:', page.url());
+
+  page.on('requestfailed', req => {
+    console.error(`[NETWORK ERROR]: Failed to load: ${req.url()} - ${req.failure().errorText}`);
+  });
+
+  page.on('pageerror', err => {
+    console.error(`[BROWSER CRASH]: ${err.toString()}`);
+  });
+
+  page.on('console', msg => {
+    console.log(`[Browser]: ${msg.text()}`);
+  });
+
+  page.on('console', async (msg) => {
+    const args = await Promise.all(msg.args().map(arg => arg.jsonValue()));
+    console.log(`[Browser]: ${args.join(' ')}`);
+  });
+
+  await page.evaluate(() => {
+    // 1. Get properties and stringify them so you can see them in your terminal
+    const props = Object.getOwnPropertyNames(window);
+    console.log('--- AVAILABLE GLOBAL FUNCTIONS ---');
+    console.log(JSON.stringify(props.filter(p => typeof window[p] === 'function' && p.toLowerCase().includes('graph'))));
+  });
   await page.evaluate((code) => {
     setGraphText(code)
     generatorChanged()

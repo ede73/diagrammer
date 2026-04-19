@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import * as fs from 'fs'
+//import * as fs from 'fs'
 import { configSupport, type ConfigType } from './configsupport.js'
 import { doLex } from './diagrammer.js'
 
@@ -20,6 +20,7 @@ function _usage() {
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
   // switch (unknownCommandLineOption.toLocaleLowerCase()) {
   // }
+  const fs = (await import('fs')).default;
   if (!config.input && fs.existsSync(unknownCommandLineOption)) {
     if (config.code) {
       config.throwError('Something is wrong, going to read the code twice')

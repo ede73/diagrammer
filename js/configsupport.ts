@@ -1,5 +1,5 @@
 import * as tty from 'node:tty'
-import * as fs from 'fs'
+//import * as fs from 'fs'
 
 export interface ConfigType {
   verbose: boolean
@@ -74,6 +74,7 @@ export const configSupport = <SubConfigType extends ConfigType>(scriptName: stri
 
       return chunks.join('')
     } else {
+      const fs = (await import('fs')).default;
       const fileContent = await fs.promises.readFile(filePath, { encoding: 'utf8' })
       return fileContent
     }

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import * as fs from 'fs'
+//import * as fs from 'fs'
 import { findGeneratorForVisualization, hasGenerator, hasVisualizer } from '../js/config.js'
 import { setVerbose } from '../model/debug.js'
 import { configSupport, type ConfigType } from './configsupport.js'
@@ -24,6 +24,7 @@ function _usage() {
 }
 
 await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownCommandLineOption) => {
+  const fs = (await import('fs')).default;
   if (!config.input && fs.existsSync(unknownCommandLineOption)) {
     if (config.code) {
       config.throwError('Something is wrong, going to read the code twice')

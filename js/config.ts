@@ -26,12 +26,6 @@ import { visualizeSankey } from '../web/visualizations/visualizeSankey.js'
 import { visualizeUmlClass } from '../web/visualizations/visualizeUmlClass.js'
 import { type GraphCanvas } from '../model/graphcanvas.js'
 
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 type ICommandLine = (format: string, outputFile?: string) => string[]
 
@@ -46,12 +40,29 @@ export class Visualization {
   }
 }
 
+let localRepoFont: string | undefined
+
+if (typeof window !== 'undefined') {
+  localRepoFont = 'fonts/dejavu-sans-bold.ttf'
+} else {
+  try {
+    const fs = (await import('fs')).default
+    const path = (await import('path')).default
+    const cwdFont = path.resolve(process.cwd(), 'fonts/dejavu-sans-bold.ttf')
+    if (fs.existsSync(cwdFont)) {
+      localRepoFont = cwdFont
+    } else {
+      const url = (await import('url')).default
+      const moduleFont = url.fileURLToPath(new URL('../fonts/dejavu-sans-bold.ttf', import.meta.url))
+      if (fs.existsSync(moduleFont)) {
+        localRepoFont = moduleFont
+      }
+    }
+  } catch (_) {}
+}
+
 function getLocalRepoFont(): string | undefined {
-  const localFont = path.resolve(__dirname, '../fonts/dejavu-sans-bold.ttf')
-  if (fs.existsSync(localFont)) {
-    return localFont
-  }
-  return undefined
+  return localRepoFont
 }
 
 

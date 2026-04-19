@@ -35,6 +35,7 @@ CE.js: CE.ts
 	@$(TRANSPILE) $< $(S)
 
 testrunner:
+	@-pkill -f "miniserver.js 8777" || true
 	@chmod u+x ../web/miniserver.js
 	@$(SHELL) -c 'cd .. ; ./web/miniserver.js 8777&'
 	@$(SHELL) -c 'cd .. ; ./js/runtests.js webport 8777'

@@ -26,6 +26,13 @@ import { visualizeSankey } from '../web/visualizations/visualizeSankey.js'
 import { visualizeUmlClass } from '../web/visualizations/visualizeUmlClass.js'
 import { type GraphCanvas } from '../model/graphcanvas.js'
 
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 type ICommandLine = (format: string, outputFile?: string) => string[]
 
 export class Visualization {
@@ -39,8 +46,17 @@ export class Visualization {
   }
 }
 
+function getLocalRepoFont(): string | undefined {
+  const localFont = path.resolve(__dirname, '../fonts/dejavu-sans-bold.ttf')
+  if (fs.existsSync(localFont)) {
+    return localFont
+  }
+  return undefined
+}
+
+
 const buggyDiags = (command: string, format: string, outputFile: string) => {
-  const font = '/usr/share/fonts/truetype/dejavu//DejaVuSans-Bold.ttf'
+  const font = getLocalRepoFont()
   const redirectingDiag = true
   if (redirectingDiag) {
     return [

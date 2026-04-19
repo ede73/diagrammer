@@ -8,6 +8,7 @@ import * as path from 'path'
 import pixelmatch from 'pixelmatch'
 import PNGx from 'pngjs'
 import { configSupport, type ConfigType } from '../js/configsupport.js'
+import images from 'images';
 const PNG = PNGx.PNG
 
 interface TestSuiteConfig extends ConfigType {
@@ -119,13 +120,24 @@ function currentAndLastRunProduceSameResults(previousRunCodeFile: string, curren
 }
 
 function diffImages(referenceImage: string, outputImage) {
+  const fs = require('fs');
   if (!fs.existsSync(referenceImage)) {
     config.tp(`  Reference visualized graph file (${referenceImage}) does not exist, first run? Copy the current file over`)
     fs.renameSync(outputImage, referenceImage)
     return true
   }
+
   const img1 = PNG.sync.read(fs.readFileSync(referenceImage))
-  const img2 = PNG.sync.read(fs.readFileSync(outputImage))
+  // Read the raw output to get dimensions without resizing yet
+  const outputBuffer = fs.readFileSync(outputImage);
+  let img2 = PNG.sync.read(outputBuffer);
+
+  // Resize ONLY if dimensions mismatch
+  if (img1.width !== img2.width || img1.height !== img2.height) {
+    const resized = images(outputBuffer).resize(img1.width, img1.height);
+    img2 = PNG.sync.read(resized.encode('png'));
+  }
+
   const { width, height } = img1
   const diff = new PNG({ width, height })
   try {
@@ -180,6 +192,7 @@ async function runATest(useVisualizer: string, webOnlyVisualizer: boolean, testF
         config.tp(`   If you think new run is correct, just do: rm ${previouslyGeneratedCodeFile}`)
         if (cfg.traces !== '') {
           config.tp(`   Full traces available in ${currentRunPath}/${testFileName}.log`)
+          const fs = require('fs');
           fs.writeFileSync(`${currentRunPath}/${testFileName}.log`, cfg.traces)
         }
       }

@@ -31,7 +31,7 @@
     "jison": "^0.4.18",
     "jison-lex": "^0.3.4",
     "jquery": "^3.6.3",
-    "mscgenjs": "^6.0.2",
+    "mscgenjs": "^8.0.0",
     "puppeteer": "^23.0.1",
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",
@@ -46,7 +46,7 @@
     "@types/viz.js": "^2.1.2",
     "colors": "^1.4.0",
     "devtools-protocol": "^0.0.1107588",
-    "diff": "^5.1.0",
+    "diff": "^5.2.2",
     "gojs": "^2.3.2",
     "viz.js": "^2.1.2"
   }

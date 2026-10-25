@@ -34,12 +34,15 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
     config.code = await config.readFile(config.input)
     return
   }
-  // must be generator
   const visualizerName = unknownCommandLineOption.toLocaleLowerCase()
-  if (!hasVisualizer(visualizerName)) {
-    config.throwError(`Unknown visualizer (${visualizerName})`)
+  if (hasVisualizer(visualizerName)) {
+    config.visualizer = visualizerName
+    return
   }
-  config.visualizer = visualizerName
+  if (!config.input) {
+    config.throwError(`Input file not found (${unknownCommandLineOption})`)
+  }
+  config.throwError(`Unknown visualizer (${visualizerName})`)
 })
 
 if (config.verbose) {

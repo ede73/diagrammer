@@ -3,7 +3,7 @@
 import { configSupport } from './configsupport.js'
 import { doVisualize } from './diagrammer.js'
 import { type VisualizeConfigType } from './visualizeConfigType.js'
-import { visualizations } from './config.js'
+import { visualizations, hasVisualizer } from './config.js'
 
 const config = configSupport<VisualizeConfigType>('visualize.js', {
   visualizer: '',
@@ -53,6 +53,14 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
     config.input = unknownCommandLineOption.trim()
     config.code = await config.readFile(config.input)
     return
+  }
+  const visualizerName = unknownCommandLineOption.toLocaleLowerCase()
+  if (hasVisualizer(visualizerName)) {
+    config.visualizer = unknownCommandLineOption
+    return
+  }
+  if (!config.input) {
+    config.throwError(`Input file not found (${unknownCommandLineOption})`)
   }
   config.tp(`Must be visualizer directive (${unknownCommandLineOption})`)
   config.visualizer = unknownCommandLineOption

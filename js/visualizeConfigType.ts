@@ -11,4 +11,5 @@ export interface VisualizeConfigType extends ConfigType {
   returnImage: boolean
   // only use if returnImage=true, returns the image here
   outputImage?: string
+  parsedCode?: string
 }

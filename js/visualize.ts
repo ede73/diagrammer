@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 import { configSupport } from './configsupport.js'
-import { doVisualize } from './diagrammer.js'
+import { doVisualize, doParse } from './diagrammer.js'
+import { supportsCliVisualization } from './clivisualize.js'
 import { type VisualizeConfigType } from './visualizeConfigType.js'
+import { type GenerateConfigType } from './generate.js'
 import { visualizations, hasVisualizer } from './config.js'
 
 const config = configSupport<VisualizeConfigType>('visualize.js', {
@@ -80,6 +82,28 @@ if (!config.code) {
   config.throwError('Failed reading code to parse')
 }
 
-await doVisualize(config, config.code, config.visualizer, (exitCode) => {
+let codeToVisualize = config.code
+if (supportsCliVisualization(config)) {
+  let errors = 0
+  config.parsedCode = ''
+  doParse(
+    config as unknown as GenerateConfigType,
+    config.code,
+    config.visualizer,
+    (result) => {
+      config.parsedCode = (config.parsedCode ?? '') + `${result}\n`
+    },
+    (parseError) => {
+      errors++
+      config.throwError(parseError)
+    }
+  )
+  if (errors) {
+    process.exit(1)
+  }
+  codeToVisualize = config.parsedCode
+}
+
+await doVisualize(config, codeToVisualize, config.visualizer, (exitCode) => {
   console.error('done')
 })

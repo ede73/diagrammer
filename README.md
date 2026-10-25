@@ -244,6 +244,24 @@ It'll make 5 vertex groups:
 
 PlantUML + GraphViz visualizer support conditionals (visually)
 
+### Loops
+Diagrammer also supports structured loop constructs:
+```
+while condition
+  task_a > task_b
+endwhile
+
+do
+  step_1 > step_2
+until loop_condition_met
+```
+
+### Directives and container defaults
+- `LANDSCAPE` or `PORTRAIT`: sets canvas layout direction.
+- `VISUALIZER <name>`: embeds preferred visualizer target directly in the diagram.
+- `START <vertex>`: explicitly declares the initial/start vertex.
+- Container color defaults: `VERTEX_COLOR`, `VERTEXTEXT_COLOR`, `EDGE_COLOR`, `EDGETEXT_COLOR`, `GROUP_COLOR`.
+
 ### Record shapes
 Not all renderers support record types (GraphViz does)
 ```
@@ -404,7 +422,7 @@ traverseTree(root, (vertex, isLeaf, hasSiblings) => {
 - tests - All the test files, diagrammer language inputs, reference renderings, transpiled outputs.
   - Test generates all the test files using all the (related) visualizations, and then does output text + output graph comparison. Super useful if you need to change the grammar, ensures the ever used to work, still does :)
 - types - web UI icons for adding vertex shapes
-- web - PHP Web Backend, provides access to backend renderers like PlantUml, mscgen (the C version), Python3 *diags, etc. Also provides import/export. Not needed for comman line use
+- web - Web frontend and Node.js development server (`web/miniserver.js`), provides browser UI and access to CLI renderers (PlantUML, mscgen, Python3 *diags, etc.) plus localstorage save/load.
 
 # Installation
 Totally at your own risk!
@@ -453,6 +471,7 @@ This repository also includes:
 - `AGENTS.md` — repo entry points, build/run/test commands, and quick navigation guidance
 - `TESTING.md` — test workflows, runnable commands, and regression runner details
 - `DEVELOPMENT.md` — development setup, build rules, CLI/web workflows, and recommended flow
+- `NOTES.md` — in-depth technical analysis, architecture, visualizer matrix, and developer notes
 
 # External project references:
 - https://github.com/ajaxorg/ace-builds

@@ -23,7 +23,7 @@ This document describes the `diagrammer` repository layout, key entry points, an
 - Run CLI visualization via web-capable output:
   - `node js/visualize.js [INPUT] [VISUALIZER]`
 - Run the image/graph regression test runner:
-  - `scripts/runtests.js [visualizer:testPattern]`
+  - `node js/runtests.js [visualizer:testPattern]`
 
 ## Main repo paths
 - `package.json` — Node dependencies and `npm test`
@@ -55,7 +55,7 @@ For new work, follow this order:
 For CLI-only checks:
 1. `npm install`
 2. `make parser`
-3. `node js/generate.js tests/test_inputs/state13.txt seqdiag`
+3. `node js/generate.js tests/test_inputs/state.txt seqdiag`
 
 ## Notes for agents
 - If you need to modify or inspect parser behavior, start in `grammar/` and `js/diagrammer.js`.
@@ -66,5 +66,5 @@ For CLI-only checks:
 ## Helpful facts
 - `make all` builds grammar, model, web assets, generators, and parser artifacts.
 - `make test` runs `make all` before invoking tests.
-- `npm test` invokes Jest directly via `node --experimental-vm-modules ./node_modules/.bin/jest`.
-- `scripts/runtests.js` compares output text and graph images against stored baselines.
+- `npm test` invokes Jest directly (note: web tests require miniserver running, or use `make -C tests jesttests`).
+- `node js/runtests.js` compares output text and graph images against stored baselines.

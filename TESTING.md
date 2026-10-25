@@ -13,7 +13,7 @@ This document describes the test workflows for the `diagrammer` project.
 - Run Jest tests inside `tests/`:
   - `make -C tests jesttests`
 - Run the regression test runner directly:
-  - `scripts/runtests.js [visualizer:testNamePattern]`
+  - `node js/runtests.js [visualizer:testNamePattern]`
 
 ## How tests are organized
 - `tests/` contains:
@@ -45,12 +45,12 @@ This document describes the test workflows for the `diagrammer` project.
 
 ## Useful direct commands
 - Run one visualizer regression test:
-  - `scripts/runtests.js dot:state1`
+  - `node js/runtests.js dot:state`
 - Run all tests with web support:
   - `make test`
 - If a regression changed intentionally, remove the old reference file from `tests/testrun/previous` and rerun.
 
 ## Notes
 - `make test` builds the whole project before running tests.
-- `npm test` only runs Jest and does not build the parser artifacts itself.
+- `npm test` runs Jest directly, but web/browser tests will fail with `ERR_CONNECTION_REFUSED` unless `web/miniserver.js` is running. Use `make -C tests jesttests` to automatically start and stop miniserver on port 8999 for Jest runs.
 - Web tests depend on `web/miniserver.js` being executable and available.

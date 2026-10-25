@@ -34,9 +34,9 @@ This document describes how to set up, build, and run `diagrammer` for developme
 
 ### CLI usage
 - Parse and transpile a diagram file:
-  - `node js/generate.js tests/test_inputs/state13.txt seqdiag`
+  - `node js/generate.js tests/test_inputs/state.txt seqdiag`
 - Visualize a diagram through the CLI:
-  - `node js/visualize.js tests/test_inputs/state13.txt dot`
+  - `node js/t.js tests/test_inputs/state.txt dot output /tmp/output.png`
 - If piping input:
   - `cat file.txt | node js/generate.js - seqdiag`
 
@@ -58,7 +58,7 @@ This document describes how to set up, build, and run `diagrammer` for developme
    - `node js/generate.js tests/test_inputs/state_sequence.txt mscgen`
 5. Run targeted tests or full regressions:
    - `make -C tests testrunner`
-   - `npm test`
+   - `make -C tests jesttests`
 
 ## Notes for contributors
 - `build/diagrammer_parser.js` is generated from `grammar/diagrammer.grammar` and `make all`.

@@ -5,7 +5,7 @@ use pest::Parser;
 
 pub struct AstBuilder {
     pub canvas: GraphCanvas,
-    container_stack: Vec<usize>, // indices or IDs of nested groups
+    group_stack: Vec<GraphGroup>,
     context: ParsingContext,
 }
 
@@ -25,7 +25,7 @@ impl AstBuilder {
 
         Self {
             canvas: GraphCanvas::new(),
-            container_stack: Vec::new(),
+            group_stack: Vec::new(),
             context,
         }
     }
@@ -44,8 +44,97 @@ impl AstBuilder {
             }
         }
 
+        // Flush any unclosed groups back to canvas
+        while let Some(group) = self.group_stack.pop() {
+            if let Some(parent) = self.group_stack.last_mut() {
+                parent.objects.push(GraphObject::Group(Box::new(group)));
+            } else {
+                self.canvas.objects.push(GraphObject::Group(Box::new(group)));
+            }
+        }
+
         self.canvas.parsing_context = Some(self.context);
         Ok(self.canvas)
+    }
+
+    fn active_defaults_mut(&mut self) -> &mut AllowedDefaults {
+        if let Some(grp) = self.group_stack.last_mut() {
+            &mut grp.defaults
+        } else {
+            &mut self.canvas.defaults
+        }
+    }
+
+    fn push_object(&mut self, obj: GraphObject) {
+        if let Some(grp) = self.group_stack.last_mut() {
+            grp.objects.push(obj);
+        } else {
+            self.canvas.objects.push(obj);
+        }
+    }
+
+    fn push_root_vertex(&mut self, obj: GraphObject) {
+        if let Some(grp) = self.group_stack.last_mut() {
+            grp.root_vertices.push(obj);
+        } else {
+            self.canvas.root_vertices.push(obj);
+        }
+    }
+
+    fn remove_from_root_vertices(&mut self, name: &str) {
+        if let Some(grp) = self.group_stack.last_mut() {
+            grp.root_vertices.retain(|obj| match obj {
+                GraphObject::VertexRef { vertex } => vertex.name != name,
+                GraphObject::Vertex(v) => v.name != name,
+                _ => true,
+            });
+        } else {
+            self.canvas.root_vertices.retain(|obj| match obj {
+                GraphObject::VertexRef { vertex } => vertex.name != name,
+                GraphObject::Vertex(v) => v.name != name,
+                _ => true,
+            });
+        }
+    }
+
+    fn object_exists_recursive(list: &[GraphObject], name: &str) -> bool {
+        for obj in list {
+            match obj {
+                GraphObject::VertexRef { vertex } if vertex.name == name => return true,
+                GraphObject::Vertex(v) if v.name == name => return true,
+                GraphObject::Group(g) => {
+                    if g.name == name || Self::object_exists_recursive(&g.objects, name) {
+                        return true;
+                    }
+                }
+                _ => {}
+            }
+        }
+        false
+    }
+
+    fn object_exists(&self, name: &str) -> bool {
+        for grp in self.group_stack.iter().rev() {
+            if grp.name == name || Self::object_exists_recursive(&grp.objects, name) {
+                return true;
+            }
+        }
+        Self::object_exists_recursive(&self.canvas.objects, name)
+    }
+
+    fn ensure_vertex_exists(&mut self, name: &str) {
+        if !self.object_exists(name) {
+            self.push_object(GraphObject::VertexRef {
+                vertex: VertexRef {
+                    name: name.to_string(),
+                },
+            });
+            self.push_root_vertex(GraphObject::VertexRef {
+                vertex: VertexRef {
+                    name: name.to_string(),
+                },
+            });
+        }
     }
 
     fn process_statement(&mut self, mut pairs: Pairs<Rule>) -> Result<(), String> {
@@ -72,32 +161,37 @@ impl AstBuilder {
             }
             Rule::vertex_color => {
                 let color = self.extract_color_or_var(pair)?;
-                self.canvas.defaults.vertexcolor = Some(color);
+                self.active_defaults_mut().vertexcolor = Some(color);
             }
             Rule::vertex_text_color => {
                 let color = self.extract_color_or_var(pair)?;
-                self.canvas.defaults.vertextextcolor = Some(color);
+                self.active_defaults_mut().vertextextcolor = Some(color);
             }
             Rule::edge_color => {
                 let color = self.extract_color_or_var(pair)?;
-                self.canvas.defaults.edgecolor = Some(color);
+                self.active_defaults_mut().edgecolor = Some(color);
             }
             Rule::edge_text_color => {
                 let color = self.extract_color_or_var(pair)?;
-                self.canvas.defaults.edgetextcolor = Some(color);
+                self.active_defaults_mut().edgetextcolor = Some(color);
             }
             Rule::group_color => {
                 let color = self.extract_color_or_var(pair)?;
-                self.canvas.defaults.groupcolor = Some(color);
+                self.active_defaults_mut().groupcolor = Some(color);
             }
             Rule::equal => {
-                // equal vertices
                 for item in pair.into_inner() {
                     let names = self.collect_vertex_names(item);
                     for name in names {
-                        self.canvas.equal.push(GraphObject::VertexRef {
-                            vertex: VertexRef { name },
-                        });
+                        if let Some(grp) = self.group_stack.last_mut() {
+                            grp.equal.push(GraphObject::VertexRef {
+                                vertex: VertexRef { name },
+                            });
+                        } else {
+                            self.canvas.equal.push(GraphObject::VertexRef {
+                                vertex: VertexRef { name },
+                            });
+                        }
                     }
                 }
             }
@@ -107,33 +201,119 @@ impl AstBuilder {
             Rule::event_chain => {
                 self.handle_event_chain(pair)?;
             }
-            Rule::vertex_group_or_attrs => {
+            Rule::vertex_target | Rule::list_item => {
                 let names = self.collect_vertex_names(pair);
                 for name in names {
                     self.ensure_vertex_exists(&name);
                 }
             }
+            Rule::while_stmt | Rule::do_stmt => {
+                let id = self.context.group_ids.unwrap_or(1);
+                self.context.group_ids = Some(id + 1);
+                let loop_type = if pair.as_rule() == Rule::while_stmt { "while" } else { "do" };
+                let label = pair.as_str().trim().trim_start_matches("while").trim_start_matches("do").trim();
+                let mut group = GraphGroup::new(&id.to_string());
+                group.conditional = Some(loop_type.to_string());
+                if !label.is_empty() {
+                    group.label = Some(label.to_string());
+                }
+                self.group_stack.push(group);
+            }
+            Rule::endwhile_stmt | Rule::until_stmt => {
+                if let Some(mut group) = self.group_stack.pop() {
+                    if pair.as_rule() == Rule::until_stmt {
+                        let label = pair.as_str().trim().trim_start_matches("until").trim();
+                        if !label.is_empty() {
+                            group.label = Some(label.to_string());
+                        }
+                    }
+                    if let Some(parent) = self.group_stack.last_mut() {
+                        parent.objects.push(GraphObject::Group(Box::new(group)));
+                    } else {
+                        self.canvas.objects.push(GraphObject::Group(Box::new(group)));
+                    }
+                }
+            }
+            Rule::if_stmt => {
+                let id = self.context.group_ids.unwrap_or(1);
+                self.context.group_ids = Some(id + 1);
+                let label = pair.as_str().trim().trim_start_matches("if").trim_end_matches("then").trim();
+                let mut group = GraphGroup::new(&id.to_string());
+                group.conditional = Some("if".to_string());
+                group.label = Some(label.to_string());
+                self.group_stack.push(group);
+            }
+            Rule::elseif_stmt | Rule::else_stmt => {
+                // Exit previous conditional branch, enter new one
+                if let Some(prev) = self.group_stack.pop() {
+                    if let Some(parent) = self.group_stack.last_mut() {
+                        parent.objects.push(GraphObject::Group(Box::new(prev)));
+                    } else {
+                        self.canvas.objects.push(GraphObject::Group(Box::new(prev)));
+                    }
+                }
+                let id = self.context.group_ids.unwrap_or(1);
+                self.context.group_ids = Some(id + 1);
+                let is_elseif = pair.as_rule() == Rule::elseif_stmt;
+                let c_type = if is_elseif { "elseif" } else { "else" };
+                let mut group = GraphGroup::new(&id.to_string());
+                group.conditional = Some(c_type.to_string());
+                if is_elseif {
+                    let label = pair.as_str().trim().trim_start_matches("else").trim().trim_start_matches("if").trim().trim_end_matches("then").trim();
+                    group.label = Some(label.to_string());
+                }
+                self.group_stack.push(group);
+            }
+            Rule::endif_stmt => {
+                if let Some(group) = self.group_stack.pop() {
+                    if let Some(parent) = self.group_stack.last_mut() {
+                        parent.objects.push(GraphObject::Group(Box::new(group)));
+                    } else {
+                        self.canvas.objects.push(GraphObject::Group(Box::new(group)));
+                    }
+                }
+            }
             Rule::group_start => {
                 let mut name = None;
                 let mut label = None;
+                let mut color = None;
+
                 for p in pair.into_inner() {
                     match p.as_rule() {
-                        Rule::NAME => name = Some(p.as_str().to_string()),
-                        Rule::LABEL => label = Some(p.as_str().trim_start_matches(';').trim().to_string()),
+                        Rule::NAME => name = Some(p.as_str().trim().to_string()),
+                        Rule::LABEL => {
+                            label = Some(p.as_str().trim_start_matches(';').trim().to_string())
+                        }
+                        Rule::color_or_variable => {
+                            color = Some(self.extract_color_or_var(p)?);
+                        }
                         _ => {}
                     }
                 }
-                let group_name = name.unwrap_or_else(|| {
+
+                let group_name = name.clone().unwrap_or_else(|| {
                     let id = self.context.group_ids.unwrap_or(1);
                     self.context.group_ids = Some(id + 1);
                     id.to_string()
                 });
+
                 let mut group = GraphGroup::new(&group_name);
-                group.label = label;
-                self.canvas.objects.push(GraphObject::Group(Box::new(group)));
+                group.label = label.or(name);
+                group.color = color;
+                let exit_id = self.context.container_exit.unwrap_or(1);
+                group.exitvertex = Some(exit_id);
+                self.context.container_exit = Some(exit_id + 1);
+
+                self.group_stack.push(group);
             }
             Rule::group_end => {
-                // Exit current group
+                if let Some(group) = self.group_stack.pop() {
+                    if let Some(parent) = self.group_stack.last_mut() {
+                        parent.objects.push(GraphObject::Group(Box::new(group)));
+                    } else {
+                        self.canvas.objects.push(GraphObject::Group(Box::new(group)));
+                    }
+                }
             }
             _ => {}
         }
@@ -141,7 +321,7 @@ impl AstBuilder {
     }
 
     fn extract_color_or_var(&mut self, pair: Pair<Rule>) -> Result<String, String> {
-        for inner in pair.into_inner() {
+        for inner in pair.clone().into_inner() {
             if inner.as_rule() == Rule::color_or_variable {
                 let s = inner.as_str().trim();
                 if s.starts_with("$(") {
@@ -150,14 +330,20 @@ impl AstBuilder {
                 return Ok(s.to_string());
             }
         }
-        Ok(String::new())
+        let s = pair.as_str().trim();
+        if s.starts_with("$(") {
+            return Ok(self.handle_variable(s));
+        }
+        Ok(s.to_string())
     }
 
     fn handle_variable(&mut self, text: &str) -> String {
         let trimmed = text.trim();
         let inner = trimmed.trim_start_matches("$(").trim_end_matches(')');
         if let Some((k, v)) = inner.split_once(':') {
-            self.context.variables.insert(k.trim().to_string(), v.trim().to_string());
+            self.context
+                .variables
+                .insert(k.trim().to_string(), v.trim().to_string());
             v.trim().to_string()
         } else if let Some(v) = self.context.variables.get(inner.trim()) {
             v.clone()
@@ -186,42 +372,17 @@ impl AstBuilder {
         names
     }
 
-    fn ensure_vertex_exists(&mut self, name: &str) {
-        let exists = self.canvas.objects.iter().any(|obj| match obj {
-            GraphObject::VertexRef { vertex } => vertex.name == name,
-            GraphObject::Vertex(v) => v.name == name,
-            _ => false,
-        });
-
-        if !exists {
-            self.canvas.objects.push(GraphObject::VertexRef {
-                vertex: VertexRef {
-                    name: name.to_string(),
-                },
-            });
-            self.canvas.root_vertices.push(GraphObject::VertexRef {
-                vertex: VertexRef {
-                    name: name.to_string(),
-                },
-            });
-        }
-    }
-
-    fn remove_from_root_vertices(&mut self, name: &str) {
-        self.canvas.root_vertices.retain(|obj| match obj {
-            GraphObject::VertexRef { vertex } => vertex.name != name,
-            GraphObject::Vertex(v) => v.name != name,
-            _ => true,
-        });
-    }
-
     fn handle_event_chain(&mut self, pair: Pair<Rule>) -> Result<(), String> {
-        let mut elements: Vec<(Vec<String>, Option<String>)> = Vec::new(); // (vertices, edge_connector)
+        let mut elements: Vec<(Vec<String>, Option<String>)> = Vec::new();
         let mut current_nodes = Vec::new();
 
         for item in pair.into_inner() {
             match item.as_rule() {
-                Rule::vertex_group_or_attrs | Rule::vertex_attrs | Rule::vertex_group => {
+                Rule::vertex_target
+                | Rule::vertex_attrs
+                | Rule::list_item
+                | Rule::vertex_list
+                | Rule::inner_graph => {
                     let names = self.collect_vertex_names(item);
                     for name in &names {
                         self.ensure_vertex_exists(name);
@@ -245,7 +406,6 @@ impl AstBuilder {
             elements.push((current_nodes, None));
         }
 
-        // Link elements in chain: elem[i] -> elem[i+1]
         for i in 0..elements.len().saturating_sub(1) {
             let (ref lhs_nodes, ref edge_type_opt) = elements[i];
             let (ref rhs_nodes, _) = elements[i + 1];
@@ -253,7 +413,7 @@ impl AstBuilder {
 
             for lhs in lhs_nodes {
                 for rhs in rhs_nodes {
-                    self.canvas.objects.push(GraphObject::Edge {
+                    self.push_object(GraphObject::Edge {
                         edge: EdgeRef {
                             edge_type: edge_type.to_string(),
                             left: lhs.clone(),

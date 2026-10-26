@@ -54,6 +54,22 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_color_group() {
+        let content = std::fs::read_to_string("../../tests/test_inputs/flow_control.txt").unwrap();
+        let builder = builder::AstBuilder::new();
+        let canvas = builder.build(&content).unwrap();
+        println!("flow_control objects len: {}", canvas.objects.len());
+        for obj in &canvas.objects {
+            match obj {
+                ast::GraphObject::Group(g) => println!("  Group: {} (cond={:?}, label={:?})", g.name, g.conditional, g.label),
+                ast::GraphObject::VertexRef { vertex } => println!("  Vertex: {}", vertex.name),
+                ast::GraphObject::Edge { edge } => println!("  Edge: {} -> {}", edge.left, edge.right),
+                _ => {}
+            }
+        }
+    }
+
+    #[test]
     fn test_build_ast() {
         let input = "a > b > c";
         let builder = builder::AstBuilder::new();

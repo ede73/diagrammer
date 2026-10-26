@@ -1,0 +1,96 @@
+// Diagrammer Shadow Grammar in Pest
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }
+
+COLOR = @{ "#" ~ ASCII_HEX_DIGIT{6} }
+VARIABLE = @{ "$(" ~ (!")" ~ ANY)+ ~ ")" }
+INLINE_STRING = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+COMPASS = @{ ":" ~ ("nw" | "ne" | "n" | "sw" | "se" | "s" | "e" | "w") }
+LABEL = @{ ";" ~ (!"\n" ~ ANY)* }
+IMAGE = @{ "/" ~ ASCII_ALPHANUMERIC+ ~ ".png" }
+NUMBER = @{ ASCII_DIGIT+ }
+
+SHAPES = {
+    "actor" | "beginpoint" | "right" | "circle" | "cloud" | "condition" | "database" |
+    "default" | "diamond" | "dots" | "doublecircle" | "ellipse" | "endpoint" | "input" |
+    "loopin" | "loopout" | "mail" | "document" | "display" | "note" | "record" |
+    "roundedbox" | "square" | "left" | "loop" | "subroutine" | "preparation" | "rect" | "folder"
+}
+
+STYLES = {
+    "dotted" | "dashed" | "solid" | "bold" | "rounded" | "diagonals" | "invis" | "singularity"
+}
+
+// Edge symbols (mirroring Jison grammar EVENT token regex)
+EVENT = @{
+    ("<<" | "<" | "|") ~ ("." | "=" | "/" | "-")? ~ (">>" | ">" | "|")?
+  | ("<<" | "<" | "|")? ~ ("." | "=" | "/" | "-")? ~ (">>" | ">" | "|")
+  | ("." | "=" | "/" | "-")
+}
+
+NAME = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+
+color_or_variable = { COLOR | VARIABLE }
+shape_or_variable = { SHAPES | VARIABLE }
+
+landscape = { "landscape" | "horizontal" | "lr" }
+portrait = { "portrait" | "vertical" | "td" }
+visualizer = { "visualizer" ~ NAME }
+start = { "start" ~ NAME }
+equal = { "equal" ~ vertex_group_or_attrs }
+shape_decl = { "shape" ~ shape_or_variable }
+
+edge_color = { "edge color" ~ color_or_variable }
+edge_text_color = { ("edge textcolor" | "edge text color") ~ color_or_variable }
+vertex_color = { "vertex color" ~ color_or_variable }
+vertex_text_color = { ("vertex textcolor" | "vertex text color") ~ color_or_variable }
+group_color = { "group color" ~ color_or_variable }
+
+if_stmt = { "if" ~ (!"then" ~ ANY)+ ~ "then" }
+elseif_stmt = { "else" ~ "if" ~ (!"then" ~ ANY)+ ~ "then" }
+else_stmt = { "else" }
+endif_stmt = { "end" ~ "if" }
+while_stmt = { "while" ~ (!("\n" | EOI) ~ ANY)+ }
+endwhile_stmt = { "end" ~ "while" }
+do_stmt = { "do" }
+until_stmt = { "until" ~ (!("\n" | EOI) ~ ANY)+ }
+
+group_start = { ("group" | "{") ~ NAME? ~ color_or_variable? ~ LABEL? }
+group_end = { "group end" | "}" }
+
+vertex_attrs = { STYLES? ~ SHAPES? ~ NAME ~ COMPASS? ~ color_or_variable? ~ IMAGE? }
+vertex_group = { "(" ~ (vertex_attrs ~ ("," ~ INLINE_STRING? ~ vertex_attrs)*)? ~ ")" }
+vertex_group_or_attrs = { vertex_group | vertex_attrs }
+
+edge_connector = { COMPASS? ~ EVENT ~ COMPASS? ~ color_or_variable? ~ INLINE_STRING? }
+event_chain = { vertex_group_or_attrs ~ (edge_connector ~ vertex_group_or_attrs)+ ~ LABEL? | vertex_group_or_attrs ~ LABEL }
+
+statement = {
+    landscape
+  | portrait
+  | visualizer
+  | start
+  | equal
+  | shape_decl
+  | edge_color
+  | edge_text_color
+  | vertex_color
+  | vertex_text_color
+  | group_color
+  | if_stmt
+  | elseif_stmt
+  | else_stmt
+  | endif_stmt
+  | while_stmt
+  | endwhile_stmt
+  | do_stmt
+  | until_stmt
+  | group_start
+  | group_end
+  | VARIABLE
+  | event_chain
+  | vertex_group_or_attrs
+}
+
+diagram = { SOI ~ statement* ~ EOI }

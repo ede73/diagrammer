@@ -1,4 +1,5 @@
 pub mod ast;
+pub mod builder;
 
 use pest_derive::Parser;
 
@@ -50,5 +51,14 @@ mod tests {
         let input = "dashed rect a #ff0000 ;dashed red rectangle\nnode > linkedtoanothernode;AndEdgeLabel";
         let result = DiagrammerParser::parse(Rule::diagram, input);
         assert!(result.is_ok(), "Failed to parse: {:?}", result.err());
+    }
+
+    #[test]
+    fn test_build_ast() {
+        let input = "a > b > c";
+        let builder = builder::AstBuilder::new();
+        let canvas = builder.build(input).expect("Failed to build AST");
+        assert_eq!(canvas.root_vertices.len(), 1);
+        assert_eq!(canvas.objects.len(), 5); // 3 vertices + 2 edges
     }
 }

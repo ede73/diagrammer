@@ -6,7 +6,11 @@ COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }
 COLOR = @{ "#" ~ ASCII_HEX_DIGIT{6} }
 VARIABLE = @{ "$(" ~ (!")" ~ ANY)+ ~ ")" }
 INLINE_STRING = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
-COMPASS = @{ ":" ~ (ASCII_ALPHANUMERIC | "_")+ }
+COMPASS_DIR = @{
+    (^"nw" | ^"ne" | ^"n" | ^"sw" | ^"se" | ^"s" | ^"e" | ^"w")
+    ~ !(ASCII_ALPHANUMERIC | "_")
+}
+COMPASS = @{ ":" ~ COMPASS_DIR }
 LABEL = @{ ";" ~ (!"\n" ~ ANY)* }
 IMAGE = @{ "/" ~ ASCII_ALPHANUMERIC+ ~ ".png" }
 NUMBER = @{ ASCII_DIGIT+ }
@@ -31,7 +35,7 @@ EVENT = @{
   | ("." | "=" | "/" | "-")
 }
 
-NAME = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+NAME = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* ~ (":" ~ !COMPASS_DIR ~ (ASCII_ALPHANUMERIC | "_")*)? }
 
 color_or_variable = { COLOR | VARIABLE }
 shape_or_variable = { SHAPES | VARIABLE }

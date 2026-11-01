@@ -1,9 +1,4 @@
 // @ts-check
-import { execFileSync } from 'child_process'
-import { fileURLToPath } from 'url'
-import path from 'path'
-import fs from 'fs'
-
 import { GraphCanvas } from '../model/graphcanvas.js'
 import { GraphVertex } from '../model/graphvertex.js'
 import { GraphEdge } from '../model/graphedge.js'
@@ -12,12 +7,25 @@ import { GraphInner } from '../model/graphinner.js'
 import { GraphReference } from '../model/graphreference.js'
 import { makeGenerator } from './config.js'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootDir = path.resolve(__dirname, '..')
-const binaryPath = path.join(rootDir, 'target', 'release', 'diagrammer_pest_parse')
+let execFileSync: any
+let fs: any
+let binaryPath: string = ''
+
+if (typeof window === 'undefined') {
+  try {
+    const cp = await import('child_process')
+    execFileSync = cp.execFileSync
+    const url = await import('url')
+    const path = (await import('path')).default
+    fs = (await import('fs')).default
+    const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
+    const rootDir = path.resolve(__dirname, '..')
+    binaryPath = path.join(rootDir, 'target', 'release', 'diagrammer_pest_parse')
+  } catch (_) {}
+}
 
 export function runPestBinary(inputCode: string): string {
-  if (!fs.existsSync(binaryPath)) {
+  if (!fs || !fs.existsSync(binaryPath)) {
     throw new Error(`Pest binary not found at ${binaryPath}. Run 'make parser PARSER_BACKEND=pest' or 'cargo build --release' first.`)
   }
   return execFileSync(binaryPath, [], {

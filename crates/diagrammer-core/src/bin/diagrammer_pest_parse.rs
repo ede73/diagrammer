@@ -1,16 +1,31 @@
 use diagrammer_core::builder::AstBuilder;
+use diagrammer_core::generators::make_generator;
 use std::env;
 use std::fs;
 use std::io::{self, Read};
+use std::path::Path;
 use std::process;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let input = if args.len() > 1 && args[1] != "-" {
-        match fs::read_to_string(&args[1]) {
+    let mut input_file: Option<String> = None;
+    let mut requested_generator: Option<String> = None;
+
+    for arg in args.into_iter().skip(1) {
+        if arg == "-" {
+            // explicit stdin marker
+        } else if Path::new(&arg).exists() && input_file.is_none() {
+            input_file = Some(arg);
+        } else if requested_generator.is_none() {
+            requested_generator = Some(arg);
+        }
+    }
+
+    let input = if let Some(ref path) = input_file {
+        match fs::read_to_string(path) {
             Ok(content) => content,
             Err(e) => {
-                eprintln!("Failed to read input file '{}': {}", args[1], e);
+                eprintln!("Failed to read input file '{}': {}", path, e);
                 process::exit(1);
             }
         }
@@ -24,13 +39,25 @@ fn main() {
     };
 
     match AstBuilder::new().build(&input) {
-        Ok(canvas) => match serde_json::to_string(&canvas) {
-            Ok(json) => println!("{}", json),
-            Err(e) => {
-                eprintln!("Serialization error: {}", e);
-                process::exit(2);
+        Ok(canvas) => {
+            if let Some(ref gen_name) = requested_generator {
+                if let Some(generator) = make_generator(gen_name) {
+                    print!("{}", generator.generate(&canvas));
+                    return;
+                } else {
+                    eprintln!("Unknown generator '{}'", gen_name);
+                    process::exit(4);
+                }
             }
-        },
+
+            match serde_json::to_string(&canvas) {
+                Ok(json) => println!("{}", json),
+                Err(e) => {
+                    eprintln!("Serialization error: {}", e);
+                    process::exit(2);
+                }
+            }
+        }
         Err(e) => {
             eprintln!("Parse error: {}", e);
             process::exit(3);

@@ -34,6 +34,29 @@ pub enum CompassPoint {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct VertexRef {
     pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shape: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub image: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub style: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+}
+
+impl VertexRef {
+    pub fn new(name: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            label: None,
+            shape: None,
+            image: None,
+            style: None,
+            color: None,
+        }
+    }
 }
 
 /// Compact edge reference
@@ -43,6 +66,41 @@ pub struct EdgeRef {
     pub edge_type: String,
     pub left: String,
     pub right: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub lcompass: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rcompass: Option<String>,
+}
+
+impl EdgeRef {
+    pub fn new(edge_type: impl Into<String>, left: impl Into<String>, right: impl Into<String>) -> Self {
+        Self {
+            edge_type: edge_type.into(),
+            left: left.into(),
+            right: right.into(),
+            label: None,
+            color: None,
+            lcompass: None,
+            rcompass: None,
+        }
+    }
+
+    pub fn line_type(&self) -> &str {
+        for c in self.edge_type.chars().rev() {
+            match c {
+                '.' => return "dotted",
+                '-' => return "dashed",
+                '=' => return "double",
+                '/' => return "broken",
+                _ => {}
+            }
+        }
+        "normal"
+    }
 }
 
 /// Objects contained in a GraphContainer
@@ -60,6 +118,80 @@ pub enum GraphObject {
     Group(Box<GraphGroup>),
     Vertex(GraphVertex),
     Reference(GraphReference),
+}
+
+impl GraphObject {
+    pub fn get_name(&self) -> &str {
+        match self {
+            GraphObject::Edge { .. } => "",
+            GraphObject::VertexRef { vertex } => &vertex.name,
+            GraphObject::Group(g) => &g.name,
+            GraphObject::Vertex(v) => &v.name,
+            GraphObject::Reference(r) => &r.name,
+        }
+    }
+
+    pub fn get_label(&self) -> Option<&str> {
+        match self {
+            GraphObject::Group(g) => g.label.as_deref(),
+            GraphObject::Vertex(v) => v.label.as_deref(),
+            GraphObject::VertexRef { vertex } => vertex.label.as_deref(),
+            GraphObject::Edge { edge } => edge.label.as_deref(),
+            GraphObject::Reference(_) => None,
+        }
+    }
+
+    pub fn get_color(&self) -> Option<&str> {
+        match self {
+            GraphObject::Group(g) => g.color.as_deref(),
+            GraphObject::Vertex(v) => v.color.as_deref(),
+            GraphObject::VertexRef { vertex } => vertex.color.as_deref(),
+            GraphObject::Edge { edge } => edge.color.as_deref(),
+            GraphObject::Reference(_) => None,
+        }
+    }
+
+    pub fn get_shape(&self) -> Option<&str> {
+        match self {
+            GraphObject::Vertex(v) => v.shape.as_deref(),
+            GraphObject::VertexRef { vertex } => vertex.shape.as_deref(),
+            GraphObject::Reference(r) => r.shape.as_deref(),
+            _ => None,
+        }
+    }
+
+    pub fn get_image(&self) -> Option<&str> {
+        match self {
+            GraphObject::Vertex(v) => v.image.as_deref(),
+            GraphObject::VertexRef { vertex } => vertex.image.as_deref(),
+            GraphObject::Reference(r) => r.image.as_deref(),
+            _ => None,
+        }
+    }
+
+    pub fn get_style(&self) -> Option<&str> {
+        match self {
+            GraphObject::Vertex(v) => v.style.as_deref(),
+            GraphObject::VertexRef { vertex } => vertex.style.as_deref(),
+            _ => None,
+        }
+    }
+
+    pub fn is_group(&self) -> bool {
+        matches!(self, GraphObject::Group(_))
+    }
+
+    pub fn is_reference(&self) -> bool {
+        matches!(self, GraphObject::Reference(_))
+    }
+
+    pub fn is_vertex(&self) -> bool {
+        matches!(self, GraphObject::Vertex(_) | GraphObject::VertexRef { .. })
+    }
+
+    pub fn is_edge(&self) -> bool {
+        matches!(self, GraphObject::Edge { .. })
+    }
 }
 
 /// Canonical GraphVertex representation
@@ -166,6 +298,17 @@ impl GraphGroup {
             textcolor: None,
         }
     }
+
+    pub fn get_objects(&self, allow_references: bool) -> Vec<&GraphObject> {
+        self.objects
+            .iter()
+            .filter(|obj| match obj {
+                GraphObject::Edge { .. } => false,
+                GraphObject::Reference(_) => allow_references,
+                _ => true,
+            })
+            .collect()
+    }
 }
 
 /// Parsing context state captured during parse
@@ -229,6 +372,27 @@ impl GraphCanvas {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn get_edges(&self) -> Vec<&EdgeRef> {
+        self.objects
+            .iter()
+            .filter_map(|obj| match obj {
+                GraphObject::Edge { edge } => Some(edge),
+                _ => None,
+            })
+            .collect()
+    }
+
+    pub fn get_objects(&self, allow_references: bool) -> Vec<&GraphObject> {
+        self.objects
+            .iter()
+            .filter(|obj| match obj {
+                GraphObject::Edge { .. } => false,
+                GraphObject::Reference(_) => allow_references,
+                _ => true,
+            })
+            .collect()
+    }
 }
 
 #[cfg(test)]
@@ -245,18 +409,12 @@ mod tests {
         let mut group = GraphGroup::new("G1");
         group.label = Some("Group 1".to_string());
         group.objects.push(GraphObject::VertexRef {
-            vertex: VertexRef {
-                name: "nodeA".to_string(),
-            },
+            vertex: VertexRef::new("nodeA"),
         });
 
         canvas.objects.push(GraphObject::Group(Box::new(group)));
         canvas.objects.push(GraphObject::Edge {
-            edge: EdgeRef {
-                edge_type: ">".to_string(),
-                left: "nodeA".to_string(),
-                right: "nodeB".to_string(),
-            },
+            edge: EdgeRef::new(">", "nodeA", "nodeB"),
         });
 
         let json = serde_json::to_string_pretty(&canvas).unwrap();

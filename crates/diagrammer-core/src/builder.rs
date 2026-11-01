@@ -135,14 +135,10 @@ impl AstBuilder {
         if !self.object_exists(name) {
             self.noedges.insert(name.to_string());
             self.push_object(GraphObject::VertexRef {
-                vertex: VertexRef {
-                    name: name.to_string(),
-                },
+                vertex: VertexRef::new(name),
             });
             self.push_root_vertex(GraphObject::VertexRef {
-                vertex: VertexRef {
-                    name: name.to_string(),
-                },
+                vertex: VertexRef::new(name),
             });
         } else if let Some(grp) = self.group_stack.last_mut() {
             if !grp.is_inner_graph {
@@ -209,11 +205,11 @@ impl AstBuilder {
                     for name in names {
                         if let Some(grp) = self.group_stack.last_mut() {
                             grp.equal.push(GraphObject::VertexRef {
-                                vertex: VertexRef { name },
+                                vertex: VertexRef::new(name),
                             });
                         } else {
                             self.canvas.equal.push(GraphObject::VertexRef {
-                                vertex: VertexRef { name },
+                                vertex: VertexRef::new(name),
                             });
                         }
                     }
@@ -356,7 +352,7 @@ impl AstBuilder {
                 });
 
                 let mut group = GraphGroup::new(&group_name);
-                group.label = label.or(name);
+                group.label = label;
                 group.color = color;
                 let exit_id = self.context.container_exit.unwrap_or(1);
                 group.exitvertex = Some(exit_id);
@@ -466,9 +462,19 @@ impl AstBuilder {
     }
 
     fn handle_event_chain(&mut self, pair: Pair<Rule>) -> Result<(), String> {
-        let mut elements: Vec<(Vec<String>, Vec<String>, Option<String>)> = Vec::new();
+        #[derive(Default, Clone)]
+        struct ConnectorData {
+            event_type: String,
+            color: Option<String>,
+            label: Option<String>,
+            lcompass: Option<String>,
+            rcompass: Option<String>,
+        }
+
+        let mut elements: Vec<(Vec<String>, Vec<String>, Option<ConnectorData>)> = Vec::new();
         let mut current_incoming = Vec::new();
         let mut current_outgoing = Vec::new();
+        let mut common_chain_label: Option<String> = None;
 
         for item in pair.into_inner() {
             match item.as_rule() {
@@ -502,17 +508,45 @@ impl AstBuilder {
                     }
                 }
                 Rule::edge_connector => {
-                    let mut event_type = ">".to_string();
+                    let mut conn = ConnectorData {
+                        event_type: ">".to_string(),
+                        ..Default::default()
+                    };
+                    let mut seen_event = false;
                     for ec in item.into_inner() {
-                        if ec.as_rule() == Rule::EVENT {
-                            event_type = ec.as_str().trim().to_string();
+                        match ec.as_rule() {
+                            Rule::EVENT => {
+                                conn.event_type = ec.as_str().trim().to_string();
+                                seen_event = true;
+                            }
+                            Rule::COMPASS => {
+                                let c = ec.as_str().trim().to_string();
+                                if !seen_event {
+                                    conn.lcompass = Some(c);
+                                } else {
+                                    conn.rcompass = Some(c);
+                                }
+                            }
+                            Rule::color_or_variable => {
+                                conn.color = Some(self.extract_color_or_var(ec)?);
+                            }
+                            Rule::INLINE_STRING => {
+                                let s = ec.as_str().trim();
+                                let unquoted = s.strip_prefix('"').and_then(|x| x.strip_suffix('"')).unwrap_or(s);
+                                conn.label = Some(unquoted.to_string());
+                            }
+                            _ => {}
                         }
                     }
                     elements.push((
                         std::mem::take(&mut current_incoming),
                         std::mem::take(&mut current_outgoing),
-                        Some(event_type),
+                        Some(conn),
                     ));
+                }
+                Rule::LABEL => {
+                    let s = item.as_str().trim_start_matches(';').trim();
+                    common_chain_label = Some(s.to_string());
                 }
                 _ => {}
             }
@@ -529,18 +563,26 @@ impl AstBuilder {
         let mut current_lhs = elements[0].1.clone();
 
         for i in 0..elements.len().saturating_sub(1) {
-            let edge_type = elements[i].2.as_deref().unwrap_or(">");
+            let default_conn = ConnectorData {
+                event_type: ">".to_string(),
+                ..Default::default()
+            };
+            let conn = elements[i].2.as_ref().unwrap_or(&default_conn);
             let ref rhs_targets = elements[i + 1].0;
 
             for lhs in &current_lhs {
                 for rhs in rhs_targets {
-                    self.canvas.objects.push(GraphObject::Edge {
-                        edge: EdgeRef {
-                            edge_type: edge_type.to_string(),
-                            left: lhs.clone(),
-                            right: rhs.clone(),
-                        },
-                    });
+                    let mut edge = EdgeRef::new(
+                        conn.event_type.clone(),
+                        lhs.clone(),
+                        rhs.clone(),
+                    );
+                    edge.color = conn.color.clone();
+                    edge.lcompass = conn.lcompass.clone();
+                    edge.rcompass = conn.rcompass.clone();
+                    edge.label = conn.label.clone().or_else(|| common_chain_label.clone());
+
+                    self.canvas.objects.push(GraphObject::Edge { edge });
                     self.maybe_remove_from_root_vertices(rhs);
                     self.noedges.remove(lhs);
                     self.noedges.remove(rhs);

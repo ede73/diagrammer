@@ -72,8 +72,9 @@ do_stmt = { DO_KW }
 UNTIL_KW = @{ ^"until" ~ !(ASCII_ALPHANUMERIC | "_") }
 until_stmt = { UNTIL_KW ~ LINE_REST }
 
+SAME_LINE_SPACE = _{ " " | "\t" }
 GROUP_KW = @{ ^"group" ~ !(ASCII_ALPHANUMERIC | "_") }
-group_start = { (GROUP_KW | "{") ~ NAME? ~ color_or_variable? ~ LABEL? }
+group_start = ${ (GROUP_KW | "{") ~ SAME_LINE_SPACE* ~ NAME? ~ SAME_LINE_SPACE* ~ color_or_variable? ~ SAME_LINE_SPACE* ~ LABEL? }
 group_end = { GROUP_KW ~ ^"end" | "}" }
 
 vertex_attrs = {

@@ -8,8 +8,14 @@ This document describes the `diagrammer` repository layout, key entry points, an
   - `npm install`
 - Build the full project:
   - `make all`
-- Build parser only:
+- Build parser only (Jison by default):
   - `make parser`
+- Build parser using Rust Pest shadow engine:
+  - `PARSER_BACKEND=pest make parser`
+- Run Rust AST parity tests:
+  - `cargo test --test ast_parity`
+- Run CLI with Pest shadow parser at runtime:
+  - `DIAGRAMMER_PARSER=pest node js/generate.js [INPUT] [VISUALIZER]`
 - Run all tests:
   - `make test`
 - Run Jest tests only:

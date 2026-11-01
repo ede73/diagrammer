@@ -23,6 +23,13 @@ include Makefile.commands
 LOCK_FILE=.lock
 BUILD_STARTED_FILE=.build_started
 
+# Parser backend toggle: jison (default) or pest
+PARSER_BACKEND ?= jison
+
+pest_parser_bin:
+	@if [ -f "$$HOME/.cargo/env" ]; then . "$$HOME/.cargo/env"; fi; \
+	cargo build --release -p diagrammer-core --bin diagrammer_pest_parse
+
 .PHONY: clean node_modules model sub_grammar sub_grammar_just_lexer sub_tests
 
 all: _all
@@ -87,6 +94,10 @@ plantuml_jar:
 	  exit 10; \
 	fi
 
+ifeq ($(PARSER_BACKEND),pest)
+build/diagrammer_parser.js: pest_parser_bin
+endif
+
 build/diagrammer_parser.js: build/diagrammer.all sub_grammar Makefile generators model js_scripts
 	@mkdir -p build
 	@if [ "${DEBUG}" != "" ]; then \
@@ -122,7 +133,8 @@ build/diagrammer_parser.js: build/diagrammer.all sub_grammar Makefile generators
 	@sed -i ${INFIX}  's/diagrammer_parser/diagrammerParser/g' $@
 	@sed -i ${INFIX}  's/exports.diagrammerLexer=diagrammerLexer;//g' build/diagrammer_lexer.js
 	@sed -i ${INFIX}  's/^var diagrammer_lexer/export var diagrammerLexer/g' build/diagrammer_lexer.js
-	@echo 'export const parse = function () { return diagrammerParser.parse.apply(diagrammerParser, arguments) }' >> $@
+	@echo "import { pestParse } from '../js/pest_adapter.js';" >> $@
+	@echo 'export const parse = function (...args) { const backend = (typeof process !== "undefined" && process.env.DIAGRAMMER_PARSER) || "$(PARSER_BACKEND)"; if (backend === "pest") { return pestParse(args[0], diagrammerParser.yy); } return diagrammerParser.parse.apply(diagrammerParser, args); }' >> $@
 
 # nicer to carry around than build target
 parser: build/diagrammer_parser.js

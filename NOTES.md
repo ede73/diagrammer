@@ -56,7 +56,19 @@ Jison natively outputs CommonJS, but the project is configured as `"type": "modu
 ### 3.4 Dual Runtime: Node.js and Browser ESM
 Files in [`js/config.ts`](file:///Users/ede/src/diagrammer/js/config.ts), [`model/`](file:///Users/ede/src/diagrammer/model), [`generators/`](file:///Users/ede/src/diagrammer/generators), and [`web/visualizations/`](file:///Users/ede/src/diagrammer/web/visualizations) are loaded both in Node.js (CLI, tests) and in the browser (via `<script type="importmap">` in [`index.html`](file:///Users/ede/src/diagrammer/index.html)):
 - Static imports of Node built-ins (`fs`, `path`) would crash the browser module loader.
-- Files needing Node APIs must use guarded checks (`if (typeof window !== 'undefined')`) or dynamic imports (`(await import('fs')).default`).
+### 3.5 Parser Backend Toggle (Jison vs Pest)
+The parser layer supports two interchangeable backends: the original Jison BNF parser and the new Rust Pest PEG shadow parser (`crates/diagrammer-core`):
+- **Default**: The default backend remains 100% original **Jison** (`PARSER_BACKEND=jison`).
+- **Build-Time Toggle**: Set `PARSER_BACKEND=pest` when building:
+  ```bash
+  PARSER_BACKEND=pest make parser
+  ```
+  This automatically compiles the Rust parser binary (`target/release/diagrammer_pest_parse`) and configures `build/diagrammer_parser.js` to use Pest by default.
+- **Runtime Toggle**: Override on the fly for any Node command via environment variable without rebuilding:
+  ```bash
+  DIAGRAMMER_PARSER=pest node js/generate.js tests/test_inputs/state.txt ast
+  ```
+- **Parity Status**: The Pest shadow parser passes 100% (53/53) of the reference AST parity tests against Jison.
 
 ---
 

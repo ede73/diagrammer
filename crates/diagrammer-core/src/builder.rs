@@ -241,16 +241,19 @@ impl AstBuilder {
                 self.canvas.direction = Some("portrait".to_string());
             }
             Rule::visualizer => {
-                let name = pair.into_inner().as_str().trim().to_lowercase();
-                self.canvas.visualizer = Some(name);
+                if let Some(p) = pair.into_inner().find(|p| p.as_rule() == Rule::NAME) {
+                    self.canvas.visualizer = Some(p.as_str().trim().to_lowercase());
+                }
             }
             Rule::start => {
-                let name = pair.into_inner().as_str().trim().to_string();
-                self.canvas.start = Some(name);
+                if let Some(p) = pair.into_inner().find(|p| p.as_rule() == Rule::NAME) {
+                    self.canvas.start = Some(p.as_str().trim().to_string());
+                }
             }
             Rule::shape_decl => {
-                let shape = pair.into_inner().as_str().trim().to_lowercase();
-                self.canvas.shape = Some(shape);
+                if let Some(p) = pair.into_inner().find(|p| p.as_rule() == Rule::NAME) {
+                    self.canvas.shape = Some(p.as_str().trim().to_lowercase());
+                }
             }
             Rule::vertex_color => {
                 let color = self.extract_color_or_var(pair)?;
@@ -273,19 +276,19 @@ impl AstBuilder {
                 self.active_defaults_mut().groupcolor = Some(color);
             }
             Rule::equal => {
+                let mut new_equal = Vec::new();
                 for item in pair.into_inner() {
                     let names = self.collect_vertex_names(item);
                     for name in names {
-                        if let Some(grp) = self.group_stack.last_mut() {
-                            grp.equal.push(GraphObject::VertexRef {
-                                vertex: VertexRef::new(name),
-                            });
-                        } else {
-                            self.canvas.equal.push(GraphObject::VertexRef {
-                                vertex: VertexRef::new(name),
-                            });
-                        }
+                        new_equal.push(GraphObject::VertexRef {
+                            vertex: VertexRef::new(name),
+                        });
                     }
+                }
+                if let Some(grp) = self.group_stack.last_mut() {
+                    grp.equal = new_equal;
+                } else {
+                    self.canvas.equal = new_equal;
                 }
             }
             Rule::VARIABLE => {

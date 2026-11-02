@@ -35,7 +35,7 @@ impl Generator for DiGraph {
             formatter.lout("null [shape=plaintext, label=\"\"];", None);
             formatter.lout(&format!("{}[shape=doublecircle];", start), None);
             formatter.lout(&format!("null->{};\n", start), None);
-            formatter.lout("", Some(false));
+            formatter.dedent();
         }
 
         if !canvas.equal.is_empty() {

@@ -57,6 +57,12 @@ impl OutputFormatter {
         }
     }
 
+    pub fn dedent(&mut self) {
+        if self.indent_level > 0 {
+            self.indent_level -= 1;
+        }
+    }
+
     pub fn raw(&mut self, text: &str) {
         self.buffer.push_str(text);
         self.buffer.push('\n');

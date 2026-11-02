@@ -24,11 +24,12 @@ if (typeof window === 'undefined') {
   } catch (_) {}
 }
 
-export function runPestBinary(inputCode: string): string {
+export function runPestBinary(inputCode: string, generatorName?: string): string {
   if (!fs || !fs.existsSync(binaryPath)) {
     throw new Error(`Pest binary not found at ${binaryPath}. Run 'make parser PARSER_BACKEND=pest' or 'cargo build --release' first.`)
   }
-  return execFileSync(binaryPath, [], {
+  const args = generatorName ? [generatorName] : []
+  return execFileSync(binaryPath, args, {
     input: inputCode,
     encoding: 'utf8',
     maxBuffer: 50 * 1024 * 1024

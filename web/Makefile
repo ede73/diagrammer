@@ -5,7 +5,7 @@ CORES =
 WEB_TSS=$(shell find ../web -maxdepth 1 -iname "*.ts")
 WEB_JSS:=$(WEB_TSS:.ts=.js)
 
-export PATH := $(CURDIR)/node_modules/.bin:$(PATH)
+export PATH := $(CURDIR)/../node_modules/.bin:$(PATH)
 
 .PHONY: clean
 

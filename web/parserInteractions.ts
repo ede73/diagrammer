@@ -3,6 +3,7 @@ import { parse as diagrammerParse } from '../build/diagrammer_parser.js'
 import { GraphCanvas } from '../model/graphcanvas.js'
 import { getError, getInputElement, getSelectedVisualizer, setError, setVisualizer } from './uiComponentAccess.js'
 import { getParserYY } from '../build/types/diagrammer_parser_types.js'
+import { makeHTTPPost } from './ajax.js'
 
 let parsingStarted: number
 
@@ -63,6 +64,37 @@ export function parse(diagrammerCode: string, successCallback: (visualizer: stri
   }
   parsingStarted = 1
   setError('')
+
+  const engineSelect = typeof document !== 'undefined' ? (document.getElementById('diagrammer-engine') as HTMLSelectElement | null) : null
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+  const useRustEngine = (engineSelect && engineSelect.value === 'rust') || (urlParams && urlParams.get('engine') === 'rust')
+
+  if (useRustEngine) {
+    makeHTTPPost(
+      `/parse?visualizer=${encodeURIComponent(visualizer)}`,
+      diagrammerCode,
+      (result) => {
+        const resultElem = getInputElement('diagrammer-result')
+        if (resultElem) {
+          resultElem.value = result
+        }
+        try {
+          successCallback(getSelectedVisualizer())
+        } catch (ex: any) {
+          setError(`Parsing went ok, but visualization failed: ${getError()} and ${String(ex)}`)
+        } finally {
+          parsingStarted = 0
+        }
+      },
+      (status, statusText, responseText) => {
+        const err = `Rust engine error (${status}): ${responseText || statusText}`
+        setError(err)
+        failureCallback(err, new DOMException(err))
+        parsingStarted = 0
+      }
+    )
+    return
+  }
   try {
     const yy = getParserYY()
     // TODO: MOVING TO GraphCanvas

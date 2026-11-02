@@ -7,6 +7,7 @@ import { type VisualizeConfigType } from './visualizeConfigType.js'
 import { type LexConfigType } from './lex.js'
 import { type GenerateConfigType } from './generate.js'
 import { getParserYY } from '../build/types/diagrammer_parser_types.js'
+import { runPestBinary } from './pest_adapter.js'
 
 export function doParse(
   config: GenerateConfigType,
@@ -35,6 +36,21 @@ export function doParse(
     config.throwError(str)
   })
   parserYY.GRAPHCANVAS = new GraphCanvas()
+
+  const useRustGen = typeof process !== 'undefined' && (process.env.DIAGRAMMER_GENERATOR === 'rust' || process.env.DIAGRAMMER_GENERATOR === 'pest')
+  if (useRustGen && visualizerName !== 'ast') {
+    try {
+      const output = runPestBinary(diagrammerCode, visualizerName)
+      for (const line of output.trimEnd().split('\n')) {
+        parserYY.result(line)
+      }
+      return
+    } catch (ex) {
+      parserYY.parseError(String(ex), 'Caught Exception')
+      throw ex
+    }
+  }
+
   try {
     diagrammerParse(diagrammerCode)
   } catch (ex) {

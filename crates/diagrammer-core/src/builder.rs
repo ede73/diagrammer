@@ -72,6 +72,14 @@ impl AstBuilder {
         Ok(self.canvas)
     }
 
+    fn active_defaults(&self) -> &AllowedDefaults {
+        if let Some(grp) = self.group_stack.last() {
+            &grp.defaults
+        } else {
+            &self.canvas.defaults
+        }
+    }
+
     fn active_defaults_mut(&mut self) -> &mut AllowedDefaults {
         if let Some(grp) = self.group_stack.last_mut() {
             &mut grp.defaults
@@ -195,11 +203,15 @@ impl AstBuilder {
     fn ensure_vertex_exists(&mut self, name: &str) {
         if !self.object_exists(name) {
             self.noedges.insert(name.to_string());
+            let mut vr = VertexRef::new(name);
+            if let Some(ref c) = self.active_defaults().vertexcolor {
+                vr.color = Some(c.clone());
+            }
             self.push_object(GraphObject::VertexRef {
-                vertex: VertexRef::new(name),
+                vertex: vr.clone(),
             });
             self.push_root_vertex(GraphObject::VertexRef {
-                vertex: VertexRef::new(name),
+                vertex: vr,
             });
         } else if let Some(grp) = self.group_stack.last_mut() {
             if !grp.is_inner_graph {

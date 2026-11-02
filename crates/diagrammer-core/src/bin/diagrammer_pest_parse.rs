@@ -38,7 +38,8 @@ fn main() {
         buf
     };
 
-    let canvas_res = if input.trim_start().starts_with("{\"__PSEUDOTYPE\":\"GraphCanvas\"") {
+    let trimmed = input.trim_start();
+    let canvas_res = if trimmed.starts_with('{') && trimmed.contains("\"__PSEUDOTYPE\"") && trimmed.contains("\"GraphCanvas\"") {
         serde_json::from_str::<diagrammer_core::ast::GraphCanvas>(&input)
             .map_err(|e| format!("Failed to parse AST JSON: {}", e))
     } else {

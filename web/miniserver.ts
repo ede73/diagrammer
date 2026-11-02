@@ -5,6 +5,7 @@ import * as fs from 'fs'
 import * as qs from 'querystring'
 import { doCliVisualize } from '../js/clivisualize.js'
 import { configSupport } from '../js/configsupport.js'
+import { runPestBinary } from '../js/pest_adapter.js'
 import * as url from 'url'
 import { type VisualizeConfigType } from '../js/visualizeConfigType.js'
 
@@ -89,6 +90,27 @@ const visualize = (
       // // https://adevait.com/nodejs/convert-node-js-buffer-to-string latin1!
       // fs.writeFileSync('/tmp/z.png', useConfig.outputImage, 'latin1')
     }).catch(err => { console.error(err) })
+  })
+}
+
+const parseEndpoint = (req: http.IncomingMessage, res: http.ServerResponse) => {
+  const qp = qs.parse(req.url?.split('?')[1] ?? '')
+  const visualizer = (qp.visualizer as string) || 'dot'
+  readPost(req, (body) => {
+    try {
+      const output = runPestBinary(body, visualizer)
+      res.writeHead(200, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        ...cacheControl(),
+        ...corsHeaders()
+      }).end(output)
+    } catch (e: any) {
+      res.writeHead(500, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        ...cacheControl(),
+        ...corsHeaders()
+      }).end(String(e))
+    }
   })
 }
 
@@ -179,6 +201,8 @@ const requestListener = (
 
       if (req.url?.startsWith('/visualize')) {
         visualize(req, res); return
+      } else if (req.url?.startsWith('/parse')) {
+        parseEndpoint(req, res); return
       } else if (req.url?.startsWith('/saveExport')) {
         saveExport(req, res); return
       }

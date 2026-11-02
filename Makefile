@@ -30,7 +30,10 @@ pest_parser_bin:
 	@if [ -f "$$HOME/.cargo/env" ]; then . "$$HOME/.cargo/env"; fi; \
 	cargo build --release -p diagrammer-core --bin diagrammer_pest_parse
 
-.PHONY: clean node_modules model sub_grammar sub_grammar_just_lexer sub_tests
+wasm_pkg:
+	npx -y wasm-pack build crates/diagrammer-core --target web --out-dir ../../build/wasm
+
+.PHONY: clean node_modules model sub_grammar sub_grammar_just_lexer sub_tests wasm_pkg
 
 all: _all
 	@touch $(LOCK_FILE)

@@ -127,6 +127,9 @@ const getContentType = (filename: string) => {
   if (filename.endsWith('.js')) {
     return 'text/javascript'
   }
+  if (filename.endsWith('.wasm')) {
+    return 'application/wasm'
+  }
   if (filename.endsWith('.svg')) {
     return 'image/svg+xml'
   }

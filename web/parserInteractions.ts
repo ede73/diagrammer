@@ -45,6 +45,28 @@ function setupParser() {
   // }
 }
 
+let wasmModule: any = null
+let wasmInitPromise: Promise<any> | null = null
+
+async function loadWasm() {
+  if (wasmModule) return wasmModule
+  if (!wasmInitPromise) {
+    wasmInitPromise = (async () => {
+      try {
+        const mod = await import('../build/wasm/diagrammer_core.js')
+        await mod.default('../build/wasm/diagrammer_core_bg.wasm')
+        wasmModule = mod
+        console.debug('Diagrammer Rust WebAssembly core successfully initialized in browser!')
+        return wasmModule
+      } catch (e) {
+        console.warn('WASM module failed to initialize, falling back to server endpoint:', e)
+        return null
+      }
+    })()
+  }
+  return wasmInitPromise
+}
+
 /**
  * @param diagrammerCode Diagrammer graph to parse using
  * @param successCallback Passing final generator, visualizer
@@ -70,29 +92,51 @@ export function parse(diagrammerCode: string, successCallback: (visualizer: stri
   const useRustEngine = (engineSelect && engineSelect.value === 'rust') || (urlParams && urlParams.get('engine') === 'rust')
 
   if (useRustEngine) {
-    makeHTTPPost(
-      `/parse?visualizer=${encodeURIComponent(visualizer)}`,
-      diagrammerCode,
-      (result) => {
-        const resultElem = getInputElement('diagrammer-result')
-        if (resultElem) {
-          resultElem.value = result
-        }
+    loadWasm().then((wasm) => {
+      if (wasm) {
         try {
-          successCallback(getSelectedVisualizer())
+          const result = wasm.wasm_parse_and_generate(diagrammerCode, visualizer)
+          const resultElem = getInputElement('diagrammer-result')
+          if (resultElem) {
+            resultElem.value = result
+          }
+          try {
+            successCallback(getSelectedVisualizer())
+          } catch (ex: any) {
+            setError(`Parsing went ok, but visualization failed: ${getError()} and ${String(ex)}`)
+          } finally {
+            parsingStarted = 0
+          }
+          return
         } catch (ex: any) {
-          setError(`Parsing went ok, but visualization failed: ${getError()} and ${String(ex)}`)
-        } finally {
+          console.warn('WASM execution error, falling back to server:', ex)
+        }
+      }
+
+      makeHTTPPost(
+        `/parse?visualizer=${encodeURIComponent(visualizer)}`,
+        diagrammerCode,
+        (result) => {
+          const resultElem = getInputElement('diagrammer-result')
+          if (resultElem) {
+            resultElem.value = result
+          }
+          try {
+            successCallback(getSelectedVisualizer())
+          } catch (ex: any) {
+            setError(`Parsing went ok, but visualization failed: ${getError()} and ${String(ex)}`)
+          } finally {
+            parsingStarted = 0
+          }
+        },
+        (status, statusText, responseText) => {
+          const err = `Rust engine error (${status}): ${responseText || statusText}`
+          setError(err)
+          failureCallback(err, new DOMException(err))
           parsingStarted = 0
         }
-      },
-      (status, statusText, responseText) => {
-        const err = `Rust engine error (${status}): ${responseText || statusText}`
-        setError(err)
-        failureCallback(err, new DOMException(err))
-        parsingStarted = 0
-      }
-    )
+      )
+    })
     return
   }
   try {

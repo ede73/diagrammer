@@ -8,6 +8,32 @@ use pest_derive::Parser;
 #[grammar = "diagrammer.pest"]
 pub struct DiagrammerParser;
 
+use wasm_bindgen::prelude::*;
+
+pub fn parse_and_generate(input: &str, visualizer: &str) -> Result<String, String> {
+    let trimmed = input.trim_start();
+    let canvas = if trimmed.starts_with('{') && trimmed.contains("\"__PSEUDOTYPE\"") && trimmed.contains("\"GraphCanvas\"") {
+        serde_json::from_str::<ast::GraphCanvas>(input)
+            .map_err(|e| format!("Failed to parse AST JSON: {}", e))?
+    } else {
+        builder::AstBuilder::new().build(input)?
+    };
+
+    if visualizer == "ast" {
+        serde_json::to_string(&canvas)
+            .map_err(|e| format!("Serialization error: {}", e))
+    } else if let Some(generator) = generators::make_generator(visualizer) {
+        Ok(generator.generate(&canvas))
+    } else {
+        Err(format!("Unknown visualizer '{}'", visualizer))
+    }
+}
+
+#[wasm_bindgen]
+pub fn wasm_parse_and_generate(input: &str, visualizer: &str) -> Result<String, JsValue> {
+    parse_and_generate(input, visualizer).map_err(|e| JsValue::from_str(&e))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

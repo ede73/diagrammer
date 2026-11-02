@@ -1,4 +1,5 @@
 pub mod actdiag;
+pub mod ast_record;
 pub mod blockdiag;
 pub mod dendrogram;
 pub mod digraph;
@@ -101,6 +102,7 @@ pub fn multi_attr_fmt(attrs: &[(&str, Option<&str>, &str)], extras: &[String]) -
 pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
     match name.to_lowercase().as_str() {
         "actdiag" => Some(Box::new(actdiag::ActDiag)),
+        "ast_record" => Some(Box::new(ast_record::ASTRecord)),
         "blockdiag" => Some(Box::new(blockdiag::BlockDiag)),
         "circlepacked" | "dendrogram" | "radialdendrogram" | "reingoldtilford" => {
             Some(Box::new(dendrogram::Dendrogram))

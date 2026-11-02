@@ -46,8 +46,16 @@ impl AstBuilder {
     }
 
     pub fn build(mut self, input: &str) -> Result<GraphCanvas, String> {
-        let pairs = DiagrammerParser::parse(Rule::diagram, input)
-            .map_err(|e| format!("Parse error: {}", e))?;
+        let pairs = DiagrammerParser::parse(Rule::diagram, input).map_err(|e| {
+            let (mut line, col) = match e.line_col {
+                pest::error::LineColLocation::Pos((l, c)) => (l, c),
+                pest::error::LineColLocation::Span((l, c), _) => (l, c),
+            };
+            if line > 1 && col == 1 {
+                line -= 1;
+            }
+            format!("Parse error on line {}: {}", line, e)
+        })?;
 
         for pair in pairs {
             if pair.as_rule() == Rule::diagram {

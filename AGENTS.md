@@ -6,20 +6,16 @@ This document describes the `diagrammer` repository layout, key entry points, an
 ## Quick commands
 - Install dependencies:
   - `npm install`
-- Build the full project:
+- Build the full project (Rust binary, WASM, web UI, CLI):
   - `make all`
-- Build parser only (Jison by default):
-  - `make parser`
-- Build parser using Rust Pest shadow engine:
-  - `PARSER_BACKEND=pest make parser`
-- Run Rust AST parity tests:
-  - `cargo test --test ast_parity`
-- Run CLI with Pest shadow parser at runtime:
-  - `DIAGRAMMER_PARSER=pest node js/generate.js [INPUT] [VISUALIZER]`
-- Run all tests:
-  - `make test`
-- Run Jest tests only:
-  - `npm test`
+- Build Rust core parser & generators only:
+  - `cargo build --release -p diagrammer-core`
+- Build WebAssembly module only:
+  - `make wasm_pkg`
+- Run Rust AST & generator parity tests:
+  - `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`
+- Run all Jest browser tests:
+  - `make -C tests jesttests`
 - Clean build artifacts:
   - `make clean`
 - Start the browser/web server:
@@ -33,7 +29,7 @@ This document describes the `diagrammer` repository layout, key entry points, an
 
 ## Main repo paths
 - `package.json` — Node dependencies and `npm test`
-- `Makefile` — top-level build rules; depends on subfolders and generated parser
+- `Makefile` — top-level build rules; builds Rust core, WASM, CLI, and web UI
 - `README.md` — user-facing project overview and installation notes
 - `tests/Makefile` — web and test runner orchestration
 - `web/miniserver.js` — development web server for browser UI and web tests
@@ -42,13 +38,11 @@ This document describes the `diagrammer` repository layout, key entry points, an
 - `js/runtests.js` — end-to-end regression test runner comparing text and image output
 
 ## Core directories
-- `grammar/` — Jison grammar and lexer source
-- `model/` — AST/model implementation for parsed diagrams
-- `generators/` — transpilers from diagrammer AST into external visualizer languages
+- `crates/diagrammer-core/` — 100% Rust core (Pest PEG grammar, AST, and all 13 generators)
 - `js/` — runtime CLI helpers, parser integrations, and visualization support
-- `web/` — browser UI, interactive editor, and web visualization support
-- `tests/` — language inputs, reference outputs, regression infrastructure
-- `build/` — generated parser/lexer outputs and build artifacts
+- `web/` — browser UI, interactive editor, WebAssembly integration, and web visualizations
+- `tests/` — language inputs, reference outputs, browser Jest regression infrastructure
+- `build/` — generated WASM packages and build artifacts
 - `scripts/` — auxiliary build/test/export utilities
 
 ## What to use first

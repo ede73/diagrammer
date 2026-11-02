@@ -203,3 +203,23 @@ until loop_condition_met
     }
     ```
 
+---
+
+## 6. Full Rust Core & WebAssembly Migration
+
+As of the final transition to Full Rust mode:
+1. **Decommissioned Legacy Layers**:
+   - `grammar/`: Legacy Jison parser and lexer removed.
+   - `model/`: Legacy TypeScript model and GraphCanvas removed.
+   - `generators/`: Legacy TypeScript generators removed.
+   - `tests/generators/`, `tests/model/`, `tests/parser/`: Legacy TS unit tests retired in favor of native Rust unit and parity test suites.
+2. **Unified Rust Core (`crates/diagrammer-core`)**:
+   - Compiles natively to `diagrammer_pest_parse` CLI binary.
+   - Compiles to WebAssembly (`build/wasm/diagrammer_core_bg.wasm`) with web-target bindings using `wasm-pack`.
+   - Runs 100% client-side in the browser with zero server roundtrip for parsing/generation, and falls back to miniserver `/parse` if WebAssembly is not supported.
+3. **Parity & Test Status**:
+   - All 9 Rust unit tests pass.
+   - Rust AST parity across all 53 test fixtures passes 100%.
+   - Generator parity across all 12 generators passes 100%.
+   - Jest / Puppeteer browser tests pass 100% (15/15 tests, 7/7 snapshots).
+   - CLI generation and visualizer execution pass cleanly across all diagram formats.

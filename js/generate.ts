@@ -2,7 +2,6 @@
 
 //import * as fs from 'fs'
 import { findGeneratorForVisualization, hasGenerator, hasVisualizer } from '../js/config.js'
-import { setVerbose } from '../model/debug.js'
 import { configSupport, type ConfigType } from './configsupport.js'
 import { doParse } from './diagrammer.js'
 
@@ -45,9 +44,7 @@ await config.parseCommandLine(process.argv.splice(2), _usage, async (unknownComm
   config.throwError(`Unknown visualizer (${visualizerName})`)
 })
 
-if (config.verbose) {
-  setVerbose(true)
-}
+
 if (config.trace) {
   config.printError("# If you didn't compile with DEBUG=1 make, deep tracing the grammar won't work")
 }

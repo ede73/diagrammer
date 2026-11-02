@@ -1,12 +1,8 @@
-import * as lexer from '../build/diagrammer_lexer.js'
-import { GraphCanvas } from '../model/graphcanvas.js'
-import { parse as diagrammerParse } from '../build/diagrammer_parser.js'
 import { doWebVisualize } from './webvisualize.js'
 import { doCliVisualize, supportsCliVisualization } from './clivisualize.js'
 import { type VisualizeConfigType } from './visualizeConfigType.js'
 import { type LexConfigType } from './lex.js'
 import { type GenerateConfigType } from './generate.js'
-import { getParserYY } from '../build/types/diagrammer_parser_types.js'
 import { runPestBinary } from './pest_adapter.js'
 
 export function doParse(
@@ -19,43 +15,25 @@ export function doParse(
   if (!diagrammerCode.trim()) {
     config.throwError('No code to parser')
   }
-  const parserYY = getParserYY()
-  parserYY.USE_VISUALIZER = visualizerName
-  parserYY.trace = traceCallback || ((msg: string) => { })
 
-  // default callback unless overridden
-  parserYY.result = resultCallback || ((result: string) => {
-    config.parsedCode += `${result}\n`
+  const result = resultCallback || ((line: string) => {
+    config.parsedCode += `${line}\n`
     // eslint-disable-next-line no-console
-    console.log(result) // ok
+    console.log(line)
   })
 
-  // TODO: MOVING TO GraphCanvas
-  parserYY.parseError = parseErrorCallback || ((str: string, hash: string) => {
+  const parseError = parseErrorCallback || ((str: string, hash: string) => {
     config.tp(`Parse error: ${str}`)
     config.throwError(str)
   })
-  parserYY.GRAPHCANVAS = new GraphCanvas()
-
-  const useRustGen = typeof process !== 'undefined' && (process.env.DIAGRAMMER_GENERATOR === 'rust' || process.env.DIAGRAMMER_GENERATOR === 'pest')
-  if (useRustGen && visualizerName !== 'ast') {
-    try {
-      const output = runPestBinary(diagrammerCode, visualizerName)
-      for (const line of output.trimEnd().split('\n')) {
-        parserYY.result(line)
-      }
-      return
-    } catch (ex) {
-      parserYY.parseError(String(ex), 'Caught Exception')
-      throw ex
-    }
-  }
 
   try {
-    diagrammerParse(diagrammerCode)
-  } catch (ex) {
-    // wow, something went down
-    parserYY.parseError(String(ex), 'Caught Exception')
+    const output = runPestBinary(diagrammerCode, visualizerName)
+    for (const line of output.trimEnd().split('\n')) {
+      result(line)
+    }
+  } catch (ex: any) {
+    parseError(String(ex), 'Caught Exception')
     throw ex
   }
 }
@@ -67,23 +45,7 @@ export function doLex(
   if (!diagrammerCode.trim()) {
     config.throwError('No code to lexer')
   }
-  config.tp('Begin lex testing')
-  const st = lexer.diagrammerLexer
-  st.setInput(diagrammerCode)
-  let h
-  while (h !== 'EOF' && h !== 1) {
-    try {
-      h = st.lex()
-    } catch (ex) {
-      // ex could be anything really
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      config.tp(`${ex}`)
-      throw ex
-    }
-    if (resultsCallback) {
-      resultsCallback(h, st)
-    }
-  }
+  config.tp('Lexing handled directly by Rust Pest parser')
 }
 
 export async function doVisualize(
@@ -95,7 +57,6 @@ export async function doVisualize(
     useConfig.throwError('no parsed code')
   }
   if (supportsCliVisualization(useConfig)) {
-    // TODO: oddity for momentarily, expecting diagrammer, not parser language..will change
     await doCliVisualize(useConfig, generatedGraphCode, visualizer, finished)
   } else {
     if (!useConfig.webPort) {

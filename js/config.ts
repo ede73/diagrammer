@@ -1,20 +1,4 @@
 // @ts-check
-import { ActDiag } from '../generators/actdiag.js'
-import { AST } from '../generators/ast.js'
-import { ASTRecord } from '../generators/ast_record.js'
-import { BlockDiag } from '../generators/blockdiag.js'
-import { Dendrogram } from '../generators/dendrogram.js'
-import { DiGraph } from '../generators/digraph.js'
-import { type Generator } from '../generators/generator.js'
-import { LayerBands } from '../generators/layerbands.js'
-import { MSCGen } from '../generators/mscgen.js'
-import { NWDiag } from '../generators/nwdiag.js'
-import { ParseTree } from '../generators/parsetree.js'
-import { PlantUMLSequence } from '../generators/plantuml_sequence.js'
-import { MermaidSequence } from '../generators/mermaid_sequence.js'
-import { Sankey } from '../generators/sankey.js'
-import { SeqDiag } from '../generators/seqdiag.js'
-import { UMLClass } from '../generators/umlclass.js'
 import { visualizeCirclePacked } from '../web/visualizations/visualizeCirclePacked.js'
 import { visualizeGraphviz } from '../web/visualizations/visualizeGraphviz.js'
 import { visualizeLayerBands } from '../web/visualizations/visualizeLayerBands.js'
@@ -24,8 +8,6 @@ import { visualizeRadialDendrogram } from '../web/visualizations/visualizeRadial
 import { visualizeReingoldTilford } from '../web/visualizations/visualizeReingoldTilford.js'
 import { visualizeSankey } from '../web/visualizations/visualizeSankey.js'
 import { visualizeUmlClass } from '../web/visualizations/visualizeUmlClass.js'
-import { type GraphCanvas } from '../model/graphcanvas.js'
-
 
 type ICommandLine = (format: string, outputFile?: string) => string[]
 
@@ -33,7 +15,7 @@ export class Visualization {
   public webVisualizer: boolean
   constructor(public name: string,
     public menuName: string,
-    public generator: typeof Generator,
+    public generator: string,
     public visualization?: (generatedResult: string) => Promise<void>,
     public cli?: ICommandLine) {
     this.webVisualizer = visualization !== undefined
@@ -65,7 +47,6 @@ function getLocalRepoFont(): string | undefined {
   return localRepoFont
 }
 
-
 const buggyDiags = (command: string, format: string, outputFile: string) => {
   const font = getLocalRepoFont()
   const redirectingDiag = true
@@ -75,81 +56,78 @@ const buggyDiags = (command: string, format: string, outputFile: string) => {
       '-a',
       `-T${format}`,
       '-f',
-      font,
+      font ?? 'fonts/dejavu-sans-bold.ttf',
       '-',
       `-o${outputFile}`]
   } else {
     return [
-      // piping works if running as cat file|nwdiag3 -o/dev/stdout -o/dev/stdin
-      // of course node.js spawn doesn't provide /dev/stdout nor /dev/stdin
-      // https://github.com/nodejs/node/issues/21941
       'sh',
       '-c',
-      `cat -| /usr/bin/${command}3 -a -T${format} -f${font} -o/dev/stdout /dev/stdin|cat`]
+      `cat -| /usr/bin/${command}3 -a -T${format} -f${font ?? 'fonts/dejavu-sans-bold.ttf'} -o/dev/stdout /dev/stdin|cat`]
   }
 }
 
 const _visualizations: Visualization[] = [
-  new Visualization('actdiag', 'Activity Diagram(cli)', ActDiag,
+  new Visualization('actdiag', 'Activity Diagram(cli)', 'actdiag',
     undefined, (format: string, outputFile?: string) => buggyDiags('actdiag', format, outputFile ?? '-')),
-  new Visualization('ast', 'AST(JSON only)', AST),
-  new Visualization('ast_record', 'Abstract Syntax Tree(Record)', ASTRecord, async (g) => {
+  new Visualization('ast', 'AST(JSON only)', 'ast'),
+  new Visualization('ast_record', 'Abstract Syntax Tree(Record)', 'ast_record', async (g) => {
     await visualizeGraphviz(g, 'dot')
   }),
-  new Visualization('blockdiag', 'Block Diagram(cli)', BlockDiag, undefined, (format: string, outputFile?: string) => buggyDiags('blockdiag', format, outputFile ?? '-')),
-  new Visualization('dot', 'Graphviz - dot(www/cli)', DiGraph, async (g) => {
+  new Visualization('blockdiag', 'Block Diagram(cli)', 'blockdiag', undefined, (format: string, outputFile?: string) => buggyDiags('blockdiag', format, outputFile ?? '-')),
+  new Visualization('dot', 'Graphviz - dot(www/cli)', 'digraph', async (g) => {
     await visualizeGraphviz(g, 'dot')
   }, (format: string) => [
     'dot',
     '-q',
     `-T${format}`
   ]),
-  new Visualization('fdp', 'Graphviz - fdp(www/cli)', DiGraph, async (g) => {
+  new Visualization('fdp', 'Graphviz - fdp(www/cli)', 'digraph', async (g) => {
     await visualizeGraphviz(g, 'fdp')
   }, (format: string) => [
     'fdp',
     '-q',
     `-T${format}`
   ]),
-  new Visualization('neato', 'Graphviz - neato(www/cli)', DiGraph, async (g) => {
+  new Visualization('neato', 'Graphviz - neato(www/cli)', 'digraph', async (g) => {
     await visualizeGraphviz(g, 'neato')
   }, (format: string) => [
     'neato',
     '-q',
     `-T${format}`
   ]),
-  new Visualization('osage', 'Graphviz - osage(www/cli)', DiGraph, async (g) => {
+  new Visualization('osage', 'Graphviz - osage(www/cli)', 'digraph', async (g) => {
     await visualizeGraphviz(g, 'osage')
   }, (format: string) => [
     'osage',
     '-q',
     `-T${format}`
   ]),
-  new Visualization('twopi', 'Graphviz - twopi(www/cli)', DiGraph, async (g) => {
+  new Visualization('twopi', 'Graphviz - twopi(www/cli)', 'digraph', async (g) => {
     await visualizeGraphviz(g, 'twopi')
   }, (format: string) => [
     'twopi',
     '-q',
     `-T${format}`
   ]),
-  new Visualization('sfdp', 'Graphviz - sfdp(cli)', DiGraph, undefined, (format: string) => [
+  new Visualization('sfdp', 'Graphviz - sfdp(cli)', 'digraph', undefined, (format: string) => [
     'sfdp',
     '-q',
     `-T${format}`
   ]),
-  new Visualization('layerbands', 'LayerBands(GoJS)', LayerBands, visualizeLayerBands),
-  new Visualization('mscgen', 'MSCGen(www/cli)', MSCGen, visualizeMscGen, (format: string) => [
+  new Visualization('layerbands', 'LayerBands(GoJS)', 'layerbands', visualizeLayerBands),
+  new Visualization('mscgen', 'MSCGen(www/cli)', 'mscgen', visualizeMscGen, (format: string) => [
     'mscgen',
     '-i-',
     '-o-',
     `-T${format}`
   ]),
-  new Visualization('nwdiag', 'Network Diagram(cli)', NWDiag, undefined, (format: string, outputFile?: string) => buggyDiags('nwdiag', format, outputFile ?? '-')),
-  new Visualization('parsetree', 'ParseTree(GoJS)', ParseTree, visualizeParseTree),
-  new Visualization('circlepacked', 'Circle packed', Dendrogram, visualizeCirclePacked),
-  new Visualization('radialdendrogram', 'Radial Dendrogram', Dendrogram, visualizeRadialDendrogram),
-  new Visualization('reingoldtilford', 'Reingold-Tilford', Dendrogram, visualizeReingoldTilford),
-  new Visualization('plantuml_sequence', 'PlantUML Sequence Diagram(cli)', PlantUMLSequence, undefined, (format: string) => [
+  new Visualization('nwdiag', 'Network Diagram(cli)', 'nwdiag', undefined, (format: string, outputFile?: string) => buggyDiags('nwdiag', format, outputFile ?? '-')),
+  new Visualization('parsetree', 'ParseTree(GoJS)', 'parsetree', visualizeParseTree),
+  new Visualization('circlepacked', 'Circle packed', 'dendrogram', visualizeCirclePacked),
+  new Visualization('radialdendrogram', 'Radial Dendrogram', 'dendrogram', visualizeRadialDendrogram),
+  new Visualization('reingoldtilford', 'Reingold-Tilford', 'dendrogram', visualizeReingoldTilford),
+  new Visualization('plantuml_sequence', 'PlantUML Sequence Diagram(cli)', 'plantuml_sequence', undefined, (format: string) => [
     'java',
     '-Djava.awt.headless=true',
     '-Xmx2048m',
@@ -158,18 +136,17 @@ const _visualizations: Visualization[] = [
     `-t${format.toLocaleLowerCase()}`,
     '-p'
   ]),
-  new Visualization('mermaid_sequence', 'Mermain Sequence Diagram(cli)', MermaidSequence, undefined, (format: string) => [
+  new Visualization('mermaid_sequence', 'Mermain Sequence Diagram(cli)', 'mermaid_sequence', undefined, (format: string) => [
     'mmdc',
     `-e png`,
     '-i-',
     '-o-'
   ]),
-  new Visualization('sankey', 'Sankey', Sankey, visualizeSankey),
-  new Visualization('seqdiag', 'Sequence Diagram(cli)', SeqDiag, undefined, (format: string, outputFile?: string) => buggyDiags('seqdiag', format, outputFile ?? '-')),
-  new Visualization('umlclass', 'UMLClass(GoJS)', UMLClass, visualizeUmlClass)
+  new Visualization('sankey', 'Sankey', 'sankey', visualizeSankey),
+  new Visualization('seqdiag', 'Sequence Diagram(cli)', 'seqdiag', undefined, (format: string, outputFile?: string) => buggyDiags('seqdiag', format, outputFile ?? '-')),
+  new Visualization('umlclass', 'UMLClass(GoJS)', 'umlclass', visualizeUmlClass)
 ]
 
-// Uh, jest mocking doesn't really work, so doing this hard way, see tests/parser/parse.test.js
 export let visualizations: Visualization[] = _visualizations
 export function setVisualizationsForTests(testVisualizations: Visualization[]) {
   visualizations = testVisualizations
@@ -180,7 +157,7 @@ export function resetVisualizationsForTests() {
 
 export function visualizationsToGenerators(): Map<string, string> {
   return new Map(visualizations.map(p => {
-    return [p.name.replace('_', ''), p.generator.name.toLocaleLowerCase()]
+    return [p.name.replace('_', ''), p.generator.toLowerCase()]
   }))
 }
 
@@ -192,19 +169,10 @@ export function findGeneratorForVisualization(visualization: string) {
   return generator
 }
 
-export function makeGenerator(useVisualization: string, graphCanvas: GraphCanvas): Generator | undefined {
-  const visualization = visualizations.find(p => p.name.toLowerCase() === useVisualization.toLowerCase())
-  if (!visualization) {
-    return undefined
-  }
-  // @ts-expect-error not an abstract class
-  return new visualization.generator(graphCanvas)
-}
-
 export function hasGenerator(generator: string) {
-  return visualizations.some(p => p.generator.name.toLocaleLowerCase() === generator.replace('_', ''))
+  return visualizations.some(p => p.generator.toLowerCase() === generator.replace('_', '').toLowerCase())
 }
 
 export function hasVisualizer(visualizer: string) {
-  return visualizations.some(p => p.name.toLocaleLowerCase() === visualizer)
+  return visualizations.some(p => p.name.toLocaleLowerCase() === visualizer.toLowerCase())
 }

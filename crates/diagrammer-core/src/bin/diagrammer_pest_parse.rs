@@ -48,8 +48,21 @@ fn main() {
 
     match canvas_res {
         Ok(canvas) => {
-            if let Some(ref gen_name) = requested_generator {
-                if let Some(generator) = make_generator(gen_name) {
+            let effective_gen = requested_generator
+                .as_deref()
+                .or(canvas.visualizer.as_deref());
+
+            if let Some(gen_name) = effective_gen {
+                if gen_name == "ast" {
+                    match serde_json::to_string(&canvas) {
+                        Ok(json) => println!("{}", json),
+                        Err(e) => {
+                            eprintln!("Serialization error: {}", e);
+                            process::exit(2);
+                        }
+                    }
+                    return;
+                } else if let Some(generator) = make_generator(gen_name) {
                     print!("{}", generator.generate(&canvas));
                     return;
                 } else {

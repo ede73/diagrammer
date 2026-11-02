@@ -88,7 +88,7 @@ export function parse(diagrammerCode: string, successCallback: (visualizer: stri
   setError('')
 
   const engineSelect = typeof document !== 'undefined' ? (document.getElementById('diagrammer-engine') as HTMLSelectElement | null) : null
-  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+  const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null
   const useRustEngine = (engineSelect && engineSelect.value === 'rust') || (urlParams && urlParams.get('engine') === 'rust')
 
   if (useRustEngine) {

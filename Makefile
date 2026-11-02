@@ -23,8 +23,8 @@ include Makefile.commands
 LOCK_FILE=.lock
 BUILD_STARTED_FILE=.build_started
 
-# Parser backend toggle: jison (default) or pest
-PARSER_BACKEND ?= jison
+# Parser backend toggle: pest (default) or jison (legacy)
+PARSER_BACKEND ?= pest
 
 pest_parser_bin:
 	@if [ -f "$$HOME/.cargo/env" ]; then . "$$HOME/.cargo/env"; fi; \
@@ -46,7 +46,7 @@ sub_grammar:
 sub_tests:
 	$(MAKE) -C tests
 
-_all: sub_grammar active_project_deps jest_test_deps parser faketypes
+_all: sub_grammar active_project_deps jest_test_deps parser faketypes wasm_pkg
 	@echo Built all
 	@rm -f $(LOCK_FILE)
 

@@ -145,3 +145,48 @@ until loop_condition_met
 3. **External Dependencies for Full Test Suite**:
    - [`ext/plantuml.jar`](file:///Users/ede/src/diagrammer/ext) (gitignored; required for PlantUML tests).
    - Local font [`fonts/DejaVuSans.ttf`](file:///Users/ede/src/diagrammer/fonts/DejaVuSans.ttf) is used by Python `*diag` tools to prevent font substitution mismatch.
+
+---
+
+## 7. Known Issues & Resolved Fixes
+
+- [x] **Anonymous group edge expansion `(b,c)>a` and `(b,c)<a` (RESOLVED)**:
+  - **Issue**: Previously, LHS anonymous groups `(b,c)>a` produced `1->a;` and `(b,c)<a` produced `a->1;`.
+  - **Fix**: In [`builder.rs`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/src/builder.rs), `current_outgoing` now preserves the inner graph's member `roots` (instead of the group ID), and `elements[0].inner_edges` is retained before chain evaluation.
+  - **Outcome**: Both forward and reverse group chaining expand completely and symmetrically:
+    - `(b,c)>a` produces `subgraph cluster_1 { b; c; }` and `b->a; c->a;`
+    - `(b,c)<a` produces `subgraph cluster_1 { b; c; }` and `a->b; a->c;` (fixing the legacy Jison bug where `c` was dropped)
+    - Full cartesian chains like `(b,c)<(a,d)` link all 4 pairs: `a->b; d->b; a->c; d->c;`.
+  - **Expected behavior** (from legacy Jison for `(b,c)>a`):
+    ```dot
+    digraph {
+        compound=true;
+        rankdir=TD;
+        subgraph cluster_1 {
+            graph[ style=invis ];
+            b;
+            c;
+        }//end of 1 
+        a;
+        //links start
+        b->a;
+        c->a;
+    }
+    ```
+  - **Expected behavior** (from legacy Jison for `(b,c)<a`):
+    ```dot
+    digraph {
+        compound=true;
+        rankdir=TD;
+        subgraph cluster_1 {
+            graph[ style=invis ];
+            b;
+            c;
+        }//end of 1 
+        a;
+        //links start
+        a->b;
+        a->c;
+    }
+    ```
+

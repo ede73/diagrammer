@@ -701,13 +701,13 @@ impl AstBuilder {
                 Rule::inner_graph => {
                     let (roots, id, inner_edges) = self.process_inner_graph(item)?;
                     current_incoming = roots
-                        .into_iter()
+                        .iter()
                         .map(|n| ParsedVertex {
-                            name: n,
+                            name: n.clone(),
                             ..Default::default()
                         })
                         .collect();
-                    current_outgoing = vec![id.clone()];
+                    current_outgoing = roots;
                     current_inner_id = Some(id);
                     current_inner_edges = inner_edges;
                 }
@@ -725,13 +725,13 @@ impl AstBuilder {
                     if let Some(inner_pair) = found_inner {
                         let (roots, id, inner_edges) = self.process_inner_graph(inner_pair)?;
                         current_incoming = roots
-                            .into_iter()
+                            .iter()
                             .map(|n| ParsedVertex {
-                                name: n,
+                                name: n.clone(),
                                 ..Default::default()
                             })
                             .collect();
-                        current_outgoing = vec![id.clone()];
+                        current_outgoing = roots;
                         current_inner_id = Some(id);
                         current_inner_edges = inner_edges;
                     } else {
@@ -817,6 +817,12 @@ impl AstBuilder {
                 }
             }
             return Ok(());
+        }
+
+        if let Some(first) = elements.first() {
+            if !first.inner_edges.is_empty() {
+                self.canvas.objects.extend(first.inner_edges.clone());
+            }
         }
 
         let mut current_lhs = elements[0].outgoing.clone();

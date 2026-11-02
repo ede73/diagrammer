@@ -128,6 +128,19 @@ until loop_condition_met
   - `EDGETEXT_COLOR <color|$(var)>`
   - `GROUP_COLOR <color|$(var)>`
 
+### 5.3 Grouping Semantics: Edge Broadcasting `()` vs Containment `{}`
+- **`()` is purely Edge Distribution / Broadcasting syntactic sugar**:
+  - `(a, b) > c` does **not** create a containment container, boundary box, or layout frame.
+  - Nodes `a` and `b` remain wherever they were already declared in the canvas or hierarchy.
+  - Follows strict commutative distribution rules:
+    - `(a, b) > c` $\iff$ `a > c; b > c`
+    - `c < (a, b)` $\iff$ `c < a; c < b` $\iff$ `a > c; b > c`
+    - `(a, b) > (c, d)` $\iff$ `a > c; a > d; b > c; b > d`
+  - The AST structure is preserved with zero breaking changes, expanding edges cleanly without creating unintended containment constraints.
+- **`GROUP <name>` and `{ ... }` are Structural Containment**:
+  - These define actual visual containers (`GraphGroup` / `GraphContainer`) with visual boundary frames, coordinate boundaries, and scoped defaults.
+
+
 ---
 
 ## 6. Testing & Regression Harness Details

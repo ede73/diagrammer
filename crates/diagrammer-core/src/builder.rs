@@ -5,6 +5,17 @@ use pest::Parser;
 
 use std::collections::HashSet;
 
+#[derive(Debug, Default, Clone)]
+struct ParsedVertex {
+    name: String,
+    style: Option<String>,
+    shape: Option<String>,
+    color: Option<String>,
+    image: Option<String>,
+    label: Option<String>,
+    edge_label: Option<String>,
+}
+
 pub struct AstBuilder {
     pub canvas: GraphCanvas,
     group_stack: Vec<GraphGroup>,
@@ -131,6 +142,56 @@ impl AstBuilder {
         Self::object_exists_recursive(&self.canvas.objects, name)
     }
 
+    fn is_group(&self, name: &str) -> bool {
+        fn check(list: &[GraphObject], name: &str) -> bool {
+            for obj in list {
+                if let GraphObject::Group(g) = obj {
+                    if g.name == name || check(&g.objects, name) {
+                        return true;
+                    }
+                }
+            }
+            false
+        }
+        for grp in self.group_stack.iter().rev() {
+            if grp.name == name || check(&grp.objects, name) {
+                return true;
+            }
+        }
+        check(&self.canvas.objects, name)
+    }
+
+    fn set_vertex_label(&mut self, name: &str, label: &str) {
+        fn set_in_list(list: &mut [GraphObject], name: &str, label: &str) -> bool {
+            for obj in list {
+                match obj {
+                    GraphObject::VertexRef { vertex } if vertex.name == name => {
+                        vertex.label = Some(label.to_string());
+                        return true;
+                    }
+                    GraphObject::Vertex(v) if v.name == name => {
+                        v.label = Some(label.to_string());
+                        return true;
+                    }
+                    GraphObject::Group(g) => {
+                        if set_in_list(&mut g.objects, name, label) {
+                            return true;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            false
+        }
+
+        for grp in self.group_stack.iter_mut().rev() {
+            if set_in_list(&mut grp.objects, name, label) {
+                return;
+            }
+        }
+        set_in_list(&mut self.canvas.objects, name, label);
+    }
+
     fn ensure_vertex_exists(&mut self, name: &str) {
         if !self.object_exists(name) {
             self.noedges.insert(name.to_string());
@@ -231,19 +292,19 @@ impl AstBuilder {
                     }
                 }
                 if !is_inner {
-                    let names = self.collect_vertex_names(pair);
-                    for name in names {
-                        self.ensure_vertex_exists(&name);
+                    let targets = self.collect_vertex_targets(pair);
+                    for pv in targets {
+                        self.ensure_vertex_exists(&pv.name);
+                        self.update_vertex_attrs(&pv);
                     }
                 }
             }
             Rule::while_stmt | Rule::do_stmt => {
                 let id = self.context.group_ids.unwrap_or(1);
                 self.context.group_ids = Some(id + 1);
-                let loop_type = if pair.as_rule() == Rule::while_stmt { "while" } else { "do" };
-                let label = pair.as_str().trim().trim_start_matches("while").trim_start_matches("do").trim();
+                let label = pair.as_str().trim();
                 let mut group = GraphGroup::new(&id.to_string());
-                group.conditional = Some(loop_type.to_string());
+                group.pseudo_type = "GraphLoop".to_string();
                 if !label.is_empty() {
                     group.label = Some(label.to_string());
                 }
@@ -252,7 +313,7 @@ impl AstBuilder {
             Rule::endwhile_stmt | Rule::until_stmt => {
                 if let Some(mut group) = self.group_stack.pop() {
                     if pair.as_rule() == Rule::until_stmt {
-                        let label = pair.as_str().trim().trim_start_matches("until").trim();
+                        let label = pair.as_str().trim();
                         if !label.is_empty() {
                             group.label = Some(label.to_string());
                         }
@@ -427,7 +488,135 @@ impl AstBuilder {
         names
     }
 
-    fn process_inner_graph(&mut self, pair: Pair<Rule>) -> Result<(Vec<String>, String), String> {
+    fn collect_vertex_targets(&mut self, pair: Pair<Rule>) -> Vec<ParsedVertex> {
+        let mut targets = Vec::new();
+        match pair.as_rule() {
+            Rule::inner_graph => {}
+            Rule::NAME => {
+                targets.push(ParsedVertex {
+                    name: pair.as_str().trim().to_string(),
+                    ..Default::default()
+                });
+            }
+            Rule::list_item => {
+                let mut edge_label = None;
+                for p in pair.into_inner() {
+                    match p.as_rule() {
+                        Rule::INLINE_STRING => {
+                            let s = p.as_str().trim();
+                            let unquoted = s
+                                .strip_prefix('"')
+                                .and_then(|x| x.strip_suffix('"'))
+                                .unwrap_or(s);
+                            edge_label = Some(unquoted.to_string());
+                        }
+                        Rule::vertex_attrs => {
+                            let mut v = self.parse_vertex_attrs(p);
+                            v.edge_label = edge_label.clone();
+                            targets.push(v);
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            Rule::vertex_attrs => {
+                targets.push(self.parse_vertex_attrs(pair));
+            }
+            _ => {
+                for p in pair.into_inner() {
+                    targets.extend(self.collect_vertex_targets(p));
+                }
+            }
+        }
+        targets
+    }
+
+    fn parse_vertex_attrs(&mut self, pair: Pair<Rule>) -> ParsedVertex {
+        let mut pv = ParsedVertex::default();
+        for p in pair.into_inner() {
+            match p.as_rule() {
+                Rule::STYLES => pv.style = Some(p.as_str().trim().to_string()),
+                Rule::SHAPES => pv.shape = Some(p.as_str().trim().to_string()),
+                Rule::NAME => pv.name = p.as_str().trim().to_string(),
+                Rule::color_or_variable => {
+                    if let Ok(c) = self.extract_color_or_var(p) {
+                        pv.color = Some(c);
+                    }
+                }
+                Rule::IMAGE => {
+                    let s = p.as_str().trim();
+                    let unquoted = s
+                        .strip_prefix('"')
+                        .and_then(|x| x.strip_suffix('"'))
+                        .unwrap_or(s);
+                    pv.image = Some(unquoted.to_string());
+                }
+                _ => {}
+            }
+        }
+        pv
+    }
+
+    fn update_vertex_attrs(&mut self, pv: &ParsedVertex) {
+        fn update_in_list(list: &mut [GraphObject], pv: &ParsedVertex) -> bool {
+            for obj in list {
+                match obj {
+                    GraphObject::VertexRef { vertex } if vertex.name == pv.name => {
+                        if let Some(ref s) = pv.style {
+                            vertex.style = Some(s.clone());
+                        }
+                        if let Some(ref sh) = pv.shape {
+                            vertex.shape = Some(sh.clone());
+                        }
+                        if let Some(ref c) = pv.color {
+                            vertex.color = Some(c.clone());
+                        }
+                        if let Some(ref img) = pv.image {
+                            vertex.image = Some(img.clone());
+                        }
+                        if let Some(ref lbl) = pv.label {
+                            vertex.label = Some(lbl.clone());
+                        }
+                        return true;
+                    }
+                    GraphObject::Vertex(v) if v.name == pv.name => {
+                        if let Some(ref s) = pv.style {
+                            v.style = Some(s.clone());
+                        }
+                        if let Some(ref sh) = pv.shape {
+                            v.shape = Some(sh.clone());
+                        }
+                        if let Some(ref c) = pv.color {
+                            v.color = Some(c.clone());
+                        }
+                        if let Some(ref img) = pv.image {
+                            v.image = Some(img.clone());
+                        }
+                        if let Some(ref lbl) = pv.label {
+                            v.label = Some(lbl.clone());
+                        }
+                        return true;
+                    }
+                    GraphObject::Group(g) => {
+                        if update_in_list(&mut g.objects, pv) {
+                            return true;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            false
+        }
+
+        for grp in self.group_stack.iter_mut().rev() {
+            if update_in_list(&mut grp.objects, pv) {
+                return;
+            }
+        }
+        update_in_list(&mut self.canvas.objects, pv);
+    }
+
+    fn process_inner_graph(&mut self, pair: Pair<Rule>) -> Result<(Vec<String>, String, Vec<GraphObject>), String> {
         let inner_id = self.context.graphinner_index.unwrap_or(1);
         self.context.graphinner_index = Some(inner_id + 1);
         let exit_id = self.context.container_exit.unwrap_or(1);
@@ -438,6 +627,8 @@ impl AstBuilder {
         inner_grp.exitvertex = Some(exit_id);
 
         self.group_stack.push(inner_grp);
+
+        let start_obj_len = self.canvas.objects.len();
 
         for stmt in pair.into_inner() {
             if stmt.as_rule() == Rule::statement {
@@ -458,7 +649,13 @@ impl AstBuilder {
 
         self.push_object(GraphObject::Group(Box::new(finished_inner)));
 
-        Ok((root_names, inner_id.to_string()))
+        let inner_edges: Vec<GraphObject> = if self.canvas.objects.len() > start_obj_len {
+            self.canvas.objects.drain(start_obj_len..).collect()
+        } else {
+            Vec::new()
+        };
+
+        Ok((root_names, inner_id.to_string(), inner_edges))
     }
 
     fn handle_event_chain(&mut self, pair: Pair<Rule>) -> Result<(), String> {
@@ -471,17 +668,36 @@ impl AstBuilder {
             rcompass: Option<String>,
         }
 
-        let mut elements: Vec<(Vec<String>, Vec<String>, Option<ConnectorData>)> = Vec::new();
-        let mut current_incoming = Vec::new();
+        #[derive(Default, Clone)]
+        struct ChainNode {
+            incoming: Vec<ParsedVertex>,
+            outgoing: Vec<String>,
+            connector: Option<ConnectorData>,
+            inner_id: Option<String>,
+            inner_edges: Vec<GraphObject>,
+        }
+
+        let mut elements: Vec<ChainNode> = Vec::new();
+        let mut current_incoming: Vec<ParsedVertex> = Vec::new();
         let mut current_outgoing = Vec::new();
+        let mut current_inner_id = None;
+        let mut current_inner_edges = Vec::new();
         let mut common_chain_label: Option<String> = None;
 
         for item in pair.into_inner() {
             match item.as_rule() {
                 Rule::inner_graph => {
-                    let (roots, id) = self.process_inner_graph(item)?;
-                    current_incoming = roots;
-                    current_outgoing = vec![id];
+                    let (roots, id, inner_edges) = self.process_inner_graph(item)?;
+                    current_incoming = roots
+                        .into_iter()
+                        .map(|n| ParsedVertex {
+                            name: n,
+                            ..Default::default()
+                        })
+                        .collect();
+                    current_outgoing = vec![id.clone()];
+                    current_inner_id = Some(id);
+                    current_inner_edges = inner_edges;
                 }
                 Rule::vertex_target
                 | Rule::vertex_attrs
@@ -495,15 +711,26 @@ impl AstBuilder {
                         }
                     }
                     if let Some(inner_pair) = found_inner {
-                        let (roots, id) = self.process_inner_graph(inner_pair)?;
-                        current_incoming = roots;
-                        current_outgoing = vec![id];
+                        let (roots, id, inner_edges) = self.process_inner_graph(inner_pair)?;
+                        current_incoming = roots
+                            .into_iter()
+                            .map(|n| ParsedVertex {
+                                name: n,
+                                ..Default::default()
+                            })
+                            .collect();
+                        current_outgoing = vec![id.clone()];
+                        current_inner_id = Some(id);
+                        current_inner_edges = inner_edges;
                     } else {
-                        let names = self.collect_vertex_names(item);
-                        for name in &names {
-                            self.ensure_vertex_exists(name);
+                        let targets = self.collect_vertex_targets(item);
+                        let mut names = Vec::new();
+                        for pv in &targets {
+                            self.ensure_vertex_exists(&pv.name);
+                            self.update_vertex_attrs(pv);
+                            names.push(pv.name.clone());
                         }
-                        current_incoming = names.clone();
+                        current_incoming = targets;
                         current_outgoing = names;
                     }
                 }
@@ -532,17 +759,22 @@ impl AstBuilder {
                             }
                             Rule::INLINE_STRING => {
                                 let s = ec.as_str().trim();
-                                let unquoted = s.strip_prefix('"').and_then(|x| x.strip_suffix('"')).unwrap_or(s);
+                                let unquoted = s
+                                    .strip_prefix('"')
+                                    .and_then(|x| x.strip_suffix('"'))
+                                    .unwrap_or(s);
                                 conn.label = Some(unquoted.to_string());
                             }
                             _ => {}
                         }
                     }
-                    elements.push((
-                        std::mem::take(&mut current_incoming),
-                        std::mem::take(&mut current_outgoing),
-                        Some(conn),
-                    ));
+                    elements.push(ChainNode {
+                        incoming: std::mem::take(&mut current_incoming),
+                        outgoing: std::mem::take(&mut current_outgoing),
+                        connector: Some(conn),
+                        inner_id: current_inner_id.take(),
+                        inner_edges: std::mem::take(&mut current_inner_edges),
+                    });
                 }
                 Rule::LABEL => {
                     let s = item.as_str().trim_start_matches(';').trim();
@@ -553,43 +785,76 @@ impl AstBuilder {
         }
 
         if !current_incoming.is_empty() || !current_outgoing.is_empty() {
-            elements.push((current_incoming, current_outgoing, None));
+            elements.push(ChainNode {
+                incoming: current_incoming,
+                outgoing: current_outgoing,
+                connector: None,
+                inner_id: current_inner_id,
+                inner_edges: current_inner_edges,
+            });
         }
 
         if elements.is_empty() {
             return Ok(());
         }
 
-        let mut current_lhs = elements[0].1.clone();
+        if elements.len() == 1 {
+            if let Some(ref lbl) = common_chain_label {
+                for pv in &elements[0].incoming {
+                    self.set_vertex_label(&pv.name, lbl);
+                }
+            }
+            return Ok(());
+        }
+
+        let mut current_lhs = elements[0].outgoing.clone();
 
         for i in 0..elements.len().saturating_sub(1) {
             let default_conn = ConnectorData {
                 event_type: ">".to_string(),
                 ..Default::default()
             };
-            let conn = elements[i].2.as_ref().unwrap_or(&default_conn);
-            let ref rhs_targets = elements[i + 1].0;
+            let conn = elements[i].connector.as_ref().unwrap_or(&default_conn);
+            let ref rhs_targets = elements[i + 1].incoming;
+
+            let parent = if let Some(ref inner_id) = elements[i + 1].inner_id {
+                Some(inner_id.clone())
+            } else {
+                self.group_stack.last().map(|g| g.name.clone())
+            };
 
             for lhs in &current_lhs {
                 for rhs in rhs_targets {
                     let mut edge = EdgeRef::new(
                         conn.event_type.clone(),
                         lhs.clone(),
-                        rhs.clone(),
+                        rhs.name.clone(),
                     );
                     edge.color = conn.color.clone();
                     edge.lcompass = conn.lcompass.clone();
                     edge.rcompass = conn.rcompass.clone();
-                    edge.label = conn.label.clone().or_else(|| common_chain_label.clone());
+                    let edge_label = if self.is_group(&rhs.name) {
+                        None
+                    } else {
+                        rhs.edge_label.clone()
+                    };
+                    edge.label = edge_label
+                        .or_else(|| conn.label.clone())
+                        .or_else(|| common_chain_label.clone());
+                    edge.parent = parent.clone();
 
                     self.canvas.objects.push(GraphObject::Edge { edge });
-                    self.maybe_remove_from_root_vertices(rhs);
+                    self.maybe_remove_from_root_vertices(&rhs.name);
                     self.noedges.remove(lhs);
-                    self.noedges.remove(rhs);
+                    self.noedges.remove(&rhs.name);
                 }
             }
 
-            if let Some(last_out) = elements[i + 1].1.last() {
+            if !elements[i + 1].inner_edges.is_empty() {
+                self.canvas.objects.extend(elements[i + 1].inner_edges.clone());
+            }
+
+            if let Some(last_out) = elements[i + 1].outgoing.last() {
                 current_lhs = vec![last_out.clone()];
             }
         }

@@ -38,7 +38,14 @@ fn main() {
         buf
     };
 
-    match AstBuilder::new().build(&input) {
+    let canvas_res = if input.trim_start().starts_with("{\"__PSEUDOTYPE\":\"GraphCanvas\"") {
+        serde_json::from_str::<diagrammer_core::ast::GraphCanvas>(&input)
+            .map_err(|e| format!("Failed to parse AST JSON: {}", e))
+    } else {
+        AstBuilder::new().build(&input)
+    };
+
+    match canvas_res {
         Ok(canvas) => {
             if let Some(ref gen_name) = requested_generator {
                 if let Some(generator) = make_generator(gen_name) {

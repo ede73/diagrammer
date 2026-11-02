@@ -59,6 +59,14 @@ impl VertexRef {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ArrowType {
+    None,
+    Normal,
+    Double,
+    Flat,
+}
+
 /// Compact edge reference
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EdgeRef {
@@ -71,10 +79,16 @@ pub struct EdgeRef {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub textcolor: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lcompass: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rcompass: Option<String>,
+    #[serde(skip)]
+    pub parent: Option<String>,
 }
+
+pub type GraphEdge = EdgeRef;
 
 impl EdgeRef {
     pub fn new(edge_type: impl Into<String>, left: impl Into<String>, right: impl Into<String>) -> Self {
@@ -84,8 +98,10 @@ impl EdgeRef {
             right: right.into(),
             label: None,
             color: None,
+            textcolor: None,
             lcompass: None,
             rcompass: None,
+            parent: None,
         }
     }
 
@@ -100,6 +116,30 @@ impl EdgeRef {
             }
         }
         "normal"
+    }
+
+    pub fn left_arrow_type(&self) -> ArrowType {
+        if self.edge_type.starts_with("<<") {
+            ArrowType::Double
+        } else if self.edge_type.starts_with('<') {
+            ArrowType::Normal
+        } else if self.edge_type.starts_with('|') {
+            ArrowType::Flat
+        } else {
+            ArrowType::None
+        }
+    }
+
+    pub fn right_arrow_type(&self) -> ArrowType {
+        if self.edge_type.ends_with(">>") {
+            ArrowType::Double
+        } else if self.edge_type.ends_with('>') {
+            ArrowType::Normal
+        } else if self.edge_type.ends_with('|') {
+            ArrowType::Flat
+        } else {
+            ArrowType::None
+        }
     }
 }
 
@@ -148,6 +188,15 @@ impl GraphObject {
             GraphObject::VertexRef { vertex } => vertex.color.as_deref(),
             GraphObject::Edge { edge } => edge.color.as_deref(),
             GraphObject::Reference(_) => None,
+        }
+    }
+
+    pub fn get_textcolor(&self) -> Option<&str> {
+        match self {
+            GraphObject::Group(g) => g.textcolor.as_deref(),
+            GraphObject::Vertex(v) => v.textcolor.as_deref(),
+            GraphObject::Edge { edge } => edge.textcolor.as_deref(),
+            _ => None,
         }
     }
 

@@ -1,5 +1,16 @@
+pub mod actdiag;
 pub mod blockdiag;
+pub mod dendrogram;
+pub mod digraph;
+pub mod layerbands;
+pub mod mermaid_sequence;
+pub mod mscgen;
 pub mod nwdiag;
+pub mod parsetree;
+pub mod plantuml_sequence;
+pub mod sankey;
+pub mod seqdiag;
+pub mod umlclass;
 
 use crate::ast::GraphCanvas;
 
@@ -46,6 +57,11 @@ impl OutputFormatter {
         }
     }
 
+    pub fn raw(&mut self, text: &str) {
+        self.buffer.push_str(text);
+        self.buffer.push('\n');
+    }
+
     pub fn finish(self) -> String {
         self.buffer
     }
@@ -78,8 +94,21 @@ pub fn multi_attr_fmt(attrs: &[(&str, Option<&str>, &str)], extras: &[String]) -
 /// Factory function to create a generator by visualizer name
 pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
     match name.to_lowercase().as_str() {
-        "nwdiag" => Some(Box::new(nwdiag::NWDiag)),
+        "actdiag" => Some(Box::new(actdiag::ActDiag)),
         "blockdiag" => Some(Box::new(blockdiag::BlockDiag)),
+        "circlepacked" | "dendrogram" | "radialdendrogram" | "reingoldtilford" => {
+            Some(Box::new(dendrogram::Dendrogram))
+        }
+        "digraph" | "dot" => Some(Box::new(digraph::DiGraph)),
+        "layerbands" => Some(Box::new(layerbands::LayerBands)),
+        "mermaid_sequence" => Some(Box::new(mermaid_sequence::MermaidSequence)),
+        "mscgen" => Some(Box::new(mscgen::MSCGen)),
+        "nwdiag" => Some(Box::new(nwdiag::NWDiag)),
+        "parsetree" => Some(Box::new(parsetree::ParseTree)),
+        "plantuml_sequence" => Some(Box::new(plantuml_sequence::PlantUMLSequence)),
+        "sankey" => Some(Box::new(sankey::Sankey)),
+        "seqdiag" => Some(Box::new(seqdiag::SeqDiag)),
+        "umlclass" => Some(Box::new(umlclass::UMLClass)),
         _ => None,
     }
 }

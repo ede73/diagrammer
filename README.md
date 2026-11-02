@@ -39,10 +39,11 @@ AND I could finally design a proper lexer/parser for the language to be. This co
 # Diagrammer and the language
 
 Main components:
-- Language grammar / lexical rules in grammar/
+- 100% Rust core in `crates/diagrammer-core`: Pest PEG grammar (`src/diagrammer.pest`), AST builder, and all 13 diagram generators
+- WebAssembly package in `build/wasm` enabling fast, zero-server client-side execution in the browser
 - Highlighting interactive editor in ace/
-- Diagrammer language makes an abstract syntax tree representation, that generators the make for the visualizer to draw out
-- tests/ lot of tests to ensure the changes in grammar don't introduce bugs
+- Web frontend in web/ and CLI runners in js/
+- Comprehensive test coverage: Rust unit tests, AST parity tests across 53 fixtures, generator parity across all 12 formats, and Jest/Puppeteer browser visual regression suites
 
 # Web Interface
 
@@ -405,18 +406,11 @@ traverseTree(root, (vertex, isLeaf, hasSiblings) => {
 # Project files/folders
 - ace - The ACE editor, and diagrammer highlight rules
 - arrows - Diagrammer arrow styles (icons for UI)
-- build - Jison grammar parser + other derivatives..built
-- css - Stylesheets
-- export - make export makes minimal distribution here
-- ext - External dependencies, CanViz/PlantUml
-- generators - Converting diagrammer AST to **any graph visualizer language** you can come up with
-- grammar - Lex + Grammar of diagrammer
+- build/wasm - WebAssembly package compiled from the Rust core for client-side browser execution
+- crates/diagrammer-core - 100% Rust parser (Pest PEG grammar), AST builder, and all 13 diagram generators
 - icons - Some copyleft icons for UI
-- index.html - Web UI main
-- js - The diagrammer parser (also transpiled mscgen, graphviz)
-  - mscgen / graphviz visualize the graphs in the Web UI in realtime without any backend support, but not required. I was hoping to build backendless visualization, all in browser. And that's what it does, but had I wanted to go all the way..PlantUML, python3 nwdiag/actdiag..etc. uh.
-- manual_test_diagrams - some diagrammer tests during development, not tied to tests
-- model - Diagrammer parser converts diagrammer language to this AST model comprising of GraphVertex, GraphEdge, shapes, GraphInner (, graphobject, graphcanvas, tree, support)
+- js - CLI entrypoints (`generate.js`, `visualize.js`, `runtests.js`, `t.js`)
+- manual_test_diagrams - Some diagrammer test inputs
 - scripts - Some utility scripts for building, testing, exporting
 - setup - setup related
 - tests - All the test files, diagrammer language inputs, reference renderings, transpiled outputs.

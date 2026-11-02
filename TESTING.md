@@ -4,33 +4,35 @@
 This document describes the test workflows for the `diagrammer` project.
 
 ## Test commands
-- Run Jest unit/browser tests:
-  - `npm test`
+- Run Rust AST & generator parity tests:
+  - `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`
+- Run Jest browser tests:
+  - `make -C tests jesttests`
 - Run full project test workflow:
   - `make test`
-- Run only the test harness inside `tests/`:
+- Run only the regression test harness inside `tests/`:
   - `make -C tests testrunner`
-- Run Jest tests inside `tests/`:
-  - `make -C tests jesttests`
 - Run the regression test runner directly:
   - `node js/runtests.js [visualizer:testNamePattern]`
 
 ## How tests are organized
+- `crates/diagrammer-core/` contains:
+  - `src/builder.rs` unit tests (AST construction, broadcasting, directions)
+  - `tests/ast_parity.rs` (AST parity across 53 baseline diagrammer fixtures)
+  - `tests/generator_parity.rs` (100% generator parity tests across all 12 formats)
 - `tests/` contains:
-  - `generators/`
-  - `model/`
-  - `parser/`
-  - `web/`
+  - `web/` — Puppeteer and Jest browser UI regression tests
   - `test_inputs/` — diagrammer source examples used by regression tests
   - `testrun/` — runtime-generated outputs for current and previous runs
 - `tests/Makefile` builds TypeScript test files and runs browser/web tests.
 
 ## Test types
-- Unit tests with Jest and `jest-puppeteer`
+- Rust native unit tests and golden parity tests
+- Browser/web interaction and visual snapshot tests with Jest and `jest-puppeteer`
 - Regression tests via `js/runtests.js`
   - compares generated text outputs with stored reference text
   - compares generated graph images with stored reference PNGs
-- Browser/web interaction tests through `web/miniserver.js`
+- Browser WebAssembly execution through `web/miniserver.js`
 
 ## Required artifacts
 - `ext/plantuml.jar` is required to run the full set of tests successfully.

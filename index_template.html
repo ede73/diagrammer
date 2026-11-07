@@ -8,14 +8,7 @@
   "imports": {
     "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm",
     "gojs": "./web/js/go-debug-module.js",
-    "jquery": "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js",
-    "js/": "/js/",
-    "diagrammer.js": "/js/diagrammer.js",
-    "/diagrammer.js": "/js/diagrammer.js",
-    "webvisualize.js": "/js/webvisualize.js",
-    "/webvisualize.js": "/js/webvisualize.js",
-    "clivisualize.js": "/js/clivisualize.js",
-    "/clivisualize.js": "/js/clivisualize.js"
+    "jquery": "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
  }
 }
 </script>
@@ -25,7 +18,7 @@
 <script type="module" src="web/backendInteractions.js"></script>
 <script type="module" src="web/localStorage.js"></script>
 <script type="module" src="web/d3support.js"></script>
-<script type="module" src="js/config.js"></script>
+<script type="module" src="web/config.js"></script>
 
 
 
@@ -284,7 +277,7 @@
 <script type="module" src="web/editorInteractions.js"></script>
 <script src="ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script type="module">
-  import { visualizations } from './js/config.js'
+  import { visualizations } from './web/config.js'
   const el = document.getElementById('diagrammer-generator')
   el.disabled = true
   visualizations.forEach(p => {

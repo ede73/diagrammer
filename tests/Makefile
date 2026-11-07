@@ -22,13 +22,6 @@ CE.js: CE.ts
  %.js: %.ts
 	@$(TRANSPILE) $< $(S)
 
-testrunner:
-	@-pkill -f "miniserver.js 8777" || true
-	@chmod u+x ../web/miniserver.js
-	@$(SHELL) -c 'cd .. ; ./web/miniserver.js 8777&'
-	@$(SHELL) -c 'cd .. ; ./js/runtests.js webport 8777'
-	@-pkill -f "miniserver.js 8777" || true
-
 checkminiserver:
 	@/bin/echo -e "Make sure miniserver is running for web tests\nYou can start it with: node web/miniserver.js"
 

@@ -39,11 +39,9 @@ _all: pest_parser_bin wasm_pkg parser active_project_deps jest_test_deps
 
 DELETE_ON_ERROR: $(LOCK_FILE)
 
-active_project_deps: js_scripts web web_visualizations index.html
+active_project_deps: web web_visualizations index.html
 web: index.html
 	make -j $(CORES) -C $@
-js_scripts:
-	make -j $(CORES) -C js
 web_visualizations:
 	make -j $(CORES) -C web/visualizations
 
@@ -70,18 +68,13 @@ plantuml_jar:
 
 parser: pest_parser_bin wasm_pkg
 
-export: parser js/diagrammer.js js/generate.js scripts/export.sh scripts/display_image.sh
-	make -C export
-
-tests: js_scripts parser plantuml_jar web/editorInteractions.js index.html
+tests: parser plantuml_jar web/editorInteractions.js index.html
 	make -C tests
 
 clean:
 	@rm -f .error
 	@rm -rf build
 	@find scripts -name "*.map" -or -name "*.js" -delete
-	@if [ -d export ]; then make -C export clean; fi
-	@make -C js clean
 	@make -C tests clean
 	@make -C web clean
 	@make -C web/visualizations clean
@@ -94,7 +87,6 @@ checkminiserver:
 jest_test_deps:
 	make -C tests $@
 test: all
-	@chmod u+x ./js/runtests.js
 	make -C tests
 
 watch:

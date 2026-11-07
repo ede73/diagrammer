@@ -37,3 +37,4 @@ tests/**/*.js
 js/*.js
 scripts/*.js
 
+target/

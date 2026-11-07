@@ -1,6 +1,6 @@
 // @ts-check
 
-import { findGeneratorForVisualization, visualizations } from '../js/config.js'
+import { findGeneratorForVisualization, visualizations } from './config.js'
 
 // Various modules operate on UI
 // Provide type safe access here

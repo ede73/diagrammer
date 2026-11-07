@@ -12,7 +12,7 @@ import { type Browser } from 'puppeteer'
 export async function singleElementScreenSnapshot(browser: Browser, elementHtml: string, width: number = 800, height: number = 600) {
   try {
     const page2 = await browser.newPage()
-    await page2.setViewport({ width, height })
+    await page2.setViewport({ width: Math.round(width), height: Math.round(height) })
     await page2.setContent(elementHtml, { waitUntil: 'networkidle0' })
     const screenshot = await page2.screenshot({ type: 'png', fullPage: true }) as Buffer
     await page2.close()

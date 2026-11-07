@@ -1,11 +1,5 @@
 CORES =
 
-GENERATORS_TEST_TSS=$(shell find ./generators -maxdepth 1 -iname "*.ts")
-GENERATORS_TEST_JSS:=$(GENERATORS_TEST_TSS:.ts=.js)
-MODEL_TEST_TSS=$(shell find ./model -maxdepth 1 -iname "*.ts")
-MODEL_TEST_JSS:=$(MODEL_TEST_TSS:.ts=.js)
-PARSER_TEST_TSS=$(shell find ./parser -maxdepth 1 -iname "*.ts")
-PARSER_TEST_JSS:=$(PARSER_TEST_TSS:.ts=.js)
 WEB_TEST_TSS=$(shell find ./web -maxdepth 1 -iname "*.ts")
 WEB_TEST_JSS:=$(WEB_TEST_TSS:.ts=.js)
 
@@ -20,26 +14,13 @@ S=| grep -v -E "(Cannot write file)" || true
 
 all: _test
 
-jest_test_deps: parsertests webtests modeltests generatortests CE.js
-parser/%.js: parser/$.ts
-parsertests: $(PARSER_TEST_JSS)
-web/%.js: parser/$.ts
+jest_test_deps: webtests CE.js
+web/%.js: web/%.ts
 webtests: $(WEB_TEST_JSS)
-model/%.js: parser/$.ts
-modeltests: $(MODEL_TEST_JSS)
-generators/%.js: parser/$.ts
-generatortests: $(GENERATORS_TEST_JSS)
 CE.js: CE.ts
 
  %.js: %.ts
 	@$(TRANSPILE) $< $(S)
-
-testrunner:
-	@-pkill -f "miniserver.js 8777" || true
-	@chmod u+x ../web/miniserver.js
-	@$(SHELL) -c 'cd .. ; ./web/miniserver.js 8777&'
-	@$(SHELL) -c 'cd .. ; ./js/runtests.js webport 8777'
-	@-pkill -f "miniserver.js 8777" || true
 
 checkminiserver:
 	@/bin/echo -e "Make sure miniserver is running for web tests\nYou can start it with: node web/miniserver.js"

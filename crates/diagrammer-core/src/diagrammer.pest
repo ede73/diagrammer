@@ -1,0 +1,131 @@
+// Diagrammer Shadow Grammar in Pest
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }
+
+COLOR = @{ "#" ~ ASCII_HEX_DIGIT{6} }
+VARIABLE = @{ "$(" ~ (!")" ~ ANY)+ ~ ")" }
+INLINE_STRING = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+COMPASS_DIR = @{
+    (^"nw" | ^"ne" | ^"n" | ^"sw" | ^"se" | ^"s" | ^"e" | ^"w")
+    ~ !(ASCII_ALPHANUMERIC | "_")
+}
+COMPASS = @{ ":" ~ COMPASS_DIR }
+LABEL = @{ ";" ~ (!"\n" ~ ANY)* }
+IMAGE = @{ "/" ~ ASCII_ALPHANUMERIC+ ~ ".png" }
+NUMBER = @{ ASCII_DIGIT+ }
+
+SHAPES = @{
+    (^"actor" | ^"beginpoint" | ^"right" | ^"circle" | ^"cloud" | ^"condition" | ^"database" |
+     ^"default" | ^"diamond" | ^"dots" | ^"doublecircle" | ^"ellipse" | ^"endpoint" | ^"input" |
+     ^"loopin" | ^"loopout" | ^"mail" | ^"document" | ^"display" | ^"note" | ^"record" |
+     ^"roundedbox" | ^"square" | ^"left" | ^"loop" | ^"subroutine" | ^"preparation" | ^"rect" | ^"folder")
+    ~ !(ASCII_ALPHANUMERIC | "_")
+}
+
+STYLES = @{
+    (^"dotted" | ^"dashed" | ^"solid" | ^"bold" | ^"rounded" | ^"diagonals" | ^"invis" | ^"singularity")
+    ~ !(ASCII_ALPHANUMERIC | "_")
+}
+
+// Edge symbols (mirroring Jison grammar EVENT token regex)
+EVENT = @{
+    ("<<" | "<" | "|") ~ ("." | "=" | "/" | "-")? ~ (">>" | ">" | "|")?
+  | ("<<" | "<" | "|")? ~ ("." | "=" | "/" | "-")? ~ (">>" | ">" | "|")
+  | ("." | "=" | "/" | "-")
+}
+
+NAME = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* ~ (":" ~ !COMPASS_DIR ~ (ASCII_ALPHANUMERIC | "_")*)? }
+
+color_or_variable = { COLOR | VARIABLE }
+shape_or_variable = { SHAPES | VARIABLE }
+
+landscape = @{ (^"landscape" | ^"horizontal" | ^"lr") ~ !(ASCII_ALPHANUMERIC | "_") }
+portrait = @{ (^"portrait" | ^"vertical" | ^"td") ~ !(ASCII_ALPHANUMERIC | "_") }
+VISUALIZER_KW = @{ ^"visualizer" ~ !(ASCII_ALPHANUMERIC | "_") }
+visualizer = { VISUALIZER_KW ~ NAME }
+START_KW = @{ ^"start" ~ !(ASCII_ALPHANUMERIC | "_") }
+start = { START_KW ~ NAME }
+EQUAL_KW = @{ ^"equal" ~ !(ASCII_ALPHANUMERIC | "_") }
+equal = { EQUAL_KW ~ vertex_target }
+SHAPE_KW = @{ ^"shape" ~ !(ASCII_ALPHANUMERIC | "_") }
+shape_decl = { SHAPE_KW ~ shape_or_variable }
+
+edge_color = { ^"edge" ~ ^"color" ~ color_or_variable }
+edge_text_color = { ^"edge" ~ (^"textcolor" | ^"text" ~ ^"color") ~ color_or_variable }
+vertex_color = { ^"vertex" ~ ^"color" ~ color_or_variable }
+vertex_text_color = { ^"vertex" ~ (^"textcolor" | ^"text" ~ ^"color") ~ color_or_variable }
+group_color = { ^"group" ~ ^"color" ~ color_or_variable }
+
+IF_KW = @{ ^"if" ~ !(ASCII_ALPHANUMERIC | "_") }
+if_stmt = { IF_KW ~ (!^"then" ~ ANY)+ ~ ^"then" }
+elseif_stmt = { ^"else" ~ ^"if" ~ (!^"then" ~ ANY)+ ~ ^"then" }
+ELSE_KW = @{ ^"else" ~ !(ASCII_ALPHANUMERIC | "_") }
+else_stmt = { ELSE_KW }
+endif_stmt = { ^"end" ~ ^"if" }
+WHILE_KW = @{ ^"while" ~ !(ASCII_ALPHANUMERIC | "_") }
+LINE_REST = @{ (!"\n" ~ ANY)+ }
+while_stmt = { WHILE_KW ~ LINE_REST }
+endwhile_stmt = { ^"end" ~ ^"while" }
+DO_KW = @{ ^"do" ~ !(ASCII_ALPHANUMERIC | "_") }
+do_stmt = { DO_KW }
+UNTIL_KW = @{ ^"until" ~ !(ASCII_ALPHANUMERIC | "_") }
+until_stmt = { UNTIL_KW ~ LINE_REST }
+
+SAME_LINE_SPACE = _{ " " | "\t" }
+GROUP_KW = @{ ^"group" ~ !(ASCII_ALPHANUMERIC | "_") }
+group_start = ${ (GROUP_KW | "{") ~ SAME_LINE_SPACE* ~ NAME? ~ SAME_LINE_SPACE* ~ color_or_variable? ~ SAME_LINE_SPACE* ~ LABEL? }
+group_end = { GROUP_KW ~ ^"end" | "}" }
+
+vertex_attrs = {
+    STYLES? ~ SHAPES? ~ NAME
+    ~ (COMPASS ~ color_or_variable? | color_or_variable ~ COMPASS?)?
+    ~ IMAGE?
+}
+
+list_item = { INLINE_STRING? ~ vertex_attrs }
+vertex_list = { list_item ~ ("," ~ list_item)+ }
+
+inner_graph = { "(" ~ statement* ~ ")" }
+
+vertex_target = {
+    inner_graph
+  | vertex_list
+  | list_item
+}
+
+edge_connector = { COMPASS? ~ EVENT ~ COMPASS? ~ color_or_variable? ~ INLINE_STRING? }
+
+event_chain = {
+    vertex_target ~ (edge_connector ~ vertex_target)+ ~ LABEL?
+  | vertex_target ~ LABEL
+}
+
+statement = {
+    landscape
+  | portrait
+  | visualizer
+  | start
+  | equal
+  | shape_decl
+  | edge_color
+  | edge_text_color
+  | vertex_color
+  | vertex_text_color
+  | group_color
+  | if_stmt
+  | elseif_stmt
+  | else_stmt
+  | endif_stmt
+  | while_stmt
+  | endwhile_stmt
+  | do_stmt
+  | until_stmt
+  | group_start
+  | group_end
+  | VARIABLE
+  | event_chain
+  | vertex_target
+}
+
+diagram = { SOI ~ statement* ~ EOI }

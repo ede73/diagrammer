@@ -56,7 +56,19 @@ Jison natively outputs CommonJS, but the project is configured as `"type": "modu
 ### 3.4 Dual Runtime: Node.js and Browser ESM
 Files in [`js/config.ts`](file:///Users/ede/src/diagrammer/js/config.ts), [`model/`](file:///Users/ede/src/diagrammer/model), [`generators/`](file:///Users/ede/src/diagrammer/generators), and [`web/visualizations/`](file:///Users/ede/src/diagrammer/web/visualizations) are loaded both in Node.js (CLI, tests) and in the browser (via `<script type="importmap">` in [`index.html`](file:///Users/ede/src/diagrammer/index.html)):
 - Static imports of Node built-ins (`fs`, `path`) would crash the browser module loader.
-- Files needing Node APIs must use guarded checks (`if (typeof window !== 'undefined')`) or dynamic imports (`(await import('fs')).default`).
+### 3.5 Parser Backend Toggle (Jison vs Pest)
+The parser layer supports two interchangeable backends: the original Jison BNF parser and the new Rust Pest PEG shadow parser (`crates/diagrammer-core`):
+- **Default**: The default backend remains 100% original **Jison** (`PARSER_BACKEND=jison`).
+- **Build-Time Toggle**: Set `PARSER_BACKEND=pest` when building:
+  ```bash
+  PARSER_BACKEND=pest make parser
+  ```
+  This automatically compiles the Rust parser binary (`target/release/diagrammer_pest_parse`) and configures `build/diagrammer_parser.js` to use Pest by default.
+- **Runtime Toggle**: Override on the fly for any Node command via environment variable without rebuilding:
+  ```bash
+  DIAGRAMMER_PARSER=pest node js/generate.js tests/test_inputs/state.txt ast
+  ```
+- **Parity Status**: The Pest shadow parser passes 100% (53/53) of the reference AST parity tests against Jison.
 
 ---
 
@@ -116,6 +128,19 @@ until loop_condition_met
   - `EDGETEXT_COLOR <color|$(var)>`
   - `GROUP_COLOR <color|$(var)>`
 
+### 5.3 Grouping Semantics: Edge Broadcasting `()` vs Containment `{}`
+- **`()` is purely Edge Distribution / Broadcasting syntactic sugar**:
+  - `(a, b) > c` does **not** create a containment container, boundary box, or layout frame.
+  - Nodes `a` and `b` remain wherever they were already declared in the canvas or hierarchy.
+  - Follows strict commutative distribution rules:
+    - `(a, b) > c` $\iff$ `a > c; b > c`
+    - `c < (a, b)` $\iff$ `c < a; c < b` $\iff$ `a > c; b > c`
+    - `(a, b) > (c, d)` $\iff$ `a > c; a > d; b > c; b > d`
+  - The AST structure is preserved with zero breaking changes, expanding edges cleanly without creating unintended containment constraints.
+- **`GROUP <name>` and `{ ... }` are Structural Containment**:
+  - These define actual visual containers (`GraphGroup` / `GraphContainer`) with visual boundary frames, coordinate boundaries, and scoped defaults.
+
+
 ---
 
 ## 6. Testing & Regression Harness Details
@@ -133,3 +158,68 @@ until loop_condition_met
 3. **External Dependencies for Full Test Suite**:
    - [`ext/plantuml.jar`](file:///Users/ede/src/diagrammer/ext) (gitignored; required for PlantUML tests).
    - Local font [`fonts/DejaVuSans.ttf`](file:///Users/ede/src/diagrammer/fonts/DejaVuSans.ttf) is used by Python `*diag` tools to prevent font substitution mismatch.
+
+---
+
+## 7. Known Issues & Resolved Fixes
+
+- [x] **Anonymous group edge expansion `(b,c)>a` and `(b,c)<a` (RESOLVED)**:
+  - **Issue**: Previously, LHS anonymous groups `(b,c)>a` produced `1->a;` and `(b,c)<a` produced `a->1;`.
+  - **Fix**: In [`builder.rs`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/src/builder.rs), `current_outgoing` now preserves the inner graph's member `roots` (instead of the group ID), and `elements[0].inner_edges` is retained before chain evaluation.
+  - **Outcome**: Both forward and reverse group chaining expand completely and symmetrically:
+    - `(b,c)>a` produces `subgraph cluster_1 { b; c; }` and `b->a; c->a;`
+    - `(b,c)<a` produces `subgraph cluster_1 { b; c; }` and `a->b; a->c;` (fixing the legacy Jison bug where `c` was dropped)
+    - Full cartesian chains like `(b,c)<(a,d)` link all 4 pairs: `a->b; d->b; a->c; d->c;`.
+  - **Expected behavior** (from legacy Jison for `(b,c)>a`):
+    ```dot
+    digraph {
+        compound=true;
+        rankdir=TD;
+        subgraph cluster_1 {
+            graph[ style=invis ];
+            b;
+            c;
+        }//end of 1 
+        a;
+        //links start
+        b->a;
+        c->a;
+    }
+    ```
+  - **Expected behavior** (from legacy Jison for `(b,c)<a`):
+    ```dot
+    digraph {
+        compound=true;
+        rankdir=TD;
+        subgraph cluster_1 {
+            graph[ style=invis ];
+            b;
+            c;
+        }//end of 1 
+        a;
+        //links start
+        a->b;
+        a->c;
+    }
+    ```
+
+---
+
+## 6. Full Rust Core & WebAssembly Migration
+
+As of the final transition to Full Rust mode:
+1. **Decommissioned Legacy Layers**:
+   - `grammar/`: Legacy Jison parser and lexer removed.
+   - `model/`: Legacy TypeScript model and GraphCanvas removed.
+   - `generators/`: Legacy TypeScript generators removed.
+   - `tests/generators/`, `tests/model/`, `tests/parser/`: Legacy TS unit tests retired in favor of native Rust unit and parity test suites.
+2. **Unified Rust Core (`crates/diagrammer-core`)**:
+   - Compiles natively to `diagrammer_pest_parse` CLI binary.
+   - Compiles to WebAssembly (`build/wasm/diagrammer_core_bg.wasm`) with web-target bindings using `wasm-pack`.
+   - Runs 100% client-side in the browser with zero server roundtrip for parsing/generation, and falls back to miniserver `/parse` if WebAssembly is not supported.
+3. **Parity & Test Status**:
+   - All 9 Rust unit tests pass.
+   - Rust AST parity across all 53 test fixtures passes 100%.
+   - Generator parity across all 12 generators passes 100%.
+   - Jest / Puppeteer browser tests pass 100% (15/15 tests, 7/7 snapshots).
+   - CLI generation and visualizer execution pass cleanly across all diagram formats.

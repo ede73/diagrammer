@@ -11,8 +11,6 @@ ifeq ($(UNAME_S),Darwin)
 	INFIX = ''
 endif
 
-export PATH := $(CURDIR)/node_modules/.bin:$(PATH)
-include Makefile.commands
 LOCK_FILE=.lock
 BUILD_STARTED_FILE=.build_started
 
@@ -44,14 +42,6 @@ active_project_deps: index.html
 index.html : index_template.html tests/test_inputs/*.txt web/visualizations/*.js
 	@awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs/*.txt | sort |sed 's,^tests/test_inputs/,,g'" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations/visualize*.js | sort" | getline var) printf("<script type=\"module\" src=\"%s\"></script>\n",var);next}{print $0}' $< >$@
 
-fixall:
-	$(ESLINT) web & \
-	$(ESLINT) tests & \
-	wait
-	make -C tests testrunner
-
- %.js: %.ts
-	@$(TRANSPILE) $< $(S)
 
 node_modules: package.json
 	npm install

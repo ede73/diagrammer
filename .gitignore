@@ -25,14 +25,5 @@ puppeteer_gojs.js
 playground
 js/mscgen
 
-model/*.js
-generators/*.js
-tests/parser/*.js
-tests/web/*.js
-**/*.map
-
-tests/**/*.js
-js/*.js
-scripts/*.js
 
 target/

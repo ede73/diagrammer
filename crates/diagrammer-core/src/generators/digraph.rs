@@ -87,6 +87,10 @@ impl Generator for DiGraph {
                 attrs.push(format!("fontcolor=\"{}\"", tc));
             }
 
+            if let Some(ref u) = edge.url {
+                attrs.push(format!("URL=\"{}\"", u));
+            }
+
             // Arrow tails/heads
             let left_arrow = edge.left_arrow_type();
             let right_arrow = edge.right_arrow_type();
@@ -233,6 +237,14 @@ fn process_a_vertex(formatter: &mut OutputFormatter, obj: &GraphObject) {
 
     if let Some(s) = obj.get_style() {
         styles.push(s.to_string());
+    }
+
+    if let Some(url) = obj.get_url() {
+        nattrs.push(format!("URL=\"{}\"", url));
+    }
+
+    if let Some(tc) = obj.get_textcolor() {
+        nattrs.push(format!("fontcolor=\"{}\"", tc));
     }
 
     if !styles.is_empty() {

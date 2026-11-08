@@ -44,6 +44,10 @@ pub struct VertexRef {
     pub style: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub textcolor: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
 }
 
 impl VertexRef {
@@ -55,6 +59,8 @@ impl VertexRef {
             image: None,
             style: None,
             color: None,
+            textcolor: None,
+            url: None,
         }
     }
 }
@@ -81,6 +87,8 @@ pub struct EdgeRef {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub textcolor: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lcompass: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rcompass: Option<String>,
@@ -99,6 +107,7 @@ impl EdgeRef {
             label: None,
             color: None,
             textcolor: None,
+            url: None,
             lcompass: None,
             rcompass: None,
             parent: None,
@@ -195,7 +204,18 @@ impl GraphObject {
         match self {
             GraphObject::Group(g) => g.textcolor.as_deref(),
             GraphObject::Vertex(v) => v.textcolor.as_deref(),
+            GraphObject::VertexRef { vertex } => vertex.textcolor.as_deref(),
             GraphObject::Edge { edge } => edge.textcolor.as_deref(),
+            _ => None,
+        }
+    }
+
+    pub fn get_url(&self) -> Option<&str> {
+        match self {
+            GraphObject::Group(_) => None,
+            GraphObject::Vertex(v) => v.url.as_deref(),
+            GraphObject::VertexRef { vertex } => vertex.url.as_deref(),
+            GraphObject::Edge { edge } => edge.url.as_deref(),
             _ => None,
         }
     }

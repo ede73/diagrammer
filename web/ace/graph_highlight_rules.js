@@ -17,7 +17,7 @@ var JsonHighlightRules = function() {
                 regex : /actor|beginpoint|box|circle|cloud|condition|database|default|diamond|dots|doublecircle|ellipse|endpoint|input|loopin|loopout|mail|minidiamond|minisquare|note|record|roundedbox|square|terminator|loop|loopend|loopstart|rect|rectangle/
             }, {
                 token : "keyword.control",
-                regex : /\{|\}|group end|equal|portait|landscape|lr|td|horizontal|vertical|generator|visualizer|start|group|shape/
+                regex : /\{|\}|group end|equal|portait|landscape|lr|td|horizontal|vertical|generator|visualizer|start|group|shape|theme|layout|include/
             }, {
                 /*styles*/
                 token : "keyword.other",

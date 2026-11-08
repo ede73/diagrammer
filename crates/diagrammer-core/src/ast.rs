@@ -413,6 +413,118 @@ impl GraphGroup {
     }
 }
 
+/// Theme configuration block in Diagrammer DSL (`theme { ... }`)
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ThemeConfig {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub font: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fontsize: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub background: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub vertexcolor: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub vertextextcolor: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub edgecolor: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub edgetextcolor: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub groupcolor: Option<String>,
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    pub properties: HashMap<String, String>,
+}
+
+impl ThemeConfig {
+    pub fn get(&self, key: &str) -> Option<&str> {
+        match key.to_lowercase().as_str() {
+            "font" | "font-family" | "fontname" => self.font.as_deref(),
+            "fontsize" | "font-size" | "size" => self.fontsize.as_deref(),
+            "color" | "textcolor" | "fontcolor" => self.color.as_deref(),
+            "background" | "bgcolor" | "bg" | "canvas" => self.background.as_deref(),
+            "vertexcolor" | "vertex-color" | "nodecolor" | "node-color" | "fill" => self.vertexcolor.as_deref(),
+            "vertextextcolor" | "vertex-textcolor" | "nodetextcolor" | "node-textcolor" => self.vertextextcolor.as_deref(),
+            "edgecolor" | "edge-color" | "linecolor" | "line-color" | "stroke" => self.edgecolor.as_deref(),
+            "edgetextcolor" | "edge-textcolor" => self.edgetextcolor.as_deref(),
+            "groupcolor" | "group-color" => self.groupcolor.as_deref(),
+            other => self.properties.get(other).map(|s| s.as_str()),
+        }
+    }
+
+    pub fn set(&mut self, key: &str, value: impl Into<String>) {
+        let v = value.into();
+        match key.to_lowercase().as_str() {
+            "font" | "font-family" | "fontname" => self.font = Some(v),
+            "fontsize" | "font-size" | "size" => self.fontsize = Some(v),
+            "color" | "textcolor" | "fontcolor" => self.color = Some(v),
+            "background" | "bgcolor" | "bg" | "canvas" => self.background = Some(v),
+            "vertexcolor" | "vertex-color" | "nodecolor" | "node-color" | "fill" => self.vertexcolor = Some(v),
+            "vertextextcolor" | "vertex-textcolor" | "nodetextcolor" | "node-textcolor" => self.vertextextcolor = Some(v),
+            "edgecolor" | "edge-color" | "linecolor" | "line-color" | "stroke" => self.edgecolor = Some(v),
+            "edgetextcolor" | "edge-textcolor" => self.edgetextcolor = Some(v),
+            "groupcolor" | "group-color" => self.groupcolor = Some(v),
+            _ => {
+                self.properties.insert(key.to_string(), v);
+            }
+        }
+    }
+}
+
+/// Layout configuration block in Diagrammer DSL (`layout { ... }`)
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LayoutConfig {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub engine: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub direction: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub padding: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub nodesep: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ranksep: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub edgesize: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub margin: Option<String>,
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    pub properties: HashMap<String, String>,
+}
+
+impl LayoutConfig {
+    pub fn get(&self, key: &str) -> Option<&str> {
+        match key.to_lowercase().as_str() {
+            "engine" | "visualizer" | "layout" => self.engine.as_deref(),
+            "direction" | "dir" | "orientation" => self.direction.as_deref(),
+            "padding" | "node-padding" | "nodepadding" => self.padding.as_deref(),
+            "nodesep" | "node-sep" | "nodeseparation" => self.nodesep.as_deref(),
+            "ranksep" | "rank-sep" | "rankseparation" => self.ranksep.as_deref(),
+            "edgesize" | "edge-size" | "edgewidth" | "edge-width" => self.edgesize.as_deref(),
+            "margin" => self.margin.as_deref(),
+            other => self.properties.get(other).map(|s| s.as_str()),
+        }
+    }
+
+    pub fn set(&mut self, key: &str, value: impl Into<String>) {
+        let v = value.into();
+        match key.to_lowercase().as_str() {
+            "engine" | "visualizer" | "layout" => self.engine = Some(v),
+            "direction" | "dir" | "orientation" => self.direction = Some(v),
+            "padding" | "node-padding" | "nodepadding" => self.padding = Some(v),
+            "nodesep" | "node-sep" | "nodeseparation" => self.nodesep = Some(v),
+            "ranksep" | "rank-sep" | "rankseparation" => self.ranksep = Some(v),
+            "edgesize" | "edge-size" | "edgewidth" | "edge-width" => self.edgesize = Some(v),
+            "margin" => self.margin = Some(v),
+            _ => {
+                self.properties.insert(key.to_string(), v);
+            }
+        }
+    }
+}
+
 /// Parsing context state captured during parse
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct ParsingContext {
@@ -448,6 +560,12 @@ pub struct GraphCanvas {
     pub start: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub shape: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub theme: Option<ThemeConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub layout: Option<LayoutConfig>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub includes: Vec<String>,
     #[serde(rename = "parsingContext", skip_serializing_if = "Option::is_none")]
     pub parsing_context: Option<ParsingContext>,
 }
@@ -465,6 +583,9 @@ impl Default for GraphCanvas {
             direction: None,
             start: None,
             shape: None,
+            theme: None,
+            layout: None,
+            includes: Vec::new(),
             parsing_context: None,
         }
     }

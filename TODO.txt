@@ -21,16 +21,16 @@ ACTIVE ROADMAP & CHAT TASKS
       * Quote and whitespace normalization for inline strings.
     - Contextual color defaults propagation: ensure `VERTEX COLOR`, `VERTEX TEXTCOLOR`, `EDGE COLOR`, `EDGE TEXTCOLOR`, and `GROUP COLOR` properly apply to objects.
     - Add `colors.txt` and `url.txt` to golden parity regression tests to guarantee 0 regressions.
-[ ] Diagram Theming & Dark Mode Color Translation Strategy:
+[x] Diagram Theming & Dark Mode Color Translation Strategy:
     - [x] Immediate step: Automatic Perceptual Color Adaptation for dark mode [Landed]
       * Perceptual color transformation (OKLab / CIELAB lightness scaling + chroma attenuation, similar to browser dark mode extensions).
       * Ensures user-defined RGB colors (e.g. #FF0000, dark text) maintain >= 4.5:1 contrast against dark canvases and do not crust or vibrate.
-    - [ ] Language DSL Extension: `theme { ... }` block
+    - [x] Language DSL Extension: `theme { ... }` block [Landed]
       * Declarative block for theme rules: fonts, palette colors, font sizes, stroke colors, dark/light theme tokens.
-    - [ ] Language DSL Extension: `layout { ... }` block
+    - [x] Language DSL Extension: `layout { ... }` block [Landed]
       * Declarative layout tuning: node padding, rank separation, node separation, edge size/weight, margins (where applicable per engine).
-    - [ ] Language DSL Extension: `include "..."` directive
-      * External file inclusion mechanism so graphs can load shared theme/layout presets (CLI, Web, or bundled defaults) without inundating the diagram source with style boilerplate.
+    - [x] Language DSL Extension: `include "..."` directive [Landed]
+      * External file inclusion mechanism so graphs can load shared theme/layout presets (CLI, Web, or bundled defaults like `theme/dark`, `theme/nord`, `layout/compact`) without inundating the diagram source with style boilerplate.
 [ ] First-party Sequence Engine extensions: lifeline activations ([ / ]), notes (note right of A), frames (loop / alt / par)
 [ ] First-party Hierarchical DAG Layout Engine in pure Rust (Sugiyama framework to replace Graphviz dot)
 [ ] Language & Grammar extensions: flow constructs (while, for, alt), rich arrowheads (|->, <<->), multi-exit subgraphs

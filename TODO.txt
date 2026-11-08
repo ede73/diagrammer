@@ -8,6 +8,7 @@ ACTIVE ROADMAP & CHAT TASKS
 [ ] First-party Sequence Engine extensions: lifeline activations ([ / ]), notes (note right of A), frames (loop / alt / par)
 [ ] First-party Hierarchical DAG Layout Engine in pure Rust (Sugiyama framework to replace Graphviz dot)
 [ ] Language & Grammar extensions: flow constructs (while, for, alt), rich arrowheads (|->, <<->), multi-exit subgraphs
+[ ] Blockdiag generator consolidation: analyze generator code (blockdiag, actdiag, nwdiag, seqdiag) to consolidate common AST traversal/syntax into unified generator with multiple target visualizers
 [ ] Modularize into independent Rust crates (diagrammer-parser, diagrammer-ast, diagrammer-generators, diagrammer-layout, diagrammer-cli)
 ================================================================================
 

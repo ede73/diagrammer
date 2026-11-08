@@ -15,10 +15,10 @@
     "jest-puppeteer": "^9.0.0",
     "jquery": "^3.6.3",
     "mscgenjs": "^6.0.2",
-    "puppeteer": "^23.0.1",
+    "puppeteer": "^25.16.0",
     "viz.js": "^2.1.2"
   },
   "dependencies": {
-    "@mermaid-js/mermaid-cli": "^11.6.0"
+    "@mermaid-js/mermaid-cli": "^12.2.0"
   }
 }

@@ -228,3 +228,13 @@ All browser assets and static resources are organized under the [`web/`](file://
 - `web/index.html`: Generated application entry point (`make all`).
 - Dev server (`./diagrammer serve`) serves `web/index.html` at `/` and `/index.html`, with transparent fallback to `web/*` for static web assets.
 
+---
+
+## 8. Development & Tooling Scripts (`scripts/`)
+
+- `scripts/watch.sh`: Lightweight, cross-platform file watcher (macOS / Linux) that monitors Rust core sources and `web/index_template.html`, rebuilding with `make all` on changes. Invoked via `make watch`. Replaced legacy `watchgrammar.sh` and Linux-only `watch_and_make.sh`.
+- `scripts/setup.sh`: Streamlined environment setup script that verifies core prerequisites (Rust/Cargo, wasm-pack, Make) and interactively installs optional external diagramming engines (Graphviz, mscgen, PlantUML, Python diag tools) for macOS (`brew`) and Linux (`apt`/`pip`).
+- `scripts/display_image.sh`: Cross-platform utility for previewing rendered image files.
+- `scripts/install-hooks.sh` & `scripts/pre-commit.sh`: Optional git hook helpers.
+
+

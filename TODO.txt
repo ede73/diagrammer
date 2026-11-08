@@ -9,7 +9,7 @@ ACTIVE ROADMAP & CHAT TASKS
 [ ] First-party Sequence Engine extensions: lifeline activations ([ / ]), notes (note right of A), frames (loop / alt / par)
 [ ] First-party Hierarchical DAG Layout Engine in pure Rust (Sugiyama framework to replace Graphviz dot)
 [ ] Language & Grammar extensions: flow constructs (while, for, alt), rich arrowheads (|->, <<->), multi-exit subgraphs
-[ ] Graceful Group Degradation for Group-Less Visualizers: when target visualizer lacks cluster/group support, flatten group containers but draw all inner nodes and edges; omit group-to-group links or convert to notes/entrance-exit links
+[x] Graceful Group Degradation for Group-Less Visualizers: flatten all groups (including nested) so inner vertices and vertex-to-vertex edges (e.g. b>e across groups) render; ignore/omit container-level links (GROUP-->AnotherGroup) when visualizer has no group concept [Landed]
 [ ] Blockdiag generator consolidation: analyze generator code (blockdiag, actdiag, nwdiag, seqdiag) to consolidate common AST traversal/syntax into unified generator with multiple target visualizers
 [ ] Modularize into independent Rust crates (diagrammer-parser, diagrammer-ast, diagrammer-generators, diagrammer-layout, diagrammer-cli)
 ================================================================================

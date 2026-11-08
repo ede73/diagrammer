@@ -299,6 +299,18 @@ fn handle_connection(stream: &mut TcpStream) -> io::Result<()> {
         }
     }
 
+    let cors_headers = "Access-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: access-control-allow-origin, content-type\r\nCache-Control: no-cache, no-store, must-revalidate\r\n";
+
+    const MAX_PAYLOAD_SIZE: usize = 10 * 1024 * 1024; // 10 MB maximum request payload
+    if content_length > MAX_PAYLOAD_SIZE {
+        let resp = format!(
+            "HTTP/1.1 413 Payload Too Large\r\n{}Content-Type: text/plain\r\nContent-Length: 17\r\n\r\nPayload Too Large",
+            cors_headers
+        );
+        stream.write_all(resp.as_bytes())?;
+        return Ok(());
+    }
+
     let mut body = vec![0u8; content_length];
     if content_length > 0 {
         reader.read_exact(&mut body)?;
@@ -316,8 +328,6 @@ fn handle_connection(stream: &mut TcpStream) -> io::Result<()> {
         }
     }
 
-    let cors_headers = "Access-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: access-control-allow-origin, content-type\r\nCache-Control: no-cache, no-store, must-revalidate\r\n";
-
     if method == "OPTIONS" {
         let resp = format!("HTTP/1.1 200 OK\r\n{}Content-Length: 0\r\n\r\n", cors_headers);
         stream.write_all(resp.as_bytes())?;
@@ -326,37 +336,28 @@ fn handle_connection(stream: &mut TcpStream) -> io::Result<()> {
 
     if method == "POST" && path == "/parse" {
         let body_str = String::from_utf8_lossy(&body);
-        let canvas_res = AstBuilder::new().build(&body_str);
-        match canvas_res {
-            Ok(canvas) => match make_generator(&visualizer) {
-                Some(generator) => {
-                    let out = generator.generate(&canvas);
-                    let resp = format!(
-                        "HTTP/1.1 200 OK\r\n{}Content-Type: text/plain; charset=utf-8\r\nContent-Length: {}\r\n\r\n{}",
-                        cors_headers,
-                        out.len(),
-                        out
-                    );
-                    stream.write_all(resp.as_bytes())?;
-                }
-                None => {
-                    let err = format!("Unknown generator: {}", visualizer);
-                    let resp = format!(
-                        "HTTP/1.1 400 Bad Request\r\n{}Content-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",
-                        cors_headers,
-                        err.len(),
-                        err
-                    );
-                    stream.write_all(resp.as_bytes())?;
-                }
-            },
-            Err(e) => {
-                let err = format!("Parse error: {}", e);
+        match diagrammer_core::parse_and_generate(&body_str, &visualizer) {
+            Ok(out) => {
                 let resp = format!(
-                    "HTTP/1.1 500 Internal Server Error\r\n{}Content-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",
+                    "HTTP/1.1 200 OK\r\n{}Content-Type: text/plain; charset=utf-8\r\nContent-Length: {}\r\n\r\n{}",
                     cors_headers,
-                    err.len(),
-                    err
+                    out.len(),
+                    out
+                );
+                stream.write_all(resp.as_bytes())?;
+            }
+            Err(e) => {
+                let status = if e.starts_with("Unknown visualizer") {
+                    "400 Bad Request"
+                } else {
+                    "500 Internal Server Error"
+                };
+                let resp = format!(
+                    "HTTP/1.1 {}\r\n{}Content-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",
+                    status,
+                    cors_headers,
+                    e.len(),
+                    e
                 );
                 stream.write_all(resp.as_bytes())?;
             }

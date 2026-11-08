@@ -8,13 +8,17 @@ import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilf
 import { visualizeSankey } from './visualizations/visualizeSankey.js';
 import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
 export class Visualization {
-    constructor(name, menuName, generator, visualization, cli) {
+    constructor(name, menuName, generator, visualization, cli, metadata = {}) {
         this.name = name;
         this.menuName = menuName;
         this.generator = generator;
         this.visualization = visualization;
         this.cli = cli;
         this.webVisualizer = visualization !== undefined;
+        this.family = metadata.family || generator;
+        this.engine = metadata.engine || name;
+        this.runtime = visualization !== undefined ? 'web' : 'cli';
+        this.description = metadata.description || '';
     }
 }
 let localRepoFont;
@@ -65,65 +69,69 @@ const buggyDiags = (command, format, outputFile) => {
     }
 };
 const _visualizations = [
-    new Visualization('actdiag', 'Activity Diagram(cli)', 'actdiag', undefined, (format, outputFile) => buggyDiags('actdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-')),
-    new Visualization('ast', 'AST(JSON only)', 'ast'),
-    new Visualization('ast_record', 'Abstract Syntax Tree(Record)', 'ast_record', async (g) => {
-        await visualizeGraphviz(g, 'dot');
-    }),
-    new Visualization('blockdiag', 'Block Diagram(cli)', 'blockdiag', undefined, (format, outputFile) => buggyDiags('blockdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-')),
-    new Visualization('dot', 'Graphviz - dot(www/cli)', 'digraph', async (g) => {
+    new Visualization('dot', 'Graphviz: dot (Hierarchical)', 'digraph', async (g) => {
         await visualizeGraphviz(g, 'dot');
     }, (format) => [
         'dot',
         '-q',
         `-T${format}`
-    ]),
-    new Visualization('fdp', 'Graphviz - fdp(www/cli)', 'digraph', async (g) => {
+    ], { family: 'Graphviz', engine: 'dot', description: 'Hierarchical DAG layout' }),
+    new Visualization('fdp', 'Graphviz: fdp (Force-directed)', 'digraph', async (g) => {
         await visualizeGraphviz(g, 'fdp');
     }, (format) => [
         'fdp',
         '-q',
         `-T${format}`
-    ]),
-    new Visualization('neato', 'Graphviz - neato(www/cli)', 'digraph', async (g) => {
+    ], { family: 'Graphviz', engine: 'fdp', description: 'Force-directed spring model' }),
+    new Visualization('neato', 'Graphviz: neato (Spring model)', 'digraph', async (g) => {
         await visualizeGraphviz(g, 'neato');
     }, (format) => [
         'neato',
         '-q',
         `-T${format}`
-    ]),
-    new Visualization('osage', 'Graphviz - osage(www/cli)', 'digraph', async (g) => {
+    ], { family: 'Graphviz', engine: 'neato', description: 'Spring model layout' }),
+    new Visualization('osage', 'Graphviz: osage (Pack array)', 'digraph', async (g) => {
         await visualizeGraphviz(g, 'osage');
     }, (format) => [
         'osage',
         '-q',
         `-T${format}`
-    ]),
-    new Visualization('twopi', 'Graphviz - twopi(www/cli)', 'digraph', async (g) => {
+    ], { family: 'Graphviz', engine: 'osage', description: 'Array/pack clustered layout' }),
+    new Visualization('twopi', 'Graphviz: twopi (Radial)', 'digraph', async (g) => {
         await visualizeGraphviz(g, 'twopi');
     }, (format) => [
         'twopi',
         '-q',
         `-T${format}`
-    ]),
-    new Visualization('sfdp', 'Graphviz - sfdp(cli)', 'digraph', undefined, (format) => [
+    ], { family: 'Graphviz', engine: 'twopi', description: 'Radial layout' }),
+    new Visualization('sfdp', 'Graphviz: sfdp [CLI]', 'digraph', undefined, (format) => [
         'sfdp',
         '-q',
         `-T${format}`
-    ]),
-    new Visualization('layerbands', 'LayerBands(GoJS)', 'layerbands', visualizeLayerBands),
-    new Visualization('mscgen', 'MSCGen(www/cli)', 'mscgen', visualizeMscGen, (format) => [
+    ], { family: 'Graphviz', engine: 'sfdp', description: 'Scalable force-directed (CLI only)' }),
+
+    new Visualization('reingoldtilford', 'D3.js: Reingold-Tilford (Tree)', 'dendrogram', visualizeReingoldTilford, undefined, { family: 'D3.js', engine: 'Reingold-Tilford', description: 'Tidy tree hierarchy' }),
+    new Visualization('radialdendrogram', 'D3.js: Radial Dendrogram', 'dendrogram', visualizeRadialDendrogram, undefined, { family: 'D3.js', engine: 'Radial Dendrogram', description: 'Radial circular tree' }),
+    new Visualization('circlepacked', 'D3.js: Circle Packed', 'dendrogram', visualizeCirclePacked, undefined, { family: 'D3.js', engine: 'Circle Packed', description: 'Nested enclosure circles' }),
+    new Visualization('sankey', 'D3.js: Sankey (Flow)', 'sankey', visualizeSankey, undefined, { family: 'D3.js', engine: 'Sankey', description: 'Flow and distribution diagram' }),
+
+    new Visualization('umlclass', 'GoJS: UML Class Diagram', 'umlclass', visualizeUmlClass, undefined, { family: 'GoJS', engine: 'UMLClass', description: 'Class hierarchy and methods' }),
+    new Visualization('layerbands', 'GoJS: LayerBands (Swimlanes)', 'layerbands', visualizeLayerBands, undefined, { family: 'GoJS', engine: 'LayerBands', description: 'Layered swimlane bands' }),
+    new Visualization('parsetree', 'GoJS: ParseTree', 'parsetree', visualizeParseTree, undefined, { family: 'GoJS', engine: 'ParseTree', description: 'Visual parse tree' }),
+
+    new Visualization('mscgen', 'MSCGen: Message Sequence Chart', 'mscgen', visualizeMscGen, (format) => [
         'mscgen',
         '-i-',
         '-o-',
         `-T${format}`
-    ]),
-    new Visualization('nwdiag', 'Network Diagram(cli)', 'nwdiag', undefined, (format, outputFile) => buggyDiags('nwdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-')),
-    new Visualization('parsetree', 'ParseTree(GoJS)', 'parsetree', visualizeParseTree),
-    new Visualization('circlepacked', 'Circle packed', 'dendrogram', visualizeCirclePacked),
-    new Visualization('radialdendrogram', 'Radial Dendrogram', 'dendrogram', visualizeRadialDendrogram),
-    new Visualization('reingoldtilford', 'Reingold-Tilford', 'dendrogram', visualizeReingoldTilford),
-    new Visualization('plantuml_sequence', 'PlantUML Sequence Diagram(cli)', 'plantuml_sequence', undefined, (format) => [
+    ], { family: 'MSCGen', engine: 'mscgenjs', description: 'Message Sequence Chart' }),
+
+    new Visualization('actdiag', 'Blockdiag: Activity Diagram [CLI]', 'actdiag', undefined, (format, outputFile) => buggyDiags('actdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'actdiag', description: 'Activity diagram (Python CLI)' }),
+    new Visualization('blockdiag', 'Blockdiag: Block Diagram [CLI]', 'blockdiag', undefined, (format, outputFile) => buggyDiags('blockdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'blockdiag', description: 'Block diagram (Python CLI)' }),
+    new Visualization('nwdiag', 'Blockdiag: Network Diagram [CLI]', 'nwdiag', undefined, (format, outputFile) => buggyDiags('nwdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'nwdiag', description: 'Network diagram (Python CLI)' }),
+    new Visualization('seqdiag', 'Blockdiag: Sequence Diagram [CLI]', 'seqdiag', undefined, (format, outputFile) => buggyDiags('seqdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'seqdiag', description: 'Sequence diagram (Python CLI)' }),
+
+    new Visualization('plantuml_sequence', 'PlantUML: Sequence Diagram [CLI]', 'plantuml_sequence', undefined, (format) => [
         'java',
         '-Djava.awt.headless=true',
         '-Xmx2048m',
@@ -131,16 +139,19 @@ const _visualizations = [
         'ext/plantuml.jar',
         `-t${format.toLocaleLowerCase()}`,
         '-p'
-    ]),
-    new Visualization('mermaid_sequence', 'Mermain Sequence Diagram(cli)', 'mermaid_sequence', undefined, (format) => [
+    ], { family: 'PlantUML', engine: 'plantuml.jar', description: 'PlantUML sequence diagram (Java CLI)' }),
+
+    new Visualization('mermaid_sequence', 'Mermaid: Sequence Diagram [CLI]', 'mermaid_sequence', undefined, (format) => [
         'mmdc',
         '-e png',
         '-i-',
         '-o-'
-    ]),
-    new Visualization('sankey', 'Sankey', 'sankey', visualizeSankey),
-    new Visualization('seqdiag', 'Sequence Diagram(cli)', 'seqdiag', undefined, (format, outputFile) => buggyDiags('seqdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-')),
-    new Visualization('umlclass', 'UMLClass(GoJS)', 'umlclass', visualizeUmlClass)
+    ], { family: 'Mermaid', engine: 'mermaid-cli', description: 'Mermaid sequence diagram (Node CLI)' }),
+
+    new Visualization('ast_record', 'AST: Record Visualizer', 'ast_record', async (g) => {
+        await visualizeGraphviz(g, 'dot');
+    }, undefined, { family: 'AST', engine: 'Graphviz Record', description: 'Abstract Syntax Tree structure' }),
+    new Visualization('ast', 'AST: JSON Only', 'ast', undefined, undefined, { family: 'AST', engine: 'Raw JSON', description: 'Abstract Syntax Tree JSON' })
 ];
 export let visualizations = _visualizations;
 export function setVisualizationsForTests(testVisualizations) {

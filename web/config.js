@@ -162,6 +162,22 @@ const _visualizations = [
         await visualizeMermaid(g);
     }, undefined, { family: 'Mermaid', engine: 'mermaid.js (Flowchart)', description: 'Mermaid flowchart in-browser' }),
 
+    new Visualization('mermaid_state', 'Mermaid: State Diagram', 'mermaid_state', async (g) => {
+        await visualizeMermaid(g);
+    }, undefined, { family: 'Mermaid', engine: 'mermaid.js (State Diagram)', description: 'Mermaid state diagram in-browser' }),
+
+    new Visualization('mermaid_class', 'Mermaid: Class Diagram', 'mermaid_class', async (g) => {
+        await visualizeMermaid(g);
+    }, undefined, { family: 'Mermaid', engine: 'mermaid.js (Class Diagram)', description: 'Mermaid class diagram in-browser' }),
+
+    new Visualization('mermaid_mindmap', 'Mermaid: Mindmap', 'mermaid_mindmap', async (g) => {
+        await visualizeMermaid(g);
+    }, undefined, { family: 'Mermaid', engine: 'mermaid.js (Mindmap)', description: 'Mermaid mindmap in-browser' }),
+
+    new Visualization('mermaid_er', 'Mermaid: ER Diagram', 'mermaid_er', async (g) => {
+        await visualizeMermaid(g);
+    }, undefined, { family: 'Mermaid', engine: 'mermaid.js (ER)', description: 'Mermaid ER diagram in-browser' }),
+
     new Visualization('mermaid_sequence', 'Mermaid: Sequence Diagram', 'mermaid_sequence', async (g) => {
         await visualizeMermaid(g);
     }, (format) => [

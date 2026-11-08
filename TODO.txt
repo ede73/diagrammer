@@ -4,8 +4,15 @@ ACTIVE ROADMAP & CHAT TASKS
 [x] Separate Generator vs Visualizer into dedicated dual dropdowns in Web UI (e.g. Graphviz -> dot, fdp, neato, osage, twopi, sfdp; D3 -> Reingold, Dendrogram, CirclePacked, Sankey) [Landed]
 [x] First-party native Rust Sequence Layout Engine prototype in crates/diagrammer-core/src/layout/sequence.rs [Landed in #58]
 [x] Architectural roadmap document for WASM visualizers and native layout engines (docs/layout_engine_and_wasm_roadmap.md)
-[x] In-Browser Mermaid Client: pure Rust Mermaid Flowchart generator + in-browser mermaid.js visualizer eliminating Node mmdc requirement [Landed]
-[ ] Mermaid Generator Family Architecture: analyze language commonalities (flowchart vs state vs sequence vs ER) and implement structural generators without hacks
+[x] Mermaid Generator Family Architecture:
+    - [x] In-Browser Mermaid Client: pure Rust Mermaid Flowchart generator + in-browser mermaid.js visualizer eliminating Node mmdc requirement [Landed]
+    - [x] Graceful Group Degradation in Mermaid Sequence: flattened participants, preserved cross-group vertex links, container-link filtering [Landed]
+    - [x] Mermaid State Diagram generator (stateDiagram-v2): composite states, [*] begin/endpoint mapping, <<choice>> conditions, recursive nesting [Landed]
+    - [x] Mermaid Class Diagram generator (classDiagram): UML object model, members/methods visibility (+, -, #, ~), generics (~T~), relationships (<|--, *--, o--, -->, ..>) [Landed]
+    - [x] Mermaid Mindmap generator (mindmap): hierarchical DFS spanning-tree projection from root with shape mapping [Landed]
+    - [x] Mermaid ER Diagram generator (erDiagram): entities and cardinality mapping (||--|{, ||--o{, }|--||, ||--||) [Landed]
+    - [x] CLI / Native Rust Fast Generator Tests: test generator syntax invariants and sanitization across fixtures via cargo test (crates/diagrammer-core/tests/mermaid_generators.rs in 0.05s, zero Puppeteer needed) [Landed]
+    - [x] Mermaid Repository Analysis (/Users/ede/src/mermaid): deeper analysis of Jison vs Langium grammars, surface lexical commonalities vs semantic AST divergence [Documented in goals.md & NOTES.md]
 [ ] First-party Sequence Engine extensions: lifeline activations ([ / ]), notes (note right of A), frames (loop / alt / par)
 [ ] First-party Hierarchical DAG Layout Engine in pure Rust (Sugiyama framework to replace Graphviz dot)
 [ ] Language & Grammar extensions: flow constructs (while, for, alt), rich arrowheads (|->, <<->), multi-exit subgraphs

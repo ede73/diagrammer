@@ -125,6 +125,25 @@ impl SequenceLayoutEngine {
       stroke-dasharray: 4 4;
       opacity: 0.65;
     }
+    .ds-activation {
+      fill: #1e293b;
+      stroke: #38bdf8;
+      stroke-width: 1.5;
+      rx: 3px;
+      ry: 3px;
+    }
+    .ds-note-box {
+      fill: #1e293b;
+      stroke: #f59e0b;
+      stroke-width: 1.5;
+      filter: url(#ds-shadow);
+    }
+    .ds-note-text {
+      font-size: 11px;
+      fill: #fef3c7;
+      dominant-baseline: central;
+      text-anchor: middle;
+    }
     .ds-box {
       rx: 8px;
       ry: 8px;

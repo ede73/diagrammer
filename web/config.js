@@ -20,7 +20,20 @@ export class Visualization {
         this.engine = metadata.engine || name;
         this.runtime = visualization !== undefined ? 'web' : 'cli';
         this.description = metadata.description || '';
+        this.visualizerLabel = metadata.visualizerLabel || (menuName.includes(':') ? menuName.split(':')[1].trim() : menuName);
     }
+}
+export function getGeneratorFamilies() {
+    const families = [];
+    visualizations.forEach(v => {
+        if (!families.includes(v.family)) {
+            families.push(v.family);
+        }
+    });
+    return families;
+}
+export function getVisualizersForFamily(family) {
+    return visualizations.filter(v => v.family === family);
 }
 let localRepoFont;
 if (typeof window !== 'undefined') {

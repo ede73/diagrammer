@@ -34,6 +34,11 @@ ACTIVE ROADMAP & CHAT TASKS
       * CLI: relative file resolution relative to the script/diagram file itself (`with_base_dir`).
       * Web UI: standalone Theme / Logical Files editor tab with local storage persistence (`getLogicalFiles`), allowing user to create/edit themes in-browser and include them seamlessly.
       * Feature example fixtures added to EXAMPLES dropdown: `theme.txt`, `include.txt`, and companion `sample_theme.txt`.
+[x] Language Design Invariants (Preserved in Rust Core & Documented):
+    - Graph essence first: vertices exist globally upon reference (`a>b`).
+    - In-place augmentation: enrich nodes (`a;label`) and additively increment edges (`a>"xxx"b` then `a>"yyy"b`) without restating graph structure.
+    - Position-forward cascading state: `edge color`, `vertex color`, `shape` apply flowing defaults strictly from declaration position onward.
+    - Explicit overrides (`rect d`) strictly take precedence over ambient defaults (`shape ellipse`).
 [ ] First-party Sequence Engine extensions: lifeline activations ([ / ]), notes (note right of A), frames (loop / alt / par)
 [ ] First-party Hierarchical DAG Layout Engine in pure Rust (Sugiyama framework to replace Graphviz dot)
 [ ] Language & Grammar extensions: flow constructs (while, for, alt), rich arrowheads (|->, <<->), multi-exit subgraphs

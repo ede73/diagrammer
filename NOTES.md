@@ -91,10 +91,10 @@ When a CLI-only visualizer is selected in the browser UI, the browser makes an A
 
 ## 5. Undocumented Language Features
 
-Several grammar features exist in [`grammar/diagrammer.grammar`](file:///Users/ede/src/diagrammer/grammar/diagrammer.grammar) but are omitted from [README.md](file:///Users/ede/src/diagrammer/README.md):
+Several grammar features exist in [`crates/diagrammer-core/src/diagrammer.pest`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/src/diagrammer.pest) but are omitted from [README.md](file:///Users/ede/src/diagrammer/README.md):
 
 ### 5.1 Loop Constructs
-In addition to `if ... elseif ... else ... endif`, the grammar parses loops into [`GraphLoop`](file:///Users/ede/src/diagrammer/model/graphloop.ts):
+In addition to `if ... elseif ... else ... endif`, the grammar parses loops into [`GraphLoop`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/src/ast/loop_node.rs):
 ```text
 while condition
   task_a > task_b
@@ -134,14 +134,13 @@ until loop_condition_met
 ## 6. Testing & Regression Harness Details
 
 1. **Jest + Puppeteer Workflow**:
-   - Web UI integration tests in [`tests/web/rendering.test.ts`](file:///Users/ede/src/diagrammer/tests/web/rendering.test.ts) launch headless Chromium, navigate to `http://localhost:<MINISERVER_TEST_PORT>`, type diagram DSL into the ACE editor, trigger parsing, and snapshot canvas/SVG DOM elements.
-   - Always run via `make -C tests jesttests`, which binds `web/miniserver.js 8999` and sets `MINISERVER_TEST_PORT=8999`.
+   - Web UI integration tests in [`tests/web/rendering.test.js`](file:///Users/ede/src/diagrammer/tests/web/rendering.test.js) launch headless Chromium, navigate to `http://localhost:<MINISERVER_TEST_PORT>`, type diagram DSL into the ACE editor, trigger parsing, and snapshot canvas/SVG DOM elements.
+   - Always run via `make -C tests jesttests`, which binds `./diagrammer serve 8999` and sets `MINISERVER_TEST_PORT=8999`.
 
-2. **Regression Runner ([`js/runtests.ts`](file:///Users/ede/src/diagrammer/js/runtests.ts))**:
-   - Takes optional regex filter: `node js/runtests.js [visualizer:pattern]` (e.g. `node js/runtests.js dot:state_tcp`).
-   - Parses each diagram in [`tests/test_inputs/`](file:///Users/ede/src/diagrammer/tests/test_inputs), saves output in `tests/testrun/current/`, and compares with `tests/testrun/previous/` using `diffJson`, `diffChars`, or `diffLines`.
-   - Compares generated PNGs with baseline PNGs using `pixelmatch`.
-   - Uses the `images` npm library to normalize/resize images prior to diffing to reduce font/DPI discrepancies across OS platforms.
+2. **Rust Core Parity Harness**:
+   - [`tests/ast_parity.rs`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/tests/ast_parity.rs): Validates that the Rust Pest PEG parser reproduces canonical AST JSON serialization across all 53 test inputs.
+   - [`tests/generator_parity.rs`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/tests/generator_parity.rs): Validates that all 12 generator backends produce exact matching output across regression test inputs.
+   - Run via `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`.
 
 3. **External Dependencies for Full Test Suite**:
    - [`ext/plantuml.jar`](file:///Users/ede/src/diagrammer/ext) (gitignored; required for PlantUML tests).

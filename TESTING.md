@@ -1,58 +1,70 @@
 # TESTING.md
 
 ## Purpose
-This document describes the test workflows for the `diagrammer` project.
+This document describes the test workflows and suites for the `diagrammer` project.
 
-## Test commands
-- Run Rust AST & generator parity tests:
-  - `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`
-- Run Jest browser tests:
-  - `make -C tests jesttests`
-- Run full project test workflow:
-  - `make test`
-- Run only the regression test harness inside `tests/`:
-  - `make -C tests testrunner`
-- Run the regression test runner directly:
-  - `node js/runtests.js [visualizer:testNamePattern]`
+## Quick Test Commands
 
-## How tests are organized
-- `crates/diagrammer-core/` contains:
-  - `src/builder.rs` unit tests (AST construction, broadcasting, directions)
-  - `tests/ast_parity.rs` (AST parity across 53 baseline diagrammer fixtures)
-  - `tests/generator_parity.rs` (100% generator parity tests across all 12 formats)
-- `tests/` contains:
-  - `web/` — Puppeteer and Jest browser UI regression tests
-  - `test_inputs/` — diagrammer source examples used by regression tests
-  - `testrun/` — runtime-generated outputs for current and previous runs
-- `tests/Makefile` builds TypeScript test files and runs browser/web tests.
+- **Run Rust unit & parity tests**:
+  ```bash
+  cargo test --manifest-path crates/diagrammer-core/Cargo.toml
+  ```
+- **Run browser visual snapshot & regression tests**:
+  ```bash
+  make -C tests jesttests
+  ```
+- **Run full test suite (Rust tests + browser tests)**:
+  ```bash
+  make test
+  ```
 
-## Test types
-- Rust native unit tests and golden parity tests
-- Browser/web interaction and visual snapshot tests with Jest and `jest-puppeteer`
-- Regression tests via `js/runtests.js`
-  - compares generated text outputs with stored reference text
-  - compares generated graph images with stored reference PNGs
-- Browser WebAssembly execution through `web/miniserver.js`
+---
 
-## Required artifacts
-- `ext/plantuml.jar` is required to run the full set of tests successfully.
-- `scripts/setup.sh SELFTEST` bootstraps a controlled test environment.
+## Test Suites
 
-## Important files
-- `package.json` — contains dependencies for Jest and Puppeteer
-- `jest.config.js` — test runner configuration and preset
-- `tests/Makefile` — test build/test orchestration
-- `js/runtests.js` — regression test runner logic
-- `web/miniserver.js` — local web server used by web tests
+### 1. Rust Core Unit & Golden Parity Tests (`crates/diagrammer-core`)
+Located in [`crates/diagrammer-core/`](file:///Users/ede/src/diagrammer/crates/diagrammer-core):
+- **Unit Tests** ([`src/lib.rs`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/src/lib.rs)): Validates PEG grammar parsing, edge directions, vertex shapes, and group container broadcasting.
+- **AST Golden Parity Tests** ([`tests/ast_parity.rs`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/tests/ast_parity.rs)): Validates that Pest PEG parser produces serialized AST JSON identical to baseline fixtures across all 53 language test inputs.
+- **Generator Parity Tests** ([`tests/generator_parity.rs`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/tests/generator_parity.rs)): Validates that all 12 generator backends (`dot`, `seqdiag`, `actdiag`, `blockdiag`, `nwdiag`, `mscgen`, `plantuml_sequence`, `dendrogram`, `sankey`, `layerbands`, `parsetree`, `umlclass`) produce exact matching output across regression test inputs.
 
-## Useful direct commands
-- Run one visualizer regression test:
-  - `node js/runtests.js dot:state`
-- Run all tests with web support:
-  - `make test`
-- If a regression changed intentionally, remove the old reference file from `tests/testrun/previous` and rerun.
+Run via:
+```bash
+cargo test --manifest-path crates/diagrammer-core/Cargo.toml
+```
 
-## Notes
-- `make test` builds the whole project before running tests.
-- `npm test` runs Jest directly, but web/browser tests will fail with `ERR_CONNECTION_REFUSED` unless `web/miniserver.js` is running. Use `make -C tests jesttests` to automatically start and stop miniserver on port 8999 for Jest runs.
-- Web tests depend on `web/miniserver.js` being executable and available.
+### 2. Browser Visual Snapshot & UI Tests (`tests/web`)
+Located in [`tests/web/`](file:///Users/ede/src/diagrammer/tests/web):
+- Uses Jest and Puppeteer in headless Chrome.
+- Automatically launches the embedded Rust dev server (`./diagrammer serve 8999`) for test isolation and terminates it when complete.
+- **Visual Snapshot Tests** ([`tests/web/rendering.test.js`](file:///Users/ede/src/diagrammer/tests/web/rendering.test.js)): Renders diagrams in Chrome and performs pixel-by-pixel image comparisons with reference PNGs in [`tests/web/snapshots/`](file:///Users/ede/src/diagrammer/tests/web/snapshots) (CirclePacked, RadialDendrogram, ReingoldTilford, Sankey, LayerBands, ParseTree, UMLClass).
+- **LocalStorage & UI Tests** ([`tests/web/localstorage.test.js`](file:///Users/ede/src/diagrammer/tests/web/localstorage.test.js)): Verifies local diagram saving, loading, importing, and exporting.
+
+Run via:
+```bash
+make -C tests jesttests
+```
+
+---
+
+## Targeted CLI Checks
+
+To verify generator output directly from the command line:
+```bash
+# Output generated visualizer code
+./diagrammer dot tests/test_inputs/state.txt
+./diagrammer seqdiag tests/test_inputs/state.txt
+
+# Render visual image output
+./diagrammer dot tests/test_inputs/state.txt -o /tmp/out.png
+```
+
+---
+
+## Test Directory Structure
+
+- [`tests/package.json`](file:///Users/ede/src/diagrammer/tests/package.json) — Isolated npm dependencies for Jest, Puppeteer, and pixelmatch.
+- [`tests/jest.config.js`](file:///Users/ede/src/diagrammer/tests/jest.config.js) — Jest configuration.
+- [`tests/test_inputs/`](file:///Users/ede/src/diagrammer/tests/test_inputs) — Diagrammer test scripts and grammar test files.
+- [`tests/web/snapshots/`](file:///Users/ede/src/diagrammer/tests/web/snapshots) — Reference snapshot PNGs for visual comparisons.
+- [`tests/Makefile`](file:///Users/ede/src/diagrammer/tests/Makefile) — Test runner orchestration.

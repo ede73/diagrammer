@@ -41,8 +41,8 @@ AND I could finally design a proper lexer/parser for the language to be. This co
 Main components:
 - 100% Rust core in `crates/diagrammer-core`: Pest PEG grammar (`src/diagrammer.pest`), AST builder, and all 13 diagram generators
 - WebAssembly package in `build/wasm` enabling fast, zero-server client-side execution in the browser
-- Highlighting interactive editor in ace/
-- Web frontend in web/ and CLI runners in js/
+- Interactive Ace editor and zero-build web frontend in `web/`
+- Native CLI binary `./diagrammer` for direct generation, image rendering, and embedded dev server
 - Comprehensive test coverage: Rust unit tests, AST parity tests across 53 fixtures, generator parity across all 12 formats, and Jest/Puppeteer browser visual regression suites
 
 # Web Interface
@@ -65,7 +65,7 @@ Plenty of examples (also used in tests)
 
 <img width=200 src="https://user-images.githubusercontent.com/1845554/216885127-25ba26bb-194d-4c92-b610-e33999ea005c.png">
 
-You can use brower's localstorage to save the diagrams (and load them). You can also export/import then to the 'backend' if needed (requires webserver, one available in web/miniserver.js)
+You can use brower's localstorage to save the diagrams (and load them). You can also export/import then to the 'backend' if needed (requires webserver, embedded in `./diagrammer serve`)
 
 <img width=200 src="https://user-images.githubusercontent.com/1845554/216885227-edf5800a-0585-4df1-b8c9-f022f459d670.png">
 
@@ -404,77 +404,62 @@ traverseTree(root, (vertex, isLeaf, hasSiblings) => {
 ```
 
 # Project files/folders
-- ace - The ACE editor, and diagrammer highlight rules
-- arrows - Diagrammer arrow styles (icons for UI)
-- build/wasm - WebAssembly package compiled from the Rust core for client-side browser execution
-- crates/diagrammer-core - 100% Rust parser (Pest PEG grammar), AST builder, and all 13 diagram generators
-- icons - Some copyleft icons for UI
-- js - CLI entrypoints (`generate.js`, `visualize.js`, `runtests.js`, `t.js`)
-- manual_test_diagrams - Some diagrammer test inputs
-- scripts - Some utility scripts for building, testing, exporting
-- setup - setup related
-- tests - All the test files, diagrammer language inputs, reference renderings, transpiled outputs.
-  - Test generates all the test files using all the (related) visualizations, and then does output text + output graph comparison. Super useful if you need to change the grammar, ensures the ever used to work, still does :)
-- types - web UI icons for adding vertex shapes
-- web - Web frontend and Node.js development server (`web/miniserver.js`), provides browser UI and access to CLI renderers (PlantUML, mscgen, Python3 *diags, etc.) plus localstorage save/load.
+- `build/wasm` — WebAssembly package compiled from the Rust core for client-side browser execution
+- `crates/diagrammer-core` — 100% Rust core: Pest PEG grammar, AST builder, all 13 diagram generators, and native CLI binary
+- `diagrammer` — Symlink to compiled native Rust CLI binary (`target/release/diagrammer`)
+- `ext/` — External tools (PlantUML jar)
+- `fonts/` — Vendored DejaVu fonts for diagram rendering
+- `manual_test_diagrams/` — Manual diagrammer test scripts
+- `scripts/` — Developer utilities (`watch.sh`, `setup.sh`, `display_image.sh`, git hooks)
+- `tests/` — Test inputs, reference outputs, isolated npm dependencies, and Puppeteer visual regression suite
+- `web/` — Zero-build web frontend:
+  - `web/ace/` — ACE editor and diagrammer highlight rules
+  - `web/arrows/` — Arrow styles and SVGs
+  - `web/css/` — Web styles
+  - `web/icons/` — UI node icons
+  - `web/types/` — Vertex shape definitions and icons
+  - `web/visualizations/` — Client-side visualization drivers (D3, GoJS, Viz.js, mscgen)
+  - `web/index_template.html` & `web/index.html` — Web application entry point
 
-# Installation
-Totally at your own risk!
-I've run this on Linux/Mac, but most recently on windows via its awesomely magnificient linux sub WSL2, which also integrates beautifully with Visual Studio Code! Just enter the linux subsystem, pull the repo, type "code ." and You've VSStudio available.
+# Quick Start & Installation
 
-Run scripts/setup.sh (or check it and run by hand). It installs required modules.
-
-```
-# Install NVM https://github.com/nvm-sh/nvm
-nvm install 18
-nvm use 18
-# If you want to run all the tests (and or use WEB interface with local render)
-# Install: graphviz mscgen
-# For nwdiag blockdiag actdiag seqdiag, check scripts/setup.sh (linux only)
-#  mkdir tmp;cd tmp
-#  git clone git@github.com:ede73/blockdiag.git
-#  for diag in act nw seq; do git clone https://github.com/blockdiag/${diag}diag.git ; done
-#  for diag in act nw seq; do cd ${diag}diag; python3 setup.py build ; cd .. ; done
-# Either install or make available in PATH somehow...
-#  mkdir ~/diags
-#  for diag in act nw seq; do cd ${diag}diag; pip3 install --target=$HOME/diags . ; cd .. ; done
-# export PYTHONPATH=$HOME/diags/lib/python3.X/site-packages:$PYTHONPATH
-
-cd ~/diagrammer
-ln -s ~/diagrammer ~/public_html/ # or ~/Sites on mac
-npm install
+### 1. Build
+Requires Rust 1.70+ and `wasm-pack`:
+```bash
 make all
-# You need plantuml.jar in ext/ to run all the tests successfully
-# make test
 ```
 
-Then go to http://localhost/~USERNAMEHERE/diagrammer # of course assuming you've setup your apache/what not
-
-And you should be ready to go.
-
-There's also scripts/export.sh that makes a minimal 'distribution' you can copy someplace and use the t.sh to render the graphs.
-
-## Testing
-You can install and test evething in a bootstrapped chroot jail - no changes done to host system
+### 2. Start Web Interface
+Run the embedded HTTP server:
+```bash
+./diagrammer serve 8000
 ```
-scripts/setup.sh SELFTEST
+Then navigate to `http://localhost:8000/`.
+
+### 3. Command Line Usage
+```bash
+# Generate visualizer code
+./diagrammer dot tests/test_inputs/state.txt
+
+# Render visual image output
+./diagrammer dot tests/test_inputs/state.txt -o out.png
+echo 'a>b>c' | ./diagrammer dot -o out.png
 ```
 
-## Developer docs
+### 4. Running Tests
+```bash
+# Core Rust unit and golden parity tests
+cargo test --manifest-path crates/diagrammer-core/Cargo.toml
+
+# Browser visual snapshot regression tests
+make -C tests jesttests
+```
+
+## Developer Docs
 This repository also includes:
-- `AGENTS.md` — repo entry points, build/run/test commands, and quick navigation guidance
-- `TESTING.md` — test workflows, runnable commands, and regression runner details
-- `DEVELOPMENT.md` — development setup, build rules, CLI/web workflows, and recommended flow
-- `NOTES.md` — in-depth technical analysis, architecture, visualizer matrix, and developer notes
+- [`AGENTS.md`](file:///Users/ede/src/diagrammer/AGENTS.md) — Repo entry points, build/run/test commands, and quick navigation guidance
+- [`DEVELOPMENT.md`](file:///Users/ede/src/diagrammer/DEVELOPMENT.md) — Development setup, build rules, CLI/web workflows, and recommended flow
+- [`TESTING.md`](file:///Users/ede/src/diagrammer/TESTING.md) — Test workflows, runnable commands, and regression runner details
+- [`NOTES.md`](file:///Users/ede/src/diagrammer/NOTES.md) — In-depth technical analysis, architecture, visualizer matrix, and developer notes
 
-# External project references:
-- https://github.com/ajaxorg/ace-builds
-  - Source of js/viz.js, you'll see the web page drawing graphviz graphs in "real time"
-  - Not necessary to use diagrammer
-- https://github.com/ajaxorg/ace-builds
-  - Highlighting editor - if you use the web interface
-  - Not necessary for command line use
-  - Base ACE editor included in ace/src-noconflict folder
-- https://github.com/zaach/jison
-  - Parser maker for Javascript
 

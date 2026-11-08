@@ -49,6 +49,7 @@ Restructure the project so that parsing, AST modeling, code generation, layout e
 - **Runtime Metadata**: Every visualizer exposes its execution runtime in the UI:
   - ⚡ **Browser (WASM/JS)**: Runs locally and privately in the browser with zero network or backend dependencies.
   - 🖥️ **CLI (Backend)**: Requires native host CLI binaries (`plantuml.jar`, `blockdiag`, etc.).
+- **Graceful Group Degradation**: When an input graph relies on groups/clusters but the target visualizer lacks group support (e.g., flat sequence visualizers or group-less graph engines), the generator must gracefully flatten the group container while preserving all member nodes and internal edges. Group-to-group or group-to-node edges are either gracefully omitted, converted to contextual notes, or expanded to entrance/exit boundary nodes.
 
 ### 1.6 In-Browser WebAssembly Everywhere (Zero CLI Tools)
 - Eliminate all backend CLI requirements for browser users:

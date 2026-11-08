@@ -6,45 +6,48 @@
  * Released under the MIT license (LICENSE.txt)
  */
 
-/* Background for the tree. May use for <body> element */
+/* Background for the tree */
 .jsontree_bg {
-    background: #FFF;
+    background: transparent;
 }
 
-/* Styles for the container of the tree (e.g. fonts, margins etc.) */
+/* Styles for the container of the tree */
 .jsontree_tree {
-    margin-left: 30px;
-    font-family: 'PT Mono', monospace;
-    font-size: 14px;
+    margin-left: 12px;
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-primary, #e6edf3);
 }
 
 /* Styles for a list of child nodes */
 .jsontree_child-nodes {
     display: none;
-    margin-left: 35px; 
-    margin-bottom: 5px;
-    line-height: 2;
+    margin-left: 24px; 
+    margin-bottom: 4px;
+    line-height: 1.8;
 }
 .jsontree_node_expanded > .jsontree_value-wrapper > .jsontree_value > .jsontree_child-nodes {
     display: block;
 }
 
-/* Styles for labels */
+/* Styles for labels (keys) */
 .jsontree_label-wrapper {
     float: left;
-    margin-right: 8px;
+    margin-right: 6px;
 }
 .jsontree_label {
-    font-weight: normal;
+    font-weight: 600;
     vertical-align: top;
-    color: #000;
+    color: #79c0ff;
     position: relative;
-    padding: 1px;
+    padding: 1px 3px;
     border-radius: 4px;
     cursor: default;
+    transition: background-color 0.15s ease;
 }
 .jsontree_node_marked > .jsontree_label-wrapper > .jsontree_label {
-    background: #fff2aa;
+    background: rgba(56, 139, 253, 0.2);
 }
 
 /* Styles for values */
@@ -58,39 +61,44 @@
 .jsontree_value { 
     vertical-align: top;
     display: inline;
+    color: var(--text-primary, #e6edf3);
 }
 .jsontree_value_null {
-    color: #777;
-    font-weight: bold;
+    color: #8b949e;
+    font-style: italic;
+    font-weight: 500;
 }
 .jsontree_value_string {
-    color: #025900;
-    font-weight: bold;
+    color: #7ee787;
+    font-weight: 500;
 }
 .jsontree_value_number {
-    color: #000E59;
-    font-weight: bold;
+    color: #f0883e;
+    font-weight: 500;
 }
 .jsontree_value_boolean {
-    color: #600100;
-    font-weight: bold;
+    color: #d2a8ff;
+    font-weight: 600;
 }
 
 /* Styles for active elements */
 .jsontree_expand-button {
     position: absolute;
-    top: 3px;
+    top: 4px;
     left: -15px;
     display: block;
     width: 11px;
     height: 11px;
     background-image: url('icons.svg');
+    filter: invert(0.9) brightness(1.2);
 }
 .jsontree_node_expanded > .jsontree_label-wrapper > .jsontree_label > .jsontree_expand-button {
     background-position: 0 -11px;
 }
 .jsontree_show-more {
     cursor: pointer;
+    color: var(--text-muted, #8b949e);
+    border-bottom: 1px dotted var(--text-muted, #8b949e);
 }
 .jsontree_node_expanded > .jsontree_value-wrapper > .jsontree_value > .jsontree_show-more {
     display: none;
@@ -106,3 +114,31 @@
     cursor: default !important;
 }
 
+/* Light Theme Overrides */
+[data-theme="light"] .jsontree_tree {
+    color: #24292f;
+}
+[data-theme="light"] .jsontree_value {
+    color: #24292f;
+}
+[data-theme="light"] .jsontree_label {
+    color: #0550ae;
+}
+[data-theme="light"] .jsontree_value_null {
+    color: #6e7681;
+}
+[data-theme="light"] .jsontree_value_string {
+    color: #116329;
+}
+[data-theme="light"] .jsontree_value_number {
+    color: #953800;
+}
+[data-theme="light"] .jsontree_value_boolean {
+    color: #8250df;
+}
+[data-theme="light"] .jsontree_expand-button {
+    filter: none;
+}
+[data-theme="light"] .jsontree_node_marked > .jsontree_label-wrapper > .jsontree_label {
+    background: #fff2aa;
+}

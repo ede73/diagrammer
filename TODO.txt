@@ -1,3 +1,16 @@
+================================================================================
+ACTIVE ROADMAP & CHAT TASKS
+================================================================================
+[x] Reorganize Generator vs Visualizer menu in Web UI with runtime metadata (Browser WASM vs CLI Backend) [Landed in #56]
+[x] First-party native Rust Sequence Layout Engine prototype in crates/diagrammer-core/src/layout/sequence.rs [Landed in #58]
+[x] Architectural roadmap document for WASM visualizers and native layout engines (docs/layout_engine_and_wasm_roadmap.md)
+[ ] In-Browser Mermaid Client: embed mermaid.js in web/ to eliminate Node mmdc CLI dependency
+[ ] First-party Sequence Engine extensions: lifeline activations ([ / ]), notes (note right of A), frames (loop / alt / par)
+[ ] First-party Hierarchical DAG Layout Engine in pure Rust (Sugiyama framework to replace Graphviz dot)
+[ ] Language & Grammar extensions: flow constructs (while, for, alt), rich arrowheads (|->, <<->), multi-exit subgraphs
+[ ] Modularize into independent Rust crates (diagrammer-parser, diagrammer-ast, diagrammer-generators, diagrammer-layout, diagrammer-cli)
+================================================================================
+
 - MSCGENJS https://www.npmjs.com/package/mscgenjs?activeTab=readme
 -  https://github.com/mscgenjs/mscgenjs-inpage/blob/master/src/mscgen-inpage.js
 

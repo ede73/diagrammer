@@ -16,7 +16,7 @@ BUILD_STARTED_FILE=.build_started
 
 pest_parser_bin:
 	@if [ -f "$$HOME/.cargo/env" ]; then . "$$HOME/.cargo/env"; fi; \
-	cargo build --release -p diagrammer-core --bin diagrammer_pest_parse
+	cargo build --release -p diagrammer-core
 
 wasm_pkg:
 	npx -y wasm-pack build crates/diagrammer-core --target web --out-dir ../../build/wasm --no-typescript

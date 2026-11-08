@@ -107,7 +107,9 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
         "circlepacked" | "dendrogram" | "radialdendrogram" | "reingoldtilford" => {
             Some(Box::new(dendrogram::Dendrogram))
         }
-        "digraph" | "dot" => Some(Box::new(digraph::DiGraph)),
+        "circo" | "digraph" | "dot" | "fdp" | "neato" | "osage" | "patchwork" | "sfdp" | "twopi" => {
+            Some(Box::new(digraph::DiGraph))
+        }
         "layerbands" => Some(Box::new(layerbands::LayerBands)),
         "mermaid_sequence" => Some(Box::new(mermaid_sequence::MermaidSequence)),
         "mscgen" => Some(Box::new(mscgen::MSCGen)),
@@ -120,3 +122,25 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
         _ => None,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_make_generator_graphviz_layouts() {
+        let layouts = ["dot", "digraph", "fdp", "neato", "osage", "twopi", "sfdp", "circo", "patchwork"];
+        for layout in &layouts {
+            assert!(make_generator(layout).is_some(), "Layout '{}' should produce a generator", layout);
+        }
+    }
+
+    #[test]
+    fn test_make_generator_dendrogram_variants() {
+        let variants = ["dendrogram", "circlepacked", "radialdendrogram", "reingoldtilford"];
+        for variant in &variants {
+            assert!(make_generator(variant).is_some(), "Variant '{}' should produce a generator", variant);
+        }
+    }
+}
+

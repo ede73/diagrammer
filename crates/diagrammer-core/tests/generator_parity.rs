@@ -149,6 +149,8 @@ fn test_dot_generator_parity() {
     let test_cases = [
         "flow_control",
         "state_y_edge",
+        "colors",
+        "url",
     ];
 
     for case in &test_cases {

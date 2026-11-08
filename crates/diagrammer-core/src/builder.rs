@@ -14,6 +14,15 @@ struct ParsedVertex {
     image: Option<String>,
     label: Option<String>,
     edge_label: Option<String>,
+    textcolor: Option<String>,
+    url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+struct DestructuredLabel {
+    label: Option<String>,
+    textcolor: Option<String>,
+    url: Option<String>,
 }
 
 pub struct AstBuilder {
@@ -80,19 +89,108 @@ impl AstBuilder {
         Ok(self.canvas)
     }
 
-    fn active_defaults(&self) -> &AllowedDefaults {
-        if let Some(grp) = self.group_stack.last() {
-            &grp.defaults
-        } else {
-            &self.canvas.defaults
-        }
-    }
-
     fn active_defaults_mut(&mut self) -> &mut AllowedDefaults {
         if let Some(grp) = self.group_stack.last_mut() {
             &mut grp.defaults
         } else {
             &mut self.canvas.defaults
+        }
+    }
+
+    fn find_default_vertexcolor(&self) -> Option<String> {
+        for grp in self.group_stack.iter().rev() {
+            if let Some(ref c) = grp.defaults.vertexcolor {
+                return Some(c.clone());
+            }
+        }
+        self.canvas.defaults.vertexcolor.clone()
+    }
+
+    fn find_default_vertextextcolor(&self) -> Option<String> {
+        for grp in self.group_stack.iter().rev() {
+            if let Some(ref c) = grp.defaults.vertextextcolor {
+                return Some(c.clone());
+            }
+        }
+        self.canvas.defaults.vertextextcolor.clone()
+    }
+
+    fn find_default_edgecolor(&self) -> Option<String> {
+        for grp in self.group_stack.iter().rev() {
+            if let Some(ref c) = grp.defaults.edgecolor {
+                return Some(c.clone());
+            }
+        }
+        self.canvas.defaults.edgecolor.clone()
+    }
+
+    fn find_default_edgetextcolor(&self) -> Option<String> {
+        for grp in self.group_stack.iter().rev() {
+            if let Some(ref c) = grp.defaults.edgetextcolor {
+                return Some(c.clone());
+            }
+        }
+        self.canvas.defaults.edgetextcolor.clone()
+    }
+
+    fn find_default_groupcolor(&self) -> Option<String> {
+        for grp in self.group_stack.iter().rev() {
+            if let Some(ref c) = grp.defaults.groupcolor {
+                return Some(c.clone());
+            }
+        }
+        self.canvas.defaults.groupcolor.clone()
+    }
+
+    fn destructure_label(&self, raw: &str) -> DestructuredLabel {
+        let trimmed = raw.trim().trim_start_matches(';').trim();
+        let mut text = trimmed.to_string();
+
+        // 1. Destructure all variables in the label
+        for (k, v) in &self.context.variables {
+            let pat = format!("$({})", k);
+            text = text.replace(&pat, v);
+        }
+
+        // 2. Strip quotes: label = label.trim().replace(/"/gi, '')
+        text = text.replace('"', "").trim().to_string();
+
+        let mut textcolor = None;
+        let mut url = None;
+
+        // 3. Take out COLOR if present: ^(#[A-Fa-f0-9]{6})(.*)$
+        if text.starts_with('#') && text.len() >= 7 {
+            let hex = &text[1..7];
+            if hex.chars().all(|c| c.is_ascii_hexdigit()) {
+                textcolor = Some(text[..7].to_string());
+                text = text[7..].trim().to_string();
+            }
+        }
+
+        // 4. Extract URL if present: ^(.*)\[([^\]]+)\](.*)$
+        if let Some(start) = text.rfind('[') {
+            if let Some(end) = text[start..].find(']') {
+                let full_end = start + end;
+                let u = text[start + 1..full_end].trim();
+                if !u.is_empty() && (u.contains("://") || u.starts_with('/') || u.contains('.')) {
+                    url = Some(u.to_string());
+                    let before = &text[..start];
+                    let after = &text[full_end + 1..];
+                    text = format!("{}{}", before, after).trim().to_string();
+                }
+            }
+        }
+
+        let final_label = if text.is_empty() {
+            None
+        } else {
+            Some(text)
+        };
+
+        DestructuredLabel {
+            label: final_label,
+            textcolor,
+            url,
         }
     }
 
@@ -178,19 +276,32 @@ impl AstBuilder {
     }
 
     fn set_vertex_label(&mut self, name: &str, label: &str) {
-        fn set_in_list(list: &mut [GraphObject], name: &str, label: &str) -> bool {
+        let dest = self.destructure_label(label);
+        fn set_in_list(list: &mut [GraphObject], name: &str, dest: &DestructuredLabel) -> bool {
             for obj in list {
                 match obj {
                     GraphObject::VertexRef { vertex } if vertex.name == name => {
-                        vertex.label = Some(label.to_string());
+                        vertex.label = dest.label.clone();
+                        if dest.textcolor.is_some() {
+                            vertex.textcolor = dest.textcolor.clone();
+                        }
+                        if dest.url.is_some() {
+                            vertex.url = dest.url.clone();
+                        }
                         return true;
                     }
                     GraphObject::Vertex(v) if v.name == name => {
-                        v.label = Some(label.to_string());
+                        v.label = dest.label.clone();
+                        if dest.textcolor.is_some() {
+                            v.textcolor = dest.textcolor.clone();
+                        }
+                        if dest.url.is_some() {
+                            v.url = dest.url.clone();
+                        }
                         return true;
                     }
                     GraphObject::Group(g) => {
-                        if set_in_list(&mut g.objects, name, label) {
+                        if set_in_list(&mut g.objects, name, dest) {
                             return true;
                         }
                     }
@@ -201,20 +312,21 @@ impl AstBuilder {
         }
 
         for grp in self.group_stack.iter_mut().rev() {
-            if set_in_list(&mut grp.objects, name, label) {
+            set_in_list(&mut grp.root_vertices, name, &dest);
+            if set_in_list(&mut grp.objects, name, &dest) {
                 return;
             }
         }
-        set_in_list(&mut self.canvas.objects, name, label);
+        set_in_list(&mut self.canvas.root_vertices, name, &dest);
+        set_in_list(&mut self.canvas.objects, name, &dest);
     }
 
     fn ensure_vertex_exists(&mut self, name: &str) {
         if !self.object_exists(name) {
             self.noedges.insert(name.to_string());
             let mut vr = VertexRef::new(name);
-            if let Some(ref c) = self.active_defaults().vertexcolor {
-                vr.color = Some(c.clone());
-            }
+            vr.color = self.find_default_vertexcolor();
+            vr.textcolor = self.find_default_vertextextcolor();
             self.push_object(GraphObject::VertexRef {
                 vertex: vr.clone(),
             });
@@ -259,8 +371,14 @@ impl AstBuilder {
                 }
             }
             Rule::shape_decl => {
-                if let Some(p) = pair.into_inner().find(|p| p.as_rule() == Rule::NAME) {
-                    self.canvas.shape = Some(p.as_str().trim().to_lowercase());
+                if let Some(p) = pair.into_inner().find(|p| p.as_rule() == Rule::shape_or_variable) {
+                    let s = p.as_str().trim();
+                    let shape = if s.starts_with("$(") {
+                        self.handle_variable(s).to_lowercase()
+                    } else {
+                        s.to_lowercase()
+                    };
+                    self.canvas.shape = Some(shape);
                 }
             }
             Rule::vertex_color => {
@@ -413,14 +531,14 @@ impl AstBuilder {
             }
             Rule::group_start => {
                 let mut name = None;
-                let mut label = None;
+                let mut raw_label = None;
                 let mut color = None;
 
                 for p in pair.into_inner() {
                     match p.as_rule() {
                         Rule::NAME => name = Some(p.as_str().trim().to_string()),
                         Rule::LABEL => {
-                            label = Some(p.as_str().trim_start_matches(';').trim().to_string())
+                            raw_label = Some(p.as_str().to_string());
                         }
                         Rule::color_or_variable => {
                             color = Some(self.extract_color_or_var(p)?);
@@ -436,8 +554,14 @@ impl AstBuilder {
                 });
 
                 let mut group = GraphGroup::new(&group_name);
-                group.label = label;
-                group.color = color;
+                if let Some(lbl) = raw_label {
+                    let dest = self.destructure_label(&lbl);
+                    group.label = dest.label;
+                    if dest.textcolor.is_some() {
+                        group.textcolor = dest.textcolor;
+                    }
+                }
+                group.color = color.or_else(|| self.find_default_groupcolor());
                 let exit_id = self.context.container_exit.unwrap_or(1);
                 group.exitvertex = Some(exit_id);
                 self.context.container_exit = Some(exit_id + 1);
@@ -459,18 +583,24 @@ impl AstBuilder {
     }
 
     fn extract_color_or_var(&mut self, pair: Pair<Rule>) -> Result<String, String> {
-        for inner in pair.clone().into_inner() {
-            if inner.as_rule() == Rule::color_or_variable {
-                let s = inner.as_str().trim();
-                if s.starts_with("$(") {
-                    return Ok(self.handle_variable(s));
-                }
-                return Ok(s.to_string());
-            }
-        }
         let s = pair.as_str().trim();
         if s.starts_with("$(") {
             return Ok(self.handle_variable(s));
+        }
+        if s.starts_with('#') {
+            return Ok(s.to_string());
+        }
+        for inner in pair.into_inner() {
+            let is = inner.as_str().trim();
+            if is.starts_with("$(") {
+                return Ok(self.handle_variable(is));
+            }
+            if inner.as_rule() == Rule::COLOR || is.starts_with('#') {
+                return Ok(is.to_string());
+            }
+            if inner.as_rule() == Rule::color_or_variable {
+                return self.extract_color_or_var(inner);
+            }
         }
         Ok(s.to_string())
     }
@@ -600,6 +730,12 @@ impl AstBuilder {
                         if let Some(ref lbl) = pv.label {
                             vertex.label = Some(lbl.clone());
                         }
+                        if let Some(ref tc) = pv.textcolor {
+                            vertex.textcolor = Some(tc.clone());
+                        }
+                        if let Some(ref u) = pv.url {
+                            vertex.url = Some(u.clone());
+                        }
                         return true;
                     }
                     GraphObject::Vertex(v) if v.name == pv.name => {
@@ -618,6 +754,12 @@ impl AstBuilder {
                         if let Some(ref lbl) = pv.label {
                             v.label = Some(lbl.clone());
                         }
+                        if let Some(ref tc) = pv.textcolor {
+                            v.textcolor = Some(tc.clone());
+                        }
+                        if let Some(ref u) = pv.url {
+                            v.url = Some(u.clone());
+                        }
                         return true;
                     }
                     GraphObject::Group(g) => {
@@ -632,10 +774,12 @@ impl AstBuilder {
         }
 
         for grp in self.group_stack.iter_mut().rev() {
+            update_in_list(&mut grp.root_vertices, pv);
             if update_in_list(&mut grp.objects, pv) {
                 return;
             }
         }
+        update_in_list(&mut self.canvas.root_vertices, pv);
         update_in_list(&mut self.canvas.objects, pv);
     }
 
@@ -859,7 +1003,7 @@ impl AstBuilder {
                         lhs.clone(),
                         rhs.name.clone(),
                     );
-                    edge.color = conn.color.clone();
+                    edge.color = conn.color.clone().or_else(|| self.find_default_edgecolor());
                     edge.lcompass = conn.lcompass.clone();
                     edge.rcompass = conn.rcompass.clone();
                     let edge_label = if self.is_group(&rhs.name) {
@@ -867,9 +1011,17 @@ impl AstBuilder {
                     } else {
                         rhs.edge_label.clone()
                     };
-                    edge.label = edge_label
+                    let raw_edge_lbl = edge_label
                         .or_else(|| conn.label.clone())
                         .or_else(|| common_chain_label.clone());
+                    if let Some(raw) = raw_edge_lbl {
+                        let dest = self.destructure_label(&raw);
+                        edge.label = dest.label;
+                        edge.textcolor = dest.textcolor.or_else(|| self.find_default_edgetextcolor());
+                        edge.url = dest.url;
+                    } else {
+                        edge.textcolor = self.find_default_edgetextcolor();
+                    }
                     edge.parent = parent.clone();
 
                     self.canvas.objects.push(GraphObject::Edge { edge });

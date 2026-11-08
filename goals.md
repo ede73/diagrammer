@@ -49,11 +49,26 @@ Restructure the project so that parsing, AST modeling, code generation, layout e
 - **Runtime Metadata**: Every visualizer exposes its execution runtime in the UI:
   - ⚡ **Browser (WASM/JS)**: Runs locally and privately in the browser with zero network or backend dependencies.
   - 🖥️ **CLI (Backend)**: Requires native host CLI binaries (`plantuml.jar`, `blockdiag`, etc.).
+- **Graceful Group Degradation**: When projecting a graph with groups onto a visualizer that has no concept of groups (analogous to projecting 3D onto 1D, e.g., Sequence Diagrams), some structural container information is naturally lost:
+  - **Flatten Groups**: Unwrap all groups (including nested groups) so all inner vertices (`a, b, c` in `GROUP`, `d, e, f` in `AnotherGroup`) are preserved as first-class vertices/participants.
+  - **Preserve Vertex-to-Vertex Edges**: All vertex-to-vertex connections (both within a group and across groups, such as `b > e`) are rendered normally.
+  - **Ignore Group-Level Links**: Edges connected directly to or from a group container (`GROUP --> AnotherGroup` or `node --> GROUP`) are ignored/omitted in group-less visualizers.
 
 ### 1.6 In-Browser WebAssembly Everywhere (Zero CLI Tools)
 - Eliminate all backend CLI requirements for browser users:
   - **Mermaid**: Migrate from backend Node `mmdc` CLI to client-side `mermaid.js` rendering (`mermaid.render()`), making Mermaid diagrams 100% in-browser.
-  - **Mermaid Generator Architecture**: Group Mermaid engines by semantic language families (Flowchart/Graph vs State vs Sequence vs ER) rather than string hacks. Provide clean structural generators mapped to matching visualizer engines.
+  - **Mermaid Generator Architecture**: Group Mermaid engines by semantic language families (Flowchart/Graph vs State vs Sequence vs ER) rather than string hacks:
+    - *Flowchart / Graph (`dagre-d3`)*: 1:1 match for general DAGs, vertices, shapes, and subgraphs. [Implemented]
+    - *State Diagram (`stateDiagram-v2`)*: 95% native match for state charts, mapping `beginpoint`/`endpoint` to `[*]`, and nested groups to `state Composite { ... }`. [Implemented]
+    - *Sequence Diagram (`sequenceDiagram`)*: Chronological interaction model with Graceful Group Degradation. [Implemented]
+    - *Class Diagram (`classDiagram`)*: UML object model with properties, methods, generics `~T~`, and relationships (`<|--`, `*--`, `o--`, `-->`, `..>`). [Implemented]
+    - *Mindmap (`mindmap`)*: Pure hierarchical DFS spanning-tree projection from root with indentation and node shapes. [Implemented]
+    - *Entity Relationship (`erDiagram`)*: Relational models with entities, attributes, and cardinality specifications (`||--|{`, `||--o{`, `}|--||`). [Implemented]
+    - *CLI Generator Test Suite*: Native Rust tests in `crates/diagrammer-core/tests/mermaid_generators.rs` run syntax and sanitization invariants across diagram fixtures in ~0.05s via `cargo test`, bypassing heavy headless browser test runners for fast generator verification. [Implemented]
+    - *Excluded Non-Graph Languages*: Pie charts (`pie`), quadrant charts (`quadrantChart`), XY charts (`xychart`), Git commit logs (`gitGraph`), user journeys (`journey`), Gantt calendars (`gantt`), and packet headers (`packet`) do not represent topological graphs and are excluded by design.
+  - **Mermaid Source Analysis (`/Users/ede/src/mermaid`)**:
+    - Inspection of Jison grammars (`packages/mermaid/src/diagrams/`) reveals that while Mermaid shares surface lexer conventions across diagrams (copy-pasting `%lex`, `%x acc_title`, `%x acc_descr`, `%%` comments, and arrow tokens from Andrew Brampton's `js-sequence-diagrams`), their AST models and grammar productions are distinct and strictly incompatible.
+    - Diagrammer's unified grammar (`diagrammer.pest`) serves as the universal adapter, allowing a single expressive model to project cleanly into any of Mermaid's specialized target sub-languages without syntax hacks.
   - **External Python tools** (`blockdiag`, `actdiag`, `nwdiag`, `seqdiag`) & **Java tools** (`plantuml.jar`): Rather than running heavy multi-megabyte Pyodide or JVM WASM emulators, replace them directly with Diagrammer's native Rust layout engines.
 
 ### 1.7 First-Party Native Rust Layout Engines (Surpassing Graphviz & Mermaid)

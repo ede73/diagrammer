@@ -358,6 +358,39 @@ impl GraphGroup {
             })
             .collect()
     }
+
+    /// Recursively flattens all groups and returns only Vertex / VertexRef objects in declaration order.
+    pub fn get_flattened_vertices(&self) -> Vec<&GraphObject> {
+        fn collect<'a>(objects: &'a [GraphObject], out: &mut Vec<&'a GraphObject>) {
+            for obj in objects {
+                match obj {
+                    GraphObject::Group(grp) => collect(&grp.objects, out),
+                    GraphObject::Vertex(_) | GraphObject::VertexRef { .. } => out.push(obj),
+                    _ => {}
+                }
+            }
+        }
+        let mut out = Vec::new();
+        collect(&self.objects, &mut out);
+        out
+    }
+
+    /// Recursively collects the names of all Group containers in the canvas.
+    pub fn get_group_names(&self) -> std::collections::HashSet<String> {
+        fn collect(objects: &[GraphObject], out: &mut std::collections::HashSet<String>) {
+            for obj in objects {
+                if let GraphObject::Group(grp) = obj {
+                    if !grp.name.is_empty() {
+                        out.insert(grp.name.clone());
+                    }
+                    collect(&grp.objects, out);
+                }
+            }
+        }
+        let mut out = std::collections::HashSet::new();
+        collect(&self.objects, &mut out);
+        out
+    }
 }
 
 /// Parsing context state captured during parse
@@ -441,6 +474,39 @@ impl GraphCanvas {
                 _ => true,
             })
             .collect()
+    }
+
+    /// Recursively flattens all groups and returns only Vertex / VertexRef objects in declaration order.
+    pub fn get_flattened_vertices(&self) -> Vec<&GraphObject> {
+        fn collect<'a>(objects: &'a [GraphObject], out: &mut Vec<&'a GraphObject>) {
+            for obj in objects {
+                match obj {
+                    GraphObject::Group(grp) => collect(&grp.objects, out),
+                    GraphObject::Vertex(_) | GraphObject::VertexRef { .. } => out.push(obj),
+                    _ => {}
+                }
+            }
+        }
+        let mut out = Vec::new();
+        collect(&self.objects, &mut out);
+        out
+    }
+
+    /// Recursively collects the names of all Group containers in the canvas.
+    pub fn get_group_names(&self) -> std::collections::HashSet<String> {
+        fn collect(objects: &[GraphObject], out: &mut std::collections::HashSet<String>) {
+            for obj in objects {
+                if let GraphObject::Group(grp) = obj {
+                    if !grp.name.is_empty() {
+                        out.insert(grp.name.clone());
+                    }
+                    collect(&grp.objects, out);
+                }
+            }
+        }
+        let mut out = std::collections::HashSet::new();
+        collect(&self.objects, &mut out);
+        out
     }
 }
 

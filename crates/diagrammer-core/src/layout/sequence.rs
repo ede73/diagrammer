@@ -1,4 +1,4 @@
-use crate::ast::{ArrowType, GraphCanvas, GraphObject};
+use crate::ast::{ArrowType, GraphCanvas};
 use std::collections::HashMap;
 
 /// Participant representation extracted from the canvas
@@ -124,6 +124,25 @@ impl SequenceLayoutEngine {
       stroke-width: 1.5;
       stroke-dasharray: 4 4;
       opacity: 0.65;
+    }
+    .ds-activation {
+      fill: #1e293b;
+      stroke: #38bdf8;
+      stroke-width: 1.5;
+      rx: 3px;
+      ry: 3px;
+    }
+    .ds-note-box {
+      fill: #1e293b;
+      stroke: #f59e0b;
+      stroke-width: 1.5;
+      filter: url(#ds-shadow);
+    }
+    .ds-note-text {
+      font-size: 11px;
+      fill: #fef3c7;
+      dominant-baseline: central;
+      text-anchor: middle;
     }
     .ds-box {
       rx: 8px;
@@ -297,46 +316,30 @@ impl SequenceLayoutEngine {
 
     /// Extracts participants and ordered messages from the GraphCanvas AST
     fn extract_model(&self, canvas: &GraphCanvas) -> (Vec<Participant>, Vec<Message>) {
+        let group_names = canvas.get_group_names();
         let mut participants: Vec<Participant> = Vec::new();
         let mut part_indices: HashMap<String, usize> = HashMap::new();
 
-        // 1. Collect explicitly defined vertices / groups
-        for obj in canvas.get_objects(false) {
-            match obj {
-                GraphObject::Group(grp) => {
-                    for z in grp.get_objects(false) {
-                        let name = z.get_name().to_string();
-                        if !name.is_empty() && !part_indices.contains_key(&name) {
-                            let label = z.get_label().unwrap_or(&name).to_string();
-                            part_indices.insert(name.clone(), participants.len());
-                            participants.push(Participant {
-                                id: name,
-                                label,
-                                color: z.get_color().map(|s| s.to_string()),
-                                textcolor: z.get_textcolor().map(|s| s.to_string()),
-                            });
-                        }
-                    }
-                }
-                GraphObject::Vertex(_) | GraphObject::VertexRef { .. } => {
-                    let name = obj.get_name().to_string();
-                    if !name.is_empty() && !part_indices.contains_key(&name) {
-                        let label = obj.get_label().unwrap_or(&name).to_string();
-                        part_indices.insert(name.clone(), participants.len());
-                        participants.push(Participant {
-                            id: name,
-                            label,
-                            color: obj.get_color().map(|s| s.to_string()),
-                            textcolor: obj.get_textcolor().map(|s| s.to_string()),
-                        });
-                    }
-                }
-                _ => {}
+        // 1. Collect explicitly defined vertices (recursively flattening groups)
+        for obj in canvas.get_flattened_vertices() {
+            let name = obj.get_name().to_string();
+            if !name.is_empty() && !part_indices.contains_key(&name) {
+                let label = obj.get_label().unwrap_or(&name).to_string();
+                part_indices.insert(name.clone(), participants.len());
+                participants.push(Participant {
+                    id: name,
+                    label,
+                    color: obj.get_color().map(|s| s.to_string()),
+                    textcolor: obj.get_textcolor().map(|s| s.to_string()),
+                });
             }
         }
 
-        // 2. Discover edge participants not yet declared
+        // 2. Discover edge participants not yet declared (ignoring group containers)
         for edge in canvas.get_edges() {
+            if group_names.contains(&edge.left) || group_names.contains(&edge.right) {
+                continue;
+            }
             if !edge.left.is_empty() && !part_indices.contains_key(&edge.left) {
                 let idx = participants.len();
                 part_indices.insert(edge.left.clone(), idx);
@@ -359,9 +362,12 @@ impl SequenceLayoutEngine {
             }
         }
 
-        // 3. Extract messages
+        // 3. Extract vertex-to-vertex messages (ignoring group-to-group / group-to-node links)
         let mut messages: Vec<Message> = Vec::new();
         for edge in canvas.get_edges() {
+            if group_names.contains(&edge.left) || group_names.contains(&edge.right) {
+                continue;
+            }
             if let (Some(&from_idx), Some(&to_idx)) = (part_indices.get(&edge.left), part_indices.get(&edge.right)) {
                 let is_dashed = edge.line_type() == "dashed" || edge.line_type() == "dotted";
                 messages.push(Message {

@@ -176,7 +176,7 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
                 .arg("-p");
             c
         }
-        "mermaid_sequence" => {
+        "mermaid_sequence" | "mermaid" | "mermaid_flowchart" | "mermaid_state" | "mermaid_class" | "mermaid_mindmap" | "mermaid_er" => {
             let mut c = Command::new("mmdc");
             c.arg("-e").arg(format).arg("-i-").arg("-o-");
             c
@@ -275,7 +275,10 @@ fn run_server(port: u16) {
 
     for stream in listener.incoming() {
         if let Ok(mut stream) = stream {
-            let _ = handle_connection(&mut stream);
+            std::thread::spawn(move || {
+                let _ = stream.set_read_timeout(Some(std::time::Duration::from_secs(15)));
+                let _ = handle_connection(&mut stream);
+            });
         }
     }
 }
@@ -309,7 +312,7 @@ fn handle_connection(stream: &mut TcpStream) -> io::Result<()> {
         }
     }
 
-    let cors_headers = "Access-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: access-control-allow-origin, content-type\r\nCache-Control: no-cache, no-store, must-revalidate\r\n";
+    let cors_headers = "Access-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: access-control-allow-origin, content-type\r\nCache-Control: no-cache, no-store, must-revalidate\r\nConnection: close\r\n";
 
     const MAX_PAYLOAD_SIZE: usize = 10 * 1024 * 1024; // 10 MB maximum request payload
     if content_length > MAX_PAYLOAD_SIZE {

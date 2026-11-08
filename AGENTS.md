@@ -33,8 +33,7 @@ This document describes the `diagrammer` repository layout, key entry points, an
 
 ## Core directories
 - `crates/diagrammer-core/` — 100% Rust core (Pest PEG grammar, AST model, and all 13 generators)
-- `web/` — browser UI, interactive editor, WebAssembly integration, and web visualizations (zero-build ES modules)
-- `ace/` — Ace code editor and diagrammer syntax highlighter mode
+- `web/` — browser UI, interactive editor, Ace mode, WebAssembly integration, and web visualizations (zero-build ES modules)
 - `tests/` — language inputs, reference outputs, browser Jest regression infrastructure
 - `build/` — generated WASM packages and build artifacts
 - `scripts/` — auxiliary build utilities

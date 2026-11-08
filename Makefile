@@ -37,9 +37,9 @@ _all: pest_parser_bin wasm_pkg parser active_project_deps
 
 DELETE_ON_ERROR: $(LOCK_FILE)
 
-active_project_deps: index.html
+active_project_deps: web/index.html
 
-index.html : index_template.html tests/test_inputs/*.txt web/visualizations/*.js
+web/index.html : web/index_template.html tests/test_inputs/*.txt web/visualizations/*.js
 	@awk '/{REPLACE_WITH_TEST_EXAMPLES}/{ while ("ls tests/test_inputs/*.txt | sort |sed 's,^tests/test_inputs/,,g'" | getline var) printf("<option value=\"test_inputs/%s\">%s</option>\n",var,var);next} /{REPLACE_WITH_WEB_VISUALIZATION_MODULES}/{ while ("ls web/visualizations/visualize*.js | sort" | getline var) printf("<script type=\"module\" src=\"%s\"></script>\n",var);next}{print $0}' $< >$@
 
 plantuml_jar:
@@ -50,7 +50,7 @@ plantuml_jar:
 
 parser: pest_parser_bin wasm_pkg
 
-tests: parser plantuml_jar index.html
+tests: parser plantuml_jar web/index.html
 	make -C tests
 
 clean:

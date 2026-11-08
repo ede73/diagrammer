@@ -127,4 +127,19 @@ describe('Diagrammer', () => {
         });
         expect(svgExists).toBe(true);
     });
+    it('asserts in-browser mermaid flowchart renders ast.txt without errors', async () => {
+        await clearGeneratorResults(getPage());
+        await clearGraph(getPage());
+        await selectExampleCode(getPage(), 'test_inputs/ast.txt');
+        await waitForGeneratorResults(getPage());
+        await selectGeneratorVisualizer(getPage(), 'mermaid');
+        await waitForGeneratorResults(getPage());
+        await waitUntilGraphDrawn(getPage());
+        const svgExists = await getPage().evaluate(() => {
+            const svg = document.querySelector('#diagrammer-graph svg');
+            const errorElem = document.querySelector('#diagrammer-graph pre');
+            return svg !== null && errorElem === null;
+        });
+        expect(svgExists).toBe(true);
+    });
 });

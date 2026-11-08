@@ -13,6 +13,19 @@ ACTIVE ROADMAP & CHAT TASKS
     - [x] Mermaid ER Diagram generator (erDiagram): entities and cardinality mapping (||--|{, ||--o{, }|--||, ||--||) [Landed]
     - [x] CLI / Native Rust Fast Generator Tests: test generator syntax invariants and sanitization across fixtures via cargo test (crates/diagrammer-core/tests/mermaid_generators.rs in 0.05s, zero Puppeteer needed) [Landed]
     - [x] Mermaid Repository Analysis (/Users/ede/src/mermaid): deeper analysis of Jison vs Langium grammars, surface lexical commonalities vs semantic AST divergence [Documented in goals.md & NOTES.md]
+[ ] Core AST & Grammar: Complete Variable Interpolation & Label Processing in AstBuilder
+    - Port legacy `setLabel` logic to Rust `builder.rs`:
+      * Variable interpolation in all labels and strings: scan `$(var)` and substitute from `ParsingContext.variables`.
+      * Color extraction: extract leading `#RRGGBB` or `$(color)` to `textcolor` property on vertex, edge, and group.
+      * URL extraction: extract `[http://...]` into `url` property on vertex and edge.
+      * Quote and whitespace normalization for inline strings.
+    - Contextual color defaults propagation: ensure `VERTEX COLOR`, `VERTEX TEXTCOLOR`, `EDGE COLOR`, `EDGE TEXTCOLOR`, and `GROUP COLOR` properly apply to objects.
+    - Add `colors.txt` and `url.txt` to golden parity regression tests to guarantee 0 regressions.
+[ ] Diagram Theming & Dark Mode Color Translation Strategy:
+    - Problem: Raw light-world colors (e.g. #FF0000, dark text, dark edge/vertex fills) get unreadable/crusted on dark canvases.
+    - Strategy: Implement adaptive dark-mode palette transformation for user-defined colors:
+      * Colors should not stay raw #FF0000 in dark mode; they need luminance-aware or theme-mapped equivalents.
+      * Evaluate DSL color syntax (`EDGE COLOR`, `group COLOR`, `VERTEX COLOR`) and potential redesign.
 [ ] First-party Sequence Engine extensions: lifeline activations ([ / ]), notes (note right of A), frames (loop / alt / par)
 [ ] First-party Hierarchical DAG Layout Engine in pure Rust (Sugiyama framework to replace Graphviz dot)
 [ ] Language & Grammar extensions: flow constructs (while, for, alt), rich arrowheads (|->, <<->), multi-exit subgraphs

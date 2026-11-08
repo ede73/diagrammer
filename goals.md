@@ -104,6 +104,21 @@ Extend Diagrammer's unified DSL to natively express rich diagram structures:
   - Arrow types: `|->`, `<<->`, `|-|`, `..>`.
   - Subgraph entrance/exit auto-linking: `b > (c > d, e > f) > z`.
 
+### 1.9 Complete Variable Interpolation & Full Label Semantics in Rust Core
+- **Problem**: Variable substitution (`$(var)`) was only hooked into direct property assignments in `AstBuilder`, leaving `$(var)` unexpanded in labels, strings, and URLs. Crucial label destructuring pipeline logic (`setLabel` from legacy TypeScript) was missed during migration: leading colors (`;#ff0000...` or `;$(darkviolet)...`) were not extracted to `textcolor`, URLs (`[http://...]`) were not extracted to `url`, and contextual defaults (`VERTEX COLOR`, `VERTEX TEXTCOLOR`, `EDGE COLOR`, etc.) did not propagate to rendered elements.
+- **Goal**:
+  1. Port the full `setLabel` destructuring pipeline into `crates/diagrammer-core/src/builder.rs`.
+  2. Perform variable expansion across all labels, quoted strings, and attribute positions using `ParsingContext.variables`.
+  3. Extract leading text colors and bracketed URLs from labels into dedicated AST fields (`textcolor`, `url`) across vertices, edges, and groups.
+  4. Expand golden parity test fixtures to include `colors.txt` and `url.txt` to guarantee zero regressions against legacy reference outputs.
+
+### 1.10 Adaptive Diagram Theming & Dark Mode Color Translation
+- **Problem**: Graphs created with light-mode colors (e.g., `#FF0000`, dark text on light backgrounds, saturated fills) often appear harsh, illegible, or "crusted" when viewed on dark canvases in modern dark-mode interfaces.
+- **Goal**:
+  1. Design and implement an intelligent theme transformation engine for colors.
+  2. Rather than retaining raw, unadapted RGB hex values in dark mode, provide luminance-aware, contrast-preserving dark mode color transformations or palette swaps.
+  3. Re-evaluate the DSL syntax for color definitions (`EDGE COLOR`, `group COLOR`, `VERTEX COLOR`) to support cleaner, modern theme-first declarations.
+
 ---
 
 ## 2. Target Component Architecture

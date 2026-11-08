@@ -87,6 +87,15 @@ export function addLine(i) {
             case 9:
                 appendLine('if something would happend then\n' + '  a1>b1\n' + 'elseif something probably would not happen then\n' + ' a2>b2\n' + 'elseif or if i see a flying bird then\n' + ' a3>b3\n' + 'else\n' + '  a4>b4\n' + 'endif\n');
                 break;
+            case 10:
+                prependLine('theme {\n  background: #1e1e2e\n  vertex-color: #3b82f6\n  edge-color: #f59e0b\n}\n');
+                break;
+            case 11:
+                prependLine('layout {\n  direction: lr\n  node-sep: 20\n  rank-sep: 40\n}\n');
+                break;
+            case 12:
+                prependLine('include "theme.diag"\n');
+                break;
         }
     }
     parseAndRegenerate();

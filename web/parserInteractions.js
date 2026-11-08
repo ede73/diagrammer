@@ -1,5 +1,6 @@
 import { getError, getInputElement, getSelectedVisualizer, setError, setVisualizer } from './uiComponentAccess.js';
 import { makeHTTPPost } from './ajax.js';
+import { getLogicalFiles } from './localStorage.js';
 let wasmModule = null;
 let wasmInitPromise = null;
 async function loadWasm() {
@@ -44,7 +45,10 @@ export function parse(diagrammerCode, successCallback, failureCallback, preferSc
     }
     if (wasmModule) {
         try {
-            const result = wasmModule.wasm_parse_and_generate(diagrammerCode, visualizer);
+            const filesJson = JSON.stringify(getLogicalFiles());
+            const result = wasmModule.wasm_parse_and_generate_with_files
+                ? wasmModule.wasm_parse_and_generate_with_files(diagrammerCode, visualizer, filesJson)
+                : wasmModule.wasm_parse_and_generate(diagrammerCode, visualizer);
             const resultElem = getInputElement('diagrammer-result');
             if (resultElem) {
                 resultElem.value = result;
@@ -68,7 +72,10 @@ export function parse(diagrammerCode, successCallback, failureCallback, preferSc
     loadWasm().then((wasm) => {
         if (wasm) {
             try {
-                const result = wasm.wasm_parse_and_generate(diagrammerCode, visualizer);
+                const filesJson = JSON.stringify(getLogicalFiles());
+                const result = wasm.wasm_parse_and_generate_with_files
+                    ? wasm.wasm_parse_and_generate_with_files(diagrammerCode, visualizer, filesJson)
+                    : wasm.wasm_parse_and_generate(diagrammerCode, visualizer);
                 const resultElem = getInputElement('diagrammer-result');
                 if (resultElem) {
                     resultElem.value = result;

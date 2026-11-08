@@ -122,7 +122,10 @@ Extend Diagrammer's unified DSL to natively express rich diagram structures:
 - **Language & DSL Architecture Roadmap**:
   1. **`theme { ... }` block**: Declarative styling block for graph-wide and element styles (fonts, font sizes, palette tokens, stroke colors, dark/light variants).
   2. **`layout { ... }` block**: Engine-agnostic geometry tuning (padding, rank/node separation, edge weight/thickness, margins).
-  3. **`include "..."` directive**: Modular preset loading for CLI and Web (e.g., `include "themes/nord.diag"`, `include "layouts/compact.diag"`) allowing diagrams to stay clean and focused solely on structure without being inundated with styling declarations.
+  3. **`include "..."` directive**: Modular preset loading for CLI and Web (e.g., `include "theme.diag"`, `include "layouts/compact.diag"`):
+     - **CLI**: Resolves files relative to the script itself via `AstBuilder::with_base_dir()`.
+     - **Web**: Standalone in-browser Theme / Logical Files editor tab storing logical files in localStorage, dynamically passed into WASM via `wasm_parse_and_generate_with_files`.
+     - Diagrams remain clean and focused on logical graph connectivity without style boilerplate.
 
 ---
 

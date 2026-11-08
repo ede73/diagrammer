@@ -11,13 +11,23 @@ pub struct DiagrammerParser;
 
 use wasm_bindgen::prelude::*;
 
-pub fn parse_and_generate(input: &str, visualizer: &str) -> Result<String, String> {
+pub fn parse_and_generate_with_files(
+    input: &str,
+    visualizer: &str,
+    files_json: Option<&str>,
+) -> Result<String, String> {
+    let mut builder = builder::AstBuilder::new();
+    if let Some(json_str) = files_json {
+        if let Ok(files) = serde_json::from_str::<std::collections::HashMap<String, String>>(json_str) {
+            builder = builder.with_logical_files(files);
+        }
+    }
     let trimmed = input.trim_start();
     let canvas = if trimmed.starts_with('{') && trimmed.contains("\"__PSEUDOTYPE\"") && trimmed.contains("\"GraphCanvas\"") {
         serde_json::from_str::<ast::GraphCanvas>(input)
             .map_err(|e| format!("Failed to parse AST JSON: {}", e))?
     } else {
-        builder::AstBuilder::new().build(input)?
+        builder.build(input)?
     };
 
     if visualizer == "ast" {
@@ -30,9 +40,22 @@ pub fn parse_and_generate(input: &str, visualizer: &str) -> Result<String, Strin
     }
 }
 
+pub fn parse_and_generate(input: &str, visualizer: &str) -> Result<String, String> {
+    parse_and_generate_with_files(input, visualizer, None)
+}
+
 #[wasm_bindgen]
 pub fn wasm_parse_and_generate(input: &str, visualizer: &str) -> Result<String, JsValue> {
     parse_and_generate(input, visualizer).map_err(|e| JsValue::from_str(&e))
+}
+
+#[wasm_bindgen]
+pub fn wasm_parse_and_generate_with_files(
+    input: &str,
+    visualizer: &str,
+    files_json: Option<String>,
+) -> Result<String, JsValue> {
+    parse_and_generate_with_files(input, visualizer, files_json.as_deref()).map_err(|e| JsValue::from_str(&e))
 }
 
 #[cfg(test)]

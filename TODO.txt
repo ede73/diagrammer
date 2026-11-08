@@ -30,7 +30,10 @@ ACTIVE ROADMAP & CHAT TASKS
     - [x] Language DSL Extension: `layout { ... }` block [Landed]
       * Declarative layout tuning: node padding, rank separation, node separation, edge size/weight, margins (where applicable per engine).
     - [x] Language DSL Extension: `include "..."` directive [Landed]
-      * External file inclusion mechanism so graphs can load shared theme/layout presets (CLI, Web, or bundled defaults like `theme/dark`, `theme/nord`, `layout/compact`) without inundating the diagram source with style boilerplate.
+      * External file inclusion mechanism so graphs can load shared theme/layout presets without inundating the diagram source with style boilerplate.
+      * CLI: relative file resolution relative to the script/diagram file itself (`with_base_dir`).
+      * Web UI: standalone Theme / Logical Files editor tab with local storage persistence (`getLogicalFiles`), allowing user to create/edit themes in-browser and include them seamlessly.
+      * Feature example fixtures added to EXAMPLES dropdown: `theme.txt`, `include.txt`, and companion `sample_theme.txt`.
 [ ] First-party Sequence Engine extensions: lifeline activations ([ / ]), notes (note right of A), frames (loop / alt / par)
 [ ] First-party Hierarchical DAG Layout Engine in pure Rust (Sugiyama framework to replace Graphviz dot)
 [ ] Language & Grammar extensions: flow constructs (while, for, alt), rich arrowheads (|->, <<->), multi-exit subgraphs

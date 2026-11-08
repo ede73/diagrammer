@@ -32,6 +32,7 @@ pub struct AstBuilder {
     noedges: HashSet<String>,
     included_files: HashSet<String>,
     base_dir: Option<std::path::PathBuf>,
+    logical_files: std::collections::HashMap<String, String>,
 }
 
 impl Default for AstBuilder {
@@ -55,11 +56,17 @@ impl AstBuilder {
             noedges: HashSet::new(),
             included_files: HashSet::new(),
             base_dir: None,
+            logical_files: std::collections::HashMap::new(),
         }
     }
 
     pub fn with_base_dir(mut self, path: impl Into<std::path::PathBuf>) -> Self {
         self.base_dir = Some(path.into());
+        self
+    }
+
+    pub fn with_logical_files(mut self, files: std::collections::HashMap<String, String>) -> Self {
+        self.logical_files = files;
         self
     }
 
@@ -764,7 +771,18 @@ impl AstBuilder {
         }
         self.included_files.insert(target.clone());
 
-        // Check virtual themes & presets
+        // 1. Check logical files (from Web editor / user storage)
+        if let Some(content) = self.logical_files.get(&target).cloned() {
+            self.parse_and_process(&content)?;
+            return Ok(());
+        }
+        let target_no_ext = target.trim_end_matches(".diag").trim_end_matches(".txt");
+        if let Some(content) = self.logical_files.get(target_no_ext).cloned() {
+            self.parse_and_process(&content)?;
+            return Ok(());
+        }
+
+        // 2. Check virtual built-in themes & presets
         let virtual_content = match target.as_str() {
             "theme/dark" | "dark" => Some("theme {\n  background: #0d1117\n  color: #c9d1d9\n  vertex-color: #161b22\n  edge-color: #58a6ff\n}\n"),
             "theme/light" | "light" => Some("theme {\n  background: #ffffff\n  color: #24292f\n  vertex-color: #f6f8fa\n  edge-color: #0969da\n}\n"),
@@ -1341,5 +1359,28 @@ c > d
         assert!(edges.iter().any(|e| e.left == "c" && e.right == "d"));
 
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn test_include_logical_files() {
+        use std::collections::HashMap;
+        let mut files = HashMap::new();
+        files.insert(
+            "custom.diag".to_string(),
+            "theme {\n  background: #333333\n  edge-color: #ffaa00\n}\n".to_string(),
+        );
+
+        let input = r#"
+include "custom.diag"
+p > q
+"#;
+        let canvas = AstBuilder::new()
+            .with_logical_files(files)
+            .build(input)
+            .expect("Failed to build AST with logical file include");
+
+        assert!(canvas.theme.is_some());
+        assert_eq!(canvas.theme.as_ref().unwrap().background.as_deref(), Some("#333333"));
+        assert_eq!(canvas.defaults.edgecolor.as_deref(), Some("#ffaa00"));
     }
 }

@@ -1,6 +1,6 @@
 import { getSavedGraphs } from './localStorage.js';
 import { parse } from './parserInteractions.js';
-import { getInputElement, getSelectElement, getSelectedVisualizer, updateRuntimeBadge } from './uiComponentAccess.js';
+import { getInputElement, getSelectElement, getSelectedVisualizer, updateRuntimeBadge, populateVisualizerDropdown, setVisualizer } from './uiComponentAccess.js';
 import { makeHTTPGet } from './ajax.js';
 import { clearBeautified, visualize } from './visualize.js';
 const acemode = 1;
@@ -92,8 +92,26 @@ export function addLine(i) {
     parseAndRegenerate();
     return false;
 }
+export function generatorGroupChanged() {
+    const groupSelect = document.getElementById('diagrammer-generator-group');
+    if (!groupSelect) return;
+    populateVisualizerDropdown(groupSelect.value);
+    const vizSelect = document.getElementById('diagrammer-visualizer');
+    if (vizSelect && vizSelect.options.length > 0) {
+        setVisualizer(vizSelect.options[0].value);
+    }
+    parseAndRegenerate();
+}
+export function visualizerChanged() {
+    const vizSelect = document.getElementById('diagrammer-visualizer');
+    if (vizSelect) {
+        setVisualizer(vizSelect.value);
+    }
+    parseAndRegenerate();
+}
 export function generatorChanged() {
-    updateRuntimeBadge();
+    const current = getSelectedVisualizer();
+    setVisualizer(current);
     parseAndRegenerate();
 }
 function parseAndRegenerate(preferScriptSpecifiedVisualizer = false) {

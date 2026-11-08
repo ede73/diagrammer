@@ -25,11 +25,39 @@ export function updateRuntimeBadge() {
         }
     } catch (_) {}
 }
+export function populateVisualizerDropdown(family) {
+    const vizSelect = document.getElementById('diagrammer-visualizer');
+    if (!vizSelect) return;
+    vizSelect.innerHTML = '';
+    const matching = visualizations.filter(p => p.family === family);
+    matching.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.textContent = p.visualizerLabel || p.menuName;
+        vizSelect.appendChild(opt);
+    });
+}
 export function setVisualizer(visualizer) {
+    if (!visualizer) return;
+    const viz = visualizations.find(p => p.name === visualizer);
+
     const select = document.querySelector('#diagrammer-generator');
-    if (visualizer && select) {
+    if (select) {
         select.value = visualizer;
     }
+
+    if (viz) {
+        const groupSelect = document.getElementById('diagrammer-generator-group');
+        if (groupSelect && groupSelect.value !== viz.family) {
+            groupSelect.value = viz.family;
+            populateVisualizerDropdown(viz.family);
+        }
+        const vizSelect = document.getElementById('diagrammer-visualizer');
+        if (vizSelect) {
+            vizSelect.value = visualizer;
+        }
+    }
+
     updateRuntimeBadge();
     if (getSelectedVisualizer() !== visualizer) {
         console.error(`Somewhy visualizer change did not go thru, we wanted ${visualizer} and have ${getSelectedVisualizer()}`);

@@ -114,4 +114,17 @@ describe('Diagrammer', () => {
     it('asserts parsetree(GoJS) visualization works', async () => {
         await testDynamicRendering(getPage(), 'test_inputs/parsetree.txt');
     });
+    it('asserts in-browser mermaid flowchart renders valid SVG', async () => {
+        await clearGeneratorResults(getPage());
+        await clearGraph(getPage());
+        await setDiagrammerCode(getPage(), 'a>b>c');
+        await selectGeneratorVisualizer(getPage(), 'mermaid');
+        await waitForGeneratorResults(getPage());
+        await waitUntilGraphDrawn(getPage());
+        const svgExists = await getPage().evaluate(() => {
+            const svg = document.querySelector('#diagrammer-graph svg');
+            return svg !== null && svg.children.length > 0;
+        });
+        expect(svgExists).toBe(true);
+    });
 });

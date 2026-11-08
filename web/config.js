@@ -8,6 +8,7 @@ import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilf
 import { visualizeSankey } from './visualizations/visualizeSankey.js';
 import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
 import { visualizeNativeSequence } from './visualizations/visualizeNativeSequence.js';
+import { visualizeMermaid } from './visualizations/visualizeMermaid.js';
 export class Visualization {
     constructor(name, menuName, generator, visualization, cli, metadata = {}) {
         this.name = name;
@@ -20,7 +21,20 @@ export class Visualization {
         this.engine = metadata.engine || name;
         this.runtime = visualization !== undefined ? 'web' : 'cli';
         this.description = metadata.description || '';
+        this.visualizerLabel = metadata.visualizerLabel || (menuName.includes(':') ? menuName.split(':')[1].trim() : menuName);
     }
+}
+export function getGeneratorFamilies() {
+    const families = [];
+    visualizations.forEach(v => {
+        if (!families.includes(v.family)) {
+            families.push(v.family);
+        }
+    });
+    return families;
+}
+export function getVisualizersForFamily(family) {
+    return visualizations.filter(v => v.family === family);
 }
 let localRepoFont;
 if (typeof window !== 'undefined') {
@@ -144,12 +158,18 @@ const _visualizations = [
         '-p'
     ], { family: 'PlantUML', engine: 'plantuml.jar', description: 'PlantUML sequence diagram (Java CLI)' }),
 
-    new Visualization('mermaid_sequence', 'Mermaid: Sequence Diagram [CLI]', 'mermaid_sequence', undefined, (format) => [
+    new Visualization('mermaid', 'Mermaid: Flowchart', 'mermaid', async (g) => {
+        await visualizeMermaid(g);
+    }, undefined, { family: 'Mermaid', engine: 'mermaid.js (Flowchart)', description: 'Mermaid flowchart in-browser' }),
+
+    new Visualization('mermaid_sequence', 'Mermaid: Sequence Diagram', 'mermaid_sequence', async (g) => {
+        await visualizeMermaid(g);
+    }, (format) => [
         'mmdc',
         '-e png',
         '-i-',
         '-o-'
-    ], { family: 'Mermaid', engine: 'mermaid-cli', description: 'Mermaid sequence diagram (Node CLI)' }),
+    ], { family: 'Mermaid', engine: 'mermaid.js (Sequence)', description: 'Mermaid sequence diagram in-browser' }),
 
     new Visualization('ast_record', 'AST: Record Visualizer', 'ast_record', async (g) => {
         await visualizeGraphviz(g, 'dot');

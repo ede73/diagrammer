@@ -20,6 +20,7 @@
 <script type="module" src="web/visualizations/visualizeCirclePacked.js"></script>
 <script type="module" src="web/visualizations/visualizeGraphviz.js"></script>
 <script type="module" src="web/visualizations/visualizeLayerBands.js"></script>
+<script type="module" src="web/visualizations/visualizeMermaid.js"></script>
 <script type="module" src="web/visualizations/visualizeMscGen.js"></script>
 <script type="module" src="web/visualizations/visualizeNativeSequence.js"></script>
 <script type="module" src="web/visualizations/visualizeParseTree.js"></script>
@@ -41,8 +42,13 @@
 <body>
   <!-- Top Toolbar / Navigation -->
   <form name="contact" action="" onsubmit="return false;">
-    <label for="diagrammer-generator">Generator</label>
-    <select id="diagrammer-generator" name="generator" onChange="generatorChanged()"></select>
+    <label for="diagrammer-generator-group">Generator:</label>
+    <select id="diagrammer-generator-group" name="generatorGroup" onChange="generatorGroupChanged()"></select>
+
+    <label for="diagrammer-visualizer" id="diagrammer-visualizer-label">Visualizer:</label>
+    <select id="diagrammer-visualizer" name="visualizer" onChange="visualizerChanged()"></select>
+
+    <select id="diagrammer-generator" name="generator" onChange="generatorChanged()" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; margin: 0; padding: 0; border: none;"></select>
     <span id="diagrammer-runtime-badge" class="runtime-badge"></span>
 
     <label for="diagrammer-example">Examples:</label>
@@ -293,17 +299,31 @@
   <script src="ace/src-noconflict/theme-kr.js" type="text/javascript" charset="utf-8"></script>
 
   <script type="module">
-    import { visualizations } from './web/config.js'
+    import { visualizations, getGeneratorFamilies } from './web/config.js'
+    import { setVisualizer } from './web/uiComponentAccess.js'
+
+    const genGroupSelect = document.getElementById('diagrammer-generator-group')
+    if (genGroupSelect) {
+      genGroupSelect.innerHTML = ''
+      getGeneratorFamilies().forEach(fam => {
+        const opt = document.createElement("option")
+        opt.value = fam
+        opt.textContent = fam
+        genGroupSelect.appendChild(opt)
+      })
+    }
+
     const el = document.getElementById('diagrammer-generator')
-    el.disabled = true
-    visualizations.forEach(p => {
-      const opt = document.createElement("option")
-      opt.value = p.name
-      opt.innerHTML = `${p.menuName}`
-      el.appendChild(opt)
-    })
+    if (el) {
+      el.innerHTML = ''
+      visualizations.forEach(p => {
+        const opt = document.createElement("option")
+        opt.value = p.name
+        opt.innerHTML = `${p.menuName}`
+        el.appendChild(opt)
+      })
+    }
     setVisualizer('ast_record')
-    el.disabled = false
 
     const editor = ace.edit("diagrammer-code");
     editor.getSession().setMode("ace/mode/state");
@@ -405,18 +425,21 @@
       }, { passive: false });
     }
 
-    import { addLine, generatorChanged, exampleChanged, savedChanged, getGraphText, setGraphText } from "./web/editorInteractions.js";
+    import { addLine, generatorChanged, generatorGroupChanged, visualizerChanged, exampleChanged, savedChanged, getGraphText, setGraphText } from "./web/editorInteractions.js";
     window.addLine = addLine;
+    window.generatorGroupChanged = generatorGroupChanged;
+    window.visualizerChanged = visualizerChanged;
     window.generatorChanged = generatorChanged;
     window.exampleChanged = exampleChanged;
     window.savedChanged = savedChanged;
     window.getGraphText = getGraphText;
     window.setGraphText = setGraphText;
 
-    import { getCurrentFilename, openPicWindow, getSelectedVisualizer, getInputElement, setVisualizer } from './web/uiComponentAccess.js';
+    import { getCurrentFilename, openPicWindow, getSelectedVisualizer, getInputElement } from './web/uiComponentAccess.js';
     window.getCurrentFilename = getCurrentFilename;
     window.openPicWindow = openPicWindow;
     window.getSelectedVisualizer = getSelectedVisualizer;
+    window.setVisualizer = setVisualizer;
 
     import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList } from "./web/localStorage.js";
     window.saveCurrentGraph = saveCurrentGraph;

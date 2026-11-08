@@ -55,6 +55,7 @@ For CLI-only checks:
 - If you need to update web UI behavior, inspect `web/` (including `web/ace/`).
 - If you need to test Rust core changes, run `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`.
 - If you need to test browser UI changes, run `make -C tests jesttests`.
+- **Mandatory Documentation Rule**: Whenever the user mentions or assigns a future task, idea, or architectural goal, immediately document and persist it in `goals.md` and `TODO.txt`. Never leave user requirements or vision solely in chat.
 
 ## Helpful facts
 - The core diagrammer parser and all 13 generators are 100% Rust (`crates/diagrammer-core`), compiled to WebAssembly for the browser and native binary for the CLI.

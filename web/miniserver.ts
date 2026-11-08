@@ -3,18 +3,15 @@
 import * as http from 'http'
 import * as fs from 'fs'
 import * as qs from 'querystring'
-import { doCliVisualize } from '../js/clivisualize.js'
-import { configSupport } from '../js/configsupport.js'
 import * as url from 'url'
-import { type VisualizeConfigType } from '../js/visualizeConfigType.js'
+import * as path from 'path'
+import * as os from 'os'
+import { execFileSync } from 'child_process'
 
 const maybePort = process.argv[2]
 
 const host = 'localhost'
-// TODO: Would love to make configurable,  (see setup.sh) tests web/backend.. web/visualize
 const port = maybePort ? Number(maybePort) : 8000
-
-// TODO: CORS MIGHT NOT WORK YET FULLY
 
 const cacheControl = () => {
   return {
@@ -53,42 +50,66 @@ const readPost = (
   })
 }
 
-interface MiniServerConfigType extends VisualizeConfigType {
-  parsedCode: string
+function getDiagrammerBin(): string {
+  if (fs.existsSync('./diagrammer')) return './diagrammer'
+  if (fs.existsSync('./target/release/diagrammer')) return './target/release/diagrammer'
+  if (fs.existsSync('../target/release/diagrammer')) return '../target/release/diagrammer'
+  return 'diagrammer'
 }
 
 const visualize = (
   req: http.IncomingMessage,
   res: http.ServerResponse) => {
-  const qp = qs.parse(req.url as string, '?')
-  if (!qp?.visualizer) {
+  const qp = qs.parse(req.url?.split('?')[1] ?? '')
+  const visualizer = qp?.visualizer as string
+  if (!visualizer) {
     res.writeHead(404)
     res.end()
     return
   }
   readPost(req, (body) => {
-    const useConfig = configSupport<MiniServerConfigType>('miniserver.js', {
-      format: 'png',
-      visualizer: '',
-      visualizedGraph: '-',
-      parsedCode: '',
-      returnImage: true,
-      outputImage: '',
-      redirectingDiag: true
-    })
-
-    useConfig.visualizer = qp.visualizer as string
-    doCliVisualize(useConfig, body, qp.visualizer as string, (finished) => {
+    const tmpPng = path.join(os.tmpdir(), `diagrammer_${Date.now()}_${Math.random().toString(36).substring(7)}.png`)
+    try {
+      const bin = getDiagrammerBin()
+      execFileSync(bin, [visualizer, '-Tpng', '-o', tmpPng], { input: body })
+      const pngBuf = fs.readFileSync(tmpPng)
+      try { fs.unlinkSync(tmpPng) } catch (_) {}
       res.writeHead(200, {
         'Content-Type': 'image/png',
         ...cacheControl(),
         ...corsHeaders()
-      }).end(
-        Buffer.from(useConfig.outputImage, 'latin1').toString('base64')
-      )
-      // // https://adevait.com/nodejs/convert-node-js-buffer-to-string latin1!
-      // fs.writeFileSync('/tmp/z.png', useConfig.outputImage, 'latin1')
-    }).catch(err => { console.error(err) })
+      }).end(pngBuf.toString('base64'))
+    } catch (err: any) {
+      try { if (fs.existsSync(tmpPng)) fs.unlinkSync(tmpPng) } catch (_) {}
+      console.error('Visualization error:', err)
+      res.writeHead(500, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        ...cacheControl(),
+        ...corsHeaders()
+      }).end(String(err))
+    }
+  })
+}
+
+const parseEndpoint = (req: http.IncomingMessage, res: http.ServerResponse) => {
+  const qp = qs.parse(req.url?.split('?')[1] ?? '')
+  const visualizer = (qp.visualizer as string) || 'dot'
+  readPost(req, (body) => {
+    try {
+      const bin = getDiagrammerBin()
+      const output = execFileSync(bin, [visualizer], { input: body, encoding: 'utf-8' })
+      res.writeHead(200, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        ...cacheControl(),
+        ...corsHeaders()
+      }).end(output)
+    } catch (e: any) {
+      res.writeHead(500, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        ...cacheControl(),
+        ...corsHeaders()
+      }).end(String(e))
+    }
   })
 }
 
@@ -105,6 +126,9 @@ const getContentType = (filename: string) => {
   if (filename.endsWith('.js')) {
     return 'text/javascript'
   }
+  if (filename.endsWith('.wasm')) {
+    return 'application/wasm'
+  }
   if (filename.endsWith('.svg')) {
     return 'image/svg+xml'
   }
@@ -117,7 +141,6 @@ const getContentType = (filename: string) => {
 const serveFile = (
   req: http.IncomingMessage,
   res: http.ServerResponse) => {
-  // suggests to use url.URL but that cannot parse relative URLs (or URIs)
   // eslint-disable-next-line n/no-deprecated-api
   const query = url.parse(req.url ?? '')
   const filename = (query.pathname === '/' ? '/index.html' : query.pathname ?? '/index.html').substring(1)
@@ -152,8 +175,8 @@ const loadExport = (
 }
 
 const saveExport = (
-  /** @type {http.IncomingMessage} */req,
-  /** @type {http.ServerResponse} */res) => {
+  req: http.IncomingMessage,
+  res: http.ServerResponse) => {
   readPost(req, (body) => {
     const filename = `web/exported/localstorage_${getSafeIP(req)}.json`
     fs.writeFileSync(filename, body, 'utf8')
@@ -168,17 +191,16 @@ const requestListener = (
   res: http.ServerResponse) => {
   switch (req.method) {
     case 'OPTIONS':
-      // related to CORS
-      // vary per request!
       res.writeHead(200, {
         ...corsHeaders(),
         'Access-Control-Allow-Headers': 'access-control-allow-origin, content-type'
       }).end()
       return
     case 'POST':
-
       if (req.url?.startsWith('/visualize')) {
         visualize(req, res); return
+      } else if (req.url?.startsWith('/parse')) {
+        parseEndpoint(req, res); return
       } else if (req.url?.startsWith('/saveExport')) {
         saveExport(req, res); return
       }

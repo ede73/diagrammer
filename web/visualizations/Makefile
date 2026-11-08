@@ -5,7 +5,7 @@ CORES =
 WEB_VISUALIZATION_TSS=$(shell find ../visualizations -maxdepth 1 -iname "*.ts")
 WEB_VISUALIZATION_JSS:=$(WEB_VISUALIZATION_TSS:.ts=.js)
 
-export PATH := $(CURDIR)/node_modules/.bin:$(PATH)
+export PATH := $(CURDIR)/../../node_modules/.bin:$(PATH)
 
 .PHONY: clean
 

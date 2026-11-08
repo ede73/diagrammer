@@ -6,44 +6,41 @@ This document describes the `diagrammer` repository layout, key entry points, an
 ## Quick commands
 - Install dependencies:
   - `npm install`
-- Build the full project:
+- Build the full project (Rust binary, WASM, web UI, CLI):
   - `make all`
-- Build parser only:
-  - `make parser`
-- Run all tests:
-  - `make test`
-- Run Jest tests only:
-  - `npm test`
+- Build Rust core parser & generators only:
+  - `cargo build --release -p diagrammer-core`
+- Build WebAssembly module only:
+  - `make wasm_pkg`
+- Run Rust AST & generator parity tests:
+  - `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`
+- Run all Jest browser tests:
+  - `make -C tests jesttests`
 - Clean build artifacts:
   - `make clean`
 - Start the browser/web server:
   - `node web/miniserver.js [port]`
-- Run CLI parse/generate:
-  - `node js/generate.js [INPUT] [VISUALIZER]`
-- Run CLI visualization via web-capable output:
-  - `node js/visualize.js [INPUT] [VISUALIZER]`
-- Run the image/graph regression test runner:
-  - `node js/runtests.js [visualizer:testPattern]`
+- Run native Rust CLI parse/generate:
+  - `./diagrammer [VISUALIZER] [INPUT_FILE]` (or piped via stdin: `echo 'a>b' | ./diagrammer [VISUALIZER]`)
+- Run native Rust CLI visualization to output image:
+  - `echo 'a>b' | ./diagrammer dot -o out.png`
+  - `./diagrammer dot tests/test_inputs/state.txt -o out.png`
 
 ## Main repo paths
 - `package.json` — Node dependencies and `npm test`
-- `Makefile` — top-level build rules; depends on subfolders and generated parser
+- `Makefile` — top-level build rules; builds Rust core, WASM, CLI, and web UI
 - `README.md` — user-facing project overview and installation notes
 - `tests/Makefile` — web and test runner orchestration
 - `web/miniserver.js` — development web server for browser UI and web tests
-- `js/generate.js` — CLI parser + transpiler entry for diagrammer source input
-- `js/visualize.js` — CLI visualizer entrypoint
-- `js/runtests.js` — end-to-end regression test runner comparing text and image output
+- `diagrammer` — symlink to `./target/release/diagrammer` native Rust CLI binary
 
 ## Core directories
-- `grammar/` — Jison grammar and lexer source
-- `model/` — AST/model implementation for parsed diagrams
-- `generators/` — transpilers from diagrammer AST into external visualizer languages
-- `js/` — runtime CLI helpers, parser integrations, and visualization support
-- `web/` — browser UI, interactive editor, and web visualization support
-- `tests/` — language inputs, reference outputs, regression infrastructure
-- `build/` — generated parser/lexer outputs and build artifacts
-- `scripts/` — auxiliary build/test/export utilities
+- `crates/diagrammer-core/` — 100% Rust core (Pest PEG grammar, AST model, and all 13 generators)
+- `web/` — browser UI, interactive editor, WebAssembly integration, and web visualizations
+- `ace/` — Ace code editor and diagrammer syntax highlighter mode
+- `tests/` — language inputs, reference outputs, browser Jest regression infrastructure
+- `build/` — generated WASM packages and build artifacts
+- `scripts/` — auxiliary build utilities
 
 ## What to use first
 For new work, follow this order:
@@ -53,18 +50,19 @@ For new work, follow this order:
 4. open `http://localhost:8777/index.html`
 
 For CLI-only checks:
-1. `npm install`
-2. `make parser`
-3. `node js/generate.js tests/test_inputs/state.txt seqdiag`
+1. `cargo build --release -p diagrammer-core`
+2. `./diagrammer dot tests/test_inputs/state.txt`
+3. `echo 'a>b>c' | ./diagrammer dot -o /tmp/out.png`
 
 ## Notes for agents
-- If you need to modify or inspect parser behavior, start in `grammar/` and `js/diagrammer.js`.
-- If you need to change output format, inspect `generators/`.
+- If you need to modify parser or AST behavior, inspect `crates/diagrammer-core/src/parser.rs` and `builder.rs`.
+- If you need to change output generator formats, inspect `crates/diagrammer-core/src/generators/`.
 - If you need to update web UI behavior, inspect `web/` and `ace/`.
-- If you need to add tests, inspect `tests/` and `js/runtests.js`.
+- If you need to test Rust core changes, run `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`.
+- If you need to test browser UI changes, run `make -C tests jesttests`.
 
 ## Helpful facts
-- `make all` builds grammar, model, web assets, generators, and parser artifacts.
-- `make test` runs `make all` before invoking tests.
-- `npm test` invokes Jest directly (note: web tests require miniserver running, or use `make -C tests jesttests`).
-- `node js/runtests.js` compares output text and graph images against stored baselines.
+- The core diagrammer parser and all 13 generators are 100% Rust (`crates/diagrammer-core`), compiled to WebAssembly for the browser and native binary for the CLI.
+- No legacy Jison or TypeScript generators exist.
+- `make all` compiles the native Rust CLI binary, builds WebAssembly via `wasm-pack`, and transpiles web TypeScript assets.
+- `make -C tests jesttests` executes the full Puppeteer browser test suite against the local miniserver.

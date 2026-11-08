@@ -1,7 +1,7 @@
 // @ts-check
 import { removeAllChildNodes, removeOldVisualizations } from './d3support.js'
 import { getHTMLElement, getInputElement, openImage } from './uiComponentAccess.js'
-import { visualizations } from '../js/config.js'
+import { visualizations } from './config.js'
 import { makeHTTPPost } from './ajax.js'
 
 function _makeNewImageHolder(pngBase64: string) {

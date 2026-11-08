@@ -12,8 +12,7 @@ export default {
   },
   // Disable TypeScript, jest crappy support via Babel, but not worth the try??
   // It needs  separate setup. Could transform be used with tsc to achieve the same?
-  // Also the transform sounds like overengineered machine
-  testMatch: [ "**/__tests__/**/*.js?(x)", "**/?(*.)+(spec|test).js?(x)" ]
+  testMatch: [ "<rootDir>/tests/web/**/?(*.)+(spec|test).js?(x)" ]
 }
 
 // also possible

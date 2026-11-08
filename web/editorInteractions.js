@@ -1,6 +1,6 @@
 import { getSavedGraphs } from './localStorage.js';
 import { parse } from './parserInteractions.js';
-import { getInputElement, getSelectElement, getSelectedVisualizer } from './uiComponentAccess.js';
+import { getInputElement, getSelectElement, getSelectedVisualizer, updateRuntimeBadge } from './uiComponentAccess.js';
 import { makeHTTPGet } from './ajax.js';
 import { clearBeautified, visualize } from './visualize.js';
 const acemode = 1;
@@ -93,6 +93,7 @@ export function addLine(i) {
     return false;
 }
 export function generatorChanged() {
+    updateRuntimeBadge();
     parseAndRegenerate();
 }
 function parseAndRegenerate(preferScriptSpecifiedVisualizer = false) {

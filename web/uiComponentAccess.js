@@ -1,4 +1,4 @@
-import { findGeneratorForVisualization } from './config.js';
+import { findGeneratorForVisualization, visualizations } from './config.js';
 export function getHTMLElement(name) {
     const element = document.getElementById(name);
     if (!element) {
@@ -6,11 +6,31 @@ export function getHTMLElement(name) {
     }
     return element;
 }
+export function updateRuntimeBadge() {
+    const badge = document.getElementById('diagrammer-runtime-badge');
+    if (!badge) return;
+    try {
+        const current = getSelectedVisualizer();
+        const viz = visualizations.find(p => p.name === current);
+        if (!viz) return;
+
+        if (viz.runtime === 'web') {
+            badge.className = 'runtime-badge runtime-badge-web';
+            badge.textContent = `⚡ Browser: ${viz.family}`;
+            badge.title = `Engine: ${viz.engine}\nGenerator: ${viz.generator}\nRuns locally in your browser (WASM/JS).`;
+        } else {
+            badge.className = 'runtime-badge runtime-badge-cli';
+            badge.textContent = `🖥️ CLI: ${viz.family}`;
+            badge.title = `Engine: ${viz.engine}\nGenerator: ${viz.generator}\nRequires native backend CLI execution.`;
+        }
+    } catch (_) {}
+}
 export function setVisualizer(visualizer) {
     const select = document.querySelector('#diagrammer-generator');
-    if (visualizer) {
+    if (visualizer && select) {
         select.value = visualizer;
     }
+    updateRuntimeBadge();
     if (getSelectedVisualizer() !== visualizer) {
         console.error(`Somewhy visualizer change did not go thru, we wanted ${visualizer} and have ${getSelectedVisualizer()}`);
     }

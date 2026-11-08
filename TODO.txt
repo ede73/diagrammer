@@ -39,7 +39,7 @@ ACTIVE ROADMAP & CHAT TASKS
     - In-place augmentation: enrich nodes (`a;label`) and additively increment edges (`a>"xxx"b` then `a>"yyy"b`) without restating graph structure.
     - Position-forward cascading state: `edge color`, `vertex color`, `shape` apply flowing defaults strictly from declaration position onward.
     - Explicit overrides (`rect d`) strictly take precedence over ambient defaults (`shape ellipse`).
-[ ] First-party Sequence Engine extensions: lifeline activations ([ / ]), notes (note right of A), frames (loop / alt / par)
+[x] First-party Sequence Engine extensions: lifeline activations, anchored notes (:: syntax & self-dividers), delay gaps (...), phase banners (==), and interaction frames (loop / alt / opt / par container tags) [Landed]
 [ ] First-party Hierarchical DAG Layout Engine in pure Rust (Sugiyama framework to replace Graphviz dot)
 [x] Language & Grammar extensions: rich arrowheads (multi-char lines: -->, ..>, ==>, |->, |--|, etc.) and multi-entrance/multi-exit subgraph linking (`b > (c > d, e > f) > z` automatically linking entrances and exits)
 [ ] Language & Grammar extensions: flow constructs (while, for, alt / if-else blocks)

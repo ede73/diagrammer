@@ -146,6 +146,17 @@ Extend Diagrammer's unified DSL to natively express rich diagram structures:
     - Exits (`b -> end`, `d -> end` or `b -> z`, `d -> z`) are automatically linked to the succeeding element, preserving labels, colors, and line types.
     - Internal chain terminals are accurately tracked via `GraphGroup.chain_terminals`, ensuring cyclic chains (e.g. `(A > B > C > B > A)`) cleanly resolve their true terminal without corrupting sequence diagrams or golden generators.
 
+### 1.13 First-Party Native Sequence Layout Engine: Activations, Anchored Notes, Dividers & Interaction Frames
+- **Pure Vector Output**: Zero external JavaScript or Java dependencies; 100% Rust engine generating modern dark/light SVG sequence diagrams directly in WASM and CLI.
+- **Lifeline Activations**: Automatically computes active intervals on lifelines when messages arrive at participants, rendering crisp `.ds-activation` bars.
+- **Anchored Notes & Dividers**:
+  - `label :: note` syntax splits into an interaction label on the message line and an anchored `.ds-note-box` callout next to the target lifeline.
+  - Arrowless dotted self-edges (`A.A ; "delay"`) render centered time delay divider lines (`.ds-divider-line`).
+  - Arrowless dashed self-edges (`A-A ; "phase"`) render full-width section headers (`.ds-divider-rect`).
+- **Interaction Frames**:
+  - Groups (`{ loop_retry; "loop Retry 3 times" ... }` or `{ alt_success; "alt ..." ... }`) render dashed container boxes (`.ds-frame-box`) with tagged corner labels (`.ds-frame-tag-text`).
+- **Fixture**: Showcased in `tests/test_inputs/native_sequence.txt`.
+
 ---
 
 ## 2. Target Component Architecture

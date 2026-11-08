@@ -17,6 +17,7 @@
   }
   </script>
   <script type="module" src="web/index.js"></script>
+  <script type="module" src="web/perceptualTheme.js"></script>
 <script type="module" src="web/visualizations/visualizeCirclePacked.js"></script>
 <script type="module" src="web/visualizations/visualizeGraphviz.js"></script>
 <script type="module" src="web/visualizations/visualizeLayerBands.js"></script>
@@ -345,6 +346,24 @@
           editor.setTheme("ace/theme/textmate");
         }
       }
+      if (window.applyPerceptualColorTheme) {
+        window.applyPerceptualColorTheme(theme === 'dark');
+      }
+    }
+
+    // Auto-adapt SVG colors on dynamic DOM insertion
+    const graphContainer = document.getElementById('diagrammer-graph');
+    if (graphContainer && window.MutationObserver) {
+      let timeoutId = null;
+      const observer = new MutationObserver(() => {
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          if (window.applyPerceptualColorTheme) {
+            window.applyPerceptualColorTheme();
+          }
+        }, 50);
+      });
+      observer.observe(graphContainer, { childList: true, subtree: true });
     }
 
     function toggleTheme() {

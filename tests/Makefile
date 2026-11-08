@@ -23,24 +23,21 @@ CE.js: CE.ts
 	@$(TRANSPILE) $< $(S)
 
 checkminiserver:
-	@/bin/echo -e "Make sure miniserver is running for web tests\nYou can start it with: node web/miniserver.js"
+	@/bin/echo -e "Make sure server is running for web tests\nYou can start it with: ./diagrammer serve"
 
 startminiserver:
-	@chmod u+x ../web/miniserver.js
-	$(SHELL) -c 'cd ..; node ./web/miniserver.js&'
+	$(SHELL) -c 'cd ..; ./diagrammer serve 8000 &'
 
 jesttests: checkminiserver jest_test_deps
 	# It is possible to hook this to jest.config or even into the tearup/down of the actual test
 	# but this is path of least resistance
-	@chmod u+x ../web/miniserver.js
-	@$(SHELL) -c 'cd ..;./web/miniserver.js 8999 &'
+	@$(SHELL) -c 'cd ..; ./diagrammer serve 8999 &'
 	@mkdir -p ../tests/testrun
 	@MINISERVER_TEST_PORT=8999 npm test
-	@-pkill -f "miniserver.js 8999" || true
+	@-pkill -f "diagrammer serve 8999" || true
 
-_test: testrunner jesttests
+_test: jesttests
 
 clean:
 	@find ../tests -name "*.map" -or -name "*.js" -delete
-	@-pkill -f "miniserver.js 8777" || true
-	@-pkill -f "miniserver.js 8999" || true
+	@-pkill -f "diagrammer serve" || true

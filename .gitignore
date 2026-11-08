@@ -27,8 +27,6 @@ js/mscgen
 
 model/*.js
 generators/*.js
-web/*.js
-web/visualizations/*.js
 tests/parser/*.js
 tests/web/*.js
 **/*.map

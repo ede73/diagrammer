@@ -7,7 +7,7 @@ export function setConfig(filename, threshold = 0.0001) {
     return {
         failureThreshold: threshold,
         failureThresholdType: 'percent',
-        customSnapshotsDir: 'tests/web/snapshots/',
+        customSnapshotsDir: new URL('snapshots/', import.meta.url).pathname,
         customSnapshotIdentifier: filename,
         noColors: true
     };
@@ -63,10 +63,12 @@ describe('Diagrammer', () => {
         await clearGeneratorResults(page);
         await clearGraph(page);
         await selectExampleCode(page, example);
+        await waitForGeneratorResults(page);
         if (overrideGeneratorVisualizer) {
             await waitUntilGraphDrawn(page);
             await clearGeneratorResults(page);
             await selectGeneratorVisualizer(page, overrideGeneratorVisualizer);
+            await waitForGeneratorResults(page);
         }
         await waitUntilGraphDrawn(page);
         const selector = (await page.$('#diagrammer-graph>svg') != null) ? '#diagrammer-graph>svg' : '#diagrammer-graph>div>svg';

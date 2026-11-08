@@ -4,8 +4,6 @@
 This document describes the `diagrammer` repository layout, key entry points, and the exact commands you can use for build, run, and test workflows.
 
 ## Quick commands
-- Install dependencies:
-  - `npm install`
 - Build the full project (Rust binary, WASM, web UI, CLI):
   - `make all`
 - Build Rust core parser & generators only:
@@ -14,7 +12,7 @@ This document describes the `diagrammer` repository layout, key entry points, an
   - `make wasm_pkg`
 - Run Rust AST & generator parity tests:
   - `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`
-- Run all Jest browser tests:
+- Run all Jest browser tests (auto-installs test dependencies if needed):
   - `make -C tests jesttests`
 - Clean build artifacts:
   - `make clean`
@@ -27,15 +25,15 @@ This document describes the `diagrammer` repository layout, key entry points, an
   - `./diagrammer dot tests/test_inputs/state.txt -o out.png`
 
 ## Main repo paths
-- `package.json` — Node dependencies and `npm test`
-- `Makefile` — top-level build rules; builds Rust core, WASM, CLI, and web UI
+- `Makefile` — top-level build rules; builds Rust core, WASM, CLI, and web UI (zero Node requirements)
 - `README.md` — user-facing project overview and installation notes
 - `tests/Makefile` — web and test runner orchestration
+- `tests/package.json` — isolated test dependencies (Jest, Puppeteer)
 - `diagrammer` — symlink to `./target/release/diagrammer` native Rust CLI binary
 
 ## Core directories
 - `crates/diagrammer-core/` — 100% Rust core (Pest PEG grammar, AST model, and all 13 generators)
-- `web/` — browser UI, interactive editor, WebAssembly integration, and web visualizations
+- `web/` — browser UI, interactive editor, WebAssembly integration, and web visualizations (zero-build ES modules)
 - `ace/` — Ace code editor and diagrammer syntax highlighter mode
 - `tests/` — language inputs, reference outputs, browser Jest regression infrastructure
 - `build/` — generated WASM packages and build artifacts
@@ -43,10 +41,9 @@ This document describes the `diagrammer` repository layout, key entry points, an
 
 ## What to use first
 For new work, follow this order:
-1. `npm install`
-2. `make all`
-3. `./diagrammer serve 8777`
-4. open `http://localhost:8777/index.html`
+1. `make all`
+2. `./diagrammer serve 8777`
+3. open `http://localhost:8777/index.html`
 
 For CLI-only checks:
 1. `cargo build --release -p diagrammer-core`

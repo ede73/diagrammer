@@ -6,6 +6,7 @@ pub mod digraph;
 pub mod layerbands;
 pub mod mermaid_sequence;
 pub mod mscgen;
+pub mod native_sequence;
 pub mod nwdiag;
 pub mod parsetree;
 pub mod plantuml_sequence;
@@ -113,6 +114,7 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
         "layerbands" => Some(Box::new(layerbands::LayerBands)),
         "mermaid_sequence" => Some(Box::new(mermaid_sequence::MermaidSequence)),
         "mscgen" => Some(Box::new(mscgen::MSCGen)),
+        "native_sequence" | "sequence" => Some(Box::new(native_sequence::NativeSequence)),
         "nwdiag" => Some(Box::new(nwdiag::NWDiag)),
         "parsetree" => Some(Box::new(parsetree::ParseTree)),
         "plantuml_sequence" => Some(Box::new(plantuml_sequence::PlantUMLSequence)),
@@ -141,6 +143,12 @@ mod tests {
         for variant in &variants {
             assert!(make_generator(variant).is_some(), "Variant '{}' should produce a generator", variant);
         }
+    }
+
+    #[test]
+    fn test_make_generator_native_sequence() {
+        assert!(make_generator("native_sequence").is_some());
+        assert!(make_generator("sequence").is_some());
     }
 }
 

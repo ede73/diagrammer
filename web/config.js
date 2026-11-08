@@ -7,6 +7,7 @@ import { visualizeRadialDendrogram } from './visualizations/visualizeRadialDendr
 import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilford.js';
 import { visualizeSankey } from './visualizations/visualizeSankey.js';
 import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
+import { visualizeNativeSequence } from './visualizations/visualizeNativeSequence.js';
 export class Visualization {
     constructor(name, menuName, generator, visualization, cli, metadata = {}) {
         this.name = name;
@@ -125,6 +126,8 @@ const _visualizations = [
         '-o-',
         `-T${format}`
     ], { family: 'MSCGen', engine: 'mscgenjs', description: 'Message Sequence Chart' }),
+
+    new Visualization('native_sequence', 'Diagrammer: Native Sequence [WASM]', 'native_sequence', visualizeNativeSequence, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency vector sequence diagram' }),
 
     new Visualization('actdiag', 'Blockdiag: Activity Diagram [CLI]', 'actdiag', undefined, (format, outputFile) => buggyDiags('actdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'actdiag', description: 'Activity diagram (Python CLI)' }),
     new Visualization('blockdiag', 'Blockdiag: Block Diagram [CLI]', 'blockdiag', undefined, (format, outputFile) => buggyDiags('blockdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'blockdiag', description: 'Block diagram (Python CLI)' }),

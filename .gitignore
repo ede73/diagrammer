@@ -7,7 +7,6 @@ node_modules
 web/post.txt
 web/result.txt
 web/error.txt
-web/icons
 web/exported
 tests/web/snapshots/
 tests/test_outputs/*.png

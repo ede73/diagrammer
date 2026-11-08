@@ -1,26 +1,10 @@
-CORES =
-
-WEB_TEST_TSS=$(shell find ./web -maxdepth 1 -iname "*.ts")
-WEB_TEST_JSS:=$(WEB_TEST_TSS:.ts=.js)
-
 export PATH := $(CURDIR)/../node_modules/.bin:$(PATH)
-TRANSPILER=tsc
-TRANSPILEOPTIONS=--module es6 --esModuleInterop --target es2017 --allowJs --removeComments --strict --checkJs --skipLibCheck
-TRANSPILE=$(TRANSPILER) $(TRANSPILEOPTIONS)
-ESLINT=eslint -f stylish --fix
-S=| grep -v -E "(Cannot write file)" || true
 
-.PHONY: clean _test
+.PHONY: clean _test all checkminiserver startminiserver jesttests jest_test_deps
 
 all: _test
 
-jest_test_deps: webtests CE.js
-web/%.js: web/%.ts
-webtests: $(WEB_TEST_JSS)
-CE.js: CE.ts
-
- %.js: %.ts
-	@$(TRANSPILE) $< $(S)
+jest_test_deps:
 
 checkminiserver:
 	@/bin/echo -e "Make sure server is running for web tests\nYou can start it with: ./diagrammer serve"
@@ -39,5 +23,5 @@ jesttests: checkminiserver jest_test_deps
 _test: jesttests
 
 clean:
-	@find ../tests -name "*.map" -or -name "*.js" -delete
+	@find ../tests -name "*.map" -delete
 	@-pkill -f "diagrammer serve" || true

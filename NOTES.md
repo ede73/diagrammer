@@ -8,24 +8,30 @@ This document collects critical technical findings, architectural details, gotch
 
 | Document | Statement in Existing Doc | Actual Reality / Fix | Impact |
 | :--- | :--- | :--- | :--- |
-| [AGENTS.md](file:///Users/ede/src/diagrammer/AGENTS.md), [TESTING.md](file:///Users/ede/src/diagrammer/TESTING.md) | `scripts/runtests.js [visualizer:testPattern]` | Script is at [`js/runtests.js`](file:///Users/ede/src/diagrammer/js/runtests.js) (or `node js/runtests.js`). `scripts/runtests.js` does **not** exist. | Direct command fails with `No such file or directory`. |
-| [AGENTS.md](file:///Users/ede/src/diagrammer/AGENTS.md), [DEVELOPMENT.md](file:///Users/ede/src/diagrammer/DEVELOPMENT.md) | `node js/generate.js tests/test_inputs/state13.txt seqdiag` | [`tests/test_inputs/state13.txt`](file:///Users/ede/src/diagrammer/tests/test_inputs) does **not** exist. Use [`tests/test_inputs/state.txt`](file:///Users/ede/src/diagrammer/tests/test_inputs/state.txt) or [`state_sequence.txt`](file:///Users/ede/src/diagrammer/tests/test_inputs/state_sequence.txt). | Command fails on first run. |
-| [AGENTS.md](file:///Users/ede/src/diagrammer/AGENTS.md), [DEVELOPMENT.md](file:///Users/ede/src/diagrammer/DEVELOPMENT.md) | `node js/visualize.js [INPUT] [VISUALIZER]` | Historically, `visualize.js` passed raw source code directly to CLI tools without transpiling it first. This is now fixed in the stack: `visualize.js` transpiles via `doParse` before running CLI visualizers (e.g. `node js/visualize.js tests/test_inputs/state.txt dot output /tmp/out.png`). [`node js/t.js [INPUT] [VISUALIZER] output [OUT.PNG]`](file:///Users/ede/src/diagrammer/js/t.js) is also available. | CLI visualizers receive properly transpiled definitions. |
-| [AGENTS.md](file:///Users/ede/src/diagrammer/AGENTS.md), [TESTING.md](file:///Users/ede/src/diagrammer/TESTING.md) | `npm test` runs all tests | `npm test` runs Jest, but web Puppeteer tests depend on [`web/miniserver.js`](file:///Users/ede/src/diagrammer/web/miniserver.js) running. Running `npm test` alone causes connection errors (`ERR_CONNECTION_REFUSED`). Use `make -C tests jesttests` (spawns and terminates server automatically). | Web tests fail unless server is running. |
-| [README.md](file:///Users/ede/src/diagrammer/README.md) (line 407) | `web/ - PHP Web Backend` | Modern backend is pure Node.js ([`web/miniserver.js`](file:///Users/ede/src/diagrammer/web/miniserver.js)). PHP scripts in `web/` are legacy. | Developers may look for Apache/PHP runtime unnecessarily. |
+| [AGENTS.md](file:///Users/ede/src/diagrammer/AGENTS.md), [TESTING.md](file:///Users/ede/src/diagrammer/TESTING.md) | `scripts/runtests.js [visualizer:testPattern]` | Legacy JS test runner was replaced. Run Rust tests via `cargo test --manifest-path crates/diagrammer-core/Cargo.toml` and browser tests via `make -C tests jesttests`. | No Node CLI test runner needed. |
+| [AGENTS.md](file:///Users/ede/src/diagrammer/AGENTS.md), [DEVELOPMENT.md](file:///Users/ede/src/diagrammer/DEVELOPMENT.md) | `node js/generate.js tests/test_inputs/state13.txt seqdiag` | Legacy `js/` directory was completely eliminated. Use the native Rust CLI `./diagrammer seqdiag tests/test_inputs/state.txt`. | Direct, native fast CLI execution. |
+| [AGENTS.md](file:///Users/ede/src/diagrammer/AGENTS.md), [TESTING.md](file:///Users/ede/src/diagrammer/TESTING.md) | `npm test` runs all tests | `npm test` runs headless Jest browser tests against the dev server (`./diagrammer serve 8999`). Use `make -C tests jesttests` which handles server lifecycle automatically. | Full visual snapshot and browser regression testing. |
+| [README.md](file:///Users/ede/src/diagrammer/README.md) | `web/ - PHP Web Backend` | The web UI is a zero-build client app using browser ES modules and WebAssembly (`build/wasm`). Dev server is native Rust (`./diagrammer serve`). | No Apache/PHP or Node server runtime needed. |
 
 ---
 
-## 2. CLI Input File Validation
+## 2. CLI Execution & Tooling
 
-In earlier versions of [`js/generate.js`](file:///Users/ede/src/diagrammer/js/generate.js) and [`js/visualize.js`](file:///Users/ede/src/diagrammer/js/visualize.js), when an input file did not exist, the parser fell through and mistakenly attempted to treat the missing filename as a visualizer name:
-```text
-Error: Unknown visualizer (non_existent_file.txt)
-```
-This is now resolved in the stack (`fix_cli_missing_file_error` layer): missing input files are caught immediately and report:
-```text
-Error: Input file not found (non_existent_file.txt)
-```
+The legacy Node CLI scripts (`js/`) and compiler scripts (`export/`) have been completely eliminated and replaced by the native Rust `diagrammer` binary:
+- **Parse & generate output**:
+  ```bash
+  ./diagrammer [VISUALIZER] [INPUT_FILE]
+  echo 'a>b>c' | ./diagrammer dot
+  ```
+- **Direct image visualization**:
+  ```bash
+  ./diagrammer dot tests/test_inputs/state.txt -o out.png
+  echo 'a>b>c' | ./diagrammer dot -o /tmp/out.png
+  ```
+- **Embedded Dev HTTP Server**:
+  ```bash
+  ./diagrammer serve [port]   # defaults to 8000
+  ```
 
 ---
 
@@ -33,71 +39,53 @@ Error: Input file not found (non_existent_file.txt)
 
 ### 3.1 `index.html` is a Generated File
 - [`index.html`](file:///Users/ede/src/diagrammer/index.html) is **generated** from [`index_template.html`](file:///Users/ede/src/diagrammer/index_template.html) during `make all` / `make index.html`.
-- The [`Makefile`](file:///Users/ede/src/diagrammer/Makefile#L57-L59) uses an `awk` rule to dynamically replace:
+- The [`Makefile`](file:///Users/ede/src/diagrammer/Makefile) uses an `awk` rule to dynamically replace:
   - `{REPLACE_WITH_TEST_EXAMPLES}` with `<option>` tags scanned from [`tests/test_inputs/*.txt`](file:///Users/ede/src/diagrammer/tests/test_inputs).
-  - `{REPLACE_WITH_WEB_VISUALIZATION_MODULES}` with `<script type="module" src="...">` tags for each file in [`web/visualizations/*.ts`](file:///Users/ede/src/diagrammer/web/visualizations).
+  - `{REPLACE_WITH_WEB_VISUALIZATION_MODULES}` with `<script type="module" src="...">` tags for each file in [`web/visualizations/visualize*.js`](file:///Users/ede/src/diagrammer/web/visualizations).
 - **Rule**: Never edit [`index.html`](file:///Users/ede/src/diagrammer/index.html) directly; always edit [`index_template.html`](file:///Users/ede/src/diagrammer/index_template.html).
 
-### 3.2 Parser Assembly & ES Module Wrapping
-Jison natively outputs CommonJS, but the project is configured as `"type": "module"` in [`package.json`](file:///Users/ede/src/diagrammer/package.json):
-1. [`grammar/Makefile`](file:///Users/ede/src/diagrammer/grammar/Makefile) concatenates `diagrammer.lex`, `lexmarker.txt`, and `diagrammer.grammar` into `build/diagrammer.all`.
-2. [`Makefile`](file:///Users/ede/src/diagrammer/Makefile#L90-L126) runs `jison build/diagrammer.all -o build/diagrammer_parser.js`.
-3. Post-build sed commands inject static ES module imports for all classes in [`generators/*.js`](file:///Users/ede/src/diagrammer/generators) and [`model/*.js`](file:///Users/ede/src/diagrammer/model), rewrite `var diagrammer_parser` to `export var diagrammerParser`, export the helper `parse()`, and create `build/package.json` with `{"type":"module"}`.
-4. Parsing and code generation are tightly coupled: calling `diagrammerParser.parse(code)` initializes [`GraphCanvas`](file:///Users/ede/src/diagrammer/model/graphcanvas.ts), constructs the AST, resolves the appropriate generator via [`makeGenerator()`](file:///Users/ede/src/diagrammer/js/config.ts#L189), runs `generator.generate()`, and feeds output to `yy.result`.
+### 3.2 100% Rust Core & WebAssembly
+- The entire parsing layer, AST data models, and all 13 generators are unified in Rust (`crates/diagrammer-core`):
+  - **Pest PEG Grammar**: [`diagrammer.pest`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/src/diagrammer.pest)
+  - **AST Model**: [`ast/`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/src/ast)
+  - **AST Builder**: [`builder.rs`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/src/builder.rs)
+  - **Generators**: [`generators/`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/src/generators)
+- Compiles natively to `./diagrammer` and to WebAssembly via `wasm-pack build --target web --no-typescript` into `build/wasm`.
+- Passes 100% of the 53 AST reference parity fixtures and 12 generator parity tests.
 
-### 3.3 In-Place TypeScript Compilation
-- There is no single `dist/` or `outDir`.
-- TypeScript is transpiled in-place (`.ts` -> `.js`) using `tsc` within each directory ([`model/`](file:///Users/ede/src/diagrammer/model), [`generators/`](file:///Users/ede/src/diagrammer/generators), [`js/`](file:///Users/ede/src/diagrammer/js), [`web/`](file:///Users/ede/src/diagrammer/web), [`tests/`](file:///Users/ede/src/diagrammer/tests)).
-- Compilation options in [`Makefile.commands`](file:///Users/ede/src/diagrammer/Makefile.commands):
-  ```makefile
-  TRANSPILEOPTIONS=--module es6 --esModuleInterop --target es2017 --allowJs --removeComments --strict --checkJs --skipLibCheck
-  ```
-
-### 3.4 Dual Runtime: Node.js and Browser ESM
-Files in [`js/config.ts`](file:///Users/ede/src/diagrammer/js/config.ts), [`model/`](file:///Users/ede/src/diagrammer/model), [`generators/`](file:///Users/ede/src/diagrammer/generators), and [`web/visualizations/`](file:///Users/ede/src/diagrammer/web/visualizations) are loaded both in Node.js (CLI, tests) and in the browser (via `<script type="importmap">` in [`index.html`](file:///Users/ede/src/diagrammer/index.html)):
-- Static imports of Node built-ins (`fs`, `path`) would crash the browser module loader.
-### 3.5 Parser Backend Toggle (Jison vs Pest)
-The parser layer supports two interchangeable backends: the original Jison BNF parser and the new Rust Pest PEG shadow parser (`crates/diagrammer-core`):
-- **Default**: The default backend remains 100% original **Jison** (`PARSER_BACKEND=jison`).
-- **Build-Time Toggle**: Set `PARSER_BACKEND=pest` when building:
-  ```bash
-  PARSER_BACKEND=pest make parser
-  ```
-  This automatically compiles the Rust parser binary (`target/release/diagrammer_pest_parse`) and configures `build/diagrammer_parser.js` to use Pest by default.
-- **Runtime Toggle**: Override on the fly for any Node command via environment variable without rebuilding:
-  ```bash
-  DIAGRAMMER_PARSER=pest node js/generate.js tests/test_inputs/state.txt ast
-  ```
-- **Parity Status**: The Pest shadow parser passes 100% (53/53) of the reference AST parity tests against Jison.
+### 3.3 Zero-Build ES Modules
+- The web frontend (`web/` and `web/visualizations/`) and web test suites (`tests/web/`) are written in native standard ES Modules (`.js`).
+- No TypeScript compiler (`tsc`) step is required to build or serve the application.
+- The browser loads `build/wasm/diagrammer_core.js` and standard ESM modules directly.
 
 ---
 
 ## 4. Visualizers & Backend Matrix
 
-The system maps visualizer targets to generators in [`js/config.ts`](file:///Users/ede/src/diagrammer/js/config.ts). Not all visualizers run purely in the browser:
+Visualizer targets and generator mappings are configured in [`web/config.js`](file:///Users/ede/src/diagrammer/web/config.js):
 
-| Visualizer Name | Menu Label | Generator Class | Runtime Execution Mode | Prerequisites |
+| Visualizer Name | Menu Label | Generator | Runtime Execution Mode | Prerequisites |
 | :--- | :--- | :--- | :--- | :--- |
-| `dot`, `neato`, `fdp`, `twopi`, `osage` | Graphviz (*cli/www*) | `DiGraph` | Client (Viz.js) **or** CLI binary (`dot`, `neato`, etc.) | Host Graphviz binary for CLI |
-| `sfdp` | Graphviz sfdp (*cli*) | `DiGraph` | CLI binary only | Graphviz `sfdp` binary |
-| `ast_record` | AST Record | `ASTRecord` | Client (Viz.js) **or** CLI binary | — |
-| `ast` | AST (JSON only) | `AST` | Text/JSON dump | — |
-| `mscgen` | MSCGen (*cli/www*) | `MSCGen` | Client (mscgenjs) **or** CLI binary | Host `mscgen` binary for CLI |
-| `plantuml_sequence` | PlantUML Seq (*cli*) | `PlantUMLSequence` | CLI via Java sub-process | JRE + [`ext/plantuml.jar`](file:///Users/ede/src/diagrammer/ext) |
-| `mermaid_sequence` | Mermaid Seq (*cli*) | `MermaidSequence` | CLI via `mmdc` | `@mermaid-js/mermaid-cli` |
-| `actdiag` | Activity Diagram (*cli*) | `ActDiag` | CLI via Python script | Python package `actdiag` |
-| `blockdiag` | Block Diagram (*cli*) | `BlockDiag` | CLI via Python script | Python package `blockdiag` |
-| `nwdiag` | Network Diagram (*cli*) | `NWDiag` | CLI via Python script | Python package `nwdiag` |
-| `seqdiag` | Sequence Diagram (*cli*) | `SeqDiag` | CLI via Python script | Python package `seqdiag` |
-| `circlepacked` | Circle packed | `Dendrogram` | In-Browser (D3.js SVG) | Browser UI / Puppeteer |
-| `radialdendrogram` | Radial Dendrogram | `Dendrogram` | In-Browser (D3.js SVG) | Browser UI / Puppeteer |
-| `reingoldtilford` | Reingold-Tilford | `Dendrogram` | In-Browser (D3.js SVG) | Browser UI / Puppeteer |
-| `sankey` | Sankey | `Sankey` | In-Browser (D3.js + d3-sankey SVG) | Browser UI / Puppeteer |
-| `layerbands` | LayerBands | `LayerBands` | In-Browser (GoJS Canvas) | Browser UI / Puppeteer |
-| `parsetree` | ParseTree | `ParseTree` | In-Browser (GoJS Canvas) | Browser UI / Puppeteer |
-| `umlclass` | UMLClass | `UMLClass` | In-Browser (GoJS Canvas) | Browser UI / Puppeteer |
+| `dot`, `neato`, `fdp`, `twopi`, `osage` | Graphviz (*cli/www*) | `dot` | Client (Viz.js) **or** CLI binary (`dot`, `neato`, etc.) | Host Graphviz binary for CLI |
+| `sfdp` | Graphviz sfdp (*cli*) | `dot` | CLI binary only | Graphviz `sfdp` binary |
+| `ast_record` | AST Record | `ast_record` | Client (Viz.js) **or** CLI binary | — |
+| `ast` | AST (JSON only) | `ast` | Text/JSON dump | — |
+| `mscgen` | MSCGen (*cli/www*) | `mscgen` | Client (mscgenjs) **or** CLI binary | Host `mscgen` binary for CLI |
+| `plantuml_sequence` | PlantUML Seq (*cli*) | `plantuml_sequence` | CLI via Java sub-process | JRE + [`ext/plantuml.jar`](file:///Users/ede/src/diagrammer/ext) |
+| `mermaid_sequence` | Mermaid Seq (*cli*) | `mermaid_sequence` | CLI via `mmdc` | `@mermaid-js/mermaid-cli` |
+| `actdiag` | Activity Diagram (*cli*) | `actdiag` | CLI via Python script | Python package `actdiag` |
+| `blockdiag` | Block Diagram (*cli*) | `blockdiag` | CLI via Python script | Python package `blockdiag` |
+| `nwdiag` | Network Diagram (*cli*) | `nwdiag` | CLI via Python script | Python package `nwdiag` |
+| `seqdiag` | Sequence Diagram (*cli*) | `seqdiag` | CLI via Python script | Python package `seqdiag` |
+| `circlepacked` | Circle packed | `dendrogram` | In-Browser (D3.js SVG) | Browser UI / Puppeteer |
+| `radialdendrogram` | Radial Dendrogram | `dendrogram` | In-Browser (D3.js SVG) | Browser UI / Puppeteer |
+| `reingoldtilford` | Reingold-Tilford | `dendrogram` | In-Browser (D3.js SVG) | Browser UI / Puppeteer |
+| `sankey` | Sankey | `sankey` | In-Browser (D3.js + d3-sankey SVG) | Browser UI / Puppeteer |
+| `layerbands` | LayerBands | `layerbands` | In-Browser (GoJS Canvas) | Browser UI / Puppeteer |
+| `parsetree` | ParseTree | `parsetree` | In-Browser (GoJS Canvas) | Browser UI / Puppeteer |
+| `umlclass` | UMLClass | `umlclass` | In-Browser (GoJS Canvas) | Browser UI / Puppeteer |
 
-When a CLI-only visualizer is selected in the browser UI, the browser makes an AJAX POST to `/visualize?visualizer=<name>` on [`web/miniserver.js`](file:///Users/ede/src/diagrammer/web/miniserver.js), which invokes [`doCliVisualize()`](file:///Users/ede/src/diagrammer/js/clivisualize.ts) and streams back a base64-encoded PNG image.
+When a CLI-only visualizer is selected in the browser UI, the browser makes an AJAX POST to `/visualize?visualizer=<name>` on `./diagrammer serve`, which executes the CLI tool and streams back the rendered output.
 
 ---
 

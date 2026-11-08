@@ -70,7 +70,8 @@ test: all
 	make -C tests
 
 watch:
-	scripts/watch_and_make.sh &
+	scripts/watch.sh &
 
 stopwatch:
-	pkill -f watch_and_make
+	pkill -f "scripts/watch.sh" || true
+

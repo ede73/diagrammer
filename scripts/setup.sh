@@ -1,102 +1,15 @@
 #!/bin/bash
-[ "$1" = "SELFTEST" ] && {
-  # Self-test:
-  [ "$(whoami)" = "root" ] && {
-    echo "Do be root, use sudo"
-  }
+# scripts/setup.sh: Setup helper for Diagrammer development environment
+# Helps install core build prerequisites and optional CLI diagramming engines.
 
-  KEEP=0
-  [ "$2" == "keep" ] && {
-    KEEP=1
-    shift
-  }
-  BOOTDIR=${2:-/tmp/diagrammer_selftest_chroot_$$}
-  EXTERNAL_SOURCES=/tmp/diagrammer_external_sources
-  TEST_USER=testuser
+set -e
 
-  [ ! -d "${EXTERNAL_SOURCES}" ] && {
-    git clone git@github.com:ede73/diagrammer.git "${EXTERNAL_SOURCES}/diagrammer"
-    git clone git@github.com:ede73/blockdiag.git "${EXTERNAL_SOURCES}/blockdiag"
-    for diag in act nw seq; do
-      git clone https://github.com/blockdiag/${diag}diag.git "${EXTERNAL_SOURCES}/${diag}diag"
-    done
-  }
-
-  [ ! -d "${BOOTDIR}" ] && {
-    echo bootstrapping
-    sudo debootstrap stable "${BOOTDIR}"
-  }
-  sudo mount --bind /proc "${BOOTDIR}/proc"
-  sudo chroot "${BOOTDIR}" sh -c "apt-get update; apt-get install -y sudo curl"
-  # On Ubuntu, node versions are always ANCIENT, get modern one! (nodejs installed later with make in general setup)
-  sudo chroot "${BOOTDIR}" sh -c "curl -fsSL https://deb.nodesource.com/setup_18.x | bash -"
-  # Trouble getting puppeteer running headless chrome, a LOT of unmet dependencies (this'll take a moment)
-  sudo chroot "${BOOTDIR}" apt -qq install -y pip libgtk-3-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 chromium-common chromium
-  # Oh boy, really need to go the LONG route here...~root jest/puppeteer just wont work as root
-  sudo chroot "${BOOTDIR}" sh -c "echo -e '\n\n\n' | adduser --disabled-password --quiet $TEST_USER"
-  sudo chroot "${BOOTDIR}" sh -c "echo '$TEST_USER ALL=(ALL) NOPASSWD: ALL' |tee /etc/sudoers.d/$TEST_USER"
-
-  mkdir "${BOOTDIR}/home/$TEST_USER/diagrammer_external_sources"
-  sudo mount --bind "${EXTERNAL_SOURCES}" "${BOOTDIR}/home/$TEST_USER/diagrammer_external_sources"
-  sudo chroot "${BOOTDIR}" sh -c "chown -R ${TEST_USER}:${TEST_USER} /home/${TEST_USER}"
-  sudo chroot "${BOOTDIR}" sh -c "ln -rs /home/$TEST_USER/diagrammer_external_sources/diagrammer /home/$TEST_USER/diagrammer"
-  # Also puppeteer/chromium doesnt support running as root with sandbox
-  cat >"${BOOTDIR}/home/$TEST_USER/diagrammer/jest-puppeteer.config.cjs" <<EOF
-module.exports = {
-  launch: {
-    dumpio: false,
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  }
-};
-EOF
-  sudo chroot "${BOOTDIR}" sh -c "su -c 'cd /home/$TEST_USER/diagrammer;scripts/setup.sh YES_TO_ALL' - $TEST_USER"
-  RC=$?
-  if [ $RC -eq 0 ]; then
-    if [ $KEEP -ne 0 ]; then
-      echo "Asked to keep the residual files"
-      echo "Renter selftest:"
-      echo " scripts/setup.sh SELFTEST keep $BOOTDIR"
-      echo "Or go examine the chroot:"
-      echo " sudo chroot $BOOTDIR"
-      exit 0
-    fi
-    sudo umount "${BOOTDIR}/proc"
-    sudo umount "${BOOTDIR}/home/$TEST_USER/diagrammer_external_sources"
-    sudo rm -fR "${BOOTDIR}"
-    rm -fR "${EXTERNAL_SOURCES}"
-    echo "Tests completed, all changes removed"
-    exit 0
-  else
-    echo "Something went wrong while testing"
-    echo "sudo chroot ${BOOTDIR} su - $TEST_USER"
-    echo "JEST_PUPPETEER_CONFIG=jest-puppeteer.config.cjs npm test"
-    exit 10
-  fi
-
-  # had to try all sorts of tricks to get headless chrome working on puppeteer
-  #JEST_PUPPETEER_CONFIG=jest-puppeteer.config.cjs npm test tests/model/graphedge.test.js
-  # find . -type d | xargs -L1 -Ixx chmod 755 xx;find . -type f -perm /u+x | xargs -L1 -Ixx chmod 755 xx;find . -type f -not -perm /u+x | xargs -L1 -Ixx chmod 644 xx
-  # also just installing the chrome
-  #sudo mount --bind /proc $BOOTDIR/proc
-  #module.exports = {
-  #launch: {
-  #  dumpio: false,
-  #  headless: true,
-  #  args: ['--no-sandbox', '--disable-setuid-sandbox']
-  #}
-  #};
-}
-
-# USE AT OWN RISK! Haven't run in a while...
-[ -d web ] && [ -d ace ] && [ -d css ] && [ -d generators ] && [ -d model ] || {
-  echo "Run this is diagrammer folder..."
+[ -f Cargo.toml ] && [ -d web ] && [ -d crates ] || {
+  echo "Error: Run this script from the diagrammer project root directory."
   exit 10
 }
 
 YES_TO_ALL=${1:-}
-
-# This script requires sudo to install
 
 confirm() {
   affirmative="$1"
@@ -127,128 +40,128 @@ warning() {
 
 OSTYPE=$(uname | tr '[:upper:]' '[:lower:]')
 
-install() {
+install_pkg() {
   case $OSTYPE in
   darwin*)
-    brew install $*
+    brew install "$@"
     ;;
   linux*)
-    sudo apt -qq -y install $*
+    sudo apt -qq -y install "$@"
     ;;
   *)
-    error "Unknown architecture ($OSTYPE) - no package install command"
-    exit 10
+    warning "Unknown OS ($OSTYPE). Please install: $* manually."
     ;;
   esac
 }
 
-install_diags() {
-  # case $OSTYPE in
-  # linux*)
-  #   # TODO: Pull and install from my repo (these dont support stdout redirect!)
-  #   install python3-nwdiag python3-blockdiag python3-actdiag python3-seqdiag
-  #   ;;
-  # *)
-  #   error "Unsupported platform $OSTYPE, install nwdiag, blockdiag, actdiag, seqdiags manually"
-  #   ;;
-  # esac
-  # Need to build the diags
+check_core_prereqs() {
+  echo "=== Checking Core Prerequisites ==="
+  local missing=0
 
-  for diag in blockdiag nwdiag actdiag seqdiag; do
-    cd ~/diagrammer_external_sources/$diag
-    sudo pip install .
-  done
-  cd
-}
+  if command -v cargo >/dev/null 2>&1; then
+    echo "  [OK] Rust / Cargo: $(cargo --version)"
+  else
+    echo "  [MISSING] Rust / Cargo (install via https://rustup.rs)"
+    missing=1
+  fi
 
-install_plantuml() {
-  cd ~/diagrammer
-  install plantuml
+  if command -v wasm-pack >/dev/null 2>&1; then
+    echo "  [OK] wasm-pack: $(wasm-pack --version 2>/dev/null || echo 'installed')"
+  elif command -v npx >/dev/null 2>&1 && npx wasm-pack --version >/dev/null 2>&1; then
+    echo "  [OK] wasm-pack (via npx): $(npx wasm-pack --version 2>/dev/null)"
+  else
+    echo "  [MISSING] wasm-pack (install via 'cargo install wasm-pack' or 'npm install -g wasm-pack')"
+    missing=1
+  fi
 
-  PLANT_JAR=$(dpkg -L plantuml | grep .jar)
-  cp $PLANT_JAR ext/
+  if command -v make >/dev/null 2>&1; then
+    echo "  [OK] make: $(make --version | head -n 1)"
+  else
+    echo "  [MISSING] make (build essential)"
+    missing=1
+  fi
 
-  install default-jre-headless
-
-  # uh oh, rasp zero is armv6 and openjdk-11 doesn't provide armv6 compatible build (openjdk11 is default)
-  uname -m | grep armv6 && {
-    install openjdk-8-jdk
-    # this may not be enuf, might need to set as default, as jdk11 installs anyway(as it seems)
-    # but it solved the Vm (armv6 not supported) issue on ca-certificates-java
-  }
+  if [ $missing -ne 0 ]; then
+    warning "Please install the missing core prerequisites above to build Diagrammer."
+  else
+    echo "All core prerequisites are installed!"
+  fi
+  echo ""
 }
 
 install_graphviz() {
-  # Note MAC brew install graphviz --with-pango
-  install graphviz
+  install_pkg graphviz
 }
 
 install_mscgen() {
-  install mscgen
+  install_pkg mscgen
 }
 
-npm_install() {
-  (
-    cd ~/diagrammer
-    npm i
-  )
+install_plantuml() {
+  case $OSTYPE in
+  darwin*)
+    brew install plantuml default-jre
+    ;;
+  linux*)
+    sudo apt -qq -y install plantuml default-jre-headless
+    PLANT_JAR=$(dpkg -L plantuml | grep '\.jar$' | head -n 1 || true)
+    if [ -n "$PLANT_JAR" ]; then
+      mkdir -p ext
+      cp "$PLANT_JAR" ext/
+    fi
+    ;;
+  esac
 }
 
-install_nodejs() {
-  # On Ubuntu, nodejs is ANCIENT, hack required to install modern one, alas creating conflicts with npm for apt
-  # how ever both will get installed
-  install nodejs make
-  [ ! $(command -v npm) ] && {
-    install npm
-  }
-  confirm npm_install "Run npm i? You can do it manually later also..."
+install_python_diags() {
+  echo "Installing Python diagram generators via pip (nwdiag, blockdiag, actdiag, seqdiag)..."
+  pip install --user nwdiag blockdiag actdiag seqdiag || \
+  pip3 install --user nwdiag blockdiag actdiag seqdiag || \
+  warning "Could not run pip. Please install nwdiag, blockdiag, actdiag, seqdiag manually."
 }
 
-run_tests() {
-  cd ~/diagrammer
-  # New bug in ubuntu? setup? Anyway, puppeteer refused to run with no clear error
-  # chromium --headless pointed out cannot access /dev/shm, suggested solution is chmod below
-  sudo chmod 1777 /dev/shm
-  # Fixed that one issue, but puppeteer still will not go...
-  # https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md
-  # no-sandbox option seems to work.. but that sounds just so wrong...
-  # [0311/191338.674081:FATAL:zygote_host_impl_linux.cc(127)] No usable sandbox! Update your kernel or see https://chromium.googlesource.com/chromium/src/+/main/docs/linux/suid_sandbox_development.md for more information on developing with the SUID sandbox. If you want to live dangerously and need an immediate workaround, you can try using --no-sandbox.
-  # Something changes in the ubuntu setup since last run (few weeks ago :( )
-  # OK, this works, specifying the chromium sandbox specifically
-  export CHROME_DEVEL_SANDBOX=$(dpkg -L chromium-sandbox | grep chrome-sandbox)
-  make
-  set -e
-  JEST_PUPPETEER_CONFIG=jest-puppeteer.config.cjs make test
-  pkill -f miniserver || true
+install_test_deps() {
+  echo "Installing isolated test dependencies (Puppeteer, Jest) in tests/..."
+  (cd tests && npm install)
 }
 
-install_typescript() {
-  sudo npm install -g typescript
-}
-
+# Main banner
 cat <<EOF
-NOTICE!
+===========================================================
+               Diagrammer Environment Setup
+===========================================================
+Diagrammer core is built in 100% Rust and compiles to:
+  - Native binary (./diagrammer)
+  - WebAssembly (build/wasm) for zero-build browser UI
 
-If you plan to use the WWW frontend, you need a web server! Any will do. There's web/miniserver.js.
+All 13 diagram formats can be parsed and generated natively.
+Some formats (e.g. Graphviz, PlantUML, mscgen, BlockDiag)
+can also utilize host CLI binaries when available.
+===========================================================
 
-Some renderers require backend rendering even with WWW front (plantuml sequence, [act|block|nw|seq]diags).
-
-On the other hand, if you only plan to use the command line rendering capabilities, there's no need to webserver. Depending on your graphing needs, you may still require those renderers!
-
-Graphviz can be rendered on WWW/javascript only (excluding sfdp).
-
-Also some renderers are only available via WWW (D3.js, GoJS)
-
-Command line rendering required NodeJS, but WWW relies on many rendering packages via NodeJS. Yes, there are online CDN for these, but for development needs, these are not used.
 EOF
 
-confirm install_graphviz "[OPTIONAL!] Install graphviz?"
-confirm install_diags "[OPTIONAL!] Do you want to install nwdiag, blockdiag, actdiag, seqdiag?"
-confirm install_mscgen "[OPTIONAL!] Do you want to install mscgen?"
-confirm install_plantuml "[OPTIONAL!] Do you want to install plantuml?"
-confirm install_nodejs "[Required!] Do you want to install nodejs and npm?"
-confirm install_typescript "[Required!] tsc(Typescript) is required to transpile, install (will use npm -g)?"
-echo "If you installed renderers, nodejs and its modules, you can now run the test suite to verify all works as expected"
-confirm run_tests "[Optional!] Run tests?"
+check_core_prereqs
 
-#Also requires is typescript?
+echo "=== Optional External Visualizer Engines ==="
+confirm install_graphviz "[Optional] Install Graphviz (dot, neato, fdp, sfdp, twopi, osage)?" || true
+confirm install_mscgen "[Optional] Install mscgen (Message Sequence Charts)?" || true
+confirm install_plantuml "[Optional] Install PlantUML + Java runtime?" || true
+confirm install_python_diags "[Optional] Install Python diagram CLI tools (blockdiag, seqdiag, actdiag, nwdiag)?" || true
+
+echo ""
+echo "=== Optional Browser Regression Testing Dependencies ==="
+confirm install_test_deps "[Optional] Install Jest/Puppeteer browser test dependencies in tests/?" || true
+
+echo ""
+echo "=== Setup Complete ==="
+echo "To build everything:"
+echo "  make all"
+echo ""
+echo "To start the embedded web server:"
+echo "  ./diagrammer serve 8000"
+echo ""
+echo "To run tests:"
+echo "  cargo test --manifest-path crates/diagrammer-core/Cargo.toml"
+echo "  make -C tests jesttests"
+echo ""

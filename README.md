@@ -51,7 +51,7 @@ I just run this locally (in my Mac or in my Windows on WSL2/Ubuntu)
 
 Example TCP state diagram in the editor
 
-<img width=60% src="https://user-images.githubusercontent.com/1845554/216884833-b2f23d32-7f8b-48cc-b1dd-c6b6d7679c6f.png">
+<img width=60% alt="image" src="https://github.com/user-attachments/assets/288fd63c-561e-4ca4-a37d-98bb30c076c3" />
 
 And output
 
@@ -59,19 +59,17 @@ And output
 
 You can select different visualizers from the drop down (without changing your diagram)
 
-<img width=200 src="https://user-images.githubusercontent.com/1845554/216885102-38ef5450-ecf0-4583-945e-f1b7954eb674.png">
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/32f27910-7545-4574-ba49-3c94ee121770" />
 
 Plenty of examples (also used in tests)
-
-<img width=200 src="https://user-images.githubusercontent.com/1845554/216885127-25ba26bb-194d-4c92-b610-e33999ea005c.png">
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/9d4b4a22-db25-4e63-85a0-8c43a6f55413" />
 
 You can use brower's localstorage to save the diagrams (and load them). You can also export/import then to the 'backend' if needed (requires webserver, embedded in `./diagrammer serve`)
-
-<img width=200 src="https://user-images.githubusercontent.com/1845554/216885227-edf5800a-0585-4df1-b8c9-f022f459d670.png">
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/8fb3d0f2-d0d8-4f29-958e-1d9402d1f2be" />
 
 And if you don't remember how exactly in diagrammer language something was done, you can just click the shapes, arrows, types and it'll output that in the editor
 
-<img width=200 src="https://user-images.githubusercontent.com/1845554/216885357-8a1ba706-05ad-41a9-abf9-95745a2f884c.png">
+<img width="60%" alt="image" src="https://github.com/user-attachments/assets/61af4bcd-0cd7-4904-99c7-e26910e084b5" />
 
 # The language
 

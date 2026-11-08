@@ -571,21 +571,15 @@ img.iconicon {
 #diagrammer-graph {
     transform-origin: center center;
     transition: transform 0.12s ease-out;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    max-width: 100%;
+    display: inline-block;
+    margin: auto;
 }
 
 #diagrammer-graph svg {
-    max-width: 100%;
-    height: auto;
     display: block;
 }
 
 #diagrammer-graph img {
-    max-width: 100%;
-    height: auto;
     display: block;
 }
 

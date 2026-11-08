@@ -8,11 +8,12 @@ impl Generator for MSCGen {
         let mut formatter = OutputFormatter::new();
         formatter.lout("msc {", Some(true));
 
+        let group_names = canvas.get_group_names();
         let mut vertices = Vec::new();
         for obj in canvas.get_objects(false) {
             match obj {
                 GraphObject::Group(grp) => {
-                    for z in grp.get_objects(false) {
+                    for z in grp.get_flattened_vertices() {
                         let tmp = multi_attr_fmt(
                             &[
                                 ("color", z.get_color(), "color=\"{0}\""),
@@ -76,6 +77,9 @@ impl Generator for MSCGen {
 
         let mut id = 1;
         for edge in canvas.get_edges() {
+            if group_names.contains(&edge.left) || group_names.contains(&edge.right) {
+                continue;
+            }
             let mut edge_type_str = String::new();
             let mut right_name = edge.right.clone();
             let lhs_name = &edge.left;

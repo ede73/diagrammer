@@ -49,7 +49,10 @@ Restructure the project so that parsing, AST modeling, code generation, layout e
 - **Runtime Metadata**: Every visualizer exposes its execution runtime in the UI:
   - ⚡ **Browser (WASM/JS)**: Runs locally and privately in the browser with zero network or backend dependencies.
   - 🖥️ **CLI (Backend)**: Requires native host CLI binaries (`plantuml.jar`, `blockdiag`, etc.).
-- **Graceful Group Degradation**: When an input graph relies on groups/clusters but the target visualizer lacks group support (e.g., flat sequence visualizers or group-less graph engines), the generator must gracefully flatten the group container while preserving all member nodes and internal edges. Group-to-group or group-to-node edges are either gracefully omitted, converted to contextual notes, or expanded to entrance/exit boundary nodes.
+- **Graceful Group Degradation**: When projecting a graph with groups onto a visualizer that has no concept of groups (analogous to projecting 3D onto 1D, e.g., Sequence Diagrams), some structural container information is naturally lost:
+  - **Flatten Groups**: Unwrap all groups (including nested groups) so all inner vertices (`a, b, c` in `GROUP`, `d, e, f` in `AnotherGroup`) are preserved as first-class vertices/participants.
+  - **Preserve Vertex-to-Vertex Edges**: All vertex-to-vertex connections (both within a group and across groups, such as `b > e`) are rendered normally.
+  - **Ignore Group-Level Links**: Edges connected directly to or from a group container (`GROUP --> AnotherGroup` or `node --> GROUP`) are ignored/omitted in group-less visualizers.
 
 ### 1.6 In-Browser WebAssembly Everywhere (Zero CLI Tools)
 - Eliminate all backend CLI requirements for browser users:

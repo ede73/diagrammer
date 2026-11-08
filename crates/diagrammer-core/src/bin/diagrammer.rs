@@ -130,6 +130,16 @@ fn main() {
 }
 
 fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Option<&str>) -> Result<Vec<u8>, String> {
+    if visualizer == "native_sequence" || visualizer == "sequence" {
+        let bytes = code.as_bytes().to_vec();
+        if let Some(out) = output_path {
+            fs::write(out, &bytes).map_err(|e| format!("Failed to write SVG output to '{}': {}", out, e))?;
+        } else {
+            io::stdout().write_all(&bytes).map_err(|e| format!("Failed to write to stdout: {}", e))?;
+        }
+        return Ok(bytes);
+    }
+
     let mut cmd = match visualizer {
         "dot" | "digraph" | "circo" | "fdp" | "neato" | "osage" | "patchwork" | "twopi" | "sfdp" | "ast_record" => {
             let bin = if visualizer == "digraph" || visualizer == "ast_record" { "dot" } else { visualizer };

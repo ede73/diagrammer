@@ -37,6 +37,15 @@ export async function visualizeGraphviz(generatedResult, visualizer) {
                 { path: 'icons/rack.png', width: '64', height: '64' }
             ]
         });
+        // Make Graphviz default background transparent to blend seamlessly with canvas
+        const bg = svg.querySelector('g.graph > polygon:first-of-type');
+        if (bg) {
+            const fill = bg.getAttribute('fill');
+            if (fill === '#ffffff' || fill === 'white' || fill === '#fff') {
+                bg.setAttribute('fill', 'transparent');
+                bg.setAttribute('stroke', 'transparent');
+            }
+        }
         const vizContainer = getHTMLElement(anchor);
         removeAllChildNodes(vizContainer);
         vizContainer.appendChild(svg);

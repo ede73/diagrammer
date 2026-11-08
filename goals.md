@@ -112,12 +112,17 @@ Extend Diagrammer's unified DSL to natively express rich diagram structures:
   3. Extract leading text colors and bracketed URLs from labels into dedicated AST fields (`textcolor`, `url`) across vertices, edges, and groups.
   4. Expand golden parity test fixtures to include `colors.txt` and `url.txt` to guarantee zero regressions against legacy reference outputs.
 
-### 1.10 Adaptive Diagram Theming & Dark Mode Color Translation
-- **Problem**: Graphs created with light-mode colors (e.g., `#FF0000`, dark text on light backgrounds, saturated fills) often appear harsh, illegible, or "crusted" when viewed on dark canvases in modern dark-mode interfaces.
-- **Goal**:
-  1. Design and implement an intelligent theme transformation engine for colors.
-  2. Rather than retaining raw, unadapted RGB hex values in dark mode, provide luminance-aware, contrast-preserving dark mode color transformations or palette swaps.
-  3. Re-evaluate the DSL syntax for color definitions (`EDGE COLOR`, `group COLOR`, `VERTEX COLOR`) to support cleaner, modern theme-first declarations.
+### 1.10 Adaptive Diagram Theming & Perceptual Dark Mode Engine
+- **Problem**: Graphs created with light-mode colors (e.g., `#FF0000`, dark text on light backgrounds, saturated fills) appear harsh, illegible, or "crusted" when viewed on dark canvases in modern dark-mode interfaces.
+- **Immediate Solution (Automatic Perceptual Color Adaptation)**:
+  - Implement a perceptual color adjustment algorithm (similar to browser dark-mode engines like Dark Reader) in OKLab/CIELAB color space.
+  - Dynamically invert/compress luminance and tone down chroma so that:
+    - Saturated reds like `#FF0000` shift to softer, contrast-safe dark-mode hues (e.g. `#ff6b6b`).
+    - Dark text and borders automatically scale lightness against dark backgrounds to satisfy WCAG contrast ($\ge 4.5:1$).
+- **Language & DSL Architecture Roadmap**:
+  1. **`theme { ... }` block**: Declarative styling block for graph-wide and element styles (fonts, font sizes, palette tokens, stroke colors, dark/light variants).
+  2. **`layout { ... }` block**: Engine-agnostic geometry tuning (padding, rank/node separation, edge weight/thickness, margins).
+  3. **`include "..."` directive**: Modular preset loading for CLI and Web (e.g., `include "themes/nord.diag"`, `include "layouts/compact.diag"`) allowing diagrams to stay clean and focused solely on structure without being inundated with styling declarations.
 
 ---
 

@@ -52,12 +52,12 @@ For CLI-only checks:
 ## Notes for agents
 - If you need to modify parser or AST behavior, inspect `crates/diagrammer-core/src/parser.rs` and `builder.rs`.
 - If you need to change output generator formats, inspect `crates/diagrammer-core/src/generators/`.
-- If you need to update web UI behavior, inspect `web/` and `ace/`.
+- If you need to update web UI behavior, inspect `web/` (including `web/ace/`).
 - If you need to test Rust core changes, run `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`.
 - If you need to test browser UI changes, run `make -C tests jesttests`.
 
 ## Helpful facts
 - The core diagrammer parser and all 13 generators are 100% Rust (`crates/diagrammer-core`), compiled to WebAssembly for the browser and native binary for the CLI.
 - No legacy Jison or TypeScript generators exist.
-- `make all` compiles the native Rust CLI binary, builds WebAssembly via `wasm-pack`, and transpiles web TypeScript assets.
-- `make -C tests jesttests` executes the full Puppeteer browser test suite against the local miniserver.
+- `make all` compiles the native Rust CLI binary, builds WebAssembly via `wasm-pack`, and generates `web/index.html` (zero-build ES modules).
+- `make -C tests jesttests` executes the full Puppeteer browser test suite against the embedded dev server (`./diagrammer serve 8999`).

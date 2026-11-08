@@ -85,6 +85,6 @@ Restructure the project so that parsing, AST modeling, code generation, and UI b
 | **M1: Legacy JS Elimination** | Delete `js/`, `export/`, decouple web configs, update build rules. | *(Completed)* Zero legacy JS CLI tools. |
 | **M2: Rust CLI Pipelining** | Native `diagrammer` binary supporting text stdout and image rendering. | *(Completed)* `echo 'a>b' \| diagrammer dot -o out.png`. |
 | **M3: Rust Crate Splitting** | Split `diagrammer-core` into modular crates (`parser`, `ast`, `generators`). | Strict API boundaries; standalone library usage. |
-| **M4: Native Rust Dev Server** | Replace `web/miniserver.ts` with lightweight Rust server binary. | Eliminates Node server requirement. |
-| **M5: Web UI Decoupling** | Replace TypeScript in `web/` with zero-build ES modules or Rust WASM UI. | Deletes `package.json`, `node_modules`, and npm dependency entirely. |
+| **M4: Native Rust Dev Server** | Replace `web/miniserver.ts` with lightweight Rust server binary. | *(Completed)* Built-in `./diagrammer serve`. |
+| **M5: Web UI Decoupling** | Replace TypeScript in `web/` with zero-build ES modules or Rust WASM UI. | *(Completed)* Zero-build ES modules, web assets under `web/`, npm isolated to `tests/`. |
 | **M6: Native Rust Renderers** | Implement native sequence / block layout engines in Rust. | Replaces Python `blockdiag`/`actdiag`/etc. |

@@ -37,12 +37,12 @@ The legacy Node CLI scripts (`js/`) and compiler scripts (`export/`) have been c
 
 ## 3. Architecture & Build System Mechanics
 
-### 3.1 `index.html` is a Generated File
-- [`index.html`](file:///Users/ede/src/diagrammer/index.html) is **generated** from [`index_template.html`](file:///Users/ede/src/diagrammer/index_template.html) during `make all` / `make index.html`.
+### 3.1 `web/index.html` is a Generated File
+- [`web/index.html`](file:///Users/ede/src/diagrammer/web/index.html) is **generated** from [`web/index_template.html`](file:///Users/ede/src/diagrammer/web/index_template.html) during `make all`.
 - The [`Makefile`](file:///Users/ede/src/diagrammer/Makefile) uses an `awk` rule to dynamically replace:
   - `{REPLACE_WITH_TEST_EXAMPLES}` with `<option>` tags scanned from [`tests/test_inputs/*.txt`](file:///Users/ede/src/diagrammer/tests/test_inputs).
   - `{REPLACE_WITH_WEB_VISUALIZATION_MODULES}` with `<script type="module" src="...">` tags for each file in [`web/visualizations/visualize*.js`](file:///Users/ede/src/diagrammer/web/visualizations).
-- **Rule**: Never edit [`index.html`](file:///Users/ede/src/diagrammer/index.html) directly; always edit [`index_template.html`](file:///Users/ede/src/diagrammer/index_template.html).
+- **Rule**: Never edit [`web/index.html`](file:///Users/ede/src/diagrammer/web/index.html) directly; always edit [`web/index_template.html`](file:///Users/ede/src/diagrammer/web/index_template.html).
 
 ### 3.2 100% Rust Core & WebAssembly
 - The entire parsing layer, AST data models, and all 13 generators are unified in Rust (`crates/diagrammer-core`):
@@ -211,3 +211,20 @@ As of the final transition to Full Rust mode:
    - Generator parity across all 12 generators passes 100%.
    - Jest / Puppeteer browser tests pass 100% (15/15 tests, 7/7 snapshots).
    - CLI generation and visualizer execution pass cleanly across all diagram formats.
+
+---
+
+## 7. Web Asset Consolidation (`web/`)
+
+All browser assets and static resources are organized under the [`web/`](file:///Users/ede/src/diagrammer/web) directory:
+- `web/ace/`: Embedded Ace editor library, themes, and modes.
+- `web/acetest.html`: Standalone editor test page.
+- `web/arrows/`: Arrowhead SVGs/images.
+- `web/css/`: Web stylesheets (`textarea.css`, etc.).
+- `web/icons/`: Node icon PNGs.
+- `web/types/`: Node type icons (`xactor.png`, `xcircle.png`, etc.) and shape definitions.
+- `web/favicon.ico`: Browser favicon icon.
+- `web/index_template.html`: Master web template.
+- `web/index.html`: Generated application entry point (`make all`).
+- Dev server (`./diagrammer serve`) serves `web/index.html` at `/` and `/index.html`, with transparent fallback to `web/*` for static web assets.
+

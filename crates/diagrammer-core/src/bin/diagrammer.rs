@@ -239,6 +239,8 @@ fn get_mime_type(filename: &str) -> &'static str {
         "text/css; charset=utf-8"
     } else if filename.ends_with(".png") {
         "image/png"
+    } else if filename.ends_with(".ico") {
+        "image/x-icon"
     } else if filename.ends_with(".svg") {
         "image/svg+xml"
     } else if filename.ends_with(".json") {
@@ -452,10 +454,19 @@ fn handle_connection(stream: &mut TcpStream) -> io::Result<()> {
     }
 
     if method == "GET" || method == "HEAD" {
-        let file_path = if path == "/" {
-            "index.html".to_string()
+        let file_path = if path == "/" || path == "/index.html" {
+            if Path::new("web/index.html").exists() {
+                "web/index.html".to_string()
+            } else {
+                "index.html".to_string()
+            }
         } else {
-            path.trim_start_matches('/').to_string()
+            let p = path.trim_start_matches('/').to_string();
+            if !Path::new(&p).exists() && Path::new(&format!("web/{}", p)).exists() {
+                format!("web/{}", p)
+            } else {
+                p
+            }
         };
 
         if file_path.contains("..") {

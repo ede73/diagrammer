@@ -1,7 +1,7 @@
 ================================================================================
 ACTIVE ROADMAP & CHAT TASKS
 ================================================================================
-[x] Reorganize Generator vs Visualizer menu in Web UI with runtime metadata (Browser WASM vs CLI Backend) [Landed in #56]
+[x] Separate Generator vs Visualizer into dedicated dual dropdowns in Web UI (e.g. Graphviz -> dot, fdp, neato, osage, twopi, sfdp; D3 -> Reingold, Dendrogram, CirclePacked, Sankey) [Landed]
 [x] First-party native Rust Sequence Layout Engine prototype in crates/diagrammer-core/src/layout/sequence.rs [Landed in #58]
 [x] Architectural roadmap document for WASM visualizers and native layout engines (docs/layout_engine_and_wasm_roadmap.md)
 [ ] In-Browser Mermaid Client: embed mermaid.js in web/ to eliminate Node mmdc CLI dependency

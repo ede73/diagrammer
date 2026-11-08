@@ -36,9 +36,40 @@ impl Generator for MermaidFlowchart {
         }
 
         for edge in canvas.get_edges() {
-            let lhs = safe_id(&edge.left);
-            let rhs = safe_id(&edge.right);
-            let arrow = get_mermaid_flow_arrow(edge);
+            let left_arr = edge.left_arrow_type() != ArrowType::None;
+            let right_arr = edge.right_arrow_type() != ArrowType::None;
+            let lt = edge.line_type();
+            let is_self_loop = edge.left == edge.right;
+
+            let (lhs, rhs, arrow) = if left_arr && !right_arr {
+                // Mermaid flowchart only supports forward arrows -> reverse nodes
+                let l = safe_id(&edge.right);
+                let r = safe_id(&edge.left);
+                let a = if lt == "dotted" || lt == "dashed" { "-.->" } else { "-->" };
+                (l, r, a)
+            } else if left_arr && right_arr {
+                let l = safe_id(&edge.left);
+                let r = safe_id(&edge.right);
+                let a = if lt == "dotted" || lt == "dashed" { "<-.->" } else { "<-->" };
+                (l, r, a)
+            } else if right_arr {
+                let l = safe_id(&edge.left);
+                let r = safe_id(&edge.right);
+                let a = if lt == "dotted" || lt == "dashed" { "-.->" } else { "-->" };
+                (l, r, a)
+            } else if is_self_loop {
+                // Dagre crashes on undirected self-loops; route as directed self-loop
+                let l = safe_id(&edge.left);
+                let r = safe_id(&edge.right);
+                let a = if lt == "dotted" || lt == "dashed" { "-.->" } else { "-->" };
+                (l, r, a)
+            } else {
+                let l = safe_id(&edge.left);
+                let r = safe_id(&edge.right);
+                let a = if lt == "dotted" || lt == "dashed" { "-.-" } else { "---" };
+                (l, r, a)
+            };
+
             let label = edge.label.as_deref().map(|s| s.trim()).unwrap_or("");
             if !label.is_empty() {
                 let escaped = escape_label(label);
@@ -102,32 +133,6 @@ fn format_vertex(obj: &GraphObject) -> String {
     }
 }
 
-fn get_mermaid_flow_arrow(edge: &crate::ast::GraphEdge) -> &'static str {
-    let lt = edge.line_type();
-    let left = edge.left_arrow_type() != ArrowType::None;
-    let right = edge.right_arrow_type() != ArrowType::None;
-
-    if lt == "dotted" || lt == "dashed" {
-        if left && right {
-            "<-.->"
-        } else if left {
-            "<-.-"
-        } else if right {
-            "-.->"
-        } else {
-            "-.-"
-        }
-    } else if left && right {
-        "<-->"
-    } else if left {
-        "<--"
-    } else if right {
-        "-->"
-    } else {
-        "---"
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -144,6 +149,16 @@ mod tests {
         assert!(output.contains("a[\"a\"]"));
         assert!(output.contains("a --> b"));
         assert!(output.contains("b --> c"));
+    }
+
+    #[test]
+    fn test_mermaid_flowchart_left_arrow_reversal() {
+        let input = "a < b";
+        let canvas = AstBuilder::new().build(input).unwrap();
+        let generator = MermaidFlowchart;
+        let output = generator.generate(&canvas);
+
+        assert!(output.contains("b --> a"));
     }
 
     #[test]

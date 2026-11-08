@@ -15,16 +15,52 @@ function _makeNewImageHolder(pngBase64) {
     (_a = getHTMLElement('diagrammer-graph')) === null || _a === void 0 ? void 0 : _a.appendChild(img);
 }
 function beautifyJSON(generatedCode) {
-    let data;
-    try {
-        data = JSON.parse(generatedCode);
-    }
-    catch (ex) {
-        console.debug('Failed beautifying generated code JSON(perhaps digraph etc?)', ex);
+    clearBeautified();
+    const wrapper = document.getElementById('diagrammer-beautified');
+    if (!wrapper) return;
+
+    const trimmed = (generatedCode || '').trim();
+    if (!trimmed) {
+        wrapper.innerHTML = '<div class="beautified-empty">No generated result available.</div>';
         return;
     }
-    const wrapper = document.getElementById('diagrammer-beautified');
-    jsonTree.create(data, wrapper);
+
+    let data;
+    try {
+        data = JSON.parse(trimmed);
+    }
+    catch (ex) {
+        // Not a JSON result (e.g. dot, blockdiag, plantuml).
+        // Provide a formatted, readable code display instead of leaving the tab blank.
+        const notice = document.createElement('div');
+        notice.className = 'beautified-notice';
+        notice.textContent = 'Tree viewer is active for JSON outputs (e.g. AST, Sankey, Dendrogram). Formatted text view:';
+        
+        const pre = document.createElement('pre');
+        pre.className = 'beautified-code-view';
+        pre.textContent = trimmed;
+
+        wrapper.appendChild(notice);
+        wrapper.appendChild(pre);
+        return;
+    }
+
+    try {
+        if (typeof jsonTree !== 'undefined') {
+            jsonTree.create(data, wrapper);
+        } else {
+            const pre = document.createElement('pre');
+            pre.className = 'beautified-code-view';
+            pre.textContent = JSON.stringify(data, null, 2);
+            wrapper.appendChild(pre);
+        }
+    } catch (err) {
+        console.error('Failed to create jsonTree:', err);
+        const pre = document.createElement('pre');
+        pre.className = 'beautified-code-view';
+        pre.textContent = JSON.stringify(data, null, 2);
+        wrapper.appendChild(pre);
+    }
 }
 export function clearBeautified() {
     const result = getInputElement('diagrammer-beautified');

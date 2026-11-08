@@ -492,10 +492,39 @@ img.iconicon {
     width: 100%;
     height: 100%;
     min-height: 540px;
-    padding: 12px;
+    padding: 16px;
     overflow: auto;
     background-color: var(--bg-input);
     color: var(--text-primary);
+    box-sizing: border-box;
+}
+
+.beautified-notice {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    padding: 6px 10px;
+    background-color: var(--bg-surface-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+}
+
+.beautified-code-view {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.beautified-empty {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 12px 0;
 }
 
 /* ==========================================================================

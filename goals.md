@@ -52,7 +52,8 @@ Restructure the project so that parsing, AST modeling, code generation, layout e
 
 ### 1.6 In-Browser WebAssembly Everywhere (Zero CLI Tools)
 - Eliminate all backend CLI requirements for browser users:
-  - **Mermaid**: Migrate from backend Node `mmdc` CLI to client-side `mermaid.js` rendering (`mermaid.render()`), making Mermaid sequence diagrams 100% in-browser.
+  - **Mermaid**: Migrate from backend Node `mmdc` CLI to client-side `mermaid.js` rendering (`mermaid.render()`), making Mermaid diagrams 100% in-browser.
+  - **Mermaid Generator Architecture**: Group Mermaid engines by semantic language families (Flowchart/Graph vs State vs Sequence vs ER) rather than string hacks. Provide clean structural generators mapped to matching visualizer engines.
   - **External Python tools** (`blockdiag`, `actdiag`, `nwdiag`, `seqdiag`) & **Java tools** (`plantuml.jar`): Rather than running heavy multi-megabyte Pyodide or JVM WASM emulators, replace them directly with Diagrammer's native Rust layout engines.
 
 ### 1.7 First-Party Native Rust Layout Engines (Surpassing Graphviz & Mermaid)

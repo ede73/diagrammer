@@ -4,6 +4,7 @@ pub mod blockdiag;
 pub mod dendrogram;
 pub mod digraph;
 pub mod layerbands;
+pub mod mermaid_flowchart;
 pub mod mermaid_sequence;
 pub mod mscgen;
 pub mod native_sequence;
@@ -112,6 +113,9 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
             Some(Box::new(digraph::DiGraph))
         }
         "layerbands" => Some(Box::new(layerbands::LayerBands)),
+        "mermaid" | "mermaid_flowchart" | "mermaid_graph" => {
+            Some(Box::new(mermaid_flowchart::MermaidFlowchart))
+        }
         "mermaid_sequence" => Some(Box::new(mermaid_sequence::MermaidSequence)),
         "mscgen" => Some(Box::new(mscgen::MSCGen)),
         "native_sequence" | "sequence" => Some(Box::new(native_sequence::NativeSequence)),

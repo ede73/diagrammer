@@ -1,6 +1,6 @@
 # Developer & Architectural Notes (NOTES.md)
 
-This document collects critical technical findings, architectural details, gotchas, and documentation corrections discovered from analyzing the codebase that are missing from or inaccurate in the existing markdown files ([README.md](file:///Users/ede/src/diagrammer/README.md), [AGENTS.md](file:///Users/ede/src/diagrammer/AGENTS.md), [DEVELOPMENT.md](file:///Users/ede/src/diagrammer/DEVELOPMENT.md), [TESTING.md](file:///Users/ede/src/diagrammer/TESTING.md), and [DOCKER.md](file:///Users/ede/src/diagrammer/DOCKER.md)).
+This document collects critical technical findings, architectural details, gotchas, and documentation corrections discovered from analyzing the codebase that are missing from or inaccurate in the existing markdown files ([README.md](file:///Users/ede/src/diagrammer/README.md), [AGENTS.md](file:///Users/ede/src/diagrammer/AGENTS.md), [DEVELOPMENT.md](file:///Users/ede/src/diagrammer/DEVELOPMENT.md), and [TESTING.md](file:///Users/ede/src/diagrammer/TESTING.md)).
 
 ---
 

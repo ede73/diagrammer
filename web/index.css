@@ -573,14 +573,20 @@ img.iconicon {
     transition: transform 0.12s ease-out;
     display: inline-block;
     margin: auto;
+    min-width: max-content;
+    flex-shrink: 0;
 }
 
 #diagrammer-graph svg {
     display: block;
+    max-width: none;
+    flex-shrink: 0;
 }
 
 #diagrammer-graph img {
     display: block;
+    max-width: none;
+    flex-shrink: 0;
 }
 
 /* ==========================================================================

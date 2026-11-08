@@ -19,7 +19,7 @@ This document describes the `diagrammer` repository layout, key entry points, an
 - Clean build artifacts:
   - `make clean`
 - Start the browser/web server:
-  - `node web/miniserver.js [port]`
+  - `./diagrammer serve [port]` (defaults to 8000)
 - Run native Rust CLI parse/generate:
   - `./diagrammer [VISUALIZER] [INPUT_FILE]` (or piped via stdin: `echo 'a>b' | ./diagrammer [VISUALIZER]`)
 - Run native Rust CLI visualization to output image:
@@ -31,7 +31,6 @@ This document describes the `diagrammer` repository layout, key entry points, an
 - `Makefile` — top-level build rules; builds Rust core, WASM, CLI, and web UI
 - `README.md` — user-facing project overview and installation notes
 - `tests/Makefile` — web and test runner orchestration
-- `web/miniserver.js` — development web server for browser UI and web tests
 - `diagrammer` — symlink to `./target/release/diagrammer` native Rust CLI binary
 
 ## Core directories
@@ -46,7 +45,7 @@ This document describes the `diagrammer` repository layout, key entry points, an
 For new work, follow this order:
 1. `npm install`
 2. `make all`
-3. `node web/miniserver.js 8777`
+3. `./diagrammer serve 8777`
 4. open `http://localhost:8777/index.html`
 
 For CLI-only checks:

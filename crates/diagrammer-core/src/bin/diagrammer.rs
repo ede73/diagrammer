@@ -131,7 +131,7 @@ fn main() {
 
 fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Option<&str>) -> Result<Vec<u8>, String> {
     let mut cmd = match visualizer {
-        "dot" | "digraph" | "fdp" | "neato" | "osage" | "twopi" | "sfdp" | "ast_record" => {
+        "dot" | "digraph" | "circo" | "fdp" | "neato" | "osage" | "patchwork" | "twopi" | "sfdp" | "ast_record" => {
             let bin = if visualizer == "digraph" || visualizer == "ast_record" { "dot" } else { visualizer };
             let mut c = Command::new(bin);
             c.arg("-q").arg(format!("-T{}", format));

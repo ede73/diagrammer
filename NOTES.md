@@ -190,6 +190,11 @@ until loop_condition_met
     }
     ```
 
+- [x] **Graphviz layout engine visualizers (RESOLVED)**:
+  - **Issue**: Visualizers `fdp`, `neato`, `osage`, `twopi`, `sfdp`, `circo`, and `patchwork` failed with `Unknown visualizer` / `Unknown generator` because `make_generator` only recognized `digraph` and `dot`.
+  - **Fix**: Mapped all Graphviz layout engine visualizers (`circo`, `digraph`, `dot`, `fdp`, `neato`, `osage`, `patchwork`, `sfdp`, `twopi`) to [`digraph::DiGraph`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/src/generators/digraph.rs) in [`make_generator`](file:///Users/ede/src/diagrammer/crates/diagrammer-core/src/generators/mod.rs).
+  - **Outcome**: The visualizer produces standard Graphviz DOT definitions that are laid out by Viz.js client-side in the browser or rendered by the corresponding Graphviz binary CLI.
+
 ---
 
 ## 6. Full Rust Core & WebAssembly Migration

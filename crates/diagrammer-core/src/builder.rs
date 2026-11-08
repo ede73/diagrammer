@@ -975,7 +975,7 @@ impl AstBuilder {
         update_in_list(&mut self.canvas.objects, pv);
     }
 
-    fn process_inner_graph(&mut self, pair: Pair<Rule>) -> Result<(Vec<String>, String, Vec<GraphObject>), String> {
+    fn process_inner_graph(&mut self, pair: Pair<Rule>) -> Result<(Vec<String>, Vec<String>, String, Vec<GraphObject>), String> {
         let inner_id = self.context.graphinner_index.unwrap_or(1);
         self.context.graphinner_index = Some(inner_id + 1);
         let exit_id = self.context.container_exit.unwrap_or(1);
@@ -996,6 +996,56 @@ impl AstBuilder {
         }
 
         let finished_inner = self.group_stack.pop().unwrap();
+
+        let inner_edges: Vec<GraphObject> = if self.canvas.objects.len() > start_obj_len {
+            self.canvas.objects.drain(start_obj_len..).collect()
+        } else {
+            Vec::new()
+        };
+
+        // Determine all vertices inside finished_inner
+        let mut all_inner_vertices = Vec::new();
+        for obj in &finished_inner.objects {
+            match obj {
+                GraphObject::VertexRef { vertex } => {
+                    if !all_inner_vertices.contains(&vertex.name) {
+                        all_inner_vertices.push(vertex.name.clone());
+                    }
+                }
+                GraphObject::Vertex(v) => {
+                    if !all_inner_vertices.contains(&v.name) {
+                        all_inner_vertices.push(v.name.clone());
+                    }
+                }
+                _ => {}
+            }
+        }
+        for obj in &finished_inner.root_vertices {
+            match obj {
+                GraphObject::VertexRef { vertex } => {
+                    if !all_inner_vertices.contains(&vertex.name) {
+                        all_inner_vertices.push(vertex.name.clone());
+                    }
+                }
+                GraphObject::Vertex(v) => {
+                    if !all_inner_vertices.contains(&v.name) {
+                        all_inner_vertices.push(v.name.clone());
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        // Collect all incoming and outgoing connections among inner edges
+        let mut has_incoming = HashSet::new();
+        let mut has_outgoing = HashSet::new();
+        for edge_obj in &inner_edges {
+            if let GraphObject::Edge { edge } = edge_obj {
+                has_outgoing.insert(edge.left.clone());
+                has_incoming.insert(edge.right.clone());
+            }
+        }
+
         let root_names: Vec<String> = finished_inner
             .root_vertices
             .iter()
@@ -1006,15 +1056,21 @@ impl AstBuilder {
             })
             .collect();
 
-        self.push_object(GraphObject::Group(Box::new(finished_inner)));
-
-        let inner_edges: Vec<GraphObject> = if self.canvas.objects.len() > start_obj_len {
-            self.canvas.objects.drain(start_obj_len..).collect()
+        let entrances = if !root_names.is_empty() {
+            root_names.clone()
         } else {
-            Vec::new()
+            all_inner_vertices.clone()
         };
 
-        Ok((root_names, inner_id.to_string(), inner_edges))
+        let exits = if !finished_inner.chain_terminals.is_empty() {
+            finished_inner.chain_terminals.clone()
+        } else {
+            root_names
+        };
+
+        self.push_object(GraphObject::Group(Box::new(finished_inner)));
+
+        Ok((entrances, exits, inner_id.to_string(), inner_edges))
     }
 
     fn handle_event_chain(&mut self, pair: Pair<Rule>) -> Result<(), String> {
@@ -1046,15 +1102,15 @@ impl AstBuilder {
         for item in pair.into_inner() {
             match item.as_rule() {
                 Rule::inner_graph => {
-                    let (roots, id, inner_edges) = self.process_inner_graph(item)?;
-                    current_incoming = roots
+                    let (entrances, exits, id, inner_edges) = self.process_inner_graph(item)?;
+                    current_incoming = entrances
                         .iter()
                         .map(|n| ParsedVertex {
                             name: n.clone(),
                             ..Default::default()
                         })
                         .collect();
-                    current_outgoing = roots;
+                    current_outgoing = exits;
                     current_inner_id = Some(id);
                     current_inner_edges = inner_edges;
                 }
@@ -1070,15 +1126,15 @@ impl AstBuilder {
                         }
                     }
                     if let Some(inner_pair) = found_inner {
-                        let (roots, id, inner_edges) = self.process_inner_graph(inner_pair)?;
-                        current_incoming = roots
+                        let (entrances, exits, id, inner_edges) = self.process_inner_graph(inner_pair)?;
+                        current_incoming = entrances
                             .iter()
                             .map(|n| ParsedVertex {
                                 name: n.clone(),
                                 ..Default::default()
                             })
                             .collect();
-                        current_outgoing = roots;
+                        current_outgoing = exits;
                         current_inner_id = Some(id);
                         current_inner_edges = inner_edges;
                     } else {
@@ -1227,8 +1283,16 @@ impl AstBuilder {
                 self.canvas.objects.extend(elements[i + 1].inner_edges.clone());
             }
 
-            if let Some(last_out) = elements[i + 1].outgoing.last() {
-                current_lhs = vec![last_out.clone()];
+            current_lhs = elements[i + 1].outgoing.clone();
+        }
+
+        if let Some(grp) = self.group_stack.last_mut() {
+            if let Some(last_elem) = elements.last() {
+                for node in &last_elem.outgoing {
+                    if !grp.chain_terminals.contains(node) {
+                        grp.chain_terminals.push(node.clone());
+                    }
+                }
             }
         }
 
@@ -1382,5 +1446,73 @@ p > q
         assert!(canvas.theme.is_some());
         assert_eq!(canvas.theme.as_ref().unwrap().background.as_deref(), Some("#333333"));
         assert_eq!(canvas.defaults.edgecolor.as_deref(), Some("#ffaa00"));
+    }
+
+    #[test]
+    fn test_multi_entrance_multi_exit_subgraph_linking() {
+        let input = r#"
+b > (
+  c > d > e
+  f > g > h
+) > "eandh" z
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST");
+        let edges = canvas.get_edges();
+
+        // Entrances: b should link to both c and f
+        assert!(edges.iter().any(|e| e.left == "b" && e.right == "c"), "Expected edge b -> c");
+        assert!(edges.iter().any(|e| e.left == "b" && e.right == "f"), "Expected edge b -> f");
+
+        // Internal edges
+        assert!(edges.iter().any(|e| e.left == "c" && e.right == "d"), "Expected edge c -> d");
+        assert!(edges.iter().any(|e| e.left == "d" && e.right == "e"), "Expected edge d -> e");
+        assert!(edges.iter().any(|e| e.left == "f" && e.right == "g"), "Expected edge f -> g");
+        assert!(edges.iter().any(|e| e.left == "g" && e.right == "h"), "Expected edge g -> h");
+
+        // Exits: both e and h should link to z with label 'eandh'
+        let e_to_z = edges.iter().find(|e| e.left == "e" && e.right == "z");
+        assert!(e_to_z.is_some(), "Expected edge e -> z");
+        assert_eq!(e_to_z.unwrap().label.as_deref(), Some("eandh"));
+
+        let h_to_z = edges.iter().find(|e| e.left == "h" && e.right == "z");
+        assert!(h_to_z.is_some(), "Expected edge h -> z");
+        assert_eq!(h_to_z.unwrap().label.as_deref(), Some("eandh"));
+    }
+
+    #[test]
+    fn test_rich_arrow_heads_and_lines() {
+        let input = r#"
+a --> b
+c ..> d
+e ==> f
+g <--> h
+i |--| j
+k |--> l
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST");
+        let edges = canvas.get_edges();
+
+        let edge_ab = edges.iter().find(|e| e.left == "a" && e.right == "b").unwrap();
+        assert_eq!(edge_ab.line_type(), "dashed");
+
+        let edge_cd = edges.iter().find(|e| e.left == "c" && e.right == "d").unwrap();
+        assert_eq!(edge_cd.line_type(), "dotted");
+
+        let edge_ef = edges.iter().find(|e| e.left == "e" && e.right == "f").unwrap();
+        assert_eq!(edge_ef.line_type(), "double");
+
+        let edge_gh = edges.iter().find(|e| e.left == "g" && e.right == "h").unwrap();
+        assert_eq!(edge_gh.left_arrow_type(), ArrowType::Normal);
+        assert_eq!(edge_gh.right_arrow_type(), ArrowType::Normal);
+        assert_eq!(edge_gh.line_type(), "dashed");
+
+        let edge_ij = edges.iter().find(|e| e.left == "i" && e.right == "j").unwrap();
+        assert_eq!(edge_ij.left_arrow_type(), ArrowType::Flat);
+        assert_eq!(edge_ij.right_arrow_type(), ArrowType::Flat);
+
+        let edge_kl = edges.iter().find(|e| e.left == "k" && e.right == "l").unwrap();
+        assert_eq!(edge_kl.left_arrow_type(), ArrowType::Flat);
+        assert_eq!(edge_kl.right_arrow_type(), ArrowType::Normal);
+        assert_eq!(edge_kl.line_type(), "dashed");
     }
 }

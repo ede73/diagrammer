@@ -348,6 +348,8 @@ pub struct GraphGroup {
     pub color: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub textcolor: Option<String>,
+    #[serde(skip)]
+    pub chain_terminals: Vec<String>,
 }
 
 impl GraphGroup {
@@ -365,6 +367,7 @@ impl GraphGroup {
             conditional: None,
             color: None,
             textcolor: None,
+            chain_terminals: Vec::new(),
         }
     }
 

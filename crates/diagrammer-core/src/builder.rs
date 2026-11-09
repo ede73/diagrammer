@@ -95,12 +95,6 @@ impl AstBuilder {
     }
 
     pub fn build(mut self, input: &str) -> Result<GraphCanvas, String> {
-        // Preload default logical theme if theme.diag exists in logical_files and input doesn't explicitly define/include one
-        if !input.contains("theme") && !input.contains("include") {
-            if let Some(content) = self.logical_files.get("theme.diag").cloned() {
-                let _ = self.parse_and_process(&content);
-            }
-        }
         self.parse_and_process(input)?;
 
         // Flush any unclosed groups back to canvas

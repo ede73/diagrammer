@@ -128,40 +128,42 @@ impl AstBuilder {
             inherited_vtc: Option<&str>,
             inherited_ec: Option<&str>,
             inherited_etc: Option<&str>,
+            explicit_v_colors: &HashSet<String>,
+            explicit_v_textcolors: &HashSet<String>,
         ) {
             for obj in objs.iter_mut() {
                 match obj {
                     GraphObject::VertexRef { vertex } => {
-                        if vertex.color.is_none() {
+                        if !explicit_v_colors.contains(&vertex.name) {
                             if let Some(vc) = inherited_vc {
                                 vertex.color = Some(vc.to_string());
                             }
                         }
-                        if vertex.textcolor.is_none() {
+                        if !explicit_v_textcolors.contains(&vertex.name) {
                             if let Some(vtc) = inherited_vtc {
                                 vertex.textcolor = Some(vtc.to_string());
                             }
                         }
                     }
                     GraphObject::Vertex(vertex) => {
-                        if vertex.color.is_none() {
+                        if !explicit_v_colors.contains(&vertex.name) {
                             if let Some(vc) = inherited_vc {
                                 vertex.color = Some(vc.to_string());
                             }
                         }
-                        if vertex.textcolor.is_none() {
+                        if !explicit_v_textcolors.contains(&vertex.name) {
                             if let Some(vtc) = inherited_vtc {
                                 vertex.textcolor = Some(vtc.to_string());
                             }
                         }
                     }
                     GraphObject::Edge { edge } => {
-                        if edge.color.is_none() {
+                        if edge.parent.is_none() && !edge.has_explicit_color {
                             if let Some(ec) = inherited_ec {
                                 edge.color = Some(ec.to_string());
                             }
                         }
-                        if edge.textcolor.is_none() {
+                        if edge.parent.is_none() && !edge.has_explicit_textcolor {
                             if let Some(etc) = inherited_etc {
                                 edge.textcolor = Some(etc.to_string());
                             }
@@ -178,6 +180,8 @@ impl AstBuilder {
                             grp_vtc,
                             grp_ec,
                             grp_etc,
+                            explicit_v_colors,
+                            explicit_v_textcolors,
                         );
                     }
                     _ => {}
@@ -191,6 +195,8 @@ impl AstBuilder {
             default_vtc.as_deref(),
             default_ec.as_deref(),
             default_etc.as_deref(),
+            &self.explicit_vertex_colors,
+            &self.explicit_vertex_textcolors,
         );
         update_objects(
             &mut self.canvas.root_vertices,
@@ -198,6 +204,8 @@ impl AstBuilder {
             default_vtc.as_deref(),
             default_ec.as_deref(),
             default_etc.as_deref(),
+            &self.explicit_vertex_colors,
+            &self.explicit_vertex_textcolors,
         );
     }
 

@@ -39,6 +39,9 @@
     <label for="diagrammer-visualizer" id="diagrammer-visualizer-label">Visualizer:</label>
     <select id="diagrammer-visualizer" name="visualizer" onChange="visualizerChanged()"></select>
 
+    <label for="diagrammer-theme" id="diagrammer-theme-label">Theme:</label>
+    <select id="diagrammer-theme" name="theme" onChange="themeChanged()"></select>
+
     <select id="diagrammer-generator" name="generator" onChange="generatorChanged()" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; margin: 0; padding: 0; border: none;"></select>
     <span id="diagrammer-runtime-badge" class="runtime-badge"></span>
 
@@ -467,10 +470,11 @@
       }, { passive: false });
     }
 
-    import { addLine, generatorChanged, generatorGroupChanged, visualizerChanged, exampleChanged, savedChanged, getGraphText, setGraphText, parseAndRegenerate } from "./web/editorInteractions.js";
+    import { addLine, generatorChanged, generatorGroupChanged, visualizerChanged, themeChanged, exampleChanged, savedChanged, getGraphText, setGraphText, parseAndRegenerate } from "./web/editorInteractions.js";
     window.addLine = addLine;
     window.generatorGroupChanged = generatorGroupChanged;
     window.visualizerChanged = visualizerChanged;
+    window.themeChanged = themeChanged;
     window.generatorChanged = generatorChanged;
     window.exampleChanged = exampleChanged;
     window.savedChanged = savedChanged;
@@ -484,11 +488,30 @@
     window.getSelectedVisualizer = getSelectedVisualizer;
     window.setVisualizer = setVisualizer;
 
-    import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList, saveLogicalFile, loadLogicalFile, deleteLogicalFile, getLogicalFilesAsOptionList } from "./web/localStorage.js";
+    import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList, saveLogicalFile, loadLogicalFile, deleteLogicalFile, getLogicalFilesAsOptionList, getLogicalFiles } from "./web/localStorage.js";
     window.saveCurrentGraph = saveCurrentGraph;
     window.loadGraph = loadGraph;
 
+    function populateThemeDropdown() {
+      const themeSelect = document.getElementById('diagrammer-theme');
+      if (!themeSelect) return;
+      const currentVal = themeSelect.value;
+      let html = '<option value="">(None)</option>';
+      const files = getLogicalFiles();
+      for (const k in files) {
+        html += `<option value="${k}">${k}</option>`;
+      }
+      html += '<option value="theme/dark">theme/dark (preset)</option>';
+      html += '<option value="theme/light">theme/light (preset)</option>';
+      themeSelect.innerHTML = html;
+      if (currentVal && Array.from(themeSelect.options).some(o => o.value === currentVal)) {
+        themeSelect.value = currentVal;
+      }
+    }
+    window.populateThemeDropdown = populateThemeDropdown;
+
     function refreshThemeFileList(selectFilename) {
+      populateThemeDropdown();
       const select = document.getElementById('theme-file-select');
       const input = document.getElementById('theme-filename');
       if (select) {

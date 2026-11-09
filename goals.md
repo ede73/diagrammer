@@ -46,6 +46,12 @@ Restructure the project so that parsing, AST modeling, code generation, layout e
   - *AST*: Generators include JSON AST and Record Visualizer.
   - *D3*: Generator is hierarchical JSON; visualizers include Reingold-Tilford, Radial Dendrogram, CirclePacked, Sankey.
   - *Mermaid & PlantUML*: Domain-specific sequence generators rendered by external or in-browser engines.
+- **Unified Global AST Configuration & Canonical Invariants**:
+  - **Theme & Layout as Global Cascading State**: `theme { ... }` and `layout { ... }` blocks (whether included via `include` or written inline) are parsed into global canvas properties.
+  - **The "Last Replaces" Principle**: Later declarations overwrite previous declarations for overlapping keys, while non-overlapping properties cascade forward.
+  - **Single Unambiguous AST Contract for Generators**: Generators consume an AST containing at most ONE canonical `Theme` and ONE canonical `Layout` object. Generators are completely decoupled from provenance (they do not need to know whether settings came from 0, 1, or 5 includes or in-line blocks). Visualizers and generators that lack theme/layout support (e.g. basic mscgen) safely and completely ignore them.
+  - **Declarative Graph Theming on Preceding Nodes**: Theme colors (`vertex-color`, `edge-color`, etc.) apply globally to all uncolored nodes and edges across the graph regardless of whether the theme block is placed at the top or bottom of the document. Explicit element-level colors (`a#ff0000`, `rect d#000000`) strictly override ambient theme defaults.
+  - **Web UI Theme Preset Dropdown (`Theme: [ (None) v ]`)**: Provides an ambient theme selector in the web toolbar prepending `include "<theme>"\n` dynamically upon parse, keeping diagram source code 100% clean and allowing diagrams to effortlessly override any theme settings with in-graph blocks.
 - **Runtime Metadata**: Every visualizer exposes its execution runtime in the UI:
   - ⚡ **Browser (WASM/JS)**: Runs locally and privately in the browser with zero network or backend dependencies.
   - 🖥️ **CLI (Backend)**: Requires native host CLI binaries (`plantuml.jar`, `blockdiag`, etc.).

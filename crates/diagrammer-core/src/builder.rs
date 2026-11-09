@@ -33,6 +33,8 @@ pub struct AstBuilder {
     included_files: HashSet<String>,
     base_dir: Option<std::path::PathBuf>,
     logical_files: std::collections::HashMap<String, String>,
+    explicit_vertex_colors: HashSet<String>,
+    explicit_vertex_textcolors: HashSet<String>,
 }
 
 impl Default for AstBuilder {
@@ -57,6 +59,8 @@ impl AstBuilder {
             included_files: HashSet::new(),
             base_dir: None,
             logical_files: std::collections::HashMap::new(),
+            explicit_vertex_colors: HashSet::new(),
+            explicit_vertex_textcolors: HashSet::new(),
         }
     }
 
@@ -106,8 +110,95 @@ impl AstBuilder {
             }
         }
 
+        self.apply_theme_defaults_to_canvas();
+
         self.canvas.parsing_context = Some(self.context);
         Ok(self.canvas)
+    }
+
+    fn apply_theme_defaults_to_canvas(&mut self) {
+        let default_vc = self.canvas.defaults.vertexcolor.clone();
+        let default_vtc = self.canvas.defaults.vertextextcolor.clone();
+        let default_ec = self.canvas.defaults.edgecolor.clone();
+        let default_etc = self.canvas.defaults.edgetextcolor.clone();
+
+        fn update_objects(
+            objs: &mut [GraphObject],
+            inherited_vc: Option<&str>,
+            inherited_vtc: Option<&str>,
+            inherited_ec: Option<&str>,
+            inherited_etc: Option<&str>,
+        ) {
+            for obj in objs.iter_mut() {
+                match obj {
+                    GraphObject::VertexRef { vertex } => {
+                        if vertex.color.is_none() {
+                            if let Some(vc) = inherited_vc {
+                                vertex.color = Some(vc.to_string());
+                            }
+                        }
+                        if vertex.textcolor.is_none() {
+                            if let Some(vtc) = inherited_vtc {
+                                vertex.textcolor = Some(vtc.to_string());
+                            }
+                        }
+                    }
+                    GraphObject::Vertex(vertex) => {
+                        if vertex.color.is_none() {
+                            if let Some(vc) = inherited_vc {
+                                vertex.color = Some(vc.to_string());
+                            }
+                        }
+                        if vertex.textcolor.is_none() {
+                            if let Some(vtc) = inherited_vtc {
+                                vertex.textcolor = Some(vtc.to_string());
+                            }
+                        }
+                    }
+                    GraphObject::Edge { edge } => {
+                        if edge.color.is_none() {
+                            if let Some(ec) = inherited_ec {
+                                edge.color = Some(ec.to_string());
+                            }
+                        }
+                        if edge.textcolor.is_none() {
+                            if let Some(etc) = inherited_etc {
+                                edge.textcolor = Some(etc.to_string());
+                            }
+                        }
+                    }
+                    GraphObject::Group(group) => {
+                        let grp_vc = group.defaults.vertexcolor.as_deref().or(inherited_vc);
+                        let grp_vtc = group.defaults.vertextextcolor.as_deref().or(inherited_vtc);
+                        let grp_ec = group.defaults.edgecolor.as_deref().or(inherited_ec);
+                        let grp_etc = group.defaults.edgetextcolor.as_deref().or(inherited_etc);
+                        update_objects(
+                            &mut group.objects,
+                            grp_vc,
+                            grp_vtc,
+                            grp_ec,
+                            grp_etc,
+                        );
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        update_objects(
+            &mut self.canvas.objects,
+            default_vc.as_deref(),
+            default_vtc.as_deref(),
+            default_ec.as_deref(),
+            default_etc.as_deref(),
+        );
+        update_objects(
+            &mut self.canvas.root_vertices,
+            default_vc.as_deref(),
+            default_vtc.as_deref(),
+            default_ec.as_deref(),
+            default_etc.as_deref(),
+        );
     }
 
     fn active_defaults_mut(&mut self) -> &mut AllowedDefaults {
@@ -298,6 +389,9 @@ impl AstBuilder {
 
     fn set_vertex_label(&mut self, name: &str, label: &str) {
         let dest = self.destructure_label(label);
+        if dest.textcolor.is_some() {
+            self.explicit_vertex_textcolors.insert(name.to_string());
+        }
         fn set_in_list(list: &mut [GraphObject], name: &str, dest: &DestructuredLabel) -> bool {
             for obj in list {
                 match obj {
@@ -469,30 +563,20 @@ impl AstBuilder {
                         }
                     }
                 }
-                if self.canvas.defaults.vertexcolor.is_none() {
-                    if let Some(vc) = theme.get("vertexcolor") {
-                        self.canvas.defaults.vertexcolor = Some(vc.to_string());
-                    }
+                if let Some(vc) = theme.get("vertexcolor") {
+                    self.canvas.defaults.vertexcolor = Some(vc.to_string());
                 }
-                if self.canvas.defaults.vertextextcolor.is_none() {
-                    if let Some(vtc) = theme.get("vertextextcolor") {
-                        self.canvas.defaults.vertextextcolor = Some(vtc.to_string());
-                    }
+                if let Some(vtc) = theme.get("vertextextcolor") {
+                    self.canvas.defaults.vertextextcolor = Some(vtc.to_string());
                 }
-                if self.canvas.defaults.edgecolor.is_none() {
-                    if let Some(ec) = theme.get("edgecolor") {
-                        self.canvas.defaults.edgecolor = Some(ec.to_string());
-                    }
+                if let Some(ec) = theme.get("edgecolor") {
+                    self.canvas.defaults.edgecolor = Some(ec.to_string());
                 }
-                if self.canvas.defaults.edgetextcolor.is_none() {
-                    if let Some(etc) = theme.get("edgetextcolor") {
-                        self.canvas.defaults.edgetextcolor = Some(etc.to_string());
-                    }
+                if let Some(etc) = theme.get("edgetextcolor") {
+                    self.canvas.defaults.edgetextcolor = Some(etc.to_string());
                 }
-                if self.canvas.defaults.groupcolor.is_none() {
-                    if let Some(gc) = theme.get("groupcolor") {
-                        self.canvas.defaults.groupcolor = Some(gc.to_string());
-                    }
+                if let Some(gc) = theme.get("groupcolor") {
+                    self.canvas.defaults.groupcolor = Some(gc.to_string());
                 }
                 self.canvas.theme = Some(theme);
             }
@@ -527,15 +611,11 @@ impl AstBuilder {
                         }
                     }
                 }
-                if self.canvas.direction.is_none() {
-                    if let Some(dir) = layout.get("direction") {
-                        self.canvas.direction = Some(dir.to_string());
-                    }
+                if let Some(dir) = layout.get("direction") {
+                    self.canvas.direction = Some(dir.to_string());
                 }
-                if self.canvas.visualizer.is_none() {
-                    if let Some(eng) = layout.get("engine") {
-                        self.canvas.visualizer = Some(eng.to_string());
-                    }
+                if let Some(eng) = layout.get("engine") {
+                    self.canvas.visualizer = Some(eng.to_string());
                 }
                 self.canvas.layout = Some(layout);
             }
@@ -903,6 +983,12 @@ impl AstBuilder {
     }
 
     fn update_vertex_attrs(&mut self, pv: &ParsedVertex) {
+        if pv.color.is_some() {
+            self.explicit_vertex_colors.insert(pv.name.clone());
+        }
+        if pv.textcolor.is_some() {
+            self.explicit_vertex_textcolors.insert(pv.name.clone());
+        }
         fn update_in_list(list: &mut [GraphObject], pv: &ParsedVertex) -> bool {
             for obj in list {
                 match obj {
@@ -1251,7 +1337,12 @@ impl AstBuilder {
                         lhs.clone(),
                         rhs.name.clone(),
                     );
-                    edge.color = conn.color.clone().or_else(|| self.find_default_edgecolor());
+                    if let Some(ref c) = conn.color {
+                        edge.color = Some(c.clone());
+                        edge.has_explicit_color = true;
+                    } else {
+                        edge.color = self.find_default_edgecolor();
+                    }
                     edge.lcompass = conn.lcompass.clone();
                     edge.rcompass = conn.rcompass.clone();
                     let edge_label = if self.is_group(&rhs.name) {
@@ -1265,7 +1356,12 @@ impl AstBuilder {
                     if let Some(raw) = raw_edge_lbl {
                         let dest = self.destructure_label(&raw);
                         edge.label = dest.label;
-                        edge.textcolor = dest.textcolor.or_else(|| self.find_default_edgetextcolor());
+                        if let Some(tc) = dest.textcolor {
+                            edge.textcolor = Some(tc);
+                            edge.has_explicit_textcolor = true;
+                        } else {
+                            edge.textcolor = self.find_default_edgetextcolor();
+                        }
                         edge.url = dest.url;
                     } else {
                         edge.textcolor = self.find_default_edgetextcolor();

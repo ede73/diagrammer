@@ -8,7 +8,14 @@ impl Generator for ASTRecord {
         let mut formatter = OutputFormatter::new();
         formatter.lout("digraph {", Some(true));
         formatter.lout("compound=true;", None);
-        formatter.lout("rankdir=TD;", None);
+        if matches!(
+            canvas.direction.as_deref().map(|s| s.to_lowercase()).as_deref(),
+            Some("landscape") | Some("lr") | Some("horizontal")
+        ) {
+            formatter.lout("rankdir=LR;", None);
+        } else {
+            formatter.lout("rankdir=TD;", None);
+        }
         formatter.lout("node[fontsize=\"9\"];", None);
         formatter.lout("edge[fontsize=\"9\"];", None);
         formatter.lout("subgraph cluster_canvas {", Some(true));

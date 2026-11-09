@@ -30,7 +30,14 @@ ACTIVE ROADMAP & CHAT TASKS
       * External file inclusion mechanism so graphs can load shared theme/layout presets without inundating the diagram source with style boilerplate.
       * CLI: relative file resolution relative to the script/diagram file itself (`with_base_dir`).
       * Web UI: standalone Theme / Logical Files editor tab with local storage persistence (`getLogicalFiles`), allowing user to create/edit themes in-browser and include them seamlessly.
+      * Web UI: Dedicated `Theme: [ (None) v ]` toolbar dropdown that dynamically prepends `include "<theme>"\n` on parse, enabling 1-click theme switching while keeping diagram text clean.
       * Feature example fixtures added to EXAMPLES dropdown: `theme.txt`, `include.txt`, and companion `sample_theme.txt`.
+    - [x] Unified AST Contract ("Last Replaces" Cascading Global Settings):
+      * Theme & Layout are global settings: later definitions overwrite overlapping keys while cascading non-overlapping defaults.
+      * Single unambiguous result: Generators see at most ONE canonical `Theme` and ONE `Layout` object, regardless of how many includes or blocks were evaluated.
+      * Agnostic generators: Visualizers/generators lacking theme support (e.g. basic mscgen) safely ignore theme/layout blocks.
+      * Declarative node styling: Ambient theme defaults apply to all uncolored vertices and edges across the graph regardless of block positioning (top or bottom), while explicit overrides (`a#00ff00`) are strictly preserved.
+    - [x] AstRecord direction mapping: `ast_record` honors `layout { direction: lr }` (`rankdir=LR;`) matching `digraph.rs`.
 [x] Language Design Invariants (Preserved in Rust Core & Documented):
     - Graph essence first: vertices exist globally upon reference (`a>b`).
     - In-place augmentation: enrich nodes (`a;label`) and additively increment edges (`a>"xxx"b` then `a>"yyy"b`) without restating graph structure.

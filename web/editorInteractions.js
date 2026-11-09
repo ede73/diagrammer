@@ -123,7 +123,7 @@ export function generatorChanged() {
     setVisualizer(current);
     parseAndRegenerate();
 }
-function parseAndRegenerate(preferScriptSpecifiedVisualizer = false) {
+export function parseAndRegenerate(preferScriptSpecifiedVisualizer = false) {
     const code = getGraphText() + '\n';
     parse(code, (finalVisualizer) => {
         console.debug(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`);

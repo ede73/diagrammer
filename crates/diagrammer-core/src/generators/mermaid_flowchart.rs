@@ -6,10 +6,11 @@ pub struct MermaidFlowchart;
 impl Generator for MermaidFlowchart {
     fn generate(&self, canvas: &GraphCanvas) -> String {
         let mut formatter = OutputFormatter::new();
-        let dir = if canvas.direction.as_deref() == Some("landscape") {
-            "LR"
-        } else {
-            "TD"
+        let dir = match canvas.direction.as_deref().map(|s| s.to_lowercase()).as_deref() {
+            Some("landscape") | Some("lr") | Some("horizontal") => "LR",
+            Some("rl") => "RL",
+            Some("bt") | Some("bottom-top") => "BT",
+            _ => "TD",
         };
         formatter.lout(&format!("flowchart {}", dir), Some(true));
 
@@ -76,6 +77,28 @@ impl Generator for MermaidFlowchart {
                 formatter.lout(&format!("{} {}|\"{}\"| {}", lhs, arrow, escaped, rhs), None);
             } else {
                 formatter.lout(&format!("{} {} {}", lhs, arrow, rhs), None);
+            }
+        }
+
+        // Emit node styles if colors are specified
+        for obj in canvas.get_flattened_vertices() {
+            let id = safe_id(obj.get_name());
+            let mut style_parts: Vec<String> = Vec::new();
+            if let Some(color) = obj.get_color() {
+                style_parts.push(format!("fill:{}", color));
+            }
+            if let Some(tc) = obj.get_textcolor() {
+                style_parts.push(format!("color:{}", tc));
+            }
+            if !style_parts.is_empty() {
+                formatter.lout(&format!("style {} {}", id, style_parts.join(",")), None);
+            }
+        }
+
+        // Emit edge styles if colors are specified
+        for (i, edge) in canvas.get_edges().iter().enumerate() {
+            if let Some(ref color) = edge.color {
+                formatter.lout(&format!("linkStyle {} stroke:{}", i, color), None);
             }
         }
 

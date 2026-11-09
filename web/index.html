@@ -258,14 +258,14 @@
         <!-- Left: Tabbed Editor -->
         <div class="editor-pane">
           <div class="tabbed">
-            <input type="radio" id="tab1" name="css-tabs" checked>
+            <input type="radio" id="tab1" name="css-tabs" checked onchange="if(window.parseAndRegenerate) window.parseAndRegenerate();">
             <input type="radio" id="tab4" name="css-tabs" onchange="if(window.themeEditor) window.themeEditor.resize();">
             <input type="radio" id="tab2" name="css-tabs">
             <input type="radio" id="tab3" name="css-tabs">
 
             <ul class="tabs">
               <li class="tab"><label for="tab1">Code</label></li>
-              <li class="tab"><label for="tab4">Theme / Files</label></li>
+              <li class="tab"><label for="tab4">Theme</label></li>
               <li class="tab"><label for="tab2">Generated result</label></li>
               <li class="tab"><label for="tab3">Generated result (beautified)</label></li>
             </ul>
@@ -276,7 +276,7 @@
             <div class="tab-content" id="diagrammer-theme-pane">
               <div class="theme-file-bar">
                 <label for="theme-filename">File:</label>
-                <input type="text" id="theme-filename" value="theme.diag" placeholder="theme.diag" style="width: 130px;" />
+                <input type="text" id="theme-filename" value="theme.diag" placeholder="theme.diag" style="width: 120px;" />
                 <select id="theme-file-select" onchange="onThemeFileSelected()"></select>
                 <button type="button" onclick="saveThemeFile();return false;">Save</button>
                 <button type="button" onclick="newThemeFile();return false;">New</button>
@@ -480,7 +480,7 @@
       }, { passive: false });
     }
 
-    import { addLine, generatorChanged, generatorGroupChanged, visualizerChanged, exampleChanged, savedChanged, getGraphText, setGraphText } from "./web/editorInteractions.js";
+    import { addLine, generatorChanged, generatorGroupChanged, visualizerChanged, exampleChanged, savedChanged, getGraphText, setGraphText, parseAndRegenerate } from "./web/editorInteractions.js";
     window.addLine = addLine;
     window.generatorGroupChanged = generatorGroupChanged;
     window.visualizerChanged = visualizerChanged;
@@ -489,6 +489,7 @@
     window.savedChanged = savedChanged;
     window.getGraphText = getGraphText;
     window.setGraphText = setGraphText;
+    window.parseAndRegenerate = parseAndRegenerate;
 
     import { getCurrentFilename, openPicWindow, getSelectedVisualizer, getInputElement } from './web/uiComponentAccess.js';
     window.getCurrentFilename = getCurrentFilename;
@@ -525,6 +526,9 @@
         input.value = select.value;
         if (themeEditor) {
           themeEditor.setValue(loadLogicalFile(select.value) || '', -1);
+          if (window.parseAndRegenerate) {
+            window.parseAndRegenerate();
+          }
         }
       }
     }
@@ -535,10 +539,25 @@
       if (themeEditor) {
         saveLogicalFile(filename, themeEditor.getValue());
         refreshThemeFileList(filename);
-        if (window.visualize && window.getSelectedVisualizer) {
-          window.visualize(window.getSelectedVisualizer());
+        if (window.parseAndRegenerate) {
+          window.parseAndRegenerate();
         }
       }
+    }
+
+    if (themeEditor) {
+      let themeTimer = null;
+      themeEditor.getSession().on('change', () => {
+        if (themeTimer) clearTimeout(themeTimer);
+        themeTimer = setTimeout(() => {
+          const input = document.getElementById('theme-filename');
+          const filename = (input && input.value.trim()) ? input.value.trim() : 'theme.diag';
+          saveLogicalFile(filename, themeEditor.getValue());
+          if (window.parseAndRegenerate) {
+            window.parseAndRegenerate();
+          }
+        }, 250);
+      });
     }
 
     function newThemeFile() {

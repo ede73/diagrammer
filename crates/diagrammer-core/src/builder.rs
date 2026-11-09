@@ -1407,6 +1407,7 @@ impl AstBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::generators::Generator;
 
     #[test]
     fn test_parse_theme_block() {
@@ -1618,5 +1619,51 @@ k |--> l
         assert_eq!(edge_kl.left_arrow_type(), ArrowType::Flat);
         assert_eq!(edge_kl.right_arrow_type(), ArrowType::Normal);
         assert_eq!(edge_kl.line_type(), "dashed");
+    }
+
+    #[test]
+    fn test_theme_cascading_and_last_replaces_with_preceding_nodes() {
+        let input = r#"
+include "theme/dark"
+a > b#00ff00 > c
+layout {
+    direction: td
+}
+layout {
+    direction: lr
+}
+theme {
+    vertex-color: #0000ff
+}
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST");
+        assert_eq!(canvas.direction.as_deref(), Some("lr"));
+
+        let vertices = canvas.get_flattened_vertices();
+        let va = vertices.iter().find(|v| v.get_name() == "a").expect("a exists");
+        let vb = vertices.iter().find(|v| v.get_name() == "b").expect("b exists");
+        let vc = vertices.iter().find(|v| v.get_name() == "c").expect("c exists");
+
+        // a and c should receive the redesigned theme vertex-color #0000ff
+        assert_eq!(va.get_color(), Some("#0000ff"));
+        assert_eq!(vc.get_color(), Some("#0000ff"));
+
+        // b has explicit override #00ff00 which must be preserved
+        assert_eq!(vb.get_color(), Some("#00ff00"));
+
+        // edges should inherit edge-color from theme/dark (#58a6ff)
+        let edges = canvas.get_edges();
+        assert_eq!(edges.len(), 2);
+        assert_eq!(edges[0].color.as_deref(), Some("#58a6ff"));
+        assert_eq!(edges[1].color.as_deref(), Some("#58a6ff"));
+
+        // Verify Mermaid flowchart output matches
+        let mermaid = crate::generators::mermaid_flowchart::MermaidFlowchart.generate(&canvas);
+        assert!(mermaid.contains("flowchart LR"));
+        assert!(mermaid.contains("style a fill:#0000ff"));
+        assert!(mermaid.contains("style b fill:#00ff00"));
+        assert!(mermaid.contains("style c fill:#0000ff"));
+        assert!(mermaid.contains("linkStyle 0 stroke:#58a6ff"));
+        assert!(mermaid.contains("linkStyle 1 stroke:#58a6ff"));
     }
 }

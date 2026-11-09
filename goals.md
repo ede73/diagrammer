@@ -214,8 +214,8 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
 | **M4: Native Rust Dev Server** | Built-in HTTP static dev server in the CLI. | **Done** | `./diagrammer serve [port]`. |
 | **M5: Generator & Visualizer UI Reorganization** | Enriched metadata (`family`, `engine`, `runtime`), clean dropdowns, runtime status badge. | **Done** | Real-time ⚡ Browser vs 🖥️ CLI indicator; clean menu layout. |
 | **M6: Native Sequence Layout Engine (Prototype)** | First-party Rust sequence layout in `crates/diagrammer-core/src/layout/sequence.rs`. | **Done** | Standalone vector SVG directly in CLI (`-o out.svg`) and WASM browser UI without external tools. |
-| **M7: In-Browser Mermaid Client** | Embed `mermaid.min.js` in `web/` to execute `mermaid_sequence` client-side. | **Planned** | Eliminates Node `mmdc` CLI requirement; runs 100% in browser. |
-| **M8: Advanced Sequence Engine Features** | Activations (`[`/`]`), notes (`note right of A`), and container frames (`loop`/`alt`). | **Planned** | Completely supersedes MSCGen and SeqDiag feature sets. |
-| **M9: First-Party Hierarchical DAG Engine** | Implement Sugiyama layered layout in pure Rust (`layout/layered.rs`). | **Planned** | Zero-dependency Graphviz replacement compiling to CLI and WebAssembly. |
-| **M10: Grammar & DSL Extensions** | Control flow blocks (`alt`, `loop`, `while`), rich arrowheads, subgraph linking. | **Planned** | Native expressiveness without relying on external syntax hacks. |
+| **M7: In-Browser Mermaid Client** | Embed `mermaid.min.js` in `web/` to execute `mermaid_sequence` client-side. | **Done** | Eliminates Node `mmdc` CLI requirement; runs 100% in browser. |
+| **M8: Advanced Sequence Engine Features** | Activations (`[`/`]`), notes (`note right of A`), and container frames (`loop`/`alt`). | **Done** | Completely supersedes MSCGen and SeqDiag feature sets. |
+| **M9: First-Party Hierarchical DAG Engine** | Implement Sugiyama layered layout in pure Rust (`layout/layered.rs`). | **Done** | Zero-dependency hierarchical DAG & UML layout engine compiling to CLI and WebAssembly. |
+| **M10: Grammar & DSL Extensions** | Control flow blocks (`alt`, `loop`, `while`), rich arrowheads, subgraph linking. | **In Progress** | Rich arrowheads & subgraph linking landed; control flow next. |
 | **M11: Rust Crate Splitting** | Split `diagrammer-core` into modular workspace crates (`parser`, `ast`, `generators`, `layout`). | **Planned** | Standalone library usage and crisp crate boundaries. |

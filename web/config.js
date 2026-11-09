@@ -8,6 +8,7 @@ import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilf
 import { visualizeSankey } from './visualizations/visualizeSankey.js';
 import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
 import { visualizeNativeSequence } from './visualizations/visualizeNativeSequence.js';
+import { visualizeLayered } from './visualizations/visualizeLayered.js';
 import { visualizeMermaid } from './visualizations/visualizeMermaid.js';
 export class Visualization {
     constructor(name, menuName, generator, visualization, cli, metadata = {}) {
@@ -142,6 +143,7 @@ const _visualizations = [
     ], { family: 'MSCGen', engine: 'mscgenjs', description: 'Message Sequence Chart' }),
 
     new Visualization('native_sequence', 'Diagrammer: Native Sequence [WASM]', 'native_sequence', visualizeNativeSequence, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency vector sequence diagram' }),
+    new Visualization('layered', 'Diagrammer: Layered DAG [WASM]', 'layered', visualizeLayered, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency hierarchical DAG and UML flowchart engine' }),
 
     new Visualization('actdiag', 'Blockdiag: Activity Diagram [CLI]', 'actdiag', undefined, (format, outputFile) => buggyDiags('actdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'actdiag', description: 'Activity diagram (Python CLI)' }),
     new Visualization('blockdiag', 'Blockdiag: Block Diagram [CLI]', 'blockdiag', undefined, (format, outputFile) => buggyDiags('blockdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'blockdiag', description: 'Block diagram (Python CLI)' }),

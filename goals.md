@@ -96,7 +96,10 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
    - Standalone Reingold-Tilford tree layout and physics spring-electrical layouts in pure Rust.
 
 ### 1.8 Diagrammer Language & Grammar Evolution
-Extend Diagrammer's unified DSL to natively express rich diagram structures:
+- **Universal Representation Philosophy**:
+  "A graph language that allows describing anything, visualizable with anything else."
+  - Diagrammer's container/group syntax (`{Person;Person ...}`) acts as an expressive, polymorphic structural representation without requiring language-specific keywords.
+  - The same unified construct projects seamlessly as a UML Class diagram (with members, methods, visibility, and inheritance), as a Graphviz cluster, as a Record Visualizer table, or as a nested state/loop container depending on the target visualizer.
 - **Participant Declarations & Stereotypes**:
   ```diagrammer
   participant "API Gateway" as api [color=#3b82f6, shape=actor]

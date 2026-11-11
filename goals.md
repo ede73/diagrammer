@@ -46,6 +46,15 @@ Restructure the project so that parsing, AST modeling, code generation, layout e
   - *AST*: Generators include JSON AST and Record Visualizer.
   - *D3*: Generator is hierarchical JSON; visualizers include Reingold-Tilford, Radial Dendrogram, CirclePacked, Sankey.
   - *Mermaid & PlantUML*: Domain-specific sequence generators rendered by external or in-browser engines.
+- **Visualizer Hints as Presentation Subtypes for Native Archetype Engines**:
+  - Rather than creating $N$ separate generators and $M$ layout engines, Diagrammer maintains a concise set of **Core Topology Archetypes** (Layered DAG, Sequence, Tree, Force, Timeline).
+  - The `visualizer <hint>` directive acts as a polymorphic **presentation and styling subtype hint** passed into the archetype engine:
+    - `visualizer uml`: Layered DAG engine uses UML class cards, member compartments, orthogonal elbow routing, and hollow triangle inheritance markers.
+    - `visualizer network`: Layered DAG engine uses network topology iconography, multi-drop bus lines, IP/port tags, and router/switch node skins.
+    - `visualizer er`: Layered DAG engine uses relational entity tables and crow's foot cardinality connectors (`||--|{`).
+    - `visualizer flowchart`: Layered DAG engine uses rounded flow nodes, diamond decision splits, and smooth Bézier connectors.
+    - `visualizer <unrecognized>`: Gracefully falls back to the default general-purpose layered DAG layout.
+  - This completely avoids code explosion while empowering users to guide diagram styling and routing nuances directly via `visualizer <hint>`.
 - **Unified Global AST Configuration & Canonical Invariants**:
   - **Theme & Layout as Global Cascading State**: `theme { ... }` and `layout { ... }` blocks (whether included via `include` or written inline) are parsed into global canvas properties.
   - **The "Last Replaces" Principle**: Later declarations overwrite previous declarations for overlapping keys, while non-overlapping properties cascade forward.

@@ -56,6 +56,14 @@ ACTIVE ROADMAP & CHAT TASKS
         * Border Port Distribution: distribute multiple outbound/inbound edge endpoints evenly along node perimeter instead of single-point pinning
         * Edge Label Decluttering: borderless labels with contrast halos and head/tail port anchoring to eliminate line and text occlusions
         * Compound Graph Routing: isolate container-internal routes from inter-cluster highways
+[ ] Archetype Engines with Polymorphic Visualizer Hints:
+    - Core Generator Archetypes (Layered DAG, Sequence, Tree, Force, Timeline).
+    - `visualizer <hint>` acts as a presentation & styling subtype hint within the archetype rather than requiring N separate layout engines:
+        * `visualizer uml` -> Layered DAG: UML class cards, orthogonal routing, inheritance markers, member compartments.
+        * `visualizer network` -> Layered DAG: Network topology, device icons, bus routing, IP/port callouts.
+        * `visualizer er` -> Layered DAG: Relational tables, crow's foot cardinality, PK/FK badges.
+        * `visualizer flowchart` -> Layered DAG: Diamond decision nodes, rounded rects, smooth Bézier connectors.
+        * `visualizer <unknown>` -> Graceful fallback to default layered DAG presentation.
 [ ] Graph Archetypes & Specialized Engines:
     - [ ] Temporal & Genealogical Engine (generational rank vs temporal timeline)
     - [ ] Radial & Dendrogram Engine (Reingold-Tilford tree projection in vector SVG)

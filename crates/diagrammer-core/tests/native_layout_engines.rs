@@ -96,6 +96,38 @@ fn test_layered_dag_engine_renders_fixtures() {
 }
 
 #[test]
+fn test_tree_engine_renders_fixtures() {
+    let tree_gen = make_generator("tree").expect("Failed to create tree generator");
+    let radial_gen = make_generator("radial").expect("Failed to create radial generator");
+
+    let input_path = "../../tests/test_inputs/tree_dendrogram.txt";
+    let fallback_path = "tests/test_inputs/tree_dendrogram.txt";
+    let path = if Path::new(input_path).exists() {
+        input_path
+    } else if Path::new(fallback_path).exists() {
+        fallback_path
+    } else {
+        return;
+    };
+
+    let input_code = fs::read_to_string(path).expect("Failed to read tree_dendrogram.txt");
+    let canvas = AstBuilder::new().build(&input_code).expect("Failed to build AST");
+
+    // 1. Tidy tree
+    let tree_svg = tree_gen.generate(&canvas);
+    assert!(tree_svg.contains("class=\"diagrammer-tree-svg\""));
+    assert!(tree_svg.contains("dt-edge"));
+    assert!(tree_svg.contains("dt-node"));
+    assert!(!tree_svg.contains("NaN"));
+
+    // 2. Radial dendrogram
+    let radial_svg = radial_gen.generate(&canvas);
+    assert!(radial_svg.contains("class=\"diagrammer-tree-svg\""));
+    assert!(radial_svg.contains("dt-edge"));
+    assert!(!radial_svg.contains("NaN"));
+}
+
+#[test]
 fn test_cli_rendering_verification() {
     use std::process::Command;
 

@@ -18,6 +18,7 @@ pub mod parsetree;
 pub mod plantuml_sequence;
 pub mod sankey;
 pub mod seqdiag;
+pub mod tree;
 pub mod umlclass;
 
 use crate::ast::GraphCanvas;
@@ -134,6 +135,7 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
         "plantuml_sequence" => Some(Box::new(plantuml_sequence::PlantUMLSequence)),
         "sankey" => Some(Box::new(sankey::Sankey)),
         "seqdiag" => Some(Box::new(seqdiag::SeqDiag)),
+        "tree" | "radial" | "native_tree" | "fan" => Some(Box::new(tree::TreeGenerator)),
         "umlclass" => Some(Box::new(umlclass::UMLClass)),
         _ => None,
     }
@@ -165,6 +167,8 @@ mod tests {
         assert!(make_generator("sequence").is_some());
         assert!(make_generator("layered").is_some());
         assert!(make_generator("dag").is_some());
+        assert!(make_generator("tree").is_some());
+        assert!(make_generator("radial").is_some());
     }
 }
 

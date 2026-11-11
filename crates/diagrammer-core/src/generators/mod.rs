@@ -3,6 +3,7 @@ pub mod ast_record;
 pub mod blockdiag;
 pub mod dendrogram;
 pub mod digraph;
+pub mod layered;
 pub mod layerbands;
 pub mod mermaid_class;
 pub mod mermaid_er;
@@ -117,6 +118,7 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
             Some(Box::new(digraph::DiGraph))
         }
         "layerbands" => Some(Box::new(layerbands::LayerBands)),
+        "layered" | "dag" => Some(Box::new(layered::LayeredGenerator)),
         "mermaid" | "mermaid_flowchart" | "mermaid_graph" => {
             Some(Box::new(mermaid_flowchart::MermaidFlowchart))
         }
@@ -161,6 +163,8 @@ mod tests {
     fn test_make_generator_native_sequence() {
         assert!(make_generator("native_sequence").is_some());
         assert!(make_generator("sequence").is_some());
+        assert!(make_generator("layered").is_some());
+        assert!(make_generator("dag").is_some());
     }
 }
 

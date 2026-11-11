@@ -91,8 +91,17 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
      - Phase 2: Rank assignment (longest path / network simplex).
      - Phase 3: Crossing minimization (barycenter / median heuristic).
      - Phase 4: Coordinate assignment (Brandes-Köpf algorithm).
-     - Phase 5: Smooth cubic Bézier spline routing avoiding node collisions.
-3. **Tree & Force Engines (`layout/tree.rs`, `layout/force.rs`)**:
+     - Phase 5: Advanced Orthogonal & Spline Routing:
+       * **Channel Routing & Track Assignment**: Allocate distinct horizontal/vertical lanes in inter-rank channels so parallel edge trunks do not collapse onto the exact same coordinate.
+       * **Port Distribution**: Distribute multiple edge connections evenly across node perimeter rather than collapsing all onto a single center anchor.
+       * **Non-Occluding Edge Labels**: Render labels borderless with subtle text halos or offset toward ports (head/tail anchors) to prevent occlusion of adjacent paths.
+       * **Compound / Container Routing**: Partition edges into container-internal routes (confined inside a cluster) vs inter-container highways traversing cluster boundaries.
+3. **Graph Archetypes & Routing Topologies**:
+   - **Type A: Hierarchical Layered DAG** (UML, ER, Flowcharts, State machines): Topological rank dictates layers; channel routing handles connectors.
+   - **Type B: Monotonic Timeline / Lifeline** (Sequence diagrams, MSC, Gantt): 1D entities on one axis, strictly monotonic time progression on the other.
+   - **Type C: Constrained Radial / Dendrogram Trees** (Reingold-Tilford, Sunburst, Mindmap): Parent-child radial or branching projection where routes follow fixed geometry.
+   - **Type D: Temporal / Genealogical Graphs** (Family trees, Git branching DAGs): Dual-axis constraints where generational rank can either collapse inline or map to continuous temporal coordinates.
+4. **Tree & Force Engines (`layout/tree.rs`, `layout/force.rs`)**:
    - Standalone Reingold-Tilford tree layout and physics spring-electrical layouts in pure Rust.
 
 ### 1.8 Diagrammer Language & Grammar Evolution
@@ -214,8 +223,8 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
 | **M4: Native Rust Dev Server** | Built-in HTTP static dev server in the CLI. | **Done** | `./diagrammer serve [port]`. |
 | **M5: Generator & Visualizer UI Reorganization** | Enriched metadata (`family`, `engine`, `runtime`), clean dropdowns, runtime status badge. | **Done** | Real-time ⚡ Browser vs 🖥️ CLI indicator; clean menu layout. |
 | **M6: Native Sequence Layout Engine (Prototype)** | First-party Rust sequence layout in `crates/diagrammer-core/src/layout/sequence.rs`. | **Done** | Standalone vector SVG directly in CLI (`-o out.svg`) and WASM browser UI without external tools. |
-| **M7: In-Browser Mermaid Client** | Embed `mermaid.min.js` in `web/` to execute `mermaid_sequence` client-side. | **Planned** | Eliminates Node `mmdc` CLI requirement; runs 100% in browser. |
-| **M8: Advanced Sequence Engine Features** | Activations (`[`/`]`), notes (`note right of A`), and container frames (`loop`/`alt`). | **Planned** | Completely supersedes MSCGen and SeqDiag feature sets. |
-| **M9: First-Party Hierarchical DAG Engine** | Implement Sugiyama layered layout in pure Rust (`layout/layered.rs`). | **Planned** | Zero-dependency Graphviz replacement compiling to CLI and WebAssembly. |
-| **M10: Grammar & DSL Extensions** | Control flow blocks (`alt`, `loop`, `while`), rich arrowheads, subgraph linking. | **Planned** | Native expressiveness without relying on external syntax hacks. |
+| **M7: In-Browser Mermaid Client** | Embed `mermaid.min.js` in `web/` to execute `mermaid_sequence` client-side. | **Done** | Eliminates Node `mmdc` CLI requirement; runs 100% in browser. |
+| **M8: Advanced Sequence Engine Features** | Activations (`[`/`]`), notes (`note right of A`), and container frames (`loop`/`alt`). | **Done** | Completely supersedes MSCGen and SeqDiag feature sets. |
+| **M9: First-Party Hierarchical DAG Engine** | Implement Sugiyama layered layout in pure Rust (`layout/layered.rs`). | **Done** | Zero-dependency hierarchical DAG & UML layout engine compiling to CLI and WebAssembly. |
+| **M10: Grammar & DSL Extensions** | Control flow blocks (`alt`, `loop`, `while`), rich arrowheads, subgraph linking. | **In Progress** | Rich arrowheads & subgraph linking landed; control flow next. |
 | **M11: Rust Crate Splitting** | Split `diagrammer-core` into modular workspace crates (`parser`, `ast`, `generators`, `layout`). | **Planned** | Standalone library usage and crisp crate boundaries. |

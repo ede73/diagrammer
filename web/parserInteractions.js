@@ -1,4 +1,4 @@
-import { getError, getInputElement, getSelectedVisualizer, setError, setVisualizer } from './uiComponentAccess.js';
+import { getError, getInputElement, getSelectedVisualizer, setError, setVisualizer, isLockHintsEnabled } from './uiComponentAccess.js';
 import { makeHTTPPost } from './ajax.js';
 import { getLogicalFiles } from './localStorage.js';
 let wasmModule = null;
@@ -31,7 +31,7 @@ function extractScriptVisualizer(diagrammerCode) {
     return match ? match[1].toLowerCase() : null;
 }
 export function parse(diagrammerCode, successCallback, failureCallback, preferScriptSpecifiedVisualizer = false) {
-    if (preferScriptSpecifiedVisualizer) {
+    if (preferScriptSpecifiedVisualizer && !isLockHintsEnabled()) {
         const scriptVisualizer = extractScriptVisualizer(diagrammerCode);
         if (scriptVisualizer) {
             setVisualizer(scriptVisualizer);

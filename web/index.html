@@ -21,6 +21,7 @@
 <script type="module" src="web/visualizations/visualizeCirclePacked.js"></script>
 <script type="module" src="web/visualizations/visualizeGraphviz.js"></script>
 <script type="module" src="web/visualizations/visualizeLayerBands.js"></script>
+<script type="module" src="web/visualizations/visualizeLayered.js"></script>
 <script type="module" src="web/visualizations/visualizeMermaid.js"></script>
 <script type="module" src="web/visualizations/visualizeMscGen.js"></script>
 <script type="module" src="web/visualizations/visualizeNativeSequence.js"></script>
@@ -51,6 +52,9 @@
 
     <select id="diagrammer-generator" name="generator" onChange="generatorChanged()" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; margin: 0; padding: 0; border: none;"></select>
     <span id="diagrammer-runtime-badge" class="runtime-badge"></span>
+    <button id="diagrammer-lock-hints" type="button" class="runtime-badge toggle-hints-btn" onclick="toggleLockHints();return false;" title="Toggle locking visualizer: when locked, in-diagram 'visualizer' and 'generator' hints are ignored">
+      <span id="diagrammer-lock-hints-icon">🔓</span> <span id="diagrammer-lock-hints-text">Follow Hints</span>
+    </button>
 
     <label for="diagrammer-example">Examples:</label>
     <select id="diagrammer-example" name="example" onChange="exampleChanged()">
@@ -550,11 +554,11 @@
     window.setGraphText = setGraphText;
     window.parseAndRegenerate = parseAndRegenerate;
 
-    import { getCurrentFilename, openPicWindow, getSelectedVisualizer, getInputElement } from './web/uiComponentAccess.js';
+    import { getCurrentFilename, openPicWindow, getSelectedVisualizer, getInputElement, toggleLockHints, updateLockHintsButton } from './web/uiComponentAccess.js';
     window.getCurrentFilename = getCurrentFilename;
     window.openPicWindow = openPicWindow;
     window.getSelectedVisualizer = getSelectedVisualizer;
-    window.setVisualizer = setVisualizer;
+    window.toggleLockHints = toggleLockHints;
 
     import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList, saveLogicalFile, loadLogicalFile, deleteLogicalFile, getLogicalFilesAsOptionList, getLogicalFiles } from "./web/localStorage.js";
     window.saveCurrentGraph = saveCurrentGraph;
@@ -675,6 +679,7 @@
 
     const e = getInputElement('diagrammer-saved');
     e.innerHTML = getSavedFilesAsOptionList();
+    updateLockHintsButton();
 
     const params = new URLSearchParams(window.location.search);
     if (!params.has('do_not_load_initial_example')) {

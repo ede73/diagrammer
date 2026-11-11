@@ -45,12 +45,20 @@ ACTIVE ROADMAP & CHAT TASKS
     - Universal representation principle: "A graph language that allows describing anything, visualizable with anything else." Container groups polymorphic projection into UML classes, Graphviz clusters, records, and states.
     - Explicit overrides (`rect d`) strictly take precedence over ambient defaults (`shape ellipse`).
 [x] First-party Sequence Engine extensions: lifeline activations, anchored notes (:: syntax & self-dividers), delay gaps (...), phase banners (==), and interaction frames (loop / alt / opt / par container tags) [Landed]
-[ ] First-party Hierarchical DAG Layout Engine in pure Rust (`layout/layered.rs`):
-    - [ ] Phase 1: Topological rank assignment (longest-path layering for general DAGs and inheritance trees)
-    - [ ] Phase 2: Node dimension sizing (text bounding boxes, container heights) & layer coordinate assignment
-    - [ ] Phase 3: Edge routing (orthogonal elbow routing for UML & smooth cubic Béziers for flowcharts)
-    - [ ] Phase 4: Pure vector SVG emission (theme-adaptive, dark-mode aware, crisp typography, drop shadows)
-    - [ ] Phase 5: Wire into Web UI & CLI as `diagrammer layered` / `visualizer layered`
+[x] First-party Hierarchical DAG Layout Engine in pure Rust (`layout/layered.rs`):
+    - [x] Phase 1: Topological rank assignment (longest-path layering for general DAGs and inheritance trees) [Landed]
+    - [x] Phase 2: Node dimension sizing (text bounding boxes, container heights) & barycenter crossing reduction [Landed]
+    - [x] Phase 3: Edge routing (orthogonal elbow routing for UML & smooth cubic Béziers for flowcharts) [Landed]
+    - [x] Phase 4: Pure vector SVG emission (theme-adaptive, dark-mode aware, crisp typography, drop shadows, UML class shapes) [Landed]
+    - [x] Phase 5: Wire into Web UI & CLI as `diagrammer layered` / `visualizer layered` [Landed]
+    - [ ] Routing Evolution:
+        * Channel Routing & Multi-Track Assignment: prevent elbow trunk collapse by staggering horizontal routing lanes between layers
+        * Border Port Distribution: distribute multiple outbound/inbound edge endpoints evenly along node perimeter instead of single-point pinning
+        * Edge Label Decluttering: borderless labels with contrast halos and head/tail port anchoring to eliminate line and text occlusions
+        * Compound Graph Routing: isolate container-internal routes from inter-cluster highways
+[ ] Graph Archetypes & Specialized Engines:
+    - [ ] Temporal & Genealogical Engine (generational rank vs temporal timeline)
+    - [ ] Radial & Dendrogram Engine (Reingold-Tilford tree projection in vector SVG)
 [x] Language & Grammar extensions: rich arrowheads (multi-char lines: -->, ..>, ==>, |->, |--|, etc.) and multi-entrance/multi-exit subgraph linking (`b > (c > d, e > f) > z` automatically linking entrances and exits)
 [ ] Language & Grammar extensions: flow constructs (while, for, alt / if-else blocks)
 [x] Graceful Group Degradation for Group-Less Visualizers: flatten all groups (including nested) so inner vertices and vertex-to-vertex edges (e.g. b>e across groups) render; ignore/omit container-level links (GROUP-->AnotherGroup) when visualizer has no group concept [Landed]

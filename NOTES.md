@@ -234,7 +234,54 @@ All browser assets and static resources are organized under the [`web/`](file://
 
 ---
 
-## 8. Development & Tooling Scripts (`scripts/`)
+## 9. Core Language Design Principles: Graph Essence First, In-Place Augmentation & Position-Forward State
+
+The Diagrammer DSL was intentionally crafted around a unique set of design principles aimed at **fluency, expressiveness, and terseness**:
+
+### 9.1 Graph Essence First, In-Place Augmentation Later
+- You define the structural essence of the graph right where you think of it without requiring forward declarations or ceremonial boilerplate.
+- **Global Existence**: Any vertex referenced anywhere in a chain (e.g. `a > b > c`) immediately exists globally in the graph model.
+- **In-Place Vertex Augmentation**:
+  - `a > b` defines vertices `a` and `b` and links them.
+  - Later in the source, `a;Server Application` augments node `a` by setting its label to `"Server Application"`.
+  - The graph connectivity remains intact; attributes are merged additively.
+- **Additive Edge Augmentation**:
+  - Declaring:
+    ```diagrammer
+    a > b > c > d
+    a > "xxx" b
+    a > "yyy" b
+    ```
+    does **not** produce duplicate redundant edges. Instead, subsequent edge declarations between existing vertices **increment / add** their labels to the existing edge.
+
+### 9.2 Position-Forward Cascading Defaults (Flowing State)
+- Global style and shape directives apply **from their declaration position onward** as the parser proceeds down the source:
+  ```diagrammer
+  // Group A (default styling)
+  node1 > node2
+
+  edge color #ff0000
+  // Group B (inherits red edge color)
+  node3 > node4
+  ```
+  Nodes and edges declared *before* `edge color #ff0000` retain whatever prior default they had; all edges declared *after* receive `#ff0000`.
+
+### 9.3 Flowing Defaults vs. Explicit Element Overrides
+- Default directives (`shape ...`, `vertex color ...`, `edge color ...`) establish a flowing baseline, but **explicit per-element declarations always take precedence**:
+  ```diagrammer
+  shape circle
+  a > b > c
+
+  shape ellipse
+  rect d
+  d > e > f
+  ```
+  - `a`, `b`, and `c` are shaped `circle` (inherited from the `shape circle` default in effect).
+  - `shape ellipse` shifts the flowing default forward.
+  - `rect d` explicitly marks `d` as a rectangle; explicit definitions override the ambient default.
+  - `e` and `f` inherit the new default `ellipse`.
+  - Earlier vertices (`a`, `b`, `c`) preserve their `circle` shape without retroactive mutation.
+
 
 - `scripts/watch.sh`: Lightweight, cross-platform file watcher (macOS / Linux) that monitors Rust core sources and `web/index_template.html`, rebuilding with `make all` on changes. Invoked via `make watch`. Replaced legacy `watchgrammar.sh` and Linux-only `watch_and_make.sh`.
 - `scripts/setup.sh`: Streamlined environment setup script that verifies core prerequisites (Rust/Cargo, wasm-pack, Make) and interactively installs optional external diagramming engines (Graphviz, mscgen, PlantUML, Python diag tools) for macOS (`brew`) and Linux (`apt`/`pip`).

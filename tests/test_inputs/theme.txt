@@ -1,0 +1,24 @@
+theme {
+    font: "Helvetica"
+    fontsize: 14
+    color: #ffffff
+    background: #1e1e2e
+    vertex-color: #3b82f6
+    vertex-textcolor: #ffffff
+    edge-color: #f59e0b
+}
+
+layout {
+    engine: dot
+    direction: lr
+    node-sep: 20
+    rank-sep: 40
+}
+
+frontend;Web Client
+backend;API Gateway
+database db;PostgreSQL
+cache;Redis
+
+frontend > backend > db
+frontend > cache

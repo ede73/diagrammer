@@ -242,3 +242,4 @@ if (typeof window !== 'undefined') {
     window.applyPerceptualColorTheme = applyPerceptualColorTheme;
     window.adaptColorForDark = adaptColorForDark;
 }
+

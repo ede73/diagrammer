@@ -1,0 +1,12 @@
+theme {
+    background: #0f172a
+    vertex-color: #0284c7
+    vertex-textcolor: #ffffff
+    edge-color: #38bdf8
+}
+
+layout {
+    direction: lr
+    node-sep: 25
+}
+

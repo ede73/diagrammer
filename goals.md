@@ -122,7 +122,21 @@ Extend Diagrammer's unified DSL to natively express rich diagram structures:
 - **Language & DSL Architecture Roadmap**:
   1. **`theme { ... }` block**: Declarative styling block for graph-wide and element styles (fonts, font sizes, palette tokens, stroke colors, dark/light variants).
   2. **`layout { ... }` block**: Engine-agnostic geometry tuning (padding, rank/node separation, edge weight/thickness, margins).
-  3. **`include "..."` directive**: Modular preset loading for CLI and Web (e.g., `include "themes/nord.diag"`, `include "layouts/compact.diag"`) allowing diagrams to stay clean and focused solely on structure without being inundated with styling declarations.
+  3. **`include "..."` directive**: Modular preset loading for CLI and Web (e.g., `include "theme.diag"`, `include "layouts/compact.diag"`):
+     - **CLI**: Resolves files relative to the script itself via `AstBuilder::with_base_dir()`.
+     - **Web**: Standalone in-browser Theme / Logical Files editor tab storing logical files in localStorage, dynamically passed into WASM via `wasm_parse_and_generate_with_files`.
+     - Diagrams remain clean and focused on logical graph connectivity without style boilerplate.
+
+### 1.11 Core Language Design Principles: Graph Essence First, In-Place Augmentation & Position-Forward State
+- **Fluency, Expressiveness & Terseness**: Diagrammer allows defining the core essence of a diagram in-place with minimal ceremonial syntax.
+- **Global Existence & In-Place Augmentation**:
+  - Referencing a vertex anywhere (e.g. `a > b`) immediately creates it globally.
+  - In-place augmentation (e.g. `a;My Label`) enriches attributes without having to restate edges or forward-declare nodes.
+  - Multiple references to the same edge (e.g. `a > "xxx" b` followed by `a > "yyy" b`) additively increments the edge text rather than duplicating edges.
+- **Position-Forward Cascading Defaults (Flowing State)**:
+  - Declarations like `edge color #ff0000`, `vertex color #...`, and `shape circle` apply strictly from their declaration position onward.
+  - Previous declarations remain unaffected, while subsequent declarations inherit the active flowing defaults.
+  - Explicit per-node attributes (e.g. `rect d` amidst `shape ellipse`) always override the ambient default baseline.
 
 ---
 

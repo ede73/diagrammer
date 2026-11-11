@@ -30,6 +30,9 @@ pub struct AstBuilder {
     group_stack: Vec<GraphGroup>,
     context: ParsingContext,
     noedges: HashSet<String>,
+    included_files: HashSet<String>,
+    base_dir: Option<std::path::PathBuf>,
+    logical_files: std::collections::HashMap<String, String>,
 }
 
 impl Default for AstBuilder {
@@ -51,10 +54,23 @@ impl AstBuilder {
             group_stack: Vec::new(),
             context,
             noedges: HashSet::new(),
+            included_files: HashSet::new(),
+            base_dir: None,
+            logical_files: std::collections::HashMap::new(),
         }
     }
 
-    pub fn build(mut self, input: &str) -> Result<GraphCanvas, String> {
+    pub fn with_base_dir(mut self, path: impl Into<std::path::PathBuf>) -> Self {
+        self.base_dir = Some(path.into());
+        self
+    }
+
+    pub fn with_logical_files(mut self, files: std::collections::HashMap<String, String>) -> Self {
+        self.logical_files = files;
+        self
+    }
+
+    pub fn parse_and_process(&mut self, input: &str) -> Result<(), String> {
         let pairs = DiagrammerParser::parse(Rule::diagram, input).map_err(|e| {
             let (mut line, col) = match e.line_col {
                 pest::error::LineColLocation::Pos((l, c)) => (l, c),
@@ -75,6 +91,11 @@ impl AstBuilder {
                 }
             }
         }
+        Ok(())
+    }
+
+    pub fn build(mut self, input: &str) -> Result<GraphCanvas, String> {
+        self.parse_and_process(input)?;
 
         // Flush any unclosed groups back to canvas
         while let Some(group) = self.group_stack.pop() {
@@ -417,6 +438,121 @@ impl AstBuilder {
                     self.canvas.equal = new_equal;
                 }
             }
+            Rule::theme_block => {
+                let mut theme = self.canvas.theme.take().unwrap_or_default();
+                for entry in pair.into_inner() {
+                    if entry.as_rule() == Rule::theme_entry {
+                        let mut key = String::new();
+                        let mut val = String::new();
+                        for p in entry.into_inner() {
+                            match p.as_rule() {
+                                Rule::theme_key => key = p.as_str().trim().to_string(),
+                                Rule::theme_value => {
+                                    let raw = p.as_str().trim();
+                                    let unquoted = if raw.starts_with('"') && raw.ends_with('"') && raw.len() >= 2 {
+                                        &raw[1..raw.len() - 1]
+                                    } else {
+                                        raw
+                                    };
+                                    let mut resolved = unquoted.to_string();
+                                    for (k, v) in &self.context.variables {
+                                        let pat = format!("$({})", k);
+                                        resolved = resolved.replace(&pat, v);
+                                    }
+                                    val = resolved.trim().to_string();
+                                }
+                                _ => {}
+                            }
+                        }
+                        if !key.is_empty() {
+                            theme.set(&key, val);
+                        }
+                    }
+                }
+                if self.canvas.defaults.vertexcolor.is_none() {
+                    if let Some(vc) = theme.get("vertexcolor") {
+                        self.canvas.defaults.vertexcolor = Some(vc.to_string());
+                    }
+                }
+                if self.canvas.defaults.vertextextcolor.is_none() {
+                    if let Some(vtc) = theme.get("vertextextcolor") {
+                        self.canvas.defaults.vertextextcolor = Some(vtc.to_string());
+                    }
+                }
+                if self.canvas.defaults.edgecolor.is_none() {
+                    if let Some(ec) = theme.get("edgecolor") {
+                        self.canvas.defaults.edgecolor = Some(ec.to_string());
+                    }
+                }
+                if self.canvas.defaults.edgetextcolor.is_none() {
+                    if let Some(etc) = theme.get("edgetextcolor") {
+                        self.canvas.defaults.edgetextcolor = Some(etc.to_string());
+                    }
+                }
+                if self.canvas.defaults.groupcolor.is_none() {
+                    if let Some(gc) = theme.get("groupcolor") {
+                        self.canvas.defaults.groupcolor = Some(gc.to_string());
+                    }
+                }
+                self.canvas.theme = Some(theme);
+            }
+            Rule::layout_block => {
+                let mut layout = self.canvas.layout.take().unwrap_or_default();
+                for entry in pair.into_inner() {
+                    if entry.as_rule() == Rule::layout_entry {
+                        let mut key = String::new();
+                        let mut val = String::new();
+                        for p in entry.into_inner() {
+                            match p.as_rule() {
+                                Rule::layout_key => key = p.as_str().trim().to_string(),
+                                Rule::layout_value => {
+                                    let raw = p.as_str().trim();
+                                    let unquoted = if raw.starts_with('"') && raw.ends_with('"') && raw.len() >= 2 {
+                                        &raw[1..raw.len() - 1]
+                                    } else {
+                                        raw
+                                    };
+                                    let mut resolved = unquoted.to_string();
+                                    for (k, v) in &self.context.variables {
+                                        let pat = format!("$({})", k);
+                                        resolved = resolved.replace(&pat, v);
+                                    }
+                                    val = resolved.trim().to_string();
+                                }
+                                _ => {}
+                            }
+                        }
+                        if !key.is_empty() {
+                            layout.set(&key, val);
+                        }
+                    }
+                }
+                if self.canvas.direction.is_none() {
+                    if let Some(dir) = layout.get("direction") {
+                        self.canvas.direction = Some(dir.to_string());
+                    }
+                }
+                if self.canvas.visualizer.is_none() {
+                    if let Some(eng) = layout.get("engine") {
+                        self.canvas.visualizer = Some(eng.to_string());
+                    }
+                }
+                self.canvas.layout = Some(layout);
+            }
+            Rule::include_stmt => {
+                for p in pair.into_inner() {
+                    if p.as_rule() == Rule::include_target {
+                        self.handle_include(p.as_str())?;
+                    }
+                }
+            }
+            Rule::include_block => {
+                for p in pair.into_inner() {
+                    if p.as_rule() == Rule::include_target {
+                        self.handle_include(p.as_str())?;
+                    }
+                }
+            }
             Rule::VARIABLE => {
                 self.handle_variable(pair.as_str());
             }
@@ -618,6 +754,62 @@ impl AstBuilder {
         } else {
             inner.trim().to_string()
         }
+    }
+
+    fn handle_include(&mut self, raw: &str) -> Result<(), String> {
+        let trimmed = raw.trim();
+        let target = if trimmed.starts_with('"') && trimmed.ends_with('"') && trimmed.len() >= 2 {
+            trimmed[1..trimmed.len() - 1].to_string()
+        } else {
+            trimmed.to_string()
+        };
+
+        self.canvas.includes.push(target.clone());
+
+        if self.included_files.contains(&target) {
+            return Ok(());
+        }
+        self.included_files.insert(target.clone());
+
+        // 1. Check logical files (from Web editor / user storage)
+        if let Some(content) = self.logical_files.get(&target).cloned() {
+            self.parse_and_process(&content)?;
+            return Ok(());
+        }
+        let target_no_ext = target.trim_end_matches(".diag").trim_end_matches(".txt");
+        if let Some(content) = self.logical_files.get(target_no_ext).cloned() {
+            self.parse_and_process(&content)?;
+            return Ok(());
+        }
+
+        // 2. Check virtual built-in themes & presets
+        let virtual_content = match target.as_str() {
+            "theme/dark" | "dark" => Some("theme {\n  background: #0d1117\n  color: #c9d1d9\n  vertex-color: #161b22\n  edge-color: #58a6ff\n}\n"),
+            "theme/light" | "light" => Some("theme {\n  background: #ffffff\n  color: #24292f\n  vertex-color: #f6f8fa\n  edge-color: #0969da\n}\n"),
+            "theme/nord" | "nord" => Some("theme {\n  background: #2e3440\n  color: #eceff4\n  vertex-color: #3b4252\n  edge-color: #88c0d0\n}\n"),
+            "layout/compact" | "compact" => Some("layout {\n  node-sep: 10\n  rank-sep: 15\n  node-padding: 5\n}\n"),
+            _ => None,
+        };
+
+        if let Some(content) = virtual_content {
+            self.parse_and_process(content)?;
+            return Ok(());
+        }
+
+        // Try filesystem resolution if path exists
+        let path_to_try = if let Some(ref base) = self.base_dir {
+            base.join(&target)
+        } else {
+            std::path::PathBuf::from(&target)
+        };
+
+        if path_to_try.is_file() {
+            let content = std::fs::read_to_string(&path_to_try)
+                .map_err(|e| format!("Failed to read included file '{}': {}", target, e))?;
+            self.parse_and_process(&content)?;
+        }
+
+        Ok(())
     }
 
     fn collect_vertex_names(&self, pair: Pair<Rule>) -> Vec<String> {
@@ -1041,5 +1233,154 @@ impl AstBuilder {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_theme_block() {
+        let input = r#"
+$(accent:#3b82f6)
+theme {
+    font: "Inter, sans-serif"
+    fontsize: 14
+    color: #ffffff
+    background: #1e1e2e
+    vertex-color: $(accent)
+    edge-color: #6c7086
+    dark-mode: auto
+}
+a > b
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST");
+        let theme = canvas.theme.expect("Expected theme block in canvas");
+        assert_eq!(theme.font.as_deref(), Some("Inter, sans-serif"));
+        assert_eq!(theme.fontsize.as_deref(), Some("14"));
+        assert_eq!(theme.color.as_deref(), Some("#ffffff"));
+        assert_eq!(theme.background.as_deref(), Some("#1e1e2e"));
+        assert_eq!(theme.vertexcolor.as_deref(), Some("#3b82f6"));
+        assert_eq!(theme.edgecolor.as_deref(), Some("#6c7086"));
+        assert_eq!(theme.get("dark-mode"), Some("auto"));
+
+        // Defaults should be populated
+        assert_eq!(canvas.defaults.vertexcolor.as_deref(), Some("#3b82f6"));
+        assert_eq!(canvas.defaults.edgecolor.as_deref(), Some("#6c7086"));
+    }
+
+    #[test]
+    fn test_parse_layout_block() {
+        let input = r#"
+layout {
+    engine: dot
+    direction: lr
+    node-sep: 25
+    rank-sep: 50
+    node-padding: 12
+    edge-size: 2
+    margin: 20
+}
+x > y
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST");
+        let layout = canvas.layout.expect("Expected layout block in canvas");
+        assert_eq!(layout.engine.as_deref(), Some("dot"));
+        assert_eq!(layout.direction.as_deref(), Some("lr"));
+        assert_eq!(layout.nodesep.as_deref(), Some("25"));
+        assert_eq!(layout.ranksep.as_deref(), Some("50"));
+        assert_eq!(layout.padding.as_deref(), Some("12"));
+        assert_eq!(layout.edgesize.as_deref(), Some("2"));
+        assert_eq!(layout.margin.as_deref(), Some("20"));
+
+        // Canvas direction & visualizer should inherit
+        assert_eq!(canvas.direction.as_deref(), Some("lr"));
+        assert_eq!(canvas.visualizer.as_deref(), Some("dot"));
+    }
+
+    #[test]
+    fn test_include_virtual_theme() {
+        let input = r#"
+include "theme/dark"
+start_node > end_node
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST");
+        assert_eq!(canvas.includes, vec!["theme/dark"]);
+        let theme = canvas.theme.expect("Expected theme from virtual include");
+        assert_eq!(theme.background.as_deref(), Some("#0d1117"));
+        assert_eq!(canvas.defaults.vertexcolor.as_deref(), Some("#161b22"));
+        assert_eq!(canvas.defaults.edgecolor.as_deref(), Some("#58a6ff"));
+    }
+
+    #[test]
+    fn test_include_block_and_cycle_prevention() {
+        let input = r#"
+include {
+    "theme/nord"
+    "layout/compact"
+    "theme/nord"
+}
+node1 > node2
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST");
+        let theme = canvas.theme.expect("Expected nord theme");
+        assert_eq!(theme.background.as_deref(), Some("#2e3440"));
+        let layout = canvas.layout.expect("Expected compact layout");
+        assert_eq!(layout.nodesep.as_deref(), Some("10"));
+        assert_eq!(layout.padding.as_deref(), Some("5"));
+    }
+
+    #[test]
+    fn test_include_filesystem_file() {
+        use std::io::Write;
+        let dir = std::env::temp_dir().join("diagrammer_test_includes");
+        let _ = std::fs::create_dir_all(&dir);
+        let helper_path = dir.join("custom_theme.txt");
+        let mut file = std::fs::File::create(&helper_path).expect("Failed to create temp file");
+        writeln!(file, "theme {{\n  background: #222222\n  vertex-color: #444444\n}}\nincl_a > incl_b").unwrap();
+
+        let input = r#"
+include "custom_theme.txt"
+c > d
+"#;
+        let canvas = AstBuilder::new()
+            .with_base_dir(&dir)
+            .build(input)
+            .expect("Failed to build AST with include");
+
+        assert!(canvas.theme.is_some());
+        assert_eq!(canvas.theme.as_ref().unwrap().background.as_deref(), Some("#222222"));
+        assert_eq!(canvas.defaults.vertexcolor.as_deref(), Some("#444444"));
+
+        // Both included edge and main edge should exist
+        let edges = canvas.get_edges();
+        assert!(edges.iter().any(|e| e.left == "incl_a" && e.right == "incl_b"));
+        assert!(edges.iter().any(|e| e.left == "c" && e.right == "d"));
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn test_include_logical_files() {
+        use std::collections::HashMap;
+        let mut files = HashMap::new();
+        files.insert(
+            "custom.diag".to_string(),
+            "theme {\n  background: #333333\n  edge-color: #ffaa00\n}\n".to_string(),
+        );
+
+        let input = r#"
+include "custom.diag"
+p > q
+"#;
+        let canvas = AstBuilder::new()
+            .with_logical_files(files)
+            .build(input)
+            .expect("Failed to build AST with logical file include");
+
+        assert!(canvas.theme.is_some());
+        assert_eq!(canvas.theme.as_ref().unwrap().background.as_deref(), Some("#333333"));
+        assert_eq!(canvas.defaults.edgecolor.as_deref(), Some("#ffaa00"));
     }
 }

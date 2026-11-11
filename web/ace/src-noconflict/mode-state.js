@@ -97,7 +97,7 @@ ace.define('ace/mode/state_highlight_rules', ['require', 'exports', 'module', 'a
 
   const StateHighlightRules = function () {
     const keywords = lang.arrayToMap(
-      ('generator|visualizer|group|landscape|horizontal|portrait|vertical|equal|shape|start|if|else|then|while').split('|')
+      ('generator|visualizer|group|landscape|horizontal|portrait|vertical|equal|shape|start|if|else|then|while|theme|layout|include').split('|')
     )
     const attributes = lang.arrayToMap(
       ('actor|beginpoint|right|circle|cloud|condition|database|default|diamond|dots|doublecircle|ellipse|endpoint|input|loopin|loopout|mail|document|display|note|record|roundedbox|square|left|loop|subroutine|preparation|rect|folder|dotted|dashed|solid|bold|rounded|diagonals|invis|singularity').split('|')

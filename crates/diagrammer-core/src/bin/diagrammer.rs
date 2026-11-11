@@ -81,7 +81,13 @@ fn main() {
         serde_json::from_str::<diagrammer_core::ast::GraphCanvas>(&input)
             .map_err(|e| format!("Failed to parse AST JSON: {}", e))
     } else {
-        AstBuilder::new().build(&input)
+        let mut builder = AstBuilder::new();
+        if let Some(ref path) = input_file {
+            if let Some(parent) = Path::new(path).parent() {
+                builder = builder.with_base_dir(parent);
+            }
+        }
+        builder.build(&input)
     };
 
     match canvas_res {

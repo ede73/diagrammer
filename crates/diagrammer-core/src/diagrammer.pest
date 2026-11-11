@@ -72,6 +72,25 @@ do_stmt = { DO_KW }
 UNTIL_KW = @{ ^"until" ~ !(ASCII_ALPHANUMERIC | "_") }
 until_stmt = { UNTIL_KW ~ LINE_REST }
 
+THEME_KW = @{ ^"theme" ~ !(ASCII_ALPHANUMERIC | "_") }
+LAYOUT_KW = @{ ^"layout" ~ !(ASCII_ALPHANUMERIC | "_") }
+INCLUDE_KW = @{ ^"include" ~ !(ASCII_ALPHANUMERIC | "_") }
+
+theme_key = @{ (ASCII_ALPHANUMERIC | "_" | "-")+ }
+theme_value = @{ INLINE_STRING | COLOR | VARIABLE | (!(";" | "\n" | "}" | "\r" | "//") ~ ANY)+ }
+theme_entry = { theme_key ~ (":" | "=")? ~ theme_value ~ ";"? }
+theme_block = { THEME_KW ~ "{" ~ theme_entry* ~ "}" }
+
+layout_key = @{ (ASCII_ALPHANUMERIC | "_" | "-")+ }
+layout_value = @{ INLINE_STRING | COLOR | VARIABLE | (!(";" | "\n" | "}" | "\r" | "//") ~ ANY)+ }
+layout_entry = { layout_key ~ (":" | "=")? ~ layout_value ~ ";"? }
+layout_block = { LAYOUT_KW ~ "{" ~ layout_entry* ~ "}" }
+
+include_path = @{ (ASCII_ALPHANUMERIC | "_" | "-" | "." | "/" | "\\")+ }
+include_target = { INLINE_STRING | include_path }
+include_block = { INCLUDE_KW ~ "{" ~ (include_target ~ ";"?)* ~ "}" }
+include_stmt = { INCLUDE_KW ~ include_target }
+
 SAME_LINE_SPACE = _{ " " | "\t" }
 GROUP_KW = @{ ^"group" ~ !(ASCII_ALPHANUMERIC | "_") }
 group_start = ${ (GROUP_KW | "{") ~ SAME_LINE_SPACE* ~ NAME? ~ SAME_LINE_SPACE* ~ color_or_variable? ~ SAME_LINE_SPACE* ~ LABEL? }
@@ -121,6 +140,10 @@ statement = {
   | endwhile_stmt
   | do_stmt
   | until_stmt
+  | theme_block
+  | layout_block
+  | include_block
+  | include_stmt
   | group_start
   | group_end
   | VARIABLE

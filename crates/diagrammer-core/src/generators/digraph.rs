@@ -11,7 +11,7 @@ impl Generator for DiGraph {
 
         formatter.lout("digraph {", Some(true));
         formatter.lout("compound=true;", None);
-        if canvas.direction.as_deref() == Some("portrait") {
+        if matches!(canvas.direction.as_deref(), Some("portrait") | Some("lr") | Some("horizontal")) {
             formatter.lout("rankdir=LR;", None);
         } else {
             formatter.lout("rankdir=TD;", None);

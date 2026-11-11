@@ -64,6 +64,7 @@
 <option value="test_inputs/flow_control.txt">flow_control.txt</option>
 <option value="test_inputs/fulltest.txt">fulltest.txt</option>
 <option value="test_inputs/group_group_link.txt">group_group_link.txt</option>
+<option value="test_inputs/include.txt">include.txt</option>
 <option value="test_inputs/landscape.txt">landscape.txt</option>
 <option value="test_inputs/layerbands.txt">layerbands.txt</option>
 <option value="test_inputs/lhs_rhs_lists.txt">lhs_rhs_lists.txt</option>
@@ -80,6 +81,7 @@
 <option value="test_inputs/plantuml_context.txt">plantuml_context.txt</option>
 <option value="test_inputs/plantuml_context2.txt">plantuml_context2.txt</option>
 <option value="test_inputs/record_style.txt">record_style.txt</option>
+<option value="test_inputs/sample_theme.txt">sample_theme.txt</option>
 <option value="test_inputs/sankey.txt">sankey.txt</option>
 <option value="test_inputs/sankey2.txt">sankey2.txt</option>
 <option value="test_inputs/seqdiag.txt">seqdiag.txt</option>
@@ -100,6 +102,7 @@
 <option value="test_inputs/state_sip_sequence.txt">state_sip_sequence.txt</option>
 <option value="test_inputs/state_tcp.txt">state_tcp.txt</option>
 <option value="test_inputs/state_y_edge.txt">state_y_edge.txt</option>
+<option value="test_inputs/theme.txt">theme.txt</option>
 <option value="test_inputs/two_filled_linked_vertices.txt">two_filled_linked_vertices.txt</option>
 <option value="test_inputs/two_linked_clusters.txt">two_linked_clusters.txt</option>
 <option value="test_inputs/two_linked_clusters_with_invisible_node.txt">two_linked_clusters_with_invisible_node.txt</option>
@@ -203,6 +206,9 @@
             <li tooltip="Declare equal node aliases" onclick="addLine(7);">Add Equals</li>
             <li tooltip="Define color variable" onclick="addLine(8);">Variable Color</li>
             <li tooltip="Insert conditional if/else branching" onclick="addLine(9);">Conditional</li>
+            <li tooltip="Insert theme block" onclick="addLine(10);">Theme Block</li>
+            <li tooltip="Insert layout block" onclick="addLine(11);">Layout Block</li>
+            <li tooltip="Insert include directive" onclick="addLine(12);">Include Theme</li>
           </ul>
         </div>
 
@@ -251,17 +257,30 @@
         <div class="editor-pane">
           <div class="tabbed">
             <input type="radio" id="tab1" name="css-tabs" checked>
+            <input type="radio" id="tab4" name="css-tabs" onchange="if(window.themeEditor) window.themeEditor.resize();">
             <input type="radio" id="tab2" name="css-tabs">
             <input type="radio" id="tab3" name="css-tabs">
 
             <ul class="tabs">
               <li class="tab"><label for="tab1">Code</label></li>
+              <li class="tab"><label for="tab4">Theme / Files</label></li>
               <li class="tab"><label for="tab2">Generated result</label></li>
               <li class="tab"><label for="tab3">Generated result (beautified)</label></li>
             </ul>
 
             <div class="tab-content">
               <pre id="diagrammer-code"></pre>
+            </div>
+            <div class="tab-content" id="diagrammer-theme-pane">
+              <div class="theme-file-bar">
+                <label for="theme-filename">File:</label>
+                <input type="text" id="theme-filename" value="theme.diag" placeholder="theme.diag" style="width: 130px;" />
+                <select id="theme-file-select" onchange="onThemeFileSelected()"></select>
+                <button type="button" onclick="saveThemeFile();return false;">Save</button>
+                <button type="button" onclick="newThemeFile();return false;">New</button>
+                <button type="button" onclick="deleteThemeFile();return false;">Delete</button>
+              </div>
+              <pre id="diagrammer-theme-code"></pre>
             </div>
             <div class="tab-content">
               <textarea id="diagrammer-result" rows="40" cols="10"></textarea>
@@ -330,6 +349,14 @@
     editor.getSession().setMode("ace/mode/state");
     window.editor = editor;
 
+    let themeEditor = null;
+    const themeEditorEl = document.getElementById("diagrammer-theme-code");
+    if (themeEditorEl) {
+      themeEditor = ace.edit("diagrammer-theme-code");
+      themeEditor.getSession().setMode("ace/mode/state");
+      window.themeEditor = themeEditor;
+    }
+
     // Theme Management
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
@@ -344,6 +371,13 @@
           editor.setTheme("ace/theme/kr_theme");
         } else {
           editor.setTheme("ace/theme/textmate");
+        }
+      }
+      if (themeEditor) {
+        if (theme === 'dark') {
+          themeEditor.setTheme("ace/theme/kr_theme");
+        } else {
+          themeEditor.setTheme("ace/theme/textmate");
         }
       }
       if (window.applyPerceptualColorTheme) {
@@ -460,9 +494,78 @@
     window.getSelectedVisualizer = getSelectedVisualizer;
     window.setVisualizer = setVisualizer;
 
-    import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList } from "./web/localStorage.js";
+    import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList, saveLogicalFile, loadLogicalFile, deleteLogicalFile, getLogicalFilesAsOptionList } from "./web/localStorage.js";
     window.saveCurrentGraph = saveCurrentGraph;
     window.loadGraph = loadGraph;
+
+    function refreshThemeFileList(selectFilename) {
+      const select = document.getElementById('theme-file-select');
+      const input = document.getElementById('theme-filename');
+      if (select) {
+        select.innerHTML = getLogicalFilesAsOptionList();
+        if (selectFilename) {
+          select.value = selectFilename;
+          if (input) input.value = selectFilename;
+        } else if (select.options.length > 0) {
+          if (input) input.value = select.value;
+        }
+      }
+      const activeName = (input && input.value.trim()) ? input.value.trim() : 'theme.diag';
+      if (themeEditor) {
+        themeEditor.setValue(loadLogicalFile(activeName) || '', -1);
+      }
+    }
+
+    function onThemeFileSelected() {
+      const select = document.getElementById('theme-file-select');
+      const input = document.getElementById('theme-filename');
+      if (select && input) {
+        input.value = select.value;
+        if (themeEditor) {
+          themeEditor.setValue(loadLogicalFile(select.value) || '', -1);
+        }
+      }
+    }
+
+    function saveThemeFile() {
+      const input = document.getElementById('theme-filename');
+      const filename = (input && input.value.trim()) ? input.value.trim() : 'theme.diag';
+      if (themeEditor) {
+        saveLogicalFile(filename, themeEditor.getValue());
+        refreshThemeFileList(filename);
+        if (window.visualize && window.getSelectedVisualizer) {
+          window.visualize(window.getSelectedVisualizer());
+        }
+      }
+    }
+
+    function newThemeFile() {
+      const name = prompt('Enter new theme/include file name (e.g. nord.diag):');
+      if (name && name.trim()) {
+        const cleanName = name.trim();
+        saveLogicalFile(cleanName, `theme {\n    background: #2e3440\n    vertex-color: #3b4252\n    edge-color: #88c0d0\n}\n\nlayout {\n    direction: lr\n}\n`);
+        refreshThemeFileList(cleanName);
+      }
+    }
+
+    function deleteThemeFile() {
+      const input = document.getElementById('theme-filename');
+      const filename = input ? input.value.trim() : '';
+      if (filename && confirm(`Delete ${filename}?`)) {
+        deleteLogicalFile(filename);
+        refreshThemeFileList();
+        if (window.visualize && window.getSelectedVisualizer) {
+          window.visualize(window.getSelectedVisualizer());
+        }
+      }
+    }
+
+    window.saveThemeFile = saveThemeFile;
+    window.newThemeFile = newThemeFile;
+    window.deleteThemeFile = deleteThemeFile;
+    window.onThemeFileSelected = onThemeFileSelected;
+    window.refreshThemeFileList = refreshThemeFileList;
+    refreshThemeFileList('theme.diag');
 
     import { importGraphs, exportGraphs } from "./web/backendInteractions.js";
     window.importGraphs = importGraphs;

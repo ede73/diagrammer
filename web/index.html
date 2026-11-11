@@ -69,6 +69,7 @@
 <option value="test_inputs/layerbands.txt">layerbands.txt</option>
 <option value="test_inputs/lhs_rhs_lists.txt">lhs_rhs_lists.txt</option>
 <option value="test_inputs/multiple_lhs_lists.txt">multiple_lhs_lists.txt</option>
+<option value="test_inputs/native_sequence.txt">native_sequence.txt</option>
 <option value="test_inputs/node_and_edge_coloring.txt">node_and_edge_coloring.txt</option>
 <option value="test_inputs/node_and_edge_coloring2.txt">node_and_edge_coloring2.txt</option>
 <option value="test_inputs/nodes.txt">nodes.txt</option>
@@ -257,16 +258,20 @@
         <!-- Left: Tabbed Editor -->
         <div class="editor-pane">
           <div class="tabbed">
-            <input type="radio" id="tab1" name="css-tabs" checked>
+            <input type="radio" id="tab1" name="css-tabs" checked onchange="if(window.parseAndRegenerate) window.parseAndRegenerate();">
             <input type="radio" id="tab4" name="css-tabs" onchange="if(window.themeEditor) window.themeEditor.resize();">
             <input type="radio" id="tab2" name="css-tabs">
             <input type="radio" id="tab3" name="css-tabs">
 
             <ul class="tabs">
               <li class="tab"><label for="tab1">Code</label></li>
-              <li class="tab"><label for="tab4">Theme / Files</label></li>
+              <li class="tab"><label for="tab4">Theme</label></li>
               <li class="tab"><label for="tab2">Generated result</label></li>
               <li class="tab"><label for="tab3">Generated result (beautified)</label></li>
+              <li class="tab-theme-selector" style="margin-left: auto; display: inline-flex; align-items: center; padding: 4px 12px; gap: 6px;">
+                <label for="diagrammer-theme" style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); cursor: default;">Use Theme:</label>
+                <select id="diagrammer-theme" name="theme" onChange="themeChanged()" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 3px 8px; font-size: 12px; outline: none; cursor: pointer;"></select>
+              </li>
             </ul>
 
             <div class="tab-content">
@@ -275,7 +280,7 @@
             <div class="tab-content" id="diagrammer-theme-pane">
               <div class="theme-file-bar">
                 <label for="theme-filename">File:</label>
-                <input type="text" id="theme-filename" value="theme.diag" placeholder="theme.diag" style="width: 130px;" />
+                <input type="text" id="theme-filename" value="theme.diag" placeholder="theme.diag" style="width: 120px;" />
                 <select id="theme-file-select" onchange="onThemeFileSelected()"></select>
                 <button type="button" onclick="saveThemeFile();return false;">Save</button>
                 <button type="button" onclick="newThemeFile();return false;">New</button>
@@ -356,6 +361,60 @@
       themeEditor = ace.edit("diagrammer-theme-code");
       themeEditor.getSession().setMode("ace/mode/state");
       window.themeEditor = themeEditor;
+    }
+
+    // Direct clipboard integration for embedded browsers & desktop webviews
+    function setupAceClipboard(aceEditor) {
+      if (!aceEditor) return;
+      aceEditor.container.addEventListener('click', () => {
+        aceEditor.focus();
+      });
+
+      aceEditor.commands.addCommand({
+        name: 'copySelection',
+        bindKey: { win: 'Ctrl-C', mac: 'Command-C' },
+        exec: (ed) => {
+          const selectedText = ed.getCopyText();
+          if (selectedText && navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(selectedText).catch(() => {});
+          }
+        },
+        readOnly: true
+      });
+
+      aceEditor.commands.addCommand({
+        name: 'cutSelection',
+        bindKey: { win: 'Ctrl-X', mac: 'Command-X' },
+        exec: (ed) => {
+          const selectedText = ed.getCopyText();
+          if (selectedText && navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(selectedText).then(() => {
+              ed.insert('');
+            }).catch(() => {});
+          }
+        },
+        readOnly: false
+      });
+
+      aceEditor.commands.addCommand({
+        name: 'pasteClipboard',
+        bindKey: { win: 'Ctrl-V', mac: 'Command-V' },
+        exec: (ed) => {
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            navigator.clipboard.readText().then(text => {
+              if (text) {
+                ed.insert(text);
+              }
+            }).catch(() => {});
+          }
+        },
+        readOnly: false
+      });
+    }
+
+    setupAceClipboard(editor);
+    if (themeEditor) {
+      setupAceClipboard(themeEditor);
     }
 
     // Theme Management
@@ -479,15 +538,17 @@
       }, { passive: false });
     }
 
-    import { addLine, generatorChanged, generatorGroupChanged, visualizerChanged, exampleChanged, savedChanged, getGraphText, setGraphText } from "./web/editorInteractions.js";
+    import { addLine, generatorChanged, generatorGroupChanged, visualizerChanged, themeChanged, exampleChanged, savedChanged, getGraphText, setGraphText, parseAndRegenerate } from "./web/editorInteractions.js";
     window.addLine = addLine;
     window.generatorGroupChanged = generatorGroupChanged;
     window.visualizerChanged = visualizerChanged;
+    window.themeChanged = themeChanged;
     window.generatorChanged = generatorChanged;
     window.exampleChanged = exampleChanged;
     window.savedChanged = savedChanged;
     window.getGraphText = getGraphText;
     window.setGraphText = setGraphText;
+    window.parseAndRegenerate = parseAndRegenerate;
 
     import { getCurrentFilename, openPicWindow, getSelectedVisualizer, getInputElement } from './web/uiComponentAccess.js';
     window.getCurrentFilename = getCurrentFilename;
@@ -495,11 +556,30 @@
     window.getSelectedVisualizer = getSelectedVisualizer;
     window.setVisualizer = setVisualizer;
 
-    import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList, saveLogicalFile, loadLogicalFile, deleteLogicalFile, getLogicalFilesAsOptionList } from "./web/localStorage.js";
+    import { saveCurrentGraph, loadGraph, getSavedFilesAsOptionList, saveLogicalFile, loadLogicalFile, deleteLogicalFile, getLogicalFilesAsOptionList, getLogicalFiles } from "./web/localStorage.js";
     window.saveCurrentGraph = saveCurrentGraph;
     window.loadGraph = loadGraph;
 
+    function populateThemeDropdown() {
+      const themeSelect = document.getElementById('diagrammer-theme');
+      if (!themeSelect) return;
+      const currentVal = themeSelect.value;
+      let html = '<option value="">(None)</option>';
+      const files = getLogicalFiles();
+      for (const k in files) {
+        html += `<option value="${k}">${k}</option>`;
+      }
+      html += '<option value="theme/dark">theme/dark (preset)</option>';
+      html += '<option value="theme/light">theme/light (preset)</option>';
+      themeSelect.innerHTML = html;
+      if (currentVal && Array.from(themeSelect.options).some(o => o.value === currentVal)) {
+        themeSelect.value = currentVal;
+      }
+    }
+    window.populateThemeDropdown = populateThemeDropdown;
+
     function refreshThemeFileList(selectFilename) {
+      populateThemeDropdown();
       const select = document.getElementById('theme-file-select');
       const input = document.getElementById('theme-filename');
       if (select) {
@@ -524,6 +604,9 @@
         input.value = select.value;
         if (themeEditor) {
           themeEditor.setValue(loadLogicalFile(select.value) || '', -1);
+          if (window.parseAndRegenerate) {
+            window.parseAndRegenerate();
+          }
         }
       }
     }
@@ -534,10 +617,25 @@
       if (themeEditor) {
         saveLogicalFile(filename, themeEditor.getValue());
         refreshThemeFileList(filename);
-        if (window.visualize && window.getSelectedVisualizer) {
-          window.visualize(window.getSelectedVisualizer());
+        if (window.parseAndRegenerate) {
+          window.parseAndRegenerate();
         }
       }
+    }
+
+    if (themeEditor) {
+      let themeTimer = null;
+      themeEditor.getSession().on('change', () => {
+        if (themeTimer) clearTimeout(themeTimer);
+        themeTimer = setTimeout(() => {
+          const input = document.getElementById('theme-filename');
+          const filename = (input && input.value.trim()) ? input.value.trim() : 'theme.diag';
+          saveLogicalFile(filename, themeEditor.getValue());
+          if (window.parseAndRegenerate) {
+            window.parseAndRegenerate();
+          }
+        }, 250);
+      });
     }
 
     function newThemeFile() {

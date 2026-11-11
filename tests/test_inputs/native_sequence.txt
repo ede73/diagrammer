@@ -1,0 +1,27 @@
+visualizer native_sequence
+
+$(user:#38bdf8)
+$(auth:#a855f7)
+$(db:#34d399)
+$(gw:#f59e0b)
+$(be:#ec4899)
+
+User$(user)>"Login request :: HTTP POST /auth"AuthServer$(auth)
+AuthServer>"Lookup credentials"UserDB$(db)
+UserDB>"Credentials record"AuthServer
+
+AuthServer.AuthServer ; "Validate password hash"
+
+{ alt_auth; "alt Successful Authentication"
+  AuthServer>"Issue JWT token :: HMAC-SHA256"User
+}
+
+User>"Fetch profile data"APIGateway$(gw)
+APIGateway-APIGateway ; "Phase 2: Data retrieval"
+
+{ loop_retry; "loop Retry 3 times"
+  APIGateway>"Query microservice"Backend$(be)
+  Backend>"Service response"APIGateway
+}
+
+APIGateway>"Profile payload"User

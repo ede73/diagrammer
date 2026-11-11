@@ -118,13 +118,20 @@ export function visualizerChanged() {
     }
     parseAndRegenerate();
 }
+export function themeChanged() {
+    parseAndRegenerate();
+}
 export function generatorChanged() {
     const current = getSelectedVisualizer();
     setVisualizer(current);
     parseAndRegenerate();
 }
-function parseAndRegenerate(preferScriptSpecifiedVisualizer = false) {
-    const code = getGraphText() + '\n';
+export function parseAndRegenerate(preferScriptSpecifiedVisualizer = false) {
+    let code = getGraphText() + '\n';
+    const themeSelect = document.getElementById('diagrammer-theme');
+    if (themeSelect && themeSelect.value && themeSelect.value.trim() !== '') {
+        code = `include "${themeSelect.value.trim()}"\n` + code;
+    }
     parse(code, (finalVisualizer) => {
         console.debug(`  parseAndRegenerate() - visualize using final visualizer ${finalVisualizer}`);
         visualize(finalVisualizer);

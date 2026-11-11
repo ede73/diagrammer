@@ -94,6 +94,10 @@ pub struct EdgeRef {
     pub rcompass: Option<String>,
     #[serde(skip)]
     pub parent: Option<String>,
+    #[serde(skip)]
+    pub has_explicit_color: bool,
+    #[serde(skip)]
+    pub has_explicit_textcolor: bool,
 }
 
 pub type GraphEdge = EdgeRef;
@@ -111,6 +115,8 @@ impl EdgeRef {
             lcompass: None,
             rcompass: None,
             parent: None,
+            has_explicit_color: false,
+            has_explicit_textcolor: false,
         }
     }
 

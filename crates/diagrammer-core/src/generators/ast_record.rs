@@ -8,7 +8,14 @@ impl Generator for ASTRecord {
         let mut formatter = OutputFormatter::new();
         formatter.lout("digraph {", Some(true));
         formatter.lout("compound=true;", None);
-        formatter.lout("rankdir=TD;", None);
+        if matches!(
+            canvas.direction.as_deref().map(|s| s.to_lowercase()).as_deref(),
+            Some("landscape") | Some("lr") | Some("horizontal")
+        ) {
+            formatter.lout("rankdir=LR;", None);
+        } else {
+            formatter.lout("rankdir=TD;", None);
+        }
         formatter.lout("node[fontsize=\"9\"];", None);
         formatter.lout("edge[fontsize=\"9\"];", None);
         formatter.lout("subgraph cluster_canvas {", Some(true));
@@ -23,7 +30,15 @@ impl Generator for ASTRecord {
         }
 
         for edge in canvas.get_edges() {
-            let label = format!("GraphEdge\\nedgeType={}\\nleft={}\\nright={}", edge.edge_type, edge.left, edge.right);
+            let mut parts = vec![
+                format!("edgeType={}", edge.edge_type),
+                format!("left={}", edge.left),
+                format!("right={}", edge.right),
+            ];
+            if let Some(ref c) = edge.color {
+                parts.push(format!("color={}", c));
+            }
+            let label = format!("GraphEdge\\n{}", parts.join("\\n"));
             formatter.lout(&format!("{} -> {}[label=\"{}\"];", edge.left, edge.right, label), None);
         }
 
@@ -41,6 +56,25 @@ fn collect_canvas_properties(canvas: &GraphCanvas) -> Vec<(String, String)> {
     }
     if let Some(ref vis) = canvas.visualizer {
         props.push(("visualizer".to_string(), vis.clone()));
+    }
+    if let Some(ref theme) = canvas.theme {
+        if let Some(ref bg) = theme.background {
+            props.push(("theme.background".to_string(), bg.clone()));
+        }
+        if let Some(ref vc) = theme.vertexcolor {
+            props.push(("theme.vertexcolor".to_string(), vc.clone()));
+        }
+        if let Some(ref vtc) = theme.vertextextcolor {
+            props.push(("theme.vertextextcolor".to_string(), vtc.clone()));
+        }
+        if let Some(ref ec) = theme.edgecolor {
+            props.push(("theme.edgecolor".to_string(), ec.clone()));
+        }
+    }
+    if let Some(ref layout) = canvas.layout {
+        if let Some(ref dir) = layout.direction {
+            props.push(("layout.direction".to_string(), dir.clone()));
+        }
     }
     let objects_str = canvas.objects.iter().map(|o| o.get_name()).collect::<Vec<_>>().join(", ");
     props.push(("_OBJECTS".to_string(), objects_str));

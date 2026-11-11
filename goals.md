@@ -46,6 +46,12 @@ Restructure the project so that parsing, AST modeling, code generation, layout e
   - *AST*: Generators include JSON AST and Record Visualizer.
   - *D3*: Generator is hierarchical JSON; visualizers include Reingold-Tilford, Radial Dendrogram, CirclePacked, Sankey.
   - *Mermaid & PlantUML*: Domain-specific sequence generators rendered by external or in-browser engines.
+- **Unified Global AST Configuration & Canonical Invariants**:
+  - **Theme & Layout as Global Cascading State**: `theme { ... }` and `layout { ... }` blocks (whether included via `include` or written inline) are parsed into global canvas properties.
+  - **The "Last Replaces" Principle**: Later declarations overwrite previous declarations for overlapping keys, while non-overlapping properties cascade forward.
+  - **Single Unambiguous AST Contract for Generators**: Generators consume an AST containing at most ONE canonical `Theme` and ONE canonical `Layout` object. Generators are completely decoupled from provenance (they do not need to know whether settings came from 0, 1, or 5 includes or in-line blocks). Visualizers and generators that lack theme/layout support (e.g. basic mscgen) safely and completely ignore them.
+  - **Declarative Graph Theming on Preceding Nodes**: Theme colors (`vertex-color`, `edge-color`, etc.) apply globally to all uncolored nodes and edges across the graph regardless of whether the theme block is placed at the top or bottom of the document. Explicit element-level colors (`a#ff0000`, `rect d#000000`) strictly override ambient theme defaults.
+  - **Web UI Theme Preset Dropdown (`Theme: [ (None) v ]`)**: Provides an ambient theme selector in the web toolbar prepending `include "<theme>"\n` dynamically upon parse, keeping diagram source code 100% clean and allowing diagrams to effortlessly override any theme settings with in-graph blocks.
 - **Runtime Metadata**: Every visualizer exposes its execution runtime in the UI:
   - ⚡ **Browser (WASM/JS)**: Runs locally and privately in the browser with zero network or backend dependencies.
   - 🖥️ **CLI (Backend)**: Requires native host CLI binaries (`plantuml.jar`, `blockdiag`, etc.).
@@ -90,7 +96,10 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
    - Standalone Reingold-Tilford tree layout and physics spring-electrical layouts in pure Rust.
 
 ### 1.8 Diagrammer Language & Grammar Evolution
-Extend Diagrammer's unified DSL to natively express rich diagram structures:
+- **Universal Representation Philosophy**:
+  "A graph language that allows describing anything, visualizable with anything else."
+  - Diagrammer's container/group syntax (`{Person;Person ...}`) acts as an expressive, polymorphic structural representation without requiring language-specific keywords.
+  - The same unified construct projects seamlessly as a UML Class diagram (with members, methods, visibility, and inheritance), as a Graphviz cluster, as a Record Visualizer table, or as a nested state/loop container depending on the target visualizer.
 - **Participant Declarations & Stereotypes**:
   ```diagrammer
   participant "API Gateway" as api [color=#3b82f6, shape=actor]
@@ -145,6 +154,17 @@ Extend Diagrammer's unified DSL to natively express rich diagram structures:
     - Entrances (`start -> a`, `start -> c`) are automatically linked from the preceding element.
     - Exits (`b -> end`, `d -> end` or `b -> z`, `d -> z`) are automatically linked to the succeeding element, preserving labels, colors, and line types.
     - Internal chain terminals are accurately tracked via `GraphGroup.chain_terminals`, ensuring cyclic chains (e.g. `(A > B > C > B > A)`) cleanly resolve their true terminal without corrupting sequence diagrams or golden generators.
+
+### 1.13 First-Party Native Sequence Layout Engine: Activations, Anchored Notes, Dividers & Interaction Frames
+- **Pure Vector Output**: Zero external JavaScript or Java dependencies; 100% Rust engine generating modern dark/light SVG sequence diagrams directly in WASM and CLI.
+- **Lifeline Activations**: Automatically computes active intervals on lifelines when messages arrive at participants, rendering crisp `.ds-activation` bars.
+- **Anchored Notes & Dividers**:
+  - `label :: note` syntax splits into an interaction label on the message line and an anchored `.ds-note-box` callout next to the target lifeline.
+  - Arrowless dotted self-edges (`A.A ; "delay"`) render centered time delay divider lines (`.ds-divider-line`).
+  - Arrowless dashed self-edges (`A-A ; "phase"`) render full-width section headers (`.ds-divider-rect`).
+- **Interaction Frames**:
+  - Groups (`{ loop_retry; "loop Retry 3 times" ... }` or `{ alt_success; "alt ..." ... }`) render dashed container boxes (`.ds-frame-box`) with tagged corner labels (`.ds-frame-tag-text`).
+- **Fixture**: Showcased in `tests/test_inputs/native_sequence.txt`.
 
 ---
 

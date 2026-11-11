@@ -1,4 +1,4 @@
-use crate::ast::{ArrowType, GraphCanvas};
+use crate::ast::{ArrowType, GraphCanvas, GraphObject};
 use std::collections::HashMap;
 
 /// Participant representation extracted from the canvas
@@ -16,11 +16,42 @@ pub struct Message {
     pub from_idx: usize,
     pub to_idx: usize,
     pub label: String,
+    pub note: Option<String>,
     pub color: Option<String>,
     pub textcolor: Option<String>,
     pub is_dashed: bool,
     pub left_arrow: ArrowType,
     pub right_arrow: ArrowType,
+    pub group_parent: Option<String>,
+}
+
+/// Sequence step: message, divider/delay, or standalone note
+#[derive(Debug, Clone)]
+pub enum SequenceStep {
+    Message(Message),
+    Divider {
+        label: String,
+        is_delay: bool,
+        color: Option<String>,
+        textcolor: Option<String>,
+        group_parent: Option<String>,
+    },
+    Note {
+        participant_idx: usize,
+        text: String,
+        color: Option<String>,
+        textcolor: Option<String>,
+        group_parent: Option<String>,
+    },
+}
+
+/// Interaction frame (group/loop/alt/par container)
+#[derive(Debug, Clone)]
+pub struct SequenceFrame {
+    pub name: String,
+    pub label: String,
+    pub kind: String,
+    pub step_indices: Vec<usize>,
 }
 
 pub struct SequenceLayoutEngine;
@@ -32,7 +63,7 @@ impl SequenceLayoutEngine {
 
     /// Renders a GraphCanvas into a standalone, modern SVG sequence diagram
     pub fn render_svg(&self, canvas: &GraphCanvas) -> String {
-        let (participants, messages) = self.extract_model(canvas);
+        let (participants, steps, frames) = self.extract_model(canvas);
 
         if participants.is_empty() {
             return "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 120\" width=\"100%\" height=\"120\">\n  <text x=\"200\" y=\"60\" text-anchor=\"middle\" fill=\"#94a3b8\" font-family=\"sans-serif\" font-size=\"14\">No participants defined in diagram</text>\n</svg>".to_string();
@@ -45,6 +76,7 @@ impl SequenceLayoutEngine {
         let header_bottom = top_padding + header_height;
         let step_height = 54.0;
         let self_step_height = 68.0;
+        let divider_step_height = 46.0;
 
         // Calculate participant box widths and centers
         let mut box_widths: Vec<f64> = Vec::new();
@@ -70,25 +102,66 @@ impl SequenceLayoutEngine {
 
         let total_width = (center_xs.last().unwrap() + box_widths.last().unwrap() / 2.0 + margin_x).max(420.0);
 
-        // Calculate Y positions for messages
-        let mut message_ys: Vec<(f64, bool)> = Vec::new();
+        // Calculate Y positions for each step
+        let mut step_ys: Vec<f64> = Vec::new();
         let mut cur_y = header_bottom + 36.0;
-        for msg in &messages {
-            let is_self = msg.from_idx == msg.to_idx;
-            message_ys.push((cur_y, is_self));
-            if is_self {
-                cur_y += self_step_height;
-            } else {
-                cur_y += step_height;
+
+        for step in &steps {
+            step_ys.push(cur_y);
+            match step {
+                SequenceStep::Message(msg) => {
+                    let is_self = msg.from_idx == msg.to_idx;
+                    let has_note = msg.note.is_some();
+                    if is_self {
+                        cur_y += self_step_height;
+                    } else if has_note {
+                        cur_y += step_height + 16.0;
+                    } else {
+                        cur_y += step_height;
+                    }
+                }
+                SequenceStep::Divider { .. } => {
+                    cur_y += divider_step_height;
+                }
+                SequenceStep::Note { .. } => {
+                    cur_y += divider_step_height;
+                }
             }
         }
 
-        let footer_top = (cur_y + 16.0).max(header_bottom + 100.0);
+        // Calculate activation intervals on lifelines
+        // (participant_idx, start_y, end_y)
+        let mut activations: Vec<(usize, f64, f64)> = Vec::new();
+        let mut active_starts: HashMap<usize, f64> = HashMap::new();
+
+        for (idx, step) in steps.iter().enumerate() {
+            let y = step_ys[idx];
+            if let SequenceStep::Message(msg) = step {
+                if msg.from_idx != msg.to_idx {
+                    // If target is not active, activate it starting at this call
+                    if !active_starts.contains_key(&msg.to_idx) {
+                        active_starts.insert(msg.to_idx, y);
+                    } else if active_starts.contains_key(&msg.from_idx) {
+                        // Deactivate source when it sends reply back
+                        if let Some(start_y) = active_starts.remove(&msg.from_idx) {
+                            activations.push((msg.from_idx, start_y, y + 8.0));
+                        }
+                    }
+                }
+            }
+        }
+        // Close remaining activations
+        for (p_idx, start_y) in active_starts {
+            let end_y = (start_y + step_height).min(cur_y);
+            activations.push((p_idx, start_y, end_y));
+        }
+
+        let footer_top = (cur_y + 24.0).max(header_bottom + 100.0);
         let footer_bottom = footer_top + header_height;
         let total_height = footer_bottom + top_padding;
 
         // Build SVG
-        let mut svg = String::with_capacity(4096);
+        let mut svg = String::with_capacity(8192);
         svg.push_str(&format!(
             r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {:.1} {:.1}" width="100%" height="{:.1}" class="diagrammer-sequence">"#,
             total_width, total_height, total_height
@@ -137,12 +210,58 @@ impl SequenceLayoutEngine {
       stroke: #f59e0b;
       stroke-width: 1.5;
       filter: url(#ds-shadow);
+      rx: 4px;
+      ry: 4px;
     }
     .ds-note-text {
       font-size: 11px;
       fill: #fef3c7;
       dominant-baseline: central;
       text-anchor: middle;
+    }
+    .ds-divider-line {
+      stroke: #64748b;
+      stroke-width: 1.5;
+      stroke-dasharray: 4 3;
+      opacity: 0.7;
+    }
+    .ds-divider-rect {
+      fill: #1e293b;
+      stroke: #475569;
+      stroke-width: 1;
+      rx: 4px;
+      ry: 4px;
+    }
+    .ds-divider-text {
+      font-size: 11px;
+      font-weight: 600;
+      fill: #94a3b8;
+      dominant-baseline: central;
+      text-anchor: middle;
+      letter-spacing: 0.5px;
+    }
+    .ds-frame-box {
+      fill: #0f172a;
+      fill-opacity: 0.25;
+      stroke: #475569;
+      stroke-width: 1.5;
+      stroke-dasharray: 6 3;
+      rx: 6px;
+      ry: 6px;
+    }
+    .ds-frame-tag-bg {
+      fill: #334155;
+      stroke: #475569;
+      stroke-width: 1;
+      rx: 3px;
+      ry: 3px;
+    }
+    .ds-frame-tag-text {
+      font-size: 11px;
+      font-weight: 700;
+      fill: #38bdf8;
+      dominant-baseline: central;
+      text-anchor: start;
     }
     .ds-box {
       rx: 8px;
@@ -187,98 +306,231 @@ impl SequenceLayoutEngine {
         }
         svg.push_str("  </g>\n\n");
 
-        // 2. Draw messages
-        svg.push_str("  <!-- Messages -->\n  <g class=\"ds-messages-group\">\n");
-        for (i, msg) in messages.iter().enumerate() {
-            let (y, is_self) = message_ys[i];
-            let color = msg.color.as_deref().unwrap_or("#60a5fa");
-            let text_color = msg.textcolor.as_deref().unwrap_or("#f1f5f9");
-            let stroke_dash = if msg.is_dashed { r#" stroke-dasharray="5 4""# } else { "" };
+        // 2. Draw interaction frames (groups/loops/alts)
+        if !frames.is_empty() {
+            svg.push_str("  <!-- Interaction Frames -->\n  <g class=\"ds-frames-group\">\n");
+            for frame in &frames {
+                if frame.step_indices.is_empty() {
+                    continue;
+                }
+                let first_idx = frame.step_indices[0];
+                let last_idx = *frame.step_indices.last().unwrap();
+                let min_y = step_ys[first_idx] - 22.0;
+                let max_y = step_ys[last_idx] + 28.0;
 
-            if is_self {
-                let x = center_xs[msg.from_idx];
-                let loop_w = 42.0;
-                let loop_h = 24.0;
-                let label_escaped = escape_xml(&msg.label);
+                // Frame spans participants involved or all lifelines
+                let frame_left = margin_x - 12.0;
+                let frame_right = total_width - margin_x + 12.0;
+                let frame_w = frame_right - frame_left;
+                let frame_h = max_y - min_y;
+
+                let tag_display = if !frame.label.is_empty() {
+                    format!("{}: {}", frame.kind, frame.label)
+                } else {
+                    frame.kind.clone()
+                };
+                let tag_w = (tag_display.chars().count() as f64 * 7.5 + 16.0).max(48.0);
+                let tag_escaped = escape_xml(&tag_display);
 
                 svg.push_str(&format!(
-                    r#"    <g color="{color}">
-      <path d="M {:.1} {:.1} C {:.1} {:.1}, {:.1} {:.1}, {:.1} {:.1}" fill="none" stroke="{color}" class="ds-msg-line"{stroke_dash} marker-end="url(#ds-arrow-right)" />"#,
-                    x, y,
-                    x + loop_w, y - 4.0,
-                    x + loop_w, y + loop_h + 4.0,
-                    x, y + loop_h
+                    r#"    <g class="ds-frame">
+      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" class="ds-frame-box" />
+      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="20" class="ds-frame-tag-bg" />
+      <text x="{:.1}" y="{:.1}" class="ds-frame-tag-text">{}</text>
+    </g>
+"#,
+                    frame_left, min_y, frame_w, frame_h,
+                    frame_left, min_y, tag_w,
+                    frame_left + 8.0, min_y + 10.0,
+                    tag_escaped
+                ));
+            }
+            svg.push_str("  </g>\n\n");
+        }
+
+        // 3. Draw lifeline activations
+        if !activations.is_empty() {
+            svg.push_str("  <!-- Activations -->\n  <g class=\"ds-activations-group\">\n");
+            for (p_idx, y_start, y_end) in &activations {
+                let cx = center_xs[*p_idx];
+                let act_w = 12.0;
+                let act_x = cx - act_w / 2.0;
+                let height = (y_end - y_start).max(18.0);
+                svg.push_str(&format!(
+                    r#"    <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" class="ds-activation" />"#,
+                    act_x, y_start - 6.0, act_w, height
                 ));
                 svg.push('\n');
+            }
+            svg.push_str("  </g>\n\n");
+        }
 
-                if !msg.label.is_empty() {
-                    let label_x = x + loop_w + 10.0;
-                    let label_y = y + loop_h / 2.0;
-                    let est_w = msg.label.chars().count() as f64 * 7.2 + 12.0;
+        // 4. Draw sequence steps (messages, dividers, notes)
+        svg.push_str("  <!-- Sequence Steps -->\n  <g class=\"ds-steps-group\">\n");
+        for (i, step) in steps.iter().enumerate() {
+            let y = step_ys[i];
+            match step {
+                SequenceStep::Divider { label, is_delay, color, textcolor, .. } => {
+                    let text_color = textcolor.as_deref().unwrap_or("#94a3b8");
+                    let border_color = color.as_deref().unwrap_or("#475569");
+                    let left_x = margin_x;
+                    let right_x = total_width - margin_x;
+                    let label_escaped = escape_xml(label);
+
+                    if *is_delay {
+                        // Dotted time delay / pause
+                        svg.push_str(&format!(
+                            r#"    <g class="ds-step-divider">
+      <line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" class="ds-divider-line" />"#,
+                            left_x, y, right_x, y
+                        ));
+                        svg.push('\n');
+                        if !label.is_empty() {
+                            let mid_x = (left_x + right_x) / 2.0;
+                            let est_w = label.chars().count() as f64 * 7.5 + 24.0;
+                            svg.push_str(&format!(
+                                r##"      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="20" fill="#0f172a" stroke="{border_color}" class="ds-divider-rect" />
+      <text x="{:.1}" y="{:.1}" fill="{text_color}" class="ds-divider-text">{label_escaped}</text>
+    </g>
+"##,
+                                mid_x - est_w / 2.0, y - 10.0, est_w,
+                                mid_x, y
+                            ));
+                        } else {
+                            svg.push_str("    </g>\n");
+                        }
+                    } else {
+                        // Section divider / phase banner
+                        let box_w = right_x - left_x;
+                        svg.push_str(&format!(
+                            r##"    <g class="ds-step-divider">
+      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="24" fill="#1e293b" stroke="{border_color}" class="ds-divider-rect" />
+      <text x="{:.1}" y="{:.1}" fill="{text_color}" class="ds-divider-text">{label_escaped}</text>
+    </g>
+"##,
+                            left_x, y - 12.0, box_w,
+                            (left_x + right_x) / 2.0, y
+                        ));
+                    }
+                }
+                SequenceStep::Note { participant_idx, text, color, textcolor, .. } => {
+                    let cx = center_xs[*participant_idx];
+                    let text_color = textcolor.as_deref().unwrap_or("#fef3c7");
+                    let border_color = color.as_deref().unwrap_or("#f59e0b");
+                    let note_escaped = escape_xml(text);
+                    let est_w = (text.chars().count() as f64 * 7.2 + 20.0).max(80.0);
+                    let note_x = cx - est_w / 2.0;
+
                     svg.push_str(&format!(
-                        r##"      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="18" fill="#0f172a" class="ds-pill-bg" />
+                        r##"    <g class="ds-step-note">
+      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="24" fill="#1e293b" stroke="{border_color}" class="ds-note-box" />
+      <text x="{:.1}" y="{:.1}" fill="{text_color}" class="ds-note-text">{note_escaped}</text>
+    </g>
+"##,
+                        note_x, y - 12.0, est_w,
+                        cx, y
+                    ));
+                }
+                SequenceStep::Message(msg) => {
+                    let is_self = msg.from_idx == msg.to_idx;
+                    let color = msg.color.as_deref().unwrap_or("#60a5fa");
+                    let text_color = msg.textcolor.as_deref().unwrap_or("#f1f5f9");
+                    let stroke_dash = if msg.is_dashed { r#" stroke-dasharray="5 4""# } else { "" };
+
+                    if is_self {
+                        let x = center_xs[msg.from_idx];
+                        let loop_w = 42.0;
+                        let loop_h = 24.0;
+                        let label_escaped = escape_xml(&msg.label);
+
+                        svg.push_str(&format!(
+                            r#"    <g color="{color}">
+      <path d="M {:.1} {:.1} C {:.1} {:.1}, {:.1} {:.1}, {:.1} {:.1}" fill="none" stroke="{color}" class="ds-msg-line"{stroke_dash} marker-end="url(#ds-arrow-right)" />"#,
+                            x, y,
+                            x + loop_w, y - 4.0,
+                            x + loop_w, y + loop_h + 4.0,
+                            x, y + loop_h
+                        ));
+                        svg.push('\n');
+
+                        if !msg.label.is_empty() {
+                            let label_x = x + loop_w + 10.0;
+                            let label_y = y + loop_h / 2.0;
+                            let est_w = msg.label.chars().count() as f64 * 7.2 + 12.0;
+                            svg.push_str(&format!(
+                                r##"      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="18" fill="#0f172a" class="ds-pill-bg" />
       <text x="{:.1}" y="{:.1}" fill="{text_color}" class="ds-msg-label" text-anchor="start">{label_escaped}</text>
     </g>
 "##,
-                        label_x - 4.0, label_y - 9.0, est_w,
-                        label_x, label_y
-                    ));
-                } else {
-                    svg.push_str("    </g>\n");
-                }
-            } else {
-                let x1 = center_xs[msg.from_idx];
-                let x2 = center_xs[msg.to_idx];
-                let going_right = x2 > x1;
-                let offset = 4.0;
-                let line_x1 = if going_right { x1 + offset } else { x1 - offset };
-                let line_x2 = if going_right { x2 - offset } else { x2 + offset };
+                                label_x - 4.0, label_y - 9.0, est_w,
+                                label_x, label_y
+                            ));
+                        } else {
+                            svg.push_str("    </g>\n");
+                        }
+                    } else {
+                        let x1 = center_xs[msg.from_idx];
+                        let x2 = center_xs[msg.to_idx];
+                        let going_right = x2 > x1;
+                        let offset = 4.0;
+                        let line_x1 = if going_right { x1 + offset } else { x1 - offset };
+                        let line_x2 = if going_right { x2 - offset } else { x2 + offset };
 
-                let marker_end = if going_right {
-                    if msg.right_arrow != ArrowType::None {
-                        if msg.is_dashed { " marker-end=\"url(#ds-arrow-open-right)\"" } else { " marker-end=\"url(#ds-arrow-right)\"" }
-                    } else { "" }
-                } else {
-                    if msg.right_arrow != ArrowType::None {
-                        if msg.is_dashed { " marker-end=\"url(#ds-arrow-open-right)\"" } else { " marker-end=\"url(#ds-arrow-right)\"" }
-                    } else { "" }
-                };
+                        let marker_end = if msg.right_arrow != ArrowType::None {
+                            if msg.is_dashed { " marker-end=\"url(#ds-arrow-open-right)\"" } else { " marker-end=\"url(#ds-arrow-right)\"" }
+                        } else { "" };
 
-                let marker_start = if msg.left_arrow != ArrowType::None {
-                    " marker-start=\"url(#ds-arrow-left)\""
-                } else {
-                    ""
-                };
+                        let marker_start = if msg.left_arrow != ArrowType::None {
+                            " marker-start=\"url(#ds-arrow-left)\""
+                        } else { "" };
 
-                svg.push_str(&format!(
-                    r#"    <g color="{color}">
+                        svg.push_str(&format!(
+                            r#"    <g color="{color}">
       <line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="{color}" class="ds-msg-line"{stroke_dash}{marker_start}{marker_end} />"#,
-                    line_x1, y, line_x2, y
-                ));
-                svg.push('\n');
+                            line_x1, y, line_x2, y
+                        ));
+                        svg.push('\n');
 
-                if !msg.label.is_empty() {
-                    let mid_x = (x1 + x2) / 2.0;
-                    let label_y = y - 11.0;
-                    let est_w = (msg.label.chars().count() as f64 * 7.2 + 14.0).min((x2 - x1).abs() - 10.0).max(24.0);
-                    let label_escaped = escape_xml(&msg.label);
+                        if !msg.label.is_empty() {
+                            let mid_x = (x1 + x2) / 2.0;
+                            let label_y = y - 11.0;
+                            let est_w = (msg.label.chars().count() as f64 * 7.2 + 14.0).min((x2 - x1).abs() - 10.0).max(24.0);
+                            let label_escaped = escape_xml(&msg.label);
 
-                    svg.push_str(&format!(
-                        r##"      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="18" fill="#0f172a" class="ds-pill-bg" />
+                            svg.push_str(&format!(
+                                r##"      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="18" fill="#0f172a" class="ds-pill-bg" />
       <text x="{:.1}" y="{:.1}" fill="{text_color}" class="ds-msg-label">{label_escaped}</text>
-    </g>
 "##,
-                        mid_x - est_w / 2.0, label_y - 9.0, est_w,
-                        mid_x, label_y
-                    ));
-                } else {
-                    svg.push_str("    </g>\n");
+                                mid_x - est_w / 2.0, label_y - 9.0, est_w,
+                                mid_x, label_y
+                            ));
+                        }
+
+                        // Render note box anchored to target participant if present
+                        if let Some(ref note_txt) = msg.note {
+                            let note_cx = x2;
+                            let note_y = y + 16.0;
+                            let note_w = (note_txt.chars().count() as f64 * 7.0 + 16.0).max(80.0);
+                            let note_x = if going_right { note_cx + 12.0 } else { note_cx - note_w - 12.0 };
+                            let note_escaped = escape_xml(note_txt);
+
+                            svg.push_str(&format!(
+                                r##"      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="22" fill="#1e293b" stroke="#f59e0b" class="ds-note-box" />
+      <text x="{:.1}" y="{:.1}" fill="#fef3c7" class="ds-note-text">{note_escaped}</text>
+"##,
+                                note_x, note_y - 11.0, note_w,
+                                note_x + note_w / 2.0, note_y
+                            ));
+                        }
+
+                        svg.push_str("    </g>\n");
+                    }
                 }
             }
         }
         svg.push_str("  </g>\n\n");
 
-        // 3. Draw participant header and footer boxes
+        // 5. Draw participant header and footer boxes
         svg.push_str("  <!-- Participants -->\n  <g class=\"ds-participants-group\">\n");
         for (i, p) in participants.iter().enumerate() {
             let cx = center_xs[i];
@@ -314,8 +566,8 @@ impl SequenceLayoutEngine {
         svg
     }
 
-    /// Extracts participants and ordered messages from the GraphCanvas AST
-    fn extract_model(&self, canvas: &GraphCanvas) -> (Vec<Participant>, Vec<Message>) {
+    /// Extracts participants, timeline steps, and interaction frames from the GraphCanvas AST
+    fn extract_model(&self, canvas: &GraphCanvas) -> (Vec<Participant>, Vec<SequenceStep>, Vec<SequenceFrame>) {
         let group_names = canvas.get_group_names();
         let mut participants: Vec<Participant> = Vec::new();
         let mut part_indices: HashMap<String, usize> = HashMap::new();
@@ -362,28 +614,117 @@ impl SequenceLayoutEngine {
             }
         }
 
-        // 3. Extract vertex-to-vertex messages (ignoring group-to-group / group-to-node links)
-        let mut messages: Vec<Message> = Vec::new();
+        // 3. Extract steps (messages, dividers, and notes)
+        let mut steps: Vec<SequenceStep> = Vec::new();
+        let mut group_step_map: HashMap<String, Vec<usize>> = HashMap::new();
+
         for edge in canvas.get_edges() {
             if group_names.contains(&edge.left) || group_names.contains(&edge.right) {
                 continue;
             }
+
             if let (Some(&from_idx), Some(&to_idx)) = (part_indices.get(&edge.left), part_indices.get(&edge.right)) {
-                let is_dashed = edge.line_type() == "dashed" || edge.line_type() == "dotted";
-                messages.push(Message {
+                let lt = edge.line_type();
+                let is_dashed = lt == "dashed" || lt == "dotted";
+                let left_arrow = edge.left_arrow_type();
+                let right_arrow = edge.right_arrow_type();
+                let has_arrows = left_arrow != ArrowType::None || right_arrow != ArrowType::None;
+
+                // Case A: Self line without arrows -> Divider / Gap
+                if from_idx == to_idx && !has_arrows {
+                    let is_delay = lt == "dotted";
+                    let step_idx = steps.len();
+                    steps.push(SequenceStep::Divider {
+                        label: edge.label.clone().unwrap_or_default(),
+                        is_delay,
+                        color: edge.color.clone(),
+                        textcolor: edge.textcolor.clone(),
+                        group_parent: edge.parent.clone(),
+                    });
+                    if let Some(ref grp) = edge.parent {
+                        group_step_map.entry(grp.clone()).or_default().push(step_idx);
+                    }
+                    continue;
+                }
+
+                // Case B: Regular Message (with optional :: note)
+                let mut note = None;
+                let mut label = String::new();
+                if let Some(ref raw_label) = edge.label {
+                    if raw_label.contains("::") {
+                        let parts: Vec<&str> = raw_label.splitn(2, "::").collect();
+                        label = parts[0].trim().to_string();
+                        note = Some(parts[1].trim().to_string());
+                    } else {
+                        label = raw_label.clone();
+                    }
+                }
+
+                let step_idx = steps.len();
+                steps.push(SequenceStep::Message(Message {
                     from_idx,
                     to_idx,
-                    label: edge.label.clone().unwrap_or_default(),
+                    label,
+                    note,
                     color: edge.color.clone(),
                     textcolor: edge.textcolor.clone(),
                     is_dashed,
-                    left_arrow: edge.left_arrow_type(),
-                    right_arrow: edge.right_arrow_type(),
-                });
+                    left_arrow,
+                    right_arrow,
+                    group_parent: edge.parent.clone(),
+                }));
+                if let Some(ref grp) = edge.parent {
+                    group_step_map.entry(grp.clone()).or_default().push(step_idx);
+                }
             }
         }
 
-        (participants, messages)
+        // 4. Extract Interaction Frames from canvas groups
+        let mut frames: Vec<SequenceFrame> = Vec::new();
+        for obj in canvas.get_objects(false) {
+            if let GraphObject::Group(grp) = obj {
+                let grp_name = &grp.name;
+                if let Some(step_indices) = group_step_map.get(grp_name) {
+                    let (kind, label) = parse_frame_kind_and_label(&grp.name, grp.label.as_deref());
+                    frames.push(SequenceFrame {
+                        name: grp.name.clone(),
+                        label,
+                        kind,
+                        step_indices: step_indices.clone(),
+                    });
+                }
+            }
+        }
+
+        (participants, steps, frames)
+    }
+}
+
+fn parse_frame_kind_and_label(name: &str, label: Option<&str>) -> (String, String) {
+    let lower_name = name.to_lowercase();
+    let default_kind = if lower_name.starts_with("loop") {
+        "loop"
+    } else if lower_name.starts_with("alt") {
+        "alt"
+    } else if lower_name.starts_with("opt") {
+        "opt"
+    } else if lower_name.starts_with("par") {
+        "par"
+    } else {
+        "group"
+    };
+
+    if let Some(lbl) = label {
+        let parts: Vec<&str> = lbl.splitn(2, ' ').collect();
+        let first = parts[0].to_lowercase();
+        if first == "loop" || first == "alt" || first == "opt" || first == "par" || first == "group" {
+            let rest = if parts.len() > 1 { parts[1].trim().to_string() } else { String::new() };
+            (first, rest)
+        } else {
+            (default_kind.to_string(), lbl.to_string())
+        }
+    } else {
+        (default_kind.to_string(), String::new())
     }
 }
 
@@ -424,5 +765,44 @@ mod tests {
         assert!(svg.contains("Processing"));
         assert!(svg.contains("Worker"));
         assert!(svg.contains("ds-msg-line"));
+    }
+
+    #[test]
+    fn test_sequence_notes_and_dividers() {
+        let input = r#"
+Alice > "INVITE :: Over UDP port 5060" Bob
+Alice.Alice ; "5 seconds wait"
+Alice-Alice ; "Phase 2"
+Bob > "200 OK" Alice
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST");
+        let engine = SequenceLayoutEngine::new();
+        let svg = engine.render_svg(&canvas);
+
+        assert!(svg.contains("Over UDP port 5060"));
+        assert!(svg.contains("ds-note-box"));
+        assert!(svg.contains("5 seconds wait"));
+        assert!(svg.contains("ds-divider-line"));
+        assert!(svg.contains("Phase 2"));
+        assert!(svg.contains("ds-divider-rect"));
+    }
+
+    #[test]
+    fn test_sequence_group_frames_and_activations() {
+        let input = r#"
+Client > "Request" Server
+{ loop_retry; "loop Retry up to 3 times"
+  Server > "Query" DB
+  DB > "Response" Server
+}
+Server > "Reply" Client
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST");
+        let engine = SequenceLayoutEngine::new();
+        let svg = engine.render_svg(&canvas);
+
+        assert!(svg.contains("ds-activation"));
+        assert!(svg.contains("ds-frame-box"));
+        assert!(svg.contains("loop: Retry up to 3 times"));
     }
 }

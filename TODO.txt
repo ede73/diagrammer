@@ -22,25 +22,35 @@ ACTIVE ROADMAP & CHAT TASKS
     - Contextual color defaults propagation: ensure `VERTEX COLOR`, `VERTEX TEXTCOLOR`, `EDGE COLOR`, `EDGE TEXTCOLOR`, and `GROUP COLOR` properly apply to objects.
     - Add `colors.txt` and `url.txt` to golden parity regression tests to guarantee 0 regressions.
 [x] Diagram Theming & Dark Mode Color Translation Strategy:
-    - [x] Immediate step: Automatic Perceptual Color Adaptation for dark mode [Landed]
-      * Perceptual color transformation (OKLab / CIELAB lightness scaling + chroma attenuation, similar to browser dark mode extensions).
-      * Ensures user-defined RGB colors (e.g. #FF0000, dark text) maintain >= 4.5:1 contrast against dark canvases and do not crust or vibrate.
-    - [x] Language DSL Extension: `theme { ... }` block [Landed]
-      * Declarative block for theme rules: fonts, palette colors, font sizes, stroke colors, dark/light theme tokens.
-    - [x] Language DSL Extension: `layout { ... }` block [Landed]
-      * Declarative layout tuning: node padding, rank separation, node separation, edge size/weight, margins (where applicable per engine).
-    - [x] Language DSL Extension: `include "..."` directive [Landed]
+    - [x] Immediate step: Automatic Perceptual Color Adaptation for dark mode [Landed in #63]
+    - [x] Language DSL Extension: `theme { ... }` block [Landed in #64]
+    - [x] Language DSL Extension: `layout { ... }` block [Landed in #64]
+    - [x] Language DSL Extension: `include "..."` directive (explicit inclusion, zero hidden auto-imports) [Landed in #64]
+    - [x] Strict Explicit Inclusion Principle: diagrams only apply themes when explicitly declared via `theme { ... }` or `include "..."` [Landed]
       * External file inclusion mechanism so graphs can load shared theme/layout presets without inundating the diagram source with style boilerplate.
       * CLI: relative file resolution relative to the script/diagram file itself (`with_base_dir`).
       * Web UI: standalone Theme / Logical Files editor tab with local storage persistence (`getLogicalFiles`), allowing user to create/edit themes in-browser and include them seamlessly.
+      * Web UI: Dedicated `Theme: [ (None) v ]` toolbar dropdown that dynamically prepends `include "<theme>"\n` on parse, enabling 1-click theme switching while keeping diagram text clean.
       * Feature example fixtures added to EXAMPLES dropdown: `theme.txt`, `include.txt`, and companion `sample_theme.txt`.
+    - [x] Unified AST Contract ("Last Replaces" Cascading Global Settings):
+      * Theme & Layout are global settings: later definitions overwrite overlapping keys while cascading non-overlapping defaults.
+      * Single unambiguous result: Generators see at most ONE canonical `Theme` and ONE `Layout` object, regardless of how many includes or blocks were evaluated.
+      * Agnostic generators: Visualizers/generators lacking theme support (e.g. basic mscgen) safely ignore theme/layout blocks.
+      * Declarative node styling: Ambient theme defaults apply to all uncolored vertices and edges across the graph regardless of block positioning (top or bottom), while explicit overrides (`a#00ff00`) are strictly preserved.
+    - [x] AstRecord direction mapping: `ast_record` honors `layout { direction: lr }` (`rankdir=LR;`) matching `digraph.rs`.
 [x] Language Design Invariants (Preserved in Rust Core & Documented):
     - Graph essence first: vertices exist globally upon reference (`a>b`).
     - In-place augmentation: enrich nodes (`a;label`) and additively increment edges (`a>"xxx"b` then `a>"yyy"b`) without restating graph structure.
     - Position-forward cascading state: `edge color`, `vertex color`, `shape` apply flowing defaults strictly from declaration position onward.
+    - Universal representation principle: "A graph language that allows describing anything, visualizable with anything else." Container groups polymorphic projection into UML classes, Graphviz clusters, records, and states.
     - Explicit overrides (`rect d`) strictly take precedence over ambient defaults (`shape ellipse`).
-[ ] First-party Sequence Engine extensions: lifeline activations ([ / ]), notes (note right of A), frames (loop / alt / par)
-[ ] First-party Hierarchical DAG Layout Engine in pure Rust (Sugiyama framework to replace Graphviz dot)
+[x] First-party Sequence Engine extensions: lifeline activations, anchored notes (:: syntax & self-dividers), delay gaps (...), phase banners (==), and interaction frames (loop / alt / opt / par container tags) [Landed]
+[ ] First-party Hierarchical DAG Layout Engine in pure Rust (`layout/layered.rs`):
+    - [ ] Phase 1: Topological rank assignment (longest-path layering for general DAGs and inheritance trees)
+    - [ ] Phase 2: Node dimension sizing (text bounding boxes, container heights) & layer coordinate assignment
+    - [ ] Phase 3: Edge routing (orthogonal elbow routing for UML & smooth cubic Béziers for flowcharts)
+    - [ ] Phase 4: Pure vector SVG emission (theme-adaptive, dark-mode aware, crisp typography, drop shadows)
+    - [ ] Phase 5: Wire into Web UI & CLI as `diagrammer layered` / `visualizer layered`
 [x] Language & Grammar extensions: rich arrowheads (multi-char lines: -->, ..>, ==>, |->, |--|, etc.) and multi-entrance/multi-exit subgraph linking (`b > (c > d, e > f) > z` automatically linking entrances and exits)
 [ ] Language & Grammar extensions: flow constructs (while, for, alt / if-else blocks)
 [x] Graceful Group Degradation for Group-Less Visualizers: flatten all groups (including nested) so inner vertices and vertex-to-vertex edges (e.g. b>e across groups) render; ignore/omit container-level links (GROUP-->AnotherGroup) when visualizer has no group concept [Landed]

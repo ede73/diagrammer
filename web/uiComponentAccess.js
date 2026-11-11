@@ -114,3 +114,41 @@ export function getSelectedVisualizer() {
     }
     return gen;
 }
+
+export function isLockHintsEnabled() {
+    try {
+        return localStorage.getItem('diagrammer_lock_hints') === 'true';
+    } catch (_) {
+        return false;
+    }
+}
+
+export function setLockHintsEnabled(enabled) {
+    try {
+        localStorage.setItem('diagrammer_lock_hints', enabled ? 'true' : 'false');
+    } catch (_) {}
+    updateLockHintsButton();
+}
+
+export function toggleLockHints() {
+    setLockHintsEnabled(!isLockHintsEnabled());
+}
+
+export function updateLockHintsButton() {
+    const btn = document.getElementById('diagrammer-lock-hints');
+    if (!btn) return;
+    const locked = isLockHintsEnabled();
+    const icon = document.getElementById('diagrammer-lock-hints-icon');
+    const text = document.getElementById('diagrammer-lock-hints-text');
+    if (locked) {
+        btn.classList.add('locked');
+        btn.title = "Visualizer is LOCKED. In-diagram 'visualizer' and 'generator' hints are ignored when loading diagrams. Click to follow hints.";
+        if (icon) icon.textContent = '🔒';
+        if (text) text.textContent = 'Hints Ignored';
+    } else {
+        btn.classList.remove('locked');
+        btn.title = "Following in-diagram hints. Loading a diagram will switch to its declared visualizer. Click to lock visualizer.";
+        if (icon) icon.textContent = '🔓';
+        if (text) text.textContent = 'Follow Hints';
+    }
+}

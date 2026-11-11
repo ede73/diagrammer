@@ -91,8 +91,17 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
      - Phase 2: Rank assignment (longest path / network simplex).
      - Phase 3: Crossing minimization (barycenter / median heuristic).
      - Phase 4: Coordinate assignment (Brandes-Köpf algorithm).
-     - Phase 5: Smooth cubic Bézier spline routing avoiding node collisions.
-3. **Tree & Force Engines (`layout/tree.rs`, `layout/force.rs`)**:
+     - Phase 5: Advanced Orthogonal & Spline Routing:
+       * **Channel Routing & Track Assignment**: Allocate distinct horizontal/vertical lanes in inter-rank channels so parallel edge trunks do not collapse onto the exact same coordinate.
+       * **Port Distribution**: Distribute multiple edge connections evenly across node perimeter rather than collapsing all onto a single center anchor.
+       * **Non-Occluding Edge Labels**: Render labels borderless with subtle text halos or offset toward ports (head/tail anchors) to prevent occlusion of adjacent paths.
+       * **Compound / Container Routing**: Partition edges into container-internal routes (confined inside a cluster) vs inter-container highways traversing cluster boundaries.
+3. **Graph Archetypes & Routing Topologies**:
+   - **Type A: Hierarchical Layered DAG** (UML, ER, Flowcharts, State machines): Topological rank dictates layers; channel routing handles connectors.
+   - **Type B: Monotonic Timeline / Lifeline** (Sequence diagrams, MSC, Gantt): 1D entities on one axis, strictly monotonic time progression on the other.
+   - **Type C: Constrained Radial / Dendrogram Trees** (Reingold-Tilford, Sunburst, Mindmap): Parent-child radial or branching projection where routes follow fixed geometry.
+   - **Type D: Temporal / Genealogical Graphs** (Family trees, Git branching DAGs): Dual-axis constraints where generational rank can either collapse inline or map to continuous temporal coordinates.
+4. **Tree & Force Engines (`layout/tree.rs`, `layout/force.rs`)**:
    - Standalone Reingold-Tilford tree layout and physics spring-electrical layouts in pure Rust.
 
 ### 1.8 Diagrammer Language & Grammar Evolution

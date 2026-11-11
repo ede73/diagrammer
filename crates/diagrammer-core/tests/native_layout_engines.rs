@@ -128,6 +128,31 @@ fn test_tree_engine_renders_fixtures() {
 }
 
 #[test]
+fn test_grid_engine_renders_fixtures() {
+    let grid_gen = make_generator("grid").expect("Failed to create grid generator");
+
+    let input_path = "../../tests/test_inputs/network_bus.txt";
+    let fallback_path = "tests/test_inputs/network_bus.txt";
+    let path = if Path::new(input_path).exists() {
+        input_path
+    } else if Path::new(fallback_path).exists() {
+        fallback_path
+    } else {
+        return;
+    };
+
+    let input_code = fs::read_to_string(path).expect("Failed to read network_bus.txt");
+    let canvas = AstBuilder::new().build(&input_code).expect("Failed to build AST");
+
+    let grid_svg = grid_gen.generate(&canvas);
+    assert!(grid_svg.contains("class=\"diagrammer-grid-svg\""));
+    assert!(grid_svg.contains("dg-bus-rail"));
+    assert!(grid_svg.contains("dg-tap"));
+    assert!(grid_svg.contains("dg-node"));
+    assert!(!grid_svg.contains("NaN"));
+}
+
+#[test]
 fn test_cli_rendering_verification() {
     use std::process::Command;
 

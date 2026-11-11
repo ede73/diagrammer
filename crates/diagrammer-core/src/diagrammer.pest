@@ -28,11 +28,15 @@ STYLES = @{
     ~ !(ASCII_ALPHANUMERIC | "_")
 }
 
-// Edge symbols (mirroring Jison grammar EVENT token regex)
+// Edge symbols (mirroring Jison grammar EVENT token regex, extended for multi-char lines like -->, ..>, ==>, |-->)
+LINE_CHAR = _{ "." | "=" | "-" | ("/" ~ !"/") }
 EVENT = @{
-    ("<<" | "<" | "|") ~ ("." | "=" | "/" | "-")? ~ (">>" | ">" | "|")?
-  | ("<<" | "<" | "|")? ~ ("." | "=" | "/" | "-")? ~ (">>" | ">" | "|")
-  | ("." | "=" | "/" | "-")
+    ("<<" | "<" | "|") ~ LINE_CHAR* ~ (">>" | ">" | "|")
+  | ("<<" | "<" | "|") ~ LINE_CHAR+
+  | LINE_CHAR+ ~ (">>" | ">" | "|")
+  | ("<<" | "<" | "|")
+  | (">>" | ">" | "|")
+  | LINE_CHAR+
 }
 
 NAME = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* ~ (":" ~ !COMPASS_DIR ~ (ASCII_ALPHANUMERIC | "_")*)? }
@@ -105,7 +109,7 @@ vertex_attrs = {
 list_item = { INLINE_STRING? ~ vertex_attrs }
 vertex_list = { list_item ~ ("," ~ list_item)+ }
 
-inner_graph = { "(" ~ statement* ~ ")" }
+inner_graph = { "(" ~ (statement ~ ("," | ";")?)* ~ ")" }
 
 vertex_target = {
     inner_graph

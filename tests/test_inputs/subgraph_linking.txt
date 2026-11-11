@@ -1,0 +1,12 @@
+// Multi-entrance and multi-exit subgraph auto-linking
+b > (
+  c > d > e
+  f > g > h
+) > "merged" z
+
+// Rich arrowheads and line types
+dashed_left <-- solid_mid --> dashed_right
+flat_left |--| flat_right
+tee_left |--> arrow_right
+fat_left ==> fat_right
+dotted_left ..> dotted_right

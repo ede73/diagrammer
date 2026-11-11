@@ -138,6 +138,14 @@ Extend Diagrammer's unified DSL to natively express rich diagram structures:
   - Previous declarations remain unaffected, while subsequent declarations inherit the active flowing defaults.
   - Explicit per-node attributes (e.g. `rect d` amidst `shape ellipse`) always override the ambient default baseline.
 
+### 1.12 Rich Arrowhead Lines and Multi-Entrance / Multi-Exit Subgraph Auto-Linking
+- **Rich Arrow Syntax**: Multi-character edge declarations (`-->`, `..>`, `==>`, `|->`, `|-->`, `|-|`, `|--|`, `<-->`, `<<-->>`) supported directly in the Pest grammar and AST builder without requiring artificial spacing or escaping.
+- **Multi-Entrance / Multi-Exit Subgraph Chains**:
+  - When nesting subgraphs in event chains (e.g., `start > (a > b, c > d) > end` or `(a > b \n c > d) > "merged" z`):
+    - Entrances (`start -> a`, `start -> c`) are automatically linked from the preceding element.
+    - Exits (`b -> end`, `d -> end` or `b -> z`, `d -> z`) are automatically linked to the succeeding element, preserving labels, colors, and line types.
+    - Internal chain terminals are accurately tracked via `GraphGroup.chain_terminals`, ensuring cyclic chains (e.g. `(A > B > C > B > A)`) cleanly resolve their true terminal without corrupting sequence diagrams or golden generators.
+
 ---
 
 ## 2. Target Component Architecture

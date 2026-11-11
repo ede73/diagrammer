@@ -51,18 +51,17 @@ ACTIVE ROADMAP & CHAT TASKS
     - [x] Phase 3: Edge routing (orthogonal elbow routing for UML & smooth cubic Béziers for flowcharts) [Landed]
     - [x] Phase 4: Pure vector SVG emission (theme-adaptive, dark-mode aware, crisp typography, drop shadows, UML class shapes) [Landed]
     - [x] Phase 5: Wire into Web UI & CLI as `diagrammer layered` / `visualizer layered` [Landed]
-    - [ ] Routing Evolution:
-        * Channel Routing & Multi-Track Assignment: prevent elbow trunk collapse by staggering horizontal routing lanes between layers
-        * Border Port Distribution: distribute multiple outbound/inbound edge endpoints evenly along node perimeter instead of single-point pinning
-        * Edge Label Decluttering: borderless labels with contrast halos and head/tail port anchoring to eliminate line and text occlusions
+    - [x] Routing Evolution:
+        * Channel Routing & Multi-Track Assignment: prevent elbow trunk collapse by staggering horizontal routing lanes between layers [Landed in #69]
+        * Border Port Distribution: distribute multiple outbound/inbound edge endpoints evenly along node perimeter instead of single-point pinning [Landed in #69]
+        * Edge Label Decluttering: borderless labels with contrast halos and head/tail port anchoring to eliminate line and text occlusions [Landed in #69]
         * Compound Graph Routing: isolate container-internal routes from inter-cluster highways
-[ ] Archetype Engines with Polymorphic Visualizer Hints:
-    - Core Generator Archetypes (Layered DAG, Sequence, Tree, Force, Timeline).
-    - `visualizer <hint>` acts as a presentation & styling subtype hint within the archetype rather than requiring N separate layout engines:
-        * `visualizer uml` -> Layered DAG: UML class cards, orthogonal routing, inheritance markers, member compartments.
-        * `visualizer network` -> Layered DAG: Network topology, device icons, bus routing, IP/port callouts.
-        * `visualizer er` -> Layered DAG: Relational tables, crow's foot cardinality, PK/FK badges.
-        * `visualizer flowchart` -> Layered DAG: Diamond decision nodes, rounded rects, smooth Bézier connectors.
+[x] Archetype Engines with Polymorphic Visualizer Hints:
+    - [x] Layered DAG Engine (`layout/layered/`): Modularized with `LayeredStyler` trait (`uml.rs`, `default.rs`), port distribution, and multi-track routing [Landed in #69]
+    - [x] Hierarchical Tree & Radial Dendrogram Engine (`layout/tree.rs`): Tidy Reingold-Tilford branching & radial fan layout [Landed in #70]
+    - [x] 2D Block Grid & Network Bus Engine (`layout/grid.rs`): Horizontal bus rails with drop-taps and matrix placement [Landed in #71]
+    - [x] Force-Directed Physics Simulation Engine (`layout/force.rs`): Pure Rust Fruchterman-Reingold spring-electrical layout [Landed in #72]
+    - [x] Monotonic Sequence Layout Engine (`layout/sequence.rs`): Lifeline activations, anchored notes, interaction frames [Landed in #66]
         * `visualizer <unknown>` -> Graceful fallback to default layered DAG presentation.
 [ ] Graph Archetypes & Specialized Engines:
     - [ ] Temporal & Genealogical Engine (generational rank vs temporal timeline)

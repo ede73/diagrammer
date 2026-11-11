@@ -9,3 +9,4 @@ NodeE > NodeA
 
 Satellite > (NodeA, NodeC, NodeE)
 Gateway > (NodeB, NodeD)
+

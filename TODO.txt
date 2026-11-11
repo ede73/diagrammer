@@ -13,7 +13,7 @@ ACTIVE ROADMAP & CHAT TASKS
     - [x] Mermaid ER Diagram generator (erDiagram): entities and cardinality mapping (||--|{, ||--o{, }|--||, ||--||) [Landed]
     - [x] CLI / Native Rust Fast Generator Tests: test generator syntax invariants and sanitization across fixtures via cargo test (crates/diagrammer-core/tests/mermaid_generators.rs in 0.05s, zero Puppeteer needed) [Landed]
     - [x] Mermaid Repository Analysis (/Users/ede/src/mermaid): deeper analysis of Jison vs Langium grammars, surface lexical commonalities vs semantic AST divergence [Documented in goals.md & NOTES.md]
-[ ] Core AST & Grammar: Complete Variable Interpolation & Label Processing in AstBuilder
+[x] Core AST & Grammar: Complete Variable Interpolation & Label Processing in AstBuilder [Landed in #62]
     - Port legacy `setLabel` logic to Rust `builder.rs`:
       * Variable interpolation in all labels and strings: scan `$(var)` and substitute from `ParsingContext.variables`.
       * Color extraction: extract leading `#RRGGBB` or `$(color)` to `textcolor` property on vertex, edge, and group.
@@ -22,7 +22,7 @@ ACTIVE ROADMAP & CHAT TASKS
     - Contextual color defaults propagation: ensure `VERTEX COLOR`, `VERTEX TEXTCOLOR`, `EDGE COLOR`, `EDGE TEXTCOLOR`, and `GROUP COLOR` properly apply to objects.
     - Add `colors.txt` and `url.txt` to golden parity regression tests to guarantee 0 regressions.
 [ ] Diagram Theming & Dark Mode Color Translation Strategy:
-    - [ ] Immediate step: Automatic Perceptual Color Adaptation for dark mode
+    - [x] Immediate step: Automatic Perceptual Color Adaptation for dark mode [Landed]
       * Perceptual color transformation (OKLab / CIELAB lightness scaling + chroma attenuation, similar to browser dark mode extensions).
       * Ensures user-defined RGB colors (e.g. #FF0000, dark text) maintain >= 4.5:1 contrast against dark canvases and do not crust or vibrate.
     - [ ] Language DSL Extension: `theme { ... }` block

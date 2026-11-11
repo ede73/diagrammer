@@ -2,6 +2,7 @@ import { removeAllChildNodes, removeOldVisualizations } from './d3support.js';
 import { getHTMLElement, getInputElement, openImage } from './uiComponentAccess.js';
 import { visualizations } from './config.js';
 import { makeHTTPPost } from './ajax.js';
+import { applyPerceptualColorTheme } from './perceptualTheme.js';
 function _makeNewImageHolder(pngBase64) {
     var _a;
     const img = document.createElement('img');
@@ -80,7 +81,11 @@ export function visualize(visualizer) {
         return;
     }
     if (vizClass.visualization) {
-        vizClass.visualization(generatedResult).catch(rej => { });
+        Promise.resolve(vizClass.visualization(generatedResult))
+            .then(() => {
+                applyPerceptualColorTheme();
+            })
+            .catch(rej => { });
     }
     else {
         const visualizeUrl = `/visualize?visualizer=${visualizer}`;

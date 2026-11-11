@@ -571,13 +571,15 @@ impl LayeredGraph {
             let node_color = node.color.as_deref().unwrap_or(default_node_fill);
             let text_color = node.textcolor.as_deref().unwrap_or("#ffffff");
 
-            if node.shape == "uml_class" && !node.members.is_empty() {
+            if node.shape == "uml_class" {
                 // Render UML Class / Structured Object Box
-                let header_h = 32.0;
                 let stroke_color = "#64748b";
+                let has_members = !node.members.is_empty();
+                let header_h = if has_members { 32.0 } else { node.height };
 
-                svg.push_str(&format!(
-                    r##"    <g class="dl-node dl-class-node" id="node-{}" filter="url(#dl-shadow)">
+                if has_members {
+                    svg.push_str(&format!(
+                        r##"    <g class="dl-node dl-class-node" id="node-{}" filter="url(#dl-shadow)">
       <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" class="dl-class-box" fill="#0f172a" stroke="{}" />
       <!-- Class Title Header -->
       <path d="M {:.1} {:.1} L {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} L {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Z" fill="{}" />
@@ -585,30 +587,43 @@ impl LayeredGraph {
       <!-- Separator Line -->
       <line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="{}" stroke-width="1" />
 "##,
-                    escape_xml(&node.id),
-                    node.x, node.y, node.width, node.height, stroke_color,
-                    node.x, node.y + header_h,
-                    node.x, node.y + 4.0,
-                    node.x, node.y,
-                    node.x + 4.0, node.y,
-                    node.x + node.width - 4.0, node.y,
-                    node.x + node.width, node.y,
-                    node.x + node.width, node.y + 4.0,
-                    node_color,
-                    node.x + node.width / 2.0, node.y + header_h / 2.0,
-                    text_color, escape_xml(&node.label),
-                    node.x, node.y + header_h, node.x + node.width, node.y + header_h, stroke_color
-                ));
-
-                // Render Member Lines
-                let mut my = node.y + header_h + 14.0;
-                for member in &node.members {
-                    svg.push_str(&format!(
-                        r#"      <text x="{:.1}" y="{:.1}" class="dl-class-member">{}</text>
-"#,
-                        node.x + 12.0, my, escape_xml(member)
+                        escape_xml(&node.id),
+                        node.x, node.y, node.width, node.height, stroke_color,
+                        node.x, node.y + header_h,
+                        node.x, node.y + 4.0,
+                        node.x, node.y,
+                        node.x + 4.0, node.y,
+                        node.x + node.width - 4.0, node.y,
+                        node.x + node.width, node.y,
+                        node.x + node.width, node.y + 4.0,
+                        node_color,
+                        node.x + node.width / 2.0, node.y + header_h / 2.0,
+                        text_color, escape_xml(&node.label),
+                        node.x, node.y + header_h, node.x + node.width, node.y + header_h, stroke_color
                     ));
-                    my += 22.0;
+
+                    // Render Member Lines
+                    let mut my = node.y + header_h + 14.0;
+                    for member in &node.members {
+                        svg.push_str(&format!(
+                            r#"      <text x="{:.1}" y="{:.1}" class="dl-class-member">{}</text>
+"#,
+                            node.x + 12.0, my, escape_xml(member)
+                        ));
+                        my += 22.0;
+                    }
+                } else {
+                    svg.push_str(&format!(
+                        r##"    <g class="dl-node dl-class-node" id="node-{}" filter="url(#dl-shadow)">
+      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" rx="4" ry="4" class="dl-class-box" fill="{}" stroke="{}" />
+      <text x="{:.1}" y="{:.1}" class="dl-class-header" fill="{}">{}</text>
+"##,
+                        escape_xml(&node.id),
+                        node.x, node.y, node.width, node.height,
+                        node_color, stroke_color,
+                        node.x + node.width / 2.0, node.y + node.height / 2.0,
+                        text_color, escape_xml(&node.label)
+                    ));
                 }
                 svg.push_str("    </g>\n");
             } else {

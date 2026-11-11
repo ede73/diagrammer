@@ -101,6 +101,12 @@ impl GridGraph {
             }
         }
 
+        // Register any edge endpoints that weren't explicitly declared
+        for e in canvas.get_edges() {
+            node_labels.entry(e.left.clone()).or_insert_with(|| e.left.clone());
+            node_labels.entry(e.right.clone()).or_insert_with(|| e.right.clone());
+        }
+
         // 2. Compute Layout Coordinates
         let col_w = 140.0;
         let row_h = 100.0;
@@ -199,24 +205,22 @@ impl GridGraph {
             }
 
             // Route inter-node matrix edges
-            for obj in canvas.get_objects(false) {
-                if let GraphObject::Edge { edge: e } = obj {
-                    if let (Some(u), Some(v)) = (nodes.get(&e.left), nodes.get(&e.right)) {
-                        let p0 = (u.x, u.y);
-                        let p1 = (v.x, v.y);
-                        let mid_x = (p0.0 + p1.0) / 2.0;
+            for e in canvas.get_edges() {
+                if let (Some(u), Some(v)) = (nodes.get(&e.left), nodes.get(&e.right)) {
+                    let p0 = (u.x, u.y);
+                    let p1 = (v.x, v.y);
+                    let mid_x = (p0.0 + p1.0) / 2.0;
 
-                        edges.push(GridEdge {
-                            from: e.left.clone(),
-                            to: e.right.clone(),
-                            label: e.label.clone(),
-                            path_d: format!(
-                                "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
-                                p0.0, p0.1, mid_x, p0.1, mid_x, p1.1, p1.0, p1.1
-                            ),
-                            color: e.color.clone(),
-                        });
-                    }
+                    edges.push(GridEdge {
+                        from: e.left.clone(),
+                        to: e.right.clone(),
+                        label: e.label.clone(),
+                        path_d: format!(
+                            "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
+                            p0.0, p0.1, mid_x, p0.1, mid_x, p1.1, p1.0, p1.1
+                        ),
+                        color: e.color.clone(),
+                    });
                 }
             }
         }

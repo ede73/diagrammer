@@ -45,7 +45,17 @@ ACTIVE ROADMAP & CHAT TASKS
     - Universal representation principle: "A graph language that allows describing anything, visualizable with anything else." Container groups polymorphic projection into UML classes, Graphviz clusters, records, and states.
     - Explicit overrides (`rect d`) strictly take precedence over ambient defaults (`shape ellipse`).
 [x] First-party Sequence Engine extensions: lifeline activations, anchored notes (:: syntax & self-dividers), delay gaps (...), phase banners (==), and interaction frames (loop / alt / opt / par container tags) [Landed]
-[x] First-party Hierarchical DAG Layout Engine in pure Rust (`layout/layered.rs`):
+[x] First-party Force-Directed Physics Simulation Engine (`layout/force.rs`):
+    - [x] Fruchterman-Reingold spring-electrical algorithm in 100% pure Rust
+    - [x] Full edge collection via `canvas.get_edges()` & flattened group vertices via `canvas.get_flattened_vertices()`
+    - [x] Intra-subgraph cluster cohesion forces keeping grouped nodes visually clustered
+    - [x] Directed arrowheads, dashed styles, mid-point edge label badges, and node drop-shadows
+[x] First-party Tree and Dendrogram Layout Engine (`layout/tree.rs`):
+    - [x] Edge collection via `canvas.get_edges()` and recursive vertex collection
+[x] First-party 2D Block Grid Engine (`layout/grid.rs`):
+    - [x] Edge collection via `canvas.get_edges()` and matrix edge routing
+[x] CLI rasterizer format inference: infer svg/png/pdf from output filename extensions to prevent unwanted rasterization
+
     - [x] Phase 1: Topological rank assignment (longest-path layering for general DAGs and inheritance trees) [Landed]
     - [x] Phase 2: Node dimension sizing (text bounding boxes, container heights) & barycenter crossing reduction [Landed]
     - [x] Phase 3: Edge routing (orthogonal elbow routing for UML & smooth cubic Béziers for flowcharts) [Landed]

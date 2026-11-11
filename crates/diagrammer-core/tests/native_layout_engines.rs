@@ -153,6 +153,30 @@ fn test_grid_engine_renders_fixtures() {
 }
 
 #[test]
+fn test_force_engine_renders_fixtures() {
+    let force_gen = make_generator("force").expect("Failed to create force generator");
+
+    let input_path = "../../tests/test_inputs/force_network.txt";
+    let fallback_path = "tests/test_inputs/force_network.txt";
+    let path = if Path::new(input_path).exists() {
+        input_path
+    } else if Path::new(fallback_path).exists() {
+        fallback_path
+    } else {
+        return;
+    };
+
+    let input_code = fs::read_to_string(path).expect("Failed to read force_network.txt");
+    let canvas = AstBuilder::new().build(&input_code).expect("Failed to build AST");
+
+    let force_svg = force_gen.generate(&canvas);
+    assert!(force_svg.contains("class=\"diagrammer-force-svg\""));
+    assert!(force_svg.contains("dforce-edge"));
+    assert!(force_svg.contains("dforce-node"));
+    assert!(!force_svg.contains("NaN"));
+}
+
+#[test]
 fn test_cli_rendering_verification() {
     use std::process::Command;
 

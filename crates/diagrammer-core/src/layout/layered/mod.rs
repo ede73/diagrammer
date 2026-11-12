@@ -1,6 +1,14 @@
 use crate::ast::{ArrowType, GraphCanvas, GraphObject};
 use std::collections::HashMap;
 
+pub mod default;
+pub mod style;
+pub mod uml;
+
+pub use default::DefaultStyler;
+pub use style::LayeredStyler;
+pub use uml::UmlStyler;
+
 /// A node positioned on a 2D layer canvas
 #[derive(Debug, Clone)]
 pub struct LayeredNode {
@@ -354,34 +362,117 @@ impl LayeredGraph {
             }
         }
 
-        // 6. Phase 4: Edge Routing (Orthogonal Elbow Steps)
-        for e in &mut edges {
-            let from_node = nodes.get(&e.from);
-            let to_node = nodes.get(&e.to);
+        // 6. Phase 4: Edge Routing with Port Distribution and Multi-Track Channel Assignment
+        let mut exit_ports: HashMap<usize, (f64, f64)> = HashMap::new();
+        let mut entry_ports: HashMap<usize, (f64, f64)> = HashMap::new();
 
-            if let (Some(u), Some(v)) = (from_node, to_node) {
+        // 6a. Compute source exit ports per node
+        let mut node_out_edges: HashMap<String, Vec<usize>> = HashMap::new();
+        for (idx, e) in edges.iter().enumerate() {
+            node_out_edges.entry(e.from.clone()).or_default().push(idx);
+        }
+        for (u_id, mut out_idxs) in node_out_edges {
+            if let Some(u) = nodes.get(&u_id) {
+                // Sort outgoing edges by target node's coordinate to prevent line crossings
+                out_idxs.sort_by(|&a, &b| {
+                    let to_a_x = nodes.get(&edges[a].to).map(|v| if !is_lr { v.x } else { v.y }).unwrap_or(0.0);
+                    let to_b_x = nodes.get(&edges[b].to).map(|v| if !is_lr { v.x } else { v.y }).unwrap_or(0.0);
+                    to_a_x.partial_cmp(&to_b_x).unwrap_or(std::cmp::Ordering::Equal)
+                });
+                let count = out_idxs.len();
+                for (i, &edge_idx) in out_idxs.iter().enumerate() {
+                    let exit = if !is_lr {
+                        let frac = (i as f64 + 1.0) / (count as f64 + 1.0);
+                        (u.x + u.width * frac, u.y + u.height)
+                    } else {
+                        let frac = (i as f64 + 1.0) / (count as f64 + 1.0);
+                        (u.x + u.width, u.y + u.height * frac)
+                    };
+                    exit_ports.insert(edge_idx, exit);
+                }
+            }
+        }
+
+        // 6b. Compute target entry ports per node
+        let mut node_in_edges: HashMap<String, Vec<usize>> = HashMap::new();
+        for (idx, e) in edges.iter().enumerate() {
+            node_in_edges.entry(e.to.clone()).or_default().push(idx);
+        }
+        for (v_id, mut in_idxs) in node_in_edges {
+            if let Some(v) = nodes.get(&v_id) {
+                // Sort incoming edges by source node's coordinate to prevent line crossings
+                in_idxs.sort_by(|&a, &b| {
+                    let from_a_x = nodes.get(&edges[a].from).map(|u| if !is_lr { u.x } else { u.y }).unwrap_or(0.0);
+                    let from_b_x = nodes.get(&edges[b].from).map(|u| if !is_lr { u.x } else { u.y }).unwrap_or(0.0);
+                    from_a_x.partial_cmp(&from_b_x).unwrap_or(std::cmp::Ordering::Equal)
+                });
+                let count = in_idxs.len();
+                for (j, &edge_idx) in in_idxs.iter().enumerate() {
+                    let entry = if !is_lr {
+                        let frac = (j as f64 + 1.0) / (count as f64 + 1.0);
+                        (v.x + v.width * frac, v.y)
+                    } else {
+                        let frac = (j as f64 + 1.0) / (count as f64 + 1.0);
+                        (v.x, v.y + v.height * frac)
+                    };
+                    entry_ports.insert(edge_idx, entry);
+                }
+            }
+        }
+
+        // 6c. Multi-Track Channel Assignment for orthogonal elbow routes
+        // Group edges by layer channel to assign distinct non-overlapping tracks
+        let mut channel_edges: HashMap<(usize, usize), Vec<usize>> = HashMap::new();
+        for (idx, e) in edges.iter().enumerate() {
+            if let (Some(u), Some(v)) = (nodes.get(&e.from), nodes.get(&e.to)) {
+                let min_l = u.layer.min(v.layer);
+                let max_l = u.layer.max(v.layer);
+                channel_edges.entry((min_l, max_l)).or_default().push(idx);
+            }
+        }
+
+        let mut edge_track_offsets: HashMap<usize, f64> = HashMap::new();
+        for (_channel, mut c_edges) in channel_edges {
+            // Sort edges in this channel by average X coordinate so tracks don't cross
+            c_edges.sort_by(|&a, &b| {
+                let mid_a = match (exit_ports.get(&a), entry_ports.get(&a)) {
+                    (Some(p1), Some(p2)) => if !is_lr { (p1.0 + p2.0) / 2.0 } else { (p1.1 + p2.1) / 2.0 },
+                    _ => 0.0,
+                };
+                let mid_b = match (exit_ports.get(&b), entry_ports.get(&b)) {
+                    (Some(p1), Some(p2)) => if !is_lr { (p1.0 + p2.0) / 2.0 } else { (p1.1 + p2.1) / 2.0 },
+                    _ => 0.0,
+                };
+                mid_a.partial_cmp(&mid_b).unwrap_or(std::cmp::Ordering::Equal)
+            });
+
+            let count = c_edges.len();
+            for (p, &e_idx) in c_edges.iter().enumerate() {
+                if count > 1 {
+                    let offset = ((p as f64) - (count as f64 - 1.0) / 2.0) * 14.0;
+                    edge_track_offsets.insert(e_idx, offset);
+                } else {
+                    edge_track_offsets.insert(e_idx, 0.0);
+                }
+            }
+        }
+
+        // 6d. Build final routing points
+        for (idx, e) in edges.iter_mut().enumerate() {
+            if let (Some(&exit), Some(&entry)) = (exit_ports.get(&idx), entry_ports.get(&idx)) {
+                let track_offset = edge_track_offsets.get(&idx).copied().unwrap_or(0.0);
                 if !is_lr {
-                    // TD: Exit from bottom of source, enter at top of target
-                    let exit = (u.x + u.width / 2.0, u.y + u.height);
-                    let entry = (v.x + v.width / 2.0, v.y);
-
-                    if (exit.0 - entry.0).abs() < 1.0 {
-                        // Direct straight vertical line
+                    if (exit.0 - entry.0).abs() < 1.0 && track_offset.abs() < 0.1 {
                         e.points = vec![exit, entry];
                     } else {
-                        // Orthogonal elbow routing: Exit -> MidY -> MidX -> Entry
-                        let mid_y = (exit.1 + entry.1) / 2.0;
+                        let mid_y = (exit.1 + entry.1) / 2.0 + track_offset;
                         e.points = vec![exit, (exit.0, mid_y), (entry.0, mid_y), entry];
                     }
                 } else {
-                    // LR: Exit from right of source, enter at left of target
-                    let exit = (u.x + u.width, u.y + u.height / 2.0);
-                    let entry = (v.x, v.y + v.height / 2.0);
-
-                    if (exit.1 - entry.1).abs() < 1.0 {
+                    if (exit.1 - entry.1).abs() < 1.0 && track_offset.abs() < 0.1 {
                         e.points = vec![exit, entry];
                     } else {
-                        let mid_x = (exit.0 + entry.0) / 2.0;
+                        let mid_x = (exit.0 + entry.0) / 2.0 + track_offset;
                         e.points = vec![exit, (mid_x, exit.1), (mid_x, entry.1), entry];
                     }
                 }
@@ -408,6 +499,27 @@ impl LayeredGraph {
 
     /// Renders the calculated graph into a standalone, theme-adaptive vector SVG
     pub fn render_svg(&self) -> String {
+        self.render_svg_with_styler(None)
+    }
+
+    /// Renders the calculated graph into SVG using the given visualizer hint
+    pub fn render_svg_with_styler(&self, visualizer_hint: Option<&str>) -> String {
+        let styler: Box<dyn LayeredStyler> = match visualizer_hint.map(|s| s.to_lowercase()).as_deref() {
+            Some("uml") | Some("umlclass") => Box::new(UmlStyler),
+            _ => {
+                // If any node is a uml_class shape, default to UmlStyler
+                if self.nodes.values().any(|n| n.shape == "uml_class") {
+                    Box::new(UmlStyler)
+                } else {
+                    Box::new(DefaultStyler)
+                }
+            }
+        };
+
+        self.render_svg_internal(styler.as_ref())
+    }
+
+    fn render_svg_internal(&self, styler: &dyn LayeredStyler) -> String {
         let mut svg = String::with_capacity(16 * 1024);
 
         let bg_color = self.background.as_deref().unwrap_or("#1e1e2e");
@@ -480,17 +592,14 @@ impl LayeredGraph {
     .dl-edge-label {{
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 11px;
-      font-weight: 500;
-      fill: #e2e8f0;
+      font-weight: 600;
+      fill: #cbd5e1;
       text-anchor: middle;
       dominant-baseline: central;
-    }}
-    .dl-edge-pill {{
-      fill: #1e293b;
-      stroke: #475569;
-      stroke-width: 1;
-      rx: 4px;
-      ry: 4px;
+      paint-order: stroke fill;
+      stroke: {};
+      stroke-width: 3.5px;
+      stroke-linejoin: round;
     }}
   </style>
 
@@ -498,7 +607,7 @@ impl LayeredGraph {
   <rect width="100%" height="100%" class="dl-bg" />
 
 "##,
-            default_edge_stroke, default_edge_stroke, bg_color
+            default_edge_stroke, default_edge_stroke, bg_color, bg_color
         ));
 
         // 1. Render Edges
@@ -537,28 +646,8 @@ impl LayeredGraph {
                 path_d, edge_color, marker, dash_attr
             ));
 
-            // Render Edge Label if present
-            if let Some(ref lbl) = edge.label {
-                let mid_idx = edge.points.len() / 2;
-                let mid_pt = edge.points[mid_idx];
-                let prev_pt = edge.points[mid_idx.saturating_sub(1)];
-                let lx = (mid_pt.0 + prev_pt.0) / 2.0;
-                let ly = (mid_pt.1 + prev_pt.1) / 2.0;
-
-                let pill_w = (lbl.len() as f64 * 7.0 + 14.0).max(36.0);
-                let pill_h = 18.0;
-
-                svg.push_str(&format!(
-                    r#"    <g class="dl-edge-label-group">
-      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" class="dl-edge-pill" />
-      <text x="{:.1}" y="{:.1}" class="dl-edge-label">{}</text>
-    </g>
-"#,
-                    lx - pill_w / 2.0, ly - pill_h / 2.0, pill_w, pill_h,
-                    lx, ly,
-                    escape_xml(lbl)
-                ));
-            }
+            // Render Edge Label if present (borderless with SVG halo, floating cleanly on the track)
+            styler.render_edge_label(edge, &mut svg);
         }
         svg.push_str("  </g>\n\n");
 
@@ -568,91 +657,7 @@ impl LayeredGraph {
         sorted_nodes.sort_by_key(|n| (n.layer, n.x as i64));
 
         for node in sorted_nodes {
-            let node_color = node.color.as_deref().unwrap_or(default_node_fill);
-            let text_color = node.textcolor.as_deref().unwrap_or("#ffffff");
-
-            if node.shape == "uml_class" {
-                // Render UML Class / Structured Object Box
-                let stroke_color = "#64748b";
-                let has_members = !node.members.is_empty();
-                let header_h = if has_members { 32.0 } else { node.height };
-
-                if has_members {
-                    svg.push_str(&format!(
-                        r##"    <g class="dl-node dl-class-node" id="node-{}" filter="url(#dl-shadow)">
-      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" class="dl-class-box" fill="#0f172a" stroke="{}" />
-      <!-- Class Title Header -->
-      <path d="M {:.1} {:.1} L {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} L {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Z" fill="{}" />
-      <text x="{:.1}" y="{:.1}" class="dl-class-header" fill="{}">{}</text>
-      <!-- Separator Line -->
-      <line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="{}" stroke-width="1" />
-"##,
-                        escape_xml(&node.id),
-                        node.x, node.y, node.width, node.height, stroke_color,
-                        node.x, node.y + header_h,
-                        node.x, node.y + 4.0,
-                        node.x, node.y,
-                        node.x + 4.0, node.y,
-                        node.x + node.width - 4.0, node.y,
-                        node.x + node.width, node.y,
-                        node.x + node.width, node.y + 4.0,
-                        node_color,
-                        node.x + node.width / 2.0, node.y + header_h / 2.0,
-                        text_color, escape_xml(&node.label),
-                        node.x, node.y + header_h, node.x + node.width, node.y + header_h, stroke_color
-                    ));
-
-                    // Render Member Lines
-                    let mut my = node.y + header_h + 14.0;
-                    for member in &node.members {
-                        svg.push_str(&format!(
-                            r#"      <text x="{:.1}" y="{:.1}" class="dl-class-member">{}</text>
-"#,
-                            node.x + 12.0, my, escape_xml(member)
-                        ));
-                        my += 22.0;
-                    }
-                } else {
-                    svg.push_str(&format!(
-                        r##"    <g class="dl-node dl-class-node" id="node-{}" filter="url(#dl-shadow)">
-      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" rx="4" ry="4" class="dl-class-box" fill="{}" stroke="{}" />
-      <text x="{:.1}" y="{:.1}" class="dl-class-header" fill="{}">{}</text>
-"##,
-                        escape_xml(&node.id),
-                        node.x, node.y, node.width, node.height,
-                        node_color, stroke_color,
-                        node.x + node.width / 2.0, node.y + node.height / 2.0,
-                        text_color, escape_xml(&node.label)
-                    ));
-                }
-                svg.push_str("    </g>\n");
-            } else {
-                // Render Standard Vertex / Flowchart Node
-                let (rx, ry) = match node.shape.as_str() {
-                    "circle" | "doublecircle" => (node.width / 2.0, node.height / 2.0),
-                    "box" | "rect" => (2.0, 2.0),
-                    _ => (8.0, 8.0),
-                };
-
-                let stroke_color = if node_color.starts_with('#') {
-                    "#334155"
-                } else {
-                    "#475569"
-                };
-
-                svg.push_str(&format!(
-                    r#"    <g class="dl-node" id="node-{}" filter="url(#dl-shadow)">
-      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" rx="{:.1}" ry="{:.1}" class="dl-node-box" fill="{}" stroke="{}" />
-      <text x="{:.1}" y="{:.1}" class="dl-node-label" fill="{}">{}</text>
-    </g>
-"#,
-                    escape_xml(&node.id),
-                    node.x, node.y, node.width, node.height, rx, ry,
-                    node_color, stroke_color,
-                    node.x + node.width / 2.0, node.y + node.height / 2.0,
-                    text_color, escape_xml(&node.label)
-                ));
-            }
+            styler.render_node(node, default_node_fill, &mut svg);
         }
         svg.push_str("  </g>\n\n");
         svg.push_str("</svg>\n");

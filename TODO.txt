@@ -10,6 +10,20 @@ ACTIVE ROADMAP & CHAT TASKS
     - [x] Support node image / icon rendering (`image` attribute) in native vector SVG output with proper dimension scaling.
     - [x] Verify against `tests/test_inputs/nodes.txt` across `layered`, `force`, `tree`, and `grid`.
 
+[ ] Dynamic & Aspect-Oriented Meta-Graph Language (User-Defined Node Types, Operators & SVG Injection):
+    - [ ] Grammar & AST: Add `define <type_name> { ... }` block to Pest PEG grammar (`diagrammer.pest`) and `GraphCanvas` model:
+      * Raw SVG template injection: `define dude(width=80, height=60) { <svg>...</svg> }` allowing direct vector node skinning without Rust recompilation.
+      * Geometry primitives DSL: `define auto { rectangle(w=4, h=2) circle(r=2) circle(r=2) }` (Logo/CSS-style simplified geometry).
+      * Dynamic asset binding: `define dude { image = "https://.../a.png" }` or `file://...` freeing image references from local disk constraints.
+      * Dynamic instantiation syntax: `<custom_type> <node_name>` (e.g. `dude x > dude y`, `auto car1 > auto car2`).
+    - [ ] Self-Hosting Node Catalog (Standard Prelude Architecture):
+      * Move the hardcoded 29 shapes out of Rust engine conditionals into a language prelude (`include "std/shapes.txt"` or embedded built-in prelude) defined in the language itself.
+      * Native SVG renderer becomes a universal template-instantiating engine rather than a static geometry switchboard.
+    - [ ] Custom Operator Extensions: `define operator <op> { ... }` to declare new semantic edge types and layout triggers (e.g. `define operator <> { ... }` in sequence diagrams to initiate interaction blocks or custom routing constraints).
+    - [ ] Two-Pass Parsing / Type-Environment Compilation:
+      * Two-stage resolution: Pass 1 collects all `define` blocks and `include` directives to populate the dynamic `TypeRegistry` (shapes, operators, aliases).
+      * Pass 2 parses graph statements using the active type registry, preventing syntax ambiguity while enabling dynamic node types and operator extensions.
+
 [x] Separate Generator vs Visualizer into dedicated dual dropdowns in Web UI (e.g. Graphviz -> dot, fdp, neato, osage, twopi, sfdp; D3 -> Reingold, Dendrogram, CirclePacked, Sankey) [Landed]
 [x] First-party native Rust Sequence Layout Engine prototype in crates/diagrammer-core/src/layout/sequence.rs [Landed in #58]
 [x] Architectural roadmap document for WASM visualizers and native layout engines (docs/layout_engine_and_wasm_roadmap.md)

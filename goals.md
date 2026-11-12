@@ -185,6 +185,63 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
   - Groups (`{ loop_retry; "loop Retry 3 times" ... }` or `{ alt_success; "alt ..." ... }`) render dashed container boxes (`.ds-frame-box`) with tagged corner labels (`.ds-frame-tag-text`).
 - **Fixture**: Showcased in `tests/test_inputs/native_sequence.txt`.
 
+### 1.14 Dynamic & Aspect-Oriented Meta-Graph Language (User-Defined Node Types, Operators & Self-Hosting SVG Shapes)
+- **Problem & Motivation**: Currently, node shapes (`circle`, `diamond`, `database`, `actor`, etc.) and operators (`>`, `-->`, `..>`) are intrinsically hardcoded within the Pest grammar (`diagrammer.pest`) and layout engine Rust match statements (`shapes.rs`). Adding a new domain-specific shape (e.g. `auto` for a car, or custom cloud icons) requires modifying compiler internals and recompiling native/WASM binaries. Furthermore, image nodes currently rely on hardcoded local disk files (`ImageNode/actor2.png`).
+- **Core Vision**: Make the Diagrammer graph language **dynamic and aspect-oriented**, enabling users to define custom shapes, vector geometry, remote assets, and edge operators directly within the diagram text:
+  1. **User-Defined Node Types (`define <typename> { ... }`)**:
+     - **Direct SVG Template Injection**:
+       ```diagrammer
+       define dude(width=80, height=60) {
+         <svg viewBox="0 0 80 60">
+           <circle cx="40" cy="20" r="15" fill="#38bdf8" />
+           <path d="M 20 50 Q 40 30 60 50" stroke="#38bdf8" stroke-width="3" fill="none" />
+         </svg>
+       }
+       dude Alice > dude Bob
+       ```
+       Renders arbitrary user-defined vector shapes directly in native layout engines without altering Rust core code.
+     - **Simplified Geometry Primitives DSL (Logo/CSS-style)**:
+       ```diagrammer
+       define auto {
+         rectangle(width=40, height=20, rx=4)
+         circle(cx=10, cy=20, radius=6)
+         circle(cx=30, cy=20, radius=6)
+       }
+       auto car1 > auto car2
+       ```
+       Enables rapid procedural shape creation without needing raw SVG markup.
+     - **Decoupled Asset & URI Binding (Freeing the Disk)**:
+       ```diagrammer
+       define server {
+         image = "https://cdn.example.com/icons/server.svg"
+         # fallback = "file://assets/server.png"
+       }
+       server db1 > server db2
+       ```
+       Frees diagram authors from having local file paths on disk.
+  2. **Self-Hosting Standard Prelude Architecture**:
+     - Instead of maintaining a 300-line hardcoded `match shape` switch in Rust (`shapes.rs`), the entire built-in shape catalog (all 29 Graphviz shapes) will be declared directly in the language itself via a standard prelude (`std/shapes.diag` or built-in virtual include):
+       ```diagrammer
+       # std/shapes.diag
+       define circle { ... }
+       define diamond { ... }
+       define database { ... }
+       ```
+     - The Rust layout engine shrinks to a clean, universal template-instantiating SVG engine.
+  3. **Custom Operator Redefinitions (`define operator <op> { ... }`)**:
+     - Empower diagrams to declare novel edge syntax and semantic behaviors:
+       ```diagrammer
+       define operator <> {
+         type: "bidirectional-handshake"
+         style: "dashed"
+         action: "start-sequence-block"
+       }
+       client <> server
+       ```
+  4. **Aspect-Oriented Compilation (Two-Pass Type Environment)**:
+     - **Pass 1 (Pre-Scan & Macro Expansion)**: Gathers all `define` blocks and `include` directives to construct the document's dynamic `TypeRegistry` (shapes, operators, aliases).
+     - **Pass 2 (AST Construction)**: Parses the topology using the populated `TypeRegistry`, eliminating grammar ambiguities while supporting arbitrary user extensions.
+
 ---
 
 ## 2. Target Component Architecture
@@ -241,3 +298,4 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
 | **M12: Pure Rust Headless Browser Tests** | Implement 100% Rust browser test suite via Chrome DevTools Protocol (`headless_chrome`), eliminating Node.js test harness. | **Done** | Native Cargo browser integration tests (`make browsertests`) executing in under 5 seconds with zero Node/Puppeteer dependencies. |
 | **M13: Icon & Type Asset Modernization** | Re-render all repository PNG icon and type assets from modern vector SVGs using `rsvg-convert`. | **Done** | Eliminates legacy 2023 pixelated clip-art from Graphviz and web visualizations (PR #78). |
 | **M14: Native Layout Node Shapes, Styles & Icons** | Implement full shape catalog (`circle`, `diamond`, `database`, `actor`, etc.), stroke styles (`bold`, `dashed`, `dotted`), and image/icon embedding in native Rust layout engines. | **Done** | Native engines (`layered`, `force`, `tree`, `grid`) render full node shape, style, and icon semantics matching `tests/test_inputs/nodes.txt`. |
+| **M15: Dynamic Meta-Graph Language & Self-Hosting Prelude** | Add `define <typename> { ... }` (SVG template injection, primitives DSL, URI binding), `define operator`, and migrate built-in shapes to self-hosting prelude. | **Planned** | Fully dynamic, aspect-oriented graph language where shapes and operators are defined in user code or prelude rather than compiler match statements. |

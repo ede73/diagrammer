@@ -8,7 +8,8 @@ This document captures the long-term vision, component architecture, and active 
 
 ### 1.1 Eliminate Node.js & TypeScript Bloat
 - **Problem**: The project historically relied on TypeScript transpilation (`tsc`), which pulls in Node.js, `npm`, large `node_modules` trees (Jest, Puppeteer, ts-node), and build-step friction.
-- **Goal**: Because Diagrammer is a 100% Rust core compiled to WebAssembly and native binaries, Node.js is no longer a mandatory dependency. We have eliminated all TypeScript and Node runtime requirements from the build and web application. Only headless browser regression tests retain an isolated Node test runner in `tests/`.
+- **Goal**: Because Diagrammer is a 100% Rust core compiled to WebAssembly and native binaries, Node.js is no longer a mandatory dependency. We have eliminated all TypeScript and Node runtime requirements from the build and web application.
+- **Active Step (Complete Node Elimination)**: Replace the remaining isolated test runner in `tests/` (Jest + Puppeteer) with a 100% pure Rust Chrome DevTools Protocol (CDP) test suite via `headless_chrome` and the Rust `image` crate. This removes `tests/node_modules/`, `package.json`, and all npm friction, unifying tests under standard `cargo test`.
 
 ### 1.2 Modularize into Independent Rust Library Crates
 Restructure the project so that parsing, AST modeling, code generation, layout engines, and UI bindings are cleanly isolated library components with clear API boundaries:

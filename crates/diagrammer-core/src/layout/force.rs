@@ -55,6 +55,9 @@ impl ForceGraph {
         // 1. Collect group memberships & container colors
         for obj in canvas.get_objects(false) {
             if let GraphObject::Group(grp) = obj {
+                if grp.is_inner_graph || grp.name.parse::<usize>().is_ok() {
+                    continue;
+                }
                 let grp_lbl = grp.label.clone().unwrap_or_else(|| grp.name.clone());
                 for inner in &grp.objects {
                     if inner.is_vertex() {
@@ -65,7 +68,7 @@ impl ForceGraph {
                         }
                     }
                 }
-                // If group is empty, allow group itself as an entity
+                // If group is empty and named by user, allow group itself as an entity
                 if grp.objects.is_empty() {
                     node_labels.insert(grp.name.clone(), grp_lbl);
                     node_colors.insert(grp.name.clone(), grp.color.clone());
@@ -77,6 +80,9 @@ impl ForceGraph {
         // 2. Collect flattened vertices (standalone and inside groups)
         for obj in canvas.get_flattened_vertices() {
             let name = obj.get_name().to_string();
+            if name.parse::<usize>().is_ok() {
+                continue;
+            }
             let lbl = obj.get_label().unwrap_or(&name).to_string();
             node_labels.insert(name.clone(), lbl);
             if let Some(c) = obj.get_color() {
@@ -92,11 +98,16 @@ impl ForceGraph {
 
         // 3. Collect ALL edges via canvas.get_edges()
         for e in canvas.get_edges() {
-            node_labels.entry(e.left.clone()).or_insert_with(|| e.left.clone());
-            node_labels.entry(e.right.clone()).or_insert_with(|| e.right.clone());
+            let u = e.left.clone();
+            let v = e.right.clone();
+            if u.parse::<usize>().is_ok() || v.parse::<usize>().is_ok() {
+                continue;
+            }
+            node_labels.entry(u.clone()).or_insert_with(|| u.clone());
+            node_labels.entry(v.clone()).or_insert_with(|| v.clone());
             edges.push(ForceEdge {
-                from: e.left.clone(),
-                to: e.right.clone(),
+                from: u,
+                to: v,
                 label: e.label.clone(),
                 color: e.color.clone(),
                 edge_type: e.edge_type.clone(),
@@ -104,7 +115,7 @@ impl ForceGraph {
         }
 
         let num_nodes = node_labels.len().max(1);
-        let base_size = ((num_nodes as f64).sqrt() * 180.0).max(600.0);
+        let base_size = ((num_nodes as f64).sqrt() * 130.0).max(480.0);
         let width = base_size;
         let height = base_size;
         let center_x = width / 2.0;
@@ -112,7 +123,7 @@ impl ForceGraph {
 
         // 4. Initial deterministic circular placement
         let angle_step = std::f64::consts::TAU / (num_nodes as f64);
-        let init_radius = (base_size / 3.0).max(120.0);
+        let init_radius = (base_size / 3.2).max(100.0);
 
         let mut sorted_ids: Vec<String> = node_labels.keys().cloned().collect();
         sorted_ids.sort();
@@ -145,12 +156,12 @@ impl ForceGraph {
             );
         }
 
-        // 5. Fruchterman-Reingold Physics Simulation (90 iterations)
+        // 5. Fruchterman-Reingold Physics Simulation (100 iterations)
         let area = width * height;
-        let k = ((area / (num_nodes as f64)).sqrt()).max(75.0);
+        let k = ((area / (num_nodes as f64)).sqrt() * 0.75).max(70.0);
         let k2 = k * k;
-        let mut temperature = width / 6.0;
-        let iterations = 90;
+        let mut temperature = width / 5.0;
+        let iterations = 100;
 
         for _ in 0..iterations {
             let mut disp_x: HashMap<String, f64> = HashMap::new();
@@ -215,7 +226,7 @@ impl ForceGraph {
                                 let dx = nodes[u_id].x - nodes[v_id].x;
                                 let dy = nodes[u_id].y - nodes[v_id].y;
                                 let dist = (dx * dx + dy * dy).sqrt().max(1.0);
-                                let cluster_att = (dist * dist) / (k * 2.5);
+                                let cluster_att = (dist * dist) / (k * 2.0);
                                 let fx = (dx / dist) * cluster_att;
                                 let fy = (dy / dist) * cluster_att;
                                 *disp_x.get_mut(u_id).unwrap() -= fx;
@@ -228,10 +239,10 @@ impl ForceGraph {
                 }
             }
 
-            // D. Center gravity (pulls entire layout toward center)
+            // D. Center gravity (pulls entire layout toward center with proportional tension)
             for (id, node) in &nodes {
-                let gx = (center_x - node.x) * 0.04;
-                let gy = (center_y - node.y) * 0.04;
+                let gx = (center_x - node.x) * 0.12;
+                let gy = (center_y - node.y) * 0.12;
                 *disp_x.get_mut(id).unwrap() += gx;
                 *disp_y.get_mut(id).unwrap() += gy;
             }
@@ -248,7 +259,7 @@ impl ForceGraph {
             }
 
             // Cool temperature
-            temperature *= 0.94;
+            temperature *= 0.93;
         }
 
         // 6. Normalize layout bounds into well-proportioned canvas
@@ -402,8 +413,8 @@ impl ForceGraph {
         for node in self.nodes.values() {
             let fill = node.color.as_deref().unwrap_or(default_node_fill);
             let text_fill = node.textcolor.as_deref().unwrap_or("#ffffff");
-            let has_grp = node.group.is_some();
-            let label_y = if has_grp { node.y - 3.0 } else { node.y };
+            let is_real_group = node.group.as_ref().map(|g| g.parse::<usize>().is_err() && !g.is_empty() && g != &node.label).unwrap_or(false);
+            let label_y = if is_real_group { node.y - 3.0 } else { node.y };
 
             svg.push_str(&format!(
                 r##"    <g class="dforce-node" filter="url(#dforce-shadow)">
@@ -421,14 +432,16 @@ impl ForceGraph {
                 escape_xml(&node.label)
             ));
 
-            if let Some(grp) = &node.group {
-                svg.push_str(&format!(
-                    r##"      <text x="{:.1}" y="{:.1}" class="dforce-node-grp">[{}]</text>
+            if is_real_group {
+                if let Some(grp) = &node.group {
+                    svg.push_str(&format!(
+                        r##"      <text x="{:.1}" y="{:.1}" class="dforce-node-grp">[{}]</text>
 "##,
-                    node.x,
-                    node.y + 11.0,
-                    escape_xml(grp)
-                ));
+                        node.x,
+                        node.y + 11.0,
+                        escape_xml(grp)
+                    ));
+                }
             }
 
             svg.push_str("    </g>\n");

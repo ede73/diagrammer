@@ -295,12 +295,12 @@ Interconnected social cliques naturally clustered by mutual edge attraction:
 
 ```diagrammer
 visualizer force
-Alice > (Bob, Charlie, David, Eve)
-Bob > (Charlie, David, Frank)
-Charlie > (David, Eve, Grace)
-David > (Eve, Frank, Grace)
-Eve > (Frank, Grace, Heidi)
-Frank > (Grace, Heidi)
+Alice > Bob, Charlie, David, Eve
+Bob > Charlie, David, Frank
+Charlie > David, Eve, Grace
+David > Eve, Frank, Grace
+Eve > Frank, Grace, Heidi
+Frank > Grace, Heidi
 Grace > Heidi
 ```
 
@@ -310,11 +310,11 @@ Roles attract users with shared permissions into grouped partitions:
 
 ```diagrammer
 visualizer force
-Admin_Role > (User_Alice, User_Bob)
-Dev_Role > (User_Bob, User_Charlie, User_David)
-Auditor_Role > (User_Eve, User_Alice)
-Billing_Role > (User_David, User_Eve)
-Support_Role > (User_Charlie, User_Frank)
+Admin_Role > User_Alice, User_Bob
+Dev_Role > User_Bob, User_Charlie, User_David
+Auditor_Role > User_Eve, User_Alice
+Billing_Role > User_David, User_Eve
+Support_Role > User_Charlie, User_Frank
 ```
 
 #### 5.4 Dual-Clique Cluster Bridge
@@ -325,7 +325,7 @@ Two tightly connected complete subgraphs held apart by Coulomb repulsion and lin
 visualizer force
 ClusterA_1 > ClusterA_2 > ClusterA_3 > ClusterA_1
 ClusterA_2 > ClusterA_4 > ClusterA_1
-Bridge_Gateway > (ClusterA_4, ClusterB_1)
+Bridge_Gateway > ClusterA_4, ClusterB_1
 ClusterB_1 > ClusterB_2 > ClusterB_3 > ClusterB_1
 ClusterB_2 > ClusterB_4 > ClusterB_1
 ```
@@ -336,11 +336,14 @@ Input, hidden, and output layers organized dynamically by spring-electrical tens
 
 ```diagrammer
 visualizer force
-In_1 > (H1_A, H1_B, H1_C)
-In_2 > (H1_A, H1_B, H1_C)
-In_3 > (H1_A, H1_B, H1_C)
-(H1_A, H1_B, H1_C) > (H2_A, H2_B)
-(H2_A, H2_B) > (Out_Softmax, Out_Loss)
+In_1 > H1_A, H1_B, H1_C
+In_2 > H1_A, H1_B, H1_C
+In_3 > H1_A, H1_B, H1_C
+H1_A > H2_A, H2_B
+H1_B > H2_A, H2_B
+H1_C > H2_A, H2_B
+H2_A > Out_Softmax, Out_Loss
+H2_B > Out_Softmax, Out_Loss
 ```
 
 ---

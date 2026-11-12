@@ -45,6 +45,11 @@ ACTIVE ROADMAP & CHAT TASKS
     - Universal representation principle: "A graph language that allows describing anything, visualizable with anything else." Container groups polymorphic projection into UML classes, Graphviz clusters, records, and states.
     - Explicit overrides (`rect d`) strictly take precedence over ambient defaults (`shape ellipse`).
 [x] First-party Sequence Engine extensions: lifeline activations, anchored notes (:: syntax & self-dividers), delay gaps (...), phase banners (==), and interaction frames (loop / alt / opt / par container tags) [Landed]
+[ ] Eliminate Node/npm completely from test harness:
+    - [ ] Replace Jest + Puppeteer in `tests/` with 100% Rust browser testing via `headless_chrome` (Chrome DevTools Protocol directly from Cargo).
+    - [ ] Replace `jest-image-snapshot` with Rust `image` crate pixel comparison.
+    - [ ] Install `wasm-pack` via `cargo install wasm-pack` to eliminate `npx` from root Makefile.
+    - [ ] Remove `tests/package.json`, `tests/node_modules/`, and isolated Node test runner.
 [x] First-party Force-Directed Physics Simulation Engine (`layout/force.rs`):
     - [x] Fruchterman-Reingold spring-electrical algorithm in 100% pure Rust
     - [x] Full edge collection via `canvas.get_edges()` & flattened group vertices via `canvas.get_flattened_vertices()`
@@ -312,4 +317,7 @@ a>c
 or b,c>a similarily
 b>a
 c>a
+
+(DONE) Implement 100% pure Rust headless browser test suite using Chrome DevTools Protocol (headless_chrome) with zero Node.js/Jest/Puppeteer runtime dependencies. Supported via `make browsertests` and `cargo test --test browser_tests`.
+
 

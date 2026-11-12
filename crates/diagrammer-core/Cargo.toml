@@ -22,3 +22,7 @@ path = "src/bin/diagrammer.rs"
 name = "diagrammer_pest_parse"
 path = "src/bin/diagrammer_pest_parse.rs"
 
+[dev-dependencies]
+headless_chrome = "1.0.22"
+image = "0.25.10"
+

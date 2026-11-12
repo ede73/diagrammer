@@ -1,0 +1,16 @@
+visualizer tree
+
+{ System;Root
+  Core
+  Modules
+  Storage
+}
+
+Root > (Core, Modules, Storage)
+
+Core > (Parser, AST, Generator)
+Modules > (Auth, Network, UI)
+Storage > (Disk, Cache, Files)
+
+Parser > (Lexer, Grammar)
+UI > (Components, Layout, Theme)

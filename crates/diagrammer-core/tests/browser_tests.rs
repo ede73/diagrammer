@@ -348,7 +348,7 @@ fn test_pure_rust_browser_all_native_layout_engines() {
 
     let archetypes = [
         ("layered", "visualizer layered\nNode1 > Node2 > Node3\nNode1 > Node4"),
-        ("native_sequence", "visualizer sequence\nAlice > Bob: Hello\nBob > Alice: Hi"),
+        ("native_sequence", "visualizer native_sequence\nAlice > Bob: Hello\nBob > Alice: Hi"),
         ("tree", "visualizer tree\nRoot > Child1, Child2\nChild1 > LeafA, LeafB"),
         ("grid", "visualizer grid\nRackA > Server1, Server2\nRackB > Server3"),
         ("force", "visualizer force\nA > B, C\nB > C, D\nC > D"),
@@ -406,7 +406,7 @@ fn test_pure_rust_browser_screenshot_pixel_comparison() {
         .expect("Failed to decode captured PNG screenshot");
 
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let snapshot_path = manifest_dir.join("../../tests/web/snapshots/main_screen_just_loaded.png");
+    let snapshot_path = manifest_dir.join("../../tests/snapshots/main_screen_just_loaded.png");
 
     if snapshot_path.exists() {
         if let Ok(expected_img) = image::open(&snapshot_path) {

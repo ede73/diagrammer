@@ -39,7 +39,6 @@ export function populateVisualizerDropdown(family) {
 }
 export function setVisualizer(visualizer) {
     if (!visualizer) return;
-    if (visualizer === 'sequence') visualizer = 'native_sequence';
     const viz = visualizations.find(p => p.name === visualizer);
 
     const select = document.querySelector('#diagrammer-generator');

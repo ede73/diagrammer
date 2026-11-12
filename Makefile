@@ -64,8 +64,6 @@ startminiserver:
 	make -C tests $@
 checkminiserver:
 	make -C tests $@
-jest_test_deps:
-	make -C tests $@
 browsertests:
 	make -C tests $@
 rust_browser_tests:

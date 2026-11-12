@@ -28,9 +28,7 @@ if (typeof window !== 'undefined') {
 }
 function extractScriptVisualizer(diagrammerCode) {
     const match = diagrammerCode.match(/(?:^|\n)\s*(?:generator|visualizer)\s+([A-Za-z0-9_]+)/i);
-    if (!match) return null;
-    const viz = match[1].toLowerCase();
-    return viz === 'sequence' ? 'native_sequence' : viz;
+    return match ? match[1].toLowerCase() : null;
 }
 export function parse(diagrammerCode, successCallback, failureCallback, preferScriptSpecifiedVisualizer = false) {
     if (preferScriptSpecifiedVisualizer && !isLockHintsEnabled()) {

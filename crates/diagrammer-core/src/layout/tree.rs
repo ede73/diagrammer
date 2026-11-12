@@ -55,6 +55,9 @@ impl TreeGraph {
         // 1. Collect vertices (both standalone and inside groups)
         for obj in canvas.get_flattened_vertices() {
             let name = obj.get_name().to_string();
+            if name.parse::<usize>().is_ok() {
+                continue;
+            }
             let lbl = obj.get_label().unwrap_or(&name).to_string();
             node_labels.insert(name.clone(), lbl);
             if let Some(c) = obj.get_color() {
@@ -67,6 +70,9 @@ impl TreeGraph {
 
         for obj in canvas.get_objects(false) {
             if let GraphObject::Group(g) = obj {
+                if g.is_inner_graph || g.name.parse::<usize>().is_ok() {
+                    continue;
+                }
                 if g.objects.is_empty() {
                     let lbl = g.label.clone().unwrap_or_else(|| g.name.clone());
                     node_labels.entry(g.name.clone()).or_insert(lbl);
@@ -84,6 +90,9 @@ impl TreeGraph {
         for e in canvas.get_edges() {
             let u = e.left.clone();
             let v = e.right.clone();
+            if u.parse::<usize>().is_ok() || v.parse::<usize>().is_ok() {
+                continue;
+            }
             node_labels.entry(u.clone()).or_insert_with(|| u.clone());
             node_labels.entry(v.clone()).or_insert_with(|| v.clone());
             adj.entry(u.clone()).or_default().push(v.clone());

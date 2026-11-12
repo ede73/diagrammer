@@ -119,8 +119,20 @@ fn main() {
             let generated_text = generator.generate(&canvas);
 
             if visualize {
-                let format = output_format.as_deref().unwrap_or("png");
-                if let Err(e) = render_visualizer(effective_gen, &generated_text, format, output_file.as_deref()) {
+                let inferred_format = if let Some(ref f) = output_format {
+                    f.clone()
+                } else if let Some(ref path) = output_file {
+                    if path.ends_with(".svg") {
+                        "svg".to_string()
+                    } else if path.ends_with(".pdf") {
+                        "pdf".to_string()
+                    } else {
+                        "png".to_string()
+                    }
+                } else {
+                    "png".to_string()
+                };
+                if let Err(e) = render_visualizer(effective_gen, &generated_text, &inferred_format, output_file.as_deref()) {
                     eprintln!("{}", e);
                     process::exit(1);
                 }
@@ -136,7 +148,63 @@ fn main() {
 }
 
 fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Option<&str>) -> Result<Vec<u8>, String> {
-    if visualizer == "native_sequence" || visualizer == "sequence" || visualizer == "layered" || visualizer == "dag" {
+    if matches!(
+        visualizer,
+        "native_sequence"
+            | "sequence"
+            | "layered"
+            | "dag"
+            | "tree"
+            | "radial"
+            | "native_tree"
+            | "fan"
+            | "grid"
+            | "block"
+            | "network_bus"
+            | "force"
+            | "organic"
+            | "physics"
+    ) {
+        let is_png = format.eq_ignore_ascii_case("png");
+
+        if is_png {
+            // Attempt conversion via rsvg-convert if available
+            let rsvg_bin = if Path::new("/opt/homebrew/bin/rsvg-convert").exists() {
+                "/opt/homebrew/bin/rsvg-convert"
+            } else if Path::new("/usr/local/bin/rsvg-convert").exists() {
+                "/usr/local/bin/rsvg-convert"
+            } else {
+                "rsvg-convert"
+            };
+
+            let child = Command::new(rsvg_bin)
+                .arg("-f")
+                .arg("png")
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped())
+                .spawn();
+
+            if let Ok(mut proc) = child {
+                if let Some(mut stdin) = proc.stdin.take() {
+                    let _ = stdin.write_all(code.as_bytes());
+                }
+                if let Ok(output) = proc.wait_with_output() {
+                    if output.status.success() && !output.stdout.is_empty() {
+                        if let Some(out) = output_path {
+                            fs::write(out, &output.stdout)
+                                .map_err(|e| format!("Failed to write PNG output to '{}': {}", out, e))?;
+                        } else {
+                            io::stdout()
+                                .write_all(&output.stdout)
+                                .map_err(|e| format!("Failed to write PNG to stdout: {}", e))?;
+                        }
+                        return Ok(output.stdout);
+                    }
+                }
+            }
+        }
+
         let bytes = code.as_bytes().to_vec();
         if let Some(out) = output_path {
             fs::write(out, &bytes).map_err(|e| format!("Failed to write SVG output to '{}': {}", out, e))?;

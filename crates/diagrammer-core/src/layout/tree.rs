@@ -52,22 +52,27 @@ impl TreeGraph {
         let mut node_colors: HashMap<String, Option<String>> = HashMap::new();
         let mut node_textcolors: HashMap<String, Option<String>> = HashMap::new();
 
-        // 1. Collect vertices
+        // 1. Collect vertices (both standalone and inside groups)
+        for obj in canvas.get_flattened_vertices() {
+            let name = obj.get_name().to_string();
+            let lbl = obj.get_label().unwrap_or(&name).to_string();
+            node_labels.insert(name.clone(), lbl);
+            if let Some(c) = obj.get_color() {
+                node_colors.insert(name.clone(), Some(c.to_string()));
+            }
+            if let Some(tc) = obj.get_textcolor() {
+                node_textcolors.insert(name.clone(), Some(tc.to_string()));
+            }
+        }
+
         for obj in canvas.get_objects(false) {
-            match obj {
-                GraphObject::Vertex(v) => {
-                    let lbl = v.label.clone().unwrap_or_else(|| v.name.clone());
-                    node_labels.insert(v.name.clone(), lbl);
-                    node_colors.insert(v.name.clone(), v.color.clone());
-                    node_textcolors.insert(v.name.clone(), v.textcolor.clone());
-                }
-                GraphObject::Group(g) => {
+            if let GraphObject::Group(g) = obj {
+                if g.objects.is_empty() {
                     let lbl = g.label.clone().unwrap_or_else(|| g.name.clone());
-                    node_labels.insert(g.name.clone(), lbl);
-                    node_colors.insert(g.name.clone(), g.color.clone());
-                    node_textcolors.insert(g.name.clone(), g.textcolor.clone());
+                    node_labels.entry(g.name.clone()).or_insert(lbl);
+                    node_colors.entry(g.name.clone()).or_insert_with(|| g.color.clone());
+                    node_textcolors.entry(g.name.clone()).or_insert_with(|| g.textcolor.clone());
                 }
-                _ => {}
             }
         }
 
@@ -76,20 +81,18 @@ impl TreeGraph {
         let mut in_degree: HashMap<String, usize> = HashMap::new();
         let mut raw_edges: Vec<(String, String, Option<String>, Option<String>)> = Vec::new();
 
-        for id in node_labels.keys() {
-            in_degree.entry(id.clone()).or_insert(0);
+        for e in canvas.get_edges() {
+            let u = e.left.clone();
+            let v = e.right.clone();
+            node_labels.entry(u.clone()).or_insert_with(|| u.clone());
+            node_labels.entry(v.clone()).or_insert_with(|| v.clone());
+            adj.entry(u.clone()).or_default().push(v.clone());
+            *in_degree.entry(v.clone()).or_insert(0) += 1;
+            raw_edges.push((u, v, e.label.clone(), e.color.clone()));
         }
 
-        for obj in canvas.get_objects(false) {
-            if let GraphObject::Edge { edge: e } = obj {
-                let u = e.left.clone();
-                let v = e.right.clone();
-                node_labels.entry(u.clone()).or_insert_with(|| u.clone());
-                node_labels.entry(v.clone()).or_insert_with(|| v.clone());
-                adj.entry(u.clone()).or_default().push(v.clone());
-                *in_degree.entry(v.clone()).or_insert(0) += 1;
-                raw_edges.push((u, v, e.label.clone(), e.color.clone()));
-            }
+        for id in node_labels.keys() {
+            in_degree.entry(id.clone()).or_insert(0);
         }
 
         if node_labels.is_empty() {

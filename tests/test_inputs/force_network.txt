@@ -1,0 +1,12 @@
+visualizer force
+
+Hub > (NodeA, NodeB, NodeC, NodeD, NodeE)
+NodeA > NodeB
+NodeB > NodeC
+NodeC > NodeD
+NodeD > NodeE
+NodeE > NodeA
+
+Satellite > (NodeA, NodeC, NodeE)
+Gateway > (NodeB, NodeD)
+

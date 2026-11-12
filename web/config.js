@@ -9,6 +9,9 @@ import { visualizeSankey } from './visualizations/visualizeSankey.js';
 import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
 import { visualizeNativeSequence } from './visualizations/visualizeNativeSequence.js';
 import { visualizeLayered } from './visualizations/visualizeLayered.js';
+import { visualizeTree } from './visualizations/visualizeTree.js';
+import { visualizeGrid } from './visualizations/visualizeGrid.js';
+import { visualizeForce } from './visualizations/visualizeForce.js';
 import { visualizeMermaid } from './visualizations/visualizeMermaid.js';
 export class Visualization {
     constructor(name, menuName, generator, visualization, cli, metadata = {}) {
@@ -144,6 +147,9 @@ const _visualizations = [
 
     new Visualization('native_sequence', 'Diagrammer: Native Sequence [WASM]', 'native_sequence', visualizeNativeSequence, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency vector sequence diagram' }),
     new Visualization('layered', 'Diagrammer: Layered DAG [WASM]', 'layered', visualizeLayered, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency hierarchical DAG and UML flowchart engine' }),
+    new Visualization('tree', 'Diagrammer: Tree / Dendrogram [WASM]', 'tree', visualizeTree, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency tree and radial dendrogram engine' }),
+    new Visualization('grid', 'Diagrammer: 2D Grid / Network Bus [WASM]', 'grid', visualizeGrid, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency 2D matrix grid and network bus engine' }),
+    new Visualization('force', 'Diagrammer: Force-Directed Physics [WASM]', 'force', visualizeForce, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency spring-electrical physics simulation engine' }),
 
     new Visualization('actdiag', 'Blockdiag: Activity Diagram [CLI]', 'actdiag', undefined, (format, outputFile) => buggyDiags('actdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'actdiag', description: 'Activity diagram (Python CLI)' }),
     new Visualization('blockdiag', 'Blockdiag: Block Diagram [CLI]', 'blockdiag', undefined, (format, outputFile) => buggyDiags('blockdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'blockdiag', description: 'Block diagram (Python CLI)' }),

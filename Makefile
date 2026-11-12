@@ -19,7 +19,8 @@ pest_parser_bin:
 	cargo build --release -p diagrammer-core
 
 wasm_pkg:
-	npx -y wasm-pack build crates/diagrammer-core --target web --out-dir ../../build/wasm --no-typescript
+	@if [ -f "$$HOME/.cargo/env" ]; then . "$$HOME/.cargo/env"; fi; \
+	wasm-pack build crates/diagrammer-core --target web --out-dir ../../build/wasm --no-typescript
 
 .PHONY: clean sub_tests wasm_pkg pest_parser_bin parser
 

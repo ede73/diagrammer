@@ -67,10 +67,8 @@ check_core_prereqs() {
 
   if command -v wasm-pack >/dev/null 2>&1; then
     echo "  [OK] wasm-pack: $(wasm-pack --version 2>/dev/null || echo 'installed')"
-  elif command -v npx >/dev/null 2>&1 && npx wasm-pack --version >/dev/null 2>&1; then
-    echo "  [OK] wasm-pack (via npx): $(npx wasm-pack --version 2>/dev/null)"
   else
-    echo "  [MISSING] wasm-pack (install via 'cargo install wasm-pack' or 'npm install -g wasm-pack')"
+    echo "  [MISSING] wasm-pack (install via 'cargo install wasm-pack')"
     missing=1
   fi
 

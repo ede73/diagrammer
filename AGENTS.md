@@ -58,6 +58,7 @@ For CLI-only checks:
 - If you need to test Rust core changes, run `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`.
 - If you need to test browser UI changes, run `make -C tests jesttests`.
 - **Mandatory Documentation Rule**: Whenever the user mentions or assigns a future task, idea, or architectural goal, immediately document and persist it in `goals.md` and `TODO.txt`. Never leave user requirements or vision solely in chat.
+- **Non-Interactive CLI & Process Lifecycle Rule**: Never invoke interactive TUIs or pagers (e.g. `gh stack view` without `--json`). Always use `gh stack view --json` or pipe non-interactively. If any non-daemon command expected to finish in a few seconds fails to terminate promptly, immediately kill it via `manage_task` to prevent hanging processes from stalling the session message delivery queue.
 
 ## Helpful facts
 - The core diagrammer parser and all 13 generators are 100% Rust (`crates/diagrammer-core`), compiled to WebAssembly for the browser and native binary for the CLI.

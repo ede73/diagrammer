@@ -12,6 +12,8 @@ This document describes the `diagrammer` repository layout, key entry points, an
   - `make wasm_pkg`
 - Run Rust AST & generator parity tests:
   - `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`
+- Run pure Rust headless browser tests (Chrome DevTools Protocol):
+  - `make browsertests` (or `cargo test --manifest-path crates/diagrammer-core/Cargo.toml --test browser_tests`)
 - Run all Jest browser tests (auto-installs test dependencies if needed):
   - `make -C tests jesttests`
 - Clean build artifacts:

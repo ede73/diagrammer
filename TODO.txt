@@ -318,3 +318,6 @@ or b,c>a similarily
 b>a
 c>a
 
+(DONE) Implement 100% pure Rust headless browser test suite using Chrome DevTools Protocol (headless_chrome) with zero Node.js/Jest/Puppeteer runtime dependencies. Supported via `make browsertests` and `cargo test --test browser_tests`.
+
+

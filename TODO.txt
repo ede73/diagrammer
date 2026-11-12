@@ -1,14 +1,14 @@
 ================================================================================
 ACTIVE ROADMAP & CHAT TASKS
 ================================================================================
-[ ] Re-rasterize all repository PNG icon assets from modern clean SVGs:
-    - [ ] Re-render `web/icons/*.png` from `web/icons/*.svg` using `rsvg-convert` (eliminate legacy 2023 pixelated clip-art).
-    - [ ] Re-render `web/types/*.png` from `web/types/*.svg` using `rsvg-convert`.
-[ ] Native Layout Engine Node Shapes, Styles & Icon Support:
-    - [ ] Support Graphviz shape catalog in native layout engines (`circle`, `ellipse`, `doublecircle`, `diamond`, `condition`, `database`, `document`, `folder`, `cloud`, `input`, `subroutine`, `box`/`rect`, `roundedbox`, `actor`, `dots`).
-    - [ ] Support stroke styles in native layout engines (`bold`, `dashed`, `dotted`, `invis`).
-    - [ ] Support node image / icon rendering (`image` attribute) in native vector SVG output.
-    - [ ] Verify against `tests/test_inputs/nodes.txt`.
+[x] Re-rasterize all repository PNG icon assets from modern clean SVGs:
+    - [x] Re-render `web/icons/*.png` from `web/icons/*.svg` using `rsvg-convert` (eliminate legacy 2023 pixelated clip-art).
+    - [x] Re-render `web/types/*.png` from `web/types/*.svg` using `rsvg-convert`.
+[x] Native Layout Engine Node Shapes, Styles & Icon Support:
+    - [x] Support Graphviz shape catalog in native layout engines (`circle`, `ellipse`, `doublecircle`, `diamond`, `condition`, `database`, `document`, `folder`, `cloud`, `input`, `subroutine`, `box`/`rect`, `roundedbox`, `actor`, `dots`, `loop`, `loopin`, `loopout`, `preparation`, `left`, `right`).
+    - [x] Support stroke styles in native layout engines (`bold`, `dashed`, `dotted`, `invis`).
+    - [x] Support node image / icon rendering (`image` attribute) in native vector SVG output with proper dimension scaling.
+    - [x] Verify against `tests/test_inputs/nodes.txt` across `layered`, `force`, `tree`, and `grid`.
 
 [x] Separate Generator vs Visualizer into dedicated dual dropdowns in Web UI (e.g. Graphviz -> dot, fdp, neato, osage, twopi, sfdp; D3 -> Reingold, Dendrogram, CirclePacked, Sankey) [Landed]
 [x] First-party native Rust Sequence Layout Engine prototype in crates/diagrammer-core/src/layout/sequence.rs [Landed in #58]
@@ -54,11 +54,11 @@ ACTIVE ROADMAP & CHAT TASKS
     - Universal representation principle: "A graph language that allows describing anything, visualizable with anything else." Container groups polymorphic projection into UML classes, Graphviz clusters, records, and states.
     - Explicit overrides (`rect d`) strictly take precedence over ambient defaults (`shape ellipse`).
 [x] First-party Sequence Engine extensions: lifeline activations, anchored notes (:: syntax & self-dividers), delay gaps (...), phase banners (==), and interaction frames (loop / alt / opt / par container tags) [Landed]
-[ ] Eliminate Node/npm completely from test harness:
-    - [ ] Replace Jest + Puppeteer in `tests/` with 100% Rust browser testing via `headless_chrome` (Chrome DevTools Protocol directly from Cargo).
-    - [ ] Replace `jest-image-snapshot` with Rust `image` crate pixel comparison.
-    - [x] Install `wasm-pack` via `cargo install wasm-pack` to eliminate `npx` from root Makefile.
-    - [ ] Remove `tests/package.json`, `tests/node_modules/`, and isolated Node test runner.
+[x] Eliminate Node/npm completely from test harness:
+    - [x] Replace Jest + Puppeteer in `tests/` with 100% Rust browser testing via `headless_chrome` (Chrome DevTools Protocol directly from Cargo) [Landed in #75].
+    - [x] Replace `jest-image-snapshot` with Rust `image` crate pixel comparison [Landed in #75].
+    - [x] Install `wasm-pack` via `cargo install wasm-pack` to eliminate `npx` from root Makefile [Landed in #76].
+    - [x] Remove `tests/package.json`, `tests/node_modules/`, and isolated Node test runner [Landed in #75 and #76].
 [x] First-party Force-Directed Physics Simulation Engine (`layout/force.rs`):
     - [x] Fruchterman-Reingold spring-electrical algorithm in 100% pure Rust
     - [x] Full edge collection via `canvas.get_edges()` & flattened group vertices via `canvas.get_flattened_vertices()`

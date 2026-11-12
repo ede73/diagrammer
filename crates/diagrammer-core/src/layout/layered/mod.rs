@@ -15,6 +15,8 @@ pub struct LayeredNode {
     pub id: String,
     pub label: String,
     pub shape: String,
+    pub style: Option<String>,
+    pub image: Option<String>,
     pub width: f64,
     pub height: f64,
     pub x: f64,
@@ -94,6 +96,8 @@ impl LayeredGraph {
                             id: grp.name.clone(),
                             label,
                             shape: "uml_class".to_string(),
+                            style: None,
+                            image: None,
                             width: w,
                             height: h,
                             x: 0.0,
@@ -111,8 +115,22 @@ impl LayeredGraph {
                         if !nodes.contains_key(&name) {
                             let label = obj.get_label().unwrap_or(&name).to_string();
                             let shape = obj.get_shape().unwrap_or("rounded").to_string();
-                            let w = ((label.len() as f64) * 8.8 + 36.0).max(84.0);
-                            let h = 40.0;
+                            let style = obj.get_style().map(|s| s.to_string());
+                            let image = obj.get_image().map(|s| s.to_string());
+                            let mut w = ((label.len() as f64) * 8.8 + 36.0).max(84.0);
+                            let mut h = 40.0;
+
+                            if shape == "circle" || shape == "doublecircle" {
+                                let sz = w.max(50.0);
+                                w = sz;
+                                h = sz;
+                            } else if shape == "diamond" || shape == "condition" {
+                                w = (w * 1.15).max(70.0);
+                                h = 50.0;
+                            } else if image.is_some() {
+                                h = 56.0;
+                                w = w.max(72.0);
+                            }
 
                             nodes.insert(
                                 name.clone(),
@@ -120,6 +138,8 @@ impl LayeredGraph {
                                     id: name,
                                     label,
                                     shape,
+                                    style,
+                                    image,
                                     width: w,
                                     height: h,
                                     x: 0.0,
@@ -147,6 +167,8 @@ impl LayeredGraph {
                             id: endpoint.clone(),
                             label: endpoint.clone(),
                             shape: "rounded".to_string(),
+                            style: None,
+                            image: None,
                             width: w,
                             height: 40.0,
                             x: 0.0,
@@ -666,7 +688,7 @@ impl LayeredGraph {
     }
 }
 
-fn escape_xml(s: &str) -> String {
+pub fn escape_xml(s: &str) -> String {
     s.replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")

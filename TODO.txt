@@ -48,7 +48,7 @@ ACTIVE ROADMAP & CHAT TASKS
 [ ] Eliminate Node/npm completely from test harness:
     - [ ] Replace Jest + Puppeteer in `tests/` with 100% Rust browser testing via `headless_chrome` (Chrome DevTools Protocol directly from Cargo).
     - [ ] Replace `jest-image-snapshot` with Rust `image` crate pixel comparison.
-    - [ ] Install `wasm-pack` via `cargo install wasm-pack` to eliminate `npx` from root Makefile.
+    - [x] Install `wasm-pack` via `cargo install wasm-pack` to eliminate `npx` from root Makefile.
     - [ ] Remove `tests/package.json`, `tests/node_modules/`, and isolated Node test runner.
 [x] First-party Force-Directed Physics Simulation Engine (`layout/force.rs`):
     - [x] Fruchterman-Reingold spring-electrical algorithm in 100% pure Rust

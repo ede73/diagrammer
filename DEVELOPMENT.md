@@ -9,12 +9,12 @@ This document describes how to set up, build, develop, and run `diagrammer`.
 1. **Rust & Cargo** (1.70+):
    - Install via [rustup.rs](https://rustup.rs): `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 2. **wasm-pack**:
-   - Install via Cargo: `cargo install wasm-pack` (or use `npx wasm-pack`)
+   - Install via Cargo: `cargo install wasm-pack`
 3. **Make** (standard build tool)
 
 ### Optional Setup
 - **External CLI Visualizer Engines**: Run [`scripts/setup.sh`](file:///Users/ede/src/diagrammer/scripts/setup.sh) to interactively install optional external visualization tools (Graphviz, mscgen, PlantUML + Java, and Python blockdiag/nwdiag/actdiag/seqdiag).
-- **Browser Regression Testing**: Test dependencies (Jest, Puppeteer) are strictly isolated to `tests/`. Run `make -C tests jest_test_deps` (or `cd tests && npm install`).
+- **Browser Regression Testing**: 100% pure Rust headless Chrome DevTools Protocol suite (`headless_chrome`). Zero Node/Puppeteer requirements. Run `make browsertests`.
 
 *Note: Zero Node.js runtime or npm dependencies are required to build or run the native Rust CLI or embedded web server.*
 

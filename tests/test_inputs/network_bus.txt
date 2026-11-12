@@ -1,0 +1,14 @@
+visualizer grid
+
+{ dmz_bus;DMZ Bus
+  web01#3b82f6
+  web02#3b82f6
+  proxy#10b981
+}
+
+{ internal_lan;Internal LAN
+  db_primary#f59e0b
+  db_replica#f59e0b
+  cache01#8b5cf6
+  worker#ec4899
+}

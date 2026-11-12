@@ -3,6 +3,7 @@ pub mod ast_record;
 pub mod blockdiag;
 pub mod dendrogram;
 pub mod digraph;
+pub mod grid;
 pub mod layered;
 pub mod layerbands;
 pub mod mermaid_class;
@@ -120,6 +121,7 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
         }
         "layerbands" => Some(Box::new(layerbands::LayerBands)),
         "layered" | "dag" => Some(Box::new(layered::LayeredGenerator)),
+        "grid" | "block" | "network_bus" => Some(Box::new(grid::GridGenerator)),
         "mermaid" | "mermaid_flowchart" | "mermaid_graph" => {
             Some(Box::new(mermaid_flowchart::MermaidFlowchart))
         }

@@ -239,13 +239,16 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
        define operator <> {
          type: bidirectional
          style: dashed
-         arrowhead: dude(width=12, height=12, rotation=0)
+         arrowhead(width=12, height=12, rotation=0): dude()
          action: start-sequence-block
        }
 
        client <> server; "mTLS handshake with dude arrowheads"
        ```
-     - **Arrowhead Dimension Decoupling**: The arrowhead definition strictly controls the terminal marker size (`markerWidth`, `markerHeight`) and rotation (`orient="auto"` or degrees), completely decoupled from the original standalone node template's default dimensions.
+     - **Clean Responsibility Separation**:
+       - `arrowhead(width=12, height=12, rotation=0)` defines the **viewport / terminal frame container** (marker size, rotation, offset) governed by the host edge layout.
+       - `: dude(...)` defines the **shape content filler** (the vector graphics template being projected into that frame, receiving any template-specific arguments).
+       - Decouples terminal frame constraints from template internal parameters completely.
   4. **Aspect-Oriented Compilation (Two-Pass Type Environment)**:
      - **Pass 1 (Pre-Scan & Macro Expansion)**: Gathers all `define` blocks and `include` directives to construct the document's dynamic `TypeRegistry` (shapes, operators, aliases).
      - **Pass 2 (AST Construction)**: Parses the topology using the populated `TypeRegistry`, eliminating grammar ambiguities while supporting arbitrary user extensions.

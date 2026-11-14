@@ -23,8 +23,10 @@ ACTIVE ROADMAP & CHAT TASKS
       * Native SVG renderer becomes a universal template-instantiating engine rather than a static geometry switchboard.
     - [ ] Custom Operator Extensions & Shape-as-Arrowhead (`define operator <op> { ... }`):
       * Strongly-typed enum attributes in grammar (unquoted keywords: `type: bidirectional`, `style: dashed`, NOT loose strings).
-      * Polymorphic Shape Arrowheads (`arrowhead: <shape>`): any defined shape (e.g. `arrowhead: dude` or `arrowhead: auto(w=12, h=12, rotation=45)`) can be instantiated directly as an edge terminal / SVG `<marker>`!
-      * Arrowhead context overrides sizing and orientation independently of the original shape definition.
+      * Clean Responsibility Separation: `arrowhead(width=12, height=12, rotation=0): dude(param1=val)`
+        - Container/viewport properties (`width`, `height`, `rotation`, `offset`) belong to `arrowhead(...)`.
+        - Content/template filler and shape-internal arguments belong to `: dude(...)`.
+      * Polymorphic Shape Arrowheads: any defined shape template can be projected into an edge terminal / SVG `<marker>`.
       * Edge semantic actions (e.g. `action: start-sequence-block`).
     - [x] Two-Pass Parsing / Type-Environment Compilation (Part A):
       * Two-stage resolution: Pass 1 collects all `define` blocks to populate the dynamic `TypeRegistry` (shapes).

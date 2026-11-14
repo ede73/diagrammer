@@ -18,6 +18,7 @@ This document describes the `diagrammer` repository layout, key entry points, an
   - `make clean`
 - Start the browser/web server:
   - `./diagrammer serve [port]` (defaults to 8000)
+  - `scripts/open_browser.sh [port]` (automates opening the UI directly in Antigravity IDE's Simple Browser pane)
 - Run native Rust CLI parse/generate:
   - `./diagrammer [VISUALIZER] [INPUT_FILE]` (or piped via stdin: `echo 'a>b' | ./diagrammer [VISUALIZER]`)
 - Run native Rust CLI visualization to output image:

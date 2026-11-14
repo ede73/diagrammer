@@ -549,6 +549,62 @@ pub struct ParsingContext {
     pub variables: HashMap<String, String>,
 }
 
+/// Geometry primitive representation inside a user-defined node shape
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GeometryPrimitive {
+    pub kind: String,
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    pub attributes: HashMap<String, String>,
+}
+
+/// Body of a user-defined node shape template
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "type", content = "content")]
+pub enum NodeShapeBody {
+    Svg(String),
+    Primitives(Vec<GeometryPrimitive>),
+}
+
+/// User-defined node shape template (`define <name>(width=W, height=H) { ... }`)
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct NodeShapeTemplate {
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub width: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub height: Option<f64>,
+    pub body: NodeShapeBody,
+}
+
+/// Registry of user-defined types (shapes, templates)
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct TypeRegistry {
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    pub shapes: HashMap<String, NodeShapeTemplate>,
+}
+
+impl TypeRegistry {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.shapes.is_empty()
+    }
+
+    pub fn insert_shape(&mut self, template: NodeShapeTemplate) {
+        self.shapes.insert(template.name.clone(), template);
+    }
+
+    pub fn get_shape(&self, name: &str) -> Option<&NodeShapeTemplate> {
+        self.shapes.get(name)
+    }
+
+    pub fn has_shape(&self, name: &str) -> bool {
+        self.shapes.contains_key(name)
+    }
+}
+
 /// Top-level AST Canvas representation
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GraphCanvas {
@@ -575,6 +631,8 @@ pub struct GraphCanvas {
     pub layout: Option<LayoutConfig>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub includes: Vec<String>,
+    #[serde(default, skip_serializing_if = "TypeRegistry::is_empty")]
+    pub type_registry: TypeRegistry,
     #[serde(rename = "parsingContext", skip_serializing_if = "Option::is_none")]
     pub parsing_context: Option<ParsingContext>,
 }
@@ -595,6 +653,7 @@ impl Default for GraphCanvas {
             theme: None,
             layout: None,
             includes: Vec::new(),
+            type_registry: TypeRegistry::default(),
             parsing_context: None,
         }
     }

@@ -58,6 +58,7 @@ fn test_layered_dag_engine_renders_fixtures() {
         "two_linked_clusters.txt",
         "ast.txt",
         "arrow_types.txt",
+        "dynamic_shapes.txt",
     ];
 
     for name in &fixtures {
@@ -271,5 +272,114 @@ fn test_native_node_shapes_styles_and_icons() {
             "{} SVG must embed modern web icons from nodes.txt",
             engine_name
         );
+    }
+}
+
+#[test]
+fn test_dynamic_node_type_definitions() {
+    let input = r##"
+define dude(width=80, height=60) {
+  <svg viewBox="0 0 80 60">
+    <circle cx="40" cy="22" r="14" fill="#38bdf8" />
+    <path d="M 16 52 C 20 34, 60 34, 64 52" stroke="#38bdf8" stroke-width="3" fill="none" />
+  </svg>
+}
+
+define auto(width=60, height=32) {
+  rectangle(x=0, y=8, w=60, h=18, rx=4)
+  polygon(12,8 20,0 42,0 50,8)
+  circle(cx=15, cy=26, r=6)
+  circle(cx=45, cy=26, r=6)
+}
+
+dude Alice > dude Bob; "Calls auto"
+auto Taxi > auto Bus
+Alice > Taxi; "Takes ride"
+"##;
+
+    let canvas = AstBuilder::new().build(input).expect("Failed to build AST for dynamic shapes");
+
+    // 1. Verify AST TypeRegistry
+    assert!(canvas.type_registry.has_shape("dude"), "TypeRegistry must contain 'dude'");
+    assert!(canvas.type_registry.has_shape("auto"), "TypeRegistry must contain 'auto'");
+
+    let dude_tpl = canvas.type_registry.get_shape("dude").unwrap();
+    assert_eq!(dude_tpl.width, Some(80.0));
+    assert_eq!(dude_tpl.height, Some(60.0));
+    match &dude_tpl.body {
+        diagrammer_core::ast::NodeShapeBody::Svg(s) => {
+            assert!(s.contains("viewBox=\"0 0 80 60\""));
+            assert!(s.contains("fill=\"#38bdf8\""));
+        }
+        _ => panic!("Expected SVG body for dude"),
+    }
+
+    let auto_tpl = canvas.type_registry.get_shape("auto").unwrap();
+    assert_eq!(auto_tpl.width, Some(60.0));
+    assert_eq!(auto_tpl.height, Some(32.0));
+    match &auto_tpl.body {
+        diagrammer_core::ast::NodeShapeBody::Primitives(prims) => {
+            assert_eq!(prims.len(), 4);
+            assert_eq!(prims[0].kind, "rectangle");
+            assert_eq!(prims[1].kind, "polygon");
+            assert_eq!(prims[1].attributes.get("points").map(|s| s.as_str()), Some("12,8 20,0 42,0 50,8"));
+            assert_eq!(prims[2].kind, "circle");
+            assert_eq!(prims[3].kind, "circle");
+        }
+        _ => panic!("Expected Primitives body for auto"),
+    }
+
+    // 2. Verify vertex shape resolution
+    let vertices = canvas.get_flattened_vertices();
+    let alice = vertices.iter().find(|v| v.get_name() == "Alice").expect("Alice node exists");
+    assert_eq!(alice.get_shape(), Some("dude"));
+
+    let bob = vertices.iter().find(|v| v.get_name() == "Bob").expect("Bob node exists");
+    assert_eq!(bob.get_shape(), Some("dude"));
+
+    let taxi = vertices.iter().find(|v| v.get_name() == "Taxi").expect("Taxi node exists");
+    assert_eq!(taxi.get_shape(), Some("auto"));
+
+    let bus = vertices.iter().find(|v| v.get_name() == "Bus").expect("Bus node exists");
+    assert_eq!(bus.get_shape(), Some("auto"));
+
+    // 3. Verify native SVG rendering across all native engines
+    let engines = ["layered", "force", "tree", "grid"];
+    for engine_name in &engines {
+        let generator = make_generator(engine_name)
+            .unwrap_or_else(|| panic!("Generator {} must exist", engine_name));
+        let svg = generator.generate(&canvas);
+
+        assert!(svg.starts_with("<svg"), "{} SVG must start with <svg", engine_name);
+        assert!(svg.contains("</svg>"), "{} SVG must close with </svg>", engine_name);
+        assert!(!svg.contains("NaN"), "{} SVG must not contain NaN", engine_name);
+
+        // Verify custom SVG template injection
+        assert!(
+            svg.contains("0 0 80 60"),
+            "{} SVG must contain dude's viewBox (0 0 80 60)",
+            engine_name
+        );
+        assert!(
+            svg.contains("fill=\"#38bdf8\""),
+            "{} SVG must contain dude's SVG fill color #38bdf8",
+            engine_name
+        );
+
+        // Verify geometry primitives
+        assert!(
+            svg.contains("<polygon points=\"12,8 20,0 42,0 50,8\""),
+            "{} SVG must contain auto's polygon points",
+            engine_name
+        );
+        assert!(
+            svg.contains("<circle cx=\"15\" cy=\"26\" r=\"6\""),
+            "{} SVG must contain auto's wheel circle",
+            engine_name
+        );
+
+        // Verify labels
+        assert!(svg.contains("Alice"), "{} SVG must render label Alice", engine_name);
+        assert!(svg.contains("Taxi"), "{} SVG must render label Taxi", engine_name);
     }
 }

@@ -10,7 +10,7 @@ impl LayeredStyler for UmlStyler {
         "uml"
     }
 
-    fn render_node(&self, node: &LayeredNode, default_node_fill: &str, out: &mut String) {
+    fn render_node(&self, node: &LayeredNode, default_node_fill: &str, _custom_shapes: Option<&crate::ast::TypeRegistry>, out: &mut String) {
         let node_color = node.color.as_deref().unwrap_or(default_node_fill);
         let text_color = node.textcolor.as_deref().unwrap_or("#ffffff");
 

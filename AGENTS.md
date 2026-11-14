@@ -19,6 +19,7 @@ This document describes the `diagrammer` repository layout, key entry points, an
 - Start the browser/web server:
   - `./diagrammer serve [port]` (defaults to 8000)
   - `scripts/open_browser.sh [port]` (automates opening the UI directly in Antigravity IDE's Simple Browser pane)
+  - **IDE Internal Webview Hotkey**: `Cmd + Option + B` opens `http://localhost:8000/index.html` directly inside Antigravity IDE (configured via `~/Library/Application Support/Antigravity IDE/User/keybindings.json`).
 - Run native Rust CLI parse/generate:
   - `./diagrammer [VISUALIZER] [INPUT_FILE]` (or piped via stdin: `echo 'a>b' | ./diagrammer [VISUALIZER]`)
 - Run native Rust CLI visualization to output image:

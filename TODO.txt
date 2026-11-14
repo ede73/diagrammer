@@ -11,12 +11,13 @@ ACTIVE ROADMAP & CHAT TASKS
     - [x] Verify against `tests/test_inputs/nodes.txt` across `layered`, `force`, `tree`, and `grid`.
 
 [ ] Dynamic & Aspect-Oriented Meta-Graph Language (User-Defined Node Types, Operators & SVG Injection):
-    - [x] Grammar & AST: Add `define <type_name> { ... }` block to Pest PEG grammar (`diagrammer.pest`) and `GraphCanvas` model:
+    - [x] Part A: User-Defined Node Types (`define <type_name> { ... }`) [Landed in PR #82]:
       * Raw SVG template injection: `define dude(width=80, height=60) { <svg>...</svg> }` allowing direct vector node skinning without Rust recompilation.
       * Geometry primitives DSL: `define auto(width=60, height=32) { rectangle(...) polygon(...) circle(...) }` (Logo/CSS-style simplified geometry).
       * Dynamic instantiation syntax: `<custom_type> <node_name>` (e.g. `dude Alice > dude Bob`, `auto Taxi > auto Bus`).
       * Two-pass type environment scanning: Pass 1 pre-scans all `define` blocks into `canvas.type_registry`; Pass 2 resolves custom types on vertices while preserving non-type identifiers.
       * Cross-engine vector rendering: `layered`, `force`, `tree`, and `grid` instantiate custom SVG templates and geometry primitives with viewBox scaling, node colors, and stroke styles.
+      * Live in-browser verification in Web UI (Simple Browser / Jetski Preview via `Cmd + Option + B`).
     - [ ] Dynamic asset binding: `define dude { image = "https://.../a.png" }` or `file://...` freeing image references from local disk constraints.
     - [ ] Self-Hosting Node Catalog (Standard Prelude Architecture):
       * Move the hardcoded 29 shapes out of Rust engine conditionals into a language prelude (`include "std/shapes.txt"` or embedded built-in prelude) defined in the language itself.
@@ -28,9 +29,6 @@ ACTIVE ROADMAP & CHAT TASKS
         - Content/template filler and shape-internal arguments belong to `: dude(...)`.
       * Polymorphic Shape Arrowheads: any defined shape template can be projected into an edge terminal / SVG `<marker>`.
       * Edge semantic actions (e.g. `action: start-sequence-block`).
-    - [x] Two-Pass Parsing / Type-Environment Compilation (Part A):
-      * Two-stage resolution: Pass 1 collects all `define` blocks to populate the dynamic `TypeRegistry` (shapes).
-      * Pass 2 parses graph statements using the active type registry, preventing syntax ambiguity while enabling dynamic node types.
 
 [x] Separate Generator vs Visualizer into dedicated dual dropdowns in Web UI (e.g. Graphviz -> dot, fdp, neato, osage, twopi, sfdp; D3 -> Reingold, Dendrogram, CirclePacked, Sankey) [Landed]
 [x] First-party native Rust Sequence Layout Engine prototype in crates/diagrammer-core/src/layout/sequence.rs [Landed in #58]

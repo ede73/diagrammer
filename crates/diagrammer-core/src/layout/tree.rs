@@ -6,6 +6,9 @@ use std::collections::{HashMap, HashSet, VecDeque};
 pub struct TreeNode {
     pub id: String,
     pub label: String,
+    pub shape: String,
+    pub style: Option<String>,
+    pub image: Option<String>,
     pub x: f64,
     pub y: f64,
     pub depth: usize,
@@ -51,6 +54,9 @@ impl TreeGraph {
         let mut node_labels: HashMap<String, String> = HashMap::new();
         let mut node_colors: HashMap<String, Option<String>> = HashMap::new();
         let mut node_textcolors: HashMap<String, Option<String>> = HashMap::new();
+        let mut node_shapes: HashMap<String, String> = HashMap::new();
+        let mut node_styles: HashMap<String, String> = HashMap::new();
+        let mut node_images: HashMap<String, String> = HashMap::new();
 
         // 1. Collect vertices (both standalone and inside groups)
         for obj in canvas.get_flattened_vertices() {
@@ -65,6 +71,15 @@ impl TreeGraph {
             }
             if let Some(tc) = obj.get_textcolor() {
                 node_textcolors.insert(name.clone(), Some(tc.to_string()));
+            }
+            if let Some(sh) = obj.get_shape() {
+                node_shapes.insert(name.clone(), sh.to_string());
+            }
+            if let Some(st) = obj.get_style() {
+                node_styles.insert(name.clone(), st.to_string());
+            }
+            if let Some(img) = obj.get_image() {
+                node_images.insert(name.clone(), img.to_string());
             }
         }
 
@@ -233,14 +248,32 @@ impl TreeGraph {
                 let d = depths.get(id).copied().unwrap_or(0);
                 let x = computed_x.get(id).copied().unwrap_or(margin);
                 let y = margin + (d as f64) * level_h;
-                let w = (lbl.len() as f64 * 8.0 + 28.0).max(80.0);
-                let h = 36.0;
+                let shape = node_shapes.get(id).cloned().unwrap_or_else(|| "rounded".to_string());
+                let style = node_styles.get(id).cloned();
+                let image = node_images.get(id).cloned();
+                let mut w = (lbl.len() as f64 * 8.0 + 28.0).max(80.0);
+                let mut h = 36.0;
+
+                if shape == "circle" || shape == "doublecircle" {
+                    let sz = w.max(46.0);
+                    w = sz;
+                    h = sz;
+                } else if shape == "diamond" || shape == "condition" {
+                    w = (w * 1.15).max(64.0);
+                    h = 44.0;
+                } else if image.is_some() {
+                    h = 52.0;
+                    w = w.max(68.0);
+                }
 
                 nodes.insert(
                     id.clone(),
                     TreeNode {
                         id: id.clone(),
                         label: lbl.clone(),
+                        shape,
+                        style,
+                        image,
                         x,
                         y,
                         depth: d,
@@ -352,14 +385,29 @@ impl TreeGraph {
                 let radius = (d as f64) * radius_step;
                 let x = center_x + radius * angle.cos();
                 let y = center_y + radius * angle.sin();
-                let w = (lbl.len() as f64 * 7.5 + 24.0).max(64.0);
-                let h = 30.0;
+                let shape = node_shapes.get(id).cloned().unwrap_or_else(|| "rounded".to_string());
+                let style = node_styles.get(id).cloned();
+                let image = node_images.get(id).cloned();
+                let mut w = (lbl.len() as f64 * 7.5 + 24.0).max(64.0);
+                let mut h = 30.0;
+
+                if shape == "circle" || shape == "doublecircle" {
+                    let sz = w.max(40.0);
+                    w = sz;
+                    h = sz;
+                } else if image.is_some() {
+                    h = 48.0;
+                    w = w.max(56.0);
+                }
 
                 nodes.insert(
                     id.clone(),
                     TreeNode {
                         id: id.clone(),
                         label: lbl.clone(),
+                        shape,
+                        style,
+                        image,
                         x,
                         y,
                         depth: d,
@@ -477,31 +525,25 @@ impl TreeGraph {
             let fill = node.color.as_deref().unwrap_or(default_fill);
             let text_fill = node.textcolor.as_deref().unwrap_or("#ffffff");
 
-            svg.push_str(&format!(
-                r##"    <g class="dt-node" filter="url(#dt-shadow)">
-      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" class="dt-node-box" fill="{}" stroke="#475569" />
-      <text x="{:.1}" y="{:.1}" class="dt-node-label" fill="{}">{}</text>
-    </g>
-"##,
+            crate::layout::shapes::render_svg_node(
+                &node.id,
+                &node.label,
+                &node.shape,
+                node.style.as_deref(),
+                node.image.as_deref(),
                 node.x - node.width / 2.0,
                 node.y - node.height / 2.0,
                 node.width,
                 node.height,
                 fill,
-                node.x,
-                node.y,
                 text_fill,
-                escape_xml(&node.label)
-            ));
+                "#475569",
+                Some("url(#dt-shadow)"),
+                &mut svg,
+            );
         }
 
         svg.push_str("  </g>\n</svg>\n");
         svg
     }
-}
-
-fn escape_xml(s: &str) -> String {
-    s.replace('&', "&amp;")
-        .replace('<', "&lt;")
-        .replace('>', "&gt;")
 }

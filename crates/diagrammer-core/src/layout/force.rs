@@ -8,6 +8,8 @@ pub struct ForceNode {
     pub label: String,
     pub group: Option<String>,
     pub shape: String,
+    pub style: Option<String>,
+    pub image: Option<String>,
     pub x: f64,
     pub y: f64,
     pub vx: f64,
@@ -50,6 +52,8 @@ impl ForceGraph {
         let mut node_colors: HashMap<String, Option<String>> = HashMap::new();
         let mut node_textcolors: HashMap<String, Option<String>> = HashMap::new();
         let mut node_shapes: HashMap<String, String> = HashMap::new();
+        let mut node_styles: HashMap<String, String> = HashMap::new();
+        let mut node_images: HashMap<String, String> = HashMap::new();
         let mut node_groups: HashMap<String, String> = HashMap::new();
 
         // 1. Collect group memberships & container colors
@@ -94,6 +98,12 @@ impl ForceGraph {
             if let Some(sh) = obj.get_shape() {
                 node_shapes.insert(name.clone(), sh.to_string());
             }
+            if let Some(st) = obj.get_style() {
+                node_styles.insert(name.clone(), st.to_string());
+            }
+            if let Some(img) = obj.get_image() {
+                node_images.insert(name.clone(), img.to_string());
+            }
         }
 
         // 3. Collect ALL edges via canvas.get_edges()
@@ -134,8 +144,22 @@ impl ForceGraph {
             let y = center_y + init_radius * angle.sin();
             let lbl = node_labels.get(id).cloned().unwrap_or_else(|| id.clone());
             let shape = node_shapes.get(id).cloned().unwrap_or_else(|| "rounded".to_string());
-            let w = ((lbl.len() as f64) * 8.5 + 32.0).max(76.0);
-            let h = 38.0;
+            let style = node_styles.get(id).cloned();
+            let image = node_images.get(id).cloned();
+            let mut w = ((lbl.len() as f64) * 8.5 + 32.0).max(76.0);
+            let mut h = 38.0;
+
+            if shape == "circle" || shape == "doublecircle" {
+                let sz = w.max(48.0);
+                w = sz;
+                h = sz;
+            } else if shape == "diamond" || shape == "condition" {
+                w = (w * 1.15).max(64.0);
+                h = 46.0;
+            } else if image.is_some() {
+                h = 54.0;
+                w = w.max(68.0);
+            }
 
             nodes.insert(
                 id.clone(),
@@ -144,6 +168,8 @@ impl ForceGraph {
                     label: lbl,
                     group: node_groups.get(id).cloned(),
                     shape,
+                    style,
+                    image,
                     x,
                     y,
                     vx: 0.0,
@@ -413,25 +439,25 @@ impl ForceGraph {
         for node in self.nodes.values() {
             let fill = node.color.as_deref().unwrap_or(default_node_fill);
             let text_fill = node.textcolor.as_deref().unwrap_or("#ffffff");
-            let is_real_group = node.group.as_ref().map(|g| g.parse::<usize>().is_err() && !g.is_empty() && g != &node.label).unwrap_or(false);
-            let label_y = if is_real_group { node.y - 3.0 } else { node.y };
 
-            svg.push_str(&format!(
-                r##"    <g class="dforce-node" filter="url(#dforce-shadow)">
-      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" class="dforce-node-box" fill="{}" />
-      <text x="{:.1}" y="{:.1}" class="dforce-node-label" fill="{}">{}</text>
-"##,
+            crate::layout::shapes::render_svg_node(
+                &node.id,
+                &node.label,
+                &node.shape,
+                node.style.as_deref(),
+                node.image.as_deref(),
                 node.x - node.width / 2.0,
                 node.y - node.height / 2.0,
                 node.width,
                 node.height,
                 fill,
-                node.x,
-                label_y,
                 text_fill,
-                escape_xml(&node.label)
-            ));
+                "#475569",
+                Some("url(#dforce-shadow)"),
+                &mut svg,
+            );
 
+            let is_real_group = node.group.as_ref().map(|g| g.parse::<usize>().is_err() && !g.is_empty() && g != &node.label).unwrap_or(false);
             if is_real_group {
                 if let Some(grp) = &node.group {
                     svg.push_str(&format!(
@@ -443,8 +469,6 @@ impl ForceGraph {
                     ));
                 }
             }
-
-            svg.push_str("    </g>\n");
         }
 
         svg.push_str("  </g>\n</svg>\n");

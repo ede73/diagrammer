@@ -216,3 +216,60 @@ fn test_cli_rendering_verification() {
         }
     }
 }
+
+#[test]
+fn test_native_node_shapes_styles_and_icons() {
+    let engines = ["layered", "force", "tree", "grid"];
+    let input_path = if Path::new("tests/test_inputs/nodes.txt").exists() {
+        "tests/test_inputs/nodes.txt"
+    } else if Path::new("../../tests/test_inputs/nodes.txt").exists() {
+        "../../tests/test_inputs/nodes.txt"
+    } else {
+        panic!("tests/test_inputs/nodes.txt not found");
+    };
+
+    let input_code = fs::read_to_string(input_path).expect("Failed to read nodes.txt");
+    let canvas = AstBuilder::new().build(&input_code).expect("Failed to parse nodes.txt");
+
+    for engine_name in &engines {
+        let generator = make_generator(engine_name)
+            .unwrap_or_else(|| panic!("Failed to create generator for {}", engine_name));
+        let svg = generator.generate(&canvas);
+
+        assert!(svg.starts_with("<svg"), "{} SVG must start with <svg", engine_name);
+        assert!(svg.contains("</svg>"), "{} SVG must close with </svg>", engine_name);
+        assert!(!svg.contains("NaN"), "{} SVG must not contain NaN coordinates", engine_name);
+
+        // Assert shape rendering
+        assert!(
+            svg.contains("<circle"),
+            "{} SVG must contain circle element for circle shapes in nodes.txt",
+            engine_name
+        );
+
+        // Assert stroke styles
+        assert!(
+            svg.contains("stroke-dasharray=\"6,4\""),
+            "{} SVG must contain dashed stroke style (6,4) from nodes.txt",
+            engine_name
+        );
+        assert!(
+            svg.contains("stroke-dasharray=\"2,3\""),
+            "{} SVG must contain dotted stroke style (2,3) from nodes.txt",
+            engine_name
+        );
+        assert!(
+            svg.contains("stroke-width=\"3.0\"") || svg.contains("font-weight: 700"),
+            "{} SVG must contain bold stroke style (stroke-width 3.0) or font-weight 700 from nodes.txt. Svg snippet: {}",
+            engine_name,
+            &svg[..svg.len().min(500)]
+        );
+
+        // Assert icon embedding
+        assert!(
+            svg.contains("<image href=\"web/icons/"),
+            "{} SVG must embed modern web icons from nodes.txt",
+            engine_name
+        );
+    }
+}

@@ -14,18 +14,22 @@ impl LayeredStyler for DefaultStyler {
         let node_color = node.color.as_deref().unwrap_or(default_node_fill);
         let text_color = node.textcolor.as_deref().unwrap_or("#ffffff");
 
-        out.push_str(&format!(
-            r##"    <g class="dl-node" id="node-{}" filter="url(#dl-shadow)">
-      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" rx="8.0" ry="8.0" class="dl-node-box" fill="{}" stroke="#334155" />
-      <text x="{:.1}" y="{:.1}" class="dl-node-label" fill="{}">{}</text>
-    </g>
-"##,
-            escape_xml(&node.id),
-            node.x, node.y, node.width, node.height,
+        crate::layout::shapes::render_svg_node(
+            &node.id,
+            &node.label,
+            &node.shape,
+            node.style.as_deref(),
+            node.image.as_deref(),
+            node.x,
+            node.y,
+            node.width,
+            node.height,
             node_color,
-            node.x + node.width / 2.0, node.y + node.height / 2.0,
-            text_color, escape_xml(&node.label)
-        ));
+            text_color,
+            "#334155",
+            Some("url(#dl-shadow)"),
+            out,
+        );
     }
 
     fn render_edge_label(&self, edge: &LayeredEdge, out: &mut String) {

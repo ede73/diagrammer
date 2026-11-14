@@ -6,6 +6,9 @@ use std::collections::HashMap;
 pub struct GridNode {
     pub id: String,
     pub label: String,
+    pub shape: String,
+    pub style: Option<String>,
+    pub image: Option<String>,
     pub x: f64,
     pub y: f64,
     pub col: usize,
@@ -67,6 +70,9 @@ impl GridGraph {
         let mut node_labels: HashMap<String, String> = HashMap::new();
         let mut node_colors: HashMap<String, Option<String>> = HashMap::new();
         let mut node_textcolors: HashMap<String, Option<String>> = HashMap::new();
+        let mut node_shapes: HashMap<String, String> = HashMap::new();
+        let mut node_styles: HashMap<String, String> = HashMap::new();
+        let mut node_images: HashMap<String, String> = HashMap::new();
 
         // 1. Identify network buses (groups) and member devices
         for obj in canvas.get_objects(false) {
@@ -85,17 +91,36 @@ impl GridGraph {
                             node_labels.insert(name.clone(), lbl);
                             node_colors.insert(name.clone(), inner.get_color().map(|s| s.to_string()));
                             node_textcolors.insert(name.clone(), inner.get_textcolor().map(|s| s.to_string()));
+                            if let Some(sh) = inner.get_shape() {
+                                node_shapes.insert(name.clone(), sh.to_string());
+                            }
+                            if let Some(st) = inner.get_style() {
+                                node_styles.insert(name.clone(), st.to_string());
+                            }
+                            if let Some(img) = inner.get_image() {
+                                node_images.insert(name.clone(), img.to_string());
+                            }
                             members.push(name);
                         }
                     }
                     bus_members.insert(grp.name.clone(), members);
                 }
-                GraphObject::Vertex(v) => {
-                    let lbl = v.label.clone().unwrap_or_else(|| v.name.clone());
-                    node_labels.insert(v.name.clone(), lbl);
-                    node_colors.insert(v.name.clone(), v.color.clone());
-                    node_textcolors.insert(v.name.clone(), v.textcolor.clone());
-                    standalone_nodes.push(v.name.clone());
+                obj if obj.is_vertex() => {
+                    let name = obj.get_name().to_string();
+                    let lbl = obj.get_label().unwrap_or(&name).to_string();
+                    node_labels.insert(name.clone(), lbl);
+                    node_colors.insert(name.clone(), obj.get_color().map(|s| s.to_string()));
+                    node_textcolors.insert(name.clone(), obj.get_textcolor().map(|s| s.to_string()));
+                    if let Some(sh) = obj.get_shape() {
+                        node_shapes.insert(name.clone(), sh.to_string());
+                    }
+                    if let Some(st) = obj.get_style() {
+                        node_styles.insert(name.clone(), st.to_string());
+                    }
+                    if let Some(img) = obj.get_image() {
+                        node_images.insert(name.clone(), img.to_string());
+                    }
+                    standalone_nodes.push(name);
                 }
                 _ => {}
             }
@@ -139,18 +164,33 @@ impl GridGraph {
                 for (col_idx, m_name) in members.iter().enumerate() {
                     let device_x = margin_x + 50.0 + (col_idx as f64) * col_w;
                     let lbl = node_labels.get(m_name).cloned().unwrap_or_else(|| m_name.clone());
+                    let shape = node_shapes.get(m_name).cloned().unwrap_or_else(|| "rounded".to_string());
+                    let style = node_styles.get(m_name).cloned();
+                    let image = node_images.get(m_name).cloned();
+                    let mut w = 100.0;
+                    let mut h = 42.0;
+                    if shape == "circle" || shape == "doublecircle" {
+                        w = 48.0;
+                        h = 48.0;
+                    } else if image.is_some() {
+                        h = 52.0;
+                        w = 70.0;
+                    }
 
                     nodes.insert(
                         m_name.clone(),
                         GridNode {
                             id: m_name.clone(),
                             label: lbl,
+                            shape,
+                            style,
+                            image,
                             x: device_x,
                             y: device_y,
                             col: col_idx,
                             row: 0,
-                            width: 100.0,
-                            height: 42.0,
+                            width: w,
+                            height: h,
                             color: node_colors.get(m_name).cloned().flatten(),
                             textcolor: node_textcolors.get(m_name).cloned().flatten(),
                             network_bus: Some(bus_name.clone()),
@@ -184,18 +224,33 @@ impl GridGraph {
                 let x = margin_x + (col as f64) * (col_w + 20.0);
                 let y = margin_y + (row as f64) * row_h;
                 let lbl = node_labels.get(id).cloned().unwrap_or_else(|| id.clone());
+                let shape = node_shapes.get(id).cloned().unwrap_or_else(|| "rounded".to_string());
+                let style = node_styles.get(id).cloned();
+                let image = node_images.get(id).cloned();
+                let mut w = 110.0;
+                let mut h = 44.0;
+                if shape == "circle" || shape == "doublecircle" {
+                    w = 48.0;
+                    h = 48.0;
+                } else if image.is_some() {
+                    h = 52.0;
+                    w = 70.0;
+                }
 
                 nodes.insert(
                     id.clone(),
                     GridNode {
                         id: id.clone(),
                         label: lbl,
+                        shape,
+                        style,
+                        image,
                         x,
                         y,
                         col,
                         row,
-                        width: 110.0,
-                        height: 44.0,
+                        width: w,
+                        height: h,
                         color: node_colors.get(id).cloned().flatten(),
                         textcolor: node_textcolors.get(id).cloned().flatten(),
                         network_bus: None,
@@ -332,21 +387,22 @@ impl GridGraph {
             let fill = node.color.as_deref().unwrap_or(default_node_fill);
             let text_fill = node.textcolor.as_deref().unwrap_or("#ffffff");
 
-            svg.push_str(&format!(
-                r##"    <g class="dg-node" filter="url(#dg-shadow)">
-      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" class="dg-node-box" fill="{}" />
-      <text x="{:.1}" y="{:.1}" class="dg-node-label" fill="{}">{}</text>
-"##,
+            crate::layout::shapes::render_svg_node(
+                &node.id,
+                &node.label,
+                &node.shape,
+                node.style.as_deref(),
+                node.image.as_deref(),
                 node.x - node.width / 2.0,
                 node.y - node.height / 2.0,
                 node.width,
                 node.height,
                 fill,
-                node.x,
-                node.y - if node.address.is_some() { 6.0 } else { 0.0 },
                 text_fill,
-                escape_xml(&node.label)
-            ));
+                "#475569",
+                Some("url(#dg-shadow)"),
+                &mut svg,
+            );
 
             if let Some(ref ip) = node.address {
                 svg.push_str(&format!(
@@ -355,7 +411,6 @@ impl GridGraph {
                     node.x, node.y + 10.0, escape_xml(ip)
                 ));
             }
-            svg.push_str("    </g>\n");
         }
 
         svg.push_str("  </g>\n</svg>\n");

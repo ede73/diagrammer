@@ -86,6 +86,22 @@ impl AstBuilder {
             format!("Parse error on line {}: {}", line, e)
         })?;
 
+        // Pass 1: Scan for define blocks to register all custom types
+        for pair in pairs.clone() {
+            if pair.as_rule() == Rule::diagram {
+                for inner in pair.into_inner() {
+                    if inner.as_rule() == Rule::statement {
+                        for stmt_child in inner.into_inner() {
+                            if stmt_child.as_rule() == Rule::define_block {
+                                self.process_define_block(stmt_child)?;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Pass 2: Process all statements (including vertices with custom types)
         for pair in pairs {
             if pair.as_rule() == Rule::diagram {
                 for inner in pair.into_inner() {
@@ -641,6 +657,9 @@ impl AstBuilder {
                     }
                 }
             }
+            Rule::define_block => {
+                self.process_define_block(pair)?;
+            }
             Rule::VARIABLE => {
                 self.handle_variable(pair.as_str());
             }
@@ -806,6 +825,85 @@ impl AstBuilder {
         Ok(())
     }
 
+    fn process_define_block(&mut self, pair: Pair<Rule>) -> Result<(), String> {
+        let mut name = String::new();
+        let mut width = None;
+        let mut height = None;
+        let mut raw_svg = None;
+        let mut primitives = Vec::new();
+
+        for p in pair.into_inner() {
+            match p.as_rule() {
+                Rule::define_name => {
+                    name = p.as_str().trim().to_string();
+                }
+                Rule::define_params => {
+                    for param in p.into_inner() {
+                        if param.as_rule() == Rule::define_param {
+                            let mut key = String::new();
+                            let mut val = String::new();
+                            for kv in param.into_inner() {
+                                match kv.as_rule() {
+                                    Rule::define_param_key => key = kv.as_str().trim().to_lowercase(),
+                                    Rule::define_param_val => val = kv.as_str().trim().to_string(),
+                                    _ => {}
+                                }
+                            }
+                            if let Ok(num) = val.parse::<f64>() {
+                                match key.as_str() {
+                                    "w" | "width" => width = Some(num),
+                                    "h" | "height" => height = Some(num),
+                                    _ => {}
+                                }
+                            }
+                        }
+                    }
+                }
+                Rule::define_statement => {
+                    for inner in p.into_inner() {
+                        match inner.as_rule() {
+                            Rule::raw_svg => {
+                                raw_svg = Some(inner.as_str().trim().to_string());
+                            }
+                            Rule::geom_primitive => {
+                                let mut kw = "";
+                                let mut args = "";
+                                for g in inner.into_inner() {
+                                    match g.as_rule() {
+                                        Rule::geom_kw => kw = g.as_str().trim(),
+                                        Rule::geom_args => args = g.as_str().trim(),
+                                        _ => {}
+                                    }
+                                }
+                                primitives.push(parse_geom_primitive(kw, args));
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        if !name.is_empty() {
+            let body = if let Some(svg) = raw_svg {
+                NodeShapeBody::Svg(svg)
+            } else {
+                NodeShapeBody::Primitives(primitives)
+            };
+
+            let template = NodeShapeTemplate {
+                name,
+                width,
+                height,
+                body,
+            };
+            self.canvas.type_registry.insert_shape(template);
+        }
+
+        Ok(())
+    }
+
     fn extract_color_or_var(&mut self, pair: Pair<Rule>) -> Result<String, String> {
         let s = pair.as_str().trim();
         if s.starts_with("$(") {
@@ -907,9 +1005,37 @@ impl AstBuilder {
             Rule::NAME => names.push(pair.as_str().trim().to_string()),
             Rule::vertex_attrs => {
                 for p in pair.into_inner() {
-                    if p.as_rule() == Rule::NAME {
-                        names.push(p.as_str().trim().to_string());
+                    names.extend(self.collect_vertex_names(p));
+                }
+            }
+            Rule::vertex_name_spec => {
+                let mut found_name = None;
+                let mut found_custom_type = None;
+                let mut found_shape = None;
+                for p in pair.into_inner() {
+                    match p.as_rule() {
+                        Rule::NAME => found_name = Some(p.as_str().trim().to_string()),
+                        Rule::custom_type => found_custom_type = Some(p.as_str().trim().to_string()),
+                        Rule::SHAPES => found_shape = Some(p.as_str().trim().to_string()),
+                        _ => {}
                     }
+                }
+                if let Some(ct) = found_custom_type {
+                    if self.canvas.type_registry.has_shape(&ct) {
+                        if let Some(n) = found_name {
+                            names.push(n);
+                        }
+                    } else {
+                        // Not a registered custom shape! Both are vertex names
+                        names.push(ct);
+                        if let Some(n) = found_name {
+                            names.push(n);
+                        }
+                    }
+                } else if let Some(n) = found_name {
+                    names.push(n);
+                } else if let Some(s) = found_shape {
+                    names.push(s);
                 }
             }
             _ => {
@@ -944,16 +1070,18 @@ impl AstBuilder {
                             edge_label = Some(unquoted.to_string());
                         }
                         Rule::vertex_attrs => {
-                            let mut v = self.parse_vertex_attrs(p);
-                            v.edge_label = edge_label.clone();
-                            targets.push(v);
+                            let verts = self.parse_vertex_attrs(p);
+                            for mut v in verts {
+                                v.edge_label = edge_label.clone();
+                                targets.push(v);
+                            }
                         }
                         _ => {}
                     }
                 }
             }
             Rule::vertex_attrs => {
-                targets.push(self.parse_vertex_attrs(pair));
+                targets.extend(self.parse_vertex_attrs(pair));
             }
             _ => {
                 for p in pair.into_inner() {
@@ -964,13 +1092,57 @@ impl AstBuilder {
         targets
     }
 
-    fn parse_vertex_attrs(&mut self, pair: Pair<Rule>) -> ParsedVertex {
+    fn parse_vertex_attrs(&mut self, pair: Pair<Rule>) -> Vec<ParsedVertex> {
         let mut pv = ParsedVertex::default();
+        let mut custom_type_name = None;
+        let mut parsed_name = None;
+
+        self.extract_vertex_attrs_inner(pair, &mut pv, &mut custom_type_name, &mut parsed_name);
+
+        if let Some(ct) = custom_type_name {
+            if self.canvas.type_registry.has_shape(&ct) {
+                pv.shape = Some(ct);
+                vec![pv]
+            } else {
+                let first_v = ParsedVertex {
+                    name: ct,
+                    style: pv.style.clone(),
+                    ..Default::default()
+                };
+                pv.shape = None;
+                vec![first_v, pv]
+            }
+        } else {
+            vec![pv]
+        }
+    }
+
+    fn extract_vertex_attrs_inner(
+        &mut self,
+        pair: Pair<Rule>,
+        pv: &mut ParsedVertex,
+        custom_type_name: &mut Option<String>,
+        parsed_name: &mut Option<String>,
+    ) {
         for p in pair.into_inner() {
             match p.as_rule() {
                 Rule::STYLES => pv.style = Some(p.as_str().trim().to_string()),
-                Rule::SHAPES => pv.shape = Some(p.as_str().trim().to_string()),
-                Rule::NAME => pv.name = p.as_str().trim().to_string(),
+                Rule::SHAPES => {
+                    let s = p.as_str().trim();
+                    if pv.name.is_empty() {
+                        pv.name = s.to_string();
+                    }
+                    pv.shape = Some(s.to_string());
+                }
+                Rule::custom_type => {
+                    let ct = p.as_str().trim().to_string();
+                    *custom_type_name = Some(ct);
+                }
+                Rule::NAME => {
+                    let n = p.as_str().trim().to_string();
+                    pv.name = n.clone();
+                    *parsed_name = Some(n);
+                }
                 Rule::color_or_variable => {
                     if let Ok(c) = self.extract_color_or_var(p) {
                         pv.color = Some(c);
@@ -984,10 +1156,12 @@ impl AstBuilder {
                         .unwrap_or(s);
                     pv.image = Some(unquoted.to_string());
                 }
+                Rule::vertex_name_spec => {
+                    self.extract_vertex_attrs_inner(p, pv, custom_type_name, parsed_name);
+                }
                 _ => {}
             }
         }
-        pv
     }
 
     fn update_vertex_attrs(&mut self, pv: &ParsedVertex) {
@@ -1402,6 +1576,110 @@ impl AstBuilder {
 
         Ok(())
     }
+}
+
+fn parse_geom_primitive(kind_str: &str, raw_args: &str) -> GeometryPrimitive {
+    let kind = kind_str.to_lowercase();
+    let mut attributes = std::collections::HashMap::new();
+    let args_str = raw_args.trim();
+
+    if (kind == "polygon" || kind == "polyline") && !args_str.contains('=') {
+        attributes.insert("points".to_string(), args_str.to_string());
+        return GeometryPrimitive { kind, attributes };
+    } else if kind == "path" && !args_str.contains('=') {
+        let clean_d = args_str.trim().trim_matches('"').trim_matches('\'').to_string();
+        attributes.insert("d".to_string(), clean_d);
+        return GeometryPrimitive { kind, attributes };
+    }
+
+    let mut current_key = String::new();
+    let mut current_val = String::new();
+    let mut in_quotes = false;
+    let mut reading_val = false;
+    let mut positional_points = Vec::new();
+
+    let chars: Vec<char> = args_str.chars().collect();
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        if c == '"' || c == '\'' {
+            in_quotes = !in_quotes;
+            i += 1;
+            continue;
+        }
+
+        if !in_quotes {
+            if c == '=' && !reading_val {
+                reading_val = true;
+                i += 1;
+                continue;
+            } else if c == ',' {
+                if reading_val {
+                    let k = current_key.trim().to_lowercase();
+                    let v = current_val.trim().to_string();
+                    if !k.is_empty() {
+                        attributes.insert(k, v);
+                    }
+                    current_key.clear();
+                    current_val.clear();
+                    reading_val = false;
+                } else if !current_key.trim().is_empty() {
+                    positional_points.push(current_key.trim().to_string());
+                    current_key.clear();
+                }
+                i += 1;
+                continue;
+            } else if c.is_whitespace() && !reading_val {
+                if !current_key.trim().is_empty() {
+                    let mut lookahead = i + 1;
+                    let mut has_eq = false;
+                    while lookahead < chars.len() {
+                        if chars[lookahead] == '=' {
+                            has_eq = true;
+                            break;
+                        } else if !chars[lookahead].is_whitespace() {
+                            break;
+                        }
+                        lookahead += 1;
+                    }
+                    if !has_eq {
+                        positional_points.push(current_key.trim().to_string());
+                        current_key.clear();
+                    }
+                }
+                i += 1;
+                continue;
+            }
+        }
+
+        if reading_val {
+            current_val.push(c);
+        } else {
+            current_key.push(c);
+        }
+        i += 1;
+    }
+
+    if reading_val {
+        let k = current_key.trim().to_lowercase();
+        let v = current_val.trim().to_string();
+        if !k.is_empty() {
+            attributes.insert(k, v);
+        }
+    } else if !current_key.trim().is_empty() {
+        positional_points.push(current_key.trim().to_string());
+    }
+
+    if !positional_points.is_empty() {
+        let joined = positional_points.join(" ");
+        if (kind == "polygon" || kind == "polyline") && !attributes.contains_key("points") {
+            attributes.insert("points".to_string(), joined);
+        } else if kind == "path" && !attributes.contains_key("d") {
+            attributes.insert("d".to_string(), joined);
+        }
+    }
+
+    GeometryPrimitive { kind, attributes }
 }
 
 #[cfg(test)]

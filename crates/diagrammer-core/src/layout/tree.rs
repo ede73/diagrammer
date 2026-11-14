@@ -41,6 +41,7 @@ pub struct TreeGraph {
     pub background: Option<String>,
     pub default_node_color: Option<String>,
     pub default_edge_color: Option<String>,
+    pub type_registry: crate::ast::TypeRegistry,
 }
 
 impl TreeGraph {
@@ -129,6 +130,7 @@ impl TreeGraph {
                 background: canvas.theme.as_ref().and_then(|t| t.background.clone()),
                 default_node_color: canvas.defaults.vertexcolor.clone(),
                 default_edge_color: canvas.defaults.edgecolor.clone(),
+                type_registry: canvas.type_registry.clone(),
             };
         }
 
@@ -254,7 +256,14 @@ impl TreeGraph {
                 let mut w = (lbl.len() as f64 * 8.0 + 28.0).max(80.0);
                 let mut h = 36.0;
 
-                if shape == "circle" || shape == "doublecircle" {
+                if let Some(template) = canvas.type_registry.get_shape(&shape) {
+                    if let Some(tw) = template.width {
+                        w = tw;
+                    }
+                    if let Some(th) = template.height {
+                        h = th;
+                    }
+                } else if shape == "circle" || shape == "doublecircle" {
                     let sz = w.max(46.0);
                     w = sz;
                     h = sz;
@@ -391,7 +400,14 @@ impl TreeGraph {
                 let mut w = (lbl.len() as f64 * 7.5 + 24.0).max(64.0);
                 let mut h = 30.0;
 
-                if shape == "circle" || shape == "doublecircle" {
+                if let Some(template) = canvas.type_registry.get_shape(&shape) {
+                    if let Some(tw) = template.width {
+                        w = tw;
+                    }
+                    if let Some(th) = template.height {
+                        h = th;
+                    }
+                } else if shape == "circle" || shape == "doublecircle" {
                     let sz = w.max(40.0);
                     w = sz;
                     h = sz;
@@ -465,6 +481,7 @@ impl TreeGraph {
             background: canvas.theme.as_ref().and_then(|t| t.background.clone()),
             default_node_color: canvas.defaults.vertexcolor.clone(),
             default_edge_color: canvas.defaults.edgecolor.clone(),
+            type_registry: canvas.type_registry.clone(),
         }
     }
 
@@ -539,6 +556,7 @@ impl TreeGraph {
                 text_fill,
                 "#475569",
                 Some("url(#dt-shadow)"),
+                Some(&self.type_registry),
                 &mut svg,
             );
         }

@@ -10,7 +10,7 @@ impl LayeredStyler for DefaultStyler {
         "default"
     }
 
-    fn render_node(&self, node: &LayeredNode, default_node_fill: &str, out: &mut String) {
+    fn render_node(&self, node: &LayeredNode, default_node_fill: &str, custom_shapes: Option<&crate::ast::TypeRegistry>, out: &mut String) {
         let node_color = node.color.as_deref().unwrap_or(default_node_fill);
         let text_color = node.textcolor.as_deref().unwrap_or("#ffffff");
 
@@ -28,6 +28,7 @@ impl LayeredStyler for DefaultStyler {
             text_color,
             "#334155",
             Some("url(#dl-shadow)"),
+            custom_shapes,
             out,
         );
     }

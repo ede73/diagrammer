@@ -95,13 +95,42 @@ include_target = { INLINE_STRING | include_path }
 include_block = { INCLUDE_KW ~ "{" ~ (include_target ~ ";"?)* ~ "}" }
 include_stmt = { INCLUDE_KW ~ include_target }
 
+DEFINE_KW = @{ ^"define" ~ !(ASCII_ALPHANUMERIC | "_") }
+define_name = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+define_param_key = @{ ASCII_ALPHA+ }
+define_param_val = @{ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
+define_param = { define_param_key ~ "=" ~ define_param_val }
+define_params = { "(" ~ (define_param ~ ("," ~ define_param)*)? ~ ","? ~ ")" }
+
+geom_kw = @{
+    (^"rectangle" | ^"rect" | ^"circle" | ^"ellipse" | ^"polygon" | ^"polyline" | ^"path" | ^"line")
+    ~ !(ASCII_ALPHANUMERIC | "_")
+}
+geom_args = @{ (!")" ~ ANY)* }
+geom_primitive = { geom_kw ~ "(" ~ geom_args ~ ")" }
+
+raw_svg = ${ ^"<svg" ~ (!^"</svg>" ~ ANY)* ~ ^"</svg>" }
+
+define_statement = { (raw_svg | geom_primitive) ~ ";"? }
+define_block = { DEFINE_KW ~ define_name ~ define_params? ~ "{" ~ define_statement* ~ "}" }
+
+custom_type = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+
 SAME_LINE_SPACE = _{ " " | "\t" }
 GROUP_KW = @{ ^"group" ~ !(ASCII_ALPHANUMERIC | "_") }
 group_start = ${ (GROUP_KW | "{") ~ SAME_LINE_SPACE* ~ NAME? ~ SAME_LINE_SPACE* ~ color_or_variable? ~ SAME_LINE_SPACE* ~ LABEL? }
 group_end = { GROUP_KW ~ ^"end" | "}" }
 
+vertex_name_spec = ${
+    STYLES ~ SAME_LINE_SPACE+ ~ (SHAPES | custom_type) ~ SAME_LINE_SPACE+ ~ NAME
+  | STYLES ~ SAME_LINE_SPACE+ ~ NAME
+  | (SHAPES | custom_type) ~ SAME_LINE_SPACE+ ~ NAME
+  | SHAPES
+  | NAME
+}
+
 vertex_attrs = {
-    STYLES? ~ SHAPES? ~ NAME
+    vertex_name_spec
     ~ (COMPASS ~ color_or_variable? | color_or_variable ~ COMPASS?)?
     ~ IMAGE?
 }
@@ -148,6 +177,7 @@ statement = {
   | layout_block
   | include_block
   | include_stmt
+  | define_block
   | group_start
   | group_end
   | VARIABLE

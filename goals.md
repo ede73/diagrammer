@@ -228,16 +228,24 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
        define database { ... }
        ```
      - The Rust layout engine shrinks to a clean, universal template-instantiating SVG engine.
-  3. **Custom Operator Redefinitions (`define operator <op> { ... }`)**:
-     - Empower diagrams to declare novel edge syntax and semantic behaviors:
+  3. **Custom Operator Redefinitions & Shape-as-Arrowhead (`define operator <op> { ... }`)**:
+     - Strongly-typed enum attributes in grammar (unquoted keywords: `type: bidirectional`, `style: dashed`, NOT loose quoted strings).
+     - **Polymorphic Shape Arrowheads (`arrowhead: <shape>`)**: Any user-defined shape (e.g. `dude`, `auto`) can serve as an edge arrowhead marker:
        ```diagrammer
-       define operator <> {
-         type: "bidirectional-handshake"
-         style: "dashed"
-         action: "start-sequence-block"
+       define dude(width=80, height=60) {
+         circle(cx=40, cy=20, r=15)
        }
-       client <> server
+
+       define operator <> {
+         type: bidirectional
+         style: dashed
+         arrowhead: dude(width=12, height=12, rotation=0)
+         action: start-sequence-block
+       }
+
+       client <> server; "mTLS handshake with dude arrowheads"
        ```
+     - **Arrowhead Dimension Decoupling**: The arrowhead definition strictly controls the terminal marker size (`markerWidth`, `markerHeight`) and rotation (`orient="auto"` or degrees), completely decoupled from the original standalone node template's default dimensions.
   4. **Aspect-Oriented Compilation (Two-Pass Type Environment)**:
      - **Pass 1 (Pre-Scan & Macro Expansion)**: Gathers all `define` blocks and `include` directives to construct the document's dynamic `TypeRegistry` (shapes, operators, aliases).
      - **Pass 2 (AST Construction)**: Parses the topology using the populated `TypeRegistry`, eliminating grammar ambiguities while supporting arbitrary user extensions.
@@ -298,4 +306,4 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
 | **M12: Pure Rust Headless Browser Tests** | Implement 100% Rust browser test suite via Chrome DevTools Protocol (`headless_chrome`), eliminating Node.js test harness. | **Done** | Native Cargo browser integration tests (`make browsertests`) executing in under 5 seconds with zero Node/Puppeteer dependencies. |
 | **M13: Icon & Type Asset Modernization** | Re-render all repository PNG icon and type assets from modern vector SVGs using `rsvg-convert`. | **Done** | Eliminates legacy 2023 pixelated clip-art from Graphviz and web visualizations (PR #78). |
 | **M14: Native Layout Node Shapes, Styles & Icons** | Implement full shape catalog (`circle`, `diamond`, `database`, `actor`, etc.), stroke styles (`bold`, `dashed`, `dotted`), and image/icon embedding in native Rust layout engines. | **Done** | Native engines (`layered`, `force`, `tree`, `grid`) render full node shape, style, and icon semantics matching `tests/test_inputs/nodes.txt`. |
-| **M15: Dynamic Meta-Graph Language & Self-Hosting Prelude** | Add `define <typename> { ... }` (SVG template injection, primitives DSL, URI binding), `define operator`, and migrate built-in shapes to self-hosting prelude. | **Planned** | Fully dynamic, aspect-oriented graph language where shapes and operators are defined in user code or prelude rather than compiler match statements. |
+| **M15: Dynamic Meta-Graph Language & Self-Hosting Prelude** | Add `define <typename> { ... }` (SVG template injection, primitives DSL, dynamic instantiation), `define operator`, and migrate built-in shapes to self-hosting prelude. | **In Progress** | Part A landed: `define <name>(width=W, height=H) { ... }` (raw SVG and geometry primitives DSL), dynamic instantiation (`custom_type node`), two-pass resolution, and native rendering across all 4 layout engines. |

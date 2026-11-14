@@ -53,6 +53,7 @@ pub struct GridGraph {
     pub background: Option<String>,
     pub default_node_color: Option<String>,
     pub default_edge_color: Option<String>,
+    pub type_registry: crate::ast::TypeRegistry,
 }
 
 impl GridGraph {
@@ -169,7 +170,14 @@ impl GridGraph {
                     let image = node_images.get(m_name).cloned();
                     let mut w = 100.0;
                     let mut h = 42.0;
-                    if shape == "circle" || shape == "doublecircle" {
+                    if let Some(template) = canvas.type_registry.get_shape(&shape) {
+                        if let Some(tw) = template.width {
+                            w = tw;
+                        }
+                        if let Some(th) = template.height {
+                            h = th;
+                        }
+                    } else if shape == "circle" || shape == "doublecircle" {
                         w = 48.0;
                         h = 48.0;
                     } else if image.is_some() {
@@ -229,7 +237,14 @@ impl GridGraph {
                 let image = node_images.get(id).cloned();
                 let mut w = 110.0;
                 let mut h = 44.0;
-                if shape == "circle" || shape == "doublecircle" {
+                if let Some(template) = canvas.type_registry.get_shape(&shape) {
+                    if let Some(tw) = template.width {
+                        w = tw;
+                    }
+                    if let Some(th) = template.height {
+                        h = th;
+                    }
+                } else if shape == "circle" || shape == "doublecircle" {
                     w = 48.0;
                     h = 48.0;
                 } else if image.is_some() {
@@ -296,6 +311,7 @@ impl GridGraph {
             background: canvas.theme.as_ref().and_then(|t| t.background.clone()),
             default_node_color: canvas.defaults.vertexcolor.clone(),
             default_edge_color: canvas.defaults.edgecolor.clone(),
+            type_registry: canvas.type_registry.clone(),
         }
     }
 
@@ -401,6 +417,7 @@ impl GridGraph {
                 text_fill,
                 "#475569",
                 Some("url(#dg-shadow)"),
+                Some(&self.type_registry),
                 &mut svg,
             );
 

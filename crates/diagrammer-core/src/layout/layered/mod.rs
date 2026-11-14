@@ -54,6 +54,7 @@ pub struct LayeredGraph {
     pub background: Option<String>,
     pub default_node_color: Option<String>,
     pub default_edge_color: Option<String>,
+    pub type_registry: crate::ast::TypeRegistry,
 }
 
 impl LayeredGraph {
@@ -120,7 +121,14 @@ impl LayeredGraph {
                             let mut w = ((label.len() as f64) * 8.8 + 36.0).max(84.0);
                             let mut h = 40.0;
 
-                            if shape == "circle" || shape == "doublecircle" {
+                            if let Some(template) = canvas.type_registry.get_shape(&shape) {
+                                if let Some(tw) = template.width {
+                                    w = tw;
+                                }
+                                if let Some(th) = template.height {
+                                    h = th;
+                                }
+                            } else if shape == "circle" || shape == "doublecircle" {
                                 let sz = w.max(50.0);
                                 w = sz;
                                 h = sz;
@@ -516,6 +524,7 @@ impl LayeredGraph {
             background: canvas.theme.as_ref().and_then(|t| t.background.clone()),
             default_node_color: canvas.defaults.vertexcolor.clone(),
             default_edge_color: canvas.defaults.edgecolor.clone(),
+            type_registry: canvas.type_registry.clone(),
         }
     }
 
@@ -679,7 +688,7 @@ impl LayeredGraph {
         sorted_nodes.sort_by_key(|n| (n.layer, n.x as i64));
 
         for node in sorted_nodes {
-            styler.render_node(node, default_node_fill, &mut svg);
+            styler.render_node(node, default_node_fill, Some(&self.type_registry), &mut svg);
         }
         svg.push_str("  </g>\n\n");
         svg.push_str("</svg>\n");

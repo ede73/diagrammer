@@ -1,6 +1,15 @@
 ================================================================================
 ACTIVE ROADMAP & CHAT TASKS
 ================================================================================
+[ ] Re-rasterize all repository PNG icon assets from modern clean SVGs:
+    - [ ] Re-render `web/icons/*.png` from `web/icons/*.svg` using `rsvg-convert` (eliminate legacy 2023 pixelated clip-art).
+    - [ ] Re-render `web/types/*.png` from `web/types/*.svg` using `rsvg-convert`.
+[ ] Native Layout Engine Node Shapes, Styles & Icon Support:
+    - [ ] Support Graphviz shape catalog in native layout engines (`circle`, `ellipse`, `doublecircle`, `diamond`, `condition`, `database`, `document`, `folder`, `cloud`, `input`, `subroutine`, `box`/`rect`, `roundedbox`, `actor`, `dots`).
+    - [ ] Support stroke styles in native layout engines (`bold`, `dashed`, `dotted`, `invis`).
+    - [ ] Support node image / icon rendering (`image` attribute) in native vector SVG output.
+    - [ ] Verify against `tests/test_inputs/nodes.txt`.
+
 [x] Separate Generator vs Visualizer into dedicated dual dropdowns in Web UI (e.g. Graphviz -> dot, fdp, neato, osage, twopi, sfdp; D3 -> Reingold, Dendrogram, CirclePacked, Sankey) [Landed]
 [x] First-party native Rust Sequence Layout Engine prototype in crates/diagrammer-core/src/layout/sequence.rs [Landed in #58]
 [x] Architectural roadmap document for WASM visualizers and native layout engines (docs/layout_engine_and_wasm_roadmap.md)

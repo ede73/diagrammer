@@ -1,3 +1,6 @@
+//! Legacy generator for MSCGen (Message Sequence Chart) format.
+//! Marked as legacy / unmaintained; superseded by first-party native Sequence layout.
+
 use super::{multi_attr_fmt, Generator, OutputFormatter};
 use crate::ast::{ArrowType, GraphCanvas, GraphObject};
 

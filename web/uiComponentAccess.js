@@ -152,3 +152,77 @@ export function updateLockHintsButton() {
         if (text) text.textContent = 'Follow Hints';
     }
 }
+
+export function initWorkspaceSplitter() {
+    const splitter = document.getElementById('workspace-splitter');
+    const container = document.querySelector('.workspace-main');
+    const editorPane = document.querySelector('.editor-pane');
+    if (!splitter || !container || !editorPane) return;
+
+    try {
+        const savedWidth = localStorage.getItem('diagrammer_editor_width');
+        if (savedWidth) {
+            editorPane.style.flex = `0 0 ${savedWidth}`;
+        }
+    } catch (_) {}
+
+    let isDragging = false;
+    let startX = 0;
+    let startWidth = 0;
+
+    splitter.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startWidth = editorPane.getBoundingClientRect().width;
+        splitter.classList.add('active');
+        container.classList.add('is-resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const containerWidth = container.getBoundingClientRect().width;
+        const newWidth = Math.max(180, Math.min(containerWidth - 180, startWidth + dx));
+        const pct = (newWidth / containerWidth) * 100;
+        editorPane.style.flex = `0 0 ${pct}%`;
+        try {
+            localStorage.setItem('diagrammer_editor_width', `${pct}%`);
+        } catch (_) {}
+        if (window.ace) {
+            try { ace.edit('diagrammer-code').resize(); } catch (_) {}
+            try { ace.edit('diagrammer-theme-code').resize(); } catch (_) {}
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            splitter.classList.remove('active');
+            container.classList.remove('is-resizing');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            if (window.ace) {
+                try { ace.edit('diagrammer-code').resize(); } catch (_) {}
+            }
+        }
+    });
+
+    splitter.addEventListener('dblclick', () => {
+        editorPane.style.flex = '0 0 50%';
+        try { localStorage.removeItem('diagrammer_editor_width'); } catch (_) {}
+        if (window.ace) {
+            try { ace.edit('diagrammer-code').resize(); } catch (_) {}
+        }
+    });
+}
+
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWorkspaceSplitter);
+    } else {
+        initWorkspaceSplitter();
+    }
+}

@@ -43,10 +43,25 @@ pub struct LayeredEdge {
     pub line_type: String,
 }
 
+/// A visual cluster container grouping multiple layered nodes
+#[derive(Debug, Clone)]
+pub struct LayeredGroup {
+    pub name: String,
+    pub label: String,
+    pub color: Option<String>,
+    pub textcolor: Option<String>,
+    pub member_ids: Vec<String>,
+    pub x: f64,
+    pub y: f64,
+    pub width: f64,
+    pub height: f64,
+}
+
 /// The complete laid-out DAG ready for rendering
 #[derive(Debug, Clone)]
 pub struct LayeredGraph {
     pub nodes: HashMap<String, LayeredNode>,
+    pub groups: Vec<LayeredGroup>,
     pub edges: Vec<LayeredEdge>,
     pub width: f64,
     pub height: f64,
@@ -55,6 +70,127 @@ pub struct LayeredGraph {
     pub default_node_color: Option<String>,
     pub default_edge_color: Option<String>,
     pub type_registry: crate::ast::TypeRegistry,
+}
+
+fn create_layered_node_from_obj(
+    obj: &GraphObject,
+    canvas: &GraphCanvas,
+) -> LayeredNode {
+    let name = obj.get_name().to_string();
+    let label = obj.get_label().unwrap_or(&name).to_string();
+    let shape = obj.get_shape().unwrap_or("rounded").to_string();
+    let style = obj.get_style().map(|s| s.to_string());
+    let image = obj.get_image().map(|s| s.to_string());
+    let mut w = ((label.len() as f64) * 8.8 + 36.0).max(84.0);
+    let mut h = 40.0;
+
+    if let Some(template) = canvas.type_registry.get_shape(&shape) {
+        if let Some(tw) = template.width {
+            w = tw;
+        }
+        if let Some(th) = template.height {
+            h = th;
+        }
+    } else if shape == "circle" || shape == "doublecircle" {
+        let sz = w.max(50.0);
+        w = sz;
+        h = sz;
+    } else if shape == "diamond" || shape == "condition" {
+        w = (w * 1.15).max(70.0);
+        h = 50.0;
+    } else if image.is_some() {
+        h = 56.0;
+        w = w.max(72.0);
+    }
+
+    LayeredNode {
+        id: name,
+        label,
+        shape,
+        style,
+        image,
+        width: w,
+        height: h,
+        x: 0.0,
+        y: 0.0,
+        layer: 0,
+        color: obj.get_color().map(|s| s.to_string()).or_else(|| canvas.defaults.vertexcolor.clone()),
+        textcolor: obj.get_textcolor().map(|s| s.to_string()).or_else(|| canvas.defaults.vertextextcolor.clone()),
+        members: Vec::new(),
+    }
+}
+
+fn is_uml_group(grp: &crate::ast::GraphGroup, canvas: &GraphCanvas) -> bool {
+    let visualizer_hint = canvas.visualizer.as_deref().map(|s| s.to_lowercase());
+    let is_canvas_uml = matches!(
+        visualizer_hint.as_deref(),
+        Some("uml") | Some("umlclass") | Some("ast_record") | Some("er")
+    );
+    if is_canvas_uml {
+        return true;
+    }
+    if grp.objects.iter().any(|o| o.get_shape() == Some("uml_class")) {
+        return true;
+    }
+    let has_internal_edges = grp.objects.iter().any(|o| o.is_edge());
+    let has_child_groups = grp.objects.iter().any(|o| matches!(o, GraphObject::Group(_)));
+    if has_internal_edges || has_child_groups {
+        return false;
+    }
+    let vertices: Vec<&GraphObject> = grp.objects.iter().filter(|o| o.is_vertex()).collect();
+    if vertices.len() >= 2
+        && vertices.iter().all(|v| {
+            let lbl = v.get_label().unwrap_or_else(|| v.get_name());
+            lbl.starts_with('+')
+                || lbl.starts_with('-')
+                || lbl.starts_with('#')
+                || lbl.starts_with('~')
+                || lbl.contains("()")
+                || lbl.contains(':')
+        })
+    {
+        return true;
+    }
+    false
+}
+
+fn collect_cluster_group_vertices(
+    grp: &crate::ast::GraphGroup,
+    canvas: &GraphCanvas,
+    nodes: &mut HashMap<String, LayeredNode>,
+    member_ids: &mut Vec<String>,
+) {
+    for inner in &grp.objects {
+        match inner {
+            GraphObject::Group(sub) => {
+                collect_cluster_group_vertices(sub, canvas, nodes, member_ids);
+            }
+            _ => {
+                if inner.is_vertex() || inner.is_reference() {
+                    let name = inner.get_name().to_string();
+                    if !member_ids.contains(&name) {
+                        member_ids.push(name.clone());
+                    }
+                    if let Some(existing) = nodes.get_mut(&name) {
+                        if let Some(lbl) = inner.get_label() {
+                            existing.label = lbl.to_string();
+                        }
+                        if let Some(c) = inner.get_color() {
+                            existing.color = Some(c.to_string());
+                        }
+                        if let Some(tc) = inner.get_textcolor() {
+                            existing.textcolor = Some(tc.to_string());
+                        }
+                        if let Some(img) = inner.get_image() {
+                            existing.image = Some(img.to_string());
+                        }
+                    } else {
+                        nodes.insert(name.clone(), create_layered_node_from_obj(inner, canvas));
+                    }
+                }
+            }
+        }
+    }
 }
 
 impl LayeredGraph {
@@ -66,107 +202,114 @@ impl LayeredGraph {
         };
 
         let mut nodes: HashMap<String, LayeredNode> = HashMap::new();
+        let mut groups: Vec<LayeredGroup> = Vec::new();
         let mut edges: Vec<LayeredEdge> = Vec::new();
 
-        // 1. Extract nodes (both standalone vertices and container groups like UML classes)
+        // 1. Extract nodes and groups
         for obj in canvas.get_objects(false) {
             match obj {
                 GraphObject::Group(grp) => {
-                    let mut members = Vec::new();
-                    for inner in &grp.objects {
-                        if inner.is_vertex() {
-                            let raw_lbl = inner.get_label().unwrap_or_else(|| inner.get_name());
-                            members.push(raw_lbl.to_string());
+                    if is_uml_group(grp, canvas) {
+                        let mut members = Vec::new();
+                        for inner in &grp.objects {
+                            if inner.is_vertex() {
+                                let raw_lbl = inner.get_label().unwrap_or_else(|| inner.get_name());
+                                members.push(raw_lbl.to_string());
+                            }
                         }
-                    }
-                    let label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
-                    let max_member_len = members.iter().map(|m| m.len()).max().unwrap_or(0);
-                    let title_len = label.len();
-                    let max_len = max_member_len.max(title_len);
+                        let label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
+                        let max_member_len = members.iter().map(|m| m.len()).max().unwrap_or(0);
+                        let title_len = label.len();
+                        let max_len = max_member_len.max(title_len);
 
-                    let w = ((max_len as f64) * 8.5 + 44.0).max(140.0);
-                    let h = if members.is_empty() {
-                        44.0
+                        let w = ((max_len as f64) * 8.5 + 44.0).max(140.0);
+                        let h = if members.is_empty() {
+                            44.0
+                        } else {
+                            36.0 + (members.len() as f64) * 22.0 + 8.0
+                        };
+
+                        nodes.insert(
+                            grp.name.clone(),
+                            LayeredNode {
+                                id: grp.name.clone(),
+                                label,
+                                shape: "uml_class".to_string(),
+                                style: None,
+                                image: None,
+                                width: w,
+                                height: h,
+                                x: 0.0,
+                                y: 0.0,
+                                layer: 0,
+                                color: grp.color.clone().or_else(|| canvas.defaults.vertexcolor.clone()),
+                                textcolor: grp.textcolor.clone().or_else(|| canvas.defaults.vertextextcolor.clone()),
+                                members,
+                            },
+                        );
                     } else {
-                        36.0 + (members.len() as f64) * 22.0 + 8.0
-                    };
-
-                    nodes.insert(
-                        grp.name.clone(),
-                        LayeredNode {
-                            id: grp.name.clone(),
+                        // Cluster group container: extract members and register group
+                        let mut member_ids = Vec::new();
+                        collect_cluster_group_vertices(grp, canvas, &mut nodes, &mut member_ids);
+                        let label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
+                        groups.push(LayeredGroup {
+                            name: grp.name.clone(),
                             label,
-                            shape: "uml_class".to_string(),
-                            style: None,
-                            image: None,
-                            width: w,
-                            height: h,
+                            color: grp.color.clone(),
+                            textcolor: grp.textcolor.clone(),
+                            member_ids,
                             x: 0.0,
                             y: 0.0,
-                            layer: 0,
-                            color: grp.color.clone().or_else(|| canvas.defaults.vertexcolor.clone()),
-                            textcolor: grp.textcolor.clone().or_else(|| canvas.defaults.vertextextcolor.clone()),
-                            members,
-                        },
-                    );
+                            width: 0.0,
+                            height: 0.0,
+                        });
+                    }
                 }
                 _ => {
                     if obj.is_vertex() {
                         let name = obj.get_name().to_string();
-                        if !nodes.contains_key(&name) {
-                            let label = obj.get_label().unwrap_or(&name).to_string();
-                            let shape = obj.get_shape().unwrap_or("rounded").to_string();
-                            let style = obj.get_style().map(|s| s.to_string());
-                            let image = obj.get_image().map(|s| s.to_string());
-                            let mut w = ((label.len() as f64) * 8.8 + 36.0).max(84.0);
-                            let mut h = 40.0;
-
-                            if let Some(template) = canvas.type_registry.get_shape(&shape) {
-                                if let Some(tw) = template.width {
-                                    w = tw;
-                                }
-                                if let Some(th) = template.height {
-                                    h = th;
-                                }
-                            } else if shape == "circle" || shape == "doublecircle" {
-                                let sz = w.max(50.0);
-                                w = sz;
-                                h = sz;
-                            } else if shape == "diamond" || shape == "condition" {
-                                w = (w * 1.15).max(70.0);
-                                h = 50.0;
-                            } else if image.is_some() {
-                                h = 56.0;
-                                w = w.max(72.0);
+                        if let Some(existing) = nodes.get_mut(&name) {
+                            if let Some(lbl) = obj.get_label() {
+                                existing.label = lbl.to_string();
                             }
-
-                            nodes.insert(
-                                name.clone(),
-                                LayeredNode {
-                                    id: name,
-                                    label,
-                                    shape,
-                                    style,
-                                    image,
-                                    width: w,
-                                    height: h,
-                                    x: 0.0,
-                                    y: 0.0,
-                                    layer: 0,
-                                    color: obj.get_color().map(|s| s.to_string()).or_else(|| canvas.defaults.vertexcolor.clone()),
-                                    textcolor: obj.get_textcolor().map(|s| s.to_string()).or_else(|| canvas.defaults.vertextextcolor.clone()),
-                                    members: Vec::new(),
-                                },
-                            );
+                            if let Some(c) = obj.get_color() {
+                                existing.color = Some(c.to_string());
+                            }
+                            if let Some(tc) = obj.get_textcolor() {
+                                existing.textcolor = Some(tc.to_string());
+                            }
+                            if let Some(img) = obj.get_image() {
+                                existing.image = Some(img.to_string());
+                            }
+                        } else {
+                            nodes.insert(name.clone(), create_layered_node_from_obj(obj, canvas));
                         }
                     }
                 }
             }
         }
 
-        // Ensure all edge endpoints exist as nodes
+        let mut group_members_map: HashMap<String, String> = HashMap::new();
+        for grp in &groups {
+            if let Some(first_member) = grp.member_ids.first() {
+                group_members_map.insert(grp.name.clone(), first_member.clone());
+            }
+        }
+
+        // Ensure all edge endpoints exist as nodes (resolving group names to their first member if needed)
         for edge in canvas.get_edges() {
-            for endpoint in [&edge.left, &edge.right] {
+            let left_target = if !nodes.contains_key(&edge.left) && group_members_map.contains_key(&edge.left) {
+                &group_members_map[&edge.left]
+            } else {
+                &edge.left
+            };
+            let right_target = if !nodes.contains_key(&edge.right) && group_members_map.contains_key(&edge.right) {
+                &group_members_map[&edge.right]
+            } else {
+                &edge.right
+            };
+
+            for endpoint in [left_target, right_target] {
                 if !nodes.contains_key(endpoint) {
                     let w = ((endpoint.len() as f64) * 8.8 + 36.0).max(84.0);
                     nodes.insert(
@@ -193,10 +336,21 @@ impl LayeredGraph {
 
         // 2. Extract edges and identify inheritance relationships
         for edge in canvas.get_edges() {
+            let left_target = if !nodes.contains_key(&edge.left) && group_members_map.contains_key(&edge.left) {
+                group_members_map[&edge.left].clone()
+            } else {
+                edge.left.clone()
+            };
+            let right_target = if !nodes.contains_key(&edge.right) && group_members_map.contains_key(&edge.right) {
+                group_members_map[&edge.right].clone()
+            } else {
+                edge.right.clone()
+            };
+
             let is_inh = edge.edge_type.contains('<') || edge.edge_type.contains('>');
             edges.push(LayeredEdge {
-                from: edge.left.clone(),
-                to: edge.right.clone(),
+                from: left_target,
+                to: right_target,
                 label: edge.label.clone(),
                 edge_type: edge.edge_type.clone(),
                 color: edge.color.clone().or_else(|| canvas.defaults.edgecolor.clone()),
@@ -509,14 +663,44 @@ impl LayeredGraph {
             }
         }
 
+        // Calculate group bounding boxes
+        for grp in &mut groups {
+            let member_nodes: Vec<&LayeredNode> = grp
+                .member_ids
+                .iter()
+                .filter_map(|id| nodes.get(id))
+                .collect();
+            if !member_nodes.is_empty() {
+                let pad_x = 16.0;
+                let pad_top = 28.0;
+                let pad_bottom = 16.0;
+                let min_x = member_nodes.iter().map(|n| n.x).fold(f64::INFINITY, f64::min) - pad_x;
+                let min_y = member_nodes.iter().map(|n| n.y).fold(f64::INFINITY, f64::min) - pad_top;
+                let max_x = member_nodes.iter().map(|n| n.x + n.width).fold(f64::NEG_INFINITY, f64::max) + pad_x;
+                let max_y = member_nodes.iter().map(|n| n.y + n.height).fold(f64::NEG_INFINITY, f64::max) + pad_bottom;
+
+                grp.x = min_x.max(8.0);
+                grp.y = min_y.max(8.0);
+                grp.width = (max_x - grp.x).max(100.0);
+                grp.height = (max_y - grp.y).max(50.0);
+            }
+        }
+
         // Calculate total canvas bounds
-        let max_x: f64 = nodes.values().map(|n| n.x + n.width).fold(300.0, f64::max);
-        let max_y: f64 = nodes.values().map(|n| n.y + n.height).fold(200.0, f64::max);
+        let max_node_x = nodes.values().map(|n| n.x + n.width).fold(300.0, f64::max);
+        let max_grp_x = groups.iter().map(|g| g.x + g.width).fold(300.0, f64::max);
+        let max_x = max_node_x.max(max_grp_x);
+
+        let max_node_y = nodes.values().map(|n| n.y + n.height).fold(200.0, f64::max);
+        let max_grp_y = groups.iter().map(|g| g.y + g.height).fold(200.0, f64::max);
+        let max_y = max_node_y.max(max_grp_y);
+
         let total_w = max_x + margin_x;
         let total_h = max_y + margin_y;
 
         Self {
             nodes,
+            groups,
             edges,
             width: total_w,
             height: total_h,
@@ -630,6 +814,17 @@ impl LayeredGraph {
       text-anchor: middle;
       dominant-baseline: central;
     }}
+    .dl-group-box {{
+      fill: rgba(30, 41, 59, 0.35);
+      stroke-width: 1.5;
+      stroke-dasharray: 5,4;
+    }}
+    .dl-group-label {{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }}
     .dl-edge-path {{
       fill: none;
       stroke-width: 1.8;
@@ -656,6 +851,30 @@ impl LayeredGraph {
 "##,
             default_edge_stroke, default_edge_stroke, custom_markers, bg_color, bg_color
         ));
+
+        // 0. Render Groups / Clusters
+        if !self.groups.is_empty() {
+            svg.push_str("  <!-- Groups / Clusters -->\n  <g class=\"dl-groups-group\">\n");
+            for grp in &self.groups {
+                if grp.width <= 0.0 || grp.height <= 0.0 {
+                    continue;
+                }
+                let stroke_c = grp.color.as_deref().unwrap_or("#64748b");
+                let label_c = grp.textcolor.as_deref().unwrap_or("#94a3b8");
+                svg.push_str(&format!(
+                    r##"    <g class="dl-group" id="group-{}">
+      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" rx="8.0" ry="8.0" class="dl-group-box" stroke="{}" />
+      <text x="{:.1}" y="{:.1}" class="dl-group-label" fill="{}">{}</text>
+    </g>
+"##,
+                    escape_xml(&grp.name),
+                    grp.x, grp.y, grp.width, grp.height, stroke_c,
+                    grp.x + 12.0, grp.y + 16.0,
+                    label_c, escape_xml(&grp.label)
+                ));
+            }
+            svg.push_str("  </g>\n\n");
+        }
 
         // 1. Render Edges
         svg.push_str("  <!-- Edges -->\n  <g class=\"dl-edges-group\">\n");
@@ -812,5 +1031,60 @@ Student, Professor > Person
         assert!(svg.contains("dl-class-node"));
         assert!(svg.contains("dl-class-header"));
         assert!(svg.contains("dl-arrow-inheritance"));
+    }
+
+    #[test]
+    fn test_layered_dag_group_containment_and_no_duplicate_nodes() {
+        let input = "s\n{dummy\n  a > s\n}\n";
+        let canvas = AstBuilder::new().build(input).unwrap();
+        let graph = LayeredGraph::build(&canvas);
+
+        // Must contain exactly 2 nodes: 'a' and 's', with NO duplicates
+        assert_eq!(graph.nodes.len(), 2);
+        assert!(graph.nodes.contains_key("a"));
+        assert!(graph.nodes.contains_key("s"));
+
+        // Must contain 1 cluster group (dummy) enclosing both 'a' and 's'
+        assert_eq!(graph.groups.len(), 1);
+        let dummy = &graph.groups[0];
+        assert_eq!(dummy.name, "dummy");
+        assert!(dummy.member_ids.contains(&"a".to_string()));
+        assert!(dummy.member_ids.contains(&"s".to_string()));
+        assert!(dummy.width > 0.0);
+        assert!(dummy.height > 0.0);
+
+        let svg = graph.render_svg();
+        assert!(svg.contains("dl-group-box"));
+        assert!(svg.contains("group-dummy"));
+        assert!(svg.contains("node-a"));
+        assert!(svg.contains("node-s"));
+    }
+
+    #[test]
+    fn test_layered_dag_network_clusters_and_cross_group_edges() {
+        let input = r#"
+inet
+{comcast
+  cablemodem
+  router
+}
+inet - cablemodem
+"#;
+        let canvas = AstBuilder::new().build(input).unwrap();
+        let graph = LayeredGraph::build(&canvas);
+
+        // Exactly 3 nodes: inet, cablemodem, router (no duplicate cablemodem)
+        assert_eq!(graph.nodes.len(), 3);
+        assert!(graph.nodes.contains_key("inet"));
+        assert!(graph.nodes.contains_key("cablemodem"));
+        assert!(graph.nodes.contains_key("router"));
+
+        assert_eq!(graph.groups.len(), 1);
+        assert_eq!(graph.groups[0].name, "comcast");
+
+        let svg = graph.render_svg();
+        assert!(svg.contains("group-comcast"));
+        assert!(svg.contains("node-inet"));
+        assert!(svg.contains("node-cablemodem"));
     }
 }

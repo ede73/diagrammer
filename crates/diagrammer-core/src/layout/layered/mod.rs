@@ -536,7 +536,7 @@ impl LayeredGraph {
     /// Renders the calculated graph into SVG using the given visualizer hint
     pub fn render_svg_with_styler(&self, visualizer_hint: Option<&str>) -> String {
         let styler: Box<dyn LayeredStyler> = match visualizer_hint.map(|s| s.to_lowercase()).as_deref() {
-            Some("uml") | Some("umlclass") => Box::new(UmlStyler),
+            Some("uml") | Some("umlclass") | Some("ast_record") | Some("er") => Box::new(UmlStyler),
             _ => {
                 // If any node is a uml_class shape, default to UmlStyler
                 if self.nodes.values().any(|n| n.shape == "uml_class") {

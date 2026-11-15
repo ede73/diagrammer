@@ -352,6 +352,7 @@ fn test_pure_rust_browser_all_native_layout_engines() {
         ("tree", "visualizer tree\nRoot > Child1, Child2\nChild1 > LeafA, LeafB"),
         ("grid", "visualizer grid\nRackA > Server1, Server2\nRackB > Server3"),
         ("force", "visualizer force\nA > B, C\nB > C, D\nC > D"),
+        ("ast_record", "visualizer ast_record\n{ User; id; name }\n{ Order; id; total }\nUser > Order: places"),
     ];
 
     for (engine, diagram_code) in &archetypes {

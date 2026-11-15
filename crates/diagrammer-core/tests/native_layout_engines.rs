@@ -480,3 +480,24 @@ fn test_dynamic_operator_overrides_and_arrowheads() {
     assert!(seq_svg.contains("<marker id=\"ds-op-lt_gt_\""), "Sequence SVG must define marker ds-op-lt_gt_");
     assert!(seq_svg.contains("marker-end=\"url(#ds-op-lt_gt_)\""), "Sequence SVG must reference custom marker");
 }
+
+#[test]
+fn test_ast_record_native_layered_dag_rendering() {
+    let input = fs::read_to_string("../../tests/test_inputs/ast.txt")
+        .or_else(|_| fs::read_to_string("tests/test_inputs/ast.txt"))
+        .expect("ast.txt fixture must exist");
+
+    let canvas = AstBuilder::new().build(&input).expect("Failed to parse ast.txt");
+
+    // make_generator("ast_record") must return the native Layered DAG generator
+    let generator = make_generator("ast_record").expect("ast_record generator must exist");
+    let svg = generator.generate(&canvas);
+
+    // Verify it generates Diagrammer native layered SVG (not legacy Graphviz DOT)
+    assert!(svg.contains("<svg"), "ast_record must render SVG output");
+    assert!(svg.contains("class=\"diagrammer-layered-svg\""), "Output must be diagrammer-layered-svg");
+    assert!(svg.contains("dl-class-node"), "ast_record must render class/record tables for groups");
+    assert!(svg.contains("GraphRoot:GraphObject"), "Must render GraphRoot class header");
+    assert!(svg.contains("dl-class-member"), "Must render class member compartments");
+    assert!(svg.contains("marker-end=\"url(#dl-arrow-inheritance)\""), "Must render inheritance arrowheads");
+}

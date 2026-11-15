@@ -9,10 +9,13 @@ fn test_native_sequence_engine_renders_fixtures() {
 
     let fixtures = [
         "native_sequence.txt",
+        "seqdiag.txt",
         "events.txt",
         "state_sequence.txt",
         "state_sequence2.txt",
         "state_sip_sequence.txt",
+        "plantuml_context.txt",
+        "plantuml_context2.txt",
     ];
 
     for name in &fixtures {
@@ -51,6 +54,8 @@ fn test_layered_dag_engine_renders_fixtures() {
     let fixtures = [
         "umlclass.txt",
         "umlclass_types.txt",
+        "umlclass2.txt",
+        "layerbands.txt",
         "state.txt",
         "state_tcp.txt",
         "state_machine_with_start_node.txt",
@@ -126,6 +131,20 @@ fn test_tree_engine_renders_fixtures() {
     assert!(radial_svg.contains("class=\"diagrammer-tree-svg\""));
     assert!(radial_svg.contains("dt-edge"));
     assert!(!radial_svg.contains("NaN"));
+
+    // 3. Parse tree fixture
+    let parse_path = if Path::new("../../tests/test_inputs/parsetree.txt").exists() {
+        "../../tests/test_inputs/parsetree.txt"
+    } else {
+        "tests/test_inputs/parsetree.txt"
+    };
+    if let Ok(parse_code) = fs::read_to_string(parse_path) {
+        let parse_canvas = AstBuilder::new().build(&parse_code).expect("Failed to build AST for parsetree.txt");
+        let parse_svg = tree_gen.generate(&parse_canvas);
+        assert!(parse_svg.contains("class=\"diagrammer-tree-svg\""));
+        assert!(parse_svg.contains("dt-node"));
+        assert!(!parse_svg.contains("NaN"));
+    }
 }
 
 #[test]

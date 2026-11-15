@@ -227,6 +227,18 @@ impl LayeredGraph {
         let mut groups: Vec<LayeredGroup> = Vec::new();
         let mut edges: Vec<LayeredEdge> = Vec::new();
 
+        // Identify all composite groups (groups with custom visualizers) and encapsulate their members
+        let mut composite_member_nodes: std::collections::HashSet<String> = std::collections::HashSet::new();
+        let mut composite_group_names: std::collections::HashSet<String> = std::collections::HashSet::new();
+        for obj in canvas.get_objects(false) {
+            if let GraphObject::Group(grp) = obj {
+                if grp.visualizer.is_some() {
+                    composite_group_names.insert(grp.name.clone());
+                    composite_member_nodes.extend(crate::layout::poly::collect_group_member_names(grp, canvas));
+                }
+            }
+        }
+
         // 1. Extract nodes and groups
         for obj in canvas.get_objects(false) {
             match obj {
@@ -332,6 +344,10 @@ impl LayeredGraph {
                 _ => {
                     if obj.is_vertex() {
                         let name = obj.get_name().to_string();
+                        // Encapsulation: Do not register vertices that belong to an embedded composite subgraph
+                        if composite_member_nodes.contains(&name) {
+                            continue;
+                        }
                         if let Some(existing) = nodes.get_mut(&name) {
                             if let Some(lbl) = obj.get_label() {
                                 existing.label = lbl.to_string();
@@ -362,6 +378,14 @@ impl LayeredGraph {
 
         // Ensure all edge endpoints exist as nodes (resolving group names to their first member if needed)
         for edge in canvas.get_edges() {
+            // Ignore inner edges encapsulated within an embedded composite subgraph
+            if edge.parent.as_ref().map_or(false, |p| composite_group_names.contains(p)) {
+                continue;
+            }
+            if composite_member_nodes.contains(&edge.left) && composite_member_nodes.contains(&edge.right) {
+                continue;
+            }
+
             let left_target = if !nodes.contains_key(&edge.left) && group_members_map.contains_key(&edge.left) {
                 &group_members_map[&edge.left]
             } else {
@@ -374,7 +398,7 @@ impl LayeredGraph {
             };
 
             for endpoint in [left_target, right_target] {
-                if !nodes.contains_key(endpoint) {
+                if !nodes.contains_key(endpoint) && !composite_member_nodes.contains(endpoint) {
                     let w = ((endpoint.len() as f64) * 8.8 + 36.0).max(84.0);
                     nodes.insert(
                         endpoint.clone(),
@@ -401,6 +425,13 @@ impl LayeredGraph {
 
         // 2. Extract edges and identify inheritance relationships
         for edge in canvas.get_edges() {
+            // Skip inner edges of composite subgraphs
+            if edge.parent.as_ref().map_or(false, |p| composite_group_names.contains(p)) {
+                continue;
+            }
+            if composite_member_nodes.contains(&edge.left) && composite_member_nodes.contains(&edge.right) {
+                continue;
+            }
             let left_target = if !nodes.contains_key(&edge.left) && group_members_map.contains_key(&edge.left) {
                 group_members_map[&edge.left].clone()
             } else {

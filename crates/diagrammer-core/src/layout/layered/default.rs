@@ -13,8 +13,8 @@ impl LayeredStyler for DefaultStyler {
     fn render_node(&self, node: &LayeredNode, default_node_fill: &str, custom_shapes: Option<&crate::ast::TypeRegistry>, out: &mut String) {
         if let Some((ref sub_svg, sub_w, _sub_h)) = node.embedded_subgraph {
             let stroke_c = node.color.as_deref().unwrap_or("#38bdf8");
-            let left_x = node.x - node.width / 2.0;
-            let top_y = node.y - node.height / 2.0;
+            let left_x = node.x;
+            let top_y = node.y;
             out.push_str(&format!(
                 r##"    <!-- Poly-Archetype Subgraph Container: {} -->
     <g class="dl-node ds-composite-node" id="node-{}">

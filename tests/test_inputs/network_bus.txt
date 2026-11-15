@@ -1,4 +1,4 @@
-visualizer grid
+visualizer network_bus
 
 { dmz_bus;DMZ Bus
   web01#3b82f6

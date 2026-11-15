@@ -76,8 +76,8 @@ export function visualize(visualizer) {
     }
     removeOldVisualizations();
     let vizClass = visualizations.find(p => p.name === visualizer);
-    if (!vizClass && (visualizer === 'nwdiag' || visualizer === 'network_bus')) {
-        vizClass = visualizations.find(p => p.name === 'nwdiag' || p.name === 'grid');
+    if (!vizClass && (visualizer === 'nwdiag' || visualizer === 'network_bus' || visualizer === 'grid')) {
+        vizClass = visualizations.find(p => p.name === 'network_bus' || p.name === 'grid');
     }
     if (!vizClass) {
         console.error(`O-o, could not find visualizer ${visualizer}`);

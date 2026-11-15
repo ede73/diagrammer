@@ -31,7 +31,7 @@ function beautifyJSON(generatedCode) {
         data = JSON.parse(trimmed);
     }
     catch (ex) {
-        // Not a JSON result (e.g. dot, plantuml).
+        // Not a JSON result (e.g. dot).
         // Provide a formatted, readable code display instead of leaving the tab blank.
         const notice = document.createElement('div');
         notice.className = 'beautified-notice';

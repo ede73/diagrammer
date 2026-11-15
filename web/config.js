@@ -115,16 +115,6 @@ const _visualizations = [
     new Visualization('grid', 'Diagrammer: 2D Matrix Grid [WASM]', 'grid', visualizeGrid, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency 2D matrix grid engine' }),
     new Visualization('force', 'Diagrammer: Force-Directed Physics [WASM]', 'force', visualizeForce, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency spring-electrical physics simulation engine' }),
 
-    new Visualization('plantuml_sequence', 'PlantUML: Sequence Diagram [CLI]', 'plantuml_sequence', undefined, (format) => [
-        'java',
-        '-Djava.awt.headless=true',
-        '-Xmx2048m',
-        '-jar',
-        'ext/plantuml.jar',
-        `-t${format.toLocaleLowerCase()}`,
-        '-p'
-    ], { family: 'PlantUML', engine: 'plantuml.jar', description: 'PlantUML sequence diagram (Java CLI)' }),
-
     new Visualization('mermaid', 'Mermaid: Flowchart', 'mermaid', async (g) => {
         await visualizeMermaid(g);
     }, undefined, { family: 'Mermaid', engine: 'mermaid.js (Flowchart)', description: 'Mermaid flowchart in-browser' }),

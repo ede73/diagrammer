@@ -226,16 +226,6 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
             c.arg("-i-").arg("-o-").arg(format!("-T{}", format));
             c
         }
-        "plantuml_sequence" => {
-            let mut c = Command::new("java");
-            c.arg("-Djava.awt.headless=true")
-                .arg("-Xmx2048m")
-                .arg("-jar")
-                .arg("ext/plantuml.jar")
-                .arg(format!("-t{}", format))
-                .arg("-p");
-            c
-        }
         "mermaid_sequence" | "mermaid" | "mermaid_flowchart" | "mermaid_state" | "mermaid_class" | "mermaid_mindmap" | "mermaid_er" => {
             let mut c = Command::new("mmdc");
             c.arg("-e").arg(format).arg("-i-").arg("-o-");

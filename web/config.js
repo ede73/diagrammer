@@ -1,12 +1,9 @@
 import { visualizeCirclePacked } from './visualizations/visualizeCirclePacked.js';
 import { visualizeGraphviz } from './visualizations/visualizeGraphviz.js';
-import { visualizeLayerBands } from './visualizations/visualizeLayerBands.js';
 import { visualizeMscGen } from './visualizations/visualizeMscGen.js';
-import { visualizeParseTree } from './visualizations/visualizeParseTree.js';
 import { visualizeRadialDendrogram } from './visualizations/visualizeRadialDendrogram.js';
 import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilford.js';
 import { visualizeSankey } from './visualizations/visualizeSankey.js';
-import { visualizeUmlClass } from './visualizations/visualizeUmlClass.js';
 import { visualizeNativeSequence } from './visualizations/visualizeNativeSequence.js';
 import { visualizeLayered } from './visualizations/visualizeLayered.js';
 import { visualizeTree } from './visualizations/visualizeTree.js';
@@ -133,10 +130,6 @@ const _visualizations = [
     new Visualization('radialdendrogram', 'D3.js: Radial Dendrogram', 'dendrogram', visualizeRadialDendrogram, undefined, { family: 'D3.js', engine: 'Radial Dendrogram', description: 'Radial circular tree' }),
     new Visualization('circlepacked', 'D3.js: Circle Packed', 'dendrogram', visualizeCirclePacked, undefined, { family: 'D3.js', engine: 'Circle Packed', description: 'Nested enclosure circles' }),
     new Visualization('sankey', 'D3.js: Sankey (Flow)', 'sankey', visualizeSankey, undefined, { family: 'D3.js', engine: 'Sankey', description: 'Flow and distribution diagram' }),
-
-    new Visualization('umlclass', 'GoJS: UML Class Diagram', 'umlclass', visualizeUmlClass, undefined, { family: 'GoJS', engine: 'UMLClass', description: 'Class hierarchy and methods' }),
-    new Visualization('layerbands', 'GoJS: LayerBands (Swimlanes)', 'layerbands', visualizeLayerBands, undefined, { family: 'GoJS', engine: 'LayerBands', description: 'Layered swimlane bands' }),
-    new Visualization('parsetree', 'GoJS: ParseTree', 'parsetree', visualizeParseTree, undefined, { family: 'GoJS', engine: 'ParseTree', description: 'Visual parse tree' }),
 
     new Visualization('mscgen', 'MSCGen: Message Sequence Chart', 'mscgen', visualizeMscGen, (format) => [
         'mscgen',

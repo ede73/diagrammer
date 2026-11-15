@@ -1,3 +1,6 @@
+//! Legacy generator for GoJS ParseTree visualization.
+//! Marked as legacy / unmaintained.
+
 use std::collections::HashMap;
 
 use serde::Serialize;

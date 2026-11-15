@@ -183,6 +183,35 @@ fn test_grid_engine_multi_homed_network_bus() {
 }
 
 #[test]
+fn test_grid_engine_nwdiag2_network_architecture() {
+    let grid_gen = make_generator("grid").expect("Failed to create grid generator");
+
+    let input_path = "../../tests/test_inputs/nwdiag2.txt";
+    let fallback_path = "tests/test_inputs/nwdiag2.txt";
+    let path = if Path::new(input_path).exists() {
+        input_path
+    } else if Path::new(fallback_path).exists() {
+        fallback_path
+    } else {
+        return;
+    };
+
+    let input_code = fs::read_to_string(path).expect("Failed to read nwdiag2.txt");
+    let canvas = AstBuilder::new().build(&input_code).expect("Failed to build AST");
+
+    let grid_svg = grid_gen.generate(&canvas);
+    assert!(grid_svg.contains("class=\"diagrammer-grid-svg\""));
+    assert!(grid_svg.contains("comcast"));
+    assert!(grid_svg.contains("home"));
+    assert!(grid_svg.contains("inet"));
+    assert!(grid_svg.contains("cablemodem"));
+    assert!(grid_svg.contains("router"));
+    assert!(grid_svg.contains("printer"));
+    assert!(grid_svg.contains("nas"));
+    assert!(!grid_svg.contains("NaN"));
+}
+
+#[test]
 fn test_force_engine_renders_fixtures() {
     let force_gen = make_generator("force").expect("Failed to create force generator");
 

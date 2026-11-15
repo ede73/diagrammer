@@ -75,7 +75,10 @@ export function visualize(visualizer) {
         throw new Error('Visualizer not defined');
     }
     removeOldVisualizations();
-    const vizClass = visualizations.find(p => p.name === visualizer);
+    let vizClass = visualizations.find(p => p.name === visualizer);
+    if (!vizClass && (visualizer === 'nwdiag' || visualizer === 'network_bus')) {
+        vizClass = visualizations.find(p => p.name === 'nwdiag' || p.name === 'grid');
+    }
     if (!vizClass) {
         console.error(`O-o, could not find visualizer ${visualizer}`);
         return;

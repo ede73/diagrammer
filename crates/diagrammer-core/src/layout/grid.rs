@@ -96,6 +96,7 @@ impl GridGraph {
                             if let Some(lbl) = inner.get_label() {
                                 if lbl.starts_with('.') || lbl.chars().any(|c| c.is_ascii_digit()) {
                                     node_addresses.insert((name.clone(), grp.name.clone()), lbl.to_string());
+                                    node_labels.entry(name.clone()).or_insert_with(|| name.clone());
                                 } else {
                                     node_labels.insert(name.clone(), lbl.to_string());
                                 }
@@ -182,9 +183,16 @@ impl GridGraph {
         let margin_y = 60.0;
 
         if !bus_order.is_empty() {
-            // Multi-Homed Network Bus Mode
+            // Multi-Homed Network Bus Mode: standalone devices first (e.g. inet upstream of cablemodem)
             let mut node_col: HashMap<String, usize> = HashMap::new();
             let mut next_col = 0;
+
+            for s in &standalone_nodes {
+                if !node_col.contains_key(s) {
+                    node_col.insert(s.clone(), next_col);
+                    next_col += 1;
+                }
+            }
 
             for bus_name in &bus_order {
                 if let Some(members) = bus_members.get(bus_name) {
@@ -247,7 +255,26 @@ impl GridGraph {
                     };
                     (y, only_bus.clone())
                 } else {
-                    (margin_y + 100.0, String::new())
+                    // Standalone node connected to an attached device
+                    let target_y = canvas
+                        .get_edges()
+                        .iter()
+                        .find(|e| &e.left == id || &e.right == id)
+                        .and_then(|e| {
+                            let other = if &e.left == id { &e.right } else { &e.left };
+                            bus_order.iter().find(|b| bus_members.get(*b).map(|m| m.contains(other)).unwrap_or(false))
+                        })
+                        .map(|b| {
+                            let r_y = bus_rail_y[b];
+                            let b_idx = bus_order.iter().position(|x| x == b).unwrap_or(0);
+                            if b_idx == 0 && bus_order.len() > 1 {
+                                r_y - 65.0
+                            } else {
+                                r_y + 65.0
+                            }
+                        })
+                        .unwrap_or(margin_y + 60.0);
+                    (target_y, String::new())
                 };
 
                 for bus_name in &attached_buses {
@@ -286,8 +313,8 @@ impl GridGraph {
                         height: h,
                         color: node_colors.get(id).cloned().flatten(),
                         textcolor: node_textcolors.get(id).cloned().flatten(),
-                        network_bus: Some(primary_bus),
-                        address: node_addresses.values().next().cloned(),
+                        network_bus: if primary_bus.is_empty() { None } else { Some(primary_bus) },
+                        address: attached_buses.first().and_then(|b| node_addresses.get(&(id.clone(), (*b).clone())).cloned()),
                     },
                 );
             }
@@ -323,17 +350,27 @@ impl GridGraph {
                     if let (Some(u), Some(v)) = (nodes.get(&e.left), nodes.get(&e.right)) {
                         let p0 = (u.x, u.y);
                         let p1 = (v.x, v.y);
-                        let mid_x = (p0.0 + p1.0) / 2.0;
+                        let path_d = if (p0.1 - p1.1).abs() < 5.0 {
+                            let (left_x, right_x) = if p0.0 < p1.0 {
+                                (p0.0 + u.width / 2.0, p1.0 - v.width / 2.0)
+                            } else {
+                                (p0.0 - u.width / 2.0, p1.0 + v.width / 2.0)
+                            };
+                            format!("M {:.1} {:.1} L {:.1} {:.1}", left_x, p0.1, right_x, p1.1)
+                        } else {
+                            let mid_x = (p0.0 + p1.0) / 2.0;
+                            format!(
+                                "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
+                                p0.0, p0.1, mid_x, p0.1, mid_x, p1.1, p1.0, p1.1
+                            )
+                        };
 
                         edges.push(GridEdge {
                             from: e.left.clone(),
                             to: e.right.clone(),
                             label: e.label.clone(),
-                            path_d: format!(
-                                "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
-                                p0.0, p0.1, mid_x, p0.1, mid_x, p1.1, p1.0, p1.1
-                            ),
-                            color: e.color.clone(),
+                            path_d,
+                            color: e.color.clone().or_else(|| canvas.defaults.edgecolor.clone()),
                         });
                     }
                 }
@@ -569,14 +606,6 @@ impl GridGraph {
                 Some(&self.type_registry),
                 &mut svg,
             );
-
-            if let Some(ref ip) = node.address {
-                svg.push_str(&format!(
-                    r#"      <text x="{:.1}" y="{:.1}" class="dg-node-ip">{}</text>
-"#,
-                    node.x, node.y + 10.0, escape_xml(ip)
-                ));
-            }
         }
 
         svg.push_str("  </g>\n</svg>\n");

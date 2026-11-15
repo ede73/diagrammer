@@ -9,6 +9,12 @@ pub use default::DefaultStyler;
 pub use style::LayeredStyler;
 pub use uml::UmlStyler;
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct UmlMember {
+    pub id: String,
+    pub label: String,
+}
+
 /// A node positioned on a 2D layer canvas
 #[derive(Debug, Clone)]
 pub struct LayeredNode {
@@ -24,7 +30,7 @@ pub struct LayeredNode {
     pub layer: usize,
     pub color: Option<String>,
     pub textcolor: Option<String>,
-    pub members: Vec<String>,
+    pub members: Vec<UmlMember>,
     pub embedded_subgraph: Option<crate::layout::poly::EmbeddedSubgraph>,
 }
 
@@ -269,12 +275,16 @@ impl LayeredGraph {
                         let mut members = Vec::new();
                         for inner in &grp.objects {
                             if inner.is_vertex() {
-                                let raw_lbl = inner.get_label().unwrap_or_else(|| inner.get_name());
-                                members.push(raw_lbl.to_string());
+                                let id = inner.get_name().to_string();
+                                let raw_lbl = inner.get_label().map(|s| s.to_string()).unwrap_or_else(|| id.clone());
+                                members.push(UmlMember {
+                                    id,
+                                    label: raw_lbl,
+                                });
                             }
                         }
                         let label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
-                        let max_member_len = members.iter().map(|m| m.len()).max().unwrap_or(0);
+                        let max_member_len = members.iter().map(|m| m.label.len()).max().unwrap_or(0);
                         let title_len = label.len();
                         let max_len = max_member_len.max(title_len);
 
@@ -853,6 +863,24 @@ impl LayeredGraph {
                         is_inside_subgraph: false,
                     },
                 );
+
+                if node.shape == "uml_class" {
+                    for (idx, member) in node.members.iter().enumerate() {
+                        let row_y = node.y + 32.0 + (idx as f64) * 22.0;
+                        all_node_anchors.insert(
+                            member.id.clone(),
+                            NodeAnchor {
+                                x: node.x,
+                                y: row_y,
+                                width: node.width,
+                                height: 22.0,
+                                center_x: node.x + node.width / 2.0,
+                                center_y: row_y + 11.0,
+                                is_inside_subgraph: false,
+                            },
+                        );
+                    }
+                }
             }
 
             // 2. Resolve internal child nodes within composite subgraphs
@@ -925,6 +953,19 @@ impl LayeredGraph {
                     if id == &e.left || id == &e.right {
                         continue;
                     }
+                    // Skip containers that physically enclose the endpoints
+                    let is_enclosing_u = a.x <= u_anchor.x + 1.0
+                        && a.x + a.width >= u_anchor.x + u_anchor.width - 1.0
+                        && a.y <= u_anchor.y + 1.0
+                        && a.y + a.height >= u_anchor.y + u_anchor.height - 1.0;
+                    let is_enclosing_v = a.x <= v_anchor.x + 1.0
+                        && a.x + a.width >= v_anchor.x + v_anchor.width - 1.0
+                        && a.y <= v_anchor.y + 1.0
+                        && a.y + a.height >= v_anchor.y + v_anchor.height - 1.0;
+                    if is_enclosing_u || is_enclosing_v {
+                        continue;
+                    }
+
                     if y >= a.y - 2.0 && y <= a.y + a.height + 2.0 {
                         if !(max_x < a.x || min_x > a.x + a.width) {
                             return true;

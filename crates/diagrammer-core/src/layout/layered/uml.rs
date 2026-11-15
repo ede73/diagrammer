@@ -44,10 +44,16 @@ impl LayeredStyler for UmlStyler {
 
                 let mut member_y = node.y + header_h + 14.0;
                 for member in &node.members {
+                    let row_y = member_y - 14.0;
                     out.push_str(&format!(
-                        r#"      <text x="{:.1}" y="{:.1}" class="dl-class-member">{}</text>
+                        r#"      <g class="dl-node dl-class-member-node" id="node-{}">
+        <rect x="{:.1}" y="{:.1}" width="{:.1}" height="22.0" fill="none" opacity="0.0" />
+        <text x="{:.1}" y="{:.1}" class="dl-class-member">{}</text>
+      </g>
 "#,
-                        node.x + 12.0, member_y, escape_xml(member)
+                        escape_xml(&member.id),
+                        node.x, row_y, node.width,
+                        node.x + 12.0, member_y, escape_xml(&member.label)
                     ));
                     member_y += 22.0;
                 }

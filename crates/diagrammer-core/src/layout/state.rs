@@ -696,6 +696,19 @@ impl StateGraph {
                         if id == &e.left || id == &e.right {
                             continue;
                         }
+                        // Skip containers that physically enclose the endpoints
+                        let is_enclosing_u = a.x <= u_anchor.x + 1.0
+                            && a.x + a.width >= u_anchor.x + u_anchor.width - 1.0
+                            && a.y <= u_anchor.y + 1.0
+                            && a.y + a.height >= u_anchor.y + u_anchor.height - 1.0;
+                        let is_enclosing_v = a.x <= v_anchor.x + 1.0
+                            && a.x + a.width >= v_anchor.x + v_anchor.width - 1.0
+                            && a.y <= v_anchor.y + 1.0
+                            && a.y + a.height >= v_anchor.y + v_anchor.height - 1.0;
+                        if is_enclosing_u || is_enclosing_v {
+                            continue;
+                        }
+
                         if y >= a.y - 2.0 && y <= a.y + a.height + 2.0 {
                             if !(max_x < a.x || min_x > a.x + a.width) {
                                 return true;

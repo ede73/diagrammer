@@ -152,7 +152,6 @@ const _visualizations = [
     new Visualization('force', 'Diagrammer: Force-Directed Physics [WASM]', 'force', visualizeForce, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency spring-electrical physics simulation engine' }),
 
     new Visualization('actdiag', 'Blockdiag: Activity Diagram [CLI]', 'actdiag', undefined, (format, outputFile) => buggyDiags('actdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'actdiag', description: 'Activity diagram (Python CLI)' }),
-    new Visualization('blockdiag', 'Blockdiag: Block Diagram [CLI]', 'blockdiag', undefined, (format, outputFile) => buggyDiags('blockdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'blockdiag', description: 'Block diagram (Python CLI)' }),
     new Visualization('nwdiag', 'Blockdiag: Network Diagram [CLI]', 'nwdiag', undefined, (format, outputFile) => buggyDiags('nwdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'nwdiag', description: 'Network diagram (Python CLI)' }),
     new Visualization('seqdiag', 'Blockdiag: Sequence Diagram [CLI]', 'seqdiag', undefined, (format, outputFile) => buggyDiags('seqdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'seqdiag', description: 'Sequence diagram (Python CLI)' }),
 

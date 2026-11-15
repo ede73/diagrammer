@@ -127,7 +127,7 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
             c.arg("-i-").arg("-o-").arg(format!("-T{}", format));
             c
         }
-        "actdiag" | "blockdiag" | "nwdiag" | "seqdiag" => {
+        "actdiag" | "nwdiag" | "seqdiag" => {
             let mut c = Command::new(visualizer);
             c.arg("-a").arg(format!("-T{}", format));
             if Path::new("fonts/dejavu-sans-bold.ttf").exists() {
@@ -163,7 +163,7 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
     };
 
     cmd.stdin(Stdio::piped());
-    let redirect_stdout = output_path.is_none() || (visualizer != "actdiag" && visualizer != "blockdiag" && visualizer != "nwdiag" && visualizer != "seqdiag");
+    let redirect_stdout = output_path.is_none() || (visualizer != "actdiag" && visualizer != "nwdiag" && visualizer != "seqdiag");
     if redirect_stdout {
         cmd.stdout(Stdio::piped());
     }
@@ -197,7 +197,7 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
     }
 
     if let Some(out_path) = output_path {
-        if visualizer != "actdiag" && visualizer != "blockdiag" && visualizer != "nwdiag" && visualizer != "seqdiag" {
+        if visualizer != "actdiag" && visualizer != "nwdiag" && visualizer != "seqdiag" {
             if let Err(e) = fs::write(out_path, &output.stdout) {
                 eprintln!("Failed to write output to '{}': {}", out_path, e);
                 process::exit(9);

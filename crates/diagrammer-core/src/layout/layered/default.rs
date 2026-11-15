@@ -11,7 +11,7 @@ impl LayeredStyler for DefaultStyler {
     }
 
     fn render_node(&self, node: &LayeredNode, default_node_fill: &str, custom_shapes: Option<&crate::ast::TypeRegistry>, out: &mut String) {
-        if let Some((ref sub_svg, sub_w, _sub_h)) = node.embedded_subgraph {
+        if let Some(ref sub) = node.embedded_subgraph {
             let stroke_c = node.color.as_deref().unwrap_or("#38bdf8");
             let left_x = node.x;
             let top_y = node.y;
@@ -31,8 +31,8 @@ impl LayeredStyler for DefaultStyler {
                 left_x, top_y, node.width, node.height, stroke_c,
                 left_x, top_y + 36.0, left_x + node.width, top_y + 36.0, stroke_c,
                 left_x + 18.0, top_y + 23.0, stroke_c, escape_xml(&node.label),
-                left_x + (node.width - sub_w) / 2.0, top_y + 44.0,
-                sub_svg
+                left_x + (node.width - sub.width) / 2.0, top_y + 44.0,
+                &sub.svg
             ));
             return;
         }

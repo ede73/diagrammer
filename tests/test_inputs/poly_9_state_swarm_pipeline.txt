@@ -13,3 +13,5 @@ ClusterMesh > DataPipeline > Operational
     Extract > Transform > Load
 }
 
+Worker1 > Load
+

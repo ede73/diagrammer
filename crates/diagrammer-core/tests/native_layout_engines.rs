@@ -787,4 +787,61 @@ fn test_all_10_poly_archetype_fixtures_render_cleanly() {
     }
 }
 
+#[test]
+fn test_cross_boundary_inter_group_edge_routing() {
+    use diagrammer_core::builder::AstBuilder;
+    use diagrammer_core::generators::make_generator;
+
+    let input_state = r#"
+visualizer state
+ClusterMesh > DataPipeline > Operational
+{ClusterMesh; P2P Topology
+    visualizer force
+    Leader > (Worker1, Worker2)
+    Worker1 > Worker2
+}
+{DataPipeline; Batch Stream
+    visualizer layered
+    Extract > Transform > Load
+}
+Worker1 > Load
+"#;
+
+    let canvas_state = AstBuilder::new().build(input_state).expect("AST build for state inter-group edge");
+    let state_gen = make_generator("state").unwrap();
+    let state_svg = state_gen.generate(&canvas_state);
+
+    assert!(state_svg.contains("class=\"diagrammer-state-svg\""));
+    assert!(state_svg.contains("ds-inter-group-edges"), "State SVG must contain ds-inter-group-edges layer");
+    assert!(state_svg.contains("ds-inter-group-edge"), "State SVG must contain cross-boundary edge path");
+    assert!(state_svg.contains("url(#ds-arrow-active)"), "State SVG must use active arrowhead for inter-group edge");
+    assert!(!state_svg.contains("NaN"), "State SVG must not contain NaN");
+
+    let input_layered = r#"
+visualizer layered
+ClusterMesh > DataPipeline > Operational
+{ClusterMesh; P2P Topology
+    visualizer force
+    Leader > (Worker1, Worker2)
+    Worker1 > Worker2
+}
+{DataPipeline; Batch Stream
+    visualizer layered
+    Extract > Transform > Load
+}
+Worker1 > Load
+"#;
+
+    let canvas_layered = AstBuilder::new().build(input_layered).expect("AST build for layered inter-group edge");
+    let layered_gen = make_generator("layered").unwrap();
+    let layered_svg = layered_gen.generate(&canvas_layered);
+
+    assert!(layered_svg.contains("class=\"diagrammer-layered-svg\""));
+    assert!(layered_svg.contains("dl-inter-group-edges"), "Layered SVG must contain dl-inter-group-edges layer");
+    assert!(layered_svg.contains("dl-cross-edge"), "Layered SVG must contain cross-boundary edge path");
+    assert!(layered_svg.contains("url(#dl-arrow-active)"), "Layered SVG must use active arrowhead for inter-group edge");
+    assert!(!layered_svg.contains("NaN"), "Layered SVG must not contain NaN");
+}
+
+
 

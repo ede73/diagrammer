@@ -53,6 +53,7 @@ pub struct StateNode {
     pub rank: usize,
     pub is_composite: bool,
     pub composite_sub_svg: Option<String>,
+    pub composite_subgraph: Option<crate::layout::poly::EmbeddedSubgraph>,
     pub composite_tasks: Vec<String>,
     pub composite_label: Option<String>,
 }
@@ -84,6 +85,7 @@ pub struct StateEdge {
     pub label_x: f64,
     pub label_y: f64,
     pub is_loopback: bool,
+    pub is_cross_boundary: bool,
 }
 
 /// Standalone State Machine layout engine in pure Rust
@@ -115,7 +117,7 @@ impl StateGraph {
         }
 
         // 2. Discover composite groups vs cluster groups
-        let mut composite_groups: HashMap<String, (Option<String>, Vec<String>, Option<String>, Option<String>, f64, f64)> = HashMap::new();
+        let mut composite_groups: HashMap<String, (Option<crate::layout::poly::EmbeddedSubgraph>, Vec<String>, Option<String>, Option<String>, f64, f64)> = HashMap::new();
         let mut composite_member_nodes: HashSet<String> = HashSet::new();
         let mut composite_group_names: HashSet<String> = HashSet::new();
         let mut node_to_cluster_group: HashMap<String, String> = HashMap::new();
@@ -157,15 +159,16 @@ impl StateGraph {
                 if is_composite {
                     if grp.visualizer.is_some() {
                         // Poly-archetype: Embedded Subgraph!
-                        let (sub_svg, sub_w, sub_h) = if let Some(sub) = crate::layout::poly::render_subgraph(canvas, grp) {
-                            (Some(sub.svg), sub.width, sub.height)
+                        let sub_opt = crate::layout::poly::render_subgraph(canvas, grp);
+                        let (sub_w, sub_h) = if let Some(ref sub) = sub_opt {
+                            (sub.width, sub.height)
                         } else {
-                            (None, 420.0, 240.0)
+                            (420.0, 240.0)
                         };
 
                         composite_groups.insert(
                             grp.name.clone(),
-                            (sub_svg, Vec::new(), Some(grp_label), grp.color.clone(), sub_w, sub_h),
+                            (sub_opt, Vec::new(), Some(grp_label), grp.color.clone(), sub_w, sub_h),
                         );
                     } else {
                         // Ordinary composite group (display list of tasks)
@@ -306,6 +309,7 @@ impl StateGraph {
                     rank: 0,
                     is_composite: false,
                     composite_sub_svg: None,
+                    composite_subgraph: None,
                     composite_tasks: Vec::new(),
                     composite_label: None,
                 },
@@ -315,8 +319,8 @@ impl StateGraph {
         // Add composite groups as StateNodes
         let max_composite_w = composite_groups
             .values()
-            .map(|(sub, tasks, _, _, sw, _)| {
-                if sub.is_some() {
+            .map(|(sub_opt, tasks, _, _, sw, _)| {
+                if sub_opt.is_some() {
                     (*sw + 48.0).max(480.0)
                 } else if !tasks.is_empty() {
                     ((tasks.len() as f64) * 110.0 + 80.0).max(480.0)
@@ -326,10 +330,10 @@ impl StateGraph {
             })
             .fold(480.0, f64::max);
 
-        for (grp_name, (sub_svg, tasks, lbl, clr, _sw, sh)) in composite_groups {
+        for (grp_name, (sub_opt, tasks, lbl, clr, _sw, sh)) in composite_groups {
             let width = max_composite_w;
 
-            let height = if sub_svg.is_some() {
+            let height = if sub_opt.is_some() {
                 sh + 54.0
             } else if !tasks.is_empty() {
                 116.0
@@ -341,6 +345,8 @@ impl StateGraph {
                 || (in_degrees.get(&grp_name).copied().unwrap_or(0) == 0 && out_degrees.get(&grp_name).copied().unwrap_or(0) > 0);
 
             let is_end = out_degrees.get(&grp_name).copied().unwrap_or(0) == 0 && in_degrees.get(&grp_name).copied().unwrap_or(0) > 0;
+
+            let sub_svg = sub_opt.as_ref().map(|s| s.svg.clone());
 
             nodes.insert(
                 grp_name.clone(),
@@ -363,6 +369,7 @@ impl StateGraph {
                     rank: 0,
                     is_composite: true,
                     composite_sub_svg: sub_svg,
+                    composite_subgraph: sub_opt,
                     composite_tasks: tasks,
                     composite_label: lbl,
                 },
@@ -596,12 +603,128 @@ impl StateGraph {
         let gutter_left = (min_canvas_x - 70.0).max(40.0);
         let gutter_right = max_canvas_x + 70.0;
 
+        #[derive(Debug, Clone, Copy)]
+        #[allow(dead_code)]
+        struct NodeAnchor {
+            x: f64,
+            y: f64,
+            width: f64,
+            height: f64,
+            center_x: f64,
+            center_y: f64,
+            is_inside_subgraph: bool,
+        }
+
+        let mut all_node_anchors: HashMap<String, NodeAnchor> = HashMap::new();
+        let mut node_to_composite_group: HashMap<String, String> = HashMap::new();
+
+        // 1. Top-level nodes
+        for node in nodes.values() {
+            all_node_anchors.insert(
+                node.id.clone(),
+                NodeAnchor {
+                    x: node.x,
+                    y: node.y,
+                    width: node.width,
+                    height: node.height,
+                    center_x: node.x + node.width / 2.0,
+                    center_y: node.y + node.height / 2.0,
+                    is_inside_subgraph: false,
+                },
+            );
+
+            // 2. Resolve internal child nodes within composite subgraphs
+            if let Some(ref sub) = node.composite_subgraph {
+                let sub_dim = crate::layout::poly::parse_svg_dimensions(&sub.svg);
+                let sub_x = node.x + (node.width - sub_dim.0).max(0.0) / 2.0;
+                let sub_y = node.y + 44.0;
+
+                for (child_id, bounds) in &sub.node_bounds {
+                    let abs_x = sub_x + bounds.x;
+                    let abs_y = sub_y + bounds.y;
+                    all_node_anchors.insert(
+                        child_id.clone(),
+                        NodeAnchor {
+                            x: abs_x,
+                            y: abs_y,
+                            width: bounds.width,
+                            height: bounds.height,
+                            center_x: abs_x + bounds.width / 2.0,
+                            center_y: abs_y + bounds.height / 2.0,
+                            is_inside_subgraph: true,
+                        },
+                    );
+                    node_to_composite_group.insert(child_id.clone(), node.id.clone());
+                }
+            }
+        }
+
         let mut edges: Vec<StateEdge> = Vec::new();
+        let mut inter_group_idx = 0usize;
+
         for e in &raw_edges {
             if e.parent.as_ref().map_or(false, |p| composite_group_names.contains(p)) {
                 continue;
             }
-            if composite_member_nodes.contains(&e.left) || composite_member_nodes.contains(&e.right) {
+
+            let grp_left = node_to_composite_group.get(&e.left);
+            let grp_right = node_to_composite_group.get(&e.right);
+
+            // Skip internal edges where BOTH endpoints belong to the same composite group
+            if grp_left.is_some() && grp_left == grp_right {
+                continue;
+            }
+
+            let (u_anchor, v_anchor) = match (all_node_anchors.get(&e.left), all_node_anchors.get(&e.right)) {
+                (Some(a), Some(b)) => (*a, *b),
+                _ => continue,
+            };
+
+            let is_cross_boundary = u_anchor.is_inside_subgraph || v_anchor.is_inside_subgraph;
+
+            if is_cross_boundary {
+                inter_group_idx += 1;
+                // Decide gutter side: default to closer side or left gutter
+                let use_right = u_anchor.center_x >= center_x && v_anchor.center_x >= center_x;
+                let stagger = ((inter_group_idx - 1) % 4) as f64 * 16.0;
+                let gutter_x = if use_right {
+                    gutter_right + 20.0 + stagger
+                } else {
+                    (gutter_left - 20.0 - stagger).max(30.0)
+                };
+
+                let p_start = if use_right {
+                    (u_anchor.x + u_anchor.width, u_anchor.center_y)
+                } else {
+                    (u_anchor.x, u_anchor.center_y)
+                };
+
+                let p_end = if use_right {
+                    (v_anchor.x + v_anchor.width, v_anchor.center_y)
+                } else {
+                    (v_anchor.x, v_anchor.center_y)
+                };
+
+                let path_d = format!(
+                    "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
+                    p_start.0, p_start.1, gutter_x, p_start.1, gutter_x, p_end.1, p_end.0, p_end.1
+                );
+
+                let label_x = gutter_x + if use_right { 12.0 } else { -12.0 };
+                let label_y = (p_start.1 + p_end.1) / 2.0;
+
+                edges.push(StateEdge {
+                    from: e.left.clone(),
+                    to: e.right.clone(),
+                    label: e.label.clone(),
+                    color: e.color.clone().or_else(|| Some("#38bdf8".to_string())),
+                    style: e.style.clone(),
+                    path_d,
+                    label_x,
+                    label_y,
+                    is_loopback: false,
+                    is_cross_boundary: true,
+                });
                 continue;
             }
 
@@ -717,11 +840,16 @@ impl StateGraph {
                     label_x,
                     label_y,
                     is_loopback: is_backward,
+                    is_cross_boundary: false,
                 });
             }
         }
 
-        let max_w = gutter_right + 100.0;
+        let max_w = if inter_group_idx > 0 {
+            (gutter_right + 120.0 + (inter_group_idx as f64) * 16.0).max(860.0)
+        } else {
+            (gutter_right + 100.0).max(860.0)
+        };
         let max_h = current_y + 60.0;
 
         Self {
@@ -796,9 +924,9 @@ impl StateGraph {
             }
         }
 
-        // Render Edges
+        // Render Edges (Transitions)
         svg.push_str("  <!-- Transitions -->\n  <g class=\"ds-edges\">\n");
-        for e in &self.edges {
+        for e in self.edges.iter().filter(|e| !e.is_cross_boundary) {
             let stroke = e.color.as_deref().unwrap_or(default_edge_stroke);
             let marker = if e.is_loopback {
                 "url(#ds-arrow-alert)"
@@ -842,7 +970,7 @@ impl StateGraph {
                 ));
             }
         }
-        svg.push_str("  </g>\n");
+        svg.push_str("  </g>\n\n");
 
         // Render State Nodes
         svg.push_str("  <!-- States -->\n  <g class=\"ds-nodes\">\n");
@@ -971,7 +1099,49 @@ impl StateGraph {
                 );
             }
         }
-        svg.push_str("  </g>\n");
+        svg.push_str("  </g>\n\n");
+
+        // Render Cross-Boundary Inter-Group Edges (on top layer so lines & arrowheads entering containers are crisp)
+        let cross_edges: Vec<&StateEdge> = self.edges.iter().filter(|e| e.is_cross_boundary).collect();
+        if !cross_edges.is_empty() {
+            svg.push_str("  <!-- Cross-Boundary Inter-Group Edges -->\n  <g class=\"ds-inter-group-edges\">\n");
+            for e in cross_edges {
+                let stroke = e.color.as_deref().unwrap_or("#38bdf8");
+                let is_dotted = e.style.as_deref().map(|s| s.contains("dotted") || s.contains('.')).unwrap_or(false);
+                let is_dashed = e.style.as_deref().map(|s| s.contains("dashed") || s.contains('-')).unwrap_or(false);
+                let dash_attr = if is_dotted {
+                    r#" stroke-dasharray="3,4""#
+                } else if is_dashed {
+                    r#" stroke-dasharray="6,4""#
+                } else {
+                    ""
+                };
+
+                svg.push_str(&format!(
+                    r##"    <path d="{}" fill="none" stroke="{}" stroke-width="2.2"{} marker-end="url(#ds-arrow-active)" class="ds-edge ds-edge-cross-boundary"/>
+"##,
+                    e.path_d, stroke, dash_attr
+                ));
+
+                if let Some(ref lbl) = e.label {
+                    let clean_label = lbl.replace("\\n", " ");
+                    let text_w = clean_label.len() as f64 * 6.8 + 12.0;
+                    svg.push_str(&format!(
+                        r##"    <g class="ds-edge-label" transform="translate({:.1}, {:.1})">
+      <rect x="{:.1}" y="-10" width="{:.1}" height="20" rx="6" fill="#1e293b" fill-opacity="0.85" stroke="#334155" stroke-width="0.8"/>
+      <text x="0" y="3.5" font-size="10" font-weight="500" fill="#94a3b8" text-anchor="middle">{}</text>
+    </g>
+"##,
+                        e.label_x,
+                        e.label_y,
+                        -text_w / 2.0,
+                        text_w,
+                        escape_xml(&clean_label)
+                    ));
+                }
+            }
+            svg.push_str("  </g>\n");
+        }
 
         svg.push_str("</svg>\n");
         svg

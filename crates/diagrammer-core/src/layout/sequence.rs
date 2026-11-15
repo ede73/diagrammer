@@ -586,22 +586,22 @@ impl SequenceLayoutEngine {
             // Top box
             svg.push_str(&format!(
                 r#"    <!-- Participant: {} -->
-    <g class="ds-part-node">
+    <g class="ds-part-node" id="node-{}">
       <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="url(#ds-part-grad)" stroke="{border_color}" class="ds-box" />
       <text x="{:.1}" y="{:.1}" fill="{text_color}" class="ds-part-text">{label_escaped}</text>
     </g>
 "#,
-                p.id, box_x, top_padding, w, header_height, cx, top_padding + header_height / 2.0
+                p.id, p.id, box_x, top_padding, w, header_height, cx, top_padding + header_height / 2.0
             ));
 
             // Bottom mirrored box
             svg.push_str(&format!(
-                r#"    <g class="ds-part-node">
+                r#"    <g class="ds-part-node" id="node-{}-bottom">
       <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="url(#ds-part-grad)" stroke="{border_color}" class="ds-box" />
       <text x="{:.1}" y="{:.1}" fill="{text_color}" class="ds-part-text">{label_escaped}</text>
     </g>
 "#,
-                box_x, footer_top, w, header_height, cx, footer_top + header_height / 2.0
+                p.id, box_x, footer_top, w, header_height, cx, footer_top + header_height / 2.0
             ));
         }
         svg.push_str("  </g>\n</svg>\n");

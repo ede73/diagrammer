@@ -4,7 +4,16 @@
 //! to host any other visualizer recursively inside group / cluster containers.
 
 use crate::ast::{GraphCanvas, GraphGroup, GraphObject};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+
+/// Geometric bounding box of a node rendered inside a sub-diagram.
+#[derive(Debug, Clone, PartialEq)]
+pub struct SubNodeBounds {
+    pub x: f64,
+    pub y: f64,
+    pub width: f64,
+    pub height: f64,
+}
 
 /// Representation of an embedded sub-diagram rendered by an independent visualizer engine.
 #[derive(Debug, Clone)]
@@ -13,6 +22,7 @@ pub struct EmbeddedSubgraph {
     pub svg: String,
     pub width: f64,
     pub height: f64,
+    pub node_bounds: HashMap<String, SubNodeBounds>,
 }
 
 /// Recursively collects all vertex/node names defined within a group, including edge endpoints.
@@ -80,6 +90,65 @@ pub fn parse_svg_dimensions(svg: &str) -> (f64, f64) {
         }
     }
     (w, h)
+}
+
+fn parse_attr(tag: &str, attr: &str) -> Option<f64> {
+    if let Some(pos) = tag.find(attr) {
+        let rest = &tag[pos + attr.len()..];
+        if let Some(end) = rest.find('"') {
+            return rest[..end].parse::<f64>().ok();
+        }
+    }
+    None
+}
+
+/// Scans rendered SVG for all tagged node bounding boxes (`<g id="node-<id>">...<rect|circle>`).
+pub fn extract_svg_node_bounds(svg: &str) -> HashMap<String, SubNodeBounds> {
+    let mut bounds = HashMap::new();
+    let marker = "id=\"node-";
+    let mut cursor = 0;
+    while let Some(idx) = svg[cursor..].find(marker) {
+        let start = cursor + idx + marker.len();
+        if let Some(end_id) = svg[start..].find('"') {
+            let node_id = &svg[start..start + end_id];
+            // Skip bottom mirrored sequence headers
+            if !node_id.ends_with("-bottom") {
+                let rest = &svg[start + end_id..];
+                let search_window_len = rest.len().min(1200);
+                let node_block = &rest[..search_window_len];
+
+                if let Some(rx) = node_block.find("<rect ") {
+                    let rect_str = &node_block[rx..];
+                    if let (Some(x), Some(y), Some(w), Some(h)) = (
+                        parse_attr(rect_str, "x=\""),
+                        parse_attr(rect_str, "y=\""),
+                        parse_attr(rect_str, "width=\""),
+                        parse_attr(rect_str, "height=\""),
+                    ) {
+                        bounds.insert(node_id.to_string(), SubNodeBounds { x, y, width: w, height: h });
+                    }
+                } else if let Some(cx_idx) = node_block.find("<circle ") {
+                    let circle_str = &node_block[cx_idx..];
+                    if let (Some(cx), Some(cy), Some(r)) = (
+                        parse_attr(circle_str, "cx=\""),
+                        parse_attr(circle_str, "cy=\""),
+                        parse_attr(circle_str, "r=\""),
+                    ) {
+                        bounds.insert(node_id.to_string(), SubNodeBounds {
+                            x: cx - r,
+                            y: cy - r,
+                            width: r * 2.0,
+                            height: r * 2.0,
+                        });
+                    }
+                }
+            }
+            cursor = start + end_id;
+        } else {
+            break;
+        }
+    }
+    bounds
 }
 
 /// Executes an isolated sub-generator for a group that specifies its own visualizer.
@@ -161,11 +230,13 @@ pub fn render_subgraph(
 
     let rendered = generator.generate(&sub_canvas);
     let (w, h) = parse_svg_dimensions(&rendered);
+    let node_bounds = extract_svg_node_bounds(&rendered);
 
     Some(EmbeddedSubgraph {
         visualizer: sub_viz.clone(),
         svg: rendered,
         width: w,
         height: h,
+        node_bounds,
     })
 }

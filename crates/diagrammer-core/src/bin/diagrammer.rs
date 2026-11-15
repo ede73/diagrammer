@@ -227,20 +227,6 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
             c.arg("-i-").arg("-o-").arg(format!("-T{}", format));
             c
         }
-        "nwdiag" => {
-            let mut c = Command::new(visualizer);
-            c.arg("-a").arg(format!("-T{}", format));
-            if Path::new("fonts/dejavu-sans-bold.ttf").exists() {
-                c.arg("-f").arg("fonts/dejavu-sans-bold.ttf");
-            }
-            c.arg("-");
-            if let Some(out) = output_path {
-                c.arg(format!("-o{}", out));
-            } else {
-                c.arg("-o-");
-            }
-            c
-        }
         "plantuml_sequence" => {
             let mut c = Command::new("java");
             c.arg("-Djava.awt.headless=true")
@@ -262,7 +248,7 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
     };
 
     cmd.stdin(Stdio::piped());
-    let redirect_stdout = output_path.is_none() || (visualizer != "nwdiag");
+    let redirect_stdout = output_path.is_none();
     if redirect_stdout {
         cmd.stdout(Stdio::piped());
     }
@@ -280,9 +266,7 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
     }
 
     if let Some(out_path) = output_path {
-        if visualizer != "nwdiag" {
-            fs::write(out_path, &output.stdout).map_err(|e| format!("Failed to write output to '{}': {}", out_path, e))?;
-        }
+        fs::write(out_path, &output.stdout).map_err(|e| format!("Failed to write output to '{}': {}", out_path, e))?;
     } else {
         io::stdout().write_all(&output.stdout).map_err(|e| format!("Failed to write to stdout: {}", e))?;
     }

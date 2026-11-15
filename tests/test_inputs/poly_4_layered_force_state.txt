@@ -12,3 +12,4 @@ TopologyDiscovery > LifecycleManager
     visualizer state
     Spawning > Running > Terminated
 }
+

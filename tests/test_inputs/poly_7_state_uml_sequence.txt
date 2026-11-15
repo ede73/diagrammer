@@ -15,3 +15,4 @@ DataModel > AuditSync > Committed
     visualizer native_sequence
     Service > "Log" AuditDB
 }
+

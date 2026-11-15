@@ -96,27 +96,53 @@ pub fn render_subgraph(
     let member_names = collect_group_member_names(group, parent_canvas);
     let mut sub_objects = group.objects.clone();
 
-    // Ensure all member vertices exist in sub_objects
-    let mut existing_vertices = HashSet::new();
-    for obj in &sub_objects {
-        match obj {
-            GraphObject::Vertex(v) => { existing_vertices.insert(v.name.clone()); }
-            GraphObject::VertexRef { vertex } => { existing_vertices.insert(vertex.name.clone()); }
-            _ => {}
+    // Collect all entities (vertices, references, and groups) already declared within sub_objects
+    fn collect_declared_names(objects: &[GraphObject], out: &mut HashSet<String>) {
+        for obj in objects {
+            match obj {
+                GraphObject::Vertex(v) => { out.insert(v.name.clone()); }
+                GraphObject::VertexRef { vertex } => { out.insert(vertex.name.clone()); }
+                GraphObject::Reference(r) => { out.insert(r.name.clone()); }
+                GraphObject::Group(grp) => {
+                    out.insert(grp.name.clone());
+                    collect_declared_names(&grp.objects, out);
+                }
+                _ => {}
+            }
         }
     }
+
+    let mut existing_entities = HashSet::new();
+    collect_declared_names(&sub_objects, &mut existing_entities);
+
+    // Only synthesize vertices for edge endpoints that are not declared anywhere in sub_objects
     for m in &member_names {
-        if !existing_vertices.contains(m) {
+        if !existing_entities.contains(m) {
+            let parent_vertex = parent_canvas.get_flattened_vertices().into_iter().find(|v| v.get_name() == m);
+            let (label, color, textcolor, shape, style, image, url) = if let Some(pv) = parent_vertex {
+                (
+                    pv.get_label().map(|s| s.to_string()),
+                    pv.get_color().map(|s| s.to_string()),
+                    pv.get_textcolor().map(|s| s.to_string()),
+                    pv.get_shape().map(|s| s.to_string()),
+                    pv.get_style().map(|s| s.to_string()),
+                    pv.get_image().map(|s| s.to_string()),
+                    pv.get_url().map(|s| s.to_string()),
+                )
+            } else {
+                (None, None, None, None, None, None, None)
+            };
+
             sub_objects.push(GraphObject::Vertex(crate::ast::GraphVertex {
                 pseudo_type: "GraphVertex".to_string(),
                 name: m.clone(),
-                label: None,
-                color: None,
-                textcolor: None,
-                shape: None,
-                style: None,
-                image: None,
-                url: None,
+                label,
+                color,
+                textcolor,
+                shape,
+                style,
+                image,
+                url,
             }));
         }
     }

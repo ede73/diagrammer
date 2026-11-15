@@ -230,14 +230,35 @@ impl LayeredGraph {
         // Identify all composite groups (groups with custom visualizers) and encapsulate their members
         let mut composite_member_nodes: std::collections::HashSet<String> = std::collections::HashSet::new();
         let mut composite_group_names: std::collections::HashSet<String> = std::collections::HashSet::new();
-        for obj in canvas.get_objects(false) {
-            if let GraphObject::Group(grp) = obj {
-                if grp.visualizer.is_some() {
-                    composite_group_names.insert(grp.name.clone());
-                    composite_member_nodes.extend(crate::layout::poly::collect_group_member_names(grp, canvas));
+
+        fn collect_all_group_names(grp: &crate::ast::GraphGroup, out: &mut std::collections::HashSet<String>) {
+            out.insert(grp.name.clone());
+            for obj in &grp.objects {
+                if let GraphObject::Group(sub) = obj {
+                    collect_all_group_names(sub, out);
                 }
             }
         }
+
+        fn find_composite_groups(
+            objects: &[GraphObject],
+            canvas: &GraphCanvas,
+            comp_nodes: &mut std::collections::HashSet<String>,
+            comp_groups: &mut std::collections::HashSet<String>,
+        ) {
+            for obj in objects {
+                if let GraphObject::Group(grp) = obj {
+                    if grp.visualizer.is_some() {
+                        comp_groups.insert(grp.name.clone());
+                        collect_all_group_names(grp, comp_groups);
+                        comp_nodes.extend(crate::layout::poly::collect_group_member_names(grp, canvas));
+                    }
+                    find_composite_groups(&grp.objects, canvas, comp_nodes, comp_groups);
+                }
+            }
+        }
+
+        find_composite_groups(&canvas.objects, canvas, &mut composite_member_nodes, &mut composite_group_names);
 
         // 1. Extract nodes and groups
         for obj in canvas.get_objects(false) {
@@ -382,7 +403,7 @@ impl LayeredGraph {
             if edge.parent.as_ref().map_or(false, |p| composite_group_names.contains(p)) {
                 continue;
             }
-            if composite_member_nodes.contains(&edge.left) && composite_member_nodes.contains(&edge.right) {
+            if composite_member_nodes.contains(&edge.left) || composite_member_nodes.contains(&edge.right) {
                 continue;
             }
 
@@ -429,7 +450,7 @@ impl LayeredGraph {
             if edge.parent.as_ref().map_or(false, |p| composite_group_names.contains(p)) {
                 continue;
             }
-            if composite_member_nodes.contains(&edge.left) && composite_member_nodes.contains(&edge.right) {
+            if composite_member_nodes.contains(&edge.left) || composite_member_nodes.contains(&edge.right) {
                 continue;
             }
             let left_target = if !nodes.contains_key(&edge.left) && group_members_map.contains_key(&edge.left) {

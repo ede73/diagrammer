@@ -1,13 +1,16 @@
 visualizer layered
 
-ClientAuth > DecisionTree
+StartNode > AuthSequence > DataProcessingTree > FinishNode
 
-{ClientAuth; Auth Handshake
+{AuthSequence; Authentication Handshake
     visualizer native_sequence
-    Client > "Token" Server
+    Client > "1. SYN" Server
+    Server > "2. SYN-ACK" Client
+    Client > "3. ACK" Server
 }
 
-{DecisionTree; Policy Check
+{DataProcessingTree; Decision & Routing Hierarchy
     visualizer tree
-    Allow > Deny
+    Router > (FastPath, DeepInspection)
+    DeepInspection > (PayloadScanner, Quarantine)
 }

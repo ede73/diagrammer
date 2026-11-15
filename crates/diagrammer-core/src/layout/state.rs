@@ -117,7 +117,37 @@ impl StateGraph {
         // 2. Discover composite groups vs cluster groups
         let mut composite_groups: HashMap<String, (Option<String>, Vec<String>, Option<String>, Option<String>, f64, f64)> = HashMap::new();
         let mut composite_member_nodes: HashSet<String> = HashSet::new();
+        let mut composite_group_names: HashSet<String> = HashSet::new();
         let mut node_to_cluster_group: HashMap<String, String> = HashMap::new();
+
+        fn collect_all_group_names(grp: &crate::ast::GraphGroup, out: &mut HashSet<String>) {
+            out.insert(grp.name.clone());
+            for obj in &grp.objects {
+                if let GraphObject::Group(sub) = obj {
+                    collect_all_group_names(sub, out);
+                }
+            }
+        }
+
+        fn find_composite_groups(
+            objects: &[GraphObject],
+            canvas: &GraphCanvas,
+            comp_nodes: &mut HashSet<String>,
+            comp_groups: &mut HashSet<String>,
+        ) {
+            for obj in objects {
+                if let GraphObject::Group(grp) = obj {
+                    if grp.visualizer.is_some() {
+                        comp_groups.insert(grp.name.clone());
+                        collect_all_group_names(grp, comp_groups);
+                        comp_nodes.extend(crate::layout::poly::collect_group_member_names(grp, canvas));
+                    }
+                    find_composite_groups(&grp.objects, canvas, comp_nodes, comp_groups);
+                }
+            }
+        }
+
+        find_composite_groups(&canvas.objects, canvas, &mut composite_member_nodes, &mut composite_group_names);
 
         for obj in &canvas.objects {
             if let GraphObject::Group(grp) = obj {
@@ -125,41 +155,33 @@ impl StateGraph {
                 let grp_label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
 
                 if is_composite {
-                    // Collect member node names so we encapsulate them
-                    let mut inner_tasks = Vec::new();
-                    for m in &grp.objects {
-                        match m {
-                            GraphObject::Vertex(v) => {
-                                composite_member_nodes.insert(v.name.clone());
-                                inner_tasks.push(v.label.clone().unwrap_or_else(|| v.name.clone()));
-                            }
-                            GraphObject::VertexRef { vertex } => {
-                                composite_member_nodes.insert(vertex.name.clone());
-                                inner_tasks.push(vertex.label.clone().unwrap_or_else(|| vertex.name.clone()));
-                            }
-                            GraphObject::Reference(r) => {
-                                composite_member_nodes.insert(r.name.clone());
-                                inner_tasks.push(r.name.clone());
-                            }
-                            _ => {}
-                        }
-                    }
-
-                    // Poly-archetype: Check if group declares its own visualizer
-                    let (sub_svg, sub_w, sub_h) = if grp.visualizer.is_some() {
-                        if let Some(sub) = crate::layout::poly::render_subgraph(canvas, grp) {
+                    if grp.visualizer.is_some() {
+                        // Poly-archetype: Embedded Subgraph!
+                        let (sub_svg, sub_w, sub_h) = if let Some(sub) = crate::layout::poly::render_subgraph(canvas, grp) {
                             (Some(sub.svg), sub.width, sub.height)
                         } else {
                             (None, 420.0, 240.0)
-                        }
-                    } else {
-                        (None, 420.0, 100.0)
-                    };
+                        };
 
-                    composite_groups.insert(
-                        grp.name.clone(),
-                        (sub_svg, inner_tasks, Some(grp_label), grp.color.clone(), sub_w, sub_h),
-                    );
+                        composite_groups.insert(
+                            grp.name.clone(),
+                            (sub_svg, Vec::new(), Some(grp_label), grp.color.clone(), sub_w, sub_h),
+                        );
+                    } else {
+                        // Ordinary composite group (display list of tasks)
+                        let mut inner_tasks = Vec::new();
+                        for m in &grp.objects {
+                            if m.is_vertex() || m.is_reference() {
+                                inner_tasks.push(m.get_label().unwrap_or_else(|| m.get_name()).to_string());
+                                composite_member_nodes.insert(m.get_name().to_string());
+                            }
+                        }
+
+                        composite_groups.insert(
+                            grp.name.clone(),
+                            (None, inner_tasks, Some(grp_label), grp.color.clone(), 420.0, 100.0),
+                        );
+                    }
                 } else {
                     // Cluster group (e.g. PassiveClose or ActiveClose in state_tcp)
                     let mut member_names = Vec::new();
@@ -204,7 +226,10 @@ impl StateGraph {
         let mut out_degrees: HashMap<String, usize> = HashMap::new();
 
         for e in &raw_edges {
-            if composite_member_nodes.contains(&e.left) && composite_member_nodes.contains(&e.right) {
+            if e.parent.as_ref().map_or(false, |p| composite_group_names.contains(p)) {
+                continue;
+            }
+            if composite_member_nodes.contains(&e.left) || composite_member_nodes.contains(&e.right) {
                 continue;
             }
             *in_degrees.entry(e.left.clone()).or_insert(0) += 0;
@@ -216,7 +241,7 @@ impl StateGraph {
         for v in raw_vertices {
             let name = v.get_name().to_string();
             // Skip vertices that belong inside a composite state
-            if composite_member_nodes.contains(&name) {
+            if composite_member_nodes.contains(&name) || composite_group_names.contains(&name) {
                 continue;
             }
             // If this vertex is a composite group, we will add the composite node instead
@@ -347,7 +372,10 @@ impl StateGraph {
         // 4. Topological ranking & Lane assignment
         let mut forward_adj: HashMap<String, Vec<String>> = HashMap::new();
         for e in &raw_edges {
-            if composite_member_nodes.contains(&e.left) && composite_member_nodes.contains(&e.right) {
+            if e.parent.as_ref().map_or(false, |p| composite_group_names.contains(p)) {
+                continue;
+            }
+            if composite_member_nodes.contains(&e.left) || composite_member_nodes.contains(&e.right) {
                 continue;
             }
             if e.left != e.right {
@@ -570,7 +598,10 @@ impl StateGraph {
 
         let mut edges: Vec<StateEdge> = Vec::new();
         for e in &raw_edges {
-            if composite_member_nodes.contains(&e.left) && composite_member_nodes.contains(&e.right) {
+            if e.parent.as_ref().map_or(false, |p| composite_group_names.contains(p)) {
+                continue;
+            }
+            if composite_member_nodes.contains(&e.left) || composite_member_nodes.contains(&e.right) {
                 continue;
             }
 

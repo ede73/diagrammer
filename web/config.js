@@ -1,6 +1,5 @@
 import { visualizeCirclePacked } from './visualizations/visualizeCirclePacked.js';
 import { visualizeGraphviz } from './visualizations/visualizeGraphviz.js';
-import { visualizeMscGen } from './visualizations/visualizeMscGen.js';
 import { visualizeRadialDendrogram } from './visualizations/visualizeRadialDendrogram.js';
 import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilford.js';
 import { visualizeSankey } from './visualizations/visualizeSankey.js';
@@ -62,28 +61,6 @@ else {
 function getLocalRepoFont() {
     return localRepoFont;
 }
-const buggyDiags = (command, format, outputFile) => {
-    const font = getLocalRepoFont();
-    const redirectingDiag = true;
-    if (redirectingDiag) {
-        return [
-            `${command}`,
-            '-a',
-            `-T${format}`,
-            '-f',
-            font !== null && font !== void 0 ? font : 'fonts/dejavu-sans-bold.ttf',
-            '-',
-            `-o${outputFile}`
-        ];
-    }
-    else {
-        return [
-            'sh',
-            '-c',
-            `cat -| /usr/bin/${command}3 -a -T${format} -f${font !== null && font !== void 0 ? font : 'fonts/dejavu-sans-bold.ttf'} -o/dev/stdout /dev/stdin|cat`
-        ];
-    }
-};
 const _visualizations = [
     new Visualization('dot', 'Graphviz: dot (Hierarchical)', 'digraph', async (g) => {
         await visualizeGraphviz(g, 'dot');
@@ -131,21 +108,11 @@ const _visualizations = [
     new Visualization('circlepacked', 'D3.js: Circle Packed', 'dendrogram', visualizeCirclePacked, undefined, { family: 'D3.js', engine: 'Circle Packed', description: 'Nested enclosure circles' }),
     new Visualization('sankey', 'D3.js: Sankey (Flow)', 'sankey', visualizeSankey, undefined, { family: 'D3.js', engine: 'Sankey', description: 'Flow and distribution diagram' }),
 
-    new Visualization('mscgen', 'MSCGen: Message Sequence Chart', 'mscgen', visualizeMscGen, (format) => [
-        'mscgen',
-        '-i-',
-        '-o-',
-        `-T${format}`
-    ], { family: 'MSCGen', engine: 'mscgenjs', description: 'Message Sequence Chart' }),
-
     new Visualization('native_sequence', 'Diagrammer: Native Sequence [WASM]', 'native_sequence', visualizeNativeSequence, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency vector sequence diagram' }),
     new Visualization('layered', 'Diagrammer: Layered DAG [WASM]', 'layered', visualizeLayered, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency hierarchical DAG and UML flowchart engine' }),
     new Visualization('tree', 'Diagrammer: Tree / Dendrogram [WASM]', 'tree', visualizeTree, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency tree and radial dendrogram engine' }),
     new Visualization('grid', 'Diagrammer: 2D Grid / Network Bus [WASM]', 'grid', visualizeGrid, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency 2D matrix grid and network bus engine' }),
     new Visualization('force', 'Diagrammer: Force-Directed Physics [WASM]', 'force', visualizeForce, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency spring-electrical physics simulation engine' }),
-
-    new Visualization('nwdiag', 'Blockdiag: Network Diagram [CLI]', 'nwdiag', undefined, (format, outputFile) => buggyDiags('nwdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'nwdiag', description: 'Network diagram (Python CLI)' }),
-    new Visualization('seqdiag', 'Blockdiag: Sequence Diagram [CLI]', 'seqdiag', undefined, (format, outputFile) => buggyDiags('seqdiag', format, outputFile !== null && outputFile !== void 0 ? outputFile : '-'), { family: 'Blockdiag', engine: 'seqdiag', description: 'Sequence diagram (Python CLI)' }),
 
     new Visualization('plantuml_sequence', 'PlantUML: Sequence Diagram [CLI]', 'plantuml_sequence', undefined, (format) => [
         'java',

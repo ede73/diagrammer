@@ -23,7 +23,6 @@
 <script type="module" src="web/visualizations/visualizeGrid.js"></script>
 <script type="module" src="web/visualizations/visualizeLayered.js"></script>
 <script type="module" src="web/visualizations/visualizeMermaid.js"></script>
-<script type="module" src="web/visualizations/visualizeMscGen.js"></script>
 <script type="module" src="web/visualizations/visualizeNativeSequence.js"></script>
 <script type="module" src="web/visualizations/visualizeRadialDendrogram.js"></script>
 <script type="module" src="web/visualizations/visualizeReingoldTilford.js"></script>
@@ -37,7 +36,6 @@
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://unpkg.com/d3-sankey@0"></script>
-  <script src="web/js/mscgen/dist/bundle/index.min.js"></script>
 </head>
 
 <body>
@@ -302,6 +300,9 @@
             <div class="tab-content" id="diagrammer-beautified"></div>
           </div>
         </div>
+
+        <!-- Draggable Horizontal Splitter -->
+        <div class="workspace-splitter" id="workspace-splitter" title="Drag to resize panes (double-click to reset 50/50)"></div>
 
         <!-- Right: Visualization Preview Pane -->
         <div class="preview-pane">

@@ -1,0 +1,38 @@
+// Dynamic Operator Overrides & Polymorphic Shape Arrowheads
+
+define dude(width=80, height=60) {
+  <svg viewBox="0 0 80 60">
+    <circle cx="40" cy="22" r="14" fill="#38bdf8" />
+    <path d="M 16 52 C 20 34, 60 34, 64 52" stroke="#38bdf8" stroke-width="3" fill="none" />
+  </svg>
+}
+
+define auto(width=60, height=32) {
+  rectangle(x=0, y=8, w=60, h=18, rx=4)
+  polygon(12,8 20,0 42,0 50,8)
+  circle(cx=15, cy=26, r=6)
+  circle(cx=45, cy=26, r=6)
+}
+
+define operator <> {
+  type: bidirectional
+  style: dashed
+  arrowhead(width=14, height=14, rotation=0): dude()
+  action: tls-handshake
+}
+
+define operator <~> {
+  type: bidirectional
+  style: dotted
+  arrowhead: diamond
+}
+
+define operator ~> {
+  style: dashed
+  color: #10b981
+  arrowhead(width=16, height=12): auto()
+}
+
+dude Alice <> dude Bob; "Peer sync"
+auto Taxi <~> auto Bus; "Fleet link"
+Alice ~> Taxi; "Hails cab"

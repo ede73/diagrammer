@@ -383,3 +383,100 @@ Alice > Taxi; "Takes ride"
         assert!(svg.contains("Taxi"), "{} SVG must render label Taxi", engine_name);
     }
 }
+
+#[test]
+fn test_dynamic_operator_overrides_and_arrowheads() {
+    let input_path = if Path::new("tests/test_inputs/dynamic_operators.txt").exists() {
+        "tests/test_inputs/dynamic_operators.txt"
+    } else if Path::new("../../tests/test_inputs/dynamic_operators.txt").exists() {
+        "../../tests/test_inputs/dynamic_operators.txt"
+    } else {
+        panic!("tests/test_inputs/dynamic_operators.txt not found");
+    };
+
+    let input = fs::read_to_string(input_path).expect("Failed to read dynamic_operators.txt");
+    let canvas = AstBuilder::new().build(&input).expect("Failed to build AST for dynamic operators");
+
+    // 1. Verify AST TypeRegistry Operators
+    assert!(canvas.type_registry.has_operator("<>"), "TypeRegistry must contain '<>'");
+    assert!(canvas.type_registry.has_operator("<~>"), "TypeRegistry must contain '<~>'");
+    assert!(canvas.type_registry.has_operator("~>"), "TypeRegistry must contain '~>'");
+
+    let op_diamond = canvas.type_registry.get_operator("<>").unwrap();
+    assert_eq!(op_diamond.edge_type.as_deref(), Some("bidirectional"));
+    assert_eq!(op_diamond.style.as_deref(), Some("dashed"));
+    assert_eq!(op_diamond.action.as_deref(), Some("tls-handshake"));
+    let ah_dude = op_diamond.arrowhead.as_ref().expect("Arrowhead for <> exists");
+    assert_eq!(ah_dude.shape, "dude");
+    assert_eq!(ah_dude.width, Some(14.0));
+    assert_eq!(ah_dude.height, Some(14.0));
+    assert_eq!(ah_dude.rotation, Some(0.0));
+
+    let op_tilde_bidi = canvas.type_registry.get_operator("<~>").unwrap();
+    assert_eq!(op_tilde_bidi.edge_type.as_deref(), Some("bidirectional"));
+    assert_eq!(op_tilde_bidi.style.as_deref(), Some("dotted"));
+    let ah_diamond = op_tilde_bidi.arrowhead.as_ref().expect("Arrowhead for <~> exists");
+    assert_eq!(ah_diamond.shape, "diamond");
+
+    let op_auto = canvas.type_registry.get_operator("~>").unwrap();
+    assert_eq!(op_auto.style.as_deref(), Some("dashed"));
+    assert_eq!(op_auto.color.as_deref(), Some("#10b981"));
+    let ah_auto = op_auto.arrowhead.as_ref().expect("Arrowhead for ~> exists");
+    assert_eq!(ah_auto.shape, "auto");
+    assert_eq!(ah_auto.width, Some(16.0));
+    assert_eq!(ah_auto.height, Some(12.0));
+
+    // 2. Verify edge inheritance from operator definitions
+    let edges = canvas.get_edges();
+    assert_eq!(edges.len(), 3);
+
+    let edge_peer = edges.iter().find(|e| e.left == "Alice" && e.right == "Bob").expect("Alice <> Bob exists");
+    assert_eq!(edge_peer.edge_type, "<>");
+    assert_eq!(edge_peer.style.as_deref(), Some("dashed"));
+    assert_eq!(edge_peer.arrowhead.as_deref(), Some("dude"));
+
+    let edge_fleet = edges.iter().find(|e| e.left == "Taxi" && e.right == "Bus").expect("Taxi <~> Bus exists");
+    assert_eq!(edge_fleet.edge_type, "<~>");
+    assert_eq!(edge_fleet.style.as_deref(), Some("dotted"));
+    assert_eq!(edge_fleet.arrowhead.as_deref(), Some("diamond"));
+
+    let edge_cab = edges.iter().find(|e| e.left == "Alice" && e.right == "Taxi").expect("Alice ~> Taxi exists");
+    assert_eq!(edge_cab.edge_type, "~>");
+    assert_eq!(edge_cab.color.as_deref(), Some("#10b981"));
+    assert_eq!(edge_cab.style.as_deref(), Some("dashed"));
+    assert_eq!(edge_cab.arrowhead.as_deref(), Some("auto"));
+
+    // 3. Verify Layered layout SVG output
+    let layered_gen = make_generator("layered").expect("layered generator exists");
+    let layered_svg = layered_gen.generate(&canvas);
+
+    // Layered defs must define dynamic markers
+    assert!(layered_svg.contains("<marker id=\"dl-op-lt_gt_\""), "Layered SVG must define marker dl-op-lt_gt_");
+    assert!(layered_svg.contains("<marker id=\"dl-op-lt_tilde_gt_\""), "Layered SVG must define marker dl-op-lt_tilde_gt_");
+    assert!(layered_svg.contains("<marker id=\"dl-op-tilde_gt_\""), "Layered SVG must define marker dl-op-tilde_gt_");
+
+    // Inside dude marker, dude's SVG template must be rendered
+    assert!(layered_svg.contains("0 0 80.0 60.0"), "Marker for dude must use dude template viewBox");
+
+    // Edges must reference the markers
+    assert!(layered_svg.contains("marker-end=\"url(#dl-op-lt_gt_)\""), "Layered SVG edge must reference marker-end for <>");
+    assert!(layered_svg.contains("marker-start=\"url(#dl-op-lt_gt_)\""), "Layered SVG bidirectional edge must reference marker-start for <>");
+    assert!(layered_svg.contains("marker-end=\"url(#dl-op-tilde_gt_)\""), "Layered SVG edge must reference marker-end for ~>");
+
+    // Operator styles
+    assert!(layered_svg.contains("stroke-dasharray=\"6,4\""), "Layered SVG must render dashed style for <> and ~>");
+    assert!(layered_svg.contains("stroke-dasharray=\"2,4\""), "Layered SVG must render dotted style for <~>");
+    assert!(layered_svg.contains("stroke=\"#10b981\""), "Layered SVG must render operator color #10b981 for ~>");
+
+    // 4. Verify Force layout SVG output
+    let force_gen = make_generator("force").expect("force generator exists");
+    let force_svg = force_gen.generate(&canvas);
+    assert!(force_svg.contains("<marker id=\"dforce-op-lt_gt_\""), "Force SVG must define marker dforce-op-lt_gt_");
+    assert!(force_svg.contains("marker-end=\"url(#dforce-op-tilde_gt_)\""), "Force SVG must reference custom marker");
+
+    // 5. Verify Sequence layout SVG output
+    let seq_gen = make_generator("sequence").expect("sequence generator exists");
+    let seq_svg = seq_gen.generate(&canvas);
+    assert!(seq_svg.contains("<marker id=\"ds-op-lt_gt_\""), "Sequence SVG must define marker ds-op-lt_gt_");
+    assert!(seq_svg.contains("marker-end=\"url(#ds-op-lt_gt_)\""), "Sequence SVG must reference custom marker");
+}

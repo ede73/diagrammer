@@ -29,7 +29,7 @@ STYLES = @{
 }
 
 // Edge symbols (mirroring Jison grammar EVENT token regex, extended for multi-char lines like -->, ..>, ==>, |-->)
-LINE_CHAR = _{ "." | "=" | "-" | ("/" ~ !"/") }
+LINE_CHAR = _{ "." | "=" | "-" | "~" | "*" | ("/" ~ !"/") }
 EVENT = @{
     ("<<" | "<" | "|") ~ LINE_CHAR* ~ (">>" | ">" | "|")
   | ("<<" | "<" | "|") ~ LINE_CHAR+
@@ -96,7 +96,8 @@ include_block = { INCLUDE_KW ~ "{" ~ (include_target ~ ";"?)* ~ "}" }
 include_stmt = { INCLUDE_KW ~ include_target }
 
 DEFINE_KW = @{ ^"define" ~ !(ASCII_ALPHANUMERIC | "_") }
-define_name = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+OPERATOR_KW = @{ ^"operator" ~ !(ASCII_ALPHANUMERIC | "_") }
+define_name = @{ !OPERATOR_KW ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 define_param_key = @{ ASCII_ALPHA+ }
 define_param_val = @{ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
 define_param = { define_param_key ~ "=" ~ define_param_val }
@@ -113,6 +114,29 @@ raw_svg = ${ ^"<svg" ~ (!^"</svg>" ~ ANY)* ~ ^"</svg>" }
 
 define_statement = { (raw_svg | geom_primitive) ~ ";"? }
 define_block = { DEFINE_KW ~ define_name ~ define_params? ~ "{" ~ define_statement* ~ "}" }
+
+op_type_kw = @{ (^"bidirectional" | ^"directed" | ^"undirected" | ^"double" | ^"flat" | ^"none") ~ !(ASCII_ALPHANUMERIC | "_") }
+op_style_kw = @{ (^"solid" | ^"dashed" | ^"dotted" | ^"bold" | ^"double" | ^"invis") ~ !(ASCII_ALPHANUMERIC | "_") }
+arrowhead_kw = @{ ^"arrowhead" ~ !(ASCII_ALPHANUMERIC | "_") }
+
+arrowhead_entry = { arrowhead_kw ~ define_params? ~ ":" ~ (SHAPES | custom_type) ~ ("(" ~ geom_args ~ ")")? ~ ";"? }
+op_type_entry = { ^"type" ~ ":" ~ op_type_kw ~ ";"? }
+op_style_entry = { ^"style" ~ ":" ~ op_style_kw ~ ";"? }
+op_color_entry = { ^"color" ~ ":" ~ color_or_variable ~ ";"? }
+op_action_val = @{ (ASCII_ALPHANUMERIC | "_" | "-")+ }
+op_action_entry = { ^"action" ~ ":" ~ op_action_val ~ ";"? }
+
+operator_entry = {
+    arrowhead_entry
+  | op_type_entry
+  | op_style_entry
+  | op_color_entry
+  | op_action_entry
+}
+
+define_operator_block = {
+    DEFINE_KW ~ OPERATOR_KW ~ EVENT ~ "{" ~ operator_entry* ~ "}"
+}
 
 custom_type = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 
@@ -177,6 +201,7 @@ statement = {
   | layout_block
   | include_block
   | include_stmt
+  | define_operator_block
   | define_block
   | group_start
   | group_end

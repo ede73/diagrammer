@@ -94,6 +94,8 @@ impl AstBuilder {
                         for stmt_child in inner.into_inner() {
                             if stmt_child.as_rule() == Rule::define_block {
                                 self.process_define_block(stmt_child)?;
+                            } else if stmt_child.as_rule() == Rule::define_operator_block {
+                                self.process_define_operator_block(stmt_child)?;
                             }
                         }
                     }
@@ -657,6 +659,9 @@ impl AstBuilder {
                     }
                 }
             }
+            Rule::define_operator_block => {
+                // Pre-scanned in Pass 1
+            }
             Rule::define_block => {
                 self.process_define_block(pair)?;
             }
@@ -899,6 +904,135 @@ impl AstBuilder {
                 body,
             };
             self.canvas.type_registry.insert_shape(template);
+        }
+
+        Ok(())
+    }
+
+    fn process_define_operator_block(&mut self, pair: Pair<Rule>) -> Result<(), String> {
+        let mut symbol = String::new();
+        let mut edge_type = None;
+        let mut style = None;
+        let mut color = None;
+        let mut arrowhead = None;
+        let mut action = None;
+
+        for p in pair.into_inner() {
+            match p.as_rule() {
+                Rule::EVENT => {
+                    symbol = p.as_str().trim().to_string();
+                }
+                Rule::operator_entry => {
+                    for entry in p.into_inner() {
+                        match entry.as_rule() {
+                            Rule::op_type_entry => {
+                                for inner in entry.into_inner() {
+                                    if inner.as_rule() == Rule::op_type_kw {
+                                        edge_type = Some(inner.as_str().trim().to_lowercase());
+                                    }
+                                }
+                            }
+                            Rule::op_style_entry => {
+                                for inner in entry.into_inner() {
+                                    if inner.as_rule() == Rule::op_style_kw {
+                                        style = Some(inner.as_str().trim().to_lowercase());
+                                    }
+                                }
+                            }
+                            Rule::op_color_entry => {
+                                for inner in entry.into_inner() {
+                                    if inner.as_rule() == Rule::color_or_variable {
+                                        if let Ok(c) = self.extract_color_or_var(inner) {
+                                            color = Some(c);
+                                        }
+                                    }
+                                }
+                            }
+                            Rule::arrowhead_entry => {
+                                let mut ah_shape = String::new();
+                                let mut ah_w = None;
+                                let mut ah_h = None;
+                                let mut ah_rot = None;
+                                let mut ah_refx = None;
+                                let mut ah_refy = None;
+                                let mut ah_args = None;
+
+                                for ah_part in entry.into_inner() {
+                                    match ah_part.as_rule() {
+                                        Rule::define_params => {
+                                            for param in ah_part.into_inner() {
+                                                if param.as_rule() == Rule::define_param {
+                                                    let mut key = String::new();
+                                                    let mut val = String::new();
+                                                    for kv in param.into_inner() {
+                                                        match kv.as_rule() {
+                                                            Rule::define_param_key => key = kv.as_str().trim().to_lowercase(),
+                                                            Rule::define_param_val => val = kv.as_str().trim().to_string(),
+                                                            _ => {}
+                                                        }
+                                                    }
+                                                    if let Ok(num) = val.parse::<f64>() {
+                                                        match key.as_str() {
+                                                            "w" | "width" => ah_w = Some(num),
+                                                            "h" | "height" => ah_h = Some(num),
+                                                            "rot" | "rotation" => ah_rot = Some(num),
+                                                            "refx" | "ref_x" => ah_refx = Some(num),
+                                                            "refy" | "ref_y" => ah_refy = Some(num),
+                                                            _ => {}
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        Rule::SHAPES | Rule::custom_type => {
+                                            ah_shape = ah_part.as_str().trim().to_string();
+                                        }
+                                        Rule::geom_args => {
+                                            let s = ah_part.as_str().trim();
+                                            if !s.is_empty() {
+                                                ah_args = Some(s.to_string());
+                                            }
+                                        }
+                                        _ => {}
+                                    }
+                                }
+                                if !ah_shape.is_empty() {
+                                    arrowhead = Some(crate::ast::ArrowheadSpec {
+                                        shape: ah_shape,
+                                        width: ah_w,
+                                        height: ah_h,
+                                        rotation: ah_rot,
+                                        ref_x: ah_refx,
+                                        ref_y: ah_refy,
+                                        args: ah_args,
+                                    });
+                                }
+                            }
+                            Rule::op_action_entry => {
+                                for inner in entry.into_inner() {
+                                    if inner.as_rule() == Rule::op_action_val {
+                                        action = Some(inner.as_str().trim().to_string());
+                                    }
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        if !symbol.is_empty() {
+            let op_def = crate::ast::OperatorDefinition {
+                symbol,
+                edge_type,
+                style,
+                color,
+                arrowhead,
+                action,
+            };
+            self.canvas.type_registry.insert_operator(op_def);
         }
 
         Ok(())
@@ -1549,6 +1683,21 @@ impl AstBuilder {
                         edge.textcolor = self.find_default_edgetextcolor();
                     }
                     edge.parent = parent.clone();
+
+                    let op_def = self.canvas.type_registry.get_operator(&conn.event_type).cloned();
+                    if let Some(ref op) = op_def {
+                        if !edge.has_explicit_color {
+                            if let Some(ref c) = op.color {
+                                edge.color = Some(c.clone());
+                            }
+                        }
+                        if edge.style.is_none() {
+                            edge.style = op.style.clone();
+                        }
+                        if edge.arrowhead.is_none() {
+                            edge.arrowhead = op.arrowhead.as_ref().map(|a| a.shape.clone());
+                        }
+                    }
 
                     self.canvas.objects.push(GraphObject::Edge { edge });
                     self.maybe_remove_from_root_vertices(&rhs.name);

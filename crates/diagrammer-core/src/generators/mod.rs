@@ -12,7 +12,6 @@ pub mod mermaid_sequence;
 pub mod mermaid_state;
 pub mod mscgen;
 pub mod native_sequence;
-pub mod nwdiag;
 pub mod plantuml_sequence;
 pub mod sankey;
 pub mod tree;
@@ -118,7 +117,7 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
             Some(Box::new(digraph::DiGraph))
         }
         "force" | "organic" | "physics" => Some(Box::new(force::ForceGenerator)),
-        "grid" | "block" | "network_bus" => Some(Box::new(grid::GridGenerator)),
+        "grid" | "block" | "network_bus" | "nwdiag" => Some(Box::new(grid::GridGenerator)),
         // Legacy GoJS generators (unmaintained)
         "layerbands" => Some(Box::new(layerbands::LayerBands)),
         "parsetree" => Some(Box::new(parsetree::ParseTree)),
@@ -133,7 +132,6 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
         "mermaid_state" => Some(Box::new(mermaid_state::MermaidState)),
         "mscgen" => Some(Box::new(mscgen::MSCGen)),
         "native_sequence" | "sequence" => Some(Box::new(native_sequence::NativeSequence)),
-        "nwdiag" => Some(Box::new(nwdiag::NWDiag)),
         "plantuml_sequence" => Some(Box::new(plantuml_sequence::PlantUMLSequence)),
         "sankey" => Some(Box::new(sankey::Sankey)),
         "tree" | "radial" | "native_tree" | "fan" => Some(Box::new(tree::TreeGenerator)),

@@ -838,20 +838,22 @@ impl LayeredGraph {
         let mut all_node_anchors: HashMap<String, NodeAnchor> = HashMap::new();
         let mut node_to_composite_group: HashMap<String, String> = HashMap::new();
 
-        // 1. Top-level nodes
+        // 1. Top-level leaf nodes (excluding composite containers which are hosts)
         for node in nodes.values() {
-            all_node_anchors.insert(
-                node.id.clone(),
-                NodeAnchor {
-                    x: node.x,
-                    y: node.y,
-                    width: node.width,
-                    height: node.height,
-                    center_x: node.x + node.width / 2.0,
-                    center_y: node.y + node.height / 2.0,
-                    is_inside_subgraph: false,
-                },
-            );
+            if node.embedded_subgraph.is_none() {
+                all_node_anchors.insert(
+                    node.id.clone(),
+                    NodeAnchor {
+                        x: node.x,
+                        y: node.y,
+                        width: node.width,
+                        height: node.height,
+                        center_x: node.x + node.width / 2.0,
+                        center_y: node.y + node.height / 2.0,
+                        is_inside_subgraph: false,
+                    },
+                );
+            }
 
             // 2. Resolve internal child nodes within composite subgraphs
             if let Some(ref sub) = node.embedded_subgraph {
@@ -914,7 +916,37 @@ impl LayeredGraph {
 
             cross_boundary_idx += 1;
             let stagger = ((cross_boundary_idx - 1) % 4) as f64 * 16.0;
-            let use_right = u_anchor.center_x >= center_x && v_anchor.center_x >= center_x;
+
+            // Obstacle collision avoidance: check if horizontal entry/exit segments intersect intermediate nodes
+            let collides_h = |x_start: f64, x_end: f64, y: f64| -> bool {
+                let min_x = x_start.min(x_end);
+                let max_x = x_start.max(x_end);
+                for (id, a) in &all_node_anchors {
+                    if id == &e.left || id == &e.right {
+                        continue;
+                    }
+                    if y >= a.y - 2.0 && y <= a.y + a.height + 2.0 {
+                        if !(max_x < a.x || min_x > a.x + a.width) {
+                            return true;
+                        }
+                    }
+                }
+                false
+            };
+
+            let left_collides = collides_h(gutter_left, u_anchor.x, u_anchor.center_y)
+                || collides_h(gutter_left, v_anchor.x, v_anchor.center_y);
+            let right_collides = collides_h(u_anchor.x + u_anchor.width, gutter_right, u_anchor.center_y)
+                || collides_h(v_anchor.x + v_anchor.width, gutter_right, v_anchor.center_y);
+
+            let use_right = if !right_collides && left_collides {
+                true
+            } else if !left_collides && right_collides {
+                false
+            } else {
+                (u_anchor.center_x + v_anchor.center_x) / 2.0 >= center_x
+            };
+
             let gutter_x = if use_right {
                 gutter_right + 20.0 + stagger
             } else {

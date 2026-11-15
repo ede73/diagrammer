@@ -1,3 +1,6 @@
+//! Legacy generator for GoJS UMLClass visualization.
+//! Marked as legacy / unmaintained.
+
 use std::collections::HashMap;
 
 use regex::Regex;

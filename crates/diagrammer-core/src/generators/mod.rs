@@ -4,7 +4,6 @@ pub mod digraph;
 pub mod force;
 pub mod grid;
 pub mod layered;
-pub mod layerbands;
 pub mod mermaid_class;
 pub mod mermaid_er;
 pub mod mermaid_flowchart;
@@ -14,11 +13,14 @@ pub mod mermaid_state;
 pub mod mscgen;
 pub mod native_sequence;
 pub mod nwdiag;
-pub mod parsetree;
 pub mod plantuml_sequence;
 pub mod sankey;
 pub mod seqdiag;
 pub mod tree;
+
+// Legacy generators (unmaintained GoJS backend)
+pub mod layerbands;
+pub mod parsetree;
 pub mod umlclass;
 
 use crate::ast::GraphCanvas;
@@ -116,9 +118,12 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
         "circo" | "digraph" | "dot" | "fdp" | "neato" | "osage" | "patchwork" | "sfdp" | "twopi" => {
             Some(Box::new(digraph::DiGraph))
         }
-        "layerbands" => Some(Box::new(layerbands::LayerBands)),
         "force" | "organic" | "physics" => Some(Box::new(force::ForceGenerator)),
         "grid" | "block" | "network_bus" => Some(Box::new(grid::GridGenerator)),
+        // Legacy GoJS generators (unmaintained)
+        "layerbands" => Some(Box::new(layerbands::LayerBands)),
+        "parsetree" => Some(Box::new(parsetree::ParseTree)),
+        "umlclass" => Some(Box::new(umlclass::UMLClass)),
         "mermaid" | "mermaid_flowchart" | "mermaid_graph" => {
             Some(Box::new(mermaid_flowchart::MermaidFlowchart))
         }
@@ -130,12 +135,10 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
         "mscgen" => Some(Box::new(mscgen::MSCGen)),
         "native_sequence" | "sequence" => Some(Box::new(native_sequence::NativeSequence)),
         "nwdiag" => Some(Box::new(nwdiag::NWDiag)),
-        "parsetree" => Some(Box::new(parsetree::ParseTree)),
         "plantuml_sequence" => Some(Box::new(plantuml_sequence::PlantUMLSequence)),
         "sankey" => Some(Box::new(sankey::Sankey)),
         "seqdiag" => Some(Box::new(seqdiag::SeqDiag)),
         "tree" | "radial" | "native_tree" | "fan" => Some(Box::new(tree::TreeGenerator)),
-        "umlclass" => Some(Box::new(umlclass::UMLClass)),
         _ => None,
     }
 }

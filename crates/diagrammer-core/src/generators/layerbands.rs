@@ -1,3 +1,6 @@
+//! Legacy generator for GoJS LayerBands visualization.
+//! Marked as legacy / unmaintained.
+
 use serde::Serialize;
 
 use super::Generator;

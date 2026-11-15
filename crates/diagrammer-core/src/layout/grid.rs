@@ -63,9 +63,11 @@ impl GridGraph {
         let mut buses: Vec<NetworkBus> = Vec::new();
         let mut edges: Vec<GridEdge> = Vec::new();
 
+        let mut bus_order: Vec<String> = Vec::new();
         let mut bus_members: HashMap<String, Vec<String>> = HashMap::new();
         let mut bus_labels: HashMap<String, String> = HashMap::new();
         let mut bus_colors: HashMap<String, String> = HashMap::new();
+        let mut node_addresses: HashMap<(String, String), String> = HashMap::new();
 
         let mut standalone_nodes: Vec<String> = Vec::new();
         let mut node_labels: HashMap<String, String> = HashMap::new();
@@ -79,6 +81,9 @@ impl GridGraph {
         for obj in canvas.get_objects(false) {
             match obj {
                 GraphObject::Group(grp) => {
+                    if !bus_order.contains(&grp.name) {
+                        bus_order.push(grp.name.clone());
+                    }
                     let b_label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
                     bus_labels.insert(grp.name.clone(), b_label);
                     let b_color = grp.color.clone().unwrap_or_else(|| "#38bdf8".to_string());
@@ -86,12 +91,23 @@ impl GridGraph {
 
                     let mut members = Vec::new();
                     for inner in &grp.objects {
-                        if inner.is_vertex() {
+                        if inner.is_vertex() || inner.is_reference() {
                             let name = inner.get_name().to_string();
-                            let lbl = inner.get_label().map(|s| s.to_string()).unwrap_or_else(|| name.clone());
-                            node_labels.insert(name.clone(), lbl);
-                            node_colors.insert(name.clone(), inner.get_color().map(|s| s.to_string()));
-                            node_textcolors.insert(name.clone(), inner.get_textcolor().map(|s| s.to_string()));
+                            if let Some(lbl) = inner.get_label() {
+                                if lbl.starts_with('.') || lbl.chars().any(|c| c.is_ascii_digit()) {
+                                    node_addresses.insert((name.clone(), grp.name.clone()), lbl.to_string());
+                                } else {
+                                    node_labels.insert(name.clone(), lbl.to_string());
+                                }
+                            } else {
+                                node_labels.entry(name.clone()).or_insert_with(|| name.clone());
+                            }
+                            if let Some(c) = inner.get_color() {
+                                node_colors.insert(name.clone(), Some(c.to_string()));
+                            }
+                            if let Some(tc) = inner.get_textcolor() {
+                                node_textcolors.insert(name.clone(), Some(tc.to_string()));
+                            }
                             if let Some(sh) = inner.get_shape() {
                                 node_shapes.insert(name.clone(), sh.to_string());
                             }
@@ -101,7 +117,9 @@ impl GridGraph {
                             if let Some(img) = inner.get_image() {
                                 node_images.insert(name.clone(), img.to_string());
                             }
-                            members.push(name);
+                            if !members.contains(&name) {
+                                members.push(name);
+                            }
                         }
                     }
                     bus_members.insert(grp.name.clone(), members);
@@ -127,10 +145,34 @@ impl GridGraph {
             }
         }
 
-        // Register any edge endpoints that weren't explicitly declared
+        // Register any edge endpoints that weren't explicitly declared, or bus attachments
         for e in canvas.get_edges() {
-            node_labels.entry(e.left.clone()).or_insert_with(|| e.left.clone());
-            node_labels.entry(e.right.clone()).or_insert_with(|| e.right.clone());
+            if bus_order.contains(&e.left) && !bus_order.contains(&e.right) {
+                let bus = &e.left;
+                let node = &e.right;
+                if let Some(ref l) = e.label {
+                    node_addresses.insert((node.clone(), bus.clone()), l.clone());
+                }
+                let m_list = bus_members.entry(bus.clone()).or_default();
+                if !m_list.contains(node) {
+                    m_list.push(node.clone());
+                }
+                node_labels.entry(node.clone()).or_insert_with(|| node.clone());
+            } else if bus_order.contains(&e.right) && !bus_order.contains(&e.left) {
+                let bus = &e.right;
+                let node = &e.left;
+                if let Some(ref l) = e.label {
+                    node_addresses.insert((node.clone(), bus.clone()), l.clone());
+                }
+                let m_list = bus_members.entry(bus.clone()).or_default();
+                if !m_list.contains(node) {
+                    m_list.push(node.clone());
+                }
+                node_labels.entry(node.clone()).or_insert_with(|| node.clone());
+            } else {
+                node_labels.entry(e.left.clone()).or_insert_with(|| e.left.clone());
+                node_labels.entry(e.right.clone()).or_insert_with(|| e.right.clone());
+            }
         }
 
         // 2. Compute Layout Coordinates
@@ -139,84 +181,162 @@ impl GridGraph {
         let margin_x = 60.0;
         let margin_y = 60.0;
 
-        if !bus_members.is_empty() {
-            // Network Bus Mode: horizontal rails with vertical device drop-taps
-            let mut curr_y = margin_y;
+        if !bus_order.is_empty() {
+            // Multi-Homed Network Bus Mode
+            let mut node_col: HashMap<String, usize> = HashMap::new();
+            let mut next_col = 0;
 
-            for (bus_name, members) in &bus_members {
+            for bus_name in &bus_order {
+                if let Some(members) = bus_members.get(bus_name) {
+                    for m in members {
+                        if !node_col.contains_key(m) {
+                            node_col.insert(m.clone(), next_col);
+                            next_col += 1;
+                        }
+                    }
+                }
+            }
+
+            let rail_sep = 160.0;
+            let mut bus_rail_y: HashMap<String, f64> = HashMap::new();
+            for (idx, bus_name) in bus_order.iter().enumerate() {
+                let r_y = margin_y + 60.0 + (idx as f64) * rail_sep;
+                bus_rail_y.insert(bus_name.clone(), r_y);
+            }
+
+            for (id, &col) in &node_col {
+                let device_x = margin_x + 50.0 + (col as f64) * col_w;
+                let lbl = node_labels.get(id).cloned().unwrap_or_else(|| id.clone());
+                let shape = node_shapes.get(id).cloned().unwrap_or_else(|| "rounded".to_string());
+                let style = node_styles.get(id).cloned();
+                let image = node_images.get(id).cloned();
+                let mut w = 100.0;
+                let mut h = 42.0;
+                if let Some(template) = canvas.type_registry.get_shape(&shape) {
+                    if let Some(tw) = template.width {
+                        w = tw;
+                    }
+                    if let Some(th) = template.height {
+                        h = th;
+                    }
+                } else if shape == "circle" || shape == "doublecircle" {
+                    w = 48.0;
+                    h = 48.0;
+                } else if image.is_some() {
+                    h = 52.0;
+                    w = 70.0;
+                }
+
+                let attached_buses: Vec<&String> = bus_order
+                    .iter()
+                    .filter(|b| bus_members.get(*b).map(|m| m.contains(id)).unwrap_or(false))
+                    .collect();
+
+                let (device_y, primary_bus) = if attached_buses.len() > 1 {
+                    // Multi-homed node: positioned in the inter-rail channel bridging between buses
+                    let min_y = attached_buses.iter().map(|b| bus_rail_y[*b]).fold(f64::INFINITY, f64::min);
+                    let max_y = attached_buses.iter().map(|b| bus_rail_y[*b]).fold(f64::NEG_INFINITY, f64::max);
+                    ((min_y + max_y) / 2.0, attached_buses[0].clone())
+                } else if let Some(&only_bus) = attached_buses.first() {
+                    let b_idx = bus_order.iter().position(|b| b == only_bus).unwrap_or(0);
+                    let r_y = bus_rail_y[only_bus];
+                    let y = if b_idx == 0 && bus_order.len() > 1 {
+                        r_y - 65.0
+                    } else {
+                        r_y + 65.0
+                    };
+                    (y, only_bus.clone())
+                } else {
+                    (margin_y + 100.0, String::new())
+                };
+
+                for bus_name in &attached_buses {
+                    let r_y = bus_rail_y[*bus_name];
+                    let bus_col = bus_colors.get(*bus_name).cloned().unwrap_or_else(|| "#38bdf8".to_string());
+                    let tap_addr = node_addresses.get(&(id.clone(), (*bus_name).clone())).cloned();
+
+                    let path_d = if r_y < device_y {
+                        format!("M {:.1} {:.1} L {:.1} {:.1}", device_x, r_y, device_x, device_y - h / 2.0)
+                    } else {
+                        format!("M {:.1} {:.1} L {:.1} {:.1}", device_x, r_y, device_x, device_y + h / 2.0)
+                    };
+
+                    edges.push(GridEdge {
+                        from: (*bus_name).clone(),
+                        to: id.clone(),
+                        label: tap_addr,
+                        path_d,
+                        color: Some(bus_col),
+                    });
+                }
+
+                nodes.insert(
+                    id.clone(),
+                    GridNode {
+                        id: id.clone(),
+                        label: lbl,
+                        shape,
+                        style,
+                        image,
+                        x: device_x,
+                        y: device_y,
+                        col,
+                        row: 0,
+                        width: w,
+                        height: h,
+                        color: node_colors.get(id).cloned().flatten(),
+                        textcolor: node_textcolors.get(id).cloned().flatten(),
+                        network_bus: Some(primary_bus),
+                        address: node_addresses.values().next().cloned(),
+                    },
+                );
+            }
+
+            for bus_name in &bus_order {
                 let bus_label = bus_labels.get(bus_name).cloned().unwrap_or_else(|| bus_name.clone());
                 let bus_color = bus_colors.get(bus_name).cloned().unwrap_or_else(|| "#38bdf8".to_string());
+                let r_y = bus_rail_y[bus_name];
 
-                let bus_rail_y = curr_y + 40.0;
-                let start_x = margin_x;
-                let end_x = margin_x + ((members.len().max(1)) as f64) * col_w + 40.0;
+                let cols: Vec<usize> = bus_members
+                    .get(bus_name)
+                    .map(|m| m.iter().filter_map(|id| node_col.get(id)).copied().collect())
+                    .unwrap_or_default();
+                let min_c = cols.iter().min().copied().unwrap_or(0);
+                let max_c = cols.iter().max().copied().unwrap_or(0);
+
+                let start_x = margin_x.min(margin_x + 50.0 + (min_c as f64) * col_w - 40.0);
+                let end_x = margin_x + 50.0 + (max_c as f64) * col_w + 60.0;
 
                 buses.push(NetworkBus {
                     name: bus_name.clone(),
                     label: bus_label,
-                    y: bus_rail_y,
+                    y: r_y,
                     start_x,
                     end_x,
-                    color: bus_color.clone(),
+                    color: bus_color,
                 });
+            }
 
-                // Place attached nodes below the rail
-                let device_y = bus_rail_y + 50.0;
-                for (col_idx, m_name) in members.iter().enumerate() {
-                    let device_x = margin_x + 50.0 + (col_idx as f64) * col_w;
-                    let lbl = node_labels.get(m_name).cloned().unwrap_or_else(|| m_name.clone());
-                    let shape = node_shapes.get(m_name).cloned().unwrap_or_else(|| "rounded".to_string());
-                    let style = node_styles.get(m_name).cloned();
-                    let image = node_images.get(m_name).cloned();
-                    let mut w = 100.0;
-                    let mut h = 42.0;
-                    if let Some(template) = canvas.type_registry.get_shape(&shape) {
-                        if let Some(tw) = template.width {
-                            w = tw;
-                        }
-                        if let Some(th) = template.height {
-                            h = th;
-                        }
-                    } else if shape == "circle" || shape == "doublecircle" {
-                        w = 48.0;
-                        h = 48.0;
-                    } else if image.is_some() {
-                        h = 52.0;
-                        w = 70.0;
+            // Route any inter-node explicit edges
+            for e in canvas.get_edges() {
+                if !bus_order.contains(&e.left) && !bus_order.contains(&e.right) {
+                    if let (Some(u), Some(v)) = (nodes.get(&e.left), nodes.get(&e.right)) {
+                        let p0 = (u.x, u.y);
+                        let p1 = (v.x, v.y);
+                        let mid_x = (p0.0 + p1.0) / 2.0;
+
+                        edges.push(GridEdge {
+                            from: e.left.clone(),
+                            to: e.right.clone(),
+                            label: e.label.clone(),
+                            path_d: format!(
+                                "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
+                                p0.0, p0.1, mid_x, p0.1, mid_x, p1.1, p1.0, p1.1
+                            ),
+                            color: e.color.clone(),
+                        });
                     }
-
-                    nodes.insert(
-                        m_name.clone(),
-                        GridNode {
-                            id: m_name.clone(),
-                            label: lbl,
-                            shape,
-                            style,
-                            image,
-                            x: device_x,
-                            y: device_y,
-                            col: col_idx,
-                            row: 0,
-                            width: w,
-                            height: h,
-                            color: node_colors.get(m_name).cloned().flatten(),
-                            textcolor: node_textcolors.get(m_name).cloned().flatten(),
-                            network_bus: Some(bus_name.clone()),
-                            address: Some(format!("192.168.{}.{}", buses.len(), col_idx + 10)),
-                        },
-                    );
-
-                    // Vertical drop tap from rail to device
-                    edges.push(GridEdge {
-                        from: bus_name.clone(),
-                        to: m_name.clone(),
-                        label: None,
-                        path_d: format!("M {:.1} {:.1} L {:.1} {:.1}", device_x, bus_rail_y, device_x, device_y - 21.0),
-                        color: Some(bus_color.clone()),
-                    });
                 }
-
-                curr_y = device_y + 80.0;
             }
         } else {
             // General 2D Matrix Grid Mode
@@ -346,6 +466,13 @@ impl GridGraph {
       dominant-baseline: central;
     }}
     .dg-tap {{ stroke-width: 2px; stroke-dasharray: 4,3; }}
+    .dg-tap-label {{
+      font-family: "SF Mono", Monaco, Menlo, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 600;
+      fill: #94a3b8;
+      dominant-baseline: central;
+    }}
     .dg-node-box {{
       stroke-width: 1.5;
       stroke: #334155;
@@ -379,12 +506,20 @@ impl GridGraph {
         ));
 
         for bus in &self.buses {
+            let display_tag = if bus.label != bus.name && !bus.label.is_empty() {
+                format!("{} ({})", bus.name, bus.label)
+            } else {
+                bus.label.clone()
+            };
             svg.push_str(&format!(
-                r#"    <line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="{}" class="dg-bus-rail" />
-    <text x="{:.1}" y="{:.1}" class="dg-bus-tag">{}</text>
+                r#"    <g class="dg-bus" id="bus-{}">
+      <line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="{}" class="dg-bus-rail" />
+      <text x="{:.1}" y="{:.1}" class="dg-bus-tag">{}</text>
+    </g>
 "#,
+                escape_xml(&bus.name),
                 bus.start_x, bus.y, bus.end_x, bus.y, bus.color,
-                bus.start_x + 10.0, bus.y - 12.0, escape_xml(&bus.label)
+                bus.start_x + 10.0, bus.y - 12.0, escape_xml(&display_tag)
             ));
         }
         svg.push_str("  </g>\n\n  <!-- Edges & Drop Taps -->\n  <g class=\"dg-edges\">\n");
@@ -396,6 +531,20 @@ impl GridGraph {
 "#,
                 e.path_d, stroke
             ));
+
+            if let Some(ref lbl) = e.label {
+                let parts: Vec<&str> = e.path_d.split_whitespace().collect();
+                if parts.len() >= 6 && parts[0] == "M" && parts[3] == "L" {
+                    if let (Ok(x), Ok(y1), Ok(y2)) = (parts[1].parse::<f64>(), parts[2].parse::<f64>(), parts[5].parse::<f64>()) {
+                        let mid_y = (y1 + y2) / 2.0;
+                        svg.push_str(&format!(
+                            r##"    <text x="{:.1}" y="{:.1}" class="dg-tap-label" fill="#94a3b8">{}</text>
+"##,
+                            x + 6.0, mid_y, escape_xml(lbl)
+                        ));
+                    }
+                }
+            }
         }
         svg.push_str("  </g>\n\n  <!-- Grid Nodes -->\n  <g class=\"dg-nodes\">\n");
 

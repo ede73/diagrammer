@@ -154,6 +154,35 @@ fn test_grid_engine_renders_fixtures() {
 }
 
 #[test]
+fn test_grid_engine_multi_homed_network_bus() {
+    let grid_gen = make_generator("grid").expect("Failed to create grid generator");
+
+    let input_path = "../../tests/test_inputs/nwdiag3.txt";
+    let fallback_path = "tests/test_inputs/nwdiag3.txt";
+    let path = if Path::new(input_path).exists() {
+        input_path
+    } else if Path::new(fallback_path).exists() {
+        fallback_path
+    } else {
+        return;
+    };
+
+    let input_code = fs::read_to_string(path).expect("Failed to read nwdiag3.txt");
+    let canvas = AstBuilder::new().build(&input_code).expect("Failed to build AST");
+
+    let grid_svg = grid_gen.generate(&canvas);
+    assert!(grid_svg.contains("class=\"diagrammer-grid-svg\""));
+    assert!(grid_svg.contains("Sample_front"));
+    assert!(grid_svg.contains("Sample_back"));
+    assert!(grid_svg.contains("web01"));
+    assert!(grid_svg.contains("web02"));
+    assert!(grid_svg.contains("db01"));
+    assert!(grid_svg.contains("db02"));
+    assert!(grid_svg.contains("dg-tap-label"));
+    assert!(!grid_svg.contains("NaN"));
+}
+
+#[test]
 fn test_force_engine_renders_fixtures() {
     let force_gen = make_generator("force").expect("Failed to create force generator");
 

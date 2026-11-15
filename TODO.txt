@@ -1,6 +1,15 @@
 ================================================================================
 ACTIVE ROADMAP & CHAT TASKS
 ================================================================================
+[ ] Core Language Library Isolation & Deliverables Decoupling (Kotlin/FamilyTree Integration):
+    - [ ] Decouple core language grammar (`diagrammer.pest`) and AST model into a zero-dependency language library deliverable (`diagrammer-lang`).
+    - [ ] Decouple Layout Engines (`diagrammer-layout`) to accept raw geometric graph topologies (nodes with `width`/`height` + edges) directly, bypassing text parsing when consumer already has in-memory objects.
+    - [ ] Provide lightweight JSON layout API: input `{ nodes: [...], edges: [...] }` -> output `{ positions: { id: (x, y) }, routes: [...] }` so external GUIs (e.g. Kotlin/Compose) can use the layout engine purely for positioning without text DSL round-trips.
+    - [ ] Provide lightweight AST JSON export (`diagrammer ast --json`) so external programs can parse diagrammer syntax directly without web, JS, PlantUML, or external tool dependencies.
+    - [ ] Enable external applications to act as their own specialized domain generators/renderers using the typed AST.
+    - [ ] Keep deliverables clean in the single repo via Cargo workspace: pure Rust core language library, native CLI binary, and WASM web bundle.
+    - [ ] Purge leftover vendored `web/js/mscgen/package.json` to eliminate Dependabot false alerts and complete total Node/npm detachment. [Done in PR #86]
+
 [x] Re-rasterize all repository PNG icon assets from modern clean SVGs:
     - [x] Re-render `web/icons/*.png` from `web/icons/*.svg` using `rsvg-convert` (eliminate legacy 2023 pixelated clip-art).
     - [x] Re-render `web/types/*.png` from `web/types/*.svg` using `rsvg-convert`.

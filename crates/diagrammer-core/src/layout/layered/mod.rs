@@ -137,6 +137,26 @@ fn is_uml_group(grp: &crate::ast::GraphGroup, canvas: &GraphCanvas) -> bool {
     if has_internal_edges || has_child_groups {
         return false;
     }
+    if let Some(ref l) = grp.label {
+        let l_lower = l.to_lowercase();
+        if l_lower.contains("generalization")
+            || l_lower.contains("realization")
+            || l_lower.contains("composition")
+            || l_lower.contains("aggregation")
+            || l.contains(':')
+        {
+            return true;
+        }
+    }
+    let canvas_has_uml_clues = canvas.get_edges().iter().any(|e| {
+        e.label.as_ref().map(|l| {
+            let ll = l.to_lowercase();
+            ll.contains("triangle") || ll.contains("diamond") || ll.contains("extends") || ll.contains("aggregation")
+        }).unwrap_or(false)
+    });
+    if canvas_has_uml_clues && grp.objects.is_empty() {
+        return true;
+    }
     let vertices: Vec<&GraphObject> = grp.objects.iter().filter(|o| o.is_vertex()).collect();
     if vertices.len() >= 2
         && vertices.iter().all(|v| {

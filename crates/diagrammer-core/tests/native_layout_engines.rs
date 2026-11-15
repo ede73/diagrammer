@@ -540,22 +540,20 @@ fn test_dynamic_operator_overrides_and_arrowheads() {
 }
 
 #[test]
-fn test_ast_record_native_layered_dag_rendering() {
+fn test_ast_record_generator() {
     let input = fs::read_to_string("../../tests/test_inputs/ast.txt")
         .or_else(|_| fs::read_to_string("tests/test_inputs/ast.txt"))
         .expect("ast.txt fixture must exist");
 
     let canvas = AstBuilder::new().build(&input).expect("Failed to parse ast.txt");
 
-    // make_generator("ast_record") must return the native Layered DAG generator
+    // make_generator("ast_record") must return the AST Record generator (Graphviz record digraph)
     let generator = make_generator("ast_record").expect("ast_record generator must exist");
-    let svg = generator.generate(&canvas);
+    let dot = generator.generate(&canvas);
 
-    // Verify it generates Diagrammer native layered SVG (not legacy Graphviz DOT)
-    assert!(svg.contains("<svg"), "ast_record must render SVG output");
-    assert!(svg.contains("class=\"diagrammer-layered-svg\""), "Output must be diagrammer-layered-svg");
-    assert!(svg.contains("dl-class-node"), "ast_record must render class/record tables for groups");
-    assert!(svg.contains("GraphRoot:GraphObject"), "Must render GraphRoot class header");
-    assert!(svg.contains("dl-class-member"), "Must render class member compartments");
-    assert!(svg.contains("marker-end=\"url(#dl-arrow-inheritance)\""), "Must render inheritance arrowheads");
+    // Verify it generates Graphviz digraph with AST records
+    assert!(dot.contains("digraph {"), "ast_record must output digraph");
+    assert!(dot.contains("GraphCanvas"), "Must render GraphCanvas record");
+    assert!(dot.contains("GraphObject"), "Must render GraphObject group/record");
+    assert!(dot.contains("GraphRoot"), "Must render GraphRoot group/record");
 }

@@ -124,7 +124,7 @@ fn is_uml_group(grp: &crate::ast::GraphGroup, canvas: &GraphCanvas) -> bool {
     let visualizer_hint = canvas.visualizer.as_deref().map(|s| s.to_lowercase());
     let is_canvas_uml = matches!(
         visualizer_hint.as_deref(),
-        Some("uml") | Some("umlclass") | Some("ast_record") | Some("er")
+        Some("uml") | Some("umlclass") | Some("er")
     );
     if is_canvas_uml {
         return true;
@@ -720,7 +720,7 @@ impl LayeredGraph {
     /// Renders the calculated graph into SVG using the given visualizer hint
     pub fn render_svg_with_styler(&self, visualizer_hint: Option<&str>) -> String {
         let styler: Box<dyn LayeredStyler> = match visualizer_hint.map(|s| s.to_lowercase()).as_deref() {
-            Some("uml") | Some("umlclass") | Some("ast_record") | Some("er") => Box::new(UmlStyler),
+            Some("uml") | Some("umlclass") | Some("er") => Box::new(UmlStyler),
             _ => {
                 // If any node is a uml_class shape, default to UmlStyler
                 if self.nodes.values().any(|n| n.shape == "uml_class") {

@@ -25,6 +25,7 @@ pub struct LayeredNode {
     pub color: Option<String>,
     pub textcolor: Option<String>,
     pub members: Vec<String>,
+    pub embedded_subgraph: Option<(String, f64, f64)>,
 }
 
 /// An edge routed between layered nodes
@@ -117,6 +118,7 @@ fn create_layered_node_from_obj(
         color: obj.get_color().map(|s| s.to_string()).or_else(|| canvas.defaults.vertexcolor.clone()),
         textcolor: obj.get_textcolor().map(|s| s.to_string()).or_else(|| canvas.defaults.vertextextcolor.clone()),
         members: Vec::new(),
+        embedded_subgraph: None,
     }
 }
 
@@ -265,8 +267,50 @@ impl LayeredGraph {
                                 color: grp.color.clone().or_else(|| canvas.defaults.vertexcolor.clone()),
                                 textcolor: grp.textcolor.clone().or_else(|| canvas.defaults.vertextextcolor.clone()),
                                 members,
+                                embedded_subgraph: None,
                             },
                         );
+                    } else if grp.visualizer.is_some() {
+                        // Poly-archetype: Embedded Subgraph!
+                        let label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
+                        if let Some(sub) = crate::layout::poly::render_subgraph(canvas, grp) {
+                            let w = sub.width + 48.0;
+                            let h = sub.height + 60.0;
+                            nodes.insert(
+                                grp.name.clone(),
+                                LayeredNode {
+                                    id: grp.name.clone(),
+                                    label,
+                                    shape: "poly_composite".to_string(),
+                                    style: None,
+                                    image: None,
+                                    width: w,
+                                    height: h,
+                                    x: 0.0,
+                                    y: 0.0,
+                                    layer: 0,
+                                    color: grp.color.clone().or_else(|| canvas.defaults.vertexcolor.clone()),
+                                    textcolor: grp.textcolor.clone().or_else(|| canvas.defaults.vertextextcolor.clone()),
+                                    members: Vec::new(),
+                                    embedded_subgraph: Some((sub.svg, sub.width, sub.height)),
+                                },
+                            );
+                        } else {
+                            let mut member_ids = Vec::new();
+                            collect_cluster_group_vertices(grp, canvas, &mut nodes, &mut member_ids);
+                            let label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
+                            groups.push(LayeredGroup {
+                                name: grp.name.clone(),
+                                label,
+                                color: grp.color.clone(),
+                                textcolor: grp.textcolor.clone(),
+                                member_ids,
+                                x: 0.0,
+                                y: 0.0,
+                                width: 0.0,
+                                height: 0.0,
+                            });
+                        }
                     } else {
                         // Cluster group container: extract members and register group
                         let mut member_ids = Vec::new();
@@ -348,6 +392,7 @@ impl LayeredGraph {
                             color: canvas.defaults.vertexcolor.clone(),
                             textcolor: canvas.defaults.vertextextcolor.clone(),
                             members: Vec::new(),
+                            embedded_subgraph: None,
                         },
                     );
                 }

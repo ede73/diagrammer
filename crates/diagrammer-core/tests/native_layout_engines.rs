@@ -679,3 +679,67 @@ Start > Completed; EmergencyCancel
         "Router must avoid slicing through Negotiation composite container"
     );
 }
+
+#[test]
+fn test_universal_poly_archetype_nesting_and_layered_subgraphs() {
+    use diagrammer_core::builder::AstBuilder;
+    use diagrammer_core::generators::make_generator;
+
+    // 1. Layered DAG hosting Sequence and Tree subgraphs
+    let layered_poly_input = r#"
+visualizer layered
+
+StartNode > AuthSequence > DataProcessingTree > FinishNode
+
+{AuthSequence; Authentication Handshake
+    visualizer native_sequence
+    Client > "1. SYN" Server
+    Server > "2. SYN-ACK" Client
+    Client > "3. ACK" Server
+}
+
+{DataProcessingTree; Decision & Routing Hierarchy
+    visualizer tree
+    Router > (FastPath, DeepInspection)
+    DeepInspection > (PayloadScanner, Quarantine)
+}
+"#;
+    let canvas1 = AstBuilder::new().build(layered_poly_input).expect("Failed to build AST for layered poly");
+    let layered_gen = make_generator("layered").unwrap();
+    let svg1 = layered_gen.generate(&canvas1);
+
+    assert!(svg1.contains("class=\"diagrammer-layered-svg\""), "Must produce Layered SVG");
+    assert!(svg1.contains("ds-poly-archetype-subgraph"), "Must embed poly-archetype subgraphs");
+    assert!(svg1.contains("1. SYN"), "Must embed native_sequence content");
+    assert!(svg1.contains("PayloadScanner"), "Must embed tree content");
+    assert!(svg1.contains("node-AuthSequence"), "Must contain AuthSequence composite node");
+    assert!(svg1.contains("node-DataProcessingTree"), "Must contain DataProcessingTree composite node");
+
+    // 2. 3-level Fractal Recursive Nesting: state -> layered -> native_sequence
+    let fractal_input = r#"
+visualizer state
+
+Init > CompositePipeline > Terminated
+
+{CompositePipeline; Nested Layered Flowchart
+    visualizer layered
+    
+    IngestStep > AuthGroup > OutputStep
+    
+    {AuthGroup; Embedded Sequence Protocol
+        visualizer native_sequence
+        App > "Token Request" AuthServer
+        AuthServer > "Grant JWT" App
+    }
+}
+"#;
+    let canvas2 = AstBuilder::new().build(fractal_input).expect("Failed to build AST for fractal poly");
+    let state_gen = make_generator("state").unwrap();
+    let svg2 = state_gen.generate(&canvas2);
+
+    assert!(svg2.contains("class=\"diagrammer-state-svg\""), "Must produce State SVG");
+    assert!(svg2.contains("node-CompositePipeline"), "Must contain CompositePipeline state");
+    assert!(svg2.contains("node-AuthGroup"), "Must contain AuthGroup nested layered container");
+    assert!(svg2.contains("Token Request"), "Must embed 3rd-level sequence message");
+}
+

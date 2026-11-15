@@ -146,22 +146,9 @@ impl StateGraph {
                     }
 
                     // Poly-archetype: Check if group declares its own visualizer
-                    let (sub_svg, sub_w, sub_h) = if let Some(ref sub_viz) = grp.visualizer {
-                        if let Some(generator) = crate::generators::make_generator(sub_viz) {
-                            let mut sub_canvas = canvas.clone();
-                            sub_canvas.visualizer = Some(sub_viz.clone());
-                            let mut sub_objects = grp.objects.clone();
-                            for obj in &canvas.objects {
-                                if let GraphObject::Edge { edge } = obj {
-                                    if composite_member_nodes.contains(&edge.left) && composite_member_nodes.contains(&edge.right) {
-                                        sub_objects.push(obj.clone());
-                                    }
-                                }
-                            }
-                            sub_canvas.objects = sub_objects;
-                            let rendered = generator.generate(&sub_canvas);
-                            let (sw, sh) = parse_svg_dimensions(&rendered);
-                            (Some(rendered), sw, sh)
+                    let (sub_svg, sub_w, sub_h) = if grp.visualizer.is_some() {
+                        if let Some(sub) = crate::layout::poly::render_subgraph(canvas, grp) {
+                            (Some(sub.svg), sub.width, sub.height)
                         } else {
                             (None, 420.0, 240.0)
                         }

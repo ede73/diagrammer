@@ -1,6 +1,7 @@
 pub mod force;
 pub mod grid;
 pub mod layered;
+pub mod poly;
 pub mod sequence;
 pub mod shapes;
 pub mod state;

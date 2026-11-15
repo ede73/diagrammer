@@ -9,9 +9,23 @@ This document captures the long-term vision, component architecture, and active 
 ### 1.1 Eliminate Node.js & TypeScript Bloat
 - **Problem**: The project historically relied on TypeScript transpilation (`tsc`), which pulls in Node.js, `npm`, large `node_modules` trees (Jest, Puppeteer, ts-node), and build-step friction.
 - **Goal**: Because Diagrammer is a 100% Rust core compiled to WebAssembly and native binaries, Node.js is no longer a mandatory dependency. We have eliminated all TypeScript and Node runtime requirements from the build and web application.
-- **Active Step (Complete Node Elimination)**: Replace the remaining isolated test runner in `tests/` (Jest + Puppeteer) with a 100% pure Rust Chrome DevTools Protocol (CDP) test suite via `headless_chrome` and the Rust `image` crate. This removes `tests/node_modules/`, `package.json`, and all npm friction, unifying tests under standard `cargo test`.
+- **Active Step (Complete Node Elimination)**: Purge leftover vendored package metadata (`web/js/mscgen/package.json`) to permanently stop false Dependabot alerts. All tests are 100% pure Rust (`cargo test` and `make browsertests`).
 
-### 1.2 Modularize into Independent Rust Library Crates
+### 1.2 Modularize Deliverables: Core Language Library vs. Web Consumer (FamilyTree / Kotlin Integration)
+- **Vision**: Enable external applications—such as a Kotlin familytree program—to embed and leverage Diagrammer's expressive syntax without pulling in web interfaces, JavaScript, MSCGen, or external visualization tools.
+- **Single Monorepo with Multiple Clean Deliverables**:
+  We do **NOT** need to split into multiple Git repositories. Cargo workspaces handle multiple distinct deliverables from the same repository:
+  1. **Core Language Deliverable (`diagrammer-lang` / `diagrammer-core`)**:
+     - 100% pure Rust library containing the grammar (`diagrammer.pest`), parser, and typed AST (`GraphCanvas`, `GraphVertex`, `GraphEdge`, `TypeRegistry`, custom shapes/operators).
+     - Zero dependencies on web, JavaScript, DOM, or third-party visualizers.
+     - Fast compilation, usable as a Rust `rlib`, C-ABI/JNI shared library (`cdylib`), or CLI AST emitter.
+  2. **External Consumer Workflow (Kotlin / Custom Generators / Pure Layout Engine)**:
+     - **Mode 1: Text DSL $\to$ AST**: If the user or app works with text diagram files, parse Diagrammer syntax into structured AST (via `diagrammer ast --json` or direct FFI/JNI bindings), allowing the app to act as its own custom domain generator.
+     - **Mode 2: Pure Layout Engine (Geometry-Only, Zero Text Round-Trip)**: If the app already has programmatic domain objects in memory (e.g. `Person` nodes with dimensions and parent-child edges in a Kotlin app), it does not need the graphing text language at all. It can feed the raw graph topology `{ nodes: [{ id, width, height }], edges: [{ from, to }] }` directly into `diagrammer-layout` (Tree or Layered DAG) and receive computed `(x, y)` positions and edge routing splines to render natively in its own UI framework (Jetpack Compose, JavaFX, Canvas).
+  3. **Visualizer & Generator Layer**:
+     - Optional transpilers (DOT, PlantUML, Mermaid) and native layout engines (DAG, Sequence, Force, Tree) available when needed, but completely decoupled from the core grammar.
+  4. **Web Deliverable (`web/` + WASM)**:
+     - The interactive browser playground and Ace editor package consuming the compiled WebAssembly output (`build/wasm`), completely isolated as a consumer of the core language.
 Restructure the project so that parsing, AST modeling, code generation, layout engines, and UI bindings are cleanly isolated library components with clear API boundaries:
 1. **`diagrammer-parser`**: Grammar (Pest PEG) and lexing into CST/AST. Standalone parser library.
 2. **`diagrammer-ast`**: Central graph model (`GraphCanvas`, `GraphVertex`, `GraphEdge`, `GraphGroup`).

@@ -75,6 +75,11 @@ export function visualize(visualizer) {
         throw new Error('Visualizer not defined');
     }
     removeOldVisualizations();
+    if (visualizer === 'ast') {
+        // 'ast' produces raw JSON into the result textarea and beautified tree/code view.
+        // There is no graphic image to render or CLI backend call needed.
+        return;
+    }
     let vizClass = visualizations.find(p => p.name === visualizer);
     if (!vizClass && (visualizer === 'nwdiag' || visualizer === 'network_bus' || visualizer === 'grid')) {
         vizClass = visualizations.find(p => p.name === 'network_bus' || p.name === 'grid');
@@ -90,7 +95,7 @@ export function visualize(visualizer) {
             })
             .catch(rej => { });
     }
-    else {
+    else if (vizClass.cli) {
         const visualizeUrl = `/visualize?visualizer=${visualizer}`;
         makeHTTPPost(visualizeUrl, generatedResult, (pngBase64) => {
             _makeNewImageHolder(pngBase64);

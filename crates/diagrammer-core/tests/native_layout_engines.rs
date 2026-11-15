@@ -743,3 +743,48 @@ Init > CompositePipeline > Terminated
     assert!(svg2.contains("Token Request"), "Must embed 3rd-level sequence message");
 }
 
+#[test]
+fn test_all_10_poly_archetype_fixtures_render_cleanly() {
+    use diagrammer_core::builder::AstBuilder;
+    use diagrammer_core::generators::make_generator;
+
+    let poly_fixtures = [
+        "poly_1_layered_sequence_tree.txt",
+        "poly_2_state_sequence_dag.txt",
+        "poly_3_state_grid_tree.txt",
+        "poly_4_layered_force_state.txt",
+        "poly_5_fractal_3level.txt",
+        "poly_6_layered_grid_sequence.txt",
+        "poly_7_state_uml_sequence.txt",
+        "poly_8_layered_tree_state.txt",
+        "poly_9_state_swarm_pipeline.txt",
+        "poly_10_layered_swimlane_seq.txt",
+    ];
+
+    for fixture in &poly_fixtures {
+        let fixture_path = format!("../../tests/test_inputs/{}", fixture);
+        let content = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|_| panic!("Failed to read poly fixture {}", fixture_path));
+
+        let canvas = AstBuilder::new()
+            .build(&content)
+            .unwrap_or_else(|e| panic!("Failed to parse AST for {}: {}", fixture, e));
+
+        let viz = canvas.visualizer.as_deref().unwrap_or("layered");
+        let generator = make_generator(viz)
+            .unwrap_or_else(|| panic!("Generator '{}' for fixture {} must exist", viz, fixture));
+
+        let svg = generator.generate(&canvas);
+
+        assert!(svg.starts_with("<svg"), "Fixture {} must output valid SVG starting with <svg", fixture);
+        assert!(svg.contains("</svg>"), "Fixture {} must close with </svg>", fixture);
+        assert!(!svg.contains("NaN"), "Fixture {} must not produce NaN coordinates", fixture);
+        assert!(
+            svg.contains("ds-poly-archetype-subgraph"),
+            "Fixture {} must embed at least one poly-archetype subgraph",
+            fixture
+        );
+    }
+}
+
+

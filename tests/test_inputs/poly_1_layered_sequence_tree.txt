@@ -1,0 +1,13 @@
+visualizer layered
+
+ClientAuth > DecisionTree
+
+{ClientAuth; Auth Handshake
+    visualizer native_sequence
+    Client > "Token" Server
+}
+
+{DecisionTree; Policy Check
+    visualizer tree
+    Allow > Deny
+}

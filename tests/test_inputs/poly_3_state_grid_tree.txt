@@ -1,0 +1,14 @@
+visualizer state
+
+Taxonomy > MemoryMatrix > Done
+
+{Taxonomy; Classification Tree
+    visualizer tree
+    Root > (ClassA, ClassB)
+}
+
+{MemoryMatrix; 2D Tensor Grid
+    visualizer grid
+    R0C0, R0C1
+    R1C0, R1C1
+}

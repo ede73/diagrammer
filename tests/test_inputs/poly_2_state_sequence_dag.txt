@@ -1,0 +1,14 @@
+visualizer state
+
+Handshake > Pipeline > Complete
+
+{Handshake; TLS Handshake
+    visualizer native_sequence
+    Client > "ClientHello" Server
+    Server > "ServerHello" Client
+}
+
+{Pipeline; Ingestion DAG
+    visualizer layered
+    Parse > Validate > Store
+}

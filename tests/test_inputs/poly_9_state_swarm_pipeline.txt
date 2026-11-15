@@ -1,0 +1,14 @@
+visualizer state
+
+ClusterMesh > DataPipeline > Operational
+
+{ClusterMesh; P2P Topology
+    visualizer force
+    Leader > (Worker1, Worker2)
+    Worker1 > Worker2
+}
+
+{DataPipeline; Batch Stream
+    visualizer layered
+    Extract > Transform > Load
+}

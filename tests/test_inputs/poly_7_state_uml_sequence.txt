@@ -1,0 +1,17 @@
+visualizer state
+
+DataModel > AuditSync > Committed
+
+{DataModel; Domain Entities
+    visualizer layered
+    
+    {User; User
+        id; +UUID
+        name; +String
+    }
+}
+
+{AuditSync; Ledger Exchange
+    visualizer native_sequence
+    Service > "Log" AuditDB
+}

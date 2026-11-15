@@ -474,8 +474,10 @@ impl AstBuilder {
             self.push_root_vertex(GraphObject::VertexRef {
                 vertex: vr,
             });
-        } else if let Some(grp) = self.group_stack.last_mut() {
-            if !grp.is_inner_graph {
+        } else {
+            let def_color = self.find_default_vertexcolor();
+            let def_textcolor = self.find_default_vertextextcolor();
+            if let Some(grp) = self.group_stack.last_mut() {
                 let already = grp.objects.iter().any(|obj| match obj {
                     GraphObject::VertexRef { vertex } => vertex.name == name,
                     GraphObject::Vertex(v) => v.name == name,
@@ -483,9 +485,21 @@ impl AstBuilder {
                     _ => false,
                 });
                 if !already {
-                    let r = GraphReference::new(name);
-                    grp.objects.push(GraphObject::Reference(r.clone()));
-                    grp.root_vertices.push(GraphObject::Reference(r));
+                    if grp.is_inner_graph {
+                        let mut vr = VertexRef::new(name);
+                        vr.color = def_color;
+                        vr.textcolor = def_textcolor;
+                        grp.objects.push(GraphObject::VertexRef {
+                            vertex: vr.clone(),
+                        });
+                        grp.root_vertices.push(GraphObject::VertexRef {
+                            vertex: vr,
+                        });
+                    } else {
+                        let r = GraphReference::new(name);
+                        grp.objects.push(GraphObject::Reference(r.clone()));
+                        grp.root_vertices.push(GraphObject::Reference(r));
+                    }
                 }
             }
         }
@@ -823,10 +837,31 @@ impl AstBuilder {
             }
             Rule::group_end => {
                 if let Some(group) = self.group_stack.pop() {
-                    if let Some(parent) = self.group_stack.last_mut() {
-                        parent.objects.push(GraphObject::Group(Box::new(group)));
+                    let target_list = if let Some(parent) = self.group_stack.last_mut() {
+                        &mut parent.objects
                     } else {
-                        self.canvas.objects.push(GraphObject::Group(Box::new(group)));
+                        &mut self.canvas.objects
+                    };
+
+                    let existing_pos = target_list.iter().position(|obj| match obj {
+                        GraphObject::Group(g) => g.name == group.name,
+                        _ => false,
+                    });
+
+                    if let Some(pos) = existing_pos {
+                        if let GraphObject::Group(ref mut existing) = target_list[pos] {
+                            if group.visualizer.is_some() {
+                                existing.visualizer = group.visualizer;
+                            }
+                            if group.label.is_some() {
+                                existing.label = group.label;
+                            }
+                            existing.objects.extend(group.objects);
+                            existing.root_vertices.extend(group.root_vertices);
+                            existing.chain_terminals.extend(group.chain_terminals);
+                        }
+                    } else {
+                        target_list.push(GraphObject::Group(Box::new(group)));
                     }
                 }
             }

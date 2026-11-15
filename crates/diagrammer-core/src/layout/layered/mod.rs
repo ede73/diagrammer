@@ -466,6 +466,18 @@ impl LayeredGraph {
                 edge.right.clone()
             };
 
+            // Deduplicate identical edges
+            let is_duplicate = edges.iter().any(|e| {
+                e.from == left_target
+                    && e.to == right_target
+                    && e.label == edge.label
+                    && e.edge_type == edge.edge_type
+                    && e.line_type == edge.line_type()
+            });
+            if is_duplicate {
+                continue;
+            }
+
             let is_inh = edge.edge_type.contains('<') || edge.edge_type.contains('>');
             edges.push(LayeredEdge {
                 from: left_target,
@@ -769,14 +781,18 @@ impl LayeredGraph {
                     if (exit.0 - entry.0).abs() < 1.0 && track_offset.abs() < 0.1 {
                         e.points = vec![exit, entry];
                     } else {
-                        let mid_y = (exit.1 + entry.1) / 2.0 + track_offset;
+                        let max_offset = ((entry.1 - exit.1).abs() / 2.0 - 10.0).max(0.0);
+                        let clamped_offset = track_offset.clamp(-max_offset, max_offset);
+                        let mid_y = (exit.1 + entry.1) / 2.0 + clamped_offset;
                         e.points = vec![exit, (exit.0, mid_y), (entry.0, mid_y), entry];
                     }
                 } else {
                     if (exit.1 - entry.1).abs() < 1.0 && track_offset.abs() < 0.1 {
                         e.points = vec![exit, entry];
                     } else {
-                        let mid_x = (exit.0 + entry.0) / 2.0 + track_offset;
+                        let max_offset = ((entry.0 - exit.0).abs() / 2.0 - 10.0).max(0.0);
+                        let clamped_offset = track_offset.clamp(-max_offset, max_offset);
+                        let mid_x = (exit.0 + entry.0) / 2.0 + clamped_offset;
                         e.points = vec![exit, (mid_x, exit.1), (mid_x, entry.1), entry];
                     }
                 }

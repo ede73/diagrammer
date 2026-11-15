@@ -372,58 +372,52 @@
       window.themeEditor = themeEditor;
     }
 
-    // Direct clipboard integration for embedded browsers & desktop webviews
-    function setupAceClipboard(aceEditor) {
-      if (!aceEditor) return;
-      aceEditor.container.addEventListener('click', () => {
-        aceEditor.focus();
-      });
-
-      aceEditor.commands.addCommand({
-        name: 'copySelection',
-        bindKey: { win: 'Ctrl-C', mac: 'Command-C' },
-        exec: (ed) => {
-          const selectedText = ed.getCopyText();
-          if (selectedText && navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(selectedText).catch(() => {});
-          }
-        },
-        readOnly: true
-      });
-
-      aceEditor.commands.addCommand({
-        name: 'cutSelection',
-        bindKey: { win: 'Ctrl-X', mac: 'Command-X' },
-        exec: (ed) => {
-          const selectedText = ed.getCopyText();
-          if (selectedText && navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(selectedText).then(() => {
-              ed.insert('');
-            }).catch(() => {});
-          }
-        },
-        readOnly: false
-      });
-
-      aceEditor.commands.addCommand({
-        name: 'pasteClipboard',
-        bindKey: { win: 'Ctrl-V', mac: 'Command-V' },
-        exec: (ed) => {
-          if (navigator.clipboard && navigator.clipboard.readText) {
-            navigator.clipboard.readText().then(text => {
-              if (text) {
-                ed.insert(text);
-              }
-            }).catch(() => {});
-          }
-        },
-        readOnly: false
-      });
+    // Direct clipboard integration for embedded browsers & desktop webviews (e.g. IDE webview)
+    function getActiveAceEditor() {
+      if (window.editor && window.editor.isFocused()) return window.editor;
+      if (window.themeEditor && window.themeEditor.isFocused()) return window.themeEditor;
+      return null;
     }
 
-    setupAceClipboard(editor);
+    window.addEventListener('copy', (e) => {
+      const ed = getActiveAceEditor();
+      const text = ed ? ed.getCopyText() : window.getSelection().toString();
+      if (text && e.clipboardData) {
+        e.clipboardData.clearData();
+        e.clipboardData.setData('text/plain', text);
+        e.preventDefault();
+      }
+    });
+
+    window.addEventListener('cut', (e) => {
+      const ed = getActiveAceEditor();
+      if (ed && e.clipboardData) {
+        const text = ed.getCopyText();
+        if (text) {
+          e.clipboardData.clearData();
+          e.clipboardData.setData('text/plain', text);
+          ed.insert('');
+          e.preventDefault();
+        }
+      }
+    });
+
+    window.addEventListener('paste', (e) => {
+      const ed = getActiveAceEditor();
+      if (ed && e.clipboardData) {
+        const text = e.clipboardData.getData('text/plain');
+        if (text) {
+          ed.insert(text);
+          e.preventDefault();
+        }
+      }
+    });
+
+    if (editor) {
+      editor.container.addEventListener('click', () => editor.focus());
+    }
     if (themeEditor) {
-      setupAceClipboard(themeEditor);
+      themeEditor.container.addEventListener('click', () => themeEditor.focus());
     }
 
     // Theme Management

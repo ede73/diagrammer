@@ -154,6 +154,64 @@ fn test_grid_engine_renders_fixtures() {
 }
 
 #[test]
+fn test_grid_engine_multi_homed_network_bus() {
+    let grid_gen = make_generator("grid").expect("Failed to create grid generator");
+
+    let input_path = "../../tests/test_inputs/nwdiag3.txt";
+    let fallback_path = "tests/test_inputs/nwdiag3.txt";
+    let path = if Path::new(input_path).exists() {
+        input_path
+    } else if Path::new(fallback_path).exists() {
+        fallback_path
+    } else {
+        return;
+    };
+
+    let input_code = fs::read_to_string(path).expect("Failed to read nwdiag3.txt");
+    let canvas = AstBuilder::new().build(&input_code).expect("Failed to build AST");
+
+    let grid_svg = grid_gen.generate(&canvas);
+    assert!(grid_svg.contains("class=\"diagrammer-grid-svg\""));
+    assert!(grid_svg.contains("Sample_front"));
+    assert!(grid_svg.contains("Sample_back"));
+    assert!(grid_svg.contains("web01"));
+    assert!(grid_svg.contains("web02"));
+    assert!(grid_svg.contains("db01"));
+    assert!(grid_svg.contains("db02"));
+    assert!(grid_svg.contains("dg-tap-label"));
+    assert!(!grid_svg.contains("NaN"));
+}
+
+#[test]
+fn test_grid_engine_nwdiag2_network_architecture() {
+    let grid_gen = make_generator("grid").expect("Failed to create grid generator");
+
+    let input_path = "../../tests/test_inputs/nwdiag2.txt";
+    let fallback_path = "tests/test_inputs/nwdiag2.txt";
+    let path = if Path::new(input_path).exists() {
+        input_path
+    } else if Path::new(fallback_path).exists() {
+        fallback_path
+    } else {
+        return;
+    };
+
+    let input_code = fs::read_to_string(path).expect("Failed to read nwdiag2.txt");
+    let canvas = AstBuilder::new().build(&input_code).expect("Failed to build AST");
+
+    let grid_svg = grid_gen.generate(&canvas);
+    assert!(grid_svg.contains("class=\"diagrammer-grid-svg\""));
+    assert!(grid_svg.contains("comcast"));
+    assert!(grid_svg.contains("home"));
+    assert!(grid_svg.contains("inet"));
+    assert!(grid_svg.contains("cablemodem"));
+    assert!(grid_svg.contains("router"));
+    assert!(grid_svg.contains("printer"));
+    assert!(grid_svg.contains("nas"));
+    assert!(!grid_svg.contains("NaN"));
+}
+
+#[test]
 fn test_force_engine_renders_fixtures() {
     let force_gen = make_generator("force").expect("Failed to create force generator");
 
@@ -482,22 +540,20 @@ fn test_dynamic_operator_overrides_and_arrowheads() {
 }
 
 #[test]
-fn test_ast_record_native_layered_dag_rendering() {
+fn test_ast_record_generator() {
     let input = fs::read_to_string("../../tests/test_inputs/ast.txt")
         .or_else(|_| fs::read_to_string("tests/test_inputs/ast.txt"))
         .expect("ast.txt fixture must exist");
 
     let canvas = AstBuilder::new().build(&input).expect("Failed to parse ast.txt");
 
-    // make_generator("ast_record") must return the native Layered DAG generator
+    // make_generator("ast_record") must return the AST Record generator (Graphviz record digraph)
     let generator = make_generator("ast_record").expect("ast_record generator must exist");
-    let svg = generator.generate(&canvas);
+    let dot = generator.generate(&canvas);
 
-    // Verify it generates Diagrammer native layered SVG (not legacy Graphviz DOT)
-    assert!(svg.contains("<svg"), "ast_record must render SVG output");
-    assert!(svg.contains("class=\"diagrammer-layered-svg\""), "Output must be diagrammer-layered-svg");
-    assert!(svg.contains("dl-class-node"), "ast_record must render class/record tables for groups");
-    assert!(svg.contains("GraphRoot:GraphObject"), "Must render GraphRoot class header");
-    assert!(svg.contains("dl-class-member"), "Must render class member compartments");
-    assert!(svg.contains("marker-end=\"url(#dl-arrow-inheritance)\""), "Must render inheritance arrowheads");
+    // Verify it generates Graphviz digraph with AST records
+    assert!(dot.contains("digraph {"), "ast_record must output digraph");
+    assert!(dot.contains("GraphCanvas"), "Must render GraphCanvas record");
+    assert!(dot.contains("GraphObject"), "Must render GraphObject group/record");
+    assert!(dot.contains("GraphRoot"), "Must render GraphRoot group/record");
 }

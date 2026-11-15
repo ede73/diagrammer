@@ -109,7 +109,8 @@ pub fn multi_attr_fmt(attrs: &[(&str, Option<&str>, &str)], extras: &[String]) -
 /// Factory function to create a generator by visualizer name
 pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
     match name.to_lowercase().as_str() {
-        "ast_record" | "layered" | "dag" => Some(Box::new(layered::LayeredGenerator)),
+        "ast_record" => Some(Box::new(ast_record::ASTRecord)),
+        "layered" | "dag" => Some(Box::new(layered::LayeredGenerator)),
         "circlepacked" | "dendrogram" | "radialdendrogram" | "reingoldtilford" => {
             Some(Box::new(dendrogram::Dendrogram))
         }
@@ -117,7 +118,7 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
             Some(Box::new(digraph::DiGraph))
         }
         "force" | "organic" | "physics" => Some(Box::new(force::ForceGenerator)),
-        "grid" | "block" | "network_bus" | "nwdiag" => Some(Box::new(grid::GridGenerator)),
+        "grid" | "block" | "network_bus" => Some(Box::new(grid::GridGenerator)),
         // Legacy GoJS generators (unmaintained)
         "layerbands" => Some(Box::new(layerbands::LayerBands)),
         "parsetree" => Some(Box::new(parsetree::ParseTree)),

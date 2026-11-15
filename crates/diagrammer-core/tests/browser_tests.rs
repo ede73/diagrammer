@@ -352,7 +352,7 @@ fn test_pure_rust_browser_all_native_layout_engines() {
         ("tree", "visualizer tree\nRoot > Child1, Child2\nChild1 > LeafA, LeafB"),
         ("grid", "visualizer grid\nRackA > Server1, Server2\nRackB > Server3"),
         ("force", "visualizer force\nA > B, C\nB > C, D\nC > D"),
-        ("ast_record", "visualizer ast_record\n{ User; id; name }\n{ Order; id; total }\nUser > Order: places"),
+        ("network_bus", "visualizer network_bus\nshape cloud\ninet\nshape default\n{comcast;73.0.0.0/8\n cablemodem/wifi.png\n router;73.63.53.43\n}\n{ home;192.168.1.0/24\n router/wifi.png;192.168.1.1\n printer/printer.png;192.168.1.2\n nas/harddisk.png;192.168.1.3\n}\ninet - cablemodem"),
     ];
 
     for (engine, diagram_code) in &archetypes {

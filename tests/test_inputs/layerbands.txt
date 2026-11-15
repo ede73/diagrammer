@@ -1,4 +1,4 @@
-visualizer layerbands
+visualizer layered
 
 {xxx;xxx
   a

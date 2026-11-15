@@ -39,11 +39,16 @@ export function populateVisualizerDropdown(family) {
 }
 export function setVisualizer(visualizer) {
     if (!visualizer) return;
-    const viz = visualizations.find(p => p.name === visualizer);
+    let target = visualizer;
+    let viz = visualizations.find(p => p.name === target);
+    if (!viz && (target === 'network_bus' || target === 'grid')) {
+        viz = visualizations.find(p => p.name === 'network_bus' || p.name === 'grid');
+        if (viz) target = viz.name;
+    }
 
     const select = document.querySelector('#diagrammer-generator');
     if (select) {
-        select.value = visualizer;
+        select.value = target;
     }
 
     if (viz) {
@@ -54,7 +59,7 @@ export function setVisualizer(visualizer) {
         }
         const vizSelect = document.getElementById('diagrammer-visualizer');
         if (vizSelect) {
-            vizSelect.value = visualizer;
+            vizSelect.value = target;
         }
     }
 

@@ -31,7 +31,7 @@ function beautifyJSON(generatedCode) {
         data = JSON.parse(trimmed);
     }
     catch (ex) {
-        // Not a JSON result (e.g. dot, blockdiag, plantuml).
+        // Not a JSON result (e.g. dot, plantuml).
         // Provide a formatted, readable code display instead of leaving the tab blank.
         const notice = document.createElement('div');
         notice.className = 'beautified-notice';
@@ -75,7 +75,16 @@ export function visualize(visualizer) {
         throw new Error('Visualizer not defined');
     }
     removeOldVisualizations();
-    const vizClass = visualizations.find(p => p.name === visualizer);
+    if (visualizer === 'ast') {
+        // 'ast' produces raw JSON into the result textarea and beautified tree/code view.
+        // There is no graphic image to render or CLI backend call needed.
+        return;
+    }
+    let target = visualizer;
+    let vizClass = visualizations.find(p => p.name === target);
+    if (!vizClass && (target === 'network_bus' || target === 'grid')) {
+        vizClass = visualizations.find(p => p.name === 'network_bus' || p.name === 'grid');
+    }
     if (!vizClass) {
         console.error(`O-o, could not find visualizer ${visualizer}`);
         return;
@@ -87,7 +96,7 @@ export function visualize(visualizer) {
             })
             .catch(rej => { });
     }
-    else {
+    else if (vizClass.cli) {
         const visualizeUrl = `/visualize?visualizer=${visualizer}`;
         makeHTTPPost(visualizeUrl, generatedResult, (pngBase64) => {
             _makeNewImageHolder(pngBase64);

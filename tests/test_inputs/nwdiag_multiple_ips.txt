@@ -1,4 +1,4 @@
-visualizer nwdiag
+visualizer network_bus
 
 { dmz;210.x.x.x/24
 }

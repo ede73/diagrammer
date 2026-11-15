@@ -124,7 +124,7 @@ fn is_uml_group(grp: &crate::ast::GraphGroup, canvas: &GraphCanvas) -> bool {
     let visualizer_hint = canvas.visualizer.as_deref().map(|s| s.to_lowercase());
     let is_canvas_uml = matches!(
         visualizer_hint.as_deref(),
-        Some("uml") | Some("umlclass") | Some("ast_record") | Some("er")
+        Some("uml") | Some("umlclass") | Some("er")
     );
     if is_canvas_uml {
         return true;
@@ -136,6 +136,26 @@ fn is_uml_group(grp: &crate::ast::GraphGroup, canvas: &GraphCanvas) -> bool {
     let has_child_groups = grp.objects.iter().any(|o| matches!(o, GraphObject::Group(_)));
     if has_internal_edges || has_child_groups {
         return false;
+    }
+    if let Some(ref l) = grp.label {
+        let l_lower = l.to_lowercase();
+        if l_lower.contains("generalization")
+            || l_lower.contains("realization")
+            || l_lower.contains("composition")
+            || l_lower.contains("aggregation")
+            || l.contains(':')
+        {
+            return true;
+        }
+    }
+    let canvas_has_uml_clues = canvas.get_edges().iter().any(|e| {
+        e.label.as_ref().map(|l| {
+            let ll = l.to_lowercase();
+            ll.contains("triangle") || ll.contains("diamond") || ll.contains("extends") || ll.contains("aggregation")
+        }).unwrap_or(false)
+    });
+    if canvas_has_uml_clues && grp.objects.is_empty() {
+        return true;
     }
     let vertices: Vec<&GraphObject> = grp.objects.iter().filter(|o| o.is_vertex()).collect();
     if vertices.len() >= 2
@@ -720,7 +740,7 @@ impl LayeredGraph {
     /// Renders the calculated graph into SVG using the given visualizer hint
     pub fn render_svg_with_styler(&self, visualizer_hint: Option<&str>) -> String {
         let styler: Box<dyn LayeredStyler> = match visualizer_hint.map(|s| s.to_lowercase()).as_deref() {
-            Some("uml") | Some("umlclass") | Some("ast_record") | Some("er") => Box::new(UmlStyler),
+            Some("uml") | Some("umlclass") | Some("er") => Box::new(UmlStyler),
             _ => {
                 // If any node is a uml_class shape, default to UmlStyler
                 if self.nodes.values().any(|n| n.shape == "uml_class") {

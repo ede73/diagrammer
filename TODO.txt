@@ -1,6 +1,14 @@
 ================================================================================
 ACTIVE ROADMAP & CHAT TASKS
 ================================================================================
+[ ] Native Network Architecture Layout:
+    - [ ] Support multi-homed nodes bridging multiple horizontal subnet bus rails with dual drop taps in the Grid engine.
+    - [ ] Render subgraph clusters as visual bounding boxes enclosing child nodes in hierarchical layouts.
+
+[ ] Web UI Workspace Ergonomics:
+    - [ ] Draggable horizontal splitter between editor tabs and visualization canvas.
+    - [ ] Scrollable AST inspection view for large syntax trees.
+
 [ ] Core Language Library Isolation & Deliverables Decoupling (Kotlin/FamilyTree Integration):
     - [ ] Decouple core language grammar (`diagrammer.pest`) and AST model into a zero-dependency language library deliverable (`diagrammer-lang`).
     - [ ] Decouple Layout Engines (`diagrammer-layout`) to accept raw geometric graph topologies (nodes with `width`/`height` + edges) directly, bypassing text parsing when consumer already has in-memory objects.

@@ -267,6 +267,12 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
      - **Pass 1 (Pre-Scan & Macro Expansion)**: Gathers all `define` blocks and `include` directives to construct the document's dynamic `TypeRegistry` (shapes, operators, aliases).
      - **Pass 2 (AST Construction)**: Parses the topology using the populated `TypeRegistry`, eliminating grammar ambiguities while supporting arbitrary user extensions.
 
+### 1.15 Native Network Architecture Layout
+- **Vision**: First-party layout engine support for network topologies, horizontal subnet bus rails, and multi-homed bridging nodes (e.g. firewalls, routers, multi-NIC servers connecting multiple subnets), completely eliminating reliance on legacy external network graphing tools.
+
+### 1.16 Web UI Workspace Ergonomics
+- **Splitter & Inspector**: Draggable horizontal splitter between the code/AST tabs and the canvas for flexible screen utilization; full vertical and horizontal scrollbars for inspecting deeply nested AST trees.
+
 ---
 
 ## 2. Target Component Architecture
@@ -324,3 +330,5 @@ Diagrammer's end goal is to provide its own native, beautifully styled layout en
 | **M13: Icon & Type Asset Modernization** | Re-render all repository PNG icon and type assets from modern vector SVGs using `rsvg-convert`. | **Done** | Eliminates legacy 2023 pixelated clip-art from Graphviz and web visualizations (PR #78). |
 | **M14: Native Layout Node Shapes, Styles & Icons** | Implement full shape catalog (`circle`, `diamond`, `database`, `actor`, etc.), stroke styles (`bold`, `dashed`, `dotted`), and image/icon embedding in native Rust layout engines. | **Done** | Native engines (`layered`, `force`, `tree`, `grid`) render full node shape, style, and icon semantics matching `tests/test_inputs/nodes.txt`. |
 | **M15: Dynamic Meta-Graph Language & Self-Hosting Prelude** | Add `define <typename> { ... }` (SVG template injection, primitives DSL, dynamic instantiation), `define operator`, and migrate built-in shapes to self-hosting prelude. | **In Progress** | Part A landed: `define <name>(width=W, height=H) { ... }` (raw SVG and geometry primitives DSL), dynamic instantiation (`custom_type node`), two-pass resolution, and native rendering across all 4 layout engines. |
+| **M16: Native Network Architecture Layout** | First-party multi-subnet bus rails and multi-homed routing in Grid engine. | **Planned** | Native network architecture diagrams with zero external tools. |
+| **M17: Web UI Workspace Ergonomics** | Draggable pane splitter and scrollable AST inspector. | **Planned** | Flexible workspace layout and full AST tree readability. |

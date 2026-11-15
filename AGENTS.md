@@ -57,7 +57,10 @@ For CLI-only checks:
 - If you need to update web UI behavior, inspect `web/` (including `web/ace/`).
 - If you need to test Rust core changes, run `cargo test --manifest-path crates/diagrammer-core/Cargo.toml`.
 - If you need to test browser UI changes, run `make browsertests`.
-- **Mandatory Documentation Rule**: Whenever the user mentions or assigns a future task, idea, or architectural goal, immediately document and persist it in `goals.md` and `TODO.txt`. Never leave user requirements or vision solely in chat.
+- **Repository Documentation Integrity & Confirmation Rule**:
+  - Never transcribe raw conversation notes, temporary chores, deleted files, bug logs, or conversational instructions into repository documentation (`goals.md`, `TODO.txt`, etc.). Git history already tracks deleted files and changes.
+  - `goals.md` is strictly reserved for high-level software architectural vision and forward-looking capabilities, written with professional engineering rigor.
+  - If unsure whether an item belongs in permanent repository documentation or should remain local to the conversation session, always confirm with the user before committing. Never push internal work journals, historical deletion changelogs, or chat notes into the code repository unless specifically and explicitly instructed.
 - **Non-Interactive CLI & Process Lifecycle Rule**: Never invoke interactive TUIs or pagers (e.g. `gh stack view` without `--json`). Always use `gh stack view --json` or pipe non-interactively. If any non-daemon command expected to finish in a few seconds fails to terminate promptly, immediately kill it via `manage_task` to prevent hanging processes from stalling the session message delivery queue.
 
 ## Helpful facts

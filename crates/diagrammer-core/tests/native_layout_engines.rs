@@ -622,3 +622,60 @@ Start > Negotiation > Ready
     assert!(poly_svg.contains("Server"), "Participant Server must be in embedded sequence");
     assert!(poly_svg.contains("SYN-ACK"), "Message SYN-ACK must be in embedded sequence");
 }
+
+#[test]
+fn test_state_engine_groups_are_strictly_non_overlapping_and_obstacle_avoiding() {
+    let input = r#"
+visualizer state
+
+Start > Negotiation > Process > Completed
+Start > Completed; EmergencyCancel
+
+{Negotiation; Handshake Protocol
+    visualizer native_sequence
+    Client > "1. SYN" Server
+    Server > "2. SYN-ACK" Client
+    Client > "3. ACK" Server
+}
+
+{Process; Data Processing
+    Task1 > Task2 > Task3
+}
+"#;
+    let canvas = AstBuilder::new().build(input).expect("Failed to build AST");
+    let state_graph = diagrammer_core::layout::state::StateGraph::new(&canvas);
+
+    // 1. Verify all composite nodes have disjoint non-overlapping bounding boxes
+    let composite_nodes: Vec<_> = state_graph.nodes.values().filter(|n| n.is_composite).collect();
+    assert_eq!(composite_nodes.len(), 2, "Expected 2 composite state containers");
+
+    for i in 0..composite_nodes.len() {
+        for j in (i + 1)..composite_nodes.len() {
+            let n1 = composite_nodes[i];
+            let n2 = composite_nodes[j];
+
+            let overlap_x = (n1.x + n1.width).min(n2.x + n2.width) - n1.x.max(n2.x);
+            let overlap_y = (n1.y + n1.height).min(n2.y + n2.height) - n1.y.max(n2.y);
+
+            assert!(
+                overlap_x <= 0.0 || overlap_y <= 0.0,
+                "Composite groups '{}' and '{}' must never overlap! Overlap: ({:.1}, {:.1})",
+                n1.id, n2.id, overlap_x, overlap_y
+            );
+        }
+    }
+
+    // 2. Verify bypass edge Start > Completed routes via gutter around intermediate obstacles
+    let cancel_edge = state_graph.edges.iter().find(|e| e.from == "Start" && e.to == "Completed")
+        .expect("Bypass edge Start > Completed must exist");
+    
+    // It must route via gutter around the obstacles
+    assert!(cancel_edge.path_d.contains(" L "), "Bypass edge must detour via gutter");
+    let negotiation_node = state_graph.nodes.get("Negotiation").unwrap();
+    let mid_x = negotiation_node.x + negotiation_node.width / 2.0;
+    let mid_y = negotiation_node.y + negotiation_node.height / 2.0;
+    assert!(
+        !cancel_edge.path_d.contains(&format!("L {:.1} {:.1}", mid_x, mid_y)),
+        "Router must avoid slicing through Negotiation composite container"
+    );
+}

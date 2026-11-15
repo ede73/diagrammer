@@ -425,9 +425,30 @@ impl StateGraph {
             }
         }
 
-        // 5. Coordinates Calculation
-        let center_x = 450.0;
-        let col_offset = 260.0;
+        // 5. Dynamic Non-Overlapping Coordinates Calculation
+        let mut max_w_by_col: HashMap<i32, f64> = HashMap::new();
+        for node in nodes.values() {
+            let entry = max_w_by_col.entry(node.column).or_insert(110.0);
+            *entry = entry.max(node.width);
+        }
+
+        let w_left = max_w_by_col.get(&-1).copied().unwrap_or(0.0);
+        let w_center = max_w_by_col.get(&0).copied().unwrap_or(480.0);
+        let w_right = max_w_by_col.get(&1).copied().unwrap_or(0.0);
+
+        let gutter_margin = 50.0f64;
+        let column_gap = 60.0f64;
+
+        // Dynamic column centers ensuring strictly non-overlapping columns
+        let center_x = if w_left > 0.0 {
+            gutter_margin + w_left + column_gap + w_center / 2.0
+        } else {
+            gutter_margin + w_center / 2.0 + 80.0
+        };
+
+        let left_col_x = center_x - (w_center / 2.0 + column_gap + w_left / 2.0);
+        let right_col_x = center_x + (w_center / 2.0 + column_gap + w_right / 2.0);
+
         let rank_gap = 55.0;
         let margin_top = 50.0;
 
@@ -446,7 +467,11 @@ impl StateGraph {
 
             for id in node_ids {
                 if let Some(node) = nodes.get_mut(id) {
-                    let col_x = center_x + (node.column as f64) * col_offset;
+                    let col_x = match node.column {
+                        -1 => left_col_x,
+                        1 => right_col_x,
+                        _ => center_x,
+                    };
                     node.x = col_x - (node.width / 2.0);
                     node.y = current_y;
                     max_h_in_rank = max_h_in_rank.max(node.height);
@@ -472,14 +497,85 @@ impl StateGraph {
             }
 
             if min_x <= max_x && min_y <= max_y {
-                grp.x = min_x - 24.0;
-                grp.y = min_y - 36.0;
-                grp.width = (max_x - min_x) + 48.0;
-                grp.height = (max_y - min_y) + 54.0;
+                grp.x = min_x - 16.0;
+                grp.y = min_y - 32.0;
+                grp.width = (max_x - min_x) + 32.0;
+                grp.height = (max_y - min_y) + 48.0;
             }
         }
 
-        // 6. Route Edges (Forward Straight/S-curves vs. Perimeter Gutter Loops)
+        // Guarantee strictly non-overlapping groups by checking pairwise collisions
+        for i in 0..groups.len() {
+            for j in (i + 1)..groups.len() {
+                let g1_x = groups[i].x;
+                let g1_r = groups[i].x + groups[i].width;
+                let g1_y = groups[i].y;
+                let g1_b = groups[i].y + groups[i].height;
+
+                let g2_x = groups[j].x;
+                let g2_r = groups[j].x + groups[j].width;
+                let g2_y = groups[j].y;
+                let g2_b = groups[j].y + groups[j].height;
+
+                let overlap_x = (g1_r.min(g2_r) - g1_x.max(g2_x)).max(0.0);
+                let overlap_y = (g1_b.min(g2_b) - g1_y.max(g2_y)).max(0.0);
+
+                if overlap_x > 0.0 && overlap_y > 0.0 {
+                    if g1_x < g2_x {
+                        let shift = overlap_x + 24.0;
+                        groups[j].x += shift;
+                        for m in &groups[j].member_nodes {
+                            if let Some(node) = nodes.get_mut(m) {
+                                node.x += shift;
+                            }
+                        }
+                    } else {
+                        let shift = overlap_x + 24.0;
+                        groups[i].x += shift;
+                        for m in &groups[i].member_nodes {
+                            if let Some(node) = nodes.get_mut(m) {
+                                node.x += shift;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 6. Collect all obstacles (groups & composite containers) that edge routing must avoid
+        struct Obstacle {
+            id: String,
+            x: f64,
+            y: f64,
+            width: f64,
+            height: f64,
+        }
+
+        let mut obstacles: Vec<Obstacle> = Vec::new();
+        for grp in &groups {
+            if grp.width > 0.0 && grp.height > 0.0 {
+                obstacles.push(Obstacle {
+                    id: grp.id.clone(),
+                    x: grp.x,
+                    y: grp.y,
+                    width: grp.width,
+                    height: grp.height,
+                });
+            }
+        }
+        for node in nodes.values() {
+            if node.is_composite {
+                obstacles.push(Obstacle {
+                    id: node.id.clone(),
+                    x: node.x,
+                    y: node.y,
+                    width: node.width,
+                    height: node.height,
+                });
+            }
+        }
+
+        // 7. Route Edges with Obstacle Avoidance and Perimeter Gutters
         let min_canvas_x = nodes.values().map(|n| n.x).fold(center_x, f64::min);
         let max_canvas_x = nodes.values().map(|n| n.x + n.width).fold(center_x, f64::max);
         let gutter_left = (min_canvas_x - 70.0).max(40.0);
@@ -487,7 +583,6 @@ impl StateGraph {
 
         let mut edges: Vec<StateEdge> = Vec::new();
         for e in &raw_edges {
-            // Skip edges internal to composite nodes
             if composite_member_nodes.contains(&e.left) && composite_member_nodes.contains(&e.right) {
                 continue;
             }
@@ -539,7 +634,47 @@ impl StateGraph {
                     let p_start = (u.x + u.width * 0.5, u.y + u.height);
                     let p_end = (v.x + v.width * 0.5, v.y);
 
-                    if (p_start.0 - p_end.0).abs() < 10.0 {
+                    // Check if direct line between p_start and p_end collides with any intermediate obstacle
+                    let line_y_min = p_start.1 + 8.0;
+                    let line_y_max = p_end.1 - 8.0;
+                    let line_x_center = (p_start.0 + p_end.0) / 2.0;
+
+                    let mut hits_obstacle = false;
+                    for obs in &obstacles {
+                        if obs.id == u.id || obs.id == v.id {
+                            continue;
+                        }
+                        if obs.y < line_y_max && (obs.y + obs.height) > line_y_min {
+                            if line_x_center >= (obs.x - 5.0) && line_x_center <= (obs.x + obs.width + 5.0) {
+                                hits_obstacle = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if hits_obstacle {
+                        // Router avoids obstacle: detour via perimeter gutter
+                        let use_right = u.column > 0 || (u.column == 0 && v.column > 0);
+                        let gutter_x = if use_right { gutter_right } else { gutter_left };
+
+                        let p0 = if use_right {
+                            (u.x + u.width, u.y + u.height * 0.5)
+                        } else {
+                            (u.x, u.y + u.height * 0.5)
+                        };
+                        let p3 = if use_right {
+                            (v.x + v.width, v.y + v.height * 0.5)
+                        } else {
+                            (v.x, v.y + v.height * 0.5)
+                        };
+
+                        path_d = format!(
+                            "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
+                            p0.0, p0.1, gutter_x, p0.1, gutter_x, p3.1, p3.0, p3.1
+                        );
+                        label_x = gutter_x + if use_right { 12.0 } else { -12.0 };
+                        label_y = (p0.1 + p3.1) / 2.0;
+                    } else if (p_start.0 - p_end.0).abs() < 10.0 {
                         path_d = format!("M {:.1} {:.1} L {:.1} {:.1}", p_start.0, p_start.1, p_end.0, p_end.1);
                         label_x = p_start.0 + 12.0;
                         label_y = (p_start.1 + p_end.1) / 2.0;

@@ -6,11 +6,31 @@
 //! - Multi-column parallel phase lanes (e.g. Active vs Passive close in TCP)
 //! - Perimeter gutter routing for bypass, loopback, reset, and timeout transitions
 //! - Composable Poly-Archetype Subgraph execution (groups with their own visualizer)
+//! - Composite States with embedded sub-archetypes and sub-flows
 
 use std::collections::{HashMap, HashSet};
 use crate::ast::{GraphCanvas, GraphObject};
 use crate::layout::layered::escape_xml;
 use crate::layout::shapes::render_svg_node;
+
+/// Helper to parse viewBox width and height from generated sub-SVG
+fn parse_svg_dimensions(svg: &str) -> (f64, f64) {
+    if let Some(pos) = svg.find("viewBox=\"") {
+        let rest = &svg[pos + 9..];
+        if let Some(end) = rest.find('"') {
+            let parts: Vec<&str> = rest[..end]
+                .split(|c: char| c.is_whitespace() || c == ',')
+                .filter(|s| !s.is_empty())
+                .collect();
+            if parts.len() == 4 {
+                let w = parts[2].parse::<f64>().unwrap_or(420.0);
+                let h = parts[3].parse::<f64>().unwrap_or(240.0);
+                return (w, h);
+            }
+        }
+    }
+    (420.0, 240.0)
+}
 
 /// Representation of a state node
 #[derive(Debug, Clone)]
@@ -31,6 +51,10 @@ pub struct StateNode {
     pub group: Option<String>,
     pub column: i32,
     pub rank: usize,
+    pub is_composite: bool,
+    pub composite_sub_svg: Option<String>,
+    pub composite_tasks: Vec<String>,
+    pub composite_label: Option<String>,
 }
 
 /// Representation of a state group / cluster or embedded sub-visualizer
@@ -82,71 +106,120 @@ impl StateGraph {
         let mut nodes: HashMap<String, StateNode> = HashMap::new();
         let mut groups: Vec<StateGroup> = Vec::new();
 
-        // 1. Collect all nodes from canvas and top-level groups
-        let raw_vertices = canvas.get_flattened_vertices();
+        // 1. Identify top-level edge endpoints
         let raw_edges = canvas.get_edges();
+        let mut top_level_endpoints: HashSet<String> = HashSet::new();
+        for e in &raw_edges {
+            top_level_endpoints.insert(e.left.clone());
+            top_level_endpoints.insert(e.right.clone());
+        }
 
-        // Map which nodes belong to which groups
-        let mut node_to_group: HashMap<String, String> = HashMap::new();
+        // 2. Discover composite groups vs cluster groups
+        let mut composite_groups: HashMap<String, (Option<String>, Vec<String>, Option<String>, Option<String>, f64, f64)> = HashMap::new();
+        let mut composite_member_nodes: HashSet<String> = HashSet::new();
+        let mut node_to_cluster_group: HashMap<String, String> = HashMap::new();
 
         for obj in &canvas.objects {
             if let GraphObject::Group(grp) = obj {
-                let mut member_names = Vec::new();
-                for m in &grp.objects {
-                    match m {
-                        GraphObject::Vertex(v) => {
-                            member_names.push(v.name.clone());
-                            node_to_group.insert(v.name.clone(), grp.name.clone());
-                        }
-                        GraphObject::VertexRef { vertex } => {
-                            member_names.push(vertex.name.clone());
-                            node_to_group.insert(vertex.name.clone(), grp.name.clone());
-                        }
-                        GraphObject::Reference(r) => {
-                            member_names.push(r.name.clone());
-                            node_to_group.insert(r.name.clone(), grp.name.clone());
-                        }
-                        _ => {}
-                    }
-                }
-
-                // Poly-archetype: Check if group declares its own visualizer
-                let sub_svg = if let Some(ref sub_viz) = grp.visualizer {
-                    if let Some(generator) = crate::generators::make_generator(sub_viz) {
-                        // Construct scoped canvas for sub-group
-                        let mut sub_canvas = canvas.clone();
-                        sub_canvas.visualizer = Some(sub_viz.clone());
-                        sub_canvas.objects = grp.objects.clone();
-                        Some(generator.generate(&sub_canvas))
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                };
-
+                let is_composite = grp.visualizer.is_some() || top_level_endpoints.contains(&grp.name);
                 let grp_label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
-                groups.push(StateGroup {
-                    id: grp.name.clone(),
-                    label: grp_label,
-                    color: grp.color.clone(),
-                    x: 0.0,
-                    y: 0.0,
-                    width: 0.0,
-                    height: 0.0,
-                    member_nodes: member_names,
-                    sub_visualizer: grp.visualizer.clone(),
-                    sub_svg,
-                });
+
+                if is_composite {
+                    // Collect member node names so we encapsulate them
+                    let mut inner_tasks = Vec::new();
+                    for m in &grp.objects {
+                        match m {
+                            GraphObject::Vertex(v) => {
+                                composite_member_nodes.insert(v.name.clone());
+                                inner_tasks.push(v.label.clone().unwrap_or_else(|| v.name.clone()));
+                            }
+                            GraphObject::VertexRef { vertex } => {
+                                composite_member_nodes.insert(vertex.name.clone());
+                                inner_tasks.push(vertex.label.clone().unwrap_or_else(|| vertex.name.clone()));
+                            }
+                            GraphObject::Reference(r) => {
+                                composite_member_nodes.insert(r.name.clone());
+                                inner_tasks.push(r.name.clone());
+                            }
+                            _ => {}
+                        }
+                    }
+
+                    // Poly-archetype: Check if group declares its own visualizer
+                    let (sub_svg, sub_w, sub_h) = if let Some(ref sub_viz) = grp.visualizer {
+                        if let Some(generator) = crate::generators::make_generator(sub_viz) {
+                            let mut sub_canvas = canvas.clone();
+                            sub_canvas.visualizer = Some(sub_viz.clone());
+                            let mut sub_objects = grp.objects.clone();
+                            for obj in &canvas.objects {
+                                if let GraphObject::Edge { edge } = obj {
+                                    if composite_member_nodes.contains(&edge.left) && composite_member_nodes.contains(&edge.right) {
+                                        sub_objects.push(obj.clone());
+                                    }
+                                }
+                            }
+                            sub_canvas.objects = sub_objects;
+                            let rendered = generator.generate(&sub_canvas);
+                            let (sw, sh) = parse_svg_dimensions(&rendered);
+                            (Some(rendered), sw, sh)
+                        } else {
+                            (None, 420.0, 240.0)
+                        }
+                    } else {
+                        (None, 420.0, 100.0)
+                    };
+
+                    composite_groups.insert(
+                        grp.name.clone(),
+                        (sub_svg, inner_tasks, Some(grp_label), grp.color.clone(), sub_w, sub_h),
+                    );
+                } else {
+                    // Cluster group (e.g. PassiveClose or ActiveClose in state_tcp)
+                    let mut member_names = Vec::new();
+                    for m in &grp.objects {
+                        match m {
+                            GraphObject::Vertex(v) => {
+                                member_names.push(v.name.clone());
+                                node_to_cluster_group.insert(v.name.clone(), grp.name.clone());
+                            }
+                            GraphObject::VertexRef { vertex } => {
+                                member_names.push(vertex.name.clone());
+                                node_to_cluster_group.insert(vertex.name.clone(), grp.name.clone());
+                            }
+                            GraphObject::Reference(r) => {
+                                member_names.push(r.name.clone());
+                                node_to_cluster_group.insert(r.name.clone(), grp.name.clone());
+                            }
+                            _ => {}
+                        }
+                    }
+
+                    groups.push(StateGroup {
+                        id: grp.name.clone(),
+                        label: grp_label,
+                        color: grp.color.clone(),
+                        x: 0.0,
+                        y: 0.0,
+                        width: 0.0,
+                        height: 0.0,
+                        member_nodes: member_names,
+                        sub_visualizer: grp.visualizer.clone(),
+                        sub_svg: None,
+                    });
+                }
             }
         }
 
-        // 2. Identify start and terminal nodes
+        // 3. Collect vertices: exclude internal members of composite states
+        let raw_vertices = canvas.get_flattened_vertices();
         let explicit_start = canvas.start.as_deref();
         let mut in_degrees: HashMap<String, usize> = HashMap::new();
         let mut out_degrees: HashMap<String, usize> = HashMap::new();
 
         for e in &raw_edges {
+            if composite_member_nodes.contains(&e.left) && composite_member_nodes.contains(&e.right) {
+                continue;
+            }
             *in_degrees.entry(e.left.clone()).or_insert(0) += 0;
             *out_degrees.entry(e.left.clone()).or_insert(0) += 1;
             *in_degrees.entry(e.right.clone()).or_insert(0) += 1;
@@ -155,6 +228,15 @@ impl StateGraph {
 
         for v in raw_vertices {
             let name = v.get_name().to_string();
+            // Skip vertices that belong inside a composite state
+            if composite_member_nodes.contains(&name) {
+                continue;
+            }
+            // If this vertex is a composite group, we will add the composite node instead
+            if composite_groups.contains_key(&name) {
+                continue;
+            }
+
             let label = v.get_label().unwrap_or(&name).to_string();
             let shape = v.get_shape().unwrap_or("rect").to_string();
             let style = v.get_style().map(|s| s.to_string());
@@ -176,7 +258,6 @@ impl StateGraph {
                 || name_lower == "terminal"
                 || (out_degrees.get(&name).copied().unwrap_or(0) == 0 && in_degrees.get(&name).copied().unwrap_or(0) > 0);
 
-            // Compute size based on lines in label
             let lines: Vec<&str> = label.split("\\n").collect();
             let max_line_len = lines.iter().map(|l| l.len()).max().unwrap_or(4);
             let width = if shape == "beginpoint" || shape == "endpoint" || shape == "circle" {
@@ -190,7 +271,7 @@ impl StateGraph {
                 (lines.len() as f64 * 16.0 + 26.0).max(44.0)
             };
 
-            let grp = node_to_group.get(&name).cloned();
+            let grp = node_to_cluster_group.get(&name).cloned();
 
             nodes.insert(
                 name.clone(),
@@ -211,14 +292,77 @@ impl StateGraph {
                     group: grp,
                     column: 0,
                     rank: 0,
+                    is_composite: false,
+                    composite_sub_svg: None,
+                    composite_tasks: Vec::new(),
+                    composite_label: None,
                 },
             );
         }
 
-        // 3. Topological ranking & Lane assignment
-        // Build forward adjacency
+        // Add composite groups as StateNodes
+        let max_composite_w = composite_groups
+            .values()
+            .map(|(sub, tasks, _, _, sw, _)| {
+                if sub.is_some() {
+                    (*sw + 48.0).max(480.0)
+                } else if !tasks.is_empty() {
+                    ((tasks.len() as f64) * 110.0 + 80.0).max(480.0)
+                } else {
+                    480.0
+                }
+            })
+            .fold(480.0, f64::max);
+
+        for (grp_name, (sub_svg, tasks, lbl, clr, _sw, sh)) in composite_groups {
+            let width = max_composite_w;
+
+            let height = if sub_svg.is_some() {
+                sh + 54.0
+            } else if !tasks.is_empty() {
+                116.0
+            } else {
+                80.0
+            };
+
+            let is_start = explicit_start == Some(&grp_name)
+                || (in_degrees.get(&grp_name).copied().unwrap_or(0) == 0 && out_degrees.get(&grp_name).copied().unwrap_or(0) > 0);
+
+            let is_end = out_degrees.get(&grp_name).copied().unwrap_or(0) == 0 && in_degrees.get(&grp_name).copied().unwrap_or(0) > 0;
+
+            nodes.insert(
+                grp_name.clone(),
+                StateNode {
+                    id: grp_name.clone(),
+                    label: lbl.clone().unwrap_or_else(|| grp_name.clone()),
+                    shape: "rect".to_string(),
+                    style: None,
+                    image: None,
+                    x: 0.0,
+                    y: 0.0,
+                    width,
+                    height,
+                    color: clr,
+                    textcolor: None,
+                    is_start,
+                    is_end,
+                    group: None,
+                    column: 0,
+                    rank: 0,
+                    is_composite: true,
+                    composite_sub_svg: sub_svg,
+                    composite_tasks: tasks,
+                    composite_label: lbl,
+                },
+            );
+        }
+
+        // 4. Topological ranking & Lane assignment
         let mut forward_adj: HashMap<String, Vec<String>> = HashMap::new();
         for e in &raw_edges {
+            if composite_member_nodes.contains(&e.left) && composite_member_nodes.contains(&e.right) {
+                continue;
+            }
             if e.left != e.right {
                 forward_adj.entry(e.left.clone()).or_default().push(e.right.clone());
             }
@@ -231,7 +375,6 @@ impl StateGraph {
             .map(|n| n.id.clone())
             .or_else(|| nodes.keys().next().cloned());
 
-        // Assign ranks via forward traversal
         if let Some(ref root) = start_node_id {
             let mut visited = HashSet::new();
             let mut queue = std::collections::VecDeque::new();
@@ -244,7 +387,6 @@ impl StateGraph {
                 }
                 if let Some(succs) = forward_adj.get(&curr) {
                     for s in succs {
-                        // Prevent loops from pushing ranks to infinity
                         if !visited.contains(s) {
                             visited.insert(s.clone());
                             queue.push_back((s.clone(), r + 1));
@@ -254,15 +396,11 @@ impl StateGraph {
             }
         }
 
-        // Assign columns
-        // Column 0 = Center spine
-        // Column -1 = Left lane (e.g. ActiveClose or client path)
-        // Column +1 = Right lane (e.g. PassiveClose or server path)
-        let has_two_groups = groups.len() >= 2;
-        if has_two_groups {
-            // First group -> Left column (-1), Second group -> Right column (+1)
-            let g0_name = groups[0].id.clone();
-            let g1_name = groups[1].id.clone();
+        // Assign columns for cluster groups (e.g. PassiveClose vs ActiveClose in TCP)
+        let cluster_groups: Vec<&StateGroup> = groups.iter().filter(|g| !g.member_nodes.is_empty()).collect();
+        if cluster_groups.len() >= 2 {
+            let g0_name = cluster_groups[0].id.clone();
+            let g1_name = cluster_groups[1].id.clone();
 
             for node in nodes.values_mut() {
                 if let Some(ref g) = node.group {
@@ -275,19 +413,9 @@ impl StateGraph {
             }
         }
 
-        // Heuristics for ungrouped nodes:
-        // If an edge leads to Left column, place node in Left or Center
-        // If an edge leads to Right column, place node in Right or Center
-        let mut col_assignments: HashMap<String, i32> = HashMap::new();
-        for n in nodes.values() {
-            if n.column != 0 {
-                col_assignments.insert(n.id.clone(), n.column);
-            }
-        }
-
-        // Nodes named "listen" or "syn_received" on client/server branching
+        // Heuristics for ungrouped nodes in branching graphs
         for n in nodes.values_mut() {
-            if n.column == 0 && !n.is_start && !n.is_end {
+            if n.column == 0 && !n.is_start && !n.is_end && !n.is_composite {
                 let id_lower = n.id.to_lowercase();
                 if id_lower.contains("listen") || id_lower.contains("rcvd") || id_lower.contains("received") {
                     n.column = -1;
@@ -297,19 +425,17 @@ impl StateGraph {
             }
         }
 
-        // 4. Coordinates Calculation
+        // 5. Coordinates Calculation
         let center_x = 450.0;
         let col_offset = 260.0;
-        let rank_height = 85.0;
-        let margin_top = 60.0;
+        let rank_gap = 55.0;
+        let margin_top = 50.0;
 
-        // Group rows and bounds
         let mut rank_nodes: HashMap<usize, Vec<String>> = HashMap::new();
         for (id, node) in &nodes {
             rank_nodes.entry(node.rank).or_default().push(id.clone());
         }
 
-        // Sort ranks
         let mut sorted_ranks: Vec<usize> = rank_nodes.keys().copied().collect();
         sorted_ranks.sort();
 
@@ -326,10 +452,10 @@ impl StateGraph {
                     max_h_in_rank = max_h_in_rank.max(node.height);
                 }
             }
-            current_y += max_h_in_rank + rank_height;
+            current_y += max_h_in_rank + rank_gap;
         }
 
-        // Compute group bounding boxes around their nodes
+        // Compute group bounding boxes around cluster member nodes
         for grp in &mut groups {
             let mut min_x = f64::MAX;
             let mut max_x = f64::MIN;
@@ -353,7 +479,7 @@ impl StateGraph {
             }
         }
 
-        // 5. Route Edges (Forward S-curves vs. Perimeter Gutter Loops)
+        // 6. Route Edges (Forward Straight/S-curves vs. Perimeter Gutter Loops)
         let min_canvas_x = nodes.values().map(|n| n.x).fold(center_x, f64::min);
         let max_canvas_x = nodes.values().map(|n| n.x + n.width).fold(center_x, f64::max);
         let gutter_left = (min_canvas_x - 70.0).max(40.0);
@@ -361,6 +487,11 @@ impl StateGraph {
 
         let mut edges: Vec<StateEdge> = Vec::new();
         for e in &raw_edges {
+            // Skip edges internal to composite nodes
+            if composite_member_nodes.contains(&e.left) && composite_member_nodes.contains(&e.right) {
+                continue;
+            }
+
             if let (Some(u), Some(v)) = (nodes.get(&e.left), nodes.get(&e.right)) {
                 let is_self = e.left == e.right;
                 let is_backward = u.y >= v.y || (u.is_end && !v.is_end);
@@ -370,7 +501,6 @@ impl StateGraph {
                 let label_y;
 
                 if is_self {
-                    // Self loop arc over top right
                     let p0 = (u.x + u.width * 0.7, u.y);
                     let p1 = (u.x + u.width, u.y + u.height * 0.3);
                     let arc_x = u.x + u.width + 25.0;
@@ -383,7 +513,6 @@ impl StateGraph {
                     label_x = arc_x + 10.0;
                     label_y = arc_y;
                 } else if is_backward {
-                    // Route via perimeter gutter (avoid slicing through intermediate state cards)
                     let use_right = u.column > 0 || (u.column == 0 && v.column > 0);
                     let gutter_x = if use_right { gutter_right } else { gutter_left };
 
@@ -407,17 +536,14 @@ impl StateGraph {
                     label_x = gutter_x + if use_right { 12.0 } else { -12.0 };
                     label_y = (p_start.1 + p_end.1) / 2.0;
                 } else {
-                    // Forward transition down
                     let p_start = (u.x + u.width * 0.5, u.y + u.height);
                     let p_end = (v.x + v.width * 0.5, v.y);
 
-                    if (u.x - v.x).abs() < 10.0 {
-                        // Straight vertical
+                    if (p_start.0 - p_end.0).abs() < 10.0 {
                         path_d = format!("M {:.1} {:.1} L {:.1} {:.1}", p_start.0, p_start.1, p_end.0, p_end.1);
                         label_x = p_start.0 + 12.0;
                         label_y = (p_start.1 + p_end.1) / 2.0;
                     } else {
-                        // Smooth S-curve
                         let mid_y = (p_start.1 + p_end.1) / 2.0;
                         path_d = format!(
                             "M {:.1} {:.1} C {:.1} {:.1}, {:.1} {:.1}, {:.1} {:.1}",
@@ -442,15 +568,14 @@ impl StateGraph {
             }
         }
 
-        // Canvas extents
         let max_w = gutter_right + 100.0;
-        let max_h = current_y + 100.0;
+        let max_h = current_y + 60.0;
 
         Self {
             nodes,
             groups,
             edges,
-            width: max_w.max(800.0),
+            width: max_w.max(860.0),
             height: max_h.max(600.0),
             background: canvas.theme.as_ref().and_then(|t| t.background.clone()),
             default_node_color: canvas.defaults.vertexcolor.clone(),
@@ -469,8 +594,9 @@ impl StateGraph {
         // SVG header
         svg.push_str(&format!(
             r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {:.1} {:.1}" width="{:.1}" height="{:.1}" class="diagrammer-state-svg" style="background-color: {}; font-family: system-ui, -apple-system, sans-serif;">
+  <rect width="100%" height="100%" fill="{}"/>
 "##,
-            self.width, self.height, self.width, self.height, bg_color
+            self.width, self.height, self.width, self.height, bg_color, bg_color
         ));
 
         // Defs (arrow markers, shadow filters)
@@ -514,19 +640,6 @@ impl StateGraph {
                     border_color,
                     escape_xml(&grp.label)
                 ));
-
-                // Poly-archetype: If sub-visualizer exists, embed sub-SVG
-                if let Some(ref sub) = grp.sub_svg {
-                    svg.push_str(&format!(
-                        r##"  <g class="ds-poly-archetype-subgraph" transform="translate({:.1}, {:.1})">
-{}
-  </g>
-"##,
-                        grp.x + 16.0,
-                        grp.y + 28.0,
-                        sub
-                    ));
-                }
             }
         }
 
@@ -581,33 +694,129 @@ impl StateGraph {
         // Render State Nodes
         svg.push_str("  <!-- States -->\n  <g class=\"ds-nodes\">\n");
         for node in self.nodes.values() {
-            let fill = node.color.as_deref().unwrap_or(default_node_fill);
-            let text_color = node.textcolor.as_deref().unwrap_or("#f8fafc");
-            let stroke = if node.is_start {
-                "#10b981" // emerald for start
-            } else if node.is_end {
-                "#f43f5e" // rose for end
-            } else {
-                "#38bdf8" // sky blue
-            };
+            if node.is_composite {
+                let fill = node.color.as_deref().unwrap_or(default_node_fill);
+                let border_color = if node.is_start {
+                    "#10b981"
+                } else if node.is_end {
+                    "#f43f5e"
+                } else {
+                    "#38bdf8"
+                };
 
-            render_svg_node(
-                &node.id,
-                &node.label,
-                &node.shape,
-                node.style.as_deref(),
-                node.image.as_deref(),
-                node.x,
-                node.y,
-                node.width,
-                node.height,
-                fill,
-                text_color,
-                stroke,
-                Some("url(#ds-shadow)"),
-                Some(&self.type_registry),
-                &mut svg,
-            );
+                svg.push_str(&format!(
+                    r##"    <!-- Composite State: {} -->
+    <g class="dl-node ds-composite-node" id="node-{}">
+      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" rx="14" ry="14" fill="{}" fill-opacity="0.18" stroke="{}" stroke-width="1.8" filter="url(#ds-shadow)"/>
+      <line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="{}" stroke-width="1.0" stroke-opacity="0.4"/>
+      <text x="{:.1}" y="{:.1}" font-size="13" font-weight="700" fill="{}">{}</text>
+"##,
+                    escape_xml(&node.id),
+                    escape_xml(&node.id),
+                    node.x, node.y, node.width, node.height,
+                    fill, border_color,
+                    node.x, node.y + 36.0, node.x + node.width, node.y + 36.0, border_color,
+                    node.x + 18.0, node.y + 23.0, border_color, escape_xml(&node.id)
+                ));
+
+                if let Some(ref lbl) = node.composite_label {
+                    let title_offset = node.id.len() as f64 * 8.5 + 28.0;
+                    svg.push_str(&format!(
+                        r##"      <text x="{:.1}" y="{:.1}" font-size="12" font-weight="500" fill="#94a3b8">[{}]</text>
+"##,
+                        node.x + title_offset, node.y + 23.0, escape_xml(lbl)
+                    ));
+                }
+
+                if let Some(ref sub_svg) = node.composite_sub_svg {
+                    let sub_dim = parse_svg_dimensions(sub_svg);
+                    let sub_x = node.x + (node.width - sub_dim.0).max(0.0) / 2.0;
+                    let sub_y = node.y + 44.0;
+                    let clean_sub_svg = if sub_svg.contains("width=\"100%\"") {
+                        sub_svg.replace("width=\"100%\"", &format!("width=\"{:.1}\"", sub_dim.0))
+                    } else {
+                        sub_svg.clone()
+                    };
+                    svg.push_str(&format!(
+                        r##"      <g class="ds-poly-archetype-subgraph" transform="translate({:.1}, {:.1})">
+{}
+      </g>
+"##,
+                        sub_x, sub_y, clean_sub_svg
+                    ));
+                } else if !node.composite_tasks.is_empty() {
+                    let tasks = &node.composite_tasks;
+                    let n_tasks = tasks.len();
+                    let task_w = 90.0f64;
+                    let task_h = 36.0f64;
+                    let body_y = node.y + 36.0;
+                    let body_h = node.height - 36.0;
+                    let ty = body_y + (body_h - task_h) / 2.0;
+
+                    let total_tasks_w = n_tasks as f64 * task_w;
+                    let avail_w = node.width - 40.0;
+                    let gap = if n_tasks > 1 {
+                        (avail_w - total_tasks_w) / (n_tasks as f64 - 1.0)
+                    } else {
+                        0.0
+                    };
+
+                    for (i, task_name) in tasks.iter().enumerate() {
+                        let tx = node.x + 20.0 + i as f64 * (task_w + gap);
+                        svg.push_str(&format!(
+                            r##"      <g class="ds-sub-task" id="subtask-{}-{}">
+        <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" rx="8" ry="8" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
+        <text x="{:.1}" y="{:.1}" font-size="11" font-weight="600" fill="#f8fafc" text-anchor="middle" dominant-baseline="central">{}</text>
+      </g>
+"##,
+                            escape_xml(&node.id),
+                            escape_xml(task_name),
+                            tx, ty, task_w, task_h,
+                            tx + task_w / 2.0, ty + task_h / 2.0,
+                            escape_xml(task_name)
+                        ));
+
+                        if i + 1 < n_tasks {
+                            let next_tx = node.x + 20.0 + (i + 1) as f64 * (task_w + gap);
+                            svg.push_str(&format!(
+                                r##"      <path d="M {:.1} {:.1} L {:.1} {:.1}" stroke="#64748b" stroke-width="1.5" marker-end="url(#ds-arrow)"/>
+"##,
+                                tx + task_w, ty + task_h / 2.0, next_tx, ty + task_h / 2.0
+                            ));
+                        }
+                    }
+                }
+
+                svg.push_str("    </g>\n");
+            } else {
+                let fill = node.color.as_deref().unwrap_or(default_node_fill);
+                let text_color = node.textcolor.as_deref().unwrap_or("#f8fafc");
+                let stroke = if node.is_start {
+                    "#10b981"
+                } else if node.is_end {
+                    "#f43f5e"
+                } else {
+                    "#38bdf8"
+                };
+
+                render_svg_node(
+                    &node.id,
+                    &node.label,
+                    &node.shape,
+                    node.style.as_deref(),
+                    node.image.as_deref(),
+                    node.x,
+                    node.y,
+                    node.width,
+                    node.height,
+                    fill,
+                    text_color,
+                    stroke,
+                    Some("url(#ds-shadow)"),
+                    Some(&self.type_registry),
+                    &mut svg,
+                );
+            }
         }
         svg.push_str("  </g>\n");
 

@@ -17,11 +17,11 @@ var JsonHighlightRules = function() {
                 regex : /actor|beginpoint|box|circle|cloud|condition|database|default|diamond|dots|doublecircle|ellipse|endpoint|input|loopin|loopout|mail|minidiamond|minisquare|note|record|roundedbox|square|terminator|loop|loopend|loopstart|rect|rectangle/
             }, {
                 token : "keyword.control",
-                regex : /\{|\}|group end|equal|portait|landscape|lr|td|horizontal|vertical|generator|visualizer|start|group|shape|theme|layout|include/
+                regex : /\{|\}|group end|equal|portait|landscape|lr|td|horizontal|vertical|generator|visualizer|start|group|shape|theme|layout|include|define|operator|arrowhead/
             }, {
                 /*styles*/
                 token : "keyword.other",
-                regex : /dotted|dashed|solid|bold|rounded|diagonals|invis|singularity/
+                regex : /dotted|dashed|solid|bold|rounded|diagonals|invis|singularity|bidirectional|directed|undirected/
             }, {
                 token : "variable",
                 regex : /\$\([^)]+\)/
@@ -40,7 +40,7 @@ var JsonHighlightRules = function() {
                 regex : ";[^\n]+"
             }, {
                 token : "keyword.operator",
-                regex : /<\/|\/>|<\.>|<->|<>|<-|<\.|<|->|.>|>|-|\./
+                regex : /<\/|\/>|<\.>|<->|<>|<-|<\.|<|->|.>|>|-|\.|\<~\>|~\>|\<~|==>|=>/
             }, {
                 token : "invalid.illegal", // single quoted strings are not allowed
                 regex : "['](?:(?:\\\\.)|(?:[^'\\\\]))*?[']"

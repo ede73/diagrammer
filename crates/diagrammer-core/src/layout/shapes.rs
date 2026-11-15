@@ -505,3 +505,234 @@ fn render_custom_primitives_template(
     out.push_str("        </g>\n      </svg>\n");
 }
 
+/// Sanitizes an operator symbol (e.g. `<~>` or `<>`) into a valid XML/CSS identifier
+pub fn sanitize_operator_id(symbol: &str) -> String {
+    let mut s = String::new();
+    for c in symbol.chars() {
+        match c {
+            '<' => s.push_str("lt_"),
+            '>' => s.push_str("gt_"),
+            '-' => s.push_str("dash_"),
+            '.' => s.push_str("dot_"),
+            '=' => s.push_str("eq_"),
+            '~' => s.push_str("tilde_"),
+            '*' => s.push_str("star_"),
+            '|' => s.push_str("pipe_"),
+            '/' => s.push_str("slash_"),
+            c if c.is_ascii_alphanumeric() || c == '_' => s.push(c),
+            _ => s.push('_'),
+        }
+    }
+    s
+}
+
+/// Renders a dynamic SVG `<marker>` element in `<defs>` for a custom arrowhead
+pub fn render_custom_marker(
+    marker_id: &str,
+    arrowhead: &crate::ast::ArrowheadSpec,
+    custom_shapes: Option<&crate::ast::TypeRegistry>,
+    default_stroke: &str,
+    out: &mut String,
+) {
+    let w = arrowhead.width.unwrap_or(12.0);
+    let h = arrowhead.height.unwrap_or(12.0);
+    let rotation = arrowhead.rotation.unwrap_or(0.0);
+
+    // Check if the shape is a custom template in the registry
+    if let Some(template) = custom_shapes.and_then(|reg| reg.get_shape(&arrowhead.shape)) {
+        let tw = template.width.unwrap_or(w);
+        let th = template.height.unwrap_or(h);
+        let ref_x = arrowhead.ref_x.unwrap_or(tw * 0.9);
+        let ref_y = arrowhead.ref_y.unwrap_or(th / 2.0);
+
+        out.push_str(&format!(
+            r##"    <marker id="{}" viewBox="0 0 {:.1} {:.1}" refX="{:.1}" refY="{:.1}" markerWidth="{:.1}" markerHeight="{:.1}" orient="auto-start-reverse">
+"##,
+            marker_id, tw, th, ref_x, ref_y, w, h
+        ));
+
+        let rot_open = if rotation != 0.0 {
+            format!(r#"      <g transform="rotate({:.1} {:.1} {:.1})">"#, rotation, ref_x, ref_y)
+        } else {
+            String::new()
+        };
+        let rot_close = if rotation != 0.0 { "      </g>\n" } else { "" };
+
+        if !rot_open.is_empty() {
+            out.push_str(&rot_open);
+            out.push('\n');
+        }
+
+        match &template.body {
+            crate::ast::NodeShapeBody::Svg(raw_svg) => {
+                let trimmed = raw_svg.trim();
+                let inner = if let Some(start) = trimmed.find('>') {
+                    if let Some(end) = trimmed.rfind("</") {
+                        &trimmed[start + 1..end]
+                    } else {
+                        trimmed
+                    }
+                } else {
+                    trimmed
+                };
+                out.push_str(&format!(
+                    r##"      <g fill="{}" stroke="{}">
+        {}
+      </g>
+"##,
+                    default_stroke, default_stroke, inner.trim()
+                ));
+            }
+            crate::ast::NodeShapeBody::Primitives(primitives) => {
+                out.push_str(&format!(
+                    r##"      <g fill="{}" stroke="{}">
+"##,
+                    default_stroke, default_stroke
+                ));
+                for prim in primitives {
+                    let p_fill = prim.attributes.get("fill").map(|s| s.as_str()).unwrap_or(default_stroke);
+                    let p_stroke = prim.attributes.get("stroke").map(|s| s.as_str()).unwrap_or(default_stroke);
+                    let p_sw = prim.attributes.get("stroke-width").map(|s| s.as_str()).unwrap_or("1.2");
+
+                    match prim.kind.as_str() {
+                        "rectangle" | "rect" => {
+                            let px = prim.attributes.get("x").map(|s| s.as_str()).unwrap_or("0");
+                            let py = prim.attributes.get("y").map(|s| s.as_str()).unwrap_or("0");
+                            let pw = prim.attributes.get("w").or_else(|| prim.attributes.get("width")).map(|s| s.as_str()).unwrap_or("100%");
+                            let ph = prim.attributes.get("h").or_else(|| prim.attributes.get("height")).map(|s| s.as_str()).unwrap_or("100%");
+                            out.push_str(&format!(
+                                r##"        <rect x="{}" y="{}" width="{}" height="{}" fill="{}" stroke="{}" stroke-width="{}" />
+"##,
+                                px, py, pw, ph, p_fill, p_stroke, p_sw
+                            ));
+                        }
+                        "circle" => {
+                            let cx = prim.attributes.get("cx").map(|s| s.as_str()).unwrap_or("0");
+                            let cy = prim.attributes.get("cy").map(|s| s.as_str()).unwrap_or("0");
+                            let r = prim.attributes.get("r").or_else(|| prim.attributes.get("radius")).map(|s| s.as_str()).unwrap_or("5");
+                            out.push_str(&format!(
+                                r##"        <circle cx="{}" cy="{}" r="{}" fill="{}" stroke="{}" stroke-width="{}" />
+"##,
+                                cx, cy, r, p_fill, p_stroke, p_sw
+                            ));
+                        }
+                        "ellipse" => {
+                            let cx = prim.attributes.get("cx").map(|s| s.as_str()).unwrap_or("0");
+                            let cy = prim.attributes.get("cy").map(|s| s.as_str()).unwrap_or("0");
+                            let rx = prim.attributes.get("rx").map(|s| s.as_str()).unwrap_or("6");
+                            let ry = prim.attributes.get("ry").map(|s| s.as_str()).unwrap_or("4");
+                            out.push_str(&format!(
+                                r##"        <ellipse cx="{}" cy="{}" rx="{}" ry="{}" fill="{}" stroke="{}" stroke-width="{}" />
+"##,
+                                cx, cy, rx, ry, p_fill, p_stroke, p_sw
+                            ));
+                        }
+                        "polygon" => {
+                            let pts = prim.attributes.get("points").map(|s| s.as_str()).unwrap_or("");
+                            out.push_str(&format!(
+                                r##"        <polygon points="{}" fill="{}" stroke="{}" stroke-width="{}" />
+"##,
+                                pts, p_fill, p_stroke, p_sw
+                            ));
+                        }
+                        "path" => {
+                            let d = prim.attributes.get("d").map(|s| s.as_str()).unwrap_or("");
+                            out.push_str(&format!(
+                                r##"        <path d="{}" fill="{}" stroke="{}" stroke-width="{}" />
+"##,
+                                d, p_fill, p_stroke, p_sw
+                            ));
+                        }
+                        _ => {}
+                    }
+                }
+                out.push_str("      </g>\n");
+            }
+        }
+
+        if !rot_close.is_empty() {
+            out.push_str(rot_close);
+        }
+
+        out.push_str("    </marker>\n");
+    } else {
+        // Built-in shape or primitive
+        let shape = arrowhead.shape.as_str();
+        let ref_x = arrowhead.ref_x.unwrap_or(match shape {
+            "diamond" | "condition" => w / 2.0,
+            "circle" | "doublecircle" => w / 2.0,
+            "box" | "rect" | "square" => w * 0.9,
+            _ => w * 0.9,
+        });
+        let ref_y = arrowhead.ref_y.unwrap_or(h / 2.0);
+
+        out.push_str(&format!(
+            r##"    <marker id="{}" viewBox="0 0 {:.1} {:.1}" refX="{:.1}" refY="{:.1}" markerWidth="{:.1}" markerHeight="{:.1}" orient="auto-start-reverse">
+"##,
+            marker_id, w, h, ref_x, ref_y, w, h
+        ));
+
+        let rot_open = if rotation != 0.0 {
+            format!(r#"      <g transform="rotate({:.1} {:.1} {:.1})">"#, rotation, ref_x, ref_y)
+        } else {
+            String::new()
+        };
+        let rot_close = if rotation != 0.0 { "      </g>\n" } else { "" };
+
+        if !rot_open.is_empty() {
+            out.push_str(&rot_open);
+            out.push('\n');
+        }
+
+        match shape {
+            "diamond" | "condition" => {
+                out.push_str(&format!(
+                    r##"      <polygon points="{:.1},1 {:.1},{:.1} {:.1},{:.1} 1,{:.1}" fill="{}" stroke="{}" stroke-width="1.2" />
+"##,
+                    w / 2.0, w - 1.0, h / 2.0, w / 2.0, h - 1.0, h / 2.0, default_stroke, default_stroke
+                ));
+            }
+            "circle" => {
+                let r = (w.min(h) / 2.0 - 1.0).max(1.0);
+                out.push_str(&format!(
+                    r##"      <circle cx="{:.1}" cy="{:.1}" r="{:.1}" fill="{}" stroke="{}" stroke-width="1.2" />
+"##,
+                    w / 2.0, h / 2.0, r, default_stroke, default_stroke
+                ));
+            }
+            "doublecircle" => {
+                let r = (w.min(h) / 2.0 - 1.0).max(1.0);
+                let ir = (r - 2.0).max(0.5);
+                out.push_str(&format!(
+                    r##"      <circle cx="{:.1}" cy="{:.1}" r="{:.1}" fill="{}" stroke="{}" stroke-width="1.2" />
+      <circle cx="{:.1}" cy="{:.1}" r="{:.1}" fill="none" stroke="#ffffff" stroke-width="0.8" />
+"##,
+                    w / 2.0, h / 2.0, r, default_stroke, default_stroke,
+                    w / 2.0, h / 2.0, ir
+                ));
+            }
+            "box" | "rect" | "square" => {
+                out.push_str(&format!(
+                    r##"      <rect x="1" y="1" width="{:.1}" height="{:.1}" rx="1" fill="{}" stroke="{}" stroke-width="1.2" />
+"##,
+                    w - 2.0, h - 2.0, default_stroke, default_stroke
+                ));
+            }
+            _ => {
+                // Default triangular arrowhead
+                out.push_str(&format!(
+                    r##"      <path d="M 0 1.5 L {:.1} {:.1} L 0 {:.1} z" fill="{}" />
+"##,
+                    w, h / 2.0, h - 1.5, default_stroke
+                ));
+            }
+        }
+
+        if !rot_close.is_empty() {
+            out.push_str(rot_close);
+        }
+
+        out.push_str("    </marker>\n");
+    }
+}
+

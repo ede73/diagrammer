@@ -23,6 +23,7 @@ pub struct Message {
     pub left_arrow: ArrowType,
     pub right_arrow: ArrowType,
     pub group_parent: Option<String>,
+    pub edge_type: String,
 }
 
 /// Sequence step: message, divider/delay, or standalone note
@@ -186,7 +187,23 @@ impl SequenceLayoutEngine {
     <marker id="ds-arrow-open-right" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 1 2 L 8 5 L 1 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
-  </defs>
+"##);
+
+        for op in canvas.type_registry.operators.values() {
+            if let Some(ref ah) = op.arrowhead {
+                let op_marker_id = format!("ds-op-{}", crate::layout::shapes::sanitize_operator_id(&op.symbol));
+                let stroke_c = op.color.as_deref().unwrap_or("#38bdf8");
+                crate::layout::shapes::render_custom_marker(
+                    &op_marker_id,
+                    ah,
+                    Some(&canvas.type_registry),
+                    stroke_c,
+                    &mut svg,
+                );
+            }
+        }
+
+        svg.push_str(r##"  </defs>
   <style>
     .diagrammer-sequence {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -476,13 +493,39 @@ impl SequenceLayoutEngine {
                         let line_x1 = if going_right { x1 + offset } else { x1 - offset };
                         let line_x2 = if going_right { x2 - offset } else { x2 + offset };
 
-                        let marker_end = if msg.right_arrow != ArrowType::None {
-                            if msg.is_dashed { " marker-end=\"url(#ds-arrow-open-right)\"" } else { " marker-end=\"url(#ds-arrow-right)\"" }
-                        } else { "" };
-
-                        let marker_start = if msg.left_arrow != ArrowType::None {
-                            " marker-start=\"url(#ds-arrow-left)\""
-                        } else { "" };
+                        let op_opt = canvas.type_registry.get_operator(&msg.edge_type);
+                        let (marker_start, marker_end) = if let Some(op) = op_opt {
+                            if op.arrowhead.is_some() {
+                                let op_marker_url = format!("url(#ds-op-{})", crate::layout::shapes::sanitize_operator_id(&op.symbol));
+                                let is_bidi = op.edge_type.as_deref() == Some("bidirectional") || (msg.edge_type.contains('<') && msg.edge_type.contains('>'));
+                                let is_none = op.edge_type.as_deref() == Some("none") || op.edge_type.as_deref() == Some("undirected");
+                                if is_bidi {
+                                    (format!(" marker-start=\"{}\"", op_marker_url), format!(" marker-end=\"{}\"", op_marker_url))
+                                } else if is_none {
+                                    (String::new(), String::new())
+                                } else if msg.left_arrow != ArrowType::None {
+                                    (format!(" marker-start=\"{}\"", op_marker_url), String::new())
+                                } else {
+                                    (String::new(), format!(" marker-end=\"{}\"", op_marker_url))
+                                }
+                            } else {
+                                let me = if msg.right_arrow != ArrowType::None {
+                                    if msg.is_dashed { " marker-end=\"url(#ds-arrow-open-right)\"" } else { " marker-end=\"url(#ds-arrow-right)\"" }
+                                } else { "" };
+                                let ms = if msg.left_arrow != ArrowType::None {
+                                    " marker-start=\"url(#ds-arrow-left)\""
+                                } else { "" };
+                                (ms.to_string(), me.to_string())
+                            }
+                        } else {
+                            let me = if msg.right_arrow != ArrowType::None {
+                                if msg.is_dashed { " marker-end=\"url(#ds-arrow-open-right)\"" } else { " marker-end=\"url(#ds-arrow-right)\"" }
+                            } else { "" };
+                            let ms = if msg.left_arrow != ArrowType::None {
+                                " marker-start=\"url(#ds-arrow-left)\""
+                            } else { "" };
+                            (ms.to_string(), me.to_string())
+                        };
 
                         svg.push_str(&format!(
                             r#"    <g color="{color}">
@@ -672,6 +715,7 @@ impl SequenceLayoutEngine {
                     left_arrow,
                     right_arrow,
                     group_parent: edge.parent.clone(),
+                    edge_type: edge.edge_type.clone(),
                 }));
                 if let Some(ref grp) = edge.parent {
                     group_step_map.entry(grp.clone()).or_default().push(step_idx);

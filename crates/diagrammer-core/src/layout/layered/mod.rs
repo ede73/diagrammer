@@ -563,6 +563,22 @@ impl LayeredGraph {
             self.width, self.height, self.width, self.height
         ));
 
+        // Dynamic operator arrowhead markers
+        let mut custom_markers = String::new();
+        for op in self.type_registry.operators.values() {
+            if let Some(ref ah) = op.arrowhead {
+                let op_marker_id = format!("dl-op-{}", crate::layout::shapes::sanitize_operator_id(&op.symbol));
+                let stroke_c = op.color.as_deref().unwrap_or(default_edge_stroke);
+                crate::layout::shapes::render_custom_marker(
+                    &op_marker_id,
+                    ah,
+                    Some(&self.type_registry),
+                    stroke_c,
+                    &mut custom_markers,
+                );
+            }
+        }
+
         // SVG Defs: Shadows, Markers, Gradients
         svg.push_str(&format!(
             r##"  <defs>
@@ -576,7 +592,7 @@ impl LayeredGraph {
     <marker id="dl-arrow-inheritance" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
       <polygon points="0,1 12,6 0,11" fill="#ffffff" stroke="{}" stroke-width="1.5" />
     </marker>
-  </defs>
+{}  </defs>
 
   <style>
     .dl-bg {{ fill: {}; }}
@@ -638,7 +654,7 @@ impl LayeredGraph {
   <rect width="100%" height="100%" class="dl-bg" />
 
 "##,
-            default_edge_stroke, default_edge_stroke, bg_color, bg_color
+            default_edge_stroke, default_edge_stroke, custom_markers, bg_color, bg_color
         ));
 
         // 1. Render Edges
@@ -657,24 +673,62 @@ impl LayeredGraph {
                 }
             }
 
-            let marker = if edge.is_inheritance {
-                "url(#dl-arrow-inheritance)"
+            let op_opt = self.type_registry.get_operator(&edge.edge_type);
+
+            let (marker_start_attr, marker_end_attr) = if let Some(op) = op_opt {
+                if op.arrowhead.is_some() {
+                    let op_marker_url = format!("url(#dl-op-{})", crate::layout::shapes::sanitize_operator_id(&op.symbol));
+                    let is_bidi = op.edge_type.as_deref() == Some("bidirectional") || (edge.edge_type.contains('<') && edge.edge_type.contains('>'));
+                    let is_none = op.edge_type.as_deref() == Some("none") || op.edge_type.as_deref() == Some("undirected");
+                    if is_bidi {
+                        (format!(" marker-start=\"{}\"", op_marker_url), format!(" marker-end=\"{}\"", op_marker_url))
+                    } else if is_none {
+                        (String::new(), String::new())
+                    } else {
+                        (String::new(), format!(" marker-end=\"{}\"", op_marker_url))
+                    }
+                } else {
+                    let is_bidi = op.edge_type.as_deref() == Some("bidirectional") || (edge.edge_type.contains('<') && edge.edge_type.contains('>'));
+                    let is_none = op.edge_type.as_deref() == Some("none") || op.edge_type.as_deref() == Some("undirected");
+                    let marker_url = if edge.is_inheritance { "url(#dl-arrow-inheritance)" } else { "url(#dl-arrow)" };
+                    if is_bidi {
+                        (format!(" marker-start=\"{}\"", marker_url), format!(" marker-end=\"{}\"", marker_url))
+                    } else if is_none {
+                        (String::new(), String::new())
+                    } else {
+                        (String::new(), format!(" marker-end=\"{}\"", marker_url))
+                    }
+                }
             } else {
-                "url(#dl-arrow)"
+                let is_bidi = edge.edge_type.contains('<') && edge.edge_type.contains('>');
+                let marker_url = if edge.is_inheritance { "url(#dl-arrow-inheritance)" } else { "url(#dl-arrow)" };
+                if is_bidi {
+                    (format!(" marker-start=\"{}\"", marker_url), format!(" marker-end=\"{}\"", marker_url))
+                } else if edge.edge_type.contains('>') {
+                    (String::new(), format!(" marker-end=\"{}\"", marker_url))
+                } else if edge.edge_type.contains('<') {
+                    (format!(" marker-start=\"{}\"", marker_url), String::new())
+                } else {
+                    (String::new(), String::new())
+                }
             };
 
-            let dash_attr = if edge.line_type == "dashed" {
+            let is_bold = edge.line_type == "bold" || op_opt.and_then(|o| o.style.as_deref()) == Some("bold");
+            let stroke_width_attr = if is_bold { " stroke-width=\"3.0\"" } else { "" };
+            let is_dashed = edge.line_type == "dashed" || op_opt.and_then(|o| o.style.as_deref()) == Some("dashed");
+            let is_dotted = edge.line_type == "dotted" || op_opt.and_then(|o| o.style.as_deref()) == Some("dotted");
+            let dash_attr = if is_dashed {
                 " stroke-dasharray=\"6,4\""
-            } else if edge.line_type == "dotted" {
+            } else if is_dotted {
                 " stroke-dasharray=\"2,4\""
             } else {
                 ""
             };
 
             svg.push_str(&format!(
-                r#"    <path d="{}" class="dl-edge-path" stroke="{}" marker-end="{}"{} />
+                r#"    <path d="{}" class="dl-edge-path" stroke="{}"{}{}{}{} />
 "#,
-                path_d, edge_color, marker, dash_attr
+                path_d, edge_color, marker_start_attr, marker_end_attr, dash_attr, stroke_width_attr
             ));
 
             // Render Edge Label if present (borderless with SVG halo, floating cleanly on the track)

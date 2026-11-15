@@ -92,6 +92,10 @@ pub struct EdgeRef {
     pub lcompass: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rcompass: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub style: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub arrowhead: Option<String>,
     #[serde(skip)]
     pub parent: Option<String>,
     #[serde(skip)]
@@ -114,6 +118,8 @@ impl EdgeRef {
             url: None,
             lcompass: None,
             rcompass: None,
+            style: None,
+            arrowhead: None,
             parent: None,
             has_explicit_color: false,
             has_explicit_textcolor: false,
@@ -576,11 +582,47 @@ pub struct NodeShapeTemplate {
     pub body: NodeShapeBody,
 }
 
-/// Registry of user-defined types (shapes, templates)
+/// Viewport and shape specification for edge arrowheads
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ArrowheadSpec {
+    pub shape: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub width: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub height: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rotation: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ref_x: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ref_y: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub args: Option<String>,
+}
+
+/// Definition of a custom or overridden operator
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct OperatorDefinition {
+    pub symbol: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub edge_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub style: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub arrowhead: Option<ArrowheadSpec>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub action: Option<String>,
+}
+
+/// Registry of user-defined types (shapes, templates, operators)
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct TypeRegistry {
     #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub shapes: HashMap<String, NodeShapeTemplate>,
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    pub operators: HashMap<String, OperatorDefinition>,
 }
 
 impl TypeRegistry {
@@ -589,7 +631,7 @@ impl TypeRegistry {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.shapes.is_empty()
+        self.shapes.is_empty() && self.operators.is_empty()
     }
 
     pub fn insert_shape(&mut self, template: NodeShapeTemplate) {
@@ -602,6 +644,18 @@ impl TypeRegistry {
 
     pub fn has_shape(&self, name: &str) -> bool {
         self.shapes.contains_key(name)
+    }
+
+    pub fn insert_operator(&mut self, op: OperatorDefinition) {
+        self.operators.insert(op.symbol.clone(), op);
+    }
+
+    pub fn get_operator(&self, symbol: &str) -> Option<&OperatorDefinition> {
+        self.operators.get(symbol)
+    }
+
+    pub fn has_operator(&self, symbol: &str) -> bool {
+        self.operators.contains_key(symbol)
     }
 }
 

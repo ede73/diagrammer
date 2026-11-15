@@ -347,6 +347,21 @@ impl ForceGraph {
             self.width, self.height, self.width, self.height
         ));
 
+        let mut custom_markers = String::new();
+        for op in self.type_registry.operators.values() {
+            if let Some(ref ah) = op.arrowhead {
+                let op_marker_id = format!("dforce-op-{}", crate::layout::shapes::sanitize_operator_id(&op.symbol));
+                let stroke_c = op.color.as_deref().unwrap_or(default_edge_stroke);
+                crate::layout::shapes::render_custom_marker(
+                    &op_marker_id,
+                    ah,
+                    Some(&self.type_registry),
+                    stroke_c,
+                    &mut custom_markers,
+                );
+            }
+        }
+
         svg.push_str(&format!(
             r##"  <defs>
     <filter id="dforce-shadow" x="-20%" y="-20%" width="140%" height="140%" filterUnits="userSpaceOnUse">
@@ -355,7 +370,7 @@ impl ForceGraph {
     <marker id="dforce-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="{}" />
     </marker>
-  </defs>
+{}  </defs>
 
   <style>
     .dforce-bg {{ fill: {}; }}
@@ -391,14 +406,20 @@ impl ForceGraph {
   <!-- Edges -->
   <g class="dforce-edges">
 "##,
-            default_edge_stroke, bg_color
+            default_edge_stroke, custom_markers, bg_color
         ));
 
         for e in &self.edges {
             if let (Some(u), Some(v)) = (self.nodes.get(&e.from), self.nodes.get(&e.to)) {
                 let stroke = e.color.as_deref().unwrap_or(default_edge_stroke);
-                let is_directed = e.edge_type.contains('>');
-                let is_dashed = e.edge_type.contains('.') || e.edge_type.to_lowercase().contains("dash");
+                let op_opt = self.type_registry.get_operator(&e.edge_type);
+
+                let is_bidi = op_opt.and_then(|o| o.edge_type.as_deref()) == Some("bidirectional") || (e.edge_type.contains('<') && e.edge_type.contains('>'));
+                let is_directed = op_opt.and_then(|o| o.edge_type.as_deref()) == Some("directed") || e.edge_type.contains('>');
+                let is_none = op_opt.and_then(|o| o.edge_type.as_deref()) == Some("none") || op_opt.and_then(|o| o.edge_type.as_deref()) == Some("undirected");
+                let is_dashed = op_opt.and_then(|o| o.style.as_deref()) == Some("dashed") || e.edge_type.contains('.') || e.edge_type.to_lowercase().contains("dash");
+                let is_dotted = op_opt.and_then(|o| o.style.as_deref()) == Some("dotted");
+                let is_bold = op_opt.and_then(|o| o.style.as_deref()) == Some("bold");
 
                 let dx = v.x - u.x;
                 let dy = v.y - u.y;
@@ -406,21 +427,52 @@ impl ForceGraph {
                 let ux = dx / dist;
                 let uy = dy / dist;
 
-                let r_u = (u.width / 2.0).min(u.height / 2.0).max(16.0);
-                let r_v = (v.width / 2.0).min(v.height / 2.0).max(16.0) + if is_directed { 8.0 } else { 0.0 };
+                let r_u = (u.width / 2.0).min(u.height / 2.0).max(16.0) + if is_bidi { 8.0 } else { 0.0 };
+                let r_v = (v.width / 2.0).min(v.height / 2.0).max(16.0) + if is_directed || is_bidi { 8.0 } else { 0.0 };
 
                 let x1 = u.x + ux * r_u;
                 let y1 = u.y + uy * r_u;
                 let x2 = v.x - ux * r_v;
                 let y2 = v.y - uy * r_v;
 
-                let dash_attr = if is_dashed { " stroke-dasharray=\"5,4\"" } else { "" };
-                let marker_attr = if is_directed { " marker-end=\"url(#dforce-arrow)\"" } else { "" };
+                let dash_attr = if is_dashed {
+                    " stroke-dasharray=\"5,4\""
+                } else if is_dotted {
+                    " stroke-dasharray=\"2,4\""
+                } else {
+                    ""
+                };
+                let stroke_width_attr = if is_bold { " stroke-width=\"3.0\"" } else { "" };
+
+                let (marker_start_attr, marker_end_attr) = if let Some(op) = op_opt {
+                    if op.arrowhead.is_some() {
+                        let op_marker_url = format!("url(#dforce-op-{})", crate::layout::shapes::sanitize_operator_id(&op.symbol));
+                        if is_bidi {
+                            (format!(" marker-start=\"{}\"", op_marker_url), format!(" marker-end=\"{}\"", op_marker_url))
+                        } else if is_none {
+                            (String::new(), String::new())
+                        } else {
+                            (String::new(), format!(" marker-end=\"{}\"", op_marker_url))
+                        }
+                    } else if is_bidi {
+                        (" marker-start=\"url(#dforce-arrow)\"".to_string(), " marker-end=\"url(#dforce-arrow)\"".to_string())
+                    } else if is_directed && !is_none {
+                        (String::new(), " marker-end=\"url(#dforce-arrow)\"".to_string())
+                    } else {
+                        (String::new(), String::new())
+                    }
+                } else if is_bidi {
+                    (" marker-start=\"url(#dforce-arrow)\"".to_string(), " marker-end=\"url(#dforce-arrow)\"".to_string())
+                } else if is_directed {
+                    (String::new(), " marker-end=\"url(#dforce-arrow)\"".to_string())
+                } else {
+                    (String::new(), String::new())
+                };
 
                 svg.push_str(&format!(
-                    r#"    <line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="{}" class="dforce-edge"{}{} />
+                    r#"    <line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="{}" class="dforce-edge"{}{}{}{} />
 "#,
-                    x1, y1, x2, y2, stroke, dash_attr, marker_attr
+                    x1, y1, x2, y2, stroke, dash_attr, stroke_width_attr, marker_start_attr, marker_end_attr
                 ));
 
                 if let Some(lbl) = &e.label {

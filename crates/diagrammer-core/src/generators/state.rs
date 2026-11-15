@@ -9,3 +9,4 @@ impl Generator for StateGenerator {
         StateGraph::new(canvas).render_svg()
     }
 }
+

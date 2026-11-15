@@ -316,9 +316,9 @@ form[name="contact"] > button[onclick*="visualize"]:hover {
 }
 
 .htoolbar img.edgeicon {
-    width: auto;
+    width: 48px;
     height: 18px;
-    max-width: 38px;
+    max-width: 48px;
     max-height: 18px;
     object-fit: contain;
 }

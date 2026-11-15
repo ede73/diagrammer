@@ -576,3 +576,49 @@ fn test_ast_record_generator() {
     assert!(dot.contains("GraphObject"), "Must render GraphObject group/record");
     assert!(dot.contains("GraphRoot"), "Must render GraphRoot group/record");
 }
+
+#[test]
+fn test_state_engine_renders_tcp_and_poly_archetype() {
+    let state_gen = make_generator("state").expect("state generator must exist");
+
+    // 1. Verify state_tcp.txt rendering
+    let input = fs::read_to_string("../../tests/test_inputs/state_tcp.txt")
+        .or_else(|_| fs::read_to_string("tests/test_inputs/state_tcp.txt"))
+        .expect("state_tcp.txt must exist");
+
+    let canvas = AstBuilder::new().build(&input).expect("Failed to parse state_tcp.txt");
+    let svg = state_gen.generate(&canvas);
+
+    assert!(svg.starts_with("<svg"), "State SVG must start with <svg");
+    assert!(svg.contains("</svg>"), "State SVG must close with </svg>");
+    assert!(svg.contains("class=\"diagrammer-state-svg\""), "State SVG must have diagrammer-state-svg class");
+    assert!(svg.contains("class=\"ds-group\""), "State SVG must render phase cluster groups");
+    assert!(svg.contains("Active CLOSE"), "Must render ActiveClose label");
+    assert!(svg.contains("Passive CLOSE"), "Must render PassiveClose label");
+    assert!(svg.contains("ESTABLISHED"), "Must render ESTABLISHED state");
+    assert!(svg.contains("class=\"ds-edge\""), "Must render state transitions");
+    assert!(!svg.contains("NaN"), "Must not have NaN coordinates");
+
+    // 2. Verify Poly-Archetype Composable Subgraph (Sequence embedded inside State group)
+    let poly_input = r#"
+visualizer state
+
+Start > Negotiation > Ready
+
+{Negotiation; Handshake Protocol
+    visualizer native_sequence
+    Client > "SYN" Server
+    Server > "SYN-ACK" Client
+    Client > "ACK" Server
+}
+"#;
+    let poly_canvas = AstBuilder::new().build(poly_input).expect("Failed to build poly-archetype AST");
+    let poly_svg = state_gen.generate(&poly_canvas);
+
+    assert!(poly_svg.contains("class=\"diagrammer-state-svg\""));
+    assert!(poly_svg.contains("class=\"ds-poly-archetype-subgraph\""), "Must render embedded sub-visualizer");
+    assert!(poly_svg.contains("class=\"diagrammer-sequence\""), "Embedded sequence diagram must be rendered inside state SVG");
+    assert!(poly_svg.contains("Client"), "Participant Client must be in embedded sequence");
+    assert!(poly_svg.contains("Server"), "Participant Server must be in embedded sequence");
+    assert!(poly_svg.contains("SYN-ACK"), "Message SYN-ACK must be in embedded sequence");
+}

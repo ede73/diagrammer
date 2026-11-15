@@ -3,4 +3,5 @@ pub mod grid;
 pub mod layered;
 pub mod sequence;
 pub mod shapes;
+pub mod state;
 pub mod tree;

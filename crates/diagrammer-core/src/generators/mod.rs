@@ -15,7 +15,6 @@ pub mod native_sequence;
 pub mod nwdiag;
 pub mod plantuml_sequence;
 pub mod sankey;
-pub mod seqdiag;
 pub mod tree;
 
 // Legacy generators (unmaintained GoJS backend)
@@ -137,7 +136,6 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
         "nwdiag" => Some(Box::new(nwdiag::NWDiag)),
         "plantuml_sequence" => Some(Box::new(plantuml_sequence::PlantUMLSequence)),
         "sankey" => Some(Box::new(sankey::Sankey)),
-        "seqdiag" => Some(Box::new(seqdiag::SeqDiag)),
         "tree" | "radial" | "native_tree" | "fan" => Some(Box::new(tree::TreeGenerator)),
         _ => None,
     }

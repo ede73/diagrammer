@@ -227,7 +227,7 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
             c.arg("-i-").arg("-o-").arg(format!("-T{}", format));
             c
         }
-        "nwdiag" | "seqdiag" => {
+        "nwdiag" => {
             let mut c = Command::new(visualizer);
             c.arg("-a").arg(format!("-T{}", format));
             if Path::new("fonts/dejavu-sans-bold.ttf").exists() {
@@ -262,7 +262,7 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
     };
 
     cmd.stdin(Stdio::piped());
-    let redirect_stdout = output_path.is_none() || (visualizer != "nwdiag" && visualizer != "seqdiag");
+    let redirect_stdout = output_path.is_none() || (visualizer != "nwdiag");
     if redirect_stdout {
         cmd.stdout(Stdio::piped());
     }
@@ -280,7 +280,7 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
     }
 
     if let Some(out_path) = output_path {
-        if visualizer != "nwdiag" && visualizer != "seqdiag" {
+        if visualizer != "nwdiag" {
             fs::write(out_path, &output.stdout).map_err(|e| format!("Failed to write output to '{}': {}", out_path, e))?;
         }
     } else {

@@ -195,9 +195,7 @@ const _visualizations = [
         '-o-'
     ], { family: 'Mermaid', engine: 'mermaid.js (Sequence)', description: 'Mermaid sequence diagram in-browser' }),
 
-    new Visualization('ast_record', 'AST: Record Visualizer', 'ast_record', async (g) => {
-        await visualizeGraphviz(g, 'dot');
-    }, undefined, { family: 'AST', engine: 'Graphviz Record', description: 'Abstract Syntax Tree structure' }),
+    new Visualization('ast_record', 'AST: Record Visualizer', 'ast_record', visualizeLayered, undefined, { family: 'AST', engine: 'Native Layered DAG', description: 'Abstract Syntax Tree structure rendered natively via Layered DAG' }),
     new Visualization('ast', 'AST: JSON Only', 'ast', undefined, undefined, { family: 'AST', engine: 'Raw JSON', description: 'Abstract Syntax Tree JSON' })
 ];
 export let visualizations = _visualizations;

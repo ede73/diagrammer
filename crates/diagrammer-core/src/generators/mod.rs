@@ -112,7 +112,7 @@ pub fn multi_attr_fmt(attrs: &[(&str, Option<&str>, &str)], extras: &[String]) -
 pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
     match name.to_lowercase().as_str() {
         "actdiag" => Some(Box::new(actdiag::ActDiag)),
-        "ast_record" => Some(Box::new(ast_record::ASTRecord)),
+        "ast_record" | "layered" | "dag" => Some(Box::new(layered::LayeredGenerator)),
         "blockdiag" => Some(Box::new(blockdiag::BlockDiag)),
         "circlepacked" | "dendrogram" | "radialdendrogram" | "reingoldtilford" => {
             Some(Box::new(dendrogram::Dendrogram))
@@ -121,7 +121,6 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
             Some(Box::new(digraph::DiGraph))
         }
         "layerbands" => Some(Box::new(layerbands::LayerBands)),
-        "layered" | "dag" => Some(Box::new(layered::LayeredGenerator)),
         "force" | "organic" | "physics" => Some(Box::new(force::ForceGenerator)),
         "grid" | "block" | "network_bus" => Some(Box::new(grid::GridGenerator)),
         "mermaid" | "mermaid_flowchart" | "mermaid_graph" => {

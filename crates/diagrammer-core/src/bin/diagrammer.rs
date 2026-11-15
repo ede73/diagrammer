@@ -164,6 +164,7 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
             | "force"
             | "organic"
             | "physics"
+            | "ast_record"
     ) {
         let is_png = format.eq_ignore_ascii_case("png");
 
@@ -215,8 +216,8 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
     }
 
     let mut cmd = match visualizer {
-        "dot" | "digraph" | "circo" | "fdp" | "neato" | "osage" | "patchwork" | "twopi" | "sfdp" | "ast_record" => {
-            let bin = if visualizer == "digraph" || visualizer == "ast_record" { "dot" } else { visualizer };
+        "dot" | "digraph" | "circo" | "fdp" | "neato" | "osage" | "patchwork" | "twopi" | "sfdp" => {
+            let bin = if visualizer == "digraph" { "dot" } else { visualizer };
             let mut c = Command::new(bin);
             c.arg("-q").arg(format!("-T{}", format));
             c

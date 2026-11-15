@@ -40,9 +40,6 @@ export function populateVisualizerDropdown(family) {
 export function setVisualizer(visualizer) {
     if (!visualizer) return;
     let target = visualizer;
-    if (target === 'nwdiag') {
-        target = 'network_bus';
-    }
     let viz = visualizations.find(p => p.name === target);
     if (!viz && (target === 'network_bus' || target === 'grid')) {
         viz = visualizations.find(p => p.name === 'network_bus' || p.name === 'grid');

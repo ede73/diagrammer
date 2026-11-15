@@ -1,4 +1,4 @@
-visualizer parsetree
+visualizer tree
 
 Sentence>NP1,VP1
 Sentence;Sentence

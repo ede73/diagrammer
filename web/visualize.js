@@ -31,7 +31,7 @@ function beautifyJSON(generatedCode) {
         data = JSON.parse(trimmed);
     }
     catch (ex) {
-        // Not a JSON result (e.g. dot, blockdiag, plantuml).
+        // Not a JSON result (e.g. dot, plantuml).
         // Provide a formatted, readable code display instead of leaving the tab blank.
         const notice = document.createElement('div');
         notice.className = 'beautified-notice';
@@ -80,8 +80,9 @@ export function visualize(visualizer) {
         // There is no graphic image to render or CLI backend call needed.
         return;
     }
-    let vizClass = visualizations.find(p => p.name === visualizer);
-    if (!vizClass && (visualizer === 'nwdiag' || visualizer === 'network_bus' || visualizer === 'grid')) {
+    let target = visualizer;
+    let vizClass = visualizations.find(p => p.name === target);
+    if (!vizClass && (target === 'network_bus' || target === 'grid')) {
         vizClass = visualizations.find(p => p.name === 'network_bus' || p.name === 'grid');
     }
     if (!vizClass) {

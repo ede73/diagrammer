@@ -118,7 +118,7 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
             Some(Box::new(digraph::DiGraph))
         }
         "force" | "organic" | "physics" => Some(Box::new(force::ForceGenerator)),
-        "grid" | "block" | "network_bus" | "nwdiag" => Some(Box::new(grid::GridGenerator)),
+        "grid" | "block" | "network_bus" => Some(Box::new(grid::GridGenerator)),
         // Legacy GoJS generators (unmaintained)
         "layerbands" => Some(Box::new(layerbands::LayerBands)),
         "parsetree" => Some(Box::new(parsetree::ParseTree)),

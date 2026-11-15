@@ -1,4 +1,4 @@
-visualizer umlclass
+visualizer layered
 
 // generalization - not filled triangle, continuous line
 {Person;Person - generalization

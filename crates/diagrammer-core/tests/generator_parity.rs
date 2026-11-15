@@ -40,39 +40,7 @@ fn test_nwdiag_generator_parity() {
 
 
 
-#[test]
-fn test_actdiag_generator_parity() {
-    let generator = make_generator("actdiag").expect("Failed to create actdiag generator");
 
-    let test_cases = [
-        "group_group_link",
-        "state_group",
-    ];
-
-    for case in &test_cases {
-        let input_path = format!("../../tests/test_inputs/{}.txt", case);
-        let golden_path = format!("../../tests/testrun/previous/actdiag/{}.txt", case);
-
-        if !Path::new(&input_path).exists() || !Path::new(&golden_path).exists() {
-            continue;
-        }
-
-        let input_code = fs::read_to_string(&input_path).expect("Failed to read input");
-        let expected_output = fs::read_to_string(&golden_path).expect("Failed to read golden");
-
-        let canvas = AstBuilder::new()
-            .build(&input_code)
-            .unwrap_or_else(|e| panic!("Failed to build AST for {}: {}", case, e));
-
-        let actual_output = generator.generate(&canvas);
-
-        assert_eq!(
-            actual_output, expected_output,
-            "Mismatch in generator output for ActDiag fixture: {}",
-            case
-        );
-    }
-}
 
 #[test]
 fn test_seqdiag_generator_parity() {

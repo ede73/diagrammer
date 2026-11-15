@@ -1,4 +1,3 @@
-pub mod actdiag;
 pub mod ast_record;
 pub mod dendrogram;
 pub mod digraph;
@@ -110,7 +109,6 @@ pub fn multi_attr_fmt(attrs: &[(&str, Option<&str>, &str)], extras: &[String]) -
 /// Factory function to create a generator by visualizer name
 pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
     match name.to_lowercase().as_str() {
-        "actdiag" => Some(Box::new(actdiag::ActDiag)),
         "ast_record" | "layered" | "dag" => Some(Box::new(layered::LayeredGenerator)),
         "circlepacked" | "dendrogram" | "radialdendrogram" | "reingoldtilford" => {
             Some(Box::new(dendrogram::Dendrogram))

@@ -1,0 +1,15 @@
+visualizer layered
+
+TopologyDiscovery > LifecycleManager
+
+{TopologyDiscovery; Mesh Swarm
+    visualizer force
+    Hub > (Node1, Node2)
+    Node1 > Node2
+}
+
+{LifecycleManager; Replica Lifecycle
+    visualizer state
+    Spawning > Running > Terminated
+}
+

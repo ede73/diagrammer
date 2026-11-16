@@ -12,10 +12,9 @@ pub mod mermaid_sequence;
 pub mod mermaid_state;
 pub mod mscgen;
 pub mod native_sequence;
-pub mod nwdiag;
 pub mod plantuml_sequence;
 pub mod sankey;
-pub mod seqdiag;
+pub mod state;
 pub mod tree;
 
 // Legacy generators (unmaintained GoJS backend)
@@ -111,7 +110,8 @@ pub fn multi_attr_fmt(attrs: &[(&str, Option<&str>, &str)], extras: &[String]) -
 /// Factory function to create a generator by visualizer name
 pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
     match name.to_lowercase().as_str() {
-        "ast_record" | "layered" | "dag" => Some(Box::new(layered::LayeredGenerator)),
+        "ast_record" => Some(Box::new(ast_record::ASTRecord)),
+        "layered" | "dag" => Some(Box::new(layered::LayeredGenerator)),
         "circlepacked" | "dendrogram" | "radialdendrogram" | "reingoldtilford" => {
             Some(Box::new(dendrogram::Dendrogram))
         }
@@ -134,10 +134,9 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
         "mermaid_state" => Some(Box::new(mermaid_state::MermaidState)),
         "mscgen" => Some(Box::new(mscgen::MSCGen)),
         "native_sequence" | "sequence" => Some(Box::new(native_sequence::NativeSequence)),
-        "nwdiag" => Some(Box::new(nwdiag::NWDiag)),
         "plantuml_sequence" => Some(Box::new(plantuml_sequence::PlantUMLSequence)),
         "sankey" => Some(Box::new(sankey::Sankey)),
-        "seqdiag" => Some(Box::new(seqdiag::SeqDiag)),
+        "state" | "statechart" | "fsm" => Some(Box::new(state::StateGenerator)),
         "tree" | "radial" | "native_tree" | "fan" => Some(Box::new(tree::TreeGenerator)),
         _ => None,
     }

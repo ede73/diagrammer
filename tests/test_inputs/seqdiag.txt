@@ -1,4 +1,4 @@
-visualizer seqdiag
+visualizer native_sequence
 
 a>b>c>d
 

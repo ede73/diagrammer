@@ -1,0 +1,41 @@
+visualizer network_bus
+
+{ public_wan; Public Edge (WAN 198.51.100.0/24)
+    edge_router#38bdf8
+    waf_gateway#38bdf8
+    bastion_host#f43f5e
+}
+
+{ dmz_network; Demilitarized Zone (DMZ 10.0.1.0/24)
+    edge_router
+    waf_gateway
+    api_gateway_01#06b6d4
+    api_gateway_02#06b6d4
+    auth_service#a855f7
+}
+
+{ app_cluster; Microservices Mesh (VPC 10.0.10.0/24)
+    api_gateway_01
+    api_gateway_02
+    order_svc#10b981
+    billing_svc#10b981
+    inventory_svc#10b981
+    bastion_host
+}
+
+{ data_fabric; Secure Storage Fabric (SAN 10.0.20.0/24)
+    order_svc
+    billing_svc
+    inventory_svc
+    postgres_primary#f59e0b
+    postgres_replica#f59e0b
+    redis_cluster#ec4899
+}
+
+{ oob_mgmt; Out-of-Band Management (OOB 172.16.0.0/24)
+    bastion_host
+    edge_router
+    postgres_primary
+    postgres_replica
+}
+

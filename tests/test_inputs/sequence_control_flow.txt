@@ -1,0 +1,13 @@
+visualizer native_sequence
+
+Client > "LoginRequest" AuthServer
+if valid_credentials then
+  AuthServer > "IssueToken" Client
+  Client > "FetchData(token)" APIGateway
+  while poll_job_status do
+    Client > "CheckProgress" Worker
+    Worker > "ProgressReport" Client
+  endwhile
+else
+  AuthServer > "Error401(Unauthorized)" Client
+endif

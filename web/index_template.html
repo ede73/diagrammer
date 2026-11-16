@@ -300,15 +300,60 @@
       window.themeEditor = themeEditor;
     }
 
-    // Direct clipboard integration for embedded browsers & desktop webviews
-    function setupAceClipboard(aceEditor) {
-      if (!aceEditor) return;
-      aceEditor.container.addEventListener('click', () => {
-        aceEditor.focus();
-      });
+    // Direct clipboard integration for embedded browsers & desktop webviews (e.g. IDE webview)
+    function getActiveAceEditor() {
+      if (window.editor && (window.editor.isFocused() || (document.activeElement && document.activeElement.closest && document.activeElement.closest('#diagrammer-code')))) return window.editor;
+      if (window.themeEditor && (window.themeEditor.isFocused() || (document.activeElement && document.activeElement.closest && document.activeElement.closest('#diagrammer-theme-editor')))) return window.themeEditor;
+      const tab4 = document.getElementById('tab4');
+      if (tab4 && tab4.checked && window.themeEditor) return window.themeEditor;
+      return window.editor || null;
+    }
 
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || navigator.vendor === 'Apple Computer, Inc.';
+    const isEmbeddedWebview = (window.self !== window.top) || /Electron/i.test(navigator.userAgent);
+
+    window.addEventListener('copy', (e) => {
+      const ed = getActiveAceEditor();
+      const text = ed ? ed.getCopyText() : window.getSelection().toString();
+      if (text && e.clipboardData) {
+        e.clipboardData.clearData();
+        e.clipboardData.setData('text/plain', text);
+        e.preventDefault();
+      }
+    });
+
+    window.addEventListener('cut', (e) => {
+      const ed = getActiveAceEditor();
+      if (ed && e.clipboardData) {
+        const text = ed.getCopyText();
+        if (text) {
+          e.clipboardData.clearData();
+          e.clipboardData.setData('text/plain', text);
+          ed.insert('');
+          e.preventDefault();
+        }
+      }
+    });
+
+    window.addEventListener('paste', (e) => {
+      const ed = getActiveAceEditor();
+      if (ed && e.clipboardData) {
+        const text = e.clipboardData.getData('text/plain');
+        if (text) {
+          ed.insert(text);
+          e.preventDefault();
+        }
+      }
+    });
+
+    // In embedded webviews (e.g. VS Code / Antigravity IDE Jetski preview iframe),
+    // native 'copy', 'cut', and 'paste' events are blocked from reaching the iframe.
+    // For non-Safari embedded webviews, bind explicit Ace commands and keydown fallback.
+    // Safari is explicitly excluded here to preserve native Safari clipboard security and zero-prompt copy/paste.
+    function setupEmbeddedClipboard(aceEditor) {
+      if (!aceEditor || !isEmbeddedWebview || isSafari) return;
       aceEditor.commands.addCommand({
-        name: 'copySelection',
+        name: 'embeddedCopy',
         bindKey: { win: 'Ctrl-C', mac: 'Command-C' },
         exec: (ed) => {
           const selectedText = ed.getCopyText();
@@ -318,9 +363,8 @@
         },
         readOnly: true
       });
-
       aceEditor.commands.addCommand({
-        name: 'cutSelection',
+        name: 'embeddedCut',
         bindKey: { win: 'Ctrl-X', mac: 'Command-X' },
         exec: (ed) => {
           const selectedText = ed.getCopyText();
@@ -332,9 +376,8 @@
         },
         readOnly: false
       });
-
       aceEditor.commands.addCommand({
-        name: 'pasteClipboard',
+        name: 'embeddedPaste',
         bindKey: { win: 'Ctrl-V', mac: 'Command-V' },
         exec: (ed) => {
           if (navigator.clipboard && navigator.clipboard.readText) {
@@ -349,9 +392,45 @@
       });
     }
 
-    setupAceClipboard(editor);
+    if (editor) {
+      setupEmbeddedClipboard(editor);
+      editor.container.addEventListener('click', () => editor.focus());
+    }
     if (themeEditor) {
-      setupAceClipboard(themeEditor);
+      setupEmbeddedClipboard(themeEditor);
+      themeEditor.container.addEventListener('click', () => themeEditor.focus());
+    }
+
+    if (isEmbeddedWebview && !isSafari) {
+      window.addEventListener('keydown', async (e) => {
+        const isMod = e.metaKey || e.ctrlKey;
+        if (!isMod) return;
+        const key = e.key ? e.key.toLowerCase() : '';
+        const ed = getActiveAceEditor();
+        if (!ed) return;
+
+        if (key === 'c') {
+          const selectedText = ed.getCopyText();
+          if (selectedText && navigator.clipboard && navigator.clipboard.writeText) {
+            try { await navigator.clipboard.writeText(selectedText); } catch (_) {}
+          }
+        } else if (key === 'x') {
+          const selectedText = ed.getCopyText();
+          if (selectedText && navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+              await navigator.clipboard.writeText(selectedText);
+              ed.insert('');
+            } catch (_) {}
+          }
+        } else if (key === 'v') {
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            try {
+              const text = await navigator.clipboard.readText();
+              if (text) ed.insert(text);
+            } catch (_) {}
+          }
+        }
+      });
     }
 
     // Theme Management

@@ -27,6 +27,7 @@
 <script type="module" src="web/visualizations/visualizeRadialDendrogram.js"></script>
 <script type="module" src="web/visualizations/visualizeReingoldTilford.js"></script>
 <script type="module" src="web/visualizations/visualizeSankey.js"></script>
+<script type="module" src="web/visualizations/visualizeState.js"></script>
 <script type="module" src="web/visualizations/visualizeTree.js"></script>
   <script type="module" src="web/uiComponentAccess.js"></script>
   <script type="module" src="web/backendInteractions.js"></script>
@@ -56,6 +57,7 @@
     <label for="diagrammer-example">Examples:</label>
     <select id="diagrammer-example" name="example" onChange="exampleChanged()">
 <option value="test_inputs/arrow_types.txt">arrow_types.txt</option>
+<option value="test_inputs/arrow_types_showcase.txt">arrow_types_showcase.txt</option>
 <option value="test_inputs/ast.txt">ast.txt</option>
 <option value="test_inputs/colors.txt">colors.txt</option>
 <option value="test_inputs/compass.txt">compass.txt</option>
@@ -72,9 +74,11 @@
 <option value="test_inputs/landscape.txt">landscape.txt</option>
 <option value="test_inputs/layerbands.txt">layerbands.txt</option>
 <option value="test_inputs/lhs_rhs_lists.txt">lhs_rhs_lists.txt</option>
+<option value="test_inputs/mars_rover_poly.txt">mars_rover_poly.txt</option>
 <option value="test_inputs/multiple_lhs_lists.txt">multiple_lhs_lists.txt</option>
 <option value="test_inputs/native_sequence.txt">native_sequence.txt</option>
 <option value="test_inputs/network_bus.txt">network_bus.txt</option>
+<option value="test_inputs/network_multihome_enterprise.txt">network_multihome_enterprise.txt</option>
 <option value="test_inputs/node_and_edge_coloring.txt">node_and_edge_coloring.txt</option>
 <option value="test_inputs/node_and_edge_coloring2.txt">node_and_edge_coloring2.txt</option>
 <option value="test_inputs/nodes.txt">nodes.txt</option>
@@ -86,11 +90,23 @@
 <option value="test_inputs/parsetree.txt">parsetree.txt</option>
 <option value="test_inputs/plantuml_context.txt">plantuml_context.txt</option>
 <option value="test_inputs/plantuml_context2.txt">plantuml_context2.txt</option>
+<option value="test_inputs/poly_10_layered_swimlane_seq.txt">poly_10_layered_swimlane_seq.txt</option>
+<option value="test_inputs/poly_1_layered_sequence_tree.txt">poly_1_layered_sequence_tree.txt</option>
+<option value="test_inputs/poly_2_state_sequence_dag.txt">poly_2_state_sequence_dag.txt</option>
+<option value="test_inputs/poly_3_state_grid_tree.txt">poly_3_state_grid_tree.txt</option>
+<option value="test_inputs/poly_4_layered_force_state.txt">poly_4_layered_force_state.txt</option>
+<option value="test_inputs/poly_5_fractal_3level.txt">poly_5_fractal_3level.txt</option>
+<option value="test_inputs/poly_6_layered_grid_sequence.txt">poly_6_layered_grid_sequence.txt</option>
+<option value="test_inputs/poly_7_state_uml_sequence.txt">poly_7_state_uml_sequence.txt</option>
+<option value="test_inputs/poly_8_layered_tree_state.txt">poly_8_layered_tree_state.txt</option>
+<option value="test_inputs/poly_9_state_swarm_pipeline.txt">poly_9_state_swarm_pipeline.txt</option>
+<option value="test_inputs/poly_archetype_state_sequence.txt">poly_archetype_state_sequence.txt</option>
 <option value="test_inputs/record_style.txt">record_style.txt</option>
 <option value="test_inputs/sample_theme.txt">sample_theme.txt</option>
 <option value="test_inputs/sankey.txt">sankey.txt</option>
 <option value="test_inputs/sankey2.txt">sankey2.txt</option>
 <option value="test_inputs/seqdiag.txt">seqdiag.txt</option>
+<option value="test_inputs/sequence_control_flow.txt">sequence_control_flow.txt</option>
 <option value="test_inputs/state.txt">state.txt</option>
 <option value="test_inputs/state_ancestry.txt">state_ancestry.txt</option>
 <option value="test_inputs/state_android.txt">state_android.txt</option>
@@ -116,8 +132,10 @@
 <option value="test_inputs/two_linked_clusters_with_invisible_node.txt">two_linked_clusters_with_invisible_node.txt</option>
 <option value="test_inputs/umlclass.txt">umlclass.txt</option>
 <option value="test_inputs/umlclass2.txt">umlclass2.txt</option>
+<option value="test_inputs/umlclass_scoped.txt">umlclass_scoped.txt</option>
 <option value="test_inputs/umlclass_types.txt">umlclass_types.txt</option>
 <option value="test_inputs/url.txt">url.txt</option>
+<option value="test_inputs/url_links.txt">url_links.txt</option>
     </select>
 
     <label for="diagrammer-filename">Filename</label>
@@ -372,15 +390,60 @@
       window.themeEditor = themeEditor;
     }
 
-    // Direct clipboard integration for embedded browsers & desktop webviews
-    function setupAceClipboard(aceEditor) {
-      if (!aceEditor) return;
-      aceEditor.container.addEventListener('click', () => {
-        aceEditor.focus();
-      });
+    // Direct clipboard integration for embedded browsers & desktop webviews (e.g. IDE webview)
+    function getActiveAceEditor() {
+      if (window.editor && (window.editor.isFocused() || (document.activeElement && document.activeElement.closest && document.activeElement.closest('#diagrammer-code')))) return window.editor;
+      if (window.themeEditor && (window.themeEditor.isFocused() || (document.activeElement && document.activeElement.closest && document.activeElement.closest('#diagrammer-theme-editor')))) return window.themeEditor;
+      const tab4 = document.getElementById('tab4');
+      if (tab4 && tab4.checked && window.themeEditor) return window.themeEditor;
+      return window.editor || null;
+    }
 
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || navigator.vendor === 'Apple Computer, Inc.';
+    const isEmbeddedWebview = (window.self !== window.top) || /Electron/i.test(navigator.userAgent);
+
+    window.addEventListener('copy', (e) => {
+      const ed = getActiveAceEditor();
+      const text = ed ? ed.getCopyText() : window.getSelection().toString();
+      if (text && e.clipboardData) {
+        e.clipboardData.clearData();
+        e.clipboardData.setData('text/plain', text);
+        e.preventDefault();
+      }
+    });
+
+    window.addEventListener('cut', (e) => {
+      const ed = getActiveAceEditor();
+      if (ed && e.clipboardData) {
+        const text = ed.getCopyText();
+        if (text) {
+          e.clipboardData.clearData();
+          e.clipboardData.setData('text/plain', text);
+          ed.insert('');
+          e.preventDefault();
+        }
+      }
+    });
+
+    window.addEventListener('paste', (e) => {
+      const ed = getActiveAceEditor();
+      if (ed && e.clipboardData) {
+        const text = e.clipboardData.getData('text/plain');
+        if (text) {
+          ed.insert(text);
+          e.preventDefault();
+        }
+      }
+    });
+
+    // In embedded webviews (e.g. VS Code / Antigravity IDE Jetski preview iframe),
+    // native 'copy', 'cut', and 'paste' events are blocked from reaching the iframe.
+    // For non-Safari embedded webviews, bind explicit Ace commands and keydown fallback.
+    // Safari is explicitly excluded here to preserve native Safari clipboard security and zero-prompt copy/paste.
+    function setupEmbeddedClipboard(aceEditor) {
+      if (!aceEditor || !isEmbeddedWebview || isSafari) return;
       aceEditor.commands.addCommand({
-        name: 'copySelection',
+        name: 'embeddedCopy',
         bindKey: { win: 'Ctrl-C', mac: 'Command-C' },
         exec: (ed) => {
           const selectedText = ed.getCopyText();
@@ -390,9 +453,8 @@
         },
         readOnly: true
       });
-
       aceEditor.commands.addCommand({
-        name: 'cutSelection',
+        name: 'embeddedCut',
         bindKey: { win: 'Ctrl-X', mac: 'Command-X' },
         exec: (ed) => {
           const selectedText = ed.getCopyText();
@@ -404,9 +466,8 @@
         },
         readOnly: false
       });
-
       aceEditor.commands.addCommand({
-        name: 'pasteClipboard',
+        name: 'embeddedPaste',
         bindKey: { win: 'Ctrl-V', mac: 'Command-V' },
         exec: (ed) => {
           if (navigator.clipboard && navigator.clipboard.readText) {
@@ -421,9 +482,45 @@
       });
     }
 
-    setupAceClipboard(editor);
+    if (editor) {
+      setupEmbeddedClipboard(editor);
+      editor.container.addEventListener('click', () => editor.focus());
+    }
     if (themeEditor) {
-      setupAceClipboard(themeEditor);
+      setupEmbeddedClipboard(themeEditor);
+      themeEditor.container.addEventListener('click', () => themeEditor.focus());
+    }
+
+    if (isEmbeddedWebview && !isSafari) {
+      window.addEventListener('keydown', async (e) => {
+        const isMod = e.metaKey || e.ctrlKey;
+        if (!isMod) return;
+        const key = e.key ? e.key.toLowerCase() : '';
+        const ed = getActiveAceEditor();
+        if (!ed) return;
+
+        if (key === 'c') {
+          const selectedText = ed.getCopyText();
+          if (selectedText && navigator.clipboard && navigator.clipboard.writeText) {
+            try { await navigator.clipboard.writeText(selectedText); } catch (_) {}
+          }
+        } else if (key === 'x') {
+          const selectedText = ed.getCopyText();
+          if (selectedText && navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+              await navigator.clipboard.writeText(selectedText);
+              ed.insert('');
+            } catch (_) {}
+          }
+        } else if (key === 'v') {
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            try {
+              const text = await navigator.clipboard.readText();
+              if (text) ed.insert(text);
+            } catch (_) {}
+          }
+        }
+      });
     }
 
     // Theme Management

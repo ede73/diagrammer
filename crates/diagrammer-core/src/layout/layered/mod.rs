@@ -1006,18 +1006,6 @@ impl LayeredGraph {
                 count
             };
 
-            let y_start_h = if is_source_seq {
-                u_anchor.y + u_anchor.height + 16.0
-            } else {
-                u_anchor.center_y
-            };
-
-            let y_end_h = if is_target_seq {
-                v_anchor.y - 16.0
-            } else {
-                v_anchor.center_y
-            };
-
             let u_left_x = if is_source_seq { u_anchor.center_x } else { u_anchor.x };
             let u_right_x = if is_source_seq { u_anchor.center_x } else { u_anchor.x + u_anchor.width };
             let v_left_x = if is_target_seq { v_anchor.center_x } else { v_anchor.x };
@@ -1040,8 +1028,54 @@ impl LayeredGraph {
                 gutter_left - 20.0 - stagger
             };
 
+            let u_collides = if !is_source_seq {
+                if use_right {
+                    collides_h(u_anchor.x + u_anchor.width, gutter_right, u_anchor.center_y) > 0
+                } else {
+                    collides_h(gutter_left, u_anchor.x, u_anchor.center_y) > 0
+                }
+            } else {
+                false
+            };
+
+            let v_collides = if !is_target_seq {
+                if use_right {
+                    collides_h(v_anchor.x + v_anchor.width, gutter_right, v_anchor.center_y) > 0
+                } else {
+                    collides_h(gutter_left, v_anchor.x, v_anchor.center_y) > 0
+                }
+            } else {
+                false
+            };
+
+            let y_start_h = if is_source_seq {
+                u_anchor.y + u_anchor.height + 16.0
+            } else if u_collides {
+                if v_anchor.center_y < u_anchor.center_y {
+                    u_anchor.y - 14.0
+                } else {
+                    u_anchor.y + u_anchor.height + 14.0
+                }
+            } else {
+                u_anchor.center_y
+            };
+
+            let y_end_h = if is_target_seq {
+                v_anchor.y - 16.0
+            } else if v_collides {
+                if u_anchor.center_y < v_anchor.center_y {
+                    v_anchor.y - 14.0
+                } else {
+                    v_anchor.y + v_anchor.height + 14.0
+                }
+            } else {
+                v_anchor.center_y
+            };
+
             let p_start = if is_source_seq {
                 (u_anchor.center_x, u_anchor.y + u_anchor.height)
+            } else if u_collides {
+                (u_anchor.center_x, if v_anchor.center_y < u_anchor.center_y { u_anchor.y } else { u_anchor.y + u_anchor.height })
             } else if use_right {
                 (u_anchor.x + u_anchor.width, u_anchor.center_y)
             } else {
@@ -1050,6 +1084,8 @@ impl LayeredGraph {
 
             let p_end = if is_target_seq {
                 (v_anchor.center_x, v_anchor.y)
+            } else if v_collides {
+                (v_anchor.center_x, if u_anchor.center_y < v_anchor.center_y { v_anchor.y } else { v_anchor.y + v_anchor.height })
             } else if use_right {
                 (v_anchor.x + v_anchor.width, v_anchor.center_y)
             } else {
@@ -1058,12 +1094,12 @@ impl LayeredGraph {
 
             let mut points = Vec::new();
             points.push(p_start);
-            if is_source_seq {
+            if is_source_seq || u_collides {
                 points.push((u_anchor.center_x, y_start_h));
             }
             points.push((gutter_x, y_start_h));
             points.push((gutter_x, y_end_h));
-            if is_target_seq {
+            if is_target_seq || v_collides {
                 points.push((v_anchor.center_x, y_end_h));
             }
             points.push(p_end);

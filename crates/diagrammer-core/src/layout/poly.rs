@@ -102,45 +102,100 @@ fn parse_attr(tag: &str, attr: &str) -> Option<f64> {
     None
 }
 
-/// Scans rendered SVG for all tagged node bounding boxes (`<g id="node-<id>">...<rect|circle>`).
+/// Scans rendered SVG for all tagged node bounding boxes (`<g id="node-<id>">...<rect|circle>`),
+/// accumulating any parent `<g transform="translate(tx, ty)">` translation offsets.
 pub fn extract_svg_node_bounds(svg: &str) -> HashMap<String, SubNodeBounds> {
     let mut bounds = HashMap::new();
-    let marker = "id=\"node-";
+    let mut transform_stack: Vec<(f64, f64)> = Vec::new();
     let mut cursor = 0;
-    while let Some(idx) = svg[cursor..].find(marker) {
-        let start = cursor + idx + marker.len();
-        if let Some(end_id) = svg[start..].find('"') {
-            let node_id = &svg[start..start + end_id];
-            let rest = &svg[start + end_id..];
-            let search_window_len = rest.len().min(1200);
-            let node_block = &rest[..search_window_len];
 
-            if let Some(rx) = node_block.find("<rect ") {
-                let rect_str = &node_block[rx..];
-                if let (Some(x), Some(y), Some(w), Some(h)) = (
-                    parse_attr(rect_str, "x=\""),
-                    parse_attr(rect_str, "y=\""),
-                    parse_attr(rect_str, "width=\""),
-                    parse_attr(rect_str, "height=\""),
-                ) {
-                    bounds.insert(node_id.to_string(), SubNodeBounds { x, y, width: w, height: h });
+    while cursor < svg.len() {
+        if let Some(tag_start) = svg[cursor..].find('<') {
+            let abs_start = cursor + tag_start;
+            if let Some(tag_end) = svg[abs_start..].find('>') {
+                let tag = &svg[abs_start..abs_start + tag_end + 1];
+                let is_g_open = tag.starts_with("<g") && !tag.ends_with("/>");
+                let is_g_close = tag.starts_with("</g");
+
+                if is_g_open {
+                    let mut tx = 0.0;
+                    let mut ty = 0.0;
+                    if let Some(t_idx) = tag.find("transform=\"translate") {
+                        let rest = &tag[t_idx + 19..];
+                        if let Some(paren_open) = rest.find('(') {
+                            let inside = &rest[paren_open + 1..];
+                            if let Some(paren_close) = inside.find(')') {
+                                let inner = &inside[..paren_close];
+                                let parts: Vec<&str> = inner.split(',').collect();
+                                if parts.len() == 2 {
+                                    tx = parts[0].trim().parse::<f64>().unwrap_or(0.0);
+                                    ty = parts[1].trim().parse::<f64>().unwrap_or(0.0);
+                                }
+                            }
+                        }
+                    }
+                    transform_stack.push((tx, ty));
                 }
-            } else if let Some(cx_idx) = node_block.find("<circle ") {
-                let circle_str = &node_block[cx_idx..];
-                if let (Some(cx), Some(cy), Some(r)) = (
-                    parse_attr(circle_str, "cx=\""),
-                    parse_attr(circle_str, "cy=\""),
-                    parse_attr(circle_str, "r=\""),
-                ) {
-                    bounds.insert(node_id.to_string(), SubNodeBounds {
-                        x: cx - r,
-                        y: cy - r,
-                        width: r * 2.0,
-                        height: r * 2.0,
-                    });
+
+                // Check if this tag or element has `id="node-"`
+                if let Some(n_idx) = tag.find("id=\"node-") {
+                    let id_start = n_idx + 9;
+                    if let Some(id_end) = tag[id_start..].find('"') {
+                        let node_id = &tag[id_start..id_start + id_end];
+                        let total_tx: f64 = transform_stack.iter().map(|t| t.0).sum();
+                        let total_ty: f64 = transform_stack.iter().map(|t| t.1).sum();
+
+                        let rest = &svg[abs_start + tag_end..];
+                        let window_len = rest.len().min(1200);
+                        let node_block = &rest[..window_len];
+
+                        if let Some(rx) = node_block.find("<rect ") {
+                            let rect_str = &node_block[rx..];
+                            if let (Some(x), Some(y), Some(w), Some(h)) = (
+                                parse_attr(rect_str, "x=\""),
+                                parse_attr(rect_str, "y=\""),
+                                parse_attr(rect_str, "width=\""),
+                                parse_attr(rect_str, "height=\""),
+                            ) {
+                                bounds.insert(
+                                    node_id.to_string(),
+                                    SubNodeBounds {
+                                        x: x + total_tx,
+                                        y: y + total_ty,
+                                        width: w,
+                                        height: h,
+                                    },
+                                );
+                            }
+                        } else if let Some(cx_idx) = node_block.find("<circle ") {
+                            let circle_str = &node_block[cx_idx..];
+                            if let (Some(cx), Some(cy), Some(r)) = (
+                                parse_attr(circle_str, "cx=\""),
+                                parse_attr(circle_str, "cy=\""),
+                                parse_attr(circle_str, "r=\""),
+                            ) {
+                                bounds.insert(
+                                    node_id.to_string(),
+                                    SubNodeBounds {
+                                        x: cx - r + total_tx,
+                                        y: cy - r + total_ty,
+                                        width: r * 2.0,
+                                        height: r * 2.0,
+                                    },
+                                );
+                            }
+                        }
+                    }
                 }
+
+                if is_g_close {
+                    transform_stack.pop();
+                }
+
+                cursor = abs_start + tag_end + 1;
+            } else {
+                break;
             }
-            cursor = start + end_id;
         } else {
             break;
         }

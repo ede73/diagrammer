@@ -49,6 +49,8 @@ pub struct LayeredEdge {
     pub right_arrow: ArrowType,
     pub line_type: String,
     pub is_cross_boundary: bool,
+    pub from_member: Option<String>,
+    pub to_member: Option<String>,
 }
 
 /// A visual cluster container grouping multiple layered nodes
@@ -427,6 +429,13 @@ impl LayeredGraph {
             }
         }
 
+        let mut member_to_class_map: HashMap<String, String> = HashMap::new();
+        for node in nodes.values() {
+            for member in &node.members {
+                member_to_class_map.insert(member.id.clone(), node.id.clone());
+            }
+        }
+
         // Ensure all edge endpoints exist as nodes (resolving group names to their first member if needed)
         for edge in canvas.get_edges() {
             // Ignore inner edges encapsulated within an embedded composite subgraph
@@ -437,12 +446,16 @@ impl LayeredGraph {
                 continue;
             }
 
-            let left_target = if !nodes.contains_key(&edge.left) && group_members_map.contains_key(&edge.left) {
+            let left_target = if let Some(parent) = member_to_class_map.get(&edge.left) {
+                parent
+            } else if !nodes.contains_key(&edge.left) && group_members_map.contains_key(&edge.left) {
                 &group_members_map[&edge.left]
             } else {
                 &edge.left
             };
-            let right_target = if !nodes.contains_key(&edge.right) && group_members_map.contains_key(&edge.right) {
+            let right_target = if let Some(parent) = member_to_class_map.get(&edge.right) {
+                parent
+            } else if !nodes.contains_key(&edge.right) && group_members_map.contains_key(&edge.right) {
                 &group_members_map[&edge.right]
             } else {
                 &edge.right
@@ -484,21 +497,27 @@ impl LayeredGraph {
             if composite_member_nodes.contains(&edge.left) || composite_member_nodes.contains(&edge.right) {
                 continue;
             }
-            let left_target = if !nodes.contains_key(&edge.left) && group_members_map.contains_key(&edge.left) {
-                group_members_map[&edge.left].clone()
+            let (left_target, from_member) = if let Some(parent) = member_to_class_map.get(&edge.left) {
+                (parent.clone(), Some(edge.left.clone()))
+            } else if !nodes.contains_key(&edge.left) && group_members_map.contains_key(&edge.left) {
+                (group_members_map[&edge.left].clone(), None)
             } else {
-                edge.left.clone()
+                (edge.left.clone(), None)
             };
-            let right_target = if !nodes.contains_key(&edge.right) && group_members_map.contains_key(&edge.right) {
-                group_members_map[&edge.right].clone()
+            let (right_target, to_member) = if let Some(parent) = member_to_class_map.get(&edge.right) {
+                (parent.clone(), Some(edge.right.clone()))
+            } else if !nodes.contains_key(&edge.right) && group_members_map.contains_key(&edge.right) {
+                (group_members_map[&edge.right].clone(), None)
             } else {
-                edge.right.clone()
+                (edge.right.clone(), None)
             };
 
             // Deduplicate identical edges
             let is_duplicate = edges.iter().any(|e| {
                 e.from == left_target
                     && e.to == right_target
+                    && e.from_member == from_member
+                    && e.to_member == to_member
                     && e.label == edge.label
                     && e.edge_type == edge.edge_type
                     && e.line_type == edge.line_type()
@@ -521,6 +540,8 @@ impl LayeredGraph {
                 right_arrow: edge.right_arrow_type(),
                 line_type: edge.line_type().to_string(),
                 is_cross_boundary: false,
+                from_member,
+                to_member,
             });
         }
 
@@ -726,7 +747,15 @@ impl LayeredGraph {
                 });
                 let count = out_idxs.len();
                 for (i, &edge_idx) in out_idxs.iter().enumerate() {
-                    let exit = if !is_lr {
+                    let edge = &edges[edge_idx];
+                    let exit = if let Some(ref m_id) = edge.from_member {
+                        if let Some((idx, _member)) = u.members.iter().enumerate().find(|(_, m)| &m.id == m_id) {
+                            let member_y = u.y + 32.0 + 11.0 + (idx as f64) * 22.0;
+                            (u.x + u.width, member_y)
+                        } else {
+                            (u.x + u.width, u.y + u.height / 2.0)
+                        }
+                    } else if !is_lr {
                         let frac = (i as f64 + 1.0) / (count as f64 + 1.0);
                         (u.x + u.width * frac, u.y + u.height)
                     } else {
@@ -753,7 +782,15 @@ impl LayeredGraph {
                 });
                 let count = in_idxs.len();
                 for (j, &edge_idx) in in_idxs.iter().enumerate() {
-                    let entry = if !is_lr {
+                    let edge = &edges[edge_idx];
+                    let entry = if let Some(ref m_id) = edge.to_member {
+                        if let Some((idx, _member)) = v.members.iter().enumerate().find(|(_, m)| &m.id == m_id) {
+                            let member_y = v.y + 32.0 + 11.0 + (idx as f64) * 22.0;
+                            (v.x, member_y)
+                        } else {
+                            (v.x, v.y + v.height / 2.0)
+                        }
+                    } else if !is_lr {
                         let frac = (j as f64 + 1.0) / (count as f64 + 1.0);
                         (v.x + v.width * frac, v.y)
                     } else {
@@ -806,7 +843,15 @@ impl LayeredGraph {
         for (idx, e) in edges.iter_mut().enumerate() {
             if let (Some(&exit), Some(&entry)) = (exit_ports.get(&idx), entry_ports.get(&idx)) {
                 let track_offset = edge_track_offsets.get(&idx).copied().unwrap_or(0.0);
-                if !is_lr {
+                if e.from_member.is_some() || e.to_member.is_some() {
+                    let mid_x = (exit.0 + entry.0) / 2.0 + track_offset;
+                    if exit.0 < entry.0 {
+                        e.points = vec![exit, (mid_x, exit.1), (mid_x, entry.1), entry];
+                    } else {
+                        let gutter = exit.0.max(entry.0) + 30.0 + track_offset.abs();
+                        e.points = vec![exit, (gutter, exit.1), (gutter, entry.1), entry];
+                    }
+                } else if !is_lr {
                     if (exit.0 - entry.0).abs() < 1.0 && track_offset.abs() < 0.1 {
                         e.points = vec![exit, entry];
                     } else {
@@ -1137,6 +1182,8 @@ impl LayeredGraph {
                 right_arrow: e.right_arrow_type(),
                 line_type: e.line_type().to_string(),
                 is_cross_boundary: true,
+                from_member: None,
+                to_member: None,
             });
         }
 
@@ -1551,6 +1598,47 @@ Student, Professor > Person
         assert!(svg.contains("dl-class-node"));
         assert!(svg.contains("dl-class-header"));
         assert!(svg.contains("dl-arrow-inheritance"));
+    }
+
+    #[test]
+    fn test_scoped_uml_member_inter_class_routing() {
+        let input = r#"
+visualizer layered
+
+{!Course;Course
+name;+String
+description;+String
+}
+
+{!Professor;Professor
+classes1;+classes: List<Class>
+}
+
+Course!name > Professor!classes1
+"#;
+        let canvas = AstBuilder::new().build(input).unwrap();
+        let graph = LayeredGraph::build(&canvas);
+
+        // Nodes must ONLY be Course and Professor. NO separate floating nodes!
+        assert_eq!(graph.nodes.len(), 2, "Must contain ONLY Course and Professor, no floating member boxes");
+        assert!(graph.nodes.contains_key("Course"));
+        assert!(graph.nodes.contains_key("Professor"));
+        assert!(!graph.nodes.contains_key("Course!name"), "Course!name must not be a standalone node");
+        assert!(!graph.nodes.contains_key("Professor!classes1"), "Professor!classes1 must not be a standalone node");
+
+        // The edge must connect from Course to Professor with member anchors
+        assert_eq!(graph.edges.len(), 1);
+        let edge = &graph.edges[0];
+        assert_eq!(edge.from, "Course");
+        assert_eq!(edge.to, "Professor");
+        assert_eq!(edge.from_member.as_deref(), Some("Course!name"));
+        assert_eq!(edge.to_member.as_deref(), Some("Professor!classes1"));
+        assert!(!edge.points.is_empty(), "Edge points must be computed");
+
+        let svg = graph.render_svg();
+        assert!(svg.contains("dl-class-node"));
+        assert!(svg.contains("dl-class-member-node"));
+        assert!(svg.contains("dl-edge-path"));
     }
 
     #[test]

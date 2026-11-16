@@ -885,5 +885,123 @@ fn test_pure_rust_browser_clipboard_copy_paste() {
     println!("Pure Rust browser test passed: Editor clipboard copy/cut/paste verified.");
 }
 
+#[test]
+fn test_pure_rust_browser_scoped_uml_members_routing() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate to Diagrammer");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor not found");
+
+    let input = r#"visualizer layered
+
+{!Person;Person
+name;+String
+birth;#Date
+getCurrentAge;+(): int
+}
+
+{!Student;Student
+classes;_List<Class>
+attend;-(class: Course)
+sleep;-()
+}
+
+{!Course;Course
+name;+String
+description;+String
+professor1;+professor: Professor
+location;+String
+times;+List<Time>
+prerequisites;+List<Course>
+students;+List<Student>
+}
+
+{!Professor;Professor
+classes1;+classes: List<Class>
+teach;-teach(class: Course)
+}
+
+{!BankAccount;BankAccount
+owner;+String
+balance;+Currency=0
+deposit;+(amount: Currency)
+withdraw;+(amount: Currency)
+}
+
+Student,Professor>Person
+Course.Professor
+
+Course!name>Professor!classes1
+"#;
+
+    let code_json = serde_json::to_string(&input).expect("serialize code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+
+            const svg = document.querySelector("#diagrammer-graph svg.diagrammer-layered-svg");
+            const hasSvg = svg !== null;
+            const courseNode = document.getElementById("node-Course") !== null;
+            const profNode = document.getElementById("node-Professor") !== null;
+
+            // Course!name and Professor!classes1 must exist ONLY as member elements inside class boxes, NOT standalone top-level .dl-node boxes
+            const memberNodes = svg ? Array.from(svg.querySelectorAll(".dl-class-member-node")).map(el => el.id) : [];
+            const topLevelNodes = svg ? Array.from(svg.querySelectorAll("g.dl-node:not(.dl-class-member-node)")).map(el => el.id) : [];
+
+            const hasStandaloneCourseName = topLevelNodes.includes("node-Course!name");
+            const hasStandaloneProfClasses = topLevelNodes.includes("node-Professor!classes1");
+            const memberCount = memberNodes.length;
+
+            return JSON.stringify({{
+                hasSvg,
+                courseNode,
+                profNode,
+                hasStandaloneCourseName,
+                hasStandaloneProfClasses,
+                memberCount
+            }});
+        }})()
+    "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating scoped UML test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Layered SVG must render");
+    assert_eq!(val.get("courseNode").and_then(|v| v.as_bool()), Some(true), "Course class node must exist");
+    assert_eq!(val.get("profNode").and_then(|v| v.as_bool()), Some(true), "Professor class node must exist");
+    assert_eq!(val.get("hasStandaloneCourseName").and_then(|v| v.as_bool()), Some(false), "Course!name must NOT be a standalone node");
+    assert_eq!(val.get("hasStandaloneProfClasses").and_then(|v| v.as_bool()), Some(false), "Professor!classes1 must NOT be a standalone node");
+
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/scoped_uml_verified_browser.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Scoped UML members routed directly between class containers without standalone nodes.");
+}
+
 
 

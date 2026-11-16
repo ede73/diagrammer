@@ -675,7 +675,17 @@ impl StateGraph {
                 continue;
             }
 
-            let (u_anchor, v_anchor) = match (all_node_anchors.get(&e.left), all_node_anchors.get(&e.right)) {
+            let is_source_seq = all_node_anchors.contains_key(&format!("{}-bottom", e.left));
+            let is_target_seq = all_node_anchors.contains_key(&format!("{}-bottom", e.right));
+
+            let u_anchor = if is_source_seq {
+                all_node_anchors.get(&format!("{}-bottom", e.left))
+            } else {
+                all_node_anchors.get(&e.left)
+            };
+            let v_anchor = all_node_anchors.get(&e.right);
+
+            let (u_anchor, v_anchor) = match (u_anchor, v_anchor) {
                 (Some(a), Some(b)) => (*a, *b),
                 _ => continue,
             };
@@ -692,7 +702,7 @@ impl StateGraph {
                     let max_x = x_start.max(x_end);
                     let mut count = 0;
                     for (id, a) in &all_node_anchors {
-                        if id == &e.left || id == &e.right {
+                        if id == &e.left || id == &e.right || id == &format!("{}-bottom", e.left) || id == &format!("{}-bottom", e.right) {
                             continue;
                         }
                         // Skip containers that physically enclose the endpoints
@@ -730,10 +740,27 @@ impl StateGraph {
                     count
                 };
 
-                let left_collisions = collides_h(gutter_left, u_anchor.x, u_anchor.center_y)
-                    + collides_h(gutter_left, v_anchor.x, v_anchor.center_y);
-                let right_collisions = collides_h(u_anchor.x + u_anchor.width, gutter_right, u_anchor.center_y)
-                    + collides_h(v_anchor.x + v_anchor.width, gutter_right, v_anchor.center_y);
+                let y_start_h = if is_source_seq {
+                    u_anchor.y + u_anchor.height + 16.0
+                } else {
+                    u_anchor.center_y
+                };
+
+                let y_end_h = if is_target_seq {
+                    v_anchor.y - 16.0
+                } else {
+                    v_anchor.center_y
+                };
+
+                let u_left_x = if is_source_seq { u_anchor.center_x } else { u_anchor.x };
+                let u_right_x = if is_source_seq { u_anchor.center_x } else { u_anchor.x + u_anchor.width };
+                let v_left_x = if is_target_seq { v_anchor.center_x } else { v_anchor.x };
+                let v_right_x = if is_target_seq { v_anchor.center_x } else { v_anchor.x + v_anchor.width };
+
+                let left_collisions = collides_h(gutter_left, u_left_x, u_anchor.center_y)
+                    + collides_h(gutter_left, v_left_x, v_anchor.center_y);
+                let right_collisions = collides_h(u_right_x, gutter_right, u_anchor.center_y)
+                    + collides_h(v_right_x, gutter_right, v_anchor.center_y);
 
                 let use_right = if left_collisions != right_collisions {
                     left_collisions > right_collisions
@@ -744,25 +771,45 @@ impl StateGraph {
                 let gutter_x = if use_right {
                     gutter_right + 20.0 + stagger
                 } else {
-                    (gutter_left - 20.0 - stagger).max(30.0)
+                    gutter_left - 20.0 - stagger
                 };
 
-                let p_start = if use_right {
+                let p_start = if is_source_seq {
+                    (u_anchor.center_x, u_anchor.y + u_anchor.height)
+                } else if use_right {
                     (u_anchor.x + u_anchor.width, u_anchor.center_y)
                 } else {
                     (u_anchor.x, u_anchor.center_y)
                 };
 
-                let p_end = if use_right {
+                let p_end = if is_target_seq {
+                    (v_anchor.center_x, v_anchor.y)
+                } else if use_right {
                     (v_anchor.x + v_anchor.width, v_anchor.center_y)
                 } else {
                     (v_anchor.x, v_anchor.center_y)
                 };
 
-                let path_d = format!(
-                    "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
-                    p_start.0, p_start.1, gutter_x, p_start.1, gutter_x, p_end.1, p_end.0, p_end.1
-                );
+                let mut points = Vec::new();
+                points.push(p_start);
+                if is_source_seq {
+                    points.push((u_anchor.center_x, y_start_h));
+                }
+                points.push((gutter_x, y_start_h));
+                points.push((gutter_x, y_end_h));
+                if is_target_seq {
+                    points.push((v_anchor.center_x, y_end_h));
+                }
+                points.push(p_end);
+
+                let mut path_d = String::new();
+                for (i, pt) in points.iter().enumerate() {
+                    if i == 0 {
+                        path_d.push_str(&format!("M {:.1} {:.1}", pt.0, pt.1));
+                    } else {
+                        path_d.push_str(&format!(" L {:.1} {:.1}", pt.0, pt.1));
+                    }
+                }
 
                 let label_x = gutter_x + if use_right { 12.0 } else { -12.0 };
                 let label_y = (p_start.1 + p_end.1) / 2.0;

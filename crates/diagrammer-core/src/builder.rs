@@ -843,6 +843,12 @@ impl AstBuilder {
                         &mut self.canvas.objects
                     };
 
+                    // If a forward-declared vertex placeholder exists with the same name, remove it now that the group is defined
+                    target_list.retain(|obj| match obj {
+                        GraphObject::Vertex(v) => v.name != group.name,
+                        _ => true,
+                    });
+
                     let existing_pos = target_list.iter().position(|obj| match obj {
                         GraphObject::Group(g) => g.name == group.name,
                         _ => false,

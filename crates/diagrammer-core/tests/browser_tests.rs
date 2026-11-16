@@ -655,3 +655,86 @@ fn test_pure_rust_browser_poly_9_rendering() {
     println!("Pure Rust browser test passed: poly_9 verified in browser DOM with 2 transitions and 1 cross-boundary edge.");
 }
 
+#[test]
+fn test_pure_rust_browser_poly_6_cross_boundary_sequence_connection() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor failed to initialize");
+
+    let poly6_code = r#"visualizer layered
+
+WarehouseGrid > DispatchProtocol
+
+{WarehouseGrid; Storage Bays
+    visualizer grid
+    Bay1, Bay2
+    Bay3, Bay4
+}
+
+{DispatchProtocol; Delivery Handshake
+    visualizer native_sequence
+    Robot > "Pickup" Station
+    Station > "Ack" Robot
+}
+
+Bay1 > Station
+Station > Bay1
+"#;
+    let poly6_json = serde_json::to_string(&poly6_code).expect("Failed serializing poly6_code");
+
+    let eval_script = format!(r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 400));
+            const layeredSvg = document.querySelector("#diagrammer-graph svg.diagrammer-layered-svg");
+            const crossEdges = layeredSvg ? Array.from(layeredSvg.querySelectorAll(".dl-inter-group-edges path.dl-cross-edge")).map(p => p.getAttribute("d")) : [];
+            const subSequence = layeredSvg ? layeredSvg.querySelector("svg.diagrammer-sequence") : null;
+            return JSON.stringify({{
+                hasLayeredSvg: layeredSvg !== null,
+                hasSequenceSubSvg: subSequence !== null,
+                crossEdgeCount: crossEdges.length,
+                paths: crossEdges,
+            }});
+        }})()
+    "##, poly6_json);
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating poly_6 in browser");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing evaluation result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON from browser");
+
+    assert_eq!(val.get("hasLayeredSvg").and_then(|v| v.as_bool()), Some(true), "Layered SVG must render in DOM");
+    assert_eq!(val.get("hasSequenceSubSvg").and_then(|v| v.as_bool()), Some(true), "Sequence sub-SVG must render in DOM");
+    let cross_count = val.get("crossEdgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(cross_count, 2, "Expected 2 cross-boundary edges (Bay1>Station and Station>Bay1), got {}", cross_count);
+
+    let paths = val.get("paths").and_then(|v| v.as_array()).expect("paths array");
+    let p1 = paths[0].as_str().unwrap_or("");
+    let p2 = paths[1].as_str().unwrap_or("");
+
+    // Bay1 > Station enters Station at top: ends at y = 538.0
+    assert!(p1.contains("538.0"), "Bay1 > Station must enter Station top box at y = 538.0, path: {}", p1);
+    // Station > Bay1 exits Station at bottom: starts at y = 790.0
+    assert!(p2.contains("790.0"), "Station > Bay1 must exit Station bottom box at y = 790.0, path: {}", p2);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/poly_6_cross_edges_browser_proof.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: poly_6 verified in browser DOM with top entry (538.0) and bottom exit (790.0).");
+}
+

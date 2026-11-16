@@ -111,36 +111,33 @@ pub fn extract_svg_node_bounds(svg: &str) -> HashMap<String, SubNodeBounds> {
         let start = cursor + idx + marker.len();
         if let Some(end_id) = svg[start..].find('"') {
             let node_id = &svg[start..start + end_id];
-            // Skip bottom mirrored sequence headers
-            if !node_id.ends_with("-bottom") {
-                let rest = &svg[start + end_id..];
-                let search_window_len = rest.len().min(1200);
-                let node_block = &rest[..search_window_len];
+            let rest = &svg[start + end_id..];
+            let search_window_len = rest.len().min(1200);
+            let node_block = &rest[..search_window_len];
 
-                if let Some(rx) = node_block.find("<rect ") {
-                    let rect_str = &node_block[rx..];
-                    if let (Some(x), Some(y), Some(w), Some(h)) = (
-                        parse_attr(rect_str, "x=\""),
-                        parse_attr(rect_str, "y=\""),
-                        parse_attr(rect_str, "width=\""),
-                        parse_attr(rect_str, "height=\""),
-                    ) {
-                        bounds.insert(node_id.to_string(), SubNodeBounds { x, y, width: w, height: h });
-                    }
-                } else if let Some(cx_idx) = node_block.find("<circle ") {
-                    let circle_str = &node_block[cx_idx..];
-                    if let (Some(cx), Some(cy), Some(r)) = (
-                        parse_attr(circle_str, "cx=\""),
-                        parse_attr(circle_str, "cy=\""),
-                        parse_attr(circle_str, "r=\""),
-                    ) {
-                        bounds.insert(node_id.to_string(), SubNodeBounds {
-                            x: cx - r,
-                            y: cy - r,
-                            width: r * 2.0,
-                            height: r * 2.0,
-                        });
-                    }
+            if let Some(rx) = node_block.find("<rect ") {
+                let rect_str = &node_block[rx..];
+                if let (Some(x), Some(y), Some(w), Some(h)) = (
+                    parse_attr(rect_str, "x=\""),
+                    parse_attr(rect_str, "y=\""),
+                    parse_attr(rect_str, "width=\""),
+                    parse_attr(rect_str, "height=\""),
+                ) {
+                    bounds.insert(node_id.to_string(), SubNodeBounds { x, y, width: w, height: h });
+                }
+            } else if let Some(cx_idx) = node_block.find("<circle ") {
+                let circle_str = &node_block[cx_idx..];
+                if let (Some(cx), Some(cy), Some(r)) = (
+                    parse_attr(circle_str, "cx=\""),
+                    parse_attr(circle_str, "cy=\""),
+                    parse_attr(circle_str, "r=\""),
+                ) {
+                    bounds.insert(node_id.to_string(), SubNodeBounds {
+                        x: cx - r,
+                        y: cy - r,
+                        width: r * 2.0,
+                        height: r * 2.0,
+                    });
                 }
             }
             cursor = start + end_id;

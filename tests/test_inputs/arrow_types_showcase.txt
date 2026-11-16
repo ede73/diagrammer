@@ -1,0 +1,35 @@
+visualizer layered
+
+// Standard directional, bidirectional, and flat arrows
+a1 > "directed arrow" b1
+a2 < "reverse directed" b2
+a3 <> "bidirectional" b3
+a4 - "undirected line" b4
+
+// Dashed and dotted variants
+c1 .> "dotted directed" d1
+c2 <. "dotted reverse" d2
+c3 <.> "dotted bidirectional" d3
+c4 -> "dashed directed" d4
+c5 <- "dashed reverse" d5
+c6 <-> "dashed bidirectional" d6
+
+// Thick, double, and flat stop arrows
+e1 => "double directed" f1
+e2 <= "double reverse" f2
+e3 <=> "double bidirectional" f3
+g1 -| "flat stop head" h1
+g2 |- "reverse flat stop" h2
+g3 |-| "dual flat stop" h3
+
+// Modern extended arrow syntax
+r1 --> "dashed arrow" r2
+r3 ..> "dotted arrow" r4
+r5 ==> "thick double arrow" r6
+r7 <--> "bidirectional dashed" r8
+r9 |--| "flat endpoints" r10
+r11 |--> "flat to arrow" r12
+
+// Multi-target list linking grammar
+(m1, m2) > (m3, m4);grouped pairwise
+p1, p2, p3 > q1, q2, q3;parallel fan-out fan-in

@@ -1,5 +1,6 @@
 use diagrammer_core::builder::AstBuilder;
 use diagrammer_core::generators::make_generator;
+use diagrammer_core::layout::layered::LayeredGraph;
 use std::fs;
 use std::path::Path;
 
@@ -293,6 +294,39 @@ fn test_cli_rendering_verification() {
             let _ = fs::remove_file(&tmp_svg);
         }
     }
+}
+
+#[test]
+fn test_umlclass_scoped_members_no_collision() {
+    let test_input = if Path::new("tests/test_inputs/umlclass_scoped.txt").exists() {
+        "tests/test_inputs/umlclass_scoped.txt"
+    } else if Path::new("../../tests/test_inputs/umlclass_scoped.txt").exists() {
+        "../../tests/test_inputs/umlclass_scoped.txt"
+    } else {
+        panic!("umlclass_scoped.txt not found");
+    };
+
+    let content = fs::read_to_string(test_input).expect("Failed to read umlclass_scoped.txt");
+    let canvas = AstBuilder::new().build(&content).expect("Failed to parse umlclass_scoped");
+    let graph = LayeredGraph::build(&canvas);
+
+    assert!(graph.nodes.contains_key("Person"), "Must contain Person class");
+    assert!(graph.nodes.contains_key("Course"), "Must contain Course class");
+
+    let person = &graph.nodes["Person"];
+    let course = &graph.nodes["Course"];
+
+    // Person must have its own 'name' member
+    let person_has_name = person.members.iter().any(|m| m.id == "Person!name");
+    assert!(person_has_name, "Person class must contain member Person!name");
+
+    // Course must have its own 'name' member without collision
+    let course_has_name = course.members.iter().any(|m| m.id == "Course!name");
+    assert!(course_has_name, "Course class must contain member Course!name without colliding with Person");
+
+    let svg = graph.render_svg();
+    assert!(svg.contains("<svg") && svg.contains("</svg>"));
+    assert!(svg.contains("dl-class-node"));
 }
 
 #[test]

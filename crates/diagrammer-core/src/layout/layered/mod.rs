@@ -138,6 +138,12 @@ fn is_uml_group(grp: &crate::ast::GraphGroup, canvas: &GraphCanvas) -> bool {
     if is_canvas_uml {
         return true;
     }
+    if grp.is_scoped
+        && !grp.objects.iter().any(|o| o.is_edge())
+        && !grp.objects.iter().any(|o| matches!(o, GraphObject::Group(_)))
+    {
+        return true;
+    }
     if grp.objects.iter().any(|o| o.get_shape() == Some("uml_class")) {
         return true;
     }
@@ -276,10 +282,23 @@ impl LayeredGraph {
                         for inner in &grp.objects {
                             if inner.is_vertex() {
                                 let id = inner.get_name().to_string();
-                                let raw_lbl = inner.get_label().map(|s| s.to_string()).unwrap_or_else(|| id.clone());
+                                let short_name = if let Some(pos) = id.rfind('!') {
+                                    &id[pos + 1..]
+                                } else {
+                                    &id
+                                };
+                                let raw_lbl = inner.get_label().map(|s| s.to_string()).unwrap_or_else(|| short_name.to_string());
+                                let display_lbl = if (raw_lbl.starts_with('+') || raw_lbl.starts_with('-') || raw_lbl.starts_with('#'))
+                                    && !raw_lbl.contains(':')
+                                    && !raw_lbl.contains('(')
+                                {
+                                    format!("{} {}: {}", &raw_lbl[..1], short_name, &raw_lbl[1..])
+                                } else {
+                                    raw_lbl
+                                };
                                 members.push(UmlMember {
                                     id,
-                                    label: raw_lbl,
+                                    label: display_lbl,
                                 });
                             }
                         }

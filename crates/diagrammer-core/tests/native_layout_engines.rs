@@ -841,7 +841,51 @@ Worker1 > Load
     assert!(layered_svg.contains("dl-cross-edge"), "Layered SVG must contain cross-boundary edge path");
     assert!(layered_svg.contains("url(#dl-arrow-active)"), "Layered SVG must use active arrowhead for inter-group edge");
     assert!(!layered_svg.contains("NaN"), "Layered SVG must not contain NaN");
+
+    // Test obstacle avoidance & member anchor alignment:
+    let input_obstacle = r#"
+visualizer state
+DataModel > AuditSync > Committed
+{DataModel; Domain Entities
+    visualizer layered
+    {User; User
+        id; +UUID
+        name; +String
+    }
 }
+{AuditSync; Ledger Exchange
+    visualizer native_sequence
+    Service > "Log" AuditDB
+}
+User > AuditDB
+"#;
+    let canvas_obs = AstBuilder::new().build(input_obstacle).expect("AST build for obstacle test");
+    let obs_svg = state_gen.generate(&canvas_obs);
+    // User > AuditDB should choose the right gutter (x >= 650) to avoid Service on the left
+    assert!(obs_svg.contains("L 700.0") || obs_svg.contains("L 690.0") || obs_svg.contains("L 680.0"), "User > AuditDB must route via right gutter to avoid Service obstacle");
+
+    let input_member = r#"
+visualizer state
+DataModel > AuditSync > Committed
+{DataModel; Domain Entities
+    visualizer layered
+    {User; User
+        id; +UUID
+        name; +String
+    }
+}
+{AuditSync; Ledger Exchange
+    visualizer native_sequence
+    Service > "Log" AuditDB
+}
+id > AuditDB
+"#;
+    let canvas_mem = AstBuilder::new().build(input_member).expect("AST build for member anchor test");
+    let mem_svg = state_gen.generate(&canvas_mem);
+    // Member id (+UUID) should start at y=177.0 (aligned with +UUID row, distinct from User header at y=150.0)
+    assert!(mem_svg.contains("M 380.0 177.0") || mem_svg.contains("177.0"), "id > AuditDB must anchor at member +UUID row");
+}
+
 
 
 

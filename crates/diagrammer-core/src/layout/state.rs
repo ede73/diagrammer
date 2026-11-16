@@ -688,10 +688,11 @@ impl StateGraph {
                 inter_group_idx += 1;
                 let stagger = ((inter_group_idx - 1) % 4) as f64 * 16.0;
 
-                // Obstacle collision avoidance: check if horizontal entry/exit segments intersect intermediate nodes
-                let collides_h = |x_start: f64, x_end: f64, y: f64| -> bool {
+                // Obstacle collision avoidance: count horizontal entry/exit segment intersections with intermediate nodes
+                let collides_h = |x_start: f64, x_end: f64, y: f64| -> usize {
                     let min_x = x_start.min(x_end);
                     let max_x = x_start.max(x_end);
+                    let mut count = 0;
                     for (id, a) in &all_node_anchors {
                         if id == &e.left || id == &e.right {
                             continue;
@@ -709,24 +710,35 @@ impl StateGraph {
                             continue;
                         }
 
-                        if y >= a.y - 2.0 && y <= a.y + a.height + 2.0 {
-                            if !(max_x < a.x || min_x > a.x + a.width) {
-                                return true;
+                        // Skip internal members/children enclosed by u_anchor or v_anchor
+                        let is_inside_u = a.x >= u_anchor.x - 1.0
+                            && a.x + a.width <= u_anchor.x + u_anchor.width + 1.0
+                            && a.y >= u_anchor.y - 1.0
+                            && a.y + a.height <= u_anchor.y + u_anchor.height + 1.0;
+                        let is_inside_v = a.x >= v_anchor.x - 1.0
+                            && a.x + a.width <= v_anchor.x + v_anchor.width + 1.0
+                            && a.y >= v_anchor.y - 1.0
+                            && a.y + a.height <= v_anchor.y + v_anchor.height + 1.0;
+                        if is_inside_u || is_inside_v {
+                            continue;
+                        }
+
+                        if y >= a.y && y <= a.y + a.height {
+                            if max_x > a.x + 2.0 && min_x < a.x + a.width - 2.0 {
+                                count += 1;
                             }
                         }
                     }
-                    false
+                    count
                 };
 
-                let left_collides = collides_h(gutter_left, u_anchor.x, u_anchor.center_y)
-                    || collides_h(gutter_left, v_anchor.x, v_anchor.center_y);
-                let right_collides = collides_h(u_anchor.x + u_anchor.width, gutter_right, u_anchor.center_y)
-                    || collides_h(v_anchor.x + v_anchor.width, gutter_right, v_anchor.center_y);
+                let left_collisions = collides_h(gutter_left, u_anchor.x, u_anchor.center_y)
+                    + collides_h(gutter_left, v_anchor.x, v_anchor.center_y);
+                let right_collisions = collides_h(u_anchor.x + u_anchor.width, gutter_right, u_anchor.center_y)
+                    + collides_h(v_anchor.x + v_anchor.width, gutter_right, v_anchor.center_y);
 
-                let use_right = if !right_collides && left_collides {
-                    true
-                } else if !left_collides && right_collides {
-                    false
+                let use_right = if left_collisions != right_collisions {
+                    left_collisions > right_collisions
                 } else {
                     (u_anchor.center_x + v_anchor.center_x) / 2.0 >= center_x
                 };

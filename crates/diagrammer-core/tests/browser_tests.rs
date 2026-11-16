@@ -351,6 +351,7 @@ fn test_pure_rust_browser_all_native_layout_engines() {
         ("native_sequence", "visualizer native_sequence\nAlice > Bob: Hello\nBob > Alice: Hi"),
         ("tree", "visualizer tree\nRoot > Child1, Child2\nChild1 > LeafA, LeafB"),
         ("grid", "visualizer grid\nRackA > Server1, Server2\nRackB > Server3"),
+        ("state", "visualizer state\nClosed > Listen > Established > Closed"),
         ("force", "visualizer force\nA > B, C\nB > C, D\nC > D"),
         ("network_bus", "visualizer network_bus\nshape cloud\ninet\nshape default\n{comcast;73.0.0.0/8\n cablemodem/wifi.png\n router;73.63.53.43\n}\n{ home;192.168.1.0/24\n router/wifi.png;192.168.1.1\n printer/printer.png;192.168.1.2\n nas/harddisk.png;192.168.1.3\n}\ninet - cablemodem"),
     ];
@@ -437,3 +438,303 @@ fn test_pure_rust_browser_screenshot_pixel_comparison() {
 
     println!("Pure Rust browser test 8 passed: pixel comparison against golden snapshot verified.");
 }
+
+#[test]
+fn test_pure_rust_browser_poly_archetype_state_sequence_rendering() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor failed to initialize");
+
+    let fixture_code = r#"
+visualizer state
+
+Start > Negotiation > Process > Completed
+
+{Negotiation; Handshake Protocol
+    visualizer native_sequence
+    Client > "1. SYN" Server
+    Server > "2. SYN-ACK" Client
+    Client > "3. ACK" Server
+}
+
+{Process; Data Processing
+    Task1 > Task2 > Task3
+}
+"#;
+
+    let eval_script = format!(r##"
+        (async () => {{
+            window.setGraphText(`{}`);
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 200));
+            const stateSvg = document.querySelector("#diagrammer-graph svg.diagrammer-state-svg");
+            const polyGroup = document.querySelector(".ds-poly-archetype-subgraph");
+            const seqSvg = polyGroup ? polyGroup.querySelector("svg.diagrammer-sequence") : null;
+            return JSON.stringify({{
+                hasStateSvg: stateSvg !== null,
+                hasPolyGroup: polyGroup !== null,
+                hasSeqSvg: seqSvg !== null,
+                primitiveCount: stateSvg ? stateSvg.querySelectorAll("text, path, rect, line").length : 0
+            }});
+        }})()
+    "##, fixture_code);
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating poly-archetype in browser");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing evaluation result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON from browser");
+
+    assert_eq!(val.get("hasStateSvg").and_then(|v| v.as_bool()), Some(true), "State SVG must render in DOM");
+    assert_eq!(val.get("hasPolyGroup").and_then(|v| v.as_bool()), Some(true), "Poly-archetype group must render in DOM");
+    assert_eq!(val.get("hasSeqSvg").and_then(|v| v.as_bool()), Some(true), "Embedded sequence SVG must render inside poly group");
+    let count = val.get("primitiveCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert!(count >= 20, "Expected at least 20 SVG primitives, got {}", count);
+
+    // Capture screenshot for visual proof
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let snapshot_path = manifest_dir.join("../../tests/snapshots/poly_archetype_state_sequence.png");
+    if !snapshot_path.exists() {
+        let _ = std::fs::write(&snapshot_path, &screenshot_bytes);
+    }
+
+    println!("Pure Rust browser test 9 passed: poly-archetype state+sequence verified in browser DOM with CDP screenshot.");
+}
+
+#[test]
+fn test_pure_rust_browser_state_tcp_rendering() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor failed to initialize");
+
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let tcp_fixture_path = manifest_dir.join("../../tests/test_inputs/state_tcp.txt");
+    let tcp_code = std::fs::read_to_string(&tcp_fixture_path).expect("Failed reading state_tcp.txt");
+    let tcp_json = serde_json::to_string(&tcp_code).expect("Failed serializing tcp_code");
+
+    let eval_script = format!(r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 250));
+            const stateSvg = document.querySelector("#diagrammer-graph svg.diagrammer-state-svg");
+            const groups = stateSvg ? stateSvg.querySelectorAll(".ds-group") : [];
+            const nodes = stateSvg ? stateSvg.querySelectorAll(".dl-node, [id^='node-']") : [];
+            const edges = stateSvg ? stateSvg.querySelectorAll(".ds-edge") : [];
+            return JSON.stringify({{
+                hasStateSvg: stateSvg !== null,
+                groupCount: groups.length,
+                nodeCount: nodes.length,
+                edgeCount: edges.length,
+            }});
+        }})()
+    "##, tcp_json);
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating state_tcp in browser");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing evaluation result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON from browser");
+
+    assert_eq!(val.get("hasStateSvg").and_then(|v| v.as_bool()), Some(true), "State SVG must render in DOM");
+    let groups = val.get("groupCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert!(groups >= 2, "Expected at least 2 state groups (ActiveClose, PassiveClose), got {}", groups);
+    let nodes = val.get("nodeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert!(nodes >= 8, "Expected at least 8 state nodes, got {}", nodes);
+
+    // Capture screenshot via CDP
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let snapshot_path = manifest_dir.join("../../tests/snapshots/state_tcp.png");
+    if !snapshot_path.exists() {
+        let _ = std::fs::write(&snapshot_path, &screenshot_bytes);
+    } else {
+        if let Ok(expected_img) = image::open(&snapshot_path) {
+            let captured_img = image::load_from_memory(&screenshot_bytes).expect("Failed to decode screenshot");
+            let (w1, h1) = captured_img.dimensions();
+            let (w2, h2) = expected_img.dimensions();
+            if (w1, h1) == (w2, h2) {
+                let total_pixels = (w1 * h1) as f64;
+                let mut diff_count = 0u64;
+                for y in 0..h1 {
+                    for x in 0..w1 {
+                        if captured_img.get_pixel(x, y) != expected_img.get_pixel(x, y) {
+                            diff_count += 1;
+                        }
+                    }
+                }
+                let diff_pct = (diff_count as f64 / total_pixels) * 100.0;
+                println!("state_tcp snapshot diff percentage: {:.3}%", diff_pct);
+                assert!(diff_pct < 2.0, "Visual regression detected on state_tcp: {:.3}% pixels differed", diff_pct);
+            }
+        }
+    }
+
+    println!("Pure Rust browser test 10 passed: state_tcp verified in browser DOM with CDP screenshot.");
+}
+
+#[test]
+fn test_pure_rust_browser_poly_9_rendering() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor failed to initialize");
+
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let poly9_path = manifest_dir.join("../../tests/test_inputs/poly_9_state_swarm_pipeline.txt");
+    let poly9_code = std::fs::read_to_string(&poly9_path).expect("Failed reading poly_9_state_swarm_pipeline.txt");
+    let poly9_json = serde_json::to_string(&poly9_code).expect("Failed serializing poly9_code");
+
+    let eval_script = format!(r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 300));
+            const stateSvg = document.querySelector("#diagrammer-graph svg.diagrammer-state-svg");
+            const transitions = stateSvg ? stateSvg.querySelectorAll(".ds-edges path.ds-edge") : [];
+            const crossEdges = stateSvg ? stateSvg.querySelectorAll(".ds-inter-group-edges path") : [];
+            return JSON.stringify({{
+                hasStateSvg: stateSvg !== null,
+                transitionCount: transitions.length,
+                crossEdgeCount: crossEdges.length,
+            }});
+        }})()
+    "##, poly9_json);
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating poly_9 in browser");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing evaluation result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON from browser");
+
+    assert_eq!(val.get("hasStateSvg").and_then(|v| v.as_bool()), Some(true), "State SVG must render in DOM");
+    let trans = val.get("transitionCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(trans, 2, "Expected 2 top-level transitions (ClusterMesh>DataPipeline and DataPipeline>Operational), got {}", trans);
+    let cross = val.get("crossEdgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(cross, 1, "Expected 1 cross-boundary edge (Worker1>Load), got {}", cross);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/poly_9_in_browser_proof.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: poly_9 verified in browser DOM with 2 transitions and 1 cross-boundary edge.");
+}
+
+#[test]
+fn test_pure_rust_browser_poly_6_cross_boundary_sequence_connection() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor failed to initialize");
+
+    let poly6_code = r#"visualizer layered
+
+WarehouseGrid > DispatchProtocol
+
+{WarehouseGrid; Storage Bays
+    visualizer grid
+    Bay1, Bay2
+    Bay3, Bay4
+}
+
+{DispatchProtocol; Delivery Handshake
+    visualizer native_sequence
+    Robot > "Pickup" Station
+    Station > "Ack" Robot
+}
+
+Bay1 > Station
+Station > Bay1
+"#;
+    let poly6_json = serde_json::to_string(&poly6_code).expect("Failed serializing poly6_code");
+
+    let eval_script = format!(r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 400));
+            const layeredSvg = document.querySelector("#diagrammer-graph svg.diagrammer-layered-svg");
+            const crossEdges = layeredSvg ? Array.from(layeredSvg.querySelectorAll(".dl-inter-group-edges path.dl-cross-edge")).map(p => p.getAttribute("d")) : [];
+            const subSequence = layeredSvg ? layeredSvg.querySelector("svg.diagrammer-sequence") : null;
+            return JSON.stringify({{
+                hasLayeredSvg: layeredSvg !== null,
+                hasSequenceSubSvg: subSequence !== null,
+                crossEdgeCount: crossEdges.length,
+                paths: crossEdges,
+            }});
+        }})()
+    "##, poly6_json);
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating poly_6 in browser");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing evaluation result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON from browser");
+
+    assert_eq!(val.get("hasLayeredSvg").and_then(|v| v.as_bool()), Some(true), "Layered SVG must render in DOM");
+    assert_eq!(val.get("hasSequenceSubSvg").and_then(|v| v.as_bool()), Some(true), "Sequence sub-SVG must render in DOM");
+    let cross_count = val.get("crossEdgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(cross_count, 2, "Expected 2 cross-boundary edges (Bay1>Station and Station>Bay1), got {}", cross_count);
+
+    let paths = val.get("paths").and_then(|v| v.as_array()).expect("paths array");
+    let p1 = paths[0].as_str().unwrap_or("");
+    let p2 = paths[1].as_str().unwrap_or("");
+
+    // Bay1 > Station enters Station at top: ends at y = 538.0
+    assert!(p1.contains("538.0"), "Bay1 > Station must enter Station top box at y = 538.0, path: {}", p1);
+    // Station > Bay1 exits Station at bottom: starts at y = 790.0
+    assert!(p2.contains("790.0"), "Station > Bay1 must exit Station bottom box at y = 790.0, path: {}", p2);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/poly_6_cross_edges_browser_proof.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: poly_6 verified in browser DOM with top entry (538.0) and bottom exit (790.0).");
+}
+

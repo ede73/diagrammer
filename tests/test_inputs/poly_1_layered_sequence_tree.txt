@@ -1,0 +1,16 @@
+visualizer layered
+
+StartNode > AuthSequence > DataProcessingTree > FinishNode
+
+{AuthSequence; Authentication Handshake
+    visualizer native_sequence
+    Client > "1. SYN" Server
+    Server > "2. SYN-ACK" Client
+    Client > "3. ACK" Server
+}
+
+{DataProcessingTree; Decision & Routing Hierarchy
+    visualizer tree
+    Router > (FastPath, DeepInspection)
+    DeepInspection > (PayloadScanner, Quarantine)
+}

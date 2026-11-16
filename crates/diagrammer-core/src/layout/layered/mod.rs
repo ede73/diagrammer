@@ -9,6 +9,12 @@ pub use default::DefaultStyler;
 pub use style::LayeredStyler;
 pub use uml::UmlStyler;
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct UmlMember {
+    pub id: String,
+    pub label: String,
+}
+
 /// A node positioned on a 2D layer canvas
 #[derive(Debug, Clone)]
 pub struct LayeredNode {
@@ -24,7 +30,8 @@ pub struct LayeredNode {
     pub layer: usize,
     pub color: Option<String>,
     pub textcolor: Option<String>,
-    pub members: Vec<String>,
+    pub members: Vec<UmlMember>,
+    pub embedded_subgraph: Option<crate::layout::poly::EmbeddedSubgraph>,
 }
 
 /// An edge routed between layered nodes
@@ -41,6 +48,7 @@ pub struct LayeredEdge {
     pub left_arrow: ArrowType,
     pub right_arrow: ArrowType,
     pub line_type: String,
+    pub is_cross_boundary: bool,
 }
 
 /// A visual cluster container grouping multiple layered nodes
@@ -117,6 +125,7 @@ fn create_layered_node_from_obj(
         color: obj.get_color().map(|s| s.to_string()).or_else(|| canvas.defaults.vertexcolor.clone()),
         textcolor: obj.get_textcolor().map(|s| s.to_string()).or_else(|| canvas.defaults.vertextextcolor.clone()),
         members: Vec::new(),
+        embedded_subgraph: None,
     }
 }
 
@@ -225,6 +234,39 @@ impl LayeredGraph {
         let mut groups: Vec<LayeredGroup> = Vec::new();
         let mut edges: Vec<LayeredEdge> = Vec::new();
 
+        // Identify all composite groups (groups with custom visualizers) and encapsulate their members
+        let mut composite_member_nodes: std::collections::HashSet<String> = std::collections::HashSet::new();
+        let mut composite_group_names: std::collections::HashSet<String> = std::collections::HashSet::new();
+
+        fn collect_all_group_names(grp: &crate::ast::GraphGroup, out: &mut std::collections::HashSet<String>) {
+            out.insert(grp.name.clone());
+            for obj in &grp.objects {
+                if let GraphObject::Group(sub) = obj {
+                    collect_all_group_names(sub, out);
+                }
+            }
+        }
+
+        fn find_composite_groups(
+            objects: &[GraphObject],
+            canvas: &GraphCanvas,
+            comp_nodes: &mut std::collections::HashSet<String>,
+            comp_groups: &mut std::collections::HashSet<String>,
+        ) {
+            for obj in objects {
+                if let GraphObject::Group(grp) = obj {
+                    if grp.visualizer.is_some() {
+                        comp_groups.insert(grp.name.clone());
+                        collect_all_group_names(grp, comp_groups);
+                        comp_nodes.extend(crate::layout::poly::collect_group_member_names(grp, canvas));
+                    }
+                    find_composite_groups(&grp.objects, canvas, comp_nodes, comp_groups);
+                }
+            }
+        }
+
+        find_composite_groups(&canvas.objects, canvas, &mut composite_member_nodes, &mut composite_group_names);
+
         // 1. Extract nodes and groups
         for obj in canvas.get_objects(false) {
             match obj {
@@ -233,12 +275,16 @@ impl LayeredGraph {
                         let mut members = Vec::new();
                         for inner in &grp.objects {
                             if inner.is_vertex() {
-                                let raw_lbl = inner.get_label().unwrap_or_else(|| inner.get_name());
-                                members.push(raw_lbl.to_string());
+                                let id = inner.get_name().to_string();
+                                let raw_lbl = inner.get_label().map(|s| s.to_string()).unwrap_or_else(|| id.clone());
+                                members.push(UmlMember {
+                                    id,
+                                    label: raw_lbl,
+                                });
                             }
                         }
                         let label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
-                        let max_member_len = members.iter().map(|m| m.len()).max().unwrap_or(0);
+                        let max_member_len = members.iter().map(|m| m.label.len()).max().unwrap_or(0);
                         let title_len = label.len();
                         let max_len = max_member_len.max(title_len);
 
@@ -265,8 +311,50 @@ impl LayeredGraph {
                                 color: grp.color.clone().or_else(|| canvas.defaults.vertexcolor.clone()),
                                 textcolor: grp.textcolor.clone().or_else(|| canvas.defaults.vertextextcolor.clone()),
                                 members,
+                                embedded_subgraph: None,
                             },
                         );
+                    } else if grp.visualizer.is_some() {
+                        // Poly-archetype: Embedded Subgraph!
+                        let label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
+                        if let Some(sub) = crate::layout::poly::render_subgraph(canvas, grp) {
+                            let w = sub.width + 48.0;
+                            let h = sub.height + 60.0;
+                            nodes.insert(
+                                grp.name.clone(),
+                                LayeredNode {
+                                    id: grp.name.clone(),
+                                    label,
+                                    shape: "poly_composite".to_string(),
+                                    style: None,
+                                    image: None,
+                                    width: w,
+                                    height: h,
+                                    x: 0.0,
+                                    y: 0.0,
+                                    layer: 0,
+                                    color: grp.color.clone().or_else(|| canvas.defaults.vertexcolor.clone()),
+                                    textcolor: grp.textcolor.clone().or_else(|| canvas.defaults.vertextextcolor.clone()),
+                                    members: Vec::new(),
+                                    embedded_subgraph: Some(sub),
+                                },
+                            );
+                        } else {
+                            let mut member_ids = Vec::new();
+                            collect_cluster_group_vertices(grp, canvas, &mut nodes, &mut member_ids);
+                            let label = grp.label.clone().unwrap_or_else(|| grp.name.clone());
+                            groups.push(LayeredGroup {
+                                name: grp.name.clone(),
+                                label,
+                                color: grp.color.clone(),
+                                textcolor: grp.textcolor.clone(),
+                                member_ids,
+                                x: 0.0,
+                                y: 0.0,
+                                width: 0.0,
+                                height: 0.0,
+                            });
+                        }
                     } else {
                         // Cluster group container: extract members and register group
                         let mut member_ids = Vec::new();
@@ -288,6 +376,10 @@ impl LayeredGraph {
                 _ => {
                     if obj.is_vertex() {
                         let name = obj.get_name().to_string();
+                        // Encapsulation: Do not register vertices that belong to an embedded composite subgraph
+                        if composite_member_nodes.contains(&name) {
+                            continue;
+                        }
                         if let Some(existing) = nodes.get_mut(&name) {
                             if let Some(lbl) = obj.get_label() {
                                 existing.label = lbl.to_string();
@@ -318,6 +410,14 @@ impl LayeredGraph {
 
         // Ensure all edge endpoints exist as nodes (resolving group names to their first member if needed)
         for edge in canvas.get_edges() {
+            // Ignore inner edges encapsulated within an embedded composite subgraph
+            if edge.parent.as_ref().map_or(false, |p| composite_group_names.contains(p)) {
+                continue;
+            }
+            if composite_member_nodes.contains(&edge.left) || composite_member_nodes.contains(&edge.right) {
+                continue;
+            }
+
             let left_target = if !nodes.contains_key(&edge.left) && group_members_map.contains_key(&edge.left) {
                 &group_members_map[&edge.left]
             } else {
@@ -330,7 +430,7 @@ impl LayeredGraph {
             };
 
             for endpoint in [left_target, right_target] {
-                if !nodes.contains_key(endpoint) {
+                if !nodes.contains_key(endpoint) && !composite_member_nodes.contains(endpoint) {
                     let w = ((endpoint.len() as f64) * 8.8 + 36.0).max(84.0);
                     nodes.insert(
                         endpoint.clone(),
@@ -348,6 +448,7 @@ impl LayeredGraph {
                             color: canvas.defaults.vertexcolor.clone(),
                             textcolor: canvas.defaults.vertextextcolor.clone(),
                             members: Vec::new(),
+                            embedded_subgraph: None,
                         },
                     );
                 }
@@ -355,7 +456,15 @@ impl LayeredGraph {
         }
 
         // 2. Extract edges and identify inheritance relationships
-        for edge in canvas.get_edges() {
+        let raw_edges = canvas.get_edges();
+        for edge in &raw_edges {
+            // Skip inner edges of composite subgraphs
+            if edge.parent.as_ref().map_or(false, |p| composite_group_names.contains(p)) {
+                continue;
+            }
+            if composite_member_nodes.contains(&edge.left) || composite_member_nodes.contains(&edge.right) {
+                continue;
+            }
             let left_target = if !nodes.contains_key(&edge.left) && group_members_map.contains_key(&edge.left) {
                 group_members_map[&edge.left].clone()
             } else {
@@ -366,6 +475,18 @@ impl LayeredGraph {
             } else {
                 edge.right.clone()
             };
+
+            // Deduplicate identical edges
+            let is_duplicate = edges.iter().any(|e| {
+                e.from == left_target
+                    && e.to == right_target
+                    && e.label == edge.label
+                    && e.edge_type == edge.edge_type
+                    && e.line_type == edge.line_type()
+            });
+            if is_duplicate {
+                continue;
+            }
 
             let is_inh = edge.edge_type.contains('<') || edge.edge_type.contains('>');
             edges.push(LayeredEdge {
@@ -380,6 +501,7 @@ impl LayeredGraph {
                 left_arrow: edge.left_arrow_type(),
                 right_arrow: edge.right_arrow_type(),
                 line_type: edge.line_type().to_string(),
+                is_cross_boundary: false,
             });
         }
 
@@ -669,14 +791,18 @@ impl LayeredGraph {
                     if (exit.0 - entry.0).abs() < 1.0 && track_offset.abs() < 0.1 {
                         e.points = vec![exit, entry];
                     } else {
-                        let mid_y = (exit.1 + entry.1) / 2.0 + track_offset;
+                        let max_offset = ((entry.1 - exit.1).abs() / 2.0 - 10.0).max(0.0);
+                        let clamped_offset = track_offset.clamp(-max_offset, max_offset);
+                        let mid_y = (exit.1 + entry.1) / 2.0 + clamped_offset;
                         e.points = vec![exit, (exit.0, mid_y), (entry.0, mid_y), entry];
                     }
                 } else {
                     if (exit.1 - entry.1).abs() < 1.0 && track_offset.abs() < 0.1 {
                         e.points = vec![exit, entry];
                     } else {
-                        let mid_x = (exit.0 + entry.0) / 2.0 + track_offset;
+                        let max_offset = ((entry.0 - exit.0).abs() / 2.0 - 10.0).max(0.0);
+                        let clamped_offset = track_offset.clamp(-max_offset, max_offset);
+                        let mid_x = (exit.0 + entry.0) / 2.0 + clamped_offset;
                         e.points = vec![exit, (mid_x, exit.1), (mid_x, entry.1), entry];
                     }
                 }
@@ -706,6 +832,312 @@ impl LayeredGraph {
             }
         }
 
+        // 7. Route Cross-Boundary Inter-Group Edges
+        #[derive(Debug, Clone, Copy)]
+        #[allow(dead_code)]
+        struct NodeAnchor {
+            x: f64,
+            y: f64,
+            width: f64,
+            height: f64,
+            center_x: f64,
+            center_y: f64,
+            is_inside_subgraph: bool,
+        }
+
+        let mut all_node_anchors: HashMap<String, NodeAnchor> = HashMap::new();
+        let mut node_to_composite_group: HashMap<String, String> = HashMap::new();
+
+        // 1. Top-level nodes (leaf nodes and composite containers)
+        for node in nodes.values() {
+            let (anchor_y, anchor_h) = if node.shape == "uml_class" && !node.members.is_empty() {
+                (node.y, 32.0)
+            } else {
+                (node.y, node.height)
+            };
+
+            all_node_anchors.insert(
+                node.id.clone(),
+                NodeAnchor {
+                    x: node.x,
+                    y: anchor_y,
+                    width: node.width,
+                    height: anchor_h,
+                    center_x: node.x + node.width / 2.0,
+                    center_y: anchor_y + anchor_h / 2.0,
+                    is_inside_subgraph: false,
+                },
+            );
+
+            if node.shape == "uml_class" {
+                let row_h = 22.0;
+                for (idx, member) in node.members.iter().enumerate() {
+                    let member_y = node.y + 32.0 + 11.0 + (idx as f64) * row_h;
+                    let member_x = node.x + 8.0;
+                    let member_w = ((member.label.len() as f64) * 7.5 + 14.0).max(48.0);
+                    all_node_anchors.insert(
+                        member.id.clone(),
+                        NodeAnchor {
+                            x: member_x,
+                            y: member_y - 10.0,
+                            width: member_w,
+                            height: 20.0,
+                            center_x: member_x + member_w / 2.0,
+                            center_y: member_y,
+                            is_inside_subgraph: false,
+                        },
+                    );
+                }
+            }
+
+            // 2. Resolve internal child nodes within composite subgraphs
+            if let Some(ref sub) = node.embedded_subgraph {
+                let sub_dim = crate::layout::poly::parse_svg_dimensions(&sub.svg);
+                let sub_x = node.x + (node.width - sub_dim.0).max(0.0) / 2.0;
+                let sub_y = node.y + 44.0;
+
+                for (child_id, bounds) in &sub.node_bounds {
+                    let abs_x = sub_x + bounds.x;
+                    let abs_y = sub_y + bounds.y;
+                    all_node_anchors.insert(
+                        child_id.clone(),
+                        NodeAnchor {
+                            x: abs_x,
+                            y: abs_y,
+                            width: bounds.width,
+                            height: bounds.height,
+                            center_x: abs_x + bounds.width / 2.0,
+                            center_y: abs_y + bounds.height / 2.0,
+                            is_inside_subgraph: true,
+                        },
+                    );
+                    node_to_composite_group.insert(child_id.clone(), node.id.clone());
+                }
+            }
+        }
+
+        let center_x = if !nodes.is_empty() {
+            nodes.values().map(|n| n.x + n.width / 2.0).sum::<f64>() / (nodes.len() as f64)
+        } else {
+            300.0
+        };
+        let min_canvas_x = nodes.values().map(|n| n.x).fold(center_x, f64::min);
+        let max_canvas_x = nodes.values().map(|n| n.x + n.width).fold(center_x, f64::max);
+        let gutter_left = (min_canvas_x - 70.0).max(40.0);
+        let gutter_right = max_canvas_x + 70.0;
+
+        let mut cross_boundary_idx = 0usize;
+        for e in &raw_edges {
+            if e.parent.as_ref().map_or(false, |p| composite_group_names.contains(p)) {
+                continue;
+            }
+            let grp_left = node_to_composite_group.get(&e.left);
+            let grp_right = node_to_composite_group.get(&e.right);
+
+            // Skip internal edges where BOTH endpoints belong to the same composite group
+            if grp_left.is_some() && grp_left == grp_right {
+                continue;
+            }
+
+            let is_source_seq = all_node_anchors.contains_key(&format!("{}-bottom", e.left));
+            let is_target_seq = all_node_anchors.contains_key(&format!("{}-bottom", e.right));
+
+            let u_anchor = if is_source_seq {
+                all_node_anchors.get(&format!("{}-bottom", e.left))
+            } else {
+                all_node_anchors.get(&e.left)
+            };
+            let v_anchor = all_node_anchors.get(&e.right);
+
+            let (u_anchor, v_anchor) = match (u_anchor, v_anchor) {
+                (Some(a), Some(b)) => (*a, *b),
+                _ => continue,
+            };
+
+            let is_cross = u_anchor.is_inside_subgraph || v_anchor.is_inside_subgraph;
+            if !is_cross {
+                continue;
+            }
+
+            cross_boundary_idx += 1;
+            let stagger = ((cross_boundary_idx - 1) % 4) as f64 * 16.0;
+
+            // Obstacle collision avoidance: count horizontal entry/exit segment intersections with intermediate nodes
+            let collides_h = |x_start: f64, x_end: f64, y: f64| -> usize {
+                let min_x = x_start.min(x_end);
+                let max_x = x_start.max(x_end);
+                let mut count = 0;
+                for (id, a) in &all_node_anchors {
+                    if id == &e.left || id == &e.right || id == &format!("{}-bottom", e.left) || id == &format!("{}-bottom", e.right) {
+                        continue;
+                    }
+                    // Skip containers that physically enclose the endpoints
+                    let is_enclosing_u = a.x <= u_anchor.x + 1.0
+                        && a.x + a.width >= u_anchor.x + u_anchor.width - 1.0
+                        && a.y <= u_anchor.y + 1.0
+                        && a.y + a.height >= u_anchor.y + u_anchor.height - 1.0;
+                    let is_enclosing_v = a.x <= v_anchor.x + 1.0
+                        && a.x + a.width >= v_anchor.x + v_anchor.width - 1.0
+                        && a.y <= v_anchor.y + 1.0
+                        && a.y + a.height >= v_anchor.y + v_anchor.height - 1.0;
+                    if is_enclosing_u || is_enclosing_v {
+                        continue;
+                    }
+
+                    // Skip internal members/children enclosed by u_anchor or v_anchor
+                    let is_inside_u = a.x >= u_anchor.x - 1.0
+                        && a.x + a.width <= u_anchor.x + u_anchor.width + 1.0
+                        && a.y >= u_anchor.y - 1.0
+                        && a.y + a.height <= u_anchor.y + u_anchor.height + 1.0;
+                    let is_inside_v = a.x >= v_anchor.x - 1.0
+                        && a.x + a.width <= v_anchor.x + v_anchor.width + 1.0
+                        && a.y >= v_anchor.y - 1.0
+                        && a.y + a.height <= v_anchor.y + v_anchor.height + 1.0;
+                    if is_inside_u || is_inside_v {
+                        continue;
+                    }
+
+                    if y >= a.y && y <= a.y + a.height {
+                        if max_x > a.x + 2.0 && min_x < a.x + a.width - 2.0 {
+                            count += 1;
+                        }
+                    }
+                }
+                count
+            };
+
+            let u_left_x = if is_source_seq { u_anchor.center_x } else { u_anchor.x };
+            let u_right_x = if is_source_seq { u_anchor.center_x } else { u_anchor.x + u_anchor.width };
+            let v_left_x = if is_target_seq { v_anchor.center_x } else { v_anchor.x };
+            let v_right_x = if is_target_seq { v_anchor.center_x } else { v_anchor.x + v_anchor.width };
+
+            let left_collisions = collides_h(gutter_left, u_left_x, u_anchor.center_y)
+                + collides_h(gutter_left, v_left_x, v_anchor.center_y);
+            let right_collisions = collides_h(u_right_x, gutter_right, u_anchor.center_y)
+                + collides_h(v_right_x, gutter_right, v_anchor.center_y);
+
+            let use_right = if left_collisions != right_collisions {
+                left_collisions > right_collisions
+            } else {
+                (u_anchor.center_x + v_anchor.center_x) / 2.0 >= center_x
+            };
+
+            let gutter_x = if use_right {
+                gutter_right + 20.0 + stagger
+            } else {
+                gutter_left - 20.0 - stagger
+            };
+
+            let u_collides = if !is_source_seq {
+                if use_right {
+                    collides_h(u_anchor.x + u_anchor.width, gutter_right, u_anchor.center_y) > 0
+                } else {
+                    collides_h(gutter_left, u_anchor.x, u_anchor.center_y) > 0
+                }
+            } else {
+                false
+            };
+
+            let v_collides = if !is_target_seq {
+                if use_right {
+                    collides_h(v_anchor.x + v_anchor.width, gutter_right, v_anchor.center_y) > 0
+                } else {
+                    collides_h(gutter_left, v_anchor.x, v_anchor.center_y) > 0
+                }
+            } else {
+                false
+            };
+
+            let y_start_h = if is_source_seq {
+                u_anchor.y + u_anchor.height + 16.0
+            } else if u_collides {
+                if v_anchor.center_y < u_anchor.center_y {
+                    u_anchor.y - 14.0
+                } else {
+                    u_anchor.y + u_anchor.height + 14.0
+                }
+            } else {
+                u_anchor.center_y
+            };
+
+            let y_end_h = if is_target_seq {
+                v_anchor.y - 16.0
+            } else if v_collides {
+                if u_anchor.center_y < v_anchor.center_y {
+                    v_anchor.y - 14.0
+                } else {
+                    v_anchor.y + v_anchor.height + 14.0
+                }
+            } else {
+                v_anchor.center_y
+            };
+
+            let p_start = if is_source_seq {
+                (u_anchor.center_x, u_anchor.y + u_anchor.height)
+            } else if u_collides {
+                (u_anchor.center_x, if v_anchor.center_y < u_anchor.center_y { u_anchor.y } else { u_anchor.y + u_anchor.height })
+            } else if use_right {
+                (u_anchor.x + u_anchor.width, u_anchor.center_y)
+            } else {
+                (u_anchor.x, u_anchor.center_y)
+            };
+
+            let p_end = if is_target_seq {
+                (v_anchor.center_x, v_anchor.y)
+            } else if v_collides {
+                (v_anchor.center_x, if u_anchor.center_y < v_anchor.center_y { v_anchor.y } else { v_anchor.y + v_anchor.height })
+            } else if use_right {
+                (v_anchor.x + v_anchor.width, v_anchor.center_y)
+            } else {
+                (v_anchor.x, v_anchor.center_y)
+            };
+
+            let mut points = Vec::new();
+            points.push(p_start);
+            if is_source_seq || u_collides {
+                points.push((u_anchor.center_x, y_start_h));
+            }
+            points.push((gutter_x, y_start_h));
+            points.push((gutter_x, y_end_h));
+            if is_target_seq || v_collides {
+                points.push((v_anchor.center_x, y_end_h));
+            }
+            points.push(p_end);
+
+            let is_inh = e.edge_type.contains('<') || e.edge_type.contains('>');
+            edges.push(LayeredEdge {
+                from: e.left.clone(),
+                to: e.right.clone(),
+                label: e.label.clone(),
+                edge_type: e.edge_type.clone(),
+                color: e.color.clone().or_else(|| Some("#38bdf8".to_string())),
+                textcolor: e.textcolor.clone().or_else(|| canvas.defaults.edgetextcolor.clone()),
+                points,
+                is_inheritance: is_inh,
+                left_arrow: e.left_arrow_type(),
+                right_arrow: e.right_arrow_type(),
+                line_type: e.line_type().to_string(),
+                is_cross_boundary: true,
+            });
+        }
+
+        // Auto-shift canvas right if any edge points extended into the left margin
+        let min_pt_x = edges.iter().flat_map(|e| e.points.iter().map(|p| p.0)).fold(16.0, f64::min);
+        if min_pt_x < 16.0 {
+            let shift_x = 16.0 - min_pt_x;
+            for node in nodes.values_mut() {
+                node.x += shift_x;
+            }
+            for grp in &mut groups {
+                grp.x += shift_x;
+            }
+            for edge in &mut edges {
+                for pt in &mut edge.points {
+                    pt.0 += shift_x;
+                }
+            }
+        }
+
         // Calculate total canvas bounds
         let max_node_x = nodes.values().map(|n| n.x + n.width).fold(300.0, f64::max);
         let max_grp_x = groups.iter().map(|g| g.x + g.width).fold(300.0, f64::max);
@@ -715,7 +1147,12 @@ impl LayeredGraph {
         let max_grp_y = groups.iter().map(|g| g.y + g.height).fold(200.0, f64::max);
         let max_y = max_node_y.max(max_grp_y);
 
-        let total_w = max_x + margin_x;
+        let max_gutter_x = if cross_boundary_idx > 0 {
+            gutter_right + 60.0 + (cross_boundary_idx as f64) * 16.0
+        } else {
+            max_x
+        };
+        let total_w = max_x.max(max_gutter_x) + margin_x;
         let total_h = max_y + margin_y;
 
         Self {
@@ -792,6 +1229,9 @@ impl LayeredGraph {
     <!-- Arrowhead markers -->
     <marker id="dl-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="{}" />
+    </marker>
+    <marker id="dl-arrow-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#38bdf8" />
     </marker>
     <marker id="dl-arrow-inheritance" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
       <polygon points="0,1 12,6 0,11" fill="#ffffff" stroke="{}" stroke-width="1.5" />
@@ -899,7 +1339,7 @@ impl LayeredGraph {
         // 1. Render Edges
         svg.push_str("  <!-- Edges -->\n  <g class=\"dl-edges-group\">\n");
         for edge in &self.edges {
-            if edge.points.len() < 2 {
+            if edge.is_cross_boundary || edge.points.len() < 2 {
                 continue;
             }
             let edge_color = edge.color.as_deref().unwrap_or(default_edge_stroke);
@@ -984,6 +1424,47 @@ impl LayeredGraph {
             styler.render_node(node, default_node_fill, Some(&self.type_registry), &mut svg);
         }
         svg.push_str("  </g>\n\n");
+
+        // 3. Render Cross-Boundary Inter-Group Edges (on top layer so lines & arrowheads entering containers are crisp)
+        let cross_edges: Vec<&LayeredEdge> = self.edges.iter().filter(|e| e.is_cross_boundary).collect();
+        if !cross_edges.is_empty() {
+            svg.push_str("  <!-- Cross-Boundary Inter-Group Edges -->\n  <g class=\"dl-inter-group-edges\">\n");
+            for edge in cross_edges {
+                if edge.points.len() < 2 {
+                    continue;
+                }
+                let stroke = edge.color.as_deref().unwrap_or("#38bdf8");
+                let is_bold = edge.line_type == "bold";
+                let is_dashed = edge.line_type == "dashed";
+                let is_dotted = edge.line_type == "dotted";
+                let dash_attr = if is_dotted {
+                    r#" stroke-dasharray="2,4""#
+                } else if is_dashed {
+                    r#" stroke-dasharray="6,4""#
+                } else {
+                    ""
+                };
+                let stroke_width_attr = if is_bold { " stroke-width=\"3.0\"" } else { " stroke-width=\"2.0\"" };
+
+                let mut path_d = String::new();
+                for (i, pt) in edge.points.iter().enumerate() {
+                    if i == 0 {
+                        path_d.push_str(&format!("M {:.1} {:.1}", pt.0, pt.1));
+                    } else {
+                        path_d.push_str(&format!(" L {:.1} {:.1}", pt.0, pt.1));
+                    }
+                }
+
+                svg.push_str(&format!(
+                    r#"    <path d="{}" class="dl-edge-path dl-cross-edge" fill="none" stroke="{}"{}{}{} marker-end="url(#dl-arrow-active)" />
+"#,
+                    path_d, stroke, dash_attr, stroke_width_attr, ""
+                ));
+
+                styler.render_edge_label(edge, &mut svg);
+            }
+            svg.push_str("  </g>\n\n");
+        }
         svg.push_str("</svg>\n");
 
         svg

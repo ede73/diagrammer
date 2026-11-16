@@ -22,6 +22,7 @@ impl LayeredStyler for UmlStyler {
             if has_members {
                 out.push_str(&format!(
                     r##"    <g class="dl-node dl-class-node" id="node-{}" filter="url(#dl-shadow)">
+      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="none" opacity="0.0" />
       <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" class="dl-class-box" fill="#0f172a" stroke="{}" />
       <!-- Class Title Header -->
       <path d="M {:.1} {:.1} L {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} L {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Z" fill="{}" />
@@ -30,6 +31,7 @@ impl LayeredStyler for UmlStyler {
       <line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="{}" stroke-width="1" />
 "##,
                     escape_xml(&node.id),
+                    node.x, node.y, node.width, header_h,
                     node.x, node.y, node.width, node.height, stroke_color,
                     node.x, node.y + header_h,
                     node.x, node.y + 4.0,
@@ -42,14 +44,22 @@ impl LayeredStyler for UmlStyler {
                     node.x, node.y + header_h, node.x + node.width, node.y + header_h, stroke_color
                 ));
 
-                let mut member_y = node.y + header_h + 14.0;
-                for member in &node.members {
+                let row_h = 22.0;
+                for (idx, member) in node.members.iter().enumerate() {
+                    let member_y = node.y + header_h + 11.0 + (idx as f64) * row_h;
+                    let row_y = member_y - 10.0;
+                    let member_x = node.x + 8.0;
+                    let member_w = ((member.label.len() as f64) * 7.5 + 14.0).max(48.0);
                     out.push_str(&format!(
-                        r#"      <text x="{:.1}" y="{:.1}" class="dl-class-member">{}</text>
-"#,
-                        node.x + 12.0, member_y, escape_xml(member)
+                        r##"      <g class="dl-node dl-class-member-node" id="node-{}">
+        <rect x="{:.1}" y="{:.1}" width="{:.1}" height="20.0" rx="4.0" ry="4.0" fill="rgba(30, 41, 59, 0.7)" stroke="#334155" stroke-width="1" />
+        <text x="{:.1}" y="{:.1}" class="dl-class-member">{}</text>
+      </g>
+"##,
+                        escape_xml(&member.id),
+                        member_x, row_y, member_w,
+                        member_x + 7.0, member_y, escape_xml(&member.label)
                     ));
-                    member_y += 22.0;
                 }
                 out.push_str("    </g>\n");
             } else {

@@ -576,3 +576,316 @@ fn test_ast_record_generator() {
     assert!(dot.contains("GraphObject"), "Must render GraphObject group/record");
     assert!(dot.contains("GraphRoot"), "Must render GraphRoot group/record");
 }
+
+#[test]
+fn test_state_engine_renders_tcp_and_poly_archetype() {
+    let state_gen = make_generator("state").expect("state generator must exist");
+
+    // 1. Verify state_tcp.txt rendering
+    let input = fs::read_to_string("../../tests/test_inputs/state_tcp.txt")
+        .or_else(|_| fs::read_to_string("tests/test_inputs/state_tcp.txt"))
+        .expect("state_tcp.txt must exist");
+
+    let canvas = AstBuilder::new().build(&input).expect("Failed to parse state_tcp.txt");
+    let svg = state_gen.generate(&canvas);
+
+    assert!(svg.starts_with("<svg"), "State SVG must start with <svg");
+    assert!(svg.contains("</svg>"), "State SVG must close with </svg>");
+    assert!(svg.contains("class=\"diagrammer-state-svg\""), "State SVG must have diagrammer-state-svg class");
+    assert!(svg.contains("class=\"ds-group\""), "State SVG must render phase cluster groups");
+    assert!(svg.contains("Active CLOSE"), "Must render ActiveClose label");
+    assert!(svg.contains("Passive CLOSE"), "Must render PassiveClose label");
+    assert!(svg.contains("ESTABLISHED"), "Must render ESTABLISHED state");
+    assert!(svg.contains("class=\"ds-edge\""), "Must render state transitions");
+    assert!(!svg.contains("NaN"), "Must not have NaN coordinates");
+
+    // 2. Verify Poly-Archetype Composable Subgraph (Sequence embedded inside State group)
+    let poly_input = r#"
+visualizer state
+
+Start > Negotiation > Ready
+
+{Negotiation; Handshake Protocol
+    visualizer native_sequence
+    Client > "SYN" Server
+    Server > "SYN-ACK" Client
+    Client > "ACK" Server
+}
+"#;
+    let poly_canvas = AstBuilder::new().build(poly_input).expect("Failed to build poly-archetype AST");
+    let poly_svg = state_gen.generate(&poly_canvas);
+
+    assert!(poly_svg.contains("class=\"diagrammer-state-svg\""));
+    assert!(poly_svg.contains("class=\"ds-poly-archetype-subgraph\""), "Must render embedded sub-visualizer");
+    assert!(poly_svg.contains("class=\"diagrammer-sequence\""), "Embedded sequence diagram must be rendered inside state SVG");
+    assert!(poly_svg.contains("Client"), "Participant Client must be in embedded sequence");
+    assert!(poly_svg.contains("Server"), "Participant Server must be in embedded sequence");
+    assert!(poly_svg.contains("SYN-ACK"), "Message SYN-ACK must be in embedded sequence");
+}
+
+#[test]
+fn test_state_engine_groups_are_strictly_non_overlapping_and_obstacle_avoiding() {
+    let input = r#"
+visualizer state
+
+Start > Negotiation > Process > Completed
+Start > Completed; EmergencyCancel
+
+{Negotiation; Handshake Protocol
+    visualizer native_sequence
+    Client > "1. SYN" Server
+    Server > "2. SYN-ACK" Client
+    Client > "3. ACK" Server
+}
+
+{Process; Data Processing
+    Task1 > Task2 > Task3
+}
+"#;
+    let canvas = AstBuilder::new().build(input).expect("Failed to build AST");
+    let state_graph = diagrammer_core::layout::state::StateGraph::new(&canvas);
+
+    // 1. Verify all composite nodes have disjoint non-overlapping bounding boxes
+    let composite_nodes: Vec<_> = state_graph.nodes.values().filter(|n| n.is_composite).collect();
+    assert_eq!(composite_nodes.len(), 2, "Expected 2 composite state containers");
+
+    for i in 0..composite_nodes.len() {
+        for j in (i + 1)..composite_nodes.len() {
+            let n1 = composite_nodes[i];
+            let n2 = composite_nodes[j];
+
+            let overlap_x = (n1.x + n1.width).min(n2.x + n2.width) - n1.x.max(n2.x);
+            let overlap_y = (n1.y + n1.height).min(n2.y + n2.height) - n1.y.max(n2.y);
+
+            assert!(
+                overlap_x <= 0.0 || overlap_y <= 0.0,
+                "Composite groups '{}' and '{}' must never overlap! Overlap: ({:.1}, {:.1})",
+                n1.id, n2.id, overlap_x, overlap_y
+            );
+        }
+    }
+
+    // 2. Verify bypass edge Start > Completed routes via gutter around intermediate obstacles
+    let cancel_edge = state_graph.edges.iter().find(|e| e.from == "Start" && e.to == "Completed")
+        .expect("Bypass edge Start > Completed must exist");
+    
+    // It must route via gutter around the obstacles
+    assert!(cancel_edge.path_d.contains(" L "), "Bypass edge must detour via gutter");
+    let negotiation_node = state_graph.nodes.get("Negotiation").unwrap();
+    let mid_x = negotiation_node.x + negotiation_node.width / 2.0;
+    let mid_y = negotiation_node.y + negotiation_node.height / 2.0;
+    assert!(
+        !cancel_edge.path_d.contains(&format!("L {:.1} {:.1}", mid_x, mid_y)),
+        "Router must avoid slicing through Negotiation composite container"
+    );
+}
+
+#[test]
+fn test_universal_poly_archetype_nesting_and_layered_subgraphs() {
+    use diagrammer_core::builder::AstBuilder;
+    use diagrammer_core::generators::make_generator;
+
+    // 1. Layered DAG hosting Sequence and Tree subgraphs
+    let layered_poly_input = r#"
+visualizer layered
+
+StartNode > AuthSequence > DataProcessingTree > FinishNode
+
+{AuthSequence; Authentication Handshake
+    visualizer native_sequence
+    Client > "1. SYN" Server
+    Server > "2. SYN-ACK" Client
+    Client > "3. ACK" Server
+}
+
+{DataProcessingTree; Decision & Routing Hierarchy
+    visualizer tree
+    Router > (FastPath, DeepInspection)
+    DeepInspection > (PayloadScanner, Quarantine)
+}
+"#;
+    let canvas1 = AstBuilder::new().build(layered_poly_input).expect("Failed to build AST for layered poly");
+    let layered_gen = make_generator("layered").unwrap();
+    let svg1 = layered_gen.generate(&canvas1);
+
+    assert!(svg1.contains("class=\"diagrammer-layered-svg\""), "Must produce Layered SVG");
+    assert!(svg1.contains("ds-poly-archetype-subgraph"), "Must embed poly-archetype subgraphs");
+    assert!(svg1.contains("1. SYN"), "Must embed native_sequence content");
+    assert!(svg1.contains("PayloadScanner"), "Must embed tree content");
+    assert!(svg1.contains("node-AuthSequence"), "Must contain AuthSequence composite node");
+    assert!(svg1.contains("node-DataProcessingTree"), "Must contain DataProcessingTree composite node");
+
+    // 2. 3-level Fractal Recursive Nesting: state -> layered -> native_sequence
+    let fractal_input = r#"
+visualizer state
+
+Init > CompositePipeline > Terminated
+
+{CompositePipeline; Nested Layered Flowchart
+    visualizer layered
+    
+    IngestStep > AuthGroup > OutputStep
+    
+    {AuthGroup; Embedded Sequence Protocol
+        visualizer native_sequence
+        App > "Token Request" AuthServer
+        AuthServer > "Grant JWT" App
+    }
+}
+"#;
+    let canvas2 = AstBuilder::new().build(fractal_input).expect("Failed to build AST for fractal poly");
+    let state_gen = make_generator("state").unwrap();
+    let svg2 = state_gen.generate(&canvas2);
+
+    assert!(svg2.contains("class=\"diagrammer-state-svg\""), "Must produce State SVG");
+    assert!(svg2.contains("node-CompositePipeline"), "Must contain CompositePipeline state");
+    assert!(svg2.contains("node-AuthGroup"), "Must contain AuthGroup nested layered container");
+    assert!(svg2.contains("Token Request"), "Must embed 3rd-level sequence message");
+}
+
+#[test]
+fn test_all_10_poly_archetype_fixtures_render_cleanly() {
+    use diagrammer_core::builder::AstBuilder;
+    use diagrammer_core::generators::make_generator;
+
+    let poly_fixtures = [
+        "poly_1_layered_sequence_tree.txt",
+        "poly_2_state_sequence_dag.txt",
+        "poly_3_state_grid_tree.txt",
+        "poly_4_layered_force_state.txt",
+        "poly_5_fractal_3level.txt",
+        "poly_6_layered_grid_sequence.txt",
+        "poly_7_state_uml_sequence.txt",
+        "poly_8_layered_tree_state.txt",
+        "poly_9_state_swarm_pipeline.txt",
+        "poly_10_layered_swimlane_seq.txt",
+    ];
+
+    for fixture in &poly_fixtures {
+        let fixture_path = format!("../../tests/test_inputs/{}", fixture);
+        let content = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|_| panic!("Failed to read poly fixture {}", fixture_path));
+
+        let canvas = AstBuilder::new()
+            .build(&content)
+            .unwrap_or_else(|e| panic!("Failed to parse AST for {}: {}", fixture, e));
+
+        let viz = canvas.visualizer.as_deref().unwrap_or("layered");
+        let generator = make_generator(viz)
+            .unwrap_or_else(|| panic!("Generator '{}' for fixture {} must exist", viz, fixture));
+
+        let svg = generator.generate(&canvas);
+
+        assert!(svg.starts_with("<svg"), "Fixture {} must output valid SVG starting with <svg", fixture);
+        assert!(svg.contains("</svg>"), "Fixture {} must close with </svg>", fixture);
+        assert!(!svg.contains("NaN"), "Fixture {} must not produce NaN coordinates", fixture);
+        assert!(
+            svg.contains("ds-poly-archetype-subgraph"),
+            "Fixture {} must embed at least one poly-archetype subgraph",
+            fixture
+        );
+    }
+}
+
+#[test]
+fn test_cross_boundary_inter_group_edge_routing() {
+    use diagrammer_core::builder::AstBuilder;
+    use diagrammer_core::generators::make_generator;
+
+    let input_state = r#"
+visualizer state
+ClusterMesh > DataPipeline > Operational
+{ClusterMesh; P2P Topology
+    visualizer force
+    Leader > (Worker1, Worker2)
+    Worker1 > Worker2
+}
+{DataPipeline; Batch Stream
+    visualizer layered
+    Extract > Transform > Load
+}
+Worker1 > Load
+"#;
+
+    let canvas_state = AstBuilder::new().build(input_state).expect("AST build for state inter-group edge");
+    let state_gen = make_generator("state").unwrap();
+    let state_svg = state_gen.generate(&canvas_state);
+
+    assert!(state_svg.contains("class=\"diagrammer-state-svg\""));
+    assert!(state_svg.contains("ds-inter-group-edges"), "State SVG must contain ds-inter-group-edges layer");
+    assert!(state_svg.contains("ds-inter-group-edge"), "State SVG must contain cross-boundary edge path");
+    assert!(state_svg.contains("url(#ds-arrow-active)"), "State SVG must use active arrowhead for inter-group edge");
+    assert!(!state_svg.contains("NaN"), "State SVG must not contain NaN");
+
+    let input_layered = r#"
+visualizer layered
+ClusterMesh > DataPipeline > Operational
+{ClusterMesh; P2P Topology
+    visualizer force
+    Leader > (Worker1, Worker2)
+    Worker1 > Worker2
+}
+{DataPipeline; Batch Stream
+    visualizer layered
+    Extract > Transform > Load
+}
+Worker1 > Load
+"#;
+
+    let canvas_layered = AstBuilder::new().build(input_layered).expect("AST build for layered inter-group edge");
+    let layered_gen = make_generator("layered").unwrap();
+    let layered_svg = layered_gen.generate(&canvas_layered);
+
+    assert!(layered_svg.contains("class=\"diagrammer-layered-svg\""));
+    assert!(layered_svg.contains("dl-inter-group-edges"), "Layered SVG must contain dl-inter-group-edges layer");
+    assert!(layered_svg.contains("dl-cross-edge"), "Layered SVG must contain cross-boundary edge path");
+    assert!(layered_svg.contains("url(#dl-arrow-active)"), "Layered SVG must use active arrowhead for inter-group edge");
+    assert!(!layered_svg.contains("NaN"), "Layered SVG must not contain NaN");
+
+    // Test obstacle avoidance & member anchor alignment:
+    let input_obstacle = r#"
+visualizer state
+DataModel > AuditSync > Committed
+{DataModel; Domain Entities
+    visualizer layered
+    {User; User
+        id; +UUID
+        name; +String
+    }
+}
+{AuditSync; Ledger Exchange
+    visualizer native_sequence
+    Service > "Log" AuditDB
+}
+User > AuditDB
+"#;
+    let canvas_obs = AstBuilder::new().build(input_obstacle).expect("AST build for obstacle test");
+    let obs_svg = state_gen.generate(&canvas_obs);
+    // User > AuditDB should choose the right gutter (x >= 650) to avoid Service on the left
+    assert!(obs_svg.contains("L 700.0") || obs_svg.contains("L 690.0") || obs_svg.contains("L 680.0"), "User > AuditDB must route via right gutter to avoid Service obstacle");
+
+    let input_member = r#"
+visualizer state
+DataModel > AuditSync > Committed
+{DataModel; Domain Entities
+    visualizer layered
+    {User; User
+        id; +UUID
+        name; +String
+    }
+}
+{AuditSync; Ledger Exchange
+    visualizer native_sequence
+    Service > "Log" AuditDB
+}
+id > AuditDB
+"#;
+    let canvas_mem = AstBuilder::new().build(input_member).expect("AST build for member anchor test");
+    let mem_svg = state_gen.generate(&canvas_mem);
+    // Member id (+UUID) should start at y=177.0 (aligned with +UUID row, distinct from User header at y=150.0)
+    assert!(mem_svg.contains("M 380.0 177.0") || mem_svg.contains("177.0"), "id > AuditDB must anchor at member +UUID row");
+}
+
+
+
+

@@ -1,0 +1,14 @@
+visualizer layered
+
+IngressGateway > CoreBanking
+
+{IngressGateway; Edge mTLS
+    visualizer native_sequence
+    Edge > "Verify" Auth
+}
+
+{CoreBanking; Payment Capture
+    visualizer native_sequence
+    PaymentSvc > "Charge" CardNetwork
+}
+

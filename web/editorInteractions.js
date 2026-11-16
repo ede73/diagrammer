@@ -195,7 +195,12 @@ catch (ex) { }
 if (acemode && typeof (ace) !== 'undefined') {
     const editor = getAceEditor();
     if (typeof editor !== 'undefined') {
+        let aceDebounceTimer = null;
         editor.getSession().on('change', function () {
+            if (aceDebounceTimer) clearTimeout(aceDebounceTimer);
+            aceDebounceTimer = setTimeout(() => {
+                parseAndRegenerate();
+            }, 300);
         });
     }
 }

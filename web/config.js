@@ -7,6 +7,7 @@ import { visualizeNativeSequence } from './visualizations/visualizeNativeSequenc
 import { visualizeLayered } from './visualizations/visualizeLayered.js';
 import { visualizeTree } from './visualizations/visualizeTree.js';
 import { visualizeGrid } from './visualizations/visualizeGrid.js';
+import { visualizeState } from './visualizations/visualizeState.js';
 import { visualizeForce } from './visualizations/visualizeForce.js';
 import { visualizeMermaid } from './visualizations/visualizeMermaid.js';
 export class Visualization {
@@ -113,6 +114,7 @@ const _visualizations = [
     new Visualization('tree', 'Diagrammer: Tree / Dendrogram [WASM]', 'tree', visualizeTree, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency tree and radial dendrogram engine' }),
     new Visualization('network_bus', 'Diagrammer: Network Bus [WASM]', 'grid', visualizeGrid, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency network architecture and multi-subnet bus engine' }),
     new Visualization('grid', 'Diagrammer: 2D Matrix Grid [WASM]', 'grid', visualizeGrid, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency 2D matrix grid engine' }),
+    new Visualization('state', 'Diagrammer: State Machine [WASM]', 'state', visualizeState, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency state machine & lifecycle engine' }),
     new Visualization('force', 'Diagrammer: Force-Directed Physics [WASM]', 'force', visualizeForce, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency spring-electrical physics simulation engine' }),
 
     new Visualization('mermaid', 'Mermaid: Flowchart', 'mermaid', async (g) => {

@@ -317,9 +317,6 @@ fn test_pure_rust_browser_mermaid_rendering() {
 
     tab.evaluate(eval_code, true).expect("Failed to trigger mermaid render");
 
-    // Give in-browser mermaid client a moment to finish asynchronous DOM rendering
-    std::thread::sleep(std::time::Duration::from_millis(500));
-
     let check_svg = r##"
         (() => {
             const svg = document.querySelector("#diagrammer-graph svg");
@@ -327,8 +324,18 @@ fn test_pure_rust_browser_mermaid_rendering() {
         })()
     "##;
 
-    let res = tab.evaluate(check_svg, false).expect("Failed to inspect mermaid SVG");
-    assert_eq!(res.value.and_then(|v| v.as_bool()).unwrap_or(false), true, "Expected in-browser mermaid SVG in DOM");
+    let start = std::time::Instant::now();
+    let mut rendered = false;
+    while start.elapsed() < std::time::Duration::from_secs(4) {
+        if let Ok(res) = tab.evaluate(check_svg, false) {
+            if res.value.and_then(|v| v.as_bool()).unwrap_or(false) {
+                rendered = true;
+                break;
+            }
+        }
+        std::thread::sleep(std::time::Duration::from_millis(100));
+    }
+    assert!(rendered, "Expected in-browser mermaid SVG in DOM");
 
     println!("Pure Rust browser test 6 passed: in-browser Mermaid SVG rendering verified.");
 }

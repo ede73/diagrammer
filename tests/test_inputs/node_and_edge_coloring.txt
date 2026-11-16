@@ -5,16 +5,15 @@ d#00ff00;Green
 e>f
 g>#ff00ffh
 i#ffff00>j
-k>l;moro
-
+k>l;Link with label
 
 za
 zb#ff0000
 zc;zb red
-zd#00ff00;this is greeen
+zd#00ff00;Green node
 ze>#772222f
 zg>#ff00ffh
 zi#ffff00>#aaaaaaj
-zk>#f0f0f0l;moro
+zk>#f0f0f0l;Subnode link
 
 

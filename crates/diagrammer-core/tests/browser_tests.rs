@@ -814,4 +814,69 @@ fn test_pure_rust_browser_user_can_override_generator_selection() {
     println!("Pure Rust browser test passed: User generator selection overrides in-diagram hints successfully.");
 }
 
+#[test]
+fn test_pure_rust_browser_clipboard_copy_paste() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => {
+            eprintln!("Skipping pure Rust browser test: no Chrome/Chromium binary found");
+            return;
+        }
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate to Diagrammer");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor not found");
+
+    let eval_script = r##"
+        (async () => {
+            window.setGraphText("Alpha > Beta > Gamma");
+            await new Promise(r => setTimeout(r, 200));
+
+            const ed = window.editor;
+            if (!ed) return JSON.stringify({ error: "No editor" });
+
+            // 1. Test getCopyText
+            ed.selectAll();
+            const selected = ed.getCopyText();
+
+            // 2. Test inserting text (as clipboard paste does)
+            ed.setValue("Original", 1);
+            ed.navigateFileEnd();
+            ed.insert(" > Pasted");
+            const afterPaste = ed.getValue();
+
+            // 3. Test cut (copy + replace selection)
+            ed.selectAll();
+            const cutText = ed.getCopyText();
+            ed.insert("");
+            const afterCut = ed.getValue();
+
+            // 4. Test paste back
+            ed.insert(cutText);
+            const afterRestore = ed.getValue();
+
+            return JSON.stringify({
+                selected,
+                afterPaste,
+                afterCut,
+                afterRestore
+            });
+        })()
+    "##;
+
+    let res = tab.evaluate(eval_script, true).expect("Failed evaluating clipboard test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("selected").and_then(|v| v.as_str()), Some("Alpha > Beta > Gamma"));
+    assert_eq!(val.get("afterPaste").and_then(|v| v.as_str()), Some("Original > Pasted"));
+    assert_eq!(val.get("afterCut").and_then(|v| v.as_str()), Some(""));
+    assert_eq!(val.get("afterRestore").and_then(|v| v.as_str()), Some("Original > Pasted"));
+
+    println!("Pure Rust browser test passed: Editor clipboard copy/cut/paste verified.");
+}
+
+
 

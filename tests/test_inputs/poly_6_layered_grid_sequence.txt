@@ -14,3 +14,7 @@ WarehouseGrid > DispatchProtocol
     Station > "Ack" Robot
 }
 
+Bay1 > Station
+Station > Bay1
+
+

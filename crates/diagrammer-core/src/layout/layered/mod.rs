@@ -848,47 +848,45 @@ impl LayeredGraph {
         let mut all_node_anchors: HashMap<String, NodeAnchor> = HashMap::new();
         let mut node_to_composite_group: HashMap<String, String> = HashMap::new();
 
-        // 1. Top-level leaf nodes (excluding composite containers which are hosts)
+        // 1. Top-level nodes (leaf nodes and composite containers)
         for node in nodes.values() {
-            if node.embedded_subgraph.is_none() {
-                let (anchor_y, anchor_h) = if node.shape == "uml_class" && !node.members.is_empty() {
-                    (node.y, 32.0)
-                } else {
-                    (node.y, node.height)
-                };
+            let (anchor_y, anchor_h) = if node.shape == "uml_class" && !node.members.is_empty() {
+                (node.y, 32.0)
+            } else {
+                (node.y, node.height)
+            };
 
-                all_node_anchors.insert(
-                    node.id.clone(),
-                    NodeAnchor {
-                        x: node.x,
-                        y: anchor_y,
-                        width: node.width,
-                        height: anchor_h,
-                        center_x: node.x + node.width / 2.0,
-                        center_y: anchor_y + anchor_h / 2.0,
-                        is_inside_subgraph: false,
-                    },
-                );
+            all_node_anchors.insert(
+                node.id.clone(),
+                NodeAnchor {
+                    x: node.x,
+                    y: anchor_y,
+                    width: node.width,
+                    height: anchor_h,
+                    center_x: node.x + node.width / 2.0,
+                    center_y: anchor_y + anchor_h / 2.0,
+                    is_inside_subgraph: false,
+                },
+            );
 
-                if node.shape == "uml_class" {
-                    let row_h = 22.0;
-                    for (idx, member) in node.members.iter().enumerate() {
-                        let member_y = node.y + 32.0 + 11.0 + (idx as f64) * row_h;
-                        let member_x = node.x + 8.0;
-                        let member_w = ((member.label.len() as f64) * 7.5 + 14.0).max(48.0);
-                        all_node_anchors.insert(
-                            member.id.clone(),
-                            NodeAnchor {
-                                x: member_x,
-                                y: member_y - 10.0,
-                                width: member_w,
-                                height: 20.0,
-                                center_x: member_x + member_w / 2.0,
-                                center_y: member_y,
-                                is_inside_subgraph: false,
-                            },
-                        );
-                    }
+            if node.shape == "uml_class" {
+                let row_h = 22.0;
+                for (idx, member) in node.members.iter().enumerate() {
+                    let member_y = node.y + 32.0 + 11.0 + (idx as f64) * row_h;
+                    let member_x = node.x + 8.0;
+                    let member_w = ((member.label.len() as f64) * 7.5 + 14.0).max(48.0);
+                    all_node_anchors.insert(
+                        member.id.clone(),
+                        NodeAnchor {
+                            x: member_x,
+                            y: member_y - 10.0,
+                            width: member_w,
+                            height: 20.0,
+                            center_x: member_x + member_w / 2.0,
+                            center_y: member_y,
+                            is_inside_subgraph: false,
+                        },
+                    );
                 }
             }
 

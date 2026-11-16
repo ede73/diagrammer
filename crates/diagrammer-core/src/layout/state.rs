@@ -618,22 +618,20 @@ impl StateGraph {
         let mut all_node_anchors: HashMap<String, NodeAnchor> = HashMap::new();
         let mut node_to_composite_group: HashMap<String, String> = HashMap::new();
 
-        // 1. Top-level leaf nodes (excluding composite containers which are hosts)
+        // 1. Top-level nodes (both leaf states and composite containers)
         for node in nodes.values() {
-            if !node.is_composite {
-                all_node_anchors.insert(
-                    node.id.clone(),
-                    NodeAnchor {
-                        x: node.x,
-                        y: node.y,
-                        width: node.width,
-                        height: node.height,
-                        center_x: node.x + node.width / 2.0,
-                        center_y: node.y + node.height / 2.0,
-                        is_inside_subgraph: false,
-                    },
-                );
-            }
+            all_node_anchors.insert(
+                node.id.clone(),
+                NodeAnchor {
+                    x: node.x,
+                    y: node.y,
+                    width: node.width,
+                    height: node.height,
+                    center_x: node.x + node.width / 2.0,
+                    center_y: node.y + node.height / 2.0,
+                    is_inside_subgraph: false,
+                },
+            );
 
             // 2. Resolve internal child nodes within composite subgraphs
             if let Some(ref sub) = node.composite_subgraph {

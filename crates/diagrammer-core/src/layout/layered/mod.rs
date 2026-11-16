@@ -874,14 +874,16 @@ impl LayeredGraph {
                     let row_h = 22.0;
                     for (idx, member) in node.members.iter().enumerate() {
                         let member_y = node.y + 32.0 + 11.0 + (idx as f64) * row_h;
+                        let member_x = node.x + 8.0;
+                        let member_w = ((member.label.len() as f64) * 7.5 + 14.0).max(48.0);
                         all_node_anchors.insert(
                             member.id.clone(),
                             NodeAnchor {
-                                x: node.x,
-                                y: member_y - 11.0,
-                                width: node.width,
-                                height: row_h,
-                                center_x: node.x + node.width / 2.0,
+                                x: member_x,
+                                y: member_y - 10.0,
+                                width: member_w,
+                                height: 20.0,
+                                center_x: member_x + member_w / 2.0,
                                 center_y: member_y,
                                 is_inside_subgraph: false,
                             },

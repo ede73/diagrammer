@@ -462,6 +462,17 @@ impl AstBuilder {
         set_in_list(&mut self.canvas.objects, name, &dest);
     }
 
+    pub fn get_active_scope_prefix(&self) -> String {
+        let mut prefix = String::new();
+        for grp in &self.group_stack {
+            if grp.is_scoped {
+                prefix.push_str(&grp.name);
+                prefix.push('!');
+            }
+        }
+        prefix
+    }
+
     fn ensure_vertex_exists(&mut self, name: &str) {
         if !self.object_exists(name) {
             self.noedges.insert(name.to_string());
@@ -800,10 +811,19 @@ impl AstBuilder {
                 let mut name = None;
                 let mut raw_label = None;
                 let mut color = None;
+                let mut is_scoped = pair.as_str().contains('!');
 
                 for p in pair.into_inner() {
                     match p.as_rule() {
-                        Rule::NAME => name = Some(p.as_str().trim().to_string()),
+                        Rule::NAME => {
+                            let raw = p.as_str().trim();
+                            if raw.starts_with('!') {
+                                is_scoped = true;
+                                name = Some(raw.trim_start_matches('!').to_string());
+                            } else {
+                                name = Some(raw.to_string());
+                            }
+                        }
                         Rule::LABEL => {
                             raw_label = Some(p.as_str().to_string());
                         }
@@ -821,12 +841,15 @@ impl AstBuilder {
                 });
 
                 let mut group = GraphGroup::new(&group_name);
+                group.is_scoped = is_scoped;
                 if let Some(lbl) = raw_label {
                     let dest = self.destructure_label(&lbl);
                     group.label = dest.label;
                     if dest.textcolor.is_some() {
                         group.textcolor = dest.textcolor;
                     }
+                } else if is_scoped {
+                    group.label = Some(group_name.clone());
                 }
                 group.color = color.or_else(|| self.find_default_groupcolor());
                 let exit_id = self.context.container_exit.unwrap_or(1);
@@ -1232,8 +1255,16 @@ impl AstBuilder {
         match pair.as_rule() {
             Rule::inner_graph => {}
             Rule::NAME => {
+                let mut name = pair.as_str().trim().to_string();
+                let mut label = None;
+                let active_scope = self.get_active_scope_prefix();
+                if !active_scope.is_empty() && !name.contains('!') {
+                    label = Some(name.clone());
+                    name = format!("{}{}", active_scope, name);
+                }
                 targets.push(ParsedVertex {
-                    name: pair.as_str().trim().to_string(),
+                    name,
+                    label,
                     ..Default::default()
                 });
             }
@@ -1319,7 +1350,14 @@ impl AstBuilder {
                     *custom_type_name = Some(ct);
                 }
                 Rule::NAME => {
-                    let n = p.as_str().trim().to_string();
+                    let mut n = p.as_str().trim().to_string();
+                    let active_scope = self.get_active_scope_prefix();
+                    if !active_scope.is_empty() && !n.contains('!') {
+                        if pv.label.is_none() {
+                            pv.label = Some(n.clone());
+                        }
+                        n = format!("{}{}", active_scope, n);
+                    }
                     pv.name = n.clone();
                     *parsed_name = Some(n);
                 }
@@ -2168,5 +2206,59 @@ Start > Flow > End
 
         assert_eq!(group.visualizer.as_deref(), Some("native_sequence"));
         assert_eq!(group.label.as_deref(), Some("Protocol Subsystem"));
+    }
+
+    #[test]
+    fn test_scoped_group_hierarchical_member_names() {
+        let input = r#"
+{!Person;Person
+  name;+String
+  birth;#Date
+}
+
+{!Course;Course
+  name;+String
+  credits;int
+}
+
+{!Org;Organization
+  {!Meta;Metadata
+    name;+String
+  }
+}
+
+User > Person!name
+Admin > Org!Meta!name
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST with scoped groups");
+
+        // Verify Person!name and Course!name both exist independently without collision
+        let flattened = canvas.get_flattened_vertices();
+        assert!(flattened.iter().any(|v| v.get_name() == "Person!name"), "Person!name must exist in canvas");
+        assert!(flattened.iter().any(|v| v.get_name() == "Course!name"), "Course!name must exist in canvas");
+        assert!(flattened.iter().any(|v| v.get_name() == "Org!Meta!name"), "Nested Org!Meta!name must exist in canvas");
+
+        // Verify Person group has Person!name in its members
+        let person_grp = canvas.objects.iter().find_map(|o| match o {
+            GraphObject::Group(g) if g.name == "Person" => Some(g),
+            _ => None,
+        }).expect("Person group must exist");
+        assert_eq!(person_grp.label.as_deref(), Some("Person"));
+        let person_has_member = person_grp.objects.iter().any(|o| o.get_name() == "Person!name");
+        assert!(person_has_member, "Person group must contain Person!name member");
+
+        // Verify Course group has Course!name
+        let course_grp = canvas.objects.iter().find_map(|o| match o {
+            GraphObject::Group(g) if g.name == "Course" => Some(g),
+            _ => None,
+        }).expect("Course group must exist");
+        assert_eq!(course_grp.label.as_deref(), Some("Course"));
+        let course_has_member = course_grp.objects.iter().any(|o| o.get_name() == "Course!name");
+        assert!(course_has_member, "Course group must contain Course!name member");
+
+        // Verify edges to scoped names exist
+        let edges = canvas.get_edges();
+        assert!(edges.iter().any(|e| e.left == "User" && e.right == "Person!name"), "Edge User > Person!name must exist");
+        assert!(edges.iter().any(|e| e.left == "Admin" && e.right == "Org!Meta!name"), "Edge Admin > Org!Meta!name must exist");
     }
 }

@@ -349,6 +349,25 @@ impl SequenceLayoutEngine {
                 let tag_w = (tag_display.chars().count() as f64 * 7.5 + 16.0).max(48.0);
                 let tag_escaped = escape_xml(&tag_display);
 
+                if frame.kind == "else" {
+                    let dash_y = min_y;
+                    let else_label = if frame.label.is_empty() { "[else]".to_string() } else { format!("[else {}]", frame.label) };
+                    let else_w = (else_label.chars().count() as f64 * 7.0 + 12.0).max(40.0);
+                    svg.push_str(&format!(
+                        r##"    <g class="ds-frame-else">
+      <line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#334155" stroke-dasharray="6,4" stroke-width="1.2" />
+      <rect x="{:.1}" y="{:.1}" width="{:.1}" height="18" fill="#1e293b" rx="3" />
+      <text x="{:.1}" y="{:.1}" fill="#94a3b8" font-size="10" font-family="system-ui, sans-serif">{}</text>
+    </g>
+"##,
+                        frame_left, dash_y, frame_right, dash_y,
+                        frame_left + 8.0, dash_y - 9.0, else_w,
+                        frame_left + 14.0, dash_y + 3.0,
+                        escape_xml(&else_label)
+                    ));
+                    continue;
+                }
+
                 svg.push_str(&format!(
                     r#"    <g class="ds-frame">
       <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" class="ds-frame-box" />
@@ -729,7 +748,7 @@ impl SequenceLayoutEngine {
             if let GraphObject::Group(grp) = obj {
                 let grp_name = &grp.name;
                 if let Some(step_indices) = group_step_map.get(grp_name) {
-                    let (kind, label) = parse_frame_kind_and_label(&grp.name, grp.label.as_deref());
+                    let (kind, label) = parse_frame_kind_and_label(&grp.name, grp.label.as_deref(), grp.conditional.as_deref(), &grp.pseudo_type);
                     frames.push(SequenceFrame {
                         name: grp.name.clone(),
                         label,
@@ -744,7 +763,44 @@ impl SequenceLayoutEngine {
     }
 }
 
-fn parse_frame_kind_and_label(name: &str, label: Option<&str>) -> (String, String) {
+fn parse_frame_kind_and_label(
+    name: &str,
+    label: Option<&str>,
+    conditional: Option<&str>,
+    pseudo_type: &str,
+) -> (String, String) {
+    if let Some(cond) = conditional {
+        match cond {
+            "if" => {
+                let lbl = label.unwrap_or("").trim().to_string();
+                return ("alt".to_string(), lbl);
+            }
+            "elseif" => {
+                let lbl = label.unwrap_or("").trim().to_string();
+                return ("else".to_string(), lbl);
+            }
+            "else" => {
+                let lbl = label.unwrap_or("").trim();
+                let display = if lbl.is_empty() || lbl == "else" { String::new() } else { lbl.to_string() };
+                return ("else".to_string(), display);
+            }
+            _ => {}
+        }
+    }
+
+    if pseudo_type == "GraphLoop" {
+        let raw = label.unwrap_or("").trim();
+        let cleaned = raw
+            .trim_start_matches("while")
+            .trim_start_matches("WHILE")
+            .trim_start_matches("do")
+            .trim_start_matches("DO")
+            .trim_start_matches("until")
+            .trim_start_matches("UNTIL")
+            .trim();
+        return ("loop".to_string(), cleaned.to_string());
+    }
+
     let lower_name = name.to_lowercase();
     let default_kind = if lower_name.starts_with("loop") {
         "loop"
@@ -848,5 +904,30 @@ Server > "Reply" Client
         assert!(svg.contains("ds-activation"));
         assert!(svg.contains("ds-frame-box"));
         assert!(svg.contains("loop: Retry up to 3 times"));
+    }
+
+    #[test]
+    fn test_sequence_control_flow_conditionals_and_loops() {
+        let input = r#"
+Client > "Request" Server
+if cache_hit then
+  Server > "CachedData" Client
+else
+  Server > "QueryDB" DB
+  DB > "Rows" Server
+  Server > "FreshData" Client
+endif
+while retry_needed do
+  Client > "Poll" Server
+endwhile
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST with conditionals");
+        let engine = SequenceLayoutEngine::new();
+        let svg = engine.render_svg(&canvas);
+
+        assert!(svg.contains("alt: cache_hit"), "SVG should have alt frame for if condition");
+        assert!(svg.contains("ds-frame-else"), "SVG should have else divider");
+        assert!(svg.contains("[else]"), "SVG should show else tag");
+        assert!(svg.contains("loop: retry_needed"), "SVG should have loop frame for while block");
     }
 }

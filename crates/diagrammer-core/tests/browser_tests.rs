@@ -596,3 +596,62 @@ fn test_pure_rust_browser_state_tcp_rendering() {
 
     println!("Pure Rust browser test 10 passed: state_tcp verified in browser DOM with CDP screenshot.");
 }
+
+#[test]
+fn test_pure_rust_browser_poly_9_rendering() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor failed to initialize");
+
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let poly9_path = manifest_dir.join("../../tests/test_inputs/poly_9_state_swarm_pipeline.txt");
+    let poly9_code = std::fs::read_to_string(&poly9_path).expect("Failed reading poly_9_state_swarm_pipeline.txt");
+    let poly9_json = serde_json::to_string(&poly9_code).expect("Failed serializing poly9_code");
+
+    let eval_script = format!(r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 300));
+            const stateSvg = document.querySelector("#diagrammer-graph svg.diagrammer-state-svg");
+            const transitions = stateSvg ? stateSvg.querySelectorAll(".ds-edges path.ds-edge") : [];
+            const crossEdges = stateSvg ? stateSvg.querySelectorAll(".ds-inter-group-edges path") : [];
+            return JSON.stringify({{
+                hasStateSvg: stateSvg !== null,
+                transitionCount: transitions.length,
+                crossEdgeCount: crossEdges.length,
+            }});
+        }})()
+    "##, poly9_json);
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating poly_9 in browser");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing evaluation result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON from browser");
+
+    assert_eq!(val.get("hasStateSvg").and_then(|v| v.as_bool()), Some(true), "State SVG must render in DOM");
+    let trans = val.get("transitionCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(trans, 2, "Expected 2 top-level transitions (ClusterMesh>DataPipeline and DataPipeline>Operational), got {}", trans);
+    let cross = val.get("crossEdgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(cross, 1, "Expected 1 cross-boundary edge (Worker1>Load), got {}", cross);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/poly_9_in_browser_proof.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: poly_9 verified in browser DOM with 2 transitions and 1 cross-boundary edge.");
+}
+

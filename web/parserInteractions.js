@@ -31,7 +31,7 @@ function extractScriptVisualizer(diagrammerCode) {
     return match ? match[1].toLowerCase() : null;
 }
 export function parse(diagrammerCode, successCallback, failureCallback, preferScriptSpecifiedVisualizer = false) {
-    if (!isLockHintsEnabled()) {
+    if (preferScriptSpecifiedVisualizer && !isLockHintsEnabled()) {
         const scriptVisualizer = extractScriptVisualizer(diagrammerCode);
         if (scriptVisualizer) {
             setVisualizer(scriptVisualizer);

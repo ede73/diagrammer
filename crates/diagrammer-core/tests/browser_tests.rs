@@ -738,3 +738,80 @@ Station > Bay1
     println!("Pure Rust browser test passed: poly_6 verified in browser DOM with top entry (538.0) and bottom exit (790.0).");
 }
 
+#[test]
+fn test_pure_rust_browser_user_can_override_generator_selection() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => {
+            eprintln!("Skipping pure Rust browser test: no Chrome/Chromium binary found");
+            return;
+        }
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate to Diagrammer");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor not found");
+
+    // Diagram code explicitly contains `generator state`
+    let code = "generator state\na > b > c";
+    let code_json = serde_json::to_string(&code).expect("serialize code");
+
+    let eval_script = format!(r##"
+        (async () => {{
+            window.setGraphText({});
+            // Simulate user selecting 'tree' generator in UI
+            const vizSelect = document.getElementById('diagrammer-visualizer');
+            const groupSelect = document.getElementById('diagrammer-generator-group');
+            // User selects Diagrammer Native > Tree
+            if (groupSelect) {{
+                groupSelect.value = 'Diagrammer Native';
+                if (window.generatorGroupChanged) window.generatorGroupChanged();
+            }}
+            if (vizSelect) {{
+                vizSelect.value = 'tree';
+                if (window.visualizerChanged) window.visualizerChanged();
+            }}
+            await new Promise(r => setTimeout(r, 400));
+
+            const currentViz = window.getSelectedVisualizer ? window.getSelectedVisualizer() : null;
+            const currentGroup = groupSelect ? groupSelect.value : null;
+
+            // Now test selecting Dot
+            if (groupSelect) {{
+                groupSelect.value = 'Graphviz';
+                if (window.generatorGroupChanged) window.generatorGroupChanged();
+            }}
+            if (vizSelect) {{
+                vizSelect.value = 'dot';
+                if (window.visualizerChanged) window.visualizerChanged();
+            }}
+            await new Promise(r => setTimeout(r, 400));
+            const afterDotViz = window.getSelectedVisualizer ? window.getSelectedVisualizer() : null;
+
+            return JSON.stringify({{
+                treeViz: currentViz,
+                dotViz: afterDotViz
+            }});
+        }})()
+    "##, code_json);
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating in browser");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(
+        val.get("treeViz").and_then(|v| v.as_str()),
+        Some("tree"),
+        "User selection of 'tree' must not be reverted by in-diagram 'generator state'"
+    );
+    assert_eq!(
+        val.get("dotViz").and_then(|v| v.as_str()),
+        Some("dot"),
+        "User selection of 'dot' must not be reverted by in-diagram 'generator state'"
+    );
+
+    println!("Pure Rust browser test passed: User generator selection overrides in-diagram hints successfully.");
+}
+
+

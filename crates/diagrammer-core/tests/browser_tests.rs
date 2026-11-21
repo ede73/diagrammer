@@ -1513,6 +1513,71 @@ fn test_pure_rust_browser_state_conditionals_graphviz_rendering() {
     println!("Pure Rust browser test passed: state_conditionals Graphviz DOT rendered fully connected conditional flowchart with clusters and edges.");
 }
 
+#[test]
+fn test_pure_rust_browser_state_images_rendering() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
+
+    let images_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/state_images.txt")
+        .expect("Failed reading state_images.txt");
+    let code_json = serde_json::to_string(&images_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 800));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+            const svg = document.querySelector("#diagrammer-graph svg");
+            const nodes = svg ? svg.querySelectorAll("g.node").length : 0;
+            const edges = svg ? svg.querySelectorAll("g.edge").length : 0;
+            const images = svg ? svg.querySelectorAll("image").length : 0;
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                nodeCount: nodes,
+                edgeCount: edges,
+                imageCount: images,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating state_images test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Graphviz SVG must render in DOM");
+    let nodes = val.get("nodeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(nodes, 21, "Must render exactly 21 nodes, got {}", nodes);
+    let edges = val.get("edgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(edges, 30, "Must render exactly 30 edges across tripartite clusters, got {}", edges);
+    let images = val.get("imageCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(images, 21, "Must render exactly 21 images for all icons, got {}", images);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/state_images_browser_verified.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: state_images rendered complete 21-node, 30-edge image network with icons.");
+}
+
 
 
 

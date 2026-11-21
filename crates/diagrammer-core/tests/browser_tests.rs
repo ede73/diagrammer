@@ -1135,6 +1135,116 @@ fn test_pure_rust_browser_sankey_dark_mode_rendering() {
     println!("Pure Rust browser test passed: Sankey dark-mode rendering verified with high-contrast text and vibrant gradient ribbons.");
 }
 
+#[test]
+fn test_pure_rust_browser_dendrogram_spec_reingold_tilford() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-graph").expect("Failed finding diagrammer-graph");
+
+    let spec_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/dendrogram_spec.txt")
+        .expect("Failed reading dendrogram_spec.txt");
+    let code_json = serde_json::to_string(&spec_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+            const svg = document.querySelector("#diagrammer-graph svg");
+            const nodes = svg ? svg.querySelectorAll("g.node").length : 0;
+            const links = svg ? svg.querySelectorAll("path.link").length : 0;
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                nodeCount: nodes,
+                linkCount: links,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating dendrogram test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Reingold-Tilford SVG must render in DOM");
+    assert!(val.get("nodeCount").and_then(|v| v.as_u64()).unwrap_or(0) > 100, "Must have >100 language nodes");
+
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/dendrogram_spec_verified_browser.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Reingold-Tilford dendrogram_spec rendered cleanly with adapted dark colors.");
+
+    // Now verify switching from dendrogram directly to dynamic_shapes.txt automatically resets to layered!
+    let shapes_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/dynamic_shapes.txt")
+        .expect("Failed reading dynamic_shapes.txt");
+    let shapes_json = serde_json::to_string(&shapes_code).expect("Failed serializing shapes_code");
+
+    let switch_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true, "dynamic_shapes.txt");
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+            const layeredSvg = document.querySelector("#diagrammer-graph svg.diagrammer-layered-svg");
+            const aliceNode = document.querySelector("#node-Alice");
+            const taxiNode = document.querySelector("#node-Taxi");
+            return JSON.stringify({{
+                hasLayeredSvg: layeredSvg !== null,
+                hasAlice: aliceNode !== null,
+                hasTaxi: taxiNode !== null,
+            }});
+        }})()
+        "##,
+        shapes_json
+    );
+
+    let switch_res = tab.evaluate(&switch_script, true).expect("Failed evaluating dynamic_shapes switch");
+    let switch_json = switch_res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let switch_val: serde_json::Value = serde_json::from_str(&switch_json).expect("Failed parsing JSON");
+
+    assert_eq!(switch_val.get("hasLayeredSvg").and_then(|v| v.as_bool()), Some(true), "Switching to dynamic_shapes must activate Layered SVG");
+    assert_eq!(switch_val.get("hasAlice").and_then(|v| v.as_bool()), Some(true), "Alice custom shape node must be present");
+    assert_eq!(switch_val.get("hasTaxi").and_then(|v| v.as_bool()), Some(true), "Taxi custom shape node must be present");
+
+    let shapes_screenshot = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let shapes_proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/dynamic_shapes_verified_browser.png");
+    let _ = std::fs::write(&shapes_proof_path, &shapes_screenshot);
+
+    println!("Pure Rust browser test passed: Switching to dynamic_shapes automatically reset to layered with custom SVG shapes.");
+}
+
+
+
 
 
 

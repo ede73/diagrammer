@@ -386,7 +386,7 @@
           const text = await resp.text();
           setGraphText(text);
           if (window.parseAndRegenerate) {
-            window.parseAndRegenerate(true);
+            window.parseAndRegenerate(true, 'AAA.txt');
           }
           const sel = document.getElementById('diagrammer-example');
           if (sel) sel.value = 'test_inputs/AAA.txt';

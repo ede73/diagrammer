@@ -813,11 +813,19 @@ fn test_all_10_poly_archetype_fixtures_render_cleanly() {
         assert!(svg.starts_with("<svg"), "Fixture {} must output valid SVG starting with <svg", fixture);
         assert!(svg.contains("</svg>"), "Fixture {} must close with </svg>", fixture);
         assert!(!svg.contains("NaN"), "Fixture {} must not produce NaN coordinates", fixture);
-        assert!(
-            svg.contains("ds-poly-archetype-subgraph"),
-            "Fixture {} must embed at least one poly-archetype subgraph",
-            fixture
-        );
+        if fixture.contains("swimlane") {
+            assert!(
+                svg.contains("sw-lanes-group") || svg.contains("diagrammer-swimlane-svg"),
+                "Fixture {} must output swimlane SVG with lane columns",
+                fixture
+            );
+        } else {
+            assert!(
+                svg.contains("ds-poly-archetype-subgraph"),
+                "Fixture {} must embed at least one poly-archetype subgraph",
+                fixture
+            );
+        }
     }
 }
 

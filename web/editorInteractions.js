@@ -126,7 +126,7 @@ export function generatorChanged() {
     setVisualizer(current);
     parseAndRegenerate();
 }
-export function parseAndRegenerate(preferScriptSpecifiedVisualizer = false) {
+export function parseAndRegenerate(preferScriptSpecifiedVisualizer = false, filename = null) {
     let code = getGraphText() + '\n';
     const themeSelect = document.getElementById('diagrammer-theme');
     if (themeSelect && themeSelect.value && themeSelect.value.trim() !== '') {
@@ -138,7 +138,7 @@ export function parseAndRegenerate(preferScriptSpecifiedVisualizer = false) {
     }, (_error, _ex) => {
         clearBeautified();
         console.warn(`  parseAndRegenerate() - Parsing failed :( ${_error}`);
-    }, preferScriptSpecifiedVisualizer);
+    }, preferScriptSpecifiedVisualizer, filename);
 }
 export function savedChanged() {
     const e = getSelectElement('diagrammer-saved');
@@ -149,7 +149,7 @@ export function savedChanged() {
         setGraphText(data[doc]);
         filename.value = doc;
         console.debug('savedChanged..parse');
-        parseAndRegenerate();
+        parseAndRegenerate(false, doc);
     }
 }
 export function exampleChanged() {
@@ -158,7 +158,7 @@ export function exampleChanged() {
     console.debug(`exampleChanged(${doc})`);
     makeHTTPGet(`tests/${doc}`, (msg) => {
         setGraphText(String(msg));
-        parseAndRegenerate(true);
+        parseAndRegenerate(true, doc);
     }, (stateCode, statusText, responseText) => {
         alert(`Failed fetching example tests/${doc} ${statusText} ${responseText}`);
     });

@@ -577,7 +577,7 @@ fn test_pure_rust_browser_state_tcp_rendering() {
     ).expect("Failed to capture screenshot via CDP");
 
     let snapshot_path = manifest_dir.join("../../tests/snapshots/state_tcp.png");
-    if !snapshot_path.exists() {
+    if !snapshot_path.exists() || std::env::var("UPDATE_SNAPSHOTS").is_ok() {
         let _ = std::fs::write(&snapshot_path, &screenshot_bytes);
     } else {
         if let Ok(expected_img) = image::open(&snapshot_path) {
@@ -1241,6 +1241,94 @@ fn test_pure_rust_browser_dendrogram_spec_reingold_tilford() {
     let _ = std::fs::write(&shapes_proof_path, &shapes_screenshot);
 
     println!("Pure Rust browser test passed: Switching to dynamic_shapes automatically reset to layered with custom SVG shapes.");
+}
+
+#[test]
+fn test_pure_rust_browser_example_dropdown_switching_dendrogram_to_dynamic_shapes() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
+
+    // 1. Select dendrogram_spec.txt via UI dropdown
+    let script1 = r##"
+        (async () => {
+            const select = document.querySelector("#diagrammer-example");
+            select.value = "test_inputs/dendrogram_spec.txt";
+            window.exampleChanged();
+            await new Promise(r => setTimeout(r, 800));
+            const vis = window.getSelectedVisualizer ? window.getSelectedVisualizer() : "";
+            const isReingold = vis === "reingoldtilford";
+            const svg = document.querySelector("#diagrammer-graph svg");
+            return JSON.stringify({
+                visualizer: vis,
+                isReingold,
+                hasSvg: svg !== null,
+            });
+        })()
+    "##;
+    let res1 = tab.evaluate(script1, true).expect("Failed evaluating dropdown dendrogram");
+    let json1_str = res1.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val1: serde_json::Value = serde_json::from_str(&json1_str).expect("Failed parsing JSON");
+    assert_eq!(val1.get("isReingold").and_then(|v| v.as_bool()), Some(true), "Selecting dendrogram_spec must set visualizer to reingoldtilford");
+
+    // 2. Now select dynamic_shapes.txt via UI dropdown immediately after dendrogram_spec
+    let script2 = r##"
+        (async () => {
+            const select = document.querySelector("#diagrammer-example");
+            select.value = "test_inputs/dynamic_shapes.txt";
+            window.exampleChanged();
+            await new Promise(r => setTimeout(r, 800));
+            if (window.fitGraph) {
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }
+            const vis = window.getSelectedVisualizer ? window.getSelectedVisualizer() : "";
+            const isLayered = vis === "layered";
+            const layeredSvg = document.querySelector("#diagrammer-graph svg.diagrammer-layered-svg");
+            const aliceNode = document.querySelector("#node-Alice");
+            return JSON.stringify({
+                visualizer: vis,
+                isLayered,
+                hasLayeredSvg: layeredSvg !== null,
+                hasAlice: aliceNode !== null,
+            });
+        })()
+    "##;
+    let res2 = tab.evaluate(script2, true).expect("Failed evaluating dropdown dynamic_shapes");
+    let json2_str = res2.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val2: serde_json::Value = serde_json::from_str(&json2_str).expect("Failed parsing JSON");
+    assert_eq!(val2.get("isLayered").and_then(|v| v.as_bool()), Some(true), "Selecting dynamic_shapes after dendrogram must reset visualizer to layered");
+    assert_eq!(val2.get("hasLayeredSvg").and_then(|v| v.as_bool()), Some(true), "Layered SVG must be rendered");
+    assert_eq!(val2.get("hasAlice").and_then(|v| v.as_bool()), Some(true), "Custom shape node Alice must be rendered");
+
+    // 3. Now select dynamic_operators.txt via UI dropdown
+    let script3 = r##"
+        (async () => {
+            const select = document.querySelector("#diagrammer-example");
+            select.value = "test_inputs/dynamic_operators.txt";
+            window.exampleChanged();
+            await new Promise(r => setTimeout(r, 800));
+            const vis = window.getSelectedVisualizer ? window.getSelectedVisualizer() : "";
+            const isLayered = vis === "layered";
+            const layeredSvg = document.querySelector("#diagrammer-graph svg.diagrammer-layered-svg");
+            return JSON.stringify({
+                visualizer: vis,
+                isLayered,
+                hasLayeredSvg: layeredSvg !== null,
+            });
+        })()
+    "##;
+    let res3 = tab.evaluate(script3, true).expect("Failed evaluating dropdown dynamic_operators");
+    let json3_str = res3.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val3: serde_json::Value = serde_json::from_str(&json3_str).expect("Failed parsing JSON");
+    assert_eq!(val3.get("isLayered").and_then(|v| v.as_bool()), Some(true), "Selecting dynamic_operators after dendrogram must reset visualizer to layered");
+    assert_eq!(val3.get("hasLayeredSvg").and_then(|v| v.as_bool()), Some(true), "Layered SVG must be rendered for dynamic_operators");
+    println!("Pure Rust browser test passed: UI dropdown switching verified from dendrogram_spec -> dynamic_shapes -> dynamic_operators.");
 }
 
 

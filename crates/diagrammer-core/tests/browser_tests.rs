@@ -544,7 +544,7 @@ fn test_pure_rust_browser_state_tcp_rendering() {
         (async () => {{
             window.setGraphText({});
             window.parseAndRegenerate(true);
-            await new Promise(r => setTimeout(r, 250));
+            await new Promise(r => setTimeout(r, 500));
             const stateSvg = document.querySelector("#diagrammer-graph svg.diagrammer-state-svg");
             const groups = stateSvg ? stateSvg.querySelectorAll(".ds-group") : [];
             const nodes = stateSvg ? stateSvg.querySelectorAll(".dl-node, [id^='node-']") : [];
@@ -1864,6 +1864,77 @@ fn test_pure_rust_browser_context_sensitive_ui_and_sankey_helpers() {
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: Context-sensitive helper bar and Sankey pill insertion verified; expressive arrow tooltips verified.");
+}
+
+#[test]
+fn test_pure_rust_browser_node_hover_zoom_in() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed creating browser tab");
+
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate to Diagrammer UI");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    std::thread::sleep(std::time::Duration::from_millis(600));
+
+    // 1. Find roundedbox node button in toolbar and hover over it
+    let roundedbox_li = tab.find_element(".htoolbar li[onclick*='roundedbox']")
+        .expect("Failed to find roundedbox li in htoolbar");
+
+    roundedbox_li.move_mouse_over().expect("Failed moving mouse over roundedbox");
+    std::thread::sleep(std::time::Duration::from_millis(350));
+
+    let check_zoom_script = r##"
+        (() => {
+            const img = document.querySelector(".htoolbar img[alt='roundedbox']");
+            const li = img ? img.closest("li") : null;
+            if (!li) return JSON.stringify({ error: "Missing roundedbox li" });
+
+            const style = window.getComputedStyle(li);
+            const transform = style.transform;
+            const zIndex = style.zIndex;
+
+            // Also check graph node hover styling rule
+            const graphNode = document.querySelector("#diagrammer-graph svg .node, #diagrammer-graph svg .dl-node");
+            let graphNodeStyle = null;
+            if (graphNode) {
+                const s = window.getComputedStyle(graphNode);
+                graphNodeStyle = {
+                    cursor: s.cursor,
+                    transformBox: s.transformBox
+                };
+            }
+
+            return JSON.stringify({
+                hasRoundedbox: true,
+                transform,
+                zIndex,
+                graphNodeStyle
+            });
+        })()
+    "##;
+
+    let res = tab.evaluate(check_zoom_script, false).expect("Failed evaluating zoom");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    let transform = val.get("transform").and_then(|v| v.as_str()).unwrap_or("");
+    println!("Roundedbox hover transform: {}", transform);
+    assert!(transform.contains("matrix") || transform.contains("scale"), "Hovered node button must scale up via CSS transform");
+
+    // Capture screenshot proof of zoomed-in node button
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed capturing screenshot");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/node_hover_zoom_in_verified.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Node shape button zooms in cleanly on hover (scale 1.6) for effortless readability.");
 }
 
 

@@ -46,6 +46,76 @@ impl Default for AstBuilder {
     }
 }
 
+fn preprocess_custom_shapes(input: &str) -> String {
+    let mut custom_shapes = HashSet::new();
+    for line in input.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("define ") {
+            let rest = trimmed["define ".len()..].trim_start();
+            if !rest.starts_with("operator ") && !rest.starts_with("operator{") && !rest.starts_with("operator(") {
+                let name: String = rest
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '_')
+                    .collect();
+                if !name.is_empty() {
+                    custom_shapes.insert(name);
+                }
+            }
+        }
+    }
+
+    if custom_shapes.is_empty() {
+        return input.to_string();
+    }
+
+    let mut output = String::with_capacity(input.len());
+    let mut in_define_block = false;
+    for line in input.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("define ") {
+            in_define_block = true;
+        }
+        if in_define_block {
+            output.push_str(line);
+            output.push('\n');
+            if trimmed.contains('}') {
+                in_define_block = false;
+            }
+            continue;
+        }
+
+        let mut modified_line = line.to_string();
+        for shape in &custom_shapes {
+            let target = format!("{} ", shape);
+            let replacement = format!("__custom_shape__{} ", shape);
+            let mut res = String::new();
+            let mut remaining = modified_line.as_str();
+            while let Some(idx) = remaining.find(&target) {
+                let is_word_start = if idx == 0 {
+                    true
+                } else {
+                    let prev = remaining.as_bytes()[idx - 1];
+                    !prev.is_ascii_alphanumeric() && prev != b'_'
+                };
+                if is_word_start {
+                    res.push_str(&remaining[..idx]);
+                    res.push_str(&replacement);
+                    remaining = &remaining[idx + target.len()..];
+                } else {
+                    res.push_str(&remaining[..idx + shape.len()]);
+                    remaining = &remaining[idx + shape.len()..];
+                }
+            }
+            res.push_str(remaining);
+            modified_line = res;
+        }
+        output.push_str(&modified_line);
+        output.push('\n');
+    }
+
+    output
+}
+
 impl AstBuilder {
     pub fn new() -> Self {
         let mut context = ParsingContext::default();
@@ -81,7 +151,8 @@ impl AstBuilder {
     }
 
     pub fn parse_and_process(&mut self, input: &str) -> Result<(), String> {
-        let pairs = DiagrammerParser::parse(Rule::diagram, input).map_err(|e| {
+        let preprocessed = preprocess_custom_shapes(input);
+        let pairs = DiagrammerParser::parse(Rule::diagram, &preprocessed).map_err(|e| {
             let (mut line, col) = match e.line_col {
                 pest::error::LineColLocation::Pos((l, c)) => (l, c),
                 pest::error::LineColLocation::Span((l, c), _) => (l, c),
@@ -1102,8 +1173,9 @@ impl AstBuilder {
                                                 }
                                             }
                                         }
-                                        Rule::SHAPES | Rule::custom_type => {
-                                            ah_shape = ah_part.as_str().trim().to_string();
+                                        Rule::SHAPES | Rule::custom_type | Rule::custom_shape => {
+                                            let raw = ah_part.as_str().trim();
+                                            ah_shape = raw.strip_prefix("__custom_shape__").unwrap_or(raw).to_string();
                                         }
                                         Rule::geom_args => {
                                             let s = ah_part.as_str().trim();
@@ -1267,7 +1339,10 @@ impl AstBuilder {
                 for p in pair.into_inner() {
                     match p.as_rule() {
                         Rule::NAME => found_name = Some(p.as_str().trim().to_string()),
-                        Rule::custom_type => found_custom_type = Some(p.as_str().trim().to_string()),
+                        Rule::custom_type | Rule::custom_shape => {
+                            let raw = p.as_str().trim();
+                            found_custom_type = Some(raw.strip_prefix("__custom_shape__").unwrap_or(raw).to_string());
+                        }
                         Rule::SHAPES => found_shape = Some(p.as_str().trim().to_string()),
                         _ => {}
                     }
@@ -1394,8 +1469,9 @@ impl AstBuilder {
                     }
                     pv.shape = Some(s.to_string());
                 }
-                Rule::custom_type => {
-                    let ct = p.as_str().trim().to_string();
+                Rule::custom_type | Rule::custom_shape => {
+                    let raw = p.as_str().trim();
+                    let ct = raw.strip_prefix("__custom_shape__").unwrap_or(raw).to_string();
                     *custom_type_name = Some(ct);
                 }
                 Rule::NAME => {
@@ -1591,16 +1667,34 @@ impl AstBuilder {
             })
             .collect();
 
-        let entrances = if !root_names.is_empty() {
-            root_names.clone()
-        } else {
-            all_inner_vertices.clone()
+        let entrances = {
+            let list: Vec<String> = all_inner_vertices
+                .iter()
+                .filter(|n| !has_incoming.contains(*n))
+                .cloned()
+                .collect();
+            if !list.is_empty() {
+                list
+            } else if !root_names.is_empty() {
+                root_names.clone()
+            } else {
+                all_inner_vertices.clone()
+            }
         };
 
-        let exits = if !finished_inner.chain_terminals.is_empty() {
-            finished_inner.chain_terminals.clone()
-        } else {
-            root_names
+        let exits = {
+            let list: Vec<String> = all_inner_vertices
+                .iter()
+                .filter(|n| !has_outgoing.contains(*n))
+                .cloned()
+                .collect();
+            if !list.is_empty() {
+                list
+            } else if !finished_inner.chain_terminals.is_empty() {
+                finished_inner.chain_terminals.clone()
+            } else {
+                root_names
+            }
         };
 
         self.push_object(GraphObject::Group(Box::new(finished_inner)));

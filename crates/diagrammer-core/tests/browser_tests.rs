@@ -1645,6 +1645,73 @@ fn test_pure_rust_browser_state_innergroups_rendering() {
     println!("Pure Rust browser test passed: state_innergroups rendered nested clusters and compound links.");
 }
 
+#[test]
+fn test_pure_rust_browser_state_recursive_linking_rendering() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
+
+    let recursive_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/state_recursive_linking.txt")
+        .expect("Failed reading state_recursive_linking.txt");
+    let code_json = serde_json::to_string(&recursive_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            for (let i = 0; i < 60; i++) {{
+                const svg = document.querySelector("#diagrammer-graph svg");
+                if (svg && svg.querySelectorAll("g.dl-node, g.node").length >= 10) {{
+                    break;
+                }}
+                await new Promise(r => setTimeout(r, 100));
+            }}
+            const svg = document.querySelector("#diagrammer-graph svg");
+            const nodes = svg ? svg.querySelectorAll("g.dl-node, g.node").length : 0;
+            const edges = svg ? svg.querySelectorAll("path.ds-edge, g.edge").length : 0;
+            const groups = svg ? svg.querySelectorAll("g.ds-group, g.cluster").length : 0;
+            const nodeIds = svg ? Array.from(svg.querySelectorAll("g.dl-node, g.node")).map(n => n.id || n.textContent.trim()) : [];
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                nodeCount: nodes,
+                edgeCount: edges,
+                groupCount: groups,
+                nodeIds: nodeIds,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating state_recursive_linking test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "SVG must render in DOM");
+    let nodes = val.get("nodeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(nodes, 10, "Must render all 10 nodes (a, b, c, d, e, f, g, h, s, k), got {}", nodes);
+    let edges = val.get("edgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(edges, 12, "Must render exactly 12 transitions, got {}", edges);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/state_recursive_linking_browser_verified.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: state_recursive_linking rendered all 10 nodes and 12 transitions.");
+}
+
 
 
 

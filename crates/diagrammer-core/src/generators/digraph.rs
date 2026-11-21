@@ -23,9 +23,10 @@ impl Generator for DiGraph {
         if let Some(ref start) = canvas.start {
             // Find start vertex or forward declare
             let mut found = false;
+            let default_shape = canvas.shape.as_deref();
             for obj in canvas.get_objects(false) {
                 if obj.get_name() == start {
-                    process_a_vertex(&mut formatter, obj);
+                    process_a_vertex(&mut formatter, obj, default_shape);
                     found = true;
                     break;
                 }
@@ -49,8 +50,9 @@ impl Generator for DiGraph {
             formatter.lout("}", Some(false));
         }
 
+        let default_shape = canvas.shape.as_deref();
         for obj in canvas.get_objects(false) {
-            traverse_object(&mut formatter, obj);
+            traverse_object(&mut formatter, obj, default_shape);
         }
 
         formatter.lout("//links start", None);
@@ -172,14 +174,14 @@ impl Generator for DiGraph {
     }
 }
 
-fn traverse_object(formatter: &mut OutputFormatter, obj: &GraphObject) {
+fn traverse_object(formatter: &mut OutputFormatter, obj: &GraphObject, default_shape: Option<&str>) {
     match obj {
-        GraphObject::Group(grp) => process_a_group(formatter, grp),
-        _ => process_a_vertex(formatter, obj),
+        GraphObject::Group(grp) => process_a_group(formatter, grp, default_shape),
+        _ => process_a_vertex(formatter, obj, default_shape),
     }
 }
 
-fn process_a_group(formatter: &mut OutputFormatter, grp: &GraphGroup) {
+fn process_a_group(formatter: &mut OutputFormatter, grp: &GraphGroup, default_shape: Option<&str>) {
     formatter.lout(&format!("subgraph cluster_{} {{", grp.name), Some(true));
 
     if grp.is_inner_graph {
@@ -194,7 +196,7 @@ fn process_a_group(formatter: &mut OutputFormatter, grp: &GraphGroup) {
     }
 
     for inner in grp.get_objects(false) {
-        traverse_object(formatter, inner);
+        traverse_object(formatter, inner, default_shape);
     }
 
     let cond_str = grp.conditional.as_deref().unwrap_or("");
@@ -229,7 +231,7 @@ fn process_a_group(formatter: &mut OutputFormatter, grp: &GraphGroup) {
     }
 }
 
-fn process_a_vertex(formatter: &mut OutputFormatter, obj: &GraphObject) {
+fn process_a_vertex(formatter: &mut OutputFormatter, obj: &GraphObject, default_shape: Option<&str>) {
     let mut nattrs: Vec<String> = Vec::new();
     let mut styles: Vec<String> = Vec::new();
 
@@ -267,7 +269,8 @@ fn process_a_vertex(formatter: &mut OutputFormatter, obj: &GraphObject) {
         nattrs.push("penwidth=0".to_string());
     }
 
-    if let Some(shape) = obj.get_shape() {
+    let shape_opt = obj.get_shape().or(default_shape);
+    if let Some(shape) = shape_opt {
         let (mapped, extras) = get_digraph_shape(shape);
         nattrs.push(format!("shape=\"{}\"", mapped));
         for (k, v) in extras {

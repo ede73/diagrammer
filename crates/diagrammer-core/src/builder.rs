@@ -37,6 +37,7 @@ pub struct AstBuilder {
     explicit_vertex_textcolors: HashSet<String>,
     last_seen_vertex: Option<String>,
     pending_endif_group: Option<String>,
+    has_inline_theme: bool,
 }
 
 impl Default for AstBuilder {
@@ -65,6 +66,7 @@ impl AstBuilder {
             explicit_vertex_textcolors: HashSet::new(),
             last_seen_vertex: None,
             pending_endif_group: None,
+            has_inline_theme: false,
         }
     }
 
@@ -139,6 +141,9 @@ impl AstBuilder {
     }
 
     fn apply_theme_defaults_to_canvas(&mut self) {
+        if !self.has_inline_theme {
+            return;
+        }
         let default_vc = self.canvas.defaults.vertexcolor.clone();
         let default_vtc = self.canvas.defaults.vertextextcolor.clone();
         let default_ec = self.canvas.defaults.edgecolor.clone();
@@ -628,6 +633,7 @@ impl AstBuilder {
                 }
             }
             Rule::theme_block => {
+                self.has_inline_theme = true;
                 let mut theme = self.canvas.theme.take().unwrap_or_default();
                 for entry in pair.into_inner() {
                     if entry.as_rule() == Rule::theme_entry {

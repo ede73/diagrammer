@@ -61,15 +61,17 @@ impl Generator for DiGraph {
 
         formatter.lout("//links start", None);
 
-        // Pre-compute group mappings
-        let groups: BTreeMap<&str, &GraphGroup> = canvas
-            .objects
-            .iter()
-            .filter_map(|obj| match obj {
-                GraphObject::Group(g) => Some((g.name.as_str(), g.as_ref())),
-                _ => None,
-            })
-            .collect();
+        // Pre-compute group mappings recursively
+        fn collect_groups<'a>(objs: &'a [GraphObject], map: &mut BTreeMap<&'a str, &'a GraphGroup>) {
+            for obj in objs {
+                if let GraphObject::Group(g) = obj {
+                    map.insert(g.name.as_str(), g.as_ref());
+                    collect_groups(&g.objects, map);
+                }
+            }
+        }
+        let mut groups: BTreeMap<&str, &GraphGroup> = BTreeMap::new();
+        collect_groups(&canvas.objects, &mut groups);
 
         for edge in canvas.get_edges() {
             let mut attrs: Vec<String> = Vec::new();
@@ -147,7 +149,7 @@ impl Generator for DiGraph {
                 if !grp.is_inner_graph {
                     attrs.push(format!(" lhead=cluster_{}", grp.name));
                 }
-                if let Some(first_obj) = grp.get_objects(false).first() {
+                if let Some(first_obj) = grp.get_flattened_vertices().first().copied().or_else(|| grp.get_objects(false).first().copied()) {
                     rhs_name = first_obj.get_name().to_string();
                 }
             }
@@ -156,7 +158,7 @@ impl Generator for DiGraph {
                 if !grp.is_inner_graph {
                     attrs.push(format!(" ltail=cluster_{}", grp.name));
                 }
-                if let Some(first_obj) = grp.get_objects(false).first() {
+                if let Some(first_obj) = grp.get_flattened_vertices().first().copied().or_else(|| grp.get_objects(false).first().copied()) {
                     lhs_name = first_obj.get_name().to_string();
                 }
             }

@@ -1578,6 +1578,73 @@ fn test_pure_rust_browser_state_images_rendering() {
     println!("Pure Rust browser test passed: state_images rendered complete 21-node, 30-edge image network with icons.");
 }
 
+#[test]
+fn test_pure_rust_browser_state_innergroups_rendering() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
+
+    let innergroups_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/state_innergroups.txt")
+        .expect("Failed reading state_innergroups.txt");
+    let code_json = serde_json::to_string(&innergroups_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            for (let i = 0; i < 60; i++) {{
+                const svg = document.querySelector("#diagrammer-graph svg");
+                if (svg && svg.querySelectorAll("g.node").length >= 8) {{
+                    break;
+                }}
+                await new Promise(r => setTimeout(r, 100));
+            }}
+            const svg = document.querySelector("#diagrammer-graph svg");
+            const nodes = svg ? svg.querySelectorAll("g.node").length : 0;
+            const edges = svg ? svg.querySelectorAll("g.edge").length : 0;
+            const clusters = svg ? svg.querySelectorAll("g.cluster").length : 0;
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                nodeCount: nodes,
+                edgeCount: edges,
+                clusterCount: clusters,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating state_innergroups test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Graphviz SVG must render in DOM");
+    let nodes = val.get("nodeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(nodes, 8, "Must render exactly 8 nodes, got {}", nodes);
+    let edges = val.get("edgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(edges, 8, "Must render exactly 8 compound edges, got {}", edges);
+    let clusters = val.get("clusterCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(clusters, 4, "Must render 4 nested clusters (master, innermaster1, innermaster2, other), got {}", clusters);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/state_innergroups_browser_verified.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: state_innergroups rendered nested clusters and compound links.");
+}
+
 
 
 

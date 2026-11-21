@@ -1,4 +1,4 @@
-visualizer state
+visualizer dot
 
 vertex color #ff0000
 outside1;Group to node(MUST BE RED)

@@ -1003,5 +1003,77 @@ Course!name>Professor!classes1
     println!("Pure Rust browser test passed: Scoped UML members routed directly between class containers without standalone nodes.");
 }
 
+#[test]
+fn test_pure_rust_browser_swimlane_poly_10_rendering() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab for swimlane test");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-graph").expect("Failed finding diagrammer-graph");
+
+    let swimlane_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/poly_10_layered_swimlane_seq.txt")
+        .expect("Failed reading poly_10_layered_swimlane_seq.txt");
+    let code_json = serde_json::to_string(&swimlane_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 400));
+            const svg = document.querySelector("#diagrammer-graph svg.diagrammer-swimlane-svg");
+            const headers = svg ? Array.from(svg.querySelectorAll(".sw-lane-header")).map(el => el.textContent.trim()) : [];
+            const nodes = svg ? Array.from(svg.querySelectorAll(".sw-node")).map(el => el.id) : [];
+            const dividers = svg ? svg.querySelectorAll(".sw-lane-divider").length : 0;
+            const edges = svg ? svg.querySelectorAll(".sw-edge-path").length : 0;
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                headers: headers,
+                nodeCount: nodes.length,
+                dividerCount: dividers,
+                edgeCount: edges,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating swimlane test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Swimlane SVG must render in DOM");
+    let headers = val.get("headers").and_then(|v| v.as_array()).expect("headers array");
+    assert_eq!(headers.len(), 4, "Must have 4 swimlanes");
+    assert_eq!(headers[0].as_str(), Some("Customer (Storefront)"));
+    assert_eq!(headers[1].as_str(), Some("API Gateway & Security"));
+    assert_eq!(headers[2].as_str(), Some("Order Management"));
+    assert_eq!(headers[3].as_str(), Some("Payment Provider (Stripe/Bank)"));
+
+    let node_count = val.get("nodeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(node_count, 9, "Expected 9 steps across the 4 swimlanes");
+
+    let edge_count = val.get("edgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(edge_count, 8, "Expected 8 process handoff transitions");
+
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/poly_10_swimlane_verified_browser.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Swimlane poly_10 rendered cleanly with 4 parallel lanes and cross-lane routing.");
+}
+
+
 
 

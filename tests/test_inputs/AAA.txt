@@ -1,0 +1,36 @@
+visualizer swimlane
+
+// ==========================================
+// Multi-Lane Business Process (Swimlanes)
+// ==========================================
+
+{!Customer; Customer (Storefront)
+    cart;View Cart
+    checkout;Click Checkout
+    notify;Receive Confirmation
+}
+
+{!Gateway; API Gateway & Security
+    rate_limit;Rate Limit Check
+    auth_token;Validate Session Token
+}
+
+{!Fulfillment; Order Management
+    reserve_stock;Reserve Warehouse Stock
+    pack_ship;Pack & Dispatch
+}
+
+{!Payment; Payment Provider (Stripe/Bank)
+    fraud_check;Fraud Evaluation
+    capture_funds;Capture Funds
+}
+
+// Cross-Lane Process Flow (Zig-zagging across swimlane boundaries)
+Customer!cart > Customer!checkout
+Customer!checkout > Gateway!rate_limit
+Gateway!rate_limit > Gateway!auth_token
+Gateway!auth_token > Fulfillment!reserve_stock
+Fulfillment!reserve_stock > Payment!fraud_check
+Payment!fraud_check > Payment!capture_funds
+Payment!capture_funds > Fulfillment!pack_ship;Funds Captured
+Fulfillment!pack_ship > Customer!notify;Tracking Number

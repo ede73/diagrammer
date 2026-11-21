@@ -5,4 +5,5 @@ pub mod poly;
 pub mod sequence;
 pub mod shapes;
 pub mod state;
+pub mod swimlane;
 pub mod tree;

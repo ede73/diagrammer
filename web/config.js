@@ -5,6 +5,7 @@ import { visualizeReingoldTilford } from './visualizations/visualizeReingoldTilf
 import { visualizeSankey } from './visualizations/visualizeSankey.js';
 import { visualizeNativeSequence } from './visualizations/visualizeNativeSequence.js';
 import { visualizeLayered } from './visualizations/visualizeLayered.js';
+import { visualizeSwimlane } from './visualizations/visualizeSwimlane.js';
 import { visualizeTree } from './visualizations/visualizeTree.js';
 import { visualizeGrid } from './visualizations/visualizeGrid.js';
 import { visualizeState } from './visualizations/visualizeState.js';
@@ -111,6 +112,7 @@ const _visualizations = [
 
     new Visualization('native_sequence', 'Diagrammer: Native Sequence [WASM]', 'native_sequence', visualizeNativeSequence, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency vector sequence diagram' }),
     new Visualization('layered', 'Diagrammer: Layered DAG [WASM]', 'layered', visualizeLayered, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency hierarchical DAG and UML flowchart engine' }),
+    new Visualization('swimlane', 'Diagrammer: Swimlane [WASM]', 'swimlane', visualizeSwimlane, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency multi-lane process swimlane engine' }),
     new Visualization('tree', 'Diagrammer: Tree / Dendrogram [WASM]', 'tree', visualizeTree, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency tree and radial dendrogram engine' }),
     new Visualization('network_bus', 'Diagrammer: Network Bus [WASM]', 'grid', visualizeGrid, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency network architecture and multi-subnet bus engine' }),
     new Visualization('grid', 'Diagrammer: 2D Matrix Grid [WASM]', 'grid', visualizeGrid, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency 2D matrix grid engine' }),

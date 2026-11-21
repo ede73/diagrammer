@@ -15,6 +15,7 @@ pub mod native_sequence;
 pub mod plantuml_sequence;
 pub mod sankey;
 pub mod state;
+pub mod swimlane;
 pub mod tree;
 
 // Legacy generators (unmaintained GoJS backend)
@@ -137,6 +138,7 @@ pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
         "plantuml_sequence" => Some(Box::new(plantuml_sequence::PlantUMLSequence)),
         "sankey" => Some(Box::new(sankey::Sankey)),
         "state" | "statechart" | "fsm" => Some(Box::new(state::StateGenerator)),
+        "swimlane" | "swimlanes" => Some(Box::new(swimlane::SwimlaneGenerator)),
         "tree" | "radial" | "native_tree" | "fan" => Some(Box::new(tree::TreeGenerator)),
         _ => None,
     }

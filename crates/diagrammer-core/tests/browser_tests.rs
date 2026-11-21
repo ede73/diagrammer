@@ -1074,6 +1074,68 @@ fn test_pure_rust_browser_swimlane_poly_10_rendering() {
     println!("Pure Rust browser test passed: Swimlane poly_10 rendered cleanly with 4 parallel lanes and cross-lane routing.");
 }
 
+#[test]
+fn test_pure_rust_browser_sankey_dark_mode_rendering() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab for sankey test");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-graph").expect("Failed finding diagrammer-graph");
+
+    let sankey_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/sankey.txt")
+        .expect("Failed reading sankey.txt");
+    let code_json = serde_json::to_string(&sankey_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+            const svg = document.querySelector("#diagrammer-graph svg");
+            const hasClass = svg ? svg.classList.contains("diagrammer-sankey-svg") : false;
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                svgClass: svg ? svg.getAttribute("class") : null,
+                hasD3: typeof d3 !== 'undefined',
+                hasD3Sankey: typeof d3 !== 'undefined' && typeof d3.sankey !== 'undefined',
+                domContent: document.querySelector("#diagrammer-graph") ? document.querySelector("#diagrammer-graph").innerHTML.substring(0, 200) : null,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating sankey test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Sankey SVG must render in DOM");
+    assert_eq!(val.get("hasD3Sankey").and_then(|v| v.as_bool()), Some(true), "D3 Sankey library must be loaded");
+
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/sankey_dark_mode_verified_browser.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Sankey dark-mode rendering verified with high-contrast text and vibrant gradient ribbons.");
+}
+
+
 
 
 

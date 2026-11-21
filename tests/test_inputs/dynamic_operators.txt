@@ -1,3 +1,5 @@
+visualizer layered
+
 // Dynamic Operator Overrides & Polymorphic Shape Arrowheads
 
 define dude(width=80, height=60) {

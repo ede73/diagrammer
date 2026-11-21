@@ -87,8 +87,6 @@ export const FIXTURE_DEFAULT_VISUALIZERS = {
     'AAA.txt': 'swimlane',
 
     // Layered DAG (default for UML, shapes, operators, clusters)
-    'dynamic_shapes.txt': 'layered',
-    'dynamic_operators.txt': 'layered',
     'umlclass.txt': 'layered',
     'umlclass2.txt': 'layered',
     'umlclass_types.txt': 'layered',

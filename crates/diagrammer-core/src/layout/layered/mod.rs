@@ -841,17 +841,64 @@ impl LayeredGraph {
 
         // 6d. Build final routing points
         for (idx, e) in edges.iter_mut().enumerate() {
-            if let (Some(&exit), Some(&entry)) = (exit_ports.get(&idx), entry_ports.get(&idx)) {
+            if e.from_member.is_some() || e.to_member.is_some() {
                 let track_offset = edge_track_offsets.get(&idx).copied().unwrap_or(0.0);
-                if e.from_member.is_some() || e.to_member.is_some() {
-                    let mid_x = (exit.0 + entry.0) / 2.0 + track_offset;
-                    if exit.0 < entry.0 {
+                if let (Some(u), Some(v)) = (nodes.get(&e.from), nodes.get(&e.to)) {
+                    // Compute source port on u (or member in u)
+                    let (u_m_left, u_m_right, u_m_y) = if let Some(ref m_id) = e.from_member {
+                        if let Some((idx_m, m)) = u.members.iter().enumerate().find(|(_, m)| &m.id == m_id) {
+                            let my = u.y + 32.0 + 11.0 + (idx_m as f64) * 22.0;
+                            let mx = u.x + 8.0;
+                            let mw = ((m.label.len() as f64) * 7.5 + 14.0).max(48.0);
+                            (mx, mx + mw, my)
+                        } else {
+                            (u.x, u.x + u.width, u.y + u.height / 2.0)
+                        }
+                    } else {
+                        (u.x, u.x + u.width, u.y + u.height / 2.0)
+                    };
+
+                    // Compute target port on v (or member in v)
+                    let (v_m_left, v_m_right, v_m_y) = if let Some(ref m_id) = e.to_member {
+                        if let Some((idx_m, m)) = v.members.iter().enumerate().find(|(_, m)| &m.id == m_id) {
+                            let my = v.y + 32.0 + 11.0 + (idx_m as f64) * 22.0;
+                            let mx = v.x + 8.0;
+                            let mw = ((m.label.len() as f64) * 7.5 + 14.0).max(48.0);
+                            (mx, mx + mw, my)
+                        } else {
+                            (v.x, v.x + v.width, v.y + v.height / 2.0)
+                        }
+                    } else {
+                        (v.x, v.x + v.width, v.y + v.height / 2.0)
+                    };
+
+                    let is_u_left_of_v = u.x + u.width <= v.x;
+                    let is_u_right_of_v = v.x + v.width <= u.x;
+
+                    if is_u_left_of_v {
+                        // Flowing Left to Right
+                        let exit = (u_m_right, u_m_y);
+                        let entry = (v_m_left, v_m_y);
+                        let mid_x = (u.x + u.width + v.x) / 2.0 + track_offset;
+                        e.points = vec![exit, (mid_x, exit.1), (mid_x, entry.1), entry];
+                    } else if is_u_right_of_v {
+                        // Flowing Right to Left
+                        let exit = (u_m_left, u_m_y);
+                        let entry = (v_m_right, v_m_y);
+                        let mid_x = (v.x + v.width + u.x) / 2.0 + track_offset;
                         e.points = vec![exit, (mid_x, exit.1), (mid_x, entry.1), entry];
                     } else {
-                        let gutter = exit.0.max(entry.0) + 30.0 + track_offset.abs();
-                        e.points = vec![exit, (gutter, exit.1), (gutter, entry.1), entry];
+                        // Vertically aligned or overlapping in X: route around via right gutter
+                        let max_r = (u.x + u.width).max(v.x + v.width);
+                        let gutter_x = max_r + 28.0 + track_offset.abs();
+                        let exit = (u_m_right, u_m_y);
+                        let entry = (v_m_right, v_m_y);
+                        e.points = vec![exit, (gutter_x, exit.1), (gutter_x, entry.1), entry];
                     }
-                } else if !is_lr {
+                }
+            } else if let (Some(&exit), Some(&entry)) = (exit_ports.get(&idx), entry_ports.get(&idx)) {
+                let track_offset = edge_track_offsets.get(&idx).copied().unwrap_or(0.0);
+                if !is_lr {
                     if (exit.0 - entry.0).abs() < 1.0 && track_offset.abs() < 0.1 {
                         e.points = vec![exit, entry];
                     } else {
@@ -1207,11 +1254,13 @@ impl LayeredGraph {
         // Calculate total canvas bounds
         let max_node_x = nodes.values().map(|n| n.x + n.width).fold(300.0, f64::max);
         let max_grp_x = groups.iter().map(|g| g.x + g.width).fold(300.0, f64::max);
-        let max_x = max_node_x.max(max_grp_x);
+        let max_edge_x = edges.iter().flat_map(|e| e.points.iter().map(|p| p.0)).fold(0.0, f64::max);
+        let max_x = max_node_x.max(max_grp_x).max(max_edge_x);
 
         let max_node_y = nodes.values().map(|n| n.y + n.height).fold(200.0, f64::max);
         let max_grp_y = groups.iter().map(|g| g.y + g.height).fold(200.0, f64::max);
-        let max_y = max_node_y.max(max_grp_y);
+        let max_edge_y = edges.iter().flat_map(|e| e.points.iter().map(|p| p.1)).fold(0.0, f64::max);
+        let max_y = max_node_y.max(max_grp_y).max(max_edge_y);
 
         let max_gutter_x = if cross_boundary_idx > 0 {
             gutter_right + 60.0 + (cross_boundary_idx as f64) * 16.0
@@ -1402,12 +1451,7 @@ impl LayeredGraph {
             svg.push_str("  </g>\n\n");
         }
 
-        // 1. Render Edges
-        svg.push_str("  <!-- Edges -->\n  <g class=\"dl-edges-group\">\n");
-        for edge in &self.edges {
-            if edge.is_cross_boundary || edge.points.len() < 2 {
-                continue;
-            }
+        let render_edge_fn = |edge: &LayeredEdge, out: &mut String| {
             let edge_color = edge.color.as_deref().unwrap_or(default_edge_stroke);
             let mut path_d = String::new();
             for (i, pt) in edge.points.iter().enumerate() {
@@ -1470,14 +1514,23 @@ impl LayeredGraph {
                 ""
             };
 
-            svg.push_str(&format!(
+            out.push_str(&format!(
                 r#"    <path d="{}" class="dl-edge-path" stroke="{}"{}{}{}{} />
 "#,
                 path_d, edge_color, marker_start_attr, marker_end_attr, dash_attr, stroke_width_attr
             ));
 
             // Render Edge Label if present (borderless with SVG halo, floating cleanly on the track)
-            styler.render_edge_label(edge, &mut svg);
+            styler.render_edge_label(edge, out);
+        };
+
+        // 1. Render Edges (excluding member edges and cross-boundary edges)
+        svg.push_str("  <!-- Edges -->\n  <g class=\"dl-edges-group\">\n");
+        for edge in &self.edges {
+            if edge.is_cross_boundary || edge.from_member.is_some() || edge.to_member.is_some() || edge.points.len() < 2 {
+                continue;
+            }
+            render_edge_fn(edge, &mut svg);
         }
         svg.push_str("  </g>\n\n");
 
@@ -1490,6 +1543,23 @@ impl LayeredGraph {
             styler.render_node(node, default_node_fill, Some(&self.type_registry), &mut svg);
         }
         svg.push_str("  </g>\n\n");
+
+        // 3. Render Member Edges (on top layer so lines & arrowheads entering class boxes are crisp and visible)
+        let member_edges: Vec<&LayeredEdge> = self
+            .edges
+            .iter()
+            .filter(|e| (e.from_member.is_some() || e.to_member.is_some()) && !e.is_cross_boundary)
+            .collect();
+        if !member_edges.is_empty() {
+            svg.push_str("  <!-- Scoped UML Member Edges -->\n  <g class=\"dl-member-edges\">\n");
+            for edge in member_edges {
+                if edge.points.len() < 2 {
+                    continue;
+                }
+                render_edge_fn(edge, &mut svg);
+            }
+            svg.push_str("  </g>\n\n");
+        }
 
         // 3. Render Cross-Boundary Inter-Group Edges (on top layer so lines & arrowheads entering containers are crisp)
         let cross_edges: Vec<&LayeredEdge> = self.edges.iter().filter(|e| e.is_cross_boundary).collect();

@@ -899,47 +899,9 @@ fn test_pure_rust_browser_scoped_uml_members_routing() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-code").expect("Code editor not found");
 
-    let input = r#"visualizer layered
-
-{!Person;Person
-name;+String
-birth;#Date
-getCurrentAge;+(): int
-}
-
-{!Student;Student
-classes;_List<Class>
-attend;-(class: Course)
-sleep;-()
-}
-
-{!Course;Course
-name;+String
-description;+String
-professor1;+professor: Professor
-location;+String
-times;+List<Time>
-prerequisites;+List<Course>
-students;+List<Student>
-}
-
-{!Professor;Professor
-classes1;+classes: List<Class>
-teach;-teach(class: Course)
-}
-
-{!BankAccount;BankAccount
-owner;+String
-balance;+Currency=0
-deposit;+(amount: Currency)
-withdraw;+(amount: Currency)
-}
-
-Student,Professor>Person
-Course.Professor
-
-Course!name>Professor!classes1
-"#;
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let input = std::fs::read_to_string(manifest_dir.join("../../tests/test_inputs/umlclass_scoped.txt"))
+        .expect("Failed to read umlclass_scoped.txt");
 
     let code_json = serde_json::to_string(&input).expect("serialize code");
 

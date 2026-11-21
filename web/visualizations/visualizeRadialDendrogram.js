@@ -13,15 +13,24 @@ export async function visualizeRadialDendrogram(generatorResult) {
 
     removeOldVisualizations();
 
-    const width = 1100;
-    const height = 1100;
+    const data = d3.hierarchy(jsonData);
+    const leaves = data.leaves();
+    const leafCount = Math.max(1, leaves.length);
+    const maxDepth = Math.max(1, data.height);
+
+    // Dynamic radius: give each leaf at least 15px of arc space
+    const minLeafArc = 15;
+    const computedRadius = Math.max(460, (leafCount * minLeafArc) / (2 * Math.PI) + maxDepth * 30);
+    const width = (computedRadius + 220) * 2;
+    const height = width;
+
     const svgimg = makeSVG(width, height);
     svgimg.attr('class', 'diagrammer-radial-dendrogram-svg')
         .style('overflow', 'visible');
 
     svgimg.attr('transform', `translate(${width / 2},${height / 2})`);
 
-    const radius = Math.min(width, height) / 2 - 140;
+    const radius = computedRadius;
 
     const cluster = d3.cluster()
         .size([2 * Math.PI, radius])
@@ -29,7 +38,6 @@ export async function visualizeRadialDendrogram(generatorResult) {
             return (a.parent === b.parent ? 1 : 2) / (a.depth || 1);
         });
 
-    const data = d3.hierarchy(jsonData);
     const clusterData = cluster(data);
     const links = clusterData.links();
     const nodes = clusterData.descendants();
@@ -79,25 +87,45 @@ export async function visualizeRadialDendrogram(generatorResult) {
             }
             return d.children ? '#818cf8' : '#38bdf8';
         })
-        .attr('stroke', '#0f172a')
+        .attr('stroke', '#090d16')
         .attr('stroke-width', 1.2);
 
-    const textGroup = node.append('text')
+    // In dense radial trees, suppress internal node labels for deep levels (depth > 2)
+    // to prevent radial starburst collisions. Leaf nodes always render outward.
+    const isDenseTree = nodes.length > 50;
+    const visibleTextNodes = node.filter(d => !isDenseTree || !d.children || d.depth <= 2);
+
+    const textGroup = visibleTextNodes.append('text')
         .attr('dy', '0.31em')
         .attr('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
-        .attr('font-size', '10.5px')
-        .attr('font-weight', d => (d.children ? '700' : '500'))
+        .attr('font-size', isDenseTree ? '9px' : '10px')
+        .attr('font-weight', d => (d.children ? '600' : '400'))
         .style('paint-order', 'stroke fill')
-        .attr('stroke', '#0f172a')
-        .attr('stroke-width', '3px')
+        .attr('stroke', '#090d16')
+        .attr('stroke-width', '2px')
         .attr('stroke-linejoin', 'round')
-        .attr('text-anchor', d => (d.x < Math.PI ? 'start' : 'end'))
-        .attr('transform', d => (d.x < Math.PI ? 'translate(7)' : 'rotate(180) translate(-7)'))
+        .attr('text-anchor', d => {
+            // Leaf: outward. Internal: inward
+            const isOutward = !d.children;
+            if (isOutward) {
+                return d.x < Math.PI ? 'start' : 'end';
+            } else {
+                return d.x < Math.PI ? 'end' : 'start';
+            }
+        })
+        .attr('transform', d => {
+            const isOutward = !d.children;
+            if (isOutward) {
+                return d.x < Math.PI ? 'translate(6)' : 'rotate(180) translate(-6)';
+            } else {
+                return d.x < Math.PI ? 'translate(-6)' : 'rotate(180) translate(6)';
+            }
+        })
         .attr('fill', d => {
             if (d.data.nodecolor) {
                 return resolveColor(d.data.nodecolor, '#f1f5f9', true);
             }
-            return d.children ? '#e2e8f0' : '#cbd5e1';
+            return d.children ? '#94a3b8' : '#f8fafc';
         });
 
     textGroup.each(function(d) {

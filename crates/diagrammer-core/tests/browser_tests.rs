@@ -1165,10 +1165,16 @@ fn test_pure_rust_browser_dendrogram_spec_reingold_tilford() {
             const svg = document.querySelector("#diagrammer-graph svg");
             const nodes = svg ? svg.querySelectorAll("g.node").length : 0;
             const links = svg ? svg.querySelectorAll("path.link").length : 0;
+            const graphEl = document.querySelector("#diagrammer-graph");
             return JSON.stringify({{
                 hasSvg: svg !== null,
                 nodeCount: nodes,
                 linkCount: links,
+                graphHtmlLen: graphEl ? graphEl.innerHTML.length : 0,
+                graphHtmlSnippet: graphEl ? graphEl.innerHTML.substring(0, 300) : "",
+                svgDisplay: svg ? window.getComputedStyle(svg).display : "",
+                svgVis: svg ? window.getComputedStyle(svg).visibility : "",
+                svgRect: svg ? svg.getBoundingClientRect() : null,
             }});
         }})()
         "##,
@@ -1177,6 +1183,7 @@ fn test_pure_rust_browser_dendrogram_spec_reingold_tilford() {
 
     let res = tab.evaluate(&eval_script, true).expect("Failed evaluating dendrogram test");
     let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    println!("DEBUG DENDROGRAM DOM: {}", json_str);
     let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
 
     assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Reingold-Tilford SVG must render in DOM");
@@ -1191,6 +1198,19 @@ fn test_pure_rust_browser_dendrogram_spec_reingold_tilford() {
 
     let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/dendrogram_spec_verified_browser.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    // Also capture 100% zoom view to verify readable text
+    let crop_script = r##"
+        (async () => {
+            if (window.resetZoomGraph) window.resetZoomGraph();
+            await new Promise(r => setTimeout(r, 100));
+        })()
+    "##;
+    let _ = tab.evaluate(crop_script, true);
+    if let Ok(zoom_bytes) = tab.capture_screenshot(CaptureScreenshotFormatOption::Png, None, None, true) {
+        let zoom_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/dendrogram_spec_zoom_100.png");
+        let _ = std::fs::write(&zoom_path, &zoom_bytes);
+    }
 
     println!("Pure Rust browser test passed: Reingold-Tilford dendrogram_spec rendered cleanly with adapted dark colors.");
 

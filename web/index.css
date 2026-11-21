@@ -776,9 +776,6 @@ img.iconicon {
     flex: 1;
     overflow: auto;
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     background-color: var(--canvas-bg);
     background-image: radial-gradient(var(--canvas-grid) 1px, transparent 1px);
     background-size: 20px 20px;
@@ -787,10 +784,9 @@ img.iconicon {
 }
 
 #diagrammer-graph {
-    transform-origin: center center;
+    transform-origin: 0 0;
     transition: transform 0.12s ease-out;
-    display: inline-block;
-    margin: auto;
+    display: block;
     min-width: max-content;
     flex-shrink: 0;
 }

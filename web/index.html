@@ -606,6 +606,7 @@
     function applyZoom() {
       const graph = document.getElementById('diagrammer-graph');
       if (graph) {
+        graph.style.transformOrigin = '0 0';
         graph.style.transform = `scale(${currentZoom})`;
       }
     }
@@ -624,7 +625,7 @@
       const viewport = document.getElementById('diagrammer-graph-viewport');
       const graph = document.getElementById('diagrammer-graph');
       if (!viewport || !graph) return;
-      const child = graph.firstElementChild;
+      const child = graph.querySelector('svg, img, canvas') || graph.firstElementChild;
       if (!child) {
         resetZoomGraph();
         return;

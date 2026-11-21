@@ -1,3 +1,5 @@
+visualizer dot
+
 ablack
 b;label
 cblue#0000ff

@@ -1,3 +1,5 @@
+visualizer state
+
 shape actor
 s
 { dummy

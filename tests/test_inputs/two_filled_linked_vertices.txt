@@ -1,3 +1,5 @@
+visualizer dot
+
 first$(red:#ff0000)
 first#00ff00;Primary node
 first$(blue:#0000ff);Configured as blue

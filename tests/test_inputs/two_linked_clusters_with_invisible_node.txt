@@ -1,3 +1,5 @@
+visualizer dot
+
 shape ellipse
 
 diamond xstart;start

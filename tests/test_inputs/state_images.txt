@@ -1,3 +1,5 @@
+visualizer state
+
 ovisualizer dot
 
 a/barcode.png,b/basestation.png,c/battery.png>d/camera.png,e/cpu.png,f/documents.png

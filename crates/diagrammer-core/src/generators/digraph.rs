@@ -51,8 +51,12 @@ impl Generator for DiGraph {
         }
 
         let default_shape = canvas.shape.as_deref();
+        let mut cond_state = ConditionalState {
+            lastexit: None,
+            lastendif: None,
+        };
         for obj in canvas.get_objects(false) {
-            traverse_object(&mut formatter, obj, default_shape);
+            traverse_object(&mut formatter, obj, default_shape, canvas, &mut cond_state);
         }
 
         formatter.lout("//links start", None);
@@ -174,14 +178,55 @@ impl Generator for DiGraph {
     }
 }
 
-fn traverse_object(formatter: &mut OutputFormatter, obj: &GraphObject, default_shape: Option<&str>) {
+struct ConditionalState {
+    lastexit: Option<String>,
+    lastendif: Option<String>,
+}
+
+fn traverse_object(
+    formatter: &mut OutputFormatter,
+    obj: &GraphObject,
+    default_shape: Option<&str>,
+    canvas: &GraphCanvas,
+    cond_state: &mut ConditionalState,
+) {
     match obj {
-        GraphObject::Group(grp) => process_a_group(formatter, grp, default_shape),
+        GraphObject::Group(grp) => process_a_group(formatter, grp, default_shape, canvas, cond_state),
         _ => process_a_vertex(formatter, obj, default_shape),
     }
 }
 
-fn process_a_group(formatter: &mut OutputFormatter, grp: &GraphGroup, default_shape: Option<&str>) {
+fn get_first_lhs_referred_node_from_group(canvas: &GraphCanvas, grp: &GraphGroup) -> Option<String> {
+    let grp_objs: std::collections::HashSet<String> = grp.get_objects(true).iter().map(|o| o.get_name().to_string()).collect();
+    for edge in canvas.get_edges() {
+        if grp_objs.contains(&edge.left) {
+            return Some(edge.left.clone());
+        }
+    }
+    grp.get_objects(false).first().map(|o| o.get_name().to_string())
+}
+
+fn get_last_lhs_or_rhs_referred_node_in_group(canvas: &GraphCanvas, grp: &GraphGroup) -> Option<String> {
+    let grp_objs: std::collections::HashSet<String> = grp.get_objects(true).iter().map(|o| o.get_name().to_string()).collect();
+    let mut last_node = None;
+    for edge in canvas.get_edges() {
+        if grp_objs.contains(&edge.left) {
+            last_node = Some(edge.left.clone());
+        }
+        if grp_objs.contains(&edge.right) {
+            last_node = Some(edge.right.clone());
+        }
+    }
+    last_node.or_else(|| grp.get_objects(false).last().map(|o| o.get_name().to_string()))
+}
+
+fn process_a_group(
+    formatter: &mut OutputFormatter,
+    grp: &GraphGroup,
+    default_shape: Option<&str>,
+    canvas: &GraphCanvas,
+    cond_state: &mut ConditionalState,
+) {
     formatter.lout(&format!("subgraph cluster_{} {{", grp.name), Some(true));
 
     if grp.is_inner_graph {
@@ -196,7 +241,7 @@ fn process_a_group(formatter: &mut OutputFormatter, grp: &GraphGroup, default_sh
     }
 
     for inner in grp.get_objects(false) {
-        traverse_object(formatter, inner, default_shape);
+        traverse_object(formatter, inner, default_shape, canvas, cond_state);
     }
 
     let cond_str = grp.conditional.as_deref().unwrap_or("");
@@ -204,29 +249,53 @@ fn process_a_group(formatter: &mut OutputFormatter, grp: &GraphGroup, default_sh
 
     if let Some(ref cond) = grp.conditional {
         formatter.lout(&format!("//COND {} {}", grp.name, cond), None);
-        let exit_idx = grp.exitvertex.unwrap_or(1);
-        let exit_vertex_in_conditional = format!("conditional_{}_{}", cond, exit_idx);
-        let last_endif = format!("conditional_endif_{}", exit_idx);
+        if cond == "endif" {
+            if let Some(ref exit_edge) = grp.conditional_exit_edge {
+                if let (Some(lexit), Some(lendif)) = (&cond_state.lastexit, &cond_state.lastendif) {
+                    formatter.lout(&format!("{}->{}[ color=red ];", lexit, lendif), None);
+                    formatter.lout(&format!("{}->{};", lendif, exit_edge), None);
+                }
+            }
+            cond_state.lastexit = None;
+            cond_state.lastendif = None;
+        } else {
+            let exit_idx = grp.exitvertex.unwrap_or(1);
+            let exit_vertex_in_conditional = format!("conditional_{}_{}", cond, exit_idx);
+            if cond_state.lastendif.is_none() {
+                let last_endif = format!("conditional_endif_{}", exit_idx);
+                formatter.lout(&format!("{}[ shape=circle, label=\"\", width=0.01, height=0.01 ];", last_endif), None);
+                cond_state.lastendif = Some(last_endif);
+            }
+            let grp_lbl = grp.label.as_deref().unwrap_or("");
+            formatter.lout(&format!("{}[ shape=diamond, fixedsize=true, width=1, height=1, label=\"{}\" ];", exit_vertex_in_conditional, grp_lbl), None);
 
-        formatter.lout(&format!("{}[ shape=circle, label=\"\", width=0.01, height=0.01 ];", last_endif), None);
-        let grp_lbl = grp.label.as_deref().unwrap_or("");
-        formatter.lout(&format!("{}[ shape=diamond, fixedsize=true, width=1, height=1, label=\"{}\" ];", exit_vertex_in_conditional, grp_lbl), None);
+            if cond == "if" {
+                if let Some(ref entry) = grp.conditional_entry_edge {
+                    formatter.lout(&format!("{}->{};", entry, exit_vertex_in_conditional), None);
+                }
+            }
 
-        if let Some(first_obj) = grp.get_objects(false).first() {
-            formatter.lout(
-                &format!("{exit}->{node}[ label=\"YES\", color=green, lhead=cluster_{gname} ];",
-                    exit = exit_vertex_in_conditional,
-                    node = first_obj.get_name(),
-                    gname = grp.name
-                ),
-                None
-            );
-        }
-        if let Some(last_obj) = grp.get_objects(false).last() {
-            formatter.lout(
-                &format!("{}->{}[ label=\"\" ];", last_obj.get_name(), last_endif),
-                None
-            );
+            if let Some(ref prev_exit) = cond_state.lastexit {
+                formatter.lout(&format!("{}->{}[ label=\"NO\", color=red ];", prev_exit, exit_vertex_in_conditional), None);
+            }
+
+            let first_node = get_first_lhs_referred_node_from_group(canvas, grp);
+            let last_node = get_last_lhs_or_rhs_referred_node_in_group(canvas, grp);
+
+            if let Some(ref first) = first_node {
+                formatter.lout(
+                    &format!("{exit}->{node}[ label=\"YES\", color=green, lhead=cluster_{gname} ];",
+                        exit = exit_vertex_in_conditional,
+                        node = first,
+                        gname = grp.name
+                    ),
+                    None
+                );
+            }
+            if let (Some(ref last), Some(lendif)) = (last_node, &cond_state.lastendif) {
+                formatter.lout(&format!("{}->{}[ label=\"\" ];", last, lendif), None);
+            }
+            cond_state.lastexit = Some(exit_vertex_in_conditional);
         }
     }
 }

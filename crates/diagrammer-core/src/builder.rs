@@ -35,6 +35,8 @@ pub struct AstBuilder {
     logical_files: std::collections::HashMap<String, String>,
     explicit_vertex_colors: HashSet<String>,
     explicit_vertex_textcolors: HashSet<String>,
+    last_seen_vertex: Option<String>,
+    pending_endif_group: Option<String>,
 }
 
 impl Default for AstBuilder {
@@ -61,6 +63,8 @@ impl AstBuilder {
             logical_files: std::collections::HashMap::new(),
             explicit_vertex_colors: HashSet::new(),
             explicit_vertex_textcolors: HashSet::new(),
+            last_seen_vertex: None,
+            pending_endif_group: None,
         }
     }
 
@@ -473,6 +477,41 @@ impl AstBuilder {
         prefix
     }
 
+    fn record_vertex_seen(&mut self, name: &str) {
+        if let Some(endif_name) = self.pending_endif_group.take() {
+            self.set_group_conditional_exit_edge(&endif_name, name);
+        }
+        self.last_seen_vertex = Some(name.to_string());
+    }
+
+    fn set_group_conditional_exit_edge(&mut self, group_name: &str, exit_node: &str) {
+        fn set_in_objects(objects: &mut [GraphObject], group_name: &str, exit_node: &str) -> bool {
+            for obj in objects {
+                if let GraphObject::Group(grp) = obj {
+                    if grp.name == group_name {
+                        grp.conditional_exit_edge = Some(exit_node.to_string());
+                        return true;
+                    }
+                    if set_in_objects(&mut grp.objects, group_name, exit_node) {
+                        return true;
+                    }
+                }
+            }
+            false
+        }
+
+        for grp in self.group_stack.iter_mut().rev() {
+            if grp.name == group_name {
+                grp.conditional_exit_edge = Some(exit_node.to_string());
+                return;
+            }
+            if set_in_objects(&mut grp.objects, group_name, exit_node) {
+                return;
+            }
+        }
+        set_in_objects(&mut self.canvas.objects, group_name, exit_node);
+    }
+
     fn ensure_vertex_exists(&mut self, name: &str) {
         if !self.object_exists(name) {
             self.noedges.insert(name.to_string());
@@ -715,6 +754,7 @@ impl AstBuilder {
                     for pv in targets {
                         self.ensure_vertex_exists(&pv.name);
                         self.update_vertex_attrs(&pv);
+                        self.record_vertex_seen(&pv.name);
                     }
                 }
             }
@@ -751,6 +791,7 @@ impl AstBuilder {
                 let mut group = GraphGroup::new(&id.to_string());
                 group.pseudo_type = "GraphConditional".to_string();
                 group.conditional = Some("if".to_string());
+                group.conditional_entry_edge = self.last_seen_vertex.clone();
                 group.label = Some(label.to_string());
                 let exit_id = self.context.container_exit.unwrap_or(1);
                 group.exitvertex = Some(exit_id);
@@ -801,6 +842,8 @@ impl AstBuilder {
                 let exit_id = self.context.container_exit.unwrap_or(1);
                 endif_group.exitvertex = Some(exit_id);
                 self.context.container_exit = Some(exit_id + 1);
+                let endif_name = endif_group.name.clone();
+                self.pending_endif_group = Some(endif_name);
                 if let Some(parent) = self.group_stack.last_mut() {
                     parent.objects.push(GraphObject::Group(Box::new(endif_group)));
                 } else {
@@ -1629,6 +1672,7 @@ impl AstBuilder {
                         for pv in &targets {
                             self.ensure_vertex_exists(&pv.name);
                             self.update_vertex_attrs(pv);
+                            self.record_vertex_seen(&pv.name);
                             names.push(pv.name.clone());
                         }
                         current_incoming = targets;

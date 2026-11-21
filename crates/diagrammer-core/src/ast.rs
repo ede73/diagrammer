@@ -356,6 +356,10 @@ pub struct GraphGroup {
     pub exitvertex: Option<usize>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub conditional: Option<String>,
+    #[serde(rename = "_conditionalEntryEdge", skip_serializing_if = "Option::is_none")]
+    pub conditional_entry_edge: Option<String>,
+    #[serde(rename = "_conditionalExitEdge", skip_serializing_if = "Option::is_none")]
+    pub conditional_exit_edge: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -381,6 +385,8 @@ impl GraphGroup {
             is_inner_graph: false,
             exitvertex: None,
             conditional: None,
+            conditional_entry_edge: None,
+            conditional_exit_edge: None,
             color: None,
             textcolor: None,
             visualizer: None,

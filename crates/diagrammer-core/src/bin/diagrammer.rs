@@ -240,10 +240,7 @@ fn render_visualizer(visualizer: &str, code: &str, format: &str, output_path: Op
     };
 
     cmd.stdin(Stdio::piped());
-    let redirect_stdout = output_path.is_none();
-    if redirect_stdout {
-        cmd.stdout(Stdio::piped());
-    }
+    cmd.stdout(Stdio::piped());
 
     let mut child = cmd.spawn().map_err(|e| format!("Failed to spawn visualizer command: {}", e))?;
 

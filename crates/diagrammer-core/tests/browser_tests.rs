@@ -1674,6 +1674,87 @@ fn test_pure_rust_browser_state_recursive_linking_rendering() {
     println!("Pure Rust browser test passed: state_recursive_linking rendered all 10 nodes and 12 transitions.");
 }
 
+#[test]
+fn test_pure_rust_browser_shape_record_snippet_and_expressive_tooltips() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+
+    let tab = browser.new_tab().expect("Failed opening browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor not found");
+
+    let eval_script = r##"
+        (async () => {
+            // 1. Verify Shape Record snippet button exists and has expressive tooltip
+            const recordBtn = Array.from(document.querySelectorAll(".toolbarw li")).find(li => li.textContent.includes("Shape Record"));
+            const recordTooltip = recordBtn ? recordBtn.getAttribute("tooltip") : null;
+
+            // 2. Click Shape Record snippet button (addLine(13))
+            if (recordBtn) {
+                recordBtn.click();
+            } else if (window.addLine) {
+                window.addLine(13);
+            }
+            await new Promise(r => setTimeout(r, 400));
+
+            const editorText = window.getGraphText ? window.getGraphText() : "";
+            const hasShapeRecordInEditor = editorText.includes("shape record") && editorText.includes("<f0>");
+
+            // 3. Inspect expressive tooltips on shapes and arrows
+            const tooltips = Array.from(document.querySelectorAll("[tooltip]")).map(el => ({
+                text: el.textContent.trim() || el.getAttribute("alt") || "",
+                tooltip: el.getAttribute("tooltip")
+            }));
+
+            const expressiveRecordShape = tooltips.some(t => t.tooltip && t.tooltip.toLowerCase().includes("partitioned"));
+            const expressiveCondition = tooltips.some(t => t.tooltip && t.tooltip.toLowerCase().includes("decision diamond"));
+            const expressiveDirectedArrow = tooltips.some(t => t.tooltip && t.tooltip.toLowerCase().includes("standard"));
+
+            return JSON.stringify({
+                hasRecordBtn: recordBtn !== undefined && recordBtn !== null,
+                recordTooltip,
+                hasShapeRecordInEditor,
+                expressiveRecordShape,
+                expressiveCondition,
+                expressiveDirectedArrow,
+                totalTooltipCount: tooltips.length
+            });
+        })()
+    "##;
+
+    let res = tab.evaluate(eval_script, true).expect("Failed evaluating shape record and tooltips test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasRecordBtn").and_then(|v| v.as_bool()), Some(true), "Shape Record button must exist in snippets toolbar");
+    assert_eq!(val.get("hasShapeRecordInEditor").and_then(|v| v.as_bool()), Some(true), "Clicking Shape Record must insert snippet into editor");
+    assert_eq!(val.get("expressiveRecordShape").and_then(|v| v.as_bool()), Some(true), "Record shape must have expressive tooltip");
+    assert_eq!(val.get("expressiveCondition").and_then(|v| v.as_bool()), Some(true), "Condition shape must have expressive tooltip");
+    assert_eq!(val.get("expressiveDirectedArrow").and_then(|v| v.as_bool()), Some(true), "Directed arrow must have expressive tooltip");
+
+    // Move mouse over the Shape Record button to trigger the tooltip
+    if let Ok(el) = tab.find_element(".toolbarw li:nth-child(7)") {
+        let _ = el.move_mouse_over();
+        std::thread::sleep(std::time::Duration::from_millis(250));
+    }
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed capturing screenshot");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/shape_record_and_expressive_tooltips.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Shape Record snippet button inserts multi-field template and expressive tooltips verified across UI.");
+}
+
+
 
 
 

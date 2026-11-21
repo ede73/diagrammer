@@ -76,7 +76,7 @@ export function addLine(i) {
                 prependLine('start NODENAME\n');
                 break;
             case 6:
-                appendLine('//shapes: default, invis, record, dots, actor, cloud\n' + '//beginpoint,endpoint,condition,database,terminator,input,loopin,loopout\n' + '//square,ellipse,diamond,minidiamond,note,mail\n' + 'shape box\n');
+                appendLine('// Supported node shapes:\n// default, box, record, cloud, database, actor, condition\n// beginpoint, endpoint, display, document, dots, doublecircle\n// ellipse, folder, input, left, right, loop, loopin, loopout\n// mail, note, preparation, roundedbox, square, subroutine\nshape box\n');
                 break;
             case 7:
                 prependLine('equal node1,node2\n');
@@ -95,6 +95,9 @@ export function addLine(i) {
                 break;
             case 12:
                 prependLine('include "theme.diag"\n');
+                break;
+            case 13:
+                appendLine('shape record\nnode1;<f0> left | { <f1> top | <f2> bottom } | <f3> right\nnode2;fieldA | fieldB\nnode1:f1>node2\n');
                 break;
         }
     }

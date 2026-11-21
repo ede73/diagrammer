@@ -1132,6 +1132,46 @@ fn test_pure_rust_browser_sankey_dark_mode_rendering() {
     let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/sankey_dark_mode_verified_browser.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
+    // Query computed style of the Customer enter text
+    let text_eval = r##"
+    (() => {
+        const textEl = document.querySelector("#diagrammer-graph text");
+        if (!textEl) return JSON.stringify({ error: "no text element" });
+        const styles = window.getComputedStyle(textEl);
+        return JSON.stringify({
+            text: textEl.textContent,
+            fill: styles.fill,
+            stroke: styles.stroke,
+            strokeWidth: styles.strokeWidth,
+            fontSize: styles.fontSize,
+            paintOrder: styles.paintOrder,
+            attrFill: textEl.getAttribute("fill"),
+            attrStroke: textEl.getAttribute("stroke"),
+            attrStrokeWidth: textEl.getAttribute("stroke-width"),
+        });
+    })()
+    "##;
+    let text_res = tab.evaluate(text_eval, false).expect("Failed checking text styles");
+    let text_json = text_res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing text style json");
+    println!("Computed text styling in dark mode: {}", text_json);
+
+    let text_val: serde_json::Value = serde_json::from_str(&text_json).expect("Failed parsing text JSON");
+    assert_eq!(
+        text_val.get("attrStroke").and_then(|v| v.as_str()),
+        Some("#090d16"),
+        "Sankey text stroke must be dark halo (#090d16) to prevent white blob halo regression in dark mode"
+    );
+    assert_eq!(
+        text_val.get("attrFill").and_then(|v| v.as_str()),
+        Some("#ffffff"),
+        "Sankey text fill must be pure white (#ffffff) for maximum dark mode contrast"
+    );
+    assert_eq!(
+        text_val.get("fontSize").and_then(|v| v.as_str()),
+        Some("13px"),
+        "Sankey text font size must be 13px for crisp legibility"
+    );
+
     println!("Pure Rust browser test passed: Sankey dark-mode rendering verified with high-contrast text and vibrant gradient ribbons.");
 }
 

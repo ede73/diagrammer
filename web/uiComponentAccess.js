@@ -1,4 +1,5 @@
 import { findGeneratorForVisualization, visualizations } from './config.js';
+import { updateContextHelperBar } from './contextHelper.js';
 export function getHTMLElement(name) {
     const element = document.getElementById(name);
     if (!element) {
@@ -64,6 +65,7 @@ export function setVisualizer(visualizer) {
     }
 
     updateRuntimeBadge();
+    updateContextHelperBar(target);
     if (getSelectedVisualizer() !== visualizer) {
         console.error(`Somewhy visualizer change did not go thru, we wanted ${visualizer} and have ${getSelectedVisualizer()}`);
     }

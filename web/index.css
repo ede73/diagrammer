@@ -327,93 +327,151 @@ form[name="contact"] > button[onclick*="visualize"]:hover {
    Tooltips
    ========================================================================== */
 
+/* ==========================================================================
+   Tooltips (Driven by web/tooltip.js to prevent overflow-x clipping)
+   ========================================================================== */
+
 [tooltip] {
-    position: relative;
+    cursor: pointer;
 }
 
-[tooltip]::after {
-    content: attr(tooltip);
-    position: absolute;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%) translateY(4px);
-    background-color: var(--tooltip-bg);
-    color: var(--tooltip-text);
-    border: 1px solid var(--tooltip-border);
-    border-radius: var(--radius-sm);
-    padding: 5px 10px;
-    font-size: 11.5px;
-    font-weight: 500;
-    line-height: 1.4;
-    white-space: nowrap;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+/* Disable old CSS pseudo-element tooltips that clip inside scrollable toolbars */
+[tooltip]::after,
+[tooltip]::before {
+    display: none !important;
+    content: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+.diagrammer-global-tooltip {
+    position: fixed;
+    z-index: 999999;
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+    background-color: var(--tooltip-bg, #1a202c);
+    color: var(--tooltip-text, #f0f6fc);
+    border: 1px solid var(--tooltip-border, #3b4252);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1.45;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 0.15s ease, transform 0.15s ease;
-    z-index: 1000;
+    max-width: 360px;
+    word-wrap: break-word;
+    transition: opacity 0.12s ease;
 }
 
-[tooltip]:hover::after {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0);
+.diagrammer-global-tooltip .tt-title {
+    font-weight: 700;
+    font-size: 12.5px;
+    color: #58a6ff;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding-bottom: 3px;
 }
 
-/* Tooltip flyouts for left vertical sidebars */
-.sidebars-column [tooltip]::after {
-    bottom: auto;
-    top: 50%;
-    left: calc(100% + 10px);
-    transform: translateY(-50%) translateX(-6px);
+.diagrammer-global-tooltip .tt-line {
+    color: #e6edf3;
+    margin: 2px 0;
 }
 
-.sidebars-column [tooltip]:hover::after {
-    transform: translateY(-50%) translateX(0);
+.diagrammer-global-tooltip .tt-bullet {
+    color: #c9d1d9;
+    margin: 3px 0 3px 6px;
+    font-size: 11.5px;
 }
 
-.sidebars-column [tooltip]::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: calc(100% + 4px);
-    transform: translateY(-50%);
-    border-width: 5px 6px 5px 0;
-    border-style: solid;
-    border-color: transparent var(--tooltip-border) transparent transparent;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 0.15s ease;
-    z-index: 1001;
+.diagrammer-global-tooltip .tt-code {
+    background: rgba(110, 118, 129, 0.3);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: #79c0ff;
 }
 
-.sidebars-column [tooltip]:hover::before {
-    opacity: 1;
-    visibility: visible;
+/* ==========================================================================
+   Context-Sensitive Visualizer Helper Bar
+   ========================================================================== */
+
+.context-helper-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-surface, #1e222b);
+    border-bottom: 1px solid var(--border-color, #2d333b);
+    padding: 6px 12px;
+    font-size: 12px;
+    gap: 12px;
+    flex-wrap: wrap;
+    min-height: 38px;
+    box-sizing: border-box;
 }
 
-.htoolbar [tooltip]::before {
-    content: '';
-    position: absolute;
-    bottom: calc(125% - 5px);
-    left: 50%;
-    transform: translateX(-50%);
-    border-width: 5px 5px 0 5px;
-    border-style: solid;
-    border-color: var(--tooltip-border) transparent transparent transparent;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 0.15s ease;
-    z-index: 1001;
+.context-helper-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 260px;
 }
 
-.htoolbar [tooltip]:hover::before {
-    opacity: 1;
-    visibility: visible;
+.context-helper-badge {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.context-helper-syntax {
+    color: var(--text-secondary, #8b949e);
+    font-size: 12px;
+}
+
+.context-helper-syntax code {
+    background: rgba(110, 118, 129, 0.25);
+    color: #f0f6fc;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+}
+
+.context-helper-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.context-helper-pill {
+    background: var(--bg-input, #21262d);
+    color: var(--text-primary, #e6edf3);
+    border: 1px solid var(--border-color, #30363d);
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+}
+
+.context-helper-pill:hover {
+    background: var(--accent-blue, #1f6feb);
+    border-color: var(--accent-blue, #1f6feb);
+    color: #ffffff;
 }
 
 /* ==========================================================================

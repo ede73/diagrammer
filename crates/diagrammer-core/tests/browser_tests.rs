@@ -1754,6 +1754,118 @@ fn test_pure_rust_browser_shape_record_snippet_and_expressive_tooltips() {
     println!("Pure Rust browser test passed: Shape Record snippet button inserts multi-field template and expressive tooltips verified across UI.");
 }
 
+#[test]
+fn test_pure_rust_browser_context_sensitive_ui_and_sankey_helpers() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed creating browser tab");
+
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate to Diagrammer UI");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    std::thread::sleep(std::time::Duration::from_millis(600));
+
+    let eval_script = r##"
+        (async () => {
+            const helperBar = document.getElementById("context-helper-bar");
+            if (!helperBar) return JSON.stringify({ error: "Missing #context-helper-bar element" });
+
+            // 1. Select Sankey visualizer
+            window.setVisualizer("sankey");
+            await new Promise(r => setTimeout(r, 300));
+
+            const badge = helperBar.querySelector(".context-helper-badge");
+            const badgeText = badge ? badge.textContent.trim() : "";
+            const syntax = helperBar.querySelector(".context-helper-syntax");
+            const syntaxText = syntax ? syntax.textContent.trim() : "";
+
+            const pills = Array.from(helperBar.querySelectorAll(".context-helper-pill")).map(b => b.textContent.trim());
+
+            // 2. Click "+ 3-Stage Pipeline" pill
+            const pipelinePill = Array.from(helperBar.querySelectorAll(".context-helper-pill")).find(b => b.textContent.includes("3-Stage"));
+            if (pipelinePill) {
+                // Clear editor first so we have clean test graph
+                window.setGraphText("");
+                pipelinePill.click();
+            }
+            await new Promise(r => setTimeout(r, 1000));
+
+            const editorText = window.getGraphText ? window.getGraphText() : "";
+            const hasSankeyFlowInEditor = editorText.includes("visitors") && editorText.includes("signups");
+
+            // 3. Verify Sankey SVG rendered
+            const graphEl = document.querySelector("#diagrammer-graph");
+            const graphHtml = graphEl ? graphEl.innerHTML.substring(0, 200) : "";
+            const sankeyGroup = document.querySelector("#diagrammer-graph .diagrammer-sankey-svg");
+            const sankeyNodes = sankeyGroup ? sankeyGroup.querySelectorAll(".sankey-node").length : 0;
+            const sankeyLinks = sankeyGroup ? sankeyGroup.querySelectorAll(".sankey-links path").length : 0;
+
+            // 4. Test arrow multi-context tooltip (from 3rd htoolbar which contains arrow icons)
+            const arrowToolbars = document.querySelectorAll(".htoolbar");
+            const arrowToolbar = arrowToolbars.length >= 3 ? arrowToolbars[2] : null;
+            const firstArrow = arrowToolbar ? arrowToolbar.querySelector("li[tooltip]") : document.querySelector(".htoolbar img.edgeicon")?.closest("li");
+            let arrowTooltipRaw = "";
+            let globalTooltipHtml = "";
+            if (firstArrow) {
+                arrowTooltipRaw = firstArrow.getAttribute("tooltip") || "";
+                if (window.showTooltip) {
+                    window.showTooltip(firstArrow);
+                }
+                const ttEl = document.getElementById("diagrammer-global-tooltip");
+                if (ttEl) {
+                    globalTooltipHtml = ttEl.innerHTML;
+                }
+            }
+
+            return JSON.stringify({
+                badgeText,
+                syntaxText,
+                pills,
+                hasSankeyFlowInEditor,
+                graphHtml,
+                hasSankeySvg: sankeyGroup !== null,
+                sankeyNodes,
+                sankeyLinks,
+                arrowTooltipRaw,
+                arrowTooltipHasSankey: arrowTooltipRaw.includes("Sankey: Weighted flow"),
+                arrowTooltipHasSequence: arrowTooltipRaw.includes("Sequence / MSC"),
+                globalTooltipHtml
+            });
+        })()
+    "##;
+
+    let res = tab.evaluate(eval_script, true).expect("Failed evaluating context-sensitive UI test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("badgeText").and_then(|v| v.as_str()), Some("D3.js Flow"), "Badge must reflect D3.js Flow for Sankey");
+    assert_eq!(val.get("hasSankeyFlowInEditor").and_then(|v| v.as_bool()), Some(true), "Clicking 3-Stage Pipeline pill must insert weighted flows into editor");
+    assert_eq!(val.get("hasSankeySvg").and_then(|v| v.as_bool()), Some(true), "Sankey SVG must render in DOM");
+    assert!(val.get("sankeyNodes").and_then(|v| v.as_u64()).unwrap_or(0) >= 4, "Sankey graph must contain at least 4 nodes");
+    assert!(val.get("sankeyLinks").and_then(|v| v.as_u64()).unwrap_or(0) >= 3, "Sankey graph must contain at least 3 flow links");
+    assert_eq!(val.get("arrowTooltipHasSankey").and_then(|v| v.as_bool()), Some(true), "Arrow tooltip must describe multimodal Sankey behavior");
+    assert_eq!(val.get("arrowTooltipHasSequence").and_then(|v| v.as_bool()), Some(true), "Arrow tooltip must describe multimodal Sequence behavior");
+
+    // Move mouse over the arrow to show the floating tooltip in the screenshot
+    if let Ok(el) = tab.find_element(".htoolbar li:first-child") {
+        let _ = el.move_mouse_over();
+        std::thread::sleep(std::time::Duration::from_millis(300));
+    }
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed capturing screenshot");
+
+    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/context_sensitive_sankey_and_multicontext_tooltips.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Context-sensitive helper bar and Sankey pill insertion verified; expressive arrow tooltips verified.");
+}
+
 
 
 

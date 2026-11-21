@@ -108,20 +108,20 @@
     <!-- Third horizontal toolbar: Arrows -->
     <div class="htoolbar">
       <ul>
-        <li tooltip="Solid forward arrow (a1>b1): Standard directed transition" onclick="addLine('a1>b1');"><img class="edgeicon" src="arrows/a1.svg" alt="a1>b1" /></li>
-        <li tooltip="Dashed arrow (a2->b2): Asynchronous message or weak dependency" onclick="addLine('a2->b2');"><img class="edgeicon" src="arrows/a2.svg" alt="a2->b2" /></li>
-        <li tooltip="Dotted arrow (a3.>b3): Lightweight reference or event notification" onclick="addLine('a3.>b3');"><img class="edgeicon" src="arrows/a3.svg" alt="a3.>b3" /></li>
-        <li tooltip="Solid bidirectional (a4<>b4): Mutual synchronous connection" onclick="addLine('a4<>b4');"><img class="edgeicon" src="arrows/a4.svg" alt="a4<>b4" /></li>
-        <li tooltip="Dashed bidirectional (a5<->b5): Peer-to-peer data sync" onclick="addLine('a5<->b5');"><img class="edgeicon" src="arrows/a5.svg" alt="a5<->b5" /></li>
-        <li tooltip="Dotted bidirectional (a6<.>b6): Soft mutual association" onclick="addLine('a6<.>b6');"><img class="edgeicon" src="arrows/a6.svg" alt="a6<.>b6" /></li>
-        <li tooltip="Dashed line (a7-b7): Undirected dashed association" onclick="addLine('a7-b7');"><img class="edgeicon" src="arrows/a7.svg" alt="a7-b7" /></li>
-        <li tooltip="Dotted line (a8.b8): Undirected dotted link" onclick="addLine('a8.b8');"><img class="edgeicon" src="arrows/a8.svg" alt="a8.b8" /></li>
-        <li tooltip="Broken left link (a9</b9): Inhibited / failed reverse path" onclick="addLine('a9</b9');"><img class="edgeicon" src="arrows/b9.svg" alt="a9</b9" /></li>
-        <li tooltip="Broken right link (a10/>b10): Inhibited / failed forward path" onclick="addLine('a10/>b10');"><img class="edgeicon" src="arrows/a10.svg" alt="a10/>b10" /></li>
-        <li tooltip="Double arrow (a11>>b11): High-priority data pipeline / stream" onclick="addLine('a11>>b11');"><img class="edgeicon" src="arrows/a11.svg" alt="a11>>b11" /></li>
-        <li tooltip="T-stop inhibitor (a12-|b12): Blocking constraint / barrier edge" onclick="addLine('a12-|b12');"><img class="edgeicon" src="arrows/a12.svg" alt="a12-|b12" /></li>
-        <li tooltip="Double bidirectional (a13<<>>b13): High-bandwidth duplex bus" onclick="addLine('a13<<>>b13');"><img class="edgeicon" src="arrows/a13.svg" alt="a13<<>>b13" /></li>
-        <li tooltip="Parallel bar stop (a14||b14): Mutual synchronization boundary" onclick="addLine('a14||b14');"><img class="edgeicon" src="arrows/a14.svg" alt="a14||b14" /></li>
+        <li tooltip="Solid Forward Arrow (a&gt;b)&#10;• DAG / State: Directed edge or transition&#10;• Sequence / MSC: Synchronous call (a&gt;b: msg)&#10;• Sankey: Weighted flow (&quot;val&quot;a &gt; &quot;val&quot;b)&#10;• UML: Dependency or Association" onclick="addLine('a1>b1');"><img class="edgeicon" src="arrows/a1.svg" alt="a1>b1" /></li>
+        <li tooltip="Dashed Arrow (a-&gt;b)&#10;• Sequence / MSC: Asynchronous message or reply&#10;• UML: Realization or Interface implementation&#10;• DAG: Weak / deferred dependency" onclick="addLine('a2->b2');"><img class="edgeicon" src="arrows/a2.svg" alt="a2->b2" /></li>
+        <li tooltip="Dotted Arrow (a.&gt;b)&#10;• DAG / State: Event notification / trigger&#10;• Sequence / MSC: Signal broadcast&#10;• UML: Usage dependency" onclick="addLine('a3.>b3');"><img class="edgeicon" src="arrows/a3.svg" alt="a3.>b3" /></li>
+        <li tooltip="Solid Bidirectional (a&lt;&gt;b)&#10;• DAG: Mutual synchronous link&#10;• Sequence / MSC: Synchronous two-way handshake&#10;• UML: Bidirectional association" onclick="addLine('a4<>b4');"><img class="edgeicon" src="arrows/a4.svg" alt="a4<>b4" /></li>
+        <li tooltip="Dashed Bidirectional (a&lt;-&gt;b)&#10;• Sequence / MSC: Asynchronous duplex dialogue&#10;• DAG: Peer-to-peer data sync" onclick="addLine('a5<->b5');"><img class="edgeicon" src="arrows/a5.svg" alt="a5<->b5" /></li>
+        <li tooltip="Dotted Bidirectional (a&lt;.&gt;b)&#10;• DAG: Soft mutual association&#10;• Sequence / MSC: Loose broadcast link" onclick="addLine('a6<.>b6');"><img class="edgeicon" src="arrows/a6.svg" alt="a6<.>b6" /></li>
+        <li tooltip="Dashed Line / Separator (a-b)&#10;• Sequence / MSC: Phase divider (--- &quot;Phase&quot; ---)&#10;• DAG: Undirected association / constraint&#10;• Bus / Network: Shared backbone line" onclick="addLine('a7-b7');"><img class="edgeicon" src="arrows/a7.svg" alt="a7-b7" /></li>
+        <li tooltip="Dotted Line (a.b)&#10;• Sequence / MSC: Section boundary&#10;• DAG: Undirected dotted relation" onclick="addLine('a8.b8');"><img class="edgeicon" src="arrows/a8.svg" alt="a8.b8" /></li>
+        <li tooltip="Lost Message / Broken Left (a&lt;/b)&#10;• Sequence / MSC: Lost / unreceived message&#10;• DAG: Inhibited reverse path" onclick="addLine('a9</b9');"><img class="edgeicon" src="arrows/b9.svg" alt="a9</b9" /></li>
+        <li tooltip="Lost Message / Broken Right (a/&gt;b)&#10;• Sequence / MSC: Dropped message / timeout&#10;• DAG: Inhibited forward path" onclick="addLine('a10/>b10');"><img class="edgeicon" src="arrows/a10.svg" alt="a10/>b10" /></li>
+        <li tooltip="Double Arrow (a&gt;&gt;b)&#10;• DAG: High-priority streaming data pipeline&#10;• Sequence / MSC: Multi-cast broadcast" onclick="addLine('a11>>b11');"><img class="edgeicon" src="arrows/a11.svg" alt="a11>>b11" /></li>
+        <li tooltip="T-Stop Inhibitor (a-|b)&#10;• Sequence / MSC: Execution termination / stop&#10;• DAG: Blocking constraint / barrier edge" onclick="addLine('a12-|b12');"><img class="edgeicon" src="arrows/a12.svg" alt="a12-|b12" /></li>
+        <li tooltip="Double Bidirectional (a&lt;&lt;&gt;&gt;b)&#10;• DAG: Full-duplex hardware bus channel" onclick="addLine('a13<<>>b13');"><img class="edgeicon" src="arrows/a13.svg" alt="a13<<>>b13" /></li>
+        <li tooltip="Parallel Bar Stop (a||b)&#10;• DAG: Fork-join synchronization barrier&#10;• Sequence / MSC: Parallel execution barrier" onclick="addLine('a14||b14');"><img class="edgeicon" src="arrows/a14.svg" alt="a14||b14" /></li>
         <li><input type="button" class="zoom-btn" value="Open Window" onclick="openPicWindow();" /></li>
       </ul>
     </div>
@@ -210,6 +210,8 @@
             </ul>
 
             <div class="tab-content">
+              <!-- Context-Sensitive Visualizer Helper Bar -->
+              <div id="context-helper-bar" class="context-helper-bar"></div>
               <pre id="diagrammer-code"></pre>
             </div>
             <div class="tab-content" id="diagrammer-theme-pane">
@@ -265,6 +267,16 @@
   <script type="module">
     import { visualizations, getGeneratorFamilies } from './web/config.js'
     import { setVisualizer } from './web/uiComponentAccess.js'
+    import { initGlobalTooltips, showTooltip, hideTooltip } from './web/tooltip.js'
+    import { initContextHelper } from './web/contextHelper.js'
+
+    window.setVisualizer = setVisualizer;
+    window.showTooltip = showTooltip;
+    window.hideTooltip = hideTooltip;
+    window.initContextHelper = initContextHelper;
+
+    initGlobalTooltips();
+    initContextHelper();
 
     const genGroupSelect = document.getElementById('diagrammer-generator-group')
     if (genGroupSelect) {

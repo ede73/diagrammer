@@ -390,28 +390,35 @@ impl StateGraph {
             }
         }
 
-        // Determine Start node
-        let start_node_id = nodes
-            .values()
-            .find(|n| n.is_start)
-            .map(|n| n.id.clone())
-            .or_else(|| nodes.keys().next().cloned());
+        // Topological Longest-Path Ranking for DAG
+        let mut in_degree: HashMap<String, usize> = HashMap::new();
+        for id in nodes.keys() {
+            in_degree.entry(id.clone()).or_insert(0);
+        }
+        for succs in forward_adj.values() {
+            for s in succs {
+                *in_degree.entry(s.clone()).or_default() += 1;
+            }
+        }
 
-        if let Some(ref root) = start_node_id {
-            let mut visited = HashSet::new();
-            let mut queue = std::collections::VecDeque::new();
-            queue.push_back((root.clone(), 0usize));
-            visited.insert(root.clone());
+        let mut queue = std::collections::VecDeque::new();
+        for (id, &deg) in &in_degree {
+            if deg == 0 {
+                queue.push_back(id.clone());
+            }
+        }
 
-            while let Some((curr, r)) = queue.pop_front() {
-                if let Some(node) = nodes.get_mut(&curr) {
-                    node.rank = node.rank.max(r);
-                }
-                if let Some(succs) = forward_adj.get(&curr) {
-                    for s in succs {
-                        if !visited.contains(s) {
-                            visited.insert(s.clone());
-                            queue.push_back((s.clone(), r + 1));
+        while let Some(curr) = queue.pop_front() {
+            let curr_rank = nodes.get(&curr).map_or(0, |n| n.rank);
+            if let Some(succs) = forward_adj.get(&curr) {
+                for s in succs {
+                    if let Some(succ_node) = nodes.get_mut(s) {
+                        succ_node.rank = succ_node.rank.max(curr_rank + 1);
+                    }
+                    if let Some(deg) = in_degree.get_mut(s) {
+                        *deg = deg.saturating_sub(1);
+                        if *deg == 0 {
+                            queue.push_back(s.clone());
                         }
                     }
                 }
@@ -447,21 +454,42 @@ impl StateGraph {
             }
         }
 
+        // Group nodes by rank
+        let mut rank_nodes: HashMap<usize, Vec<String>> = HashMap::new();
+        for (id, node) in &nodes {
+            rank_nodes.entry(node.rank).or_default().push(id.clone());
+        }
+
+        let mut sorted_ranks: Vec<usize> = rank_nodes.keys().copied().collect();
+        sorted_ranks.sort();
+
         // 5. Dynamic Non-Overlapping Coordinates Calculation
         let mut max_w_by_col: HashMap<i32, f64> = HashMap::new();
-        for node in nodes.values() {
-            let entry = max_w_by_col.entry(node.column).or_insert(110.0);
-            *entry = entry.max(node.width);
+        for r in &sorted_ranks {
+            let node_ids = rank_nodes.get(r).unwrap();
+            let mut by_col_count: HashMap<i32, Vec<String>> = HashMap::new();
+            for id in node_ids {
+                if let Some(node) = nodes.get(id) {
+                    by_col_count.entry(node.column).or_default().push(id.clone());
+                }
+            }
+            for (col, c_ids) in by_col_count {
+                let count = c_ids.len();
+                let row_w: f64 = c_ids.iter().map(|id| nodes.get(id).map_or(110.0, |n| n.width)).sum::<f64>()
+                    + (count.saturating_sub(1) as f64) * 24.0;
+                let entry = max_w_by_col.entry(col).or_insert(110.0);
+                *entry = entry.max(row_w);
+            }
         }
 
         let w_left = max_w_by_col.get(&-1).copied().unwrap_or(0.0);
-        let w_center = max_w_by_col.get(&0).copied().unwrap_or(480.0);
+        let w_center = max_w_by_col.get(&0).copied().unwrap_or(480.0).max(480.0);
         let w_right = max_w_by_col.get(&1).copied().unwrap_or(0.0);
 
         let gutter_margin = 50.0f64;
         let column_gap = 60.0f64;
 
-        // Dynamic column centers ensuring strictly non-overlapping columns
+        // Dynamic column centers ensuring non-overlapping columns and positive coordinates
         let center_x = if w_left > 0.0 {
             gutter_margin + w_left + column_gap + w_center / 2.0
         } else {
@@ -474,29 +502,36 @@ impl StateGraph {
         let rank_gap = 55.0;
         let margin_top = 50.0;
 
-        let mut rank_nodes: HashMap<usize, Vec<String>> = HashMap::new();
-        for (id, node) in &nodes {
-            rank_nodes.entry(node.rank).or_default().push(id.clone());
-        }
-
-        let mut sorted_ranks: Vec<usize> = rank_nodes.keys().copied().collect();
-        sorted_ranks.sort();
-
         let mut current_y = margin_top;
         for r in &sorted_ranks {
             let node_ids = rank_nodes.get(r).unwrap();
             let mut max_h_in_rank = 44.0f64;
 
+            // Group nodes in this rank by column to distribute horizontally
+            let mut by_col: HashMap<i32, Vec<String>> = HashMap::new();
             for id in node_ids {
-                if let Some(node) = nodes.get_mut(id) {
-                    let col_x = match node.column {
-                        -1 => left_col_x,
-                        1 => right_col_x,
-                        _ => center_x,
-                    };
-                    node.x = col_x - (node.width / 2.0);
-                    node.y = current_y;
-                    max_h_in_rank = max_h_in_rank.max(node.height);
+                if let Some(node) = nodes.get(id) {
+                    by_col.entry(node.column).or_default().push(id.clone());
+                }
+            }
+
+            for (col, c_ids) in by_col {
+                let base_x = match col {
+                    -1 => left_col_x,
+                    1 => right_col_x,
+                    _ => center_x,
+                };
+                let count = c_ids.len();
+                let total_w: f64 = c_ids.iter().map(|id| nodes.get(id).map_or(110.0, |n| n.width)).sum::<f64>()
+                    + (count.saturating_sub(1) as f64) * 24.0;
+                let mut curr_x = base_x - total_w / 2.0;
+                for id in &c_ids {
+                    if let Some(node) = nodes.get_mut(id) {
+                        node.x = curr_x;
+                        node.y = current_y;
+                        curr_x += node.width + 24.0;
+                        max_h_in_rank = max_h_in_rank.max(node.height);
+                    }
                 }
             }
             current_y += max_h_in_rank + rank_gap;

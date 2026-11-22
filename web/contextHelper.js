@@ -253,3 +253,4 @@ export function initContextHelper() {
     const current = vizSelect ? vizSelect.value : 'ast_record';
     updateContextHelperBar(current);
 }
+

@@ -608,15 +608,17 @@
     window.fitGraph = fitGraph;
 
     // Toggle Debug Bounding Boxes Overlay
-    let showDebugBBoxes = false;
+    let userToggledDebugBBoxes = null;
     function updateBBoxVisibility() {
       const bboxes = document.querySelectorAll('.diagrammer-debug-bounding-boxes');
+      const hasDiagramDebug = Array.from(bboxes).some(el => el.getAttribute('data-diagram-debug') === 'true');
+      const shouldShow = userToggledDebugBBoxes !== null ? userToggledDebugBBoxes : hasDiagramDebug;
       bboxes.forEach(el => {
-        el.style.display = showDebugBBoxes ? 'inline' : 'none';
+        el.style.display = shouldShow ? 'inline' : 'none';
       });
       const btn = document.getElementById('diagrammer-debug-bbox-btn');
       if (btn) {
-        if (showDebugBBoxes) {
+        if (shouldShow) {
           btn.classList.add('active');
         } else {
           btn.classList.remove('active');
@@ -625,7 +627,10 @@
     }
 
     function toggleDebugBBoxes() {
-      showDebugBBoxes = !showDebugBBoxes;
+      const bboxes = document.querySelectorAll('.diagrammer-debug-bounding-boxes');
+      const hasDiagramDebug = Array.from(bboxes).some(el => el.getAttribute('data-diagram-debug') === 'true');
+      const current = userToggledDebugBBoxes !== null ? userToggledDebugBBoxes : hasDiagramDebug;
+      userToggledDebugBBoxes = !current;
       updateBBoxVisibility();
     }
     window.toggleDebugBBoxes = toggleDebugBBoxes;

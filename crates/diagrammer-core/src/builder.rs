@@ -84,36 +84,87 @@ fn preprocess_custom_shapes(input: &str) -> String {
             continue;
         }
 
-        let mut modified_line = line.to_string();
-        for shape in &custom_shapes {
-            let target = format!("{} ", shape);
-            let replacement = format!("__custom_shape__{} ", shape);
-            let mut res = String::new();
-            let mut remaining = modified_line.as_str();
-            while let Some(idx) = remaining.find(&target) {
-                let is_word_start = if idx == 0 {
-                    true
-                } else {
-                    let prev = remaining.as_bytes()[idx - 1];
-                    !prev.is_ascii_alphanumeric() && prev != b'_'
-                };
-                if is_word_start {
-                    res.push_str(&remaining[..idx]);
-                    res.push_str(&replacement);
-                    remaining = &remaining[idx + target.len()..];
-                } else {
-                    res.push_str(&remaining[..idx + shape.len()]);
-                    remaining = &remaining[idx + shape.len()..];
-                }
-            }
-            res.push_str(remaining);
-            modified_line = res;
-        }
+        let modified_line = rewrite_custom_shapes_in_line(line, &custom_shapes);
         output.push_str(&modified_line);
         output.push('\n');
     }
 
     output
+}
+
+fn rewrite_custom_shapes_in_line(line: &str, custom_shapes: &HashSet<String>) -> String {
+    let mut result = String::with_capacity(line.len() + 16);
+    let bytes = line.as_bytes();
+    let len = bytes.len();
+    let mut i = 0;
+    let mut in_quote: Option<u8> = None;
+
+    while i < len {
+        let b = bytes[i];
+
+        // Handle escape characters inside quotes
+        if in_quote.is_some() && b == b'\\' && i + 1 < len {
+            result.push(b as char);
+            result.push(bytes[i + 1] as char);
+            i += 2;
+            continue;
+        }
+
+        // Handle quote transitions
+        if in_quote.is_none() && (b == b'"' || b == b'\'') {
+            in_quote = Some(b);
+            result.push(b as char);
+            i += 1;
+            continue;
+        } else if in_quote == Some(b) {
+            in_quote = None;
+            result.push(b as char);
+            i += 1;
+            continue;
+        }
+
+        // If inside quote, keep character verbatim without shape replacement
+        if in_quote.is_some() {
+            result.push(b as char);
+            i += 1;
+            continue;
+        }
+
+        // Comment check: if "//" outside quotes, the rest of line is comment
+        if b == b'/' && i + 1 < len && bytes[i + 1] == b'/' {
+            result.push_str(&line[i..]);
+            break;
+        }
+
+        // Word start boundary check
+        let is_word_start = i == 0 || (!bytes[i - 1].is_ascii_alphanumeric() && bytes[i - 1] != b'_');
+        if is_word_start {
+            let mut matched_shape = None;
+            for shape in custom_shapes {
+                let slen = shape.len();
+                if i + slen <= len && &line[i..i + slen] == shape.as_str() {
+                    // Check word end boundary: followed by whitespace, '{', or '('
+                    let after = if i + slen < len { bytes[i + slen] } else { b' ' };
+                    if after.is_ascii_whitespace() || after == b'{' || after == b'(' {
+                        matched_shape = Some(shape.as_str());
+                        break;
+                    }
+                }
+            }
+
+            if let Some(shape) = matched_shape {
+                result.push_str("__custom_shape__");
+                result.push_str(shape);
+                i += shape.len();
+                continue;
+            }
+        }
+
+        result.push(b as char);
+        i += 1;
+    }
+
+    result
 }
 
 impl AstBuilder {
@@ -655,7 +706,7 @@ impl AstBuilder {
                 let raw = pair.as_str();
                 let val = raw.strip_prefix("debug").or_else(|| raw.strip_prefix("DEBUG"))
                     .unwrap_or(raw)
-                    .trim_start_matches(|c: char| c.is_whitespace() || c == ':' || c == '=')
+                    .trim_matches(|c: char| c.is_whitespace() || c == ':' || c == '=' || c == ';')
                     .trim();
                 let dbg_val = if val.is_empty() { "true".to_string() } else { val.to_string() };
                 if let Some(grp) = self.group_stack.last_mut() {
@@ -2419,5 +2470,47 @@ Admin > Org!Meta!name
         let edges = canvas.get_edges();
         assert!(edges.iter().any(|e| e.left == "User" && e.right == "Person!name"), "Edge User > Person!name must exist");
         assert!(edges.iter().any(|e| e.left == "Admin" && e.right == "Org!Meta!name"), "Edge Admin > Org!Meta!name must exist");
+    }
+
+    #[test]
+    fn test_bare_debug_and_debug_values() {
+        // 1. Bare debug statement
+        let canvas1 = AstBuilder::new().build("debug\na>b").expect("Bare debug should parse");
+        assert_eq!(canvas1.debug.as_deref(), Some("true"));
+
+        // 2. Bare debug with semicolon
+        let canvas2 = AstBuilder::new().build("debug;\na>b").expect("Debug with semicolon should parse");
+        assert_eq!(canvas2.debug.as_deref(), Some("true"));
+
+        // 3. Debug with bounding_boxes
+        let canvas3 = AstBuilder::new().build("debug bounding_boxes\na>b").expect("Debug bounding_boxes should parse");
+        assert_eq!(canvas3.debug.as_deref(), Some("bounding_boxes"));
+
+        // 4. Debug with hex color
+        let canvas4 = AstBuilder::new().build("debug: #ec4899\na>b").expect("Debug hex color should parse");
+        assert_eq!(canvas4.debug.as_deref(), Some("#ec4899"));
+    }
+
+    #[test]
+    fn test_custom_shape_preserves_quoted_labels() {
+        let input = r#"
+define auto {
+  rectangle(x=0, y=8, w=60, h=18, rx=4)
+}
+
+node1; "Calls auto again"
+node2; "auto mode enabled"
+// auto in comments should not be touched
+auto real_auto_node
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Custom shape with quoted text should parse");
+        let node1 = canvas.objects.iter().find(|o| o.get_name() == "node1").expect("node1 must exist");
+        assert_eq!(node1.get_label().as_deref(), Some("Calls auto again"));
+
+        let node2 = canvas.objects.iter().find(|o| o.get_name() == "node2").expect("node2 must exist");
+        assert_eq!(node2.get_label().as_deref(), Some("auto mode enabled"));
+
+        let real_node = canvas.objects.iter().find(|o| o.get_name() == "real_auto_node").expect("real_auto_node must exist");
+        assert_eq!(real_node.get_shape().as_deref(), Some("auto"));
     }
 }

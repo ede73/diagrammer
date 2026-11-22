@@ -51,10 +51,7 @@ impl Generator for DiGraph {
         }
 
         let default_shape = canvas.shape.as_deref();
-        let mut cond_state = ConditionalState {
-            lastexit: None,
-            lastendif: None,
-        };
+        let mut cond_state = ConditionalState::default();
         for obj in canvas.get_objects(false) {
             traverse_object(&mut formatter, obj, default_shape, canvas, &mut cond_state);
         }
@@ -180,9 +177,15 @@ impl Generator for DiGraph {
     }
 }
 
-struct ConditionalState {
+#[derive(Default, Debug, Clone)]
+struct ConditionalFrame {
     lastexit: Option<String>,
     lastendif: Option<String>,
+}
+
+#[derive(Default, Debug)]
+struct ConditionalState {
+    stack: Vec<ConditionalFrame>,
 }
 
 fn traverse_object(
@@ -252,21 +255,32 @@ fn process_a_group(
     if let Some(ref cond) = grp.conditional {
         formatter.lout(&format!("//COND {} {}", grp.name, cond), None);
         if cond == "endif" {
-            if let Some(ref exit_edge) = grp.conditional_exit_edge {
-                if let (Some(lexit), Some(lendif)) = (&cond_state.lastexit, &cond_state.lastendif) {
-                    formatter.lout(&format!("{}->{}[ color=red ];", lexit, lendif), None);
-                    formatter.lout(&format!("{}->{};", lendif, exit_edge), None);
+            if let Some(frame) = cond_state.stack.pop() {
+                if let Some(ref exit_edge) = grp.conditional_exit_edge {
+                    if let (Some(lexit), Some(lendif)) = (&frame.lastexit, &frame.lastendif) {
+                        formatter.lout(&format!("{}->{}[ color=red ];", lexit, lendif), None);
+                        formatter.lout(&format!("{}->{};", lendif, exit_edge), None);
+                    }
                 }
             }
-            cond_state.lastexit = None;
-            cond_state.lastendif = None;
         } else {
+            if cond == "if" {
+                cond_state.stack.push(ConditionalFrame::default());
+            }
+
             let exit_idx = grp.exitvertex.unwrap_or(1);
             let exit_vertex_in_conditional = format!("conditional_{}_{}", cond, exit_idx);
-            if cond_state.lastendif.is_none() {
+
+            if cond_state.stack.is_empty() {
+                cond_state.stack.push(ConditionalFrame::default());
+            }
+
+            let frame = cond_state.stack.last_mut().unwrap();
+
+            if frame.lastendif.is_none() {
                 let last_endif = format!("conditional_endif_{}", exit_idx);
                 formatter.lout(&format!("{}[ shape=circle, label=\"\", width=0.01, height=0.01 ];", last_endif), None);
-                cond_state.lastendif = Some(last_endif);
+                frame.lastendif = Some(last_endif);
             }
             let grp_lbl = grp.label.as_deref().unwrap_or("");
             formatter.lout(&format!("{}[ shape=diamond, fixedsize=true, width=1, height=1, label=\"{}\" ];", exit_vertex_in_conditional, grp_lbl), None);
@@ -277,7 +291,7 @@ fn process_a_group(
                 }
             }
 
-            if let Some(ref prev_exit) = cond_state.lastexit {
+            if let Some(ref prev_exit) = frame.lastexit {
                 formatter.lout(&format!("{}->{}[ label=\"NO\", color=red ];", prev_exit, exit_vertex_in_conditional), None);
             }
 
@@ -294,10 +308,10 @@ fn process_a_group(
                     None
                 );
             }
-            if let (Some(ref last), Some(lendif)) = (last_node, &cond_state.lastendif) {
+            if let (Some(ref last), Some(lendif)) = (last_node, &frame.lastendif) {
                 formatter.lout(&format!("{}->{}[ label=\"\" ];", last, lendif), None);
             }
-            cond_state.lastexit = Some(exit_vertex_in_conditional);
+            frame.lastexit = Some(exit_vertex_in_conditional);
         }
     }
 }
@@ -393,5 +407,41 @@ fn get_digraph_shape(shape: &str) -> (&'static str, Vec<(&'static str, &'static 
         "square" => ("square", vec![]),
         "subroutine" => ("rect", vec![("peripheries", "2")]),
         _ => ("box", vec![]),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::builder::AstBuilder;
+
+    #[test]
+    fn test_nested_conditionals_scoped_state() {
+        let input = r#"
+visualizer dot
+start_node > q
+if outer_cond then
+  if inner_cond then
+    a > b
+  else
+    c > d
+  endif
+elseif outer_cond_2 then
+  e > f
+else
+  g > h
+endif
+q > end_node
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST with nested conditionals");
+        let dot = DiGraph.generate(&canvas);
+
+        // Verify outer conditional routing to outer_cond_2 is preserved and not clobbered by inner endif
+        assert!(dot.contains("conditional_if_1"), "Outer diamond if must exist: {}", dot);
+        assert!(dot.contains("conditional_if_2"), "Inner diamond if must exist: {}", dot);
+        assert!(dot.contains("conditional_elseif_5"), "Outer elseif diamond must exist: {}", dot);
+        assert!(dot.contains("conditional_else_6"), "Outer else diamond must exist: {}", dot);
+        // Outer NO transition must link outer if to outer elseif
+        assert!(dot.contains("conditional_if_1->conditional_elseif_5[ label=\"NO\", color=red ];"), "Outer NO link must connect to outer elseif: {}", dot);
     }
 }

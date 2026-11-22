@@ -1850,16 +1850,17 @@ impl LayeredGraph {
         }
 
         // Render Debug Bounding Boxes Overlay
-        let (dbg_color, dbg_display) = if let Some(ref dbg_val) = self.debug_bounding_boxes {
+        let (dbg_color, dbg_display, dbg_attr) = if let Some(ref dbg_val) = self.debug_bounding_boxes {
             let c = if dbg_val.starts_with('#') { dbg_val.as_str() } else { "#f43f5e" };
-            (c, "inline")
+            (c, "inline", " data-diagram-debug=\"true\"")
         } else {
-            ("#f43f5e", "none")
+            ("#f43f5e", "none", "")
         };
 
         svg.push_str(&format!(
-            "  <!-- Debug Bounding Boxes Overlay -->\n  <g class=\"diagrammer-debug-bounding-boxes dl-debug-bounding-boxes\" style=\"display: {}; pointer-events: none;\">\n",
-            dbg_display
+            "  <!-- Debug Bounding Boxes Overlay -->\n  <g class=\"diagrammer-debug-bounding-boxes dl-debug-bounding-boxes\"{attr} style=\"display: {disp}; pointer-events: none;\">\n",
+            attr = dbg_attr,
+            disp = dbg_display
         ));
 
         // 1. Groups

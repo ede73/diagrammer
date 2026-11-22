@@ -68,6 +68,20 @@ fn get_test_url() -> String {
     format!("http://localhost:{}/?do_not_load_initial_example=1", port)
 }
 
+fn get_fixture_path(filename: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../tests/test_inputs")
+        .join(filename)
+}
+
+fn get_proof_path(filename: &str) -> PathBuf {
+    if let Ok(dir) = std::env::var("DIAGRAMMER_ARTIFACT_DIR") {
+        PathBuf::from(dir).join(filename)
+    } else {
+        std::env::temp_dir().join(filename)
+    }
+}
+
 #[test]
 fn test_pure_rust_browser_navigation_and_dom() {
     let browser = match create_headless_browser() {
@@ -656,7 +670,7 @@ fn test_pure_rust_browser_poly_9_rendering() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/poly_9_in_browser_proof.png");
+    let proof_path = get_proof_path("poly_9_in_browser_proof.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: poly_9 verified in browser DOM with 2 transitions and 1 cross-boundary edge.");
@@ -739,7 +753,7 @@ Station > Bay1
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/poly_6_cross_edges_browser_proof.png");
+    let proof_path = get_proof_path("poly_6_cross_edges_browser_proof.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: poly_6 verified in browser DOM with top entry (538.0) and bottom exit (790.0).");
@@ -959,7 +973,7 @@ fn test_pure_rust_browser_scoped_uml_members_routing() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/scoped_uml_verified_browser.png");
+    let proof_path = get_proof_path("scoped_uml_verified_browser.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: Scoped UML members routed directly between class containers without standalone nodes.");
@@ -978,7 +992,7 @@ fn test_pure_rust_browser_swimlane_poly_10_rendering() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-graph").expect("Failed finding diagrammer-graph");
 
-    let swimlane_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/poly_10_layered_swimlane_seq.txt")
+    let swimlane_code = std::fs::read_to_string(get_fixture_path("poly_10_layered_swimlane_seq.txt"))
         .expect("Failed reading poly_10_layered_swimlane_seq.txt");
     let code_json = serde_json::to_string(&swimlane_code).expect("Failed serializing code");
 
@@ -1030,7 +1044,7 @@ fn test_pure_rust_browser_swimlane_poly_10_rendering() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/poly_10_swimlane_verified_browser.png");
+    let proof_path = get_proof_path("poly_10_swimlane_verified_browser.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: Swimlane poly_10 rendered cleanly with 4 parallel lanes and cross-lane routing.");
@@ -1049,7 +1063,7 @@ fn test_pure_rust_browser_sankey_dark_mode_rendering() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-graph").expect("Failed finding diagrammer-graph");
 
-    let sankey_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/sankey.txt")
+    let sankey_code = std::fs::read_to_string(get_fixture_path("sankey.txt"))
         .expect("Failed reading sankey.txt");
     let code_json = serde_json::to_string(&sankey_code).expect("Failed serializing code");
 
@@ -1091,7 +1105,7 @@ fn test_pure_rust_browser_sankey_dark_mode_rendering() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/sankey_dark_mode_verified_browser.png");
+    let proof_path = get_proof_path("sankey_dark_mode_verified_browser.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     // Query computed style of the Customer enter text
@@ -1150,7 +1164,7 @@ fn test_pure_rust_browser_dendrogram_spec_reingold_tilford() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-graph").expect("Failed finding diagrammer-graph");
 
-    let spec_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/dendrogram_spec.txt")
+    let spec_code = std::fs::read_to_string(get_fixture_path("dendrogram_spec.txt"))
         .expect("Failed reading dendrogram_spec.txt");
     let code_json = serde_json::to_string(&spec_code).expect("Failed serializing code");
 
@@ -1198,7 +1212,7 @@ fn test_pure_rust_browser_dendrogram_spec_reingold_tilford() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/dendrogram_spec_verified_browser.png");
+    let proof_path = get_proof_path("dendrogram_spec_verified_browser.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     // Also capture 100% zoom view to verify readable text
@@ -1210,14 +1224,14 @@ fn test_pure_rust_browser_dendrogram_spec_reingold_tilford() {
     "##;
     let _ = tab.evaluate(crop_script, true);
     if let Ok(zoom_bytes) = tab.capture_screenshot(CaptureScreenshotFormatOption::Png, None, None, true) {
-        let zoom_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/dendrogram_spec_zoom_100.png");
+        let zoom_path = get_proof_path("dendrogram_spec_zoom_100.png");
         let _ = std::fs::write(&zoom_path, &zoom_bytes);
     }
 
     println!("Pure Rust browser test passed: Reingold-Tilford dendrogram_spec rendered cleanly with adapted dark colors.");
 
     // Now verify switching from dendrogram directly to dynamic_shapes.txt automatically resets to layered!
-    let shapes_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/dynamic_shapes.txt")
+    let shapes_code = std::fs::read_to_string(get_fixture_path("dynamic_shapes.txt"))
         .expect("Failed reading dynamic_shapes.txt");
     let shapes_json = serde_json::to_string(&shapes_code).expect("Failed serializing shapes_code");
 
@@ -1259,7 +1273,7 @@ fn test_pure_rust_browser_dendrogram_spec_reingold_tilford() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let shapes_proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/dynamic_shapes_verified_browser.png");
+    let shapes_proof_path = get_proof_path("dynamic_shapes_verified_browser.png");
     let _ = std::fs::write(&shapes_proof_path, &shapes_screenshot);
 
     println!("Pure Rust browser test passed: Switching to dynamic_shapes automatically reset to layered with custom SVG shapes.");
@@ -1364,7 +1378,7 @@ fn test_pure_rust_browser_record_style_graphviz_rendering() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
 
-    let record_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/record_style.txt")
+    let record_code = std::fs::read_to_string(get_fixture_path("record_style.txt"))
         .expect("Failed reading record_style.txt");
     let code_json = serde_json::to_string(&record_code).expect("Failed serializing code");
 
@@ -1406,7 +1420,7 @@ fn test_pure_rust_browser_record_style_graphviz_rendering() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/record_style_verified_browser.png");
+    let proof_path = get_proof_path("record_style_verified_browser.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: record_style Graphviz DOT rendered true partitioned record boxes with polylines.");
@@ -1423,7 +1437,7 @@ fn test_pure_rust_browser_state_conditionals_graphviz_rendering() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
 
-    let cond_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/state_conditionals.txt")
+    let cond_code = std::fs::read_to_string(get_fixture_path("state_conditionals.txt"))
         .expect("Failed reading state_conditionals.txt");
     let code_json = serde_json::to_string(&cond_code).expect("Failed serializing code");
 
@@ -1469,7 +1483,7 @@ fn test_pure_rust_browser_state_conditionals_graphviz_rendering() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/state_conditionals_browser_verified.png");
+    let proof_path = get_proof_path("state_conditionals_browser_verified.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: state_conditionals Graphviz DOT rendered fully connected conditional flowchart with clusters and edges.");
@@ -1486,7 +1500,7 @@ fn test_pure_rust_browser_state_images_rendering() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
 
-    let images_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/state_images.txt")
+    let images_code = std::fs::read_to_string(get_fixture_path("state_images.txt"))
         .expect("Failed reading state_images.txt");
     let code_json = serde_json::to_string(&images_code).expect("Failed serializing code");
 
@@ -1534,7 +1548,7 @@ fn test_pure_rust_browser_state_images_rendering() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/state_images_browser_verified.png");
+    let proof_path = get_proof_path("state_images_browser_verified.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: state_images rendered complete 21-node, 30-edge image network with icons.");
@@ -1551,7 +1565,7 @@ fn test_pure_rust_browser_state_innergroups_rendering() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
 
-    let innergroups_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/state_innergroups.txt")
+    let innergroups_code = std::fs::read_to_string(get_fixture_path("state_innergroups.txt"))
         .expect("Failed reading state_innergroups.txt");
     let code_json = serde_json::to_string(&innergroups_code).expect("Failed serializing code");
 
@@ -1601,7 +1615,7 @@ fn test_pure_rust_browser_state_innergroups_rendering() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/state_innergroups_browser_verified.png");
+    let proof_path = get_proof_path("state_innergroups_browser_verified.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: state_innergroups rendered nested clusters and compound links.");
@@ -1618,7 +1632,7 @@ fn test_pure_rust_browser_state_recursive_linking_rendering() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
 
-    let recursive_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/state_recursive_linking.txt")
+    let recursive_code = std::fs::read_to_string(get_fixture_path("state_recursive_linking.txt"))
         .expect("Failed reading state_recursive_linking.txt");
     let code_json = serde_json::to_string(&recursive_code).expect("Failed serializing code");
 
@@ -1668,7 +1682,7 @@ fn test_pure_rust_browser_state_recursive_linking_rendering() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/state_recursive_linking_browser_verified.png");
+    let proof_path = get_proof_path("state_recursive_linking_browser_verified.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: state_recursive_linking rendered all 10 nodes and 12 transitions.");
@@ -1748,7 +1762,7 @@ fn test_pure_rust_browser_shape_record_snippet_and_expressive_tooltips() {
         true,
     ).expect("Failed capturing screenshot");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/shape_record_and_expressive_tooltips.png");
+    let proof_path = get_proof_path("shape_record_and_expressive_tooltips.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: Shape Record snippet button inserts multi-field template and expressive tooltips verified across UI.");
@@ -1860,7 +1874,7 @@ fn test_pure_rust_browser_context_sensitive_ui_and_sankey_helpers() {
         true,
     ).expect("Failed capturing screenshot");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/context_sensitive_sankey_and_multicontext_tooltips.png");
+    let proof_path = get_proof_path("context_sensitive_sankey_and_multicontext_tooltips.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: Context-sensitive helper bar and Sankey pill insertion verified; expressive arrow tooltips verified.");
@@ -1931,7 +1945,7 @@ fn test_pure_rust_browser_node_hover_zoom_in() {
         true,
     ).expect("Failed capturing screenshot");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/node_hover_zoom_in_verified.png");
+    let proof_path = get_proof_path("node_hover_zoom_in_verified.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: Node shape button zooms in cleanly on hover (scale 1.6) for effortless readability.");

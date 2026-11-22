@@ -391,12 +391,70 @@ impl StateGraph {
             }
         }
 
-        // Topological Longest-Path Ranking for DAG
+        // Cycle breaking: Extract DAG adjacency via DFS to support cyclic state machines
+        let mut state_mark: HashMap<String, u8> = HashMap::new(); // 0: unvisited, 1: visiting (stack), 2: visited
+        let mut dag_adj: HashMap<String, Vec<String>> = HashMap::new();
+
+        let mut raw_in_degree: HashMap<String, usize> = HashMap::new();
+        for id in nodes.keys() {
+            raw_in_degree.entry(id.clone()).or_insert(0);
+        }
+        for succs in forward_adj.values() {
+            for s in succs {
+                *raw_in_degree.entry(s.clone()).or_default() += 1;
+            }
+        }
+
+        let mut sorted_roots: Vec<String> = nodes.keys().cloned().collect();
+        let canvas_start = canvas.start.clone();
+        sorted_roots.sort_by(|a, b| {
+            let a_start = canvas_start.as_ref() == Some(a);
+            let b_start = canvas_start.as_ref() == Some(b);
+            b_start.cmp(&a_start)
+                .then_with(|| raw_in_degree.get(a).unwrap_or(&0).cmp(raw_in_degree.get(b).unwrap_or(&0)))
+                .then_with(|| a.cmp(b))
+        });
+
+        fn dfs_dag(
+            u: &str,
+            forward_adj: &HashMap<String, Vec<String>>,
+            state_mark: &mut HashMap<String, u8>,
+            dag_adj: &mut HashMap<String, Vec<String>>,
+        ) {
+            state_mark.insert(u.to_string(), 1); // visiting
+            if let Some(succs) = forward_adj.get(u) {
+                for v in succs {
+                    match state_mark.get(v).copied().unwrap_or(0) {
+                        1 => {
+                            // Back-edge (cycle): omit from dag_adj
+                        }
+                        0 => {
+                            dag_adj.entry(u.to_string()).or_default().push(v.clone());
+                            dfs_dag(v, forward_adj, state_mark, dag_adj);
+                        }
+                        2 => {
+                            // Cross/forward edge acyclic with current recursion stack
+                            dag_adj.entry(u.to_string()).or_default().push(v.clone());
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            state_mark.insert(u.to_string(), 2); // visited
+        }
+
+        for root in &sorted_roots {
+            if state_mark.get(root).copied().unwrap_or(0) == 0 {
+                dfs_dag(root, &forward_adj, &mut state_mark, &mut dag_adj);
+            }
+        }
+
+        // Topological Longest-Path Ranking on acyclic dag_adj
         let mut in_degree: HashMap<String, usize> = HashMap::new();
         for id in nodes.keys() {
             in_degree.entry(id.clone()).or_insert(0);
         }
-        for succs in forward_adj.values() {
+        for succs in dag_adj.values() {
             for s in succs {
                 *in_degree.entry(s.clone()).or_default() += 1;
             }
@@ -411,7 +469,7 @@ impl StateGraph {
 
         while let Some(curr) = queue.pop_front() {
             let curr_rank = nodes.get(&curr).map_or(0, |n| n.rank);
-            if let Some(succs) = forward_adj.get(&curr) {
+            if let Some(succs) = dag_adj.get(&curr) {
                 for s in succs {
                     if let Some(succ_node) = nodes.get_mut(s) {
                         succ_node.rank = succ_node.rank.max(curr_rank + 1);
@@ -1354,16 +1412,17 @@ impl StateGraph {
         }
 
         // Render Debug Bounding Boxes Overlay
-        let (dbg_color, dbg_display) = if let Some(ref dbg_val) = self.debug_bounding_boxes {
+        let (dbg_color, dbg_display, dbg_attr) = if let Some(ref dbg_val) = self.debug_bounding_boxes {
             let c = if dbg_val.starts_with('#') { dbg_val.as_str() } else { "#f43f5e" };
-            (c, "inline")
+            (c, "inline", " data-diagram-debug=\"true\"")
         } else {
-            ("#f43f5e", "none")
+            ("#f43f5e", "none", "")
         };
 
         svg.push_str(&format!(
-            "  <!-- Debug Bounding Boxes Overlay -->\n  <g class=\"diagrammer-debug-bounding-boxes ds-debug-bounding-boxes\" style=\"display: {}; pointer-events: none;\">\n",
-            dbg_display
+            "  <!-- Debug Bounding Boxes Overlay -->\n  <g class=\"diagrammer-debug-bounding-boxes ds-debug-bounding-boxes\"{attr} style=\"display: {disp}; pointer-events: none;\">\n",
+            attr = dbg_attr,
+            disp = dbg_display
         ));
         for grp in &self.groups {
             svg.push_str(&format!(

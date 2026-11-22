@@ -168,8 +168,14 @@ impl Generator for DiGraph {
 
             let lcompass = edge.lcompass.as_deref().unwrap_or("").trim();
             let rcompass = edge.rcompass.as_deref().unwrap_or("").trim();
+            let ldir = if !lcompass.is_empty() {
+                if lcompass.starts_with(':') { lcompass.to_string() } else { format!(":{}", lcompass) }
+            } else { String::new() };
+            let rdir = if !rcompass.is_empty() {
+                if rcompass.starts_with(':') { rcompass.to_string() } else { format!(":{}", rcompass) }
+            } else { String::new() };
 
-            formatter.lout(&format!("{}{ldir}->{}{rdir}{t};", lhs_name, rhs_name, ldir = lcompass, rdir = rcompass, t = t), None);
+            formatter.lout(&format!("{}{ldir}->{}{rdir}{t};", lhs_name, rhs_name, ldir = ldir, rdir = rdir, t = t), None);
         }
 
         formatter.lout("}", Some(false));
@@ -443,5 +449,21 @@ q > end_node
         assert!(dot.contains("conditional_else_6"), "Outer else diamond must exist: {}", dot);
         // Outer NO transition must link outer if to outer elseif
         assert!(dot.contains("conditional_if_1->conditional_elseif_5[ label=\"NO\", color=red ];"), "Outer NO link must connect to outer elseif: {}", dot);
+    }
+
+    #[test]
+    fn test_compass_ports_parsing_and_dot_generation() {
+        let input = r#"
+visualizer dot
+a:se.>b:s,c:se
+q:ne>b:n
+q:e>c:ne
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST with compass directions");
+        let dot = DiGraph.generate(&canvas);
+        assert!(dot.contains("a:se->b:s[ style=\"dotted\" ];"), "Must include compass ports for dotted chain: {}", dot);
+        assert!(dot.contains("a:se->c:se[ style=\"dotted\" ];"), "Must include compass ports for dotted chain 2: {}", dot);
+        assert!(dot.contains("q:ne->b:n;"), "Must include compass ports for q:ne->b:n: {}", dot);
+        assert!(dot.contains("q:e->c:ne;"), "Must include compass ports for q:e->c:ne: {}", dot);
     }
 }

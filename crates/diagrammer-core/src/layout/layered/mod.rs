@@ -51,6 +51,8 @@ pub struct LayeredEdge {
     pub is_cross_boundary: bool,
     pub from_member: Option<String>,
     pub to_member: Option<String>,
+    pub lcompass: Option<String>,
+    pub rcompass: Option<String>,
 }
 
 /// A visual cluster container grouping multiple layered nodes
@@ -664,6 +666,8 @@ impl LayeredGraph {
                 is_cross_boundary: false,
                 from_member,
                 to_member,
+                lcompass: edge.lcompass.clone(),
+                rcompass: edge.rcompass.clone(),
             });
         }
 
@@ -877,6 +881,19 @@ impl LayeredGraph {
                         } else {
                             (u.x + u.width, u.y + u.height / 2.0)
                         }
+                    } else if let Some(ref comp) = edge.lcompass {
+                        let c = comp.trim_start_matches(':').to_lowercase();
+                        match c.as_str() {
+                            "n" => (u.x + u.width / 2.0, u.y),
+                            "ne" => (u.x + u.width, u.y),
+                            "e" => (u.x + u.width, u.y + u.height / 2.0),
+                            "se" => (u.x + u.width, u.y + u.height),
+                            "s" => (u.x + u.width / 2.0, u.y + u.height),
+                            "sw" => (u.x, u.y + u.height),
+                            "w" => (u.x, u.y + u.height / 2.0),
+                            "nw" => (u.x, u.y),
+                            _ => (u.x + u.width / 2.0, u.y + u.height),
+                        }
                     } else if !is_lr {
                         let frac = (i as f64 + 1.0) / (count as f64 + 1.0);
                         (u.x + u.width * frac, u.y + u.height)
@@ -911,6 +928,19 @@ impl LayeredGraph {
                             (v.x, member_y)
                         } else {
                             (v.x, v.y + v.height / 2.0)
+                        }
+                    } else if let Some(ref comp) = edge.rcompass {
+                        let c = comp.trim_start_matches(':').to_lowercase();
+                        match c.as_str() {
+                            "n" => (v.x + v.width / 2.0, v.y),
+                            "ne" => (v.x + v.width, v.y),
+                            "e" => (v.x + v.width, v.y + v.height / 2.0),
+                            "se" => (v.x + v.width, v.y + v.height),
+                            "s" => (v.x + v.width / 2.0, v.y + v.height),
+                            "sw" => (v.x, v.y + v.height),
+                            "w" => (v.x, v.y + v.height / 2.0),
+                            "nw" => (v.x, v.y),
+                            _ => (v.x + v.width / 2.0, v.y),
                         }
                     } else if !is_lr {
                         let frac = (j as f64 + 1.0) / (count as f64 + 1.0);
@@ -1568,6 +1598,8 @@ impl LayeredGraph {
                 is_cross_boundary: true,
                 from_member: None,
                 to_member: None,
+                lcompass: e.lcompass.clone(),
+                rcompass: e.rcompass.clone(),
             });
         }
 

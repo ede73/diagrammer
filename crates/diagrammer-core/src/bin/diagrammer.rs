@@ -98,7 +98,7 @@ fn main() {
                 .unwrap_or("dot");
 
             if effective_gen == "ast" {
-                match serde_json::to_string(&canvas) {
+                match serde_json::to_string_pretty(&canvas) {
                     Ok(json) => println!("{}", json),
                     Err(e) => {
                         eprintln!("Serialization error: {}", e);

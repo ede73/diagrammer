@@ -16,6 +16,7 @@ struct ParsedVertex {
     edge_label: Option<String>,
     textcolor: Option<String>,
     url: Option<String>,
+    compass: Option<String>,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -1565,6 +1566,9 @@ impl AstBuilder {
                         .unwrap_or(s);
                     pv.image = Some(unquoted.to_string());
                 }
+                Rule::COMPASS => {
+                    pv.compass = Some(p.as_str().trim().to_string());
+                }
                 Rule::vertex_name_spec => {
                     self.extract_vertex_attrs_inner(p, pv, custom_type_name, parsed_name);
                 }
@@ -1781,7 +1785,7 @@ impl AstBuilder {
         #[derive(Default, Clone)]
         struct ChainNode {
             incoming: Vec<ParsedVertex>,
-            outgoing: Vec<String>,
+            outgoing: Vec<ParsedVertex>,
             connector: Option<ConnectorData>,
             inner_id: Option<String>,
             inner_edges: Vec<GraphObject>,
@@ -1789,7 +1793,7 @@ impl AstBuilder {
 
         let mut elements: Vec<ChainNode> = Vec::new();
         let mut current_incoming: Vec<ParsedVertex> = Vec::new();
-        let mut current_outgoing = Vec::new();
+        let mut current_outgoing: Vec<ParsedVertex> = Vec::new();
         let mut current_inner_id = None;
         let mut current_inner_edges = Vec::new();
         let mut common_chain_label: Option<String> = None;
@@ -1805,7 +1809,13 @@ impl AstBuilder {
                             ..Default::default()
                         })
                         .collect();
-                    current_outgoing = exits;
+                    current_outgoing = exits
+                        .iter()
+                        .map(|n| ParsedVertex {
+                            name: n.clone(),
+                            ..Default::default()
+                        })
+                        .collect();
                     current_inner_id = Some(id);
                     current_inner_edges = inner_edges;
                 }
@@ -1829,20 +1839,24 @@ impl AstBuilder {
                                 ..Default::default()
                             })
                             .collect();
-                        current_outgoing = exits;
+                        current_outgoing = exits
+                            .iter()
+                            .map(|n| ParsedVertex {
+                                name: n.clone(),
+                                ..Default::default()
+                            })
+                            .collect();
                         current_inner_id = Some(id);
                         current_inner_edges = inner_edges;
                     } else {
                         let targets = self.collect_vertex_targets(item);
-                        let mut names = Vec::new();
                         for pv in &targets {
                             self.ensure_vertex_exists(&pv.name);
                             self.update_vertex_attrs(pv);
                             self.record_vertex_seen(&pv.name);
-                            names.push(pv.name.clone());
                         }
+                        current_outgoing = targets.clone();
                         current_incoming = targets;
-                        current_outgoing = names;
                     }
                 }
                 Rule::edge_connector => {
@@ -1944,7 +1958,7 @@ impl AstBuilder {
                 for rhs in rhs_targets {
                     let mut edge = EdgeRef::new(
                         conn.event_type.clone(),
-                        lhs.clone(),
+                        lhs.name.clone(),
                         rhs.name.clone(),
                     );
                     if let Some(ref c) = conn.color {
@@ -1953,8 +1967,8 @@ impl AstBuilder {
                     } else {
                         edge.color = self.find_default_edgecolor();
                     }
-                    edge.lcompass = conn.lcompass.clone();
-                    edge.rcompass = conn.rcompass.clone();
+                    edge.lcompass = conn.lcompass.clone().or_else(|| lhs.compass.clone());
+                    edge.rcompass = conn.rcompass.clone().or_else(|| rhs.compass.clone());
                     let edge_label = if self.is_group(&rhs.name) {
                         None
                     } else {
@@ -1995,7 +2009,7 @@ impl AstBuilder {
 
                     self.canvas.objects.push(GraphObject::Edge { edge });
                     self.maybe_remove_from_root_vertices(&rhs.name);
-                    self.noedges.remove(lhs);
+                    self.noedges.remove(&lhs.name);
                     self.noedges.remove(&rhs.name);
                 }
             }
@@ -2010,8 +2024,8 @@ impl AstBuilder {
         if let Some(grp) = self.group_stack.last_mut() {
             if let Some(last_elem) = elements.last() {
                 for node in &last_elem.outgoing {
-                    if !grp.chain_terminals.contains(node) {
-                        grp.chain_terminals.push(node.clone());
+                    if !grp.chain_terminals.contains(&node.name) {
+                        grp.chain_terminals.push(node.name.clone());
                     }
                 }
             }

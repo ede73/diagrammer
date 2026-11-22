@@ -767,7 +767,8 @@ img.iconicon {
     border: none;
     outline: none;
     resize: none;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: auto;
     white-space: pre;
     word-break: normal;
     overflow-wrap: normal;
@@ -780,10 +781,24 @@ img.iconicon {
     height: 100%;
     min-height: 0;
     padding: 16px;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: auto;
     background-color: var(--bg-input);
     color: var(--text-primary);
     box-sizing: border-box;
+}
+
+#diagrammer-beautified .jsontree_tree {
+    min-width: max-content;
+    white-space: nowrap;
+}
+
+#diagrammer-beautified .jsontree_node {
+    white-space: nowrap;
+}
+
+#diagrammer-beautified .jsontree_value-wrapper {
+    overflow: visible;
 }
 
 .beautified-notice {
@@ -803,8 +818,10 @@ img.iconicon {
     font-size: 12px;
     line-height: 1.5;
     color: var(--text-primary);
-    white-space: pre-wrap;
-    word-break: break-word;
+    white-space: pre;
+    word-break: normal;
+    overflow-wrap: normal;
+    min-width: max-content;
 }
 
 .beautified-empty {

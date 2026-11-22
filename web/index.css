@@ -895,6 +895,12 @@ img.iconicon {
     border-color: var(--text-muted);
 }
 
+.zoom-btn.active {
+    background-color: rgba(236, 72, 153, 0.15);
+    border-color: #ec4899;
+    color: #f43f5e;
+}
+
 .graph-viewport {
     flex: 1;
     overflow: auto;

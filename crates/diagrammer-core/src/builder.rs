@@ -651,6 +651,18 @@ impl AstBuilder {
                     }
                 }
             }
+            Rule::debug_stmt => {
+                let raw = pair.as_str();
+                let val = raw.strip_prefix("debug").or_else(|| raw.strip_prefix("DEBUG"))
+                    .unwrap_or(raw)
+                    .trim_start_matches(|c: char| c.is_whitespace() || c == ':' || c == '=')
+                    .trim();
+                let dbg_val = if val.is_empty() { "true".to_string() } else { val.to_string() };
+                if let Some(grp) = self.group_stack.last_mut() {
+                    grp.debug = Some(dbg_val.clone());
+                }
+                self.canvas.debug = Some(dbg_val);
+            }
             Rule::start => {
                 if let Some(p) = pair.into_inner().find(|p| p.as_rule() == Rule::NAME) {
                     self.canvas.start = Some(p.as_str().trim().to_string());
@@ -788,6 +800,9 @@ impl AstBuilder {
                 }
                 if let Some(eng) = layout.get("engine") {
                     self.canvas.visualizer = Some(eng.to_string());
+                }
+                if let Some(dbg) = layout.get("debug") {
+                    self.canvas.debug = Some(dbg.to_string());
                 }
                 self.canvas.layout = Some(layout);
             }

@@ -100,6 +100,7 @@ pub struct StateGraph {
     pub default_node_color: Option<String>,
     pub default_edge_color: Option<String>,
     pub type_registry: crate::ast::TypeRegistry,
+    pub debug_bounding_boxes: Option<String>,
 }
 
 impl StateGraph {
@@ -1056,6 +1057,10 @@ impl StateGraph {
         };
         let max_h = current_y + 60.0;
 
+        let debug_bounding_boxes = canvas.debug.clone()
+            .or_else(|| canvas.layout.as_ref().and_then(|l| l.get("debug")).map(|s| s.to_string()))
+            .or_else(|| std::env::var("DEBUG_BBOX").ok());
+
         Self {
             nodes,
             groups,
@@ -1066,6 +1071,7 @@ impl StateGraph {
             default_node_color: canvas.defaults.vertexcolor.clone(),
             default_edge_color: canvas.defaults.edgecolor.clone(),
             type_registry: canvas.type_registry.clone(),
+            debug_bounding_boxes,
         }
     }
 
@@ -1346,6 +1352,38 @@ impl StateGraph {
             }
             svg.push_str("  </g>\n");
         }
+
+        // Render Debug Bounding Boxes Overlay
+        let (dbg_color, dbg_display) = if let Some(ref dbg_val) = self.debug_bounding_boxes {
+            let c = if dbg_val.starts_with('#') { dbg_val.as_str() } else { "#f43f5e" };
+            (c, "inline")
+        } else {
+            ("#f43f5e", "none")
+        };
+
+        svg.push_str(&format!(
+            "  <!-- Debug Bounding Boxes Overlay -->\n  <g class=\"diagrammer-debug-bounding-boxes ds-debug-bounding-boxes\" style=\"display: {}; pointer-events: none;\">\n",
+            dbg_display
+        ));
+        for grp in &self.groups {
+            svg.push_str(&format!(
+                r##"    <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="none" stroke="#ec4899" stroke-width="2.0" stroke-dasharray="6,4" />
+<text x="{:.1}" y="{:.1}" font-size="10" font-weight="700" font-family="monospace" fill="#ec4899">group: {} [{:.1}, {:.1}, {:.1}, {:.1}]</text>
+"##,
+                grp.x, grp.y, grp.width, grp.height,
+                grp.x + 6.0, grp.y + 14.0, grp.id, grp.x, grp.y, grp.width, grp.height
+            ));
+        }
+        for node in self.nodes.values() {
+            svg.push_str(&format!(
+                r##"    <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="none" stroke="{}" stroke-width="1.5" stroke-dasharray="4,3" />
+<text x="{:.1}" y="{:.1}" font-size="9" font-weight="600" font-family="monospace" fill="{}">node: {} [{:.1}, {:.1}, {:.1}, {:.1}]</text>
+"##,
+                node.x, node.y, node.width, node.height, dbg_color,
+                node.x + 4.0, (node.y - 4.0).max(10.0), dbg_color, node.id, node.x, node.y, node.width, node.height
+            ));
+        }
+        svg.push_str("  </g>\n\n");
 
         svg.push_str("</svg>\n");
         svg

@@ -244,6 +244,7 @@
               <button type="button" class="zoom-btn" onclick="zoomGraph(0.8);return false;" title="Zoom out">−</button>
               <button type="button" class="zoom-btn" onclick="resetZoomGraph();return false;" title="Reset zoom (100%)">100%</button>
               <button type="button" class="zoom-btn" onclick="fitGraph();return false;" title="Fit graph to view">Fit</button>
+              <button type="button" class="zoom-btn" id="diagrammer-debug-bbox-btn" onclick="toggleDebugBBoxes();return false;" title="Toggle Bounding Boxes Debug Overlay">BBoxes</button>
             </div>
           </div>
           <div id="diagrammer-graph-viewport" class="graph-viewport">
@@ -605,6 +606,30 @@
     window.zoomGraph = zoomGraph;
     window.resetZoomGraph = resetZoomGraph;
     window.fitGraph = fitGraph;
+
+    // Toggle Debug Bounding Boxes Overlay
+    let showDebugBBoxes = false;
+    function updateBBoxVisibility() {
+      const bboxes = document.querySelectorAll('.diagrammer-debug-bounding-boxes');
+      bboxes.forEach(el => {
+        el.style.display = showDebugBBoxes ? 'inline' : 'none';
+      });
+      const btn = document.getElementById('diagrammer-debug-bbox-btn');
+      if (btn) {
+        if (showDebugBBoxes) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      }
+    }
+
+    function toggleDebugBBoxes() {
+      showDebugBBoxes = !showDebugBBoxes;
+      updateBBoxVisibility();
+    }
+    window.toggleDebugBBoxes = toggleDebugBBoxes;
+    window.updateBBoxVisibility = updateBBoxVisibility;
 
     // Wheel zoom inside graph viewport
     const viewport = document.getElementById('diagrammer-graph-viewport');

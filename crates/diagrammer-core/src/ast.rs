@@ -366,6 +366,8 @@ pub struct GraphGroup {
     pub textcolor: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub visualizer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub debug: Option<String>,
     #[serde(skip)]
     pub chain_terminals: Vec<String>,
     #[serde(skip)]
@@ -390,6 +392,7 @@ impl GraphGroup {
             color: None,
             textcolor: None,
             visualizer: None,
+            debug: None,
             chain_terminals: Vec::new(),
             is_scoped: false,
         }
@@ -686,6 +689,8 @@ pub struct GraphCanvas {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub visualizer: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub debug: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub direction: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub start: Option<String>,
@@ -713,6 +718,7 @@ impl Default for GraphCanvas {
             equal: Vec::new(),
             objects: Vec::new(),
             visualizer: None,
+            debug: None,
             direction: None,
             start: None,
             shape: None,

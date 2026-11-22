@@ -48,6 +48,8 @@ landscape = @{ (^"landscape" | ^"horizontal" | ^"lr") ~ !(ASCII_ALPHANUMERIC | "
 portrait = @{ (^"portrait" | ^"vertical" | ^"td") ~ !(ASCII_ALPHANUMERIC | "_") }
 VISUALIZER_KW = @{ ^"visualizer" ~ !(ASCII_ALPHANUMERIC | "_") }
 visualizer = { VISUALIZER_KW ~ NAME }
+DEBUG_KW = @{ ^"debug" ~ !(ASCII_ALPHANUMERIC | "_") }
+debug_stmt = { DEBUG_KW ~ (":" | "=")? ~ (ASCII_ALPHANUMERIC | "_" | "-" | "#")+ }
 START_KW = @{ ^"start" ~ !(ASCII_ALPHANUMERIC | "_") }
 start = { START_KW ~ NAME }
 EQUAL_KW = @{ ^"equal" ~ !(ASCII_ALPHANUMERIC | "_") }
@@ -182,6 +184,7 @@ statement = {
     landscape
   | portrait
   | visualizer
+  | debug_stmt
   | start
   | equal
   | shape_decl

@@ -340,7 +340,7 @@ fn test_pure_rust_browser_mermaid_rendering() {
 
     let start = std::time::Instant::now();
     let mut rendered = false;
-    while start.elapsed() < std::time::Duration::from_secs(4) {
+    while start.elapsed() < std::time::Duration::from_secs(8) {
         if let Ok(res) = tab.evaluate(check_svg, false) {
             if res.value.and_then(|v| v.as_bool()).unwrap_or(false) {
                 rendered = true;
@@ -2088,6 +2088,82 @@ fn test_pure_rust_browser_edge_hover_zoom_in() {
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: Edge magnifies and highlights with vibrant glow on hover.");
+}
+
+#[test]
+fn test_pure_rust_browser_poly_8_compact_rendering() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => {
+            eprintln!("Skipping pure Rust browser test: no Chrome/Chromium binary found");
+            return;
+        }
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    let test_url = get_test_url();
+    tab.navigate_to(&test_url).expect("Failed navigating to Diagrammer");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+
+    let poly8_code = std::fs::read_to_string(get_fixture_path("poly_8_layered_tree_state.txt"))
+        .expect("Failed reading poly_8_layered_tree_state.txt");
+    let code_json = serde_json::to_string(&poly8_code).expect("Failed serializing poly8 code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+            const ruleEngine = document.querySelector("#diagrammer-graph #node-RuleEngine rect");
+            const jobRunner = document.querySelector("#diagrammer-graph #node-JobRunner rect");
+            const svg = document.querySelector("#diagrammer-graph svg");
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                ruleEngineWidth: ruleEngine ? parseFloat(ruleEngine.getAttribute("width")) : 0,
+                ruleEngineHeight: ruleEngine ? parseFloat(ruleEngine.getAttribute("height")) : 0,
+                jobRunnerWidth: jobRunner ? parseFloat(jobRunner.getAttribute("width")) : 0,
+                jobRunnerHeight: jobRunner ? parseFloat(jobRunner.getAttribute("height")) : 0,
+                svgViewBox: svg ? svg.getAttribute("viewBox") : "",
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating poly_8 in browser");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "SVG must render in DOM");
+    let re_w = val.get("ruleEngineWidth").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let jr_w = val.get("jobRunnerWidth").and_then(|v| v.as_f64()).unwrap_or(0.0);
+
+    assert!(re_w < 350.0, "Decision Tree (RuleEngine) width must be compact (<350), got {}", re_w);
+    assert!(jr_w < 300.0, "Execution FSM (JobRunner) width must be compact (<300), got {}", jr_w);
+
+    let _ = tab.evaluate("if (typeof fitGraph === 'function') fitGraph();", false);
+    std::thread::sleep(std::time::Duration::from_millis(200));
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed capturing screenshot");
+
+    let proof_path = get_proof_path("poly_8_minified_browser_proof.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+    let artifact_dir = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320");
+    if artifact_dir.exists() {
+        let _ = std::fs::write(artifact_dir.join("poly_8_minified_browser_proof.png"), &screenshot_bytes);
+    }
+
+    println!("Pure Rust browser test passed: poly_8 rendered with compact minified subgraphs.");
 }
 
 

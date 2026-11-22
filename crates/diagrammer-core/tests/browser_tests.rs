@@ -1636,8 +1636,8 @@ fn test_pure_rust_browser_state_recursive_linking_rendering() {
             }}
             const svg = document.querySelector("#diagrammer-graph svg");
             const nodes = svg ? svg.querySelectorAll("g.dl-node, g.node").length : 0;
-            const edges = svg ? svg.querySelectorAll("path.ds-edge, g.edge").length : 0;
-            const groups = svg ? svg.querySelectorAll("g.ds-group, g.cluster").length : 0;
+            const edges = svg ? svg.querySelectorAll("path.ds-edge, path.dl-edge-path, g.edge").length : 0;
+            const groups = svg ? svg.querySelectorAll("g.ds-group, g.dl-group, g.cluster").length : 0;
             const nodeIds = svg ? Array.from(svg.querySelectorAll("g.dl-node, g.node")).map(n => n.id || n.textContent.trim()) : [];
             return JSON.stringify({{
                 hasSvg: svg !== null,

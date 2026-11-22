@@ -957,36 +957,68 @@ impl StateGraph {
                         if obs.id == u.id || obs.id == v.id {
                             continue;
                         }
+                        // Skip enclosing cluster groups that contain both u and v (or either endpoint)
+                        let is_enclosing_group = groups.iter().any(|g| {
+                            g.id == obs.id && (g.member_nodes.contains(&u.id) || g.member_nodes.contains(&v.id))
+                        });
+                        if is_enclosing_group {
+                            continue;
+                        }
+
                         if obs.y < line_y_max && (obs.y + obs.height) > line_y_min {
-                            if line_x_center >= (obs.x - 5.0) && line_x_center <= (obs.x + obs.width + 5.0) {
+                            let obs_left = obs.x - 5.0;
+                            let obs_right = obs.x + obs.width + 5.0;
+                            let x_min = p_start.0.min(p_end.0);
+                            let x_max = p_start.0.max(p_end.0);
+                            if (line_x_center >= obs_left && line_x_center <= obs_right)
+                                || (x_max >= obs_left && x_min <= obs_right)
+                            {
                                 hits_obstacle = true;
                                 break;
                             }
                         }
                     }
 
+                    // Also check for intermediate nodes between u and v
+                    if !hits_obstacle {
+                        for other in nodes.values() {
+                            if other.id == u.id || other.id == v.id {
+                                continue;
+                            }
+                            if other.y < line_y_max && (other.y + other.height) > line_y_min {
+                                let other_left = other.x - 4.0;
+                                let other_right = other.x + other.width + 4.0;
+                                let x_min = p_start.0.min(p_end.0);
+                                let x_max = p_start.0.max(p_end.0);
+                                if (line_x_center >= other_left && line_x_center <= other_right)
+                                    || (x_max >= other_left && x_min <= other_right)
+                                {
+                                    hits_obstacle = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     if hits_obstacle {
-                        // Router avoids obstacle: detour via perimeter gutter
+                        // Router avoids obstacle: detour via perimeter gutter through clear channels
                         let use_right = u.column > 0 || (u.column == 0 && v.column > 0);
                         let gutter_x = if use_right { gutter_right } else { gutter_left };
 
-                        let p0 = if use_right {
-                            (u.x + u.width, u.y + u.height * 0.5)
-                        } else {
-                            (u.x, u.y + u.height * 0.5)
-                        };
-                        let p3 = if use_right {
-                            (v.x + v.width, v.y + v.height * 0.5)
-                        } else {
-                            (v.x, v.y + v.height * 0.5)
-                        };
+                        let y_out = p_start.1 + 12.0;
+                        let y_in = p_end.1 - 12.0;
 
                         path_d = format!(
-                            "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
-                            p0.0, p0.1, gutter_x, p0.1, gutter_x, p3.1, p3.0, p3.1
+                            "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
+                            p_start.0, p_start.1,
+                            p_start.0, y_out,
+                            gutter_x, y_out,
+                            gutter_x, y_in,
+                            p_end.0, y_in,
+                            p_end.0, p_end.1
                         );
                         label_x = gutter_x + if use_right { 12.0 } else { -12.0 };
-                        label_y = (p0.1 + p3.1) / 2.0;
+                        label_y = (y_out + y_in) / 2.0;
                     } else if (p_start.0 - p_end.0).abs() < 10.0 {
                         path_d = format!("M {:.1} {:.1} L {:.1} {:.1}", p_start.0, p_start.1, p_end.0, p_end.1);
                         label_x = p_start.0 + 12.0;

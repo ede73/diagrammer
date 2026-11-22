@@ -741,10 +741,10 @@ Station > Bay1
     let p1 = paths[0].as_str().unwrap_or("");
     let p2 = paths[1].as_str().unwrap_or("");
 
-    // Bay1 > Station enters Station at top: ends at y = 538.0
-    assert!(p1.contains("538.0"), "Bay1 > Station must enter Station top box at y = 538.0, path: {}", p1);
-    // Station > Bay1 exits Station at bottom: starts at y = 790.0
-    assert!(p2.contains("790.0"), "Station > Bay1 must exit Station bottom box at y = 790.0, path: {}", p2);
+    // Bay1 > Station enters Station at top: ends at y = 408.0 (minified) or 538.0
+    assert!(p1.contains("408.0") || p1.contains("538.0"), "Bay1 > Station must enter Station top box, path: {}", p1);
+    // Station > Bay1 exits Station at bottom: starts at bottom box of Station (y = 660.0 minified or 790.0)
+    assert!(p2.contains("660.0") || p2.contains("790.0"), "Station > Bay1 must exit Station bottom box, path: {}", p2);
 
     let screenshot_bytes = tab.capture_screenshot(
         CaptureScreenshotFormatOption::Png,

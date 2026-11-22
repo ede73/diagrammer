@@ -137,53 +137,59 @@ pub fn extract_svg_node_bounds(svg: &str) -> HashMap<String, SubNodeBounds> {
                     transform_stack.push((tx, ty));
                 }
 
-                // Check if this tag or element has `id="node-"`
-                if let Some(n_idx) = tag.find("id=\"node-") {
+                // Check if this tag or element has `id="node-"` or `id="group-"`
+                let maybe_id = if let Some(n_idx) = tag.find("id=\"node-") {
                     let id_start = n_idx + 9;
-                    if let Some(id_end) = tag[id_start..].find('"') {
-                        let node_id = &tag[id_start..id_start + id_end];
-                        let total_tx: f64 = transform_stack.iter().map(|t| t.0).sum();
-                        let total_ty: f64 = transform_stack.iter().map(|t| t.1).sum();
+                    tag[id_start..].find('"').map(|id_end| tag[id_start..id_start + id_end].to_string())
+                } else if let Some(g_idx) = tag.find("id=\"group-") {
+                    let id_start = g_idx + 10;
+                    tag[id_start..].find('"').map(|id_end| format!("__group__{}", &tag[id_start..id_start + id_end]))
+                } else {
+                    None
+                };
 
-                        let rest = &svg[abs_start + tag_end..];
-                        let window_len = rest.len().min(1200);
-                        let node_block = &rest[..window_len];
+                if let Some(node_id) = maybe_id {
+                    let total_tx: f64 = transform_stack.iter().map(|t| t.0).sum();
+                    let total_ty: f64 = transform_stack.iter().map(|t| t.1).sum();
 
-                        if let Some(rx) = node_block.find("<rect ") {
-                            let rect_str = &node_block[rx..];
-                            if let (Some(x), Some(y), Some(w), Some(h)) = (
-                                parse_attr(rect_str, "x=\""),
-                                parse_attr(rect_str, "y=\""),
-                                parse_attr(rect_str, "width=\""),
-                                parse_attr(rect_str, "height=\""),
-                            ) {
-                                bounds.insert(
-                                    node_id.to_string(),
-                                    SubNodeBounds {
-                                        x: x + total_tx,
-                                        y: y + total_ty,
-                                        width: w,
-                                        height: h,
-                                    },
-                                );
-                            }
-                        } else if let Some(cx_idx) = node_block.find("<circle ") {
-                            let circle_str = &node_block[cx_idx..];
-                            if let (Some(cx), Some(cy), Some(r)) = (
-                                parse_attr(circle_str, "cx=\""),
-                                parse_attr(circle_str, "cy=\""),
-                                parse_attr(circle_str, "r=\""),
-                            ) {
-                                bounds.insert(
-                                    node_id.to_string(),
-                                    SubNodeBounds {
-                                        x: cx - r + total_tx,
-                                        y: cy - r + total_ty,
-                                        width: r * 2.0,
-                                        height: r * 2.0,
-                                    },
-                                );
-                            }
+                    let rest = &svg[abs_start + tag_end..];
+                    let window_len = rest.len().min(1200);
+                    let node_block = &rest[..window_len];
+
+                    if let Some(rx) = node_block.find("<rect ") {
+                        let rect_str = &node_block[rx..];
+                        if let (Some(x), Some(y), Some(w), Some(h)) = (
+                            parse_attr(rect_str, "x=\""),
+                            parse_attr(rect_str, "y=\""),
+                            parse_attr(rect_str, "width=\""),
+                            parse_attr(rect_str, "height=\""),
+                        ) {
+                            bounds.insert(
+                                node_id,
+                                SubNodeBounds {
+                                    x: x + total_tx,
+                                    y: y + total_ty,
+                                    width: w,
+                                    height: h,
+                                },
+                            );
+                        }
+                    } else if let Some(cx_idx) = node_block.find("<circle ") {
+                        let circle_str = &node_block[cx_idx..];
+                        if let (Some(cx), Some(cy), Some(r)) = (
+                            parse_attr(circle_str, "cx=\""),
+                            parse_attr(circle_str, "cy=\""),
+                            parse_attr(circle_str, "r=\""),
+                        ) {
+                            bounds.insert(
+                                node_id,
+                                SubNodeBounds {
+                                    x: cx - r + total_tx,
+                                    y: cy - r + total_ty,
+                                    width: r * 2.0,
+                                    height: r * 2.0,
+                                },
+                            );
                         }
                     }
                 }
@@ -280,13 +286,96 @@ pub fn render_subgraph(
     }
     sub_canvas.objects = sub_objects;
 
+/// Computes tight content bounding box from extracted node/group boundaries
+/// and rewrites the sub-SVG's viewBox and dimensions to eliminate excess empty space.
+pub fn minify_svg_bounds(
+    svg: &str,
+    node_bounds: &mut HashMap<String, SubNodeBounds>,
+) -> (String, f64, f64) {
+    let (orig_w, orig_h) = parse_svg_dimensions(svg);
+    if node_bounds.is_empty() {
+        return (svg.to_string(), orig_w, orig_h);
+    }
+
+    let min_x = node_bounds.values().map(|b| b.x).fold(f64::INFINITY, f64::min);
+    let max_x = node_bounds.values().map(|b| b.x + b.width).fold(f64::NEG_INFINITY, f64::max);
+    let min_y = node_bounds.values().map(|b| b.y).fold(f64::INFINITY, f64::min);
+    let max_y = node_bounds.values().map(|b| b.y + b.height).fold(f64::NEG_INFINITY, f64::max);
+
+    if !min_x.is_finite() || !max_x.is_finite() || !min_y.is_finite() || !max_y.is_finite() {
+        return (svg.to_string(), orig_w, orig_h);
+    }
+
+    let pad_x = 24.0;
+    let pad_y = 20.0;
+    let crop_x = (min_x - pad_x).max(0.0);
+    let crop_y = (min_y - pad_y).max(0.0);
+    let crop_w = (max_x - crop_x + pad_x).max(80.0);
+    let crop_h = (max_y - crop_y + pad_y).max(50.0);
+
+    // Only minify if the cropped bounds are meaningfully tighter than the original canvas
+    if crop_w >= orig_w && crop_h >= orig_h && crop_x < 5.0 && crop_y < 5.0 {
+        return (svg.to_string(), orig_w, orig_h);
+    }
+
+    // Adjust all sub-node bounds relative to the new cropped top-left
+    for b in node_bounds.values_mut() {
+        b.x -= crop_x;
+        b.y -= crop_y;
+    }
+
+    // Rewrite root <svg ...> tag's viewBox, width, and height
+    let mut new_svg = svg.to_string();
+    if let Some(svg_tag_end) = new_svg.find('>') {
+        let first_tag = &new_svg[..svg_tag_end];
+        let mut rewritten_tag = first_tag.to_string();
+
+        // Replace viewBox
+        if let Some(vb_idx) = rewritten_tag.find("viewBox=\"") {
+            if let Some(end_quote) = rewritten_tag[vb_idx + 9..].find('"') {
+                let full_vb = &rewritten_tag[vb_idx..vb_idx + 9 + end_quote + 1];
+                rewritten_tag = rewritten_tag.replace(
+                    full_vb,
+                    &format!("viewBox=\"{:.1} {:.1} {:.1} {:.1}\"", crop_x, crop_y, crop_w, crop_h),
+                );
+            }
+        }
+
+        // Replace width
+        if let Some(w_idx) = rewritten_tag.find("width=\"") {
+            if let Some(end_quote) = rewritten_tag[w_idx + 7..].find('"') {
+                let full_w = &rewritten_tag[w_idx..w_idx + 7 + end_quote + 1];
+                rewritten_tag = rewritten_tag.replace(
+                    full_w,
+                    &format!("width=\"{:.1}\"", crop_w),
+                );
+            }
+        }
+
+        // Replace height
+        if let Some(h_idx) = rewritten_tag.find("height=\"") {
+            if let Some(end_quote) = rewritten_tag[h_idx + 8..].find('"') {
+                let full_h = &rewritten_tag[h_idx..h_idx + 8 + end_quote + 1];
+                rewritten_tag = rewritten_tag.replace(
+                    full_h,
+                    &format!("height=\"{:.1}\"", crop_h),
+                );
+            }
+        }
+
+        new_svg.replace_range(..svg_tag_end, &rewritten_tag);
+    }
+
+    (new_svg, crop_w, crop_h)
+}
+
     let rendered = generator.generate(&sub_canvas);
-    let (w, h) = parse_svg_dimensions(&rendered);
-    let node_bounds = extract_svg_node_bounds(&rendered);
+    let mut node_bounds = extract_svg_node_bounds(&rendered);
+    let (minified_svg, w, h) = minify_svg_bounds(&rendered, &mut node_bounds);
 
     Some(EmbeddedSubgraph {
         visualizer: sub_viz.clone(),
-        svg: rendered,
+        svg: minified_svg,
         width: w,
         height: h,
         node_bounds,

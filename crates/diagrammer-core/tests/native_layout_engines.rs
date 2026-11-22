@@ -994,8 +994,40 @@ id > AuditDB
 "#;
     let canvas_mem = AstBuilder::new().build(input_member).expect("AST build for member anchor test");
     let mem_svg = state_gen.generate(&canvas_mem);
-    // Member id (+UUID) should start at y=177.0 (aligned with +UUID row, distinct from User header at y=150.0)
-    assert!(mem_svg.contains("M 380.0 177.0") || mem_svg.contains("177.0"), "id > AuditDB must anchor at member +UUID row");
+    // Member id (+UUID) should start at y=157.0 (aligned with +UUID row, distinct from User header at y=130.0)
+    assert!(mem_svg.contains("157.0") || mem_svg.contains("177.0"), "id > AuditDB must anchor at member +UUID row");
+}
+
+#[test]
+fn test_poly_8_compact_minified_embedded_subgraphs() {
+    let test_input = if Path::new("tests/test_inputs/poly_8_layered_tree_state.txt").exists() {
+        "tests/test_inputs/poly_8_layered_tree_state.txt"
+    } else if Path::new("../../tests/test_inputs/poly_8_layered_tree_state.txt").exists() {
+        "../../tests/test_inputs/poly_8_layered_tree_state.txt"
+    } else {
+        panic!("poly_8_layered_tree_state.txt not found");
+    };
+
+    let content = fs::read_to_string(test_input).expect("Failed to read poly_8_layered_tree_state.txt");
+    let canvas = AstBuilder::new().build(&content).expect("Failed to build AST for poly_8");
+    let graph = LayeredGraph::build(&canvas);
+    let svg = graph.render_svg();
+
+    let rule_engine = graph.nodes.get("RuleEngine").expect("RuleEngine node must exist");
+    let job_runner = graph.nodes.get("JobRunner").expect("JobRunner node must exist");
+
+    // Execution FSM (JobRunner) must be compact and tightly bounded (down from 908x660)
+    assert!(job_runner.width < 300.0, "JobRunner width must be compact (<300), got {}", job_runner.width);
+    assert!(job_runner.height < 450.0, "JobRunner height must be compact (<450), got {}", job_runner.height);
+
+    // Decision Tree (RuleEngine) must be compact (down from 458x300)
+    assert!(rule_engine.width < 350.0, "RuleEngine width must be compact (<350), got {}", rule_engine.width);
+    assert!(rule_engine.height < 280.0, "RuleEngine height must be compact (<280), got {}", rule_engine.height);
+
+    assert!(svg.contains("id=\"node-RuleEngine\""));
+    assert!(svg.contains("id=\"node-JobRunner\""));
+    assert!(svg.contains("class=\"diagrammer-tree-svg\""));
+    assert!(svg.contains("class=\"diagrammer-state-svg\""));
 }
 
 

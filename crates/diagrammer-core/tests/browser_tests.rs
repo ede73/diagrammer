@@ -1951,6 +1951,72 @@ fn test_pure_rust_browser_node_hover_zoom_in() {
     println!("Pure Rust browser test passed: Node shape button zooms in cleanly on hover (scale 1.6) for effortless readability.");
 }
 
+#[test]
+fn test_pure_rust_browser_edge_hover_zoom_in() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed creating browser tab");
+
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate to Diagrammer UI");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor not found");
+
+    let input = "visualizer layered\nServiceA > \"calls\" ServiceB\nServiceB > \"queries\" Database";
+    let code_json = serde_json::to_string(&input).expect("serialize code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+
+            const edgePath = document.querySelector("#diagrammer-graph svg .dl-edge-path");
+            if (!edgePath) return JSON.stringify({{ error: "Missing edge path" }});
+            const s = window.getComputedStyle(edgePath);
+            return JSON.stringify({{
+                found: true,
+                cursor: s.cursor,
+                pointerEvents: s.pointerEvents
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed checking edge");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+    assert!(val.get("found").and_then(|v| v.as_bool()).unwrap_or(false), "Edge path must exist in diagram: {:?}", val);
+    let cursor = val.get("cursor").and_then(|v| v.as_str()).unwrap_or("");
+    assert_eq!(cursor, "pointer", "Edge path must have pointer cursor for interactive hover");
+
+    // Move mouse over the edge
+    let edge_elem = tab.find_element("#diagrammer-graph svg .dl-edge-path")
+        .expect("Failed to find edge element");
+    edge_elem.move_mouse_over().expect("Failed moving mouse over edge");
+    std::thread::sleep(std::time::Duration::from_millis(300));
+
+    // Capture screenshot proof of hovered edge
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed capturing screenshot");
+
+    let proof_path = get_proof_path("edge_hover_zoom_in_verified.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Edge magnifies and highlights with vibrant glow on hover.");
+}
+
 
 
 

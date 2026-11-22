@@ -1038,3 +1038,95 @@ svg|a:active {
     transform: scale(1.25);
     fill: #38bdf8 !important;
 }
+
+/* ==========================================================================
+   Interactive Graph Edge Hover Magnification & Highlight Zoom
+   ========================================================================== */
+
+#diagrammer-graph svg .dl-edge-path,
+#diagrammer-graph svg .ds-edge,
+#diagrammer-graph svg .sw-edge-path,
+#diagrammer-graph svg g.edge path,
+#diagrammer-graph svg .ds-msg-line,
+#diagrammer-graph svg path.dt-edge,
+#diagrammer-graph svg path.link,
+#diagrammer-graph svg .dendrogram-link,
+#diagrammer-graph svg line.dforce-edge,
+#diagrammer-graph svg path.dg-tap,
+#diagrammer-graph svg line.dg-tap,
+#diagrammer-graph svg line.dg-bus-rail,
+#diagrammer-graph svg .sankey-links path,
+#diagrammer-graph svg path.sankey-link {
+    cursor: pointer;
+    pointer-events: stroke;
+    transition: stroke-width 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+}
+
+#diagrammer-graph svg .dl-edge-path:hover,
+#diagrammer-graph svg .ds-edge:hover,
+#diagrammer-graph svg .sw-edge-path:hover,
+#diagrammer-graph svg g.edge:hover path,
+#diagrammer-graph svg .ds-msg-line:hover,
+#diagrammer-graph svg path.dt-edge:hover,
+#diagrammer-graph svg path.link:hover,
+#diagrammer-graph svg .dendrogram-link:hover,
+#diagrammer-graph svg line.dforce-edge:hover,
+#diagrammer-graph svg path.dg-tap:hover,
+#diagrammer-graph svg line.dg-tap:hover,
+#diagrammer-graph svg line.dg-bus-rail:hover {
+    stroke-width: 4px !important;
+    stroke: #38bdf8 !important;
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.85)) drop-shadow(0 0 14px rgba(56, 189, 248, 0.5));
+}
+
+#diagrammer-graph svg .dl-edge-path:hover {
+    marker-end: url(#dl-arrow-active) !important;
+}
+
+#diagrammer-graph svg .ds-edge:hover {
+    marker-end: url(#ds-arrow-active) !important;
+}
+
+#diagrammer-graph svg .sw-edge-path:hover {
+    marker-end: url(#sw-arrow-active) !important;
+}
+
+#diagrammer-graph svg g.edge:hover polygon {
+    fill: #38bdf8 !important;
+    stroke: #38bdf8 !important;
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.85));
+}
+
+#diagrammer-graph svg .sankey-links path:hover,
+#diagrammer-graph svg path.sankey-link:hover {
+    stroke-opacity: 0.9 !important;
+    filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.8));
+}
+
+#diagrammer-graph svg .dl-edge-label,
+#diagrammer-graph svg .ds-edge-label,
+#diagrammer-graph svg .sw-edge-label,
+#diagrammer-graph svg g.edge text,
+#diagrammer-graph svg .ds-msg-label,
+#diagrammer-graph svg .dforce-edge-label,
+#diagrammer-graph svg .dg-tap-label {
+    cursor: pointer;
+    transform-box: fill-box;
+    transform-origin: center center;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), fill 0.15s ease, filter 0.2s ease;
+}
+
+#diagrammer-graph svg .dl-edge-label:hover,
+#diagrammer-graph svg .ds-edge-label:hover,
+#diagrammer-graph svg .sw-edge-label:hover,
+#diagrammer-graph svg g.edge text:hover,
+#diagrammer-graph svg .ds-msg-label:hover,
+#diagrammer-graph svg .dforce-edge-label:hover,
+#diagrammer-graph svg .dg-tap-label:hover,
+#diagrammer-graph svg g.edge:hover text {
+    transform: scale(1.35);
+    fill: #38bdf8 !important;
+    filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.7));
+    font-weight: 700;
+}
+

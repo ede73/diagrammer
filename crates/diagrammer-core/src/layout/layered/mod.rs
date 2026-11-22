@@ -1652,6 +1652,13 @@ impl LayeredGraph {
       stroke-width: 1.8;
       stroke-linecap: round;
       stroke-linejoin: round;
+      cursor: pointer;
+      transition: stroke-width 0.2s ease, stroke 0.2s ease;
+    }}
+    .dl-edge-path:hover {{
+      stroke-width: 3.5px !important;
+      stroke: #38bdf8 !important;
+      marker-end: url(#dl-arrow-active) !important;
     }}
     .dl-edge-label {{
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;

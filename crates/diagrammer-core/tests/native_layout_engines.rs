@@ -330,6 +330,76 @@ fn test_umlclass_scoped_members_no_collision() {
 }
 
 #[test]
+fn test_umlclass_student_is_class_and_long_edge_strictly_avoids_intermediate_node() {
+    let test_input = if Path::new("tests/test_inputs/umlclass.txt").exists() {
+        "tests/test_inputs/umlclass.txt"
+    } else if Path::new("../../tests/test_inputs/umlclass.txt").exists() {
+        "../../tests/test_inputs/umlclass.txt"
+    } else {
+        panic!("umlclass.txt not found");
+    };
+
+    let content = fs::read_to_string(test_input).expect("Failed to read umlclass.txt");
+    let canvas = AstBuilder::new().build(&content).expect("Failed to parse umlclass");
+    let graph = LayeredGraph::build(&canvas);
+
+    // 1. Student must be recognized as a class node with members, NOT a generic cluster group
+    assert!(graph.nodes.contains_key("Student"), "Student must be in nodes map");
+    let student = &graph.nodes["Student"];
+    assert_eq!(student.shape, "uml_class", "Student must have shape uml_class");
+    assert_eq!(student.members.len(), 3, "Student must have 3 members: classes, attend, sleep");
+
+    // 2. Professor and Person must also be classes
+    assert!(graph.nodes.contains_key("Professor"));
+    assert!(graph.nodes.contains_key("Person"));
+    let prof = &graph.nodes["Professor"];
+
+    // 3. Edge from Student to Person must NOT intersect Professor's bounding box
+    let student_to_person = graph.edges.iter().find(|e| e.from == "Student" && e.to == "Person")
+        .expect("Must have edge from Student to Person");
+    assert!(!student_to_person.points.is_empty(), "Edge must have routed points");
+
+    // Check each segment of the routed edge against Professor's bounding box
+    let prof_left = prof.x;
+    let prof_right = prof.x + prof.width;
+    let prof_top = prof.y;
+    let prof_bottom = prof.y + prof.height;
+
+    for i in 0..student_to_person.points.len() - 1 {
+        let p1 = student_to_person.points[i];
+        let p2 = student_to_person.points[i + 1];
+
+        // Horizontal segment check
+        if (p1.1 - p2.1).abs() < 0.001 {
+            let y = p1.1;
+            let min_x = p1.0.min(p2.0);
+            let max_x = p1.0.max(p2.0);
+            assert!(
+                !(y > prof_top && y < prof_bottom && max_x > prof_left && min_x < prof_right),
+                "Horizontal segment {:?} -> {:?} penetrates Professor bounding box [{}, {}, {}, {}]",
+                p1, p2, prof_left, prof_top, prof_right, prof_bottom
+            );
+        }
+
+        // Vertical segment check
+        if (p1.0 - p2.0).abs() < 0.001 {
+            let x = p1.0;
+            let min_y = p1.1.min(p2.1);
+            let max_y = p1.1.max(p2.1);
+            assert!(
+                !(x > prof_left && x < prof_right && max_y > prof_top && min_y < prof_bottom),
+                "Vertical segment {:?} -> {:?} penetrates Professor bounding box [{}, {}, {}, {}]",
+                p1, p2, prof_left, prof_top, prof_right, prof_bottom
+            );
+        }
+    }
+
+    let svg = graph.render_svg();
+    assert!(svg.contains("id=\"node-Student\""), "Rendered SVG must contain Student node");
+    assert!(!svg.contains("id=\"group-Student\""), "Rendered SVG must NOT contain Student as a group box");
+}
+
+#[test]
 fn test_native_node_shapes_styles_and_icons() {
     let engines = ["layered", "force", "tree", "grid"];
     let input_path = if Path::new("tests/test_inputs/nodes.txt").exists() {

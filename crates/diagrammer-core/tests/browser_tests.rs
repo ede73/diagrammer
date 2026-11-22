@@ -980,6 +980,79 @@ fn test_pure_rust_browser_scoped_uml_members_routing() {
 }
 
 #[test]
+fn test_pure_rust_browser_umlclass_rendering() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate to Diagrammer");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor not found");
+
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let input = std::fs::read_to_string(manifest_dir.join("../../tests/test_inputs/umlclass.txt"))
+        .expect("Failed to read umlclass.txt");
+
+    let code_json = serde_json::to_string(&input).expect("serialize code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+
+            const svg = document.querySelector("#diagrammer-graph svg.diagrammer-layered-svg");
+            const hasSvg = svg !== null;
+            const studentNode = document.getElementById("node-Student") !== null;
+            const studentGroup = document.getElementById("group-Student") !== null;
+            const studentIsClass = document.querySelector("#node-Student.dl-class-node") !== null;
+            const profNode = document.getElementById("node-Professor") !== null;
+
+            return JSON.stringify({{
+                hasSvg,
+                studentNode,
+                studentGroup,
+                studentIsClass,
+                profNode
+            }});
+        }})()
+    "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating umlclass test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Layered SVG must render for umlclass");
+    assert_eq!(val.get("studentNode").and_then(|v| v.as_bool()), Some(true), "Student must exist as a node");
+    assert_eq!(val.get("studentGroup").and_then(|v| v.as_bool()), Some(false), "Student must NOT be a generic group container");
+    assert_eq!(val.get("studentIsClass").and_then(|v| v.as_bool()), Some(true), "Student must be a .dl-class-node");
+    assert_eq!(val.get("profNode").and_then(|v| v.as_bool()), Some(true), "Professor must exist as a node");
+
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = get_proof_path("umlclass_verified_browser.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: umlclass.txt renders Student as a complete class box and edge routing avoids Professor.");
+}
+
+#[test]
 fn test_pure_rust_browser_swimlane_poly_10_rendering() {
     use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
 

@@ -295,13 +295,15 @@ fn is_uml_group(grp: &crate::ast::GraphGroup, canvas: &GraphCanvas) -> bool {
         return true;
     }
     let vertices: Vec<&GraphObject> = grp.objects.iter().filter(|o| o.is_vertex()).collect();
-    if vertices.len() >= 2
-        && vertices.iter().all(|v| {
+    if !vertices.is_empty()
+        && vertices.iter().any(|v| {
             let lbl = v.get_label().unwrap_or_else(|| v.get_name());
             lbl.starts_with('+')
                 || lbl.starts_with('-')
                 || lbl.starts_with('#')
                 || lbl.starts_with('~')
+                || lbl.starts_with('_')
+                || lbl.starts_with('/')
                 || lbl.contains("()")
                 || lbl.contains(':')
         })
@@ -967,6 +969,11 @@ impl LayeredGraph {
             height: n.height,
         }).collect();
 
+        let min_all_x = nodes.values().map(|n| n.x).fold(f64::INFINITY, f64::min);
+        let max_all_x = nodes.values().map(|n| n.x + n.width).fold(f64::NEG_INFINITY, f64::max);
+        let min_all_y = nodes.values().map(|n| n.y).fold(f64::INFINITY, f64::min);
+        let max_all_y = nodes.values().map(|n| n.y + n.height).fold(f64::NEG_INFINITY, f64::max);
+
         // 6d. Build final routing points
         for (idx, e) in edges.iter_mut().enumerate() {
             if e.from_member.is_some() || e.to_member.is_some() {
@@ -1140,23 +1147,111 @@ impl LayeredGraph {
                 }
             } else if let (Some(&exit), Some(&entry)) = (exit_ports.get(&idx), entry_ports.get(&idx)) {
                 let track_offset = edge_track_offsets.get(&idx).copied().unwrap_or(0.0);
-                if !is_lr {
-                    if (exit.0 - entry.0).abs() < 1.0 && track_offset.abs() < 0.1 {
-                        e.points = vec![exit, entry];
-                    } else {
+                if let (Some(u), Some(v)) = (nodes.get(&e.from), nodes.get(&e.to)) {
+                    let mut candidates: Vec<Vec<(f64, f64)>> = Vec::new();
+                    let gutter_l = (min_all_x - 24.0).max(16.0) - (track_offset.abs() % 30.0);
+                    let gutter_r = max_all_x + 24.0 + (track_offset.abs() % 30.0);
+                    let gutter_t = (min_all_y - 24.0).max(16.0) - (track_offset.abs() % 30.0);
+                    let gutter_b = max_all_y + 24.0 + (track_offset.abs() % 30.0);
+
+                    if !is_lr {
+                        if (exit.0 - entry.0).abs() < 1.0 && track_offset.abs() < 0.1 {
+                            candidates.push(vec![exit, entry]);
+                        }
+
                         let max_offset = ((entry.1 - exit.1).abs() / 2.0 - 10.0).max(0.0);
                         let clamped_offset = track_offset.clamp(-max_offset, max_offset);
                         let mid_y = (exit.1 + entry.1) / 2.0 + clamped_offset;
-                        e.points = vec![exit, (exit.0, mid_y), (entry.0, mid_y), entry];
-                    }
-                } else {
-                    if (exit.1 - entry.1).abs() < 1.0 && track_offset.abs() < 0.1 {
-                        e.points = vec![exit, entry];
+                        candidates.push(vec![exit, (exit.0, mid_y), (entry.0, mid_y), entry]);
+
+                        if u.layer != v.layer {
+                            let min_l = u.layer.min(v.layer);
+                            let max_l = u.layer.max(v.layer);
+
+                            for l in min_l..max_l {
+                                let l_bot = nodes.values().filter(|n| n.layer == l).map(|n| n.y + n.height).fold(0.0, f64::max);
+                                let l_top = nodes.values().filter(|n| n.layer == l + 1).map(|n| n.y).fold(f64::INFINITY, f64::min);
+                                let ch_y = if l_top > l_bot { (l_bot + l_top) / 2.0 } else { l_bot + 24.0 } + clamped_offset;
+
+                                candidates.push(vec![exit, (exit.0, ch_y), (entry.0, ch_y), entry]);
+                            }
+
+                            let top_ch = {
+                                let l_bot = nodes.values().filter(|n| n.layer == min_l).map(|n| n.y + n.height).fold(0.0, f64::max);
+                                let l_top = nodes.values().filter(|n| n.layer == min_l + 1).map(|n| n.y).fold(f64::INFINITY, f64::min);
+                                if l_top > l_bot { (l_bot + l_top) / 2.0 } else { l_bot + 24.0 }
+                            };
+                            let bot_ch = {
+                                let l_bot = nodes.values().filter(|n| n.layer == max_l - 1).map(|n| n.y + n.height).fold(0.0, f64::max);
+                                let l_top = nodes.values().filter(|n| n.layer == max_l).map(|n| n.y).fold(f64::INFINITY, f64::min);
+                                if l_top > l_bot { (l_bot + l_top) / 2.0 } else { l_bot + 24.0 }
+                            };
+
+                            candidates.push(vec![exit, (exit.0, top_ch), (gutter_l, top_ch), (gutter_l, bot_ch), (entry.0, bot_ch), entry]);
+                            candidates.push(vec![exit, (exit.0, top_ch), (gutter_r, top_ch), (gutter_r, bot_ch), (entry.0, bot_ch), entry]);
+                        } else {
+                            let y_below = (u.y + u.height).max(v.y + v.height) + 24.0 + clamped_offset.abs();
+                            let y_above = (u.y.min(v.y) - 24.0 - clamped_offset.abs()).max(16.0);
+                            candidates.push(vec![exit, (exit.0, y_below), (entry.0, y_below), entry]);
+                            candidates.push(vec![exit, (exit.0, y_above), (entry.0, y_above), entry]);
+                        }
                     } else {
+                        if (exit.1 - entry.1).abs() < 1.0 && track_offset.abs() < 0.1 {
+                            candidates.push(vec![exit, entry]);
+                        }
+
                         let max_offset = ((entry.0 - exit.0).abs() / 2.0 - 10.0).max(0.0);
                         let clamped_offset = track_offset.clamp(-max_offset, max_offset);
                         let mid_x = (exit.0 + entry.0) / 2.0 + clamped_offset;
-                        e.points = vec![exit, (mid_x, exit.1), (mid_x, entry.1), entry];
+                        candidates.push(vec![exit, (mid_x, exit.1), (mid_x, entry.1), entry]);
+
+                        if u.layer != v.layer {
+                            let min_l = u.layer.min(v.layer);
+                            let max_l = u.layer.max(v.layer);
+
+                            for l in min_l..max_l {
+                                let l_right = nodes.values().filter(|n| n.layer == l).map(|n| n.x + n.width).fold(0.0, f64::max);
+                                let l_left = nodes.values().filter(|n| n.layer == l + 1).map(|n| n.x).fold(f64::INFINITY, f64::min);
+                                let ch_x = if l_left > l_right { (l_right + l_left) / 2.0 } else { l_right + 24.0 } + clamped_offset;
+
+                                candidates.push(vec![exit, (ch_x, exit.1), (ch_x, entry.1), entry]);
+                            }
+
+                            let left_ch = {
+                                let l_right = nodes.values().filter(|n| n.layer == min_l).map(|n| n.x + n.width).fold(0.0, f64::max);
+                                let l_left = nodes.values().filter(|n| n.layer == min_l + 1).map(|n| n.x).fold(f64::INFINITY, f64::min);
+                                if l_left > l_right { (l_right + l_left) / 2.0 } else { l_right + 24.0 }
+                            };
+                            let right_ch = {
+                                let l_right = nodes.values().filter(|n| n.layer == max_l - 1).map(|n| n.x + n.width).fold(0.0, f64::max);
+                                let l_left = nodes.values().filter(|n| n.layer == max_l).map(|n| n.x).fold(f64::INFINITY, f64::min);
+                                if l_left > l_right { (l_right + l_left) / 2.0 } else { l_right + 24.0 }
+                            };
+
+                            candidates.push(vec![exit, (left_ch, exit.1), (left_ch, gutter_t), (right_ch, gutter_t), (right_ch, entry.1), entry]);
+                            candidates.push(vec![exit, (left_ch, exit.1), (left_ch, gutter_b), (right_ch, gutter_b), (right_ch, entry.1), entry]);
+                        } else {
+                            let x_right = (u.x + u.width).max(v.x + v.width) + 24.0 + clamped_offset.abs();
+                            let x_left = (u.x.min(v.x) - 24.0 - clamped_offset.abs()).max(16.0);
+                            candidates.push(vec![exit, (x_right, exit.1), (x_right, entry.1), entry]);
+                            candidates.push(vec![exit, (x_left, exit.1), (x_left, entry.1), entry]);
+                        }
+                    }
+
+                    let mut scored: Vec<(usize, f64, Vec<(f64, f64)>)> = Vec::new();
+                    for cand in candidates {
+                        let pts = simplify_orthogonal_points(cand);
+                        let collisions = count_path_collisions(&pts, &obstacles, &u.id, &v.id);
+                        let length: f64 = pts.windows(2).map(|w| (w[1].0 - w[0].0).abs() + (w[1].1 - w[0].1).abs()).sum();
+                        scored.push((collisions, length, pts));
+                    }
+
+                    scored.sort_by(|a, b| {
+                        a.0.cmp(&b.0).then_with(|| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))
+                    });
+
+                    if let Some(best) = scored.into_iter().next() {
+                        e.points = best.2;
                     }
                 }
             }

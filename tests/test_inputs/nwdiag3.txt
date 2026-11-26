@@ -1,4 +1,4 @@
-visualizer nwdiag
+visualizer network_bus
 
 group color #33FF33
 vertex color #ffff00

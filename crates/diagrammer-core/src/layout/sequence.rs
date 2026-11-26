@@ -164,8 +164,8 @@ impl SequenceLayoutEngine {
         // Build SVG
         let mut svg = String::with_capacity(8192);
         svg.push_str(&format!(
-            r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {:.1} {:.1}" width="100%" height="{:.1}" class="diagrammer-sequence">"#,
-            total_width, total_height, total_height
+            r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {:.1} {:.1}" width="{:.1}" height="{:.1}" class="diagrammer-sequence">"#,
+            total_width, total_height, total_width, total_height
         ));
         svg.push('\n');
 
@@ -586,22 +586,22 @@ impl SequenceLayoutEngine {
             // Top box
             svg.push_str(&format!(
                 r#"    <!-- Participant: {} -->
-    <g class="ds-part-node">
+    <g class="ds-part-node" id="node-{}">
       <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="url(#ds-part-grad)" stroke="{border_color}" class="ds-box" />
       <text x="{:.1}" y="{:.1}" fill="{text_color}" class="ds-part-text">{label_escaped}</text>
     </g>
 "#,
-                p.id, box_x, top_padding, w, header_height, cx, top_padding + header_height / 2.0
+                p.id, p.id, box_x, top_padding, w, header_height, cx, top_padding + header_height / 2.0
             ));
 
             // Bottom mirrored box
             svg.push_str(&format!(
-                r#"    <g class="ds-part-node">
+                r#"    <g class="ds-part-node" id="node-{}-bottom">
       <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="url(#ds-part-grad)" stroke="{border_color}" class="ds-box" />
       <text x="{:.1}" y="{:.1}" fill="{text_color}" class="ds-part-text">{label_escaped}</text>
     </g>
 "#,
-                box_x, footer_top, w, header_height, cx, footer_top + header_height / 2.0
+                p.id, box_x, footer_top, w, header_height, cx, footer_top + header_height / 2.0
             ));
         }
         svg.push_str("  </g>\n</svg>\n");

@@ -1,0 +1,29 @@
+visualizer state
+
+OrbitalCruise > AtmosphericEntry > PoweredTerminalDescent > SurfaceOperations > MissionAccomplished
+
+AtmosphericEntry > SafeMode; Heatshield Anomaly
+PoweredTerminalDescent > AbortFlyaway; Thruster Flameout
+SurfaceOperations > SafeMode; Dust Storm
+SafeMode > SurfaceOperations; Reboot & Sun-Lock
+SafeMode > LostContact; Battery Depleted
+
+{PoweredTerminalDescent; Sky Crane Descent Protocol
+    visualizer native_sequence
+    Radar > "1. Alt Lock (50m)" NavComputer
+    NavComputer > "2. Fire Retro-Rockets" SkyCrane
+    SkyCrane > "3. Lower Tether (30m/s)" Rover
+    Rover > "4. Weight on Wheels!" SkyCrane
+    SkyCrane > "5. Sever Bridle & Flyaway" NavComputer
+}
+
+{SurfaceOperations; Scientific Exploration Pipeline
+    DeploySolarPanels > CalibrateSpectrometer > DrillSample > RamanAnalysis > TransmitToEarth
+}
+
+{SafeMode; Emergency Autonomy Fallback
+    KillNonCriticalBus > ReorientSolarToSun > BeaconDeepSpaceNet
+}
+
+AbortFlyaway > LostContact
+

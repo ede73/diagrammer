@@ -1,0 +1,14 @@
+visualizer layered
+
+RuleEngine > JobRunner
+
+{RuleEngine; Decision Tree
+    visualizer tree
+    Input > (Pass, Fail)
+}
+
+{JobRunner; Execution FSM
+    visualizer state
+    Queued > Running > Finished
+}
+

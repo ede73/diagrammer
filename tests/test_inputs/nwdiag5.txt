@@ -1,4 +1,4 @@
-visualizer nwdiag
+visualizer network_bus
 
 { dmz;y
 	web01 web02

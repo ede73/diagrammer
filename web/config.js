@@ -7,6 +7,7 @@ import { visualizeNativeSequence } from './visualizations/visualizeNativeSequenc
 import { visualizeLayered } from './visualizations/visualizeLayered.js';
 import { visualizeTree } from './visualizations/visualizeTree.js';
 import { visualizeGrid } from './visualizations/visualizeGrid.js';
+import { visualizeState } from './visualizations/visualizeState.js';
 import { visualizeForce } from './visualizations/visualizeForce.js';
 import { visualizeMermaid } from './visualizations/visualizeMermaid.js';
 export class Visualization {
@@ -111,18 +112,10 @@ const _visualizations = [
     new Visualization('native_sequence', 'Diagrammer: Native Sequence [WASM]', 'native_sequence', visualizeNativeSequence, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency vector sequence diagram' }),
     new Visualization('layered', 'Diagrammer: Layered DAG [WASM]', 'layered', visualizeLayered, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency hierarchical DAG and UML flowchart engine' }),
     new Visualization('tree', 'Diagrammer: Tree / Dendrogram [WASM]', 'tree', visualizeTree, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency tree and radial dendrogram engine' }),
-    new Visualization('grid', 'Diagrammer: 2D Grid / Network Bus [WASM]', 'grid', visualizeGrid, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency 2D matrix grid and network bus engine' }),
+    new Visualization('network_bus', 'Diagrammer: Network Bus [WASM]', 'grid', visualizeGrid, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency network architecture and multi-subnet bus engine' }),
+    new Visualization('grid', 'Diagrammer: 2D Matrix Grid [WASM]', 'grid', visualizeGrid, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency 2D matrix grid engine' }),
+    new Visualization('state', 'Diagrammer: State Machine [WASM]', 'state', visualizeState, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency state machine & lifecycle engine' }),
     new Visualization('force', 'Diagrammer: Force-Directed Physics [WASM]', 'force', visualizeForce, undefined, { family: 'Diagrammer Native', engine: 'Rust Layout Engine', description: 'First-party zero-dependency spring-electrical physics simulation engine' }),
-
-    new Visualization('plantuml_sequence', 'PlantUML: Sequence Diagram [CLI]', 'plantuml_sequence', undefined, (format) => [
-        'java',
-        '-Djava.awt.headless=true',
-        '-Xmx2048m',
-        '-jar',
-        'ext/plantuml.jar',
-        `-t${format.toLocaleLowerCase()}`,
-        '-p'
-    ], { family: 'PlantUML', engine: 'plantuml.jar', description: 'PlantUML sequence diagram (Java CLI)' }),
 
     new Visualization('mermaid', 'Mermaid: Flowchart', 'mermaid', async (g) => {
         await visualizeMermaid(g);
@@ -153,7 +146,9 @@ const _visualizations = [
         '-o-'
     ], { family: 'Mermaid', engine: 'mermaid.js (Sequence)', description: 'Mermaid sequence diagram in-browser' }),
 
-    new Visualization('ast_record', 'AST: Record Visualizer', 'ast_record', visualizeLayered, undefined, { family: 'AST', engine: 'Native Layered DAG', description: 'Abstract Syntax Tree structure rendered natively via Layered DAG' }),
+    new Visualization('ast_record', 'AST: Record Visualizer', 'ast_record', async (g) => {
+        await visualizeGraphviz(g, 'dot');
+    }, undefined, { family: 'AST', engine: 'Graphviz Dot', description: 'Abstract Syntax Tree structure rendered as Graphviz records' }),
     new Visualization('ast', 'AST: JSON Only', 'ast', undefined, undefined, { family: 'AST', engine: 'Raw JSON', description: 'Abstract Syntax Tree JSON' })
 ];
 export let visualizations = _visualizations;

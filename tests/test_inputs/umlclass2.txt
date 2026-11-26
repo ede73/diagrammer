@@ -1,4 +1,4 @@
-visualizer umlclass
+visualizer layered
 
 {GraphObject;GraphObject
   label;+string

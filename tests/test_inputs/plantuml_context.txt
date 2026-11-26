@@ -1,4 +1,4 @@
-visualizer plantuml_sequence
+visualizer native_sequence
 
 x>y
 q<w

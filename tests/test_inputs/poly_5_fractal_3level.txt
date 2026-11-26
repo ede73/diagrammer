@@ -1,0 +1,15 @@
+visualizer state
+
+Setup > MicroserviceStack > Ready
+
+{MicroserviceStack; Nested Flowchart
+    visualizer layered
+    
+    Gateway > AuthSubsystem
+    
+    {AuthSubsystem; Embedded Protocol
+        visualizer native_sequence
+        App > "Grant" Keycloak
+    }
+}
+

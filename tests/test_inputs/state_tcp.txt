@@ -1,4 +1,4 @@
-visualizer dot
+visualizer state
 
 $(red:#ff0000)
 $(blue:#0000ff)

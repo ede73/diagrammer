@@ -75,8 +75,8 @@ export function visualize(visualizer) {
         throw new Error('Visualizer not defined');
     }
     removeOldVisualizations();
-    if (visualizer === 'ast') {
-        // 'ast' produces raw JSON into the result textarea and beautified tree/code view.
+    if (visualizer === 'ast' || visualizer === 'diagrammer') {
+        // 'ast' and 'diagrammer' produce text into the result textarea and beautified view.
         // There is no graphic image to render or CLI backend call needed.
         return;
     }

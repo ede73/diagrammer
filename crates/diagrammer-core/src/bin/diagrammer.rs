@@ -51,6 +51,8 @@ fn main() {
             visualize = true;
         } else if arg == "-V" || arg == "--visualize" {
             visualize = true;
+        } else if requested_generator.is_none() && (make_generator(arg).is_some() || arg.eq_ignore_ascii_case("ast")) {
+            requested_generator = Some(arg.clone());
         } else if Path::new(arg).exists() && input_file.is_none() {
             input_file = Some(arg.clone());
         } else if requested_generator.is_none() {

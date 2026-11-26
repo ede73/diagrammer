@@ -1,5 +1,6 @@
 pub mod ast_record;
 pub mod dendrogram;
+pub mod diagrammer;
 pub mod digraph;
 pub mod force;
 pub mod grid;
@@ -111,6 +112,7 @@ pub fn multi_attr_fmt(attrs: &[(&str, Option<&str>, &str)], extras: &[String]) -
 /// Factory function to create a generator by visualizer name
 pub fn make_generator(name: &str) -> Option<Box<dyn Generator>> {
     match name.to_lowercase().as_str() {
+        "diagrammer" => Some(Box::new(diagrammer::DiagrammerGenerator)),
         "ast_record" => Some(Box::new(ast_record::ASTRecord)),
         "layered" | "dag" => Some(Box::new(layered::LayeredGenerator)),
         "circlepacked" | "dendrogram" | "radialdendrogram" | "reingoldtilford" => {

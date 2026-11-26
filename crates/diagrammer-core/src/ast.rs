@@ -364,6 +364,8 @@ pub struct GraphGroup {
     pub visualizer: Option<String>,
     #[serde(skip)]
     pub chain_terminals: Vec<String>,
+    #[serde(skip)]
+    pub is_scoped: bool,
 }
 
 impl GraphGroup {
@@ -383,6 +385,7 @@ impl GraphGroup {
             textcolor: None,
             visualizer: None,
             chain_terminals: Vec::new(),
+            is_scoped: false,
         }
     }
 

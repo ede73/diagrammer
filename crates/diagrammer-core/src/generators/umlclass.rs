@@ -69,15 +69,29 @@ impl Generator for UMLClass {
         let name_and_label = |ln: &GraphObject| -> String {
             let label = ln.get_label().unwrap_or("");
             let name = ln.get_name();
-            if !name.is_empty() && label.starts_with(name) {
-                label.to_string()
+            let base_name = if let Some(pos) = name.rfind('!') {
+                &name[pos + 1..]
             } else {
-                format!("{}{}", name, label)
+                name
+            };
+            if !base_name.is_empty() && label.starts_with(base_name) {
+                label.to_string()
+            } else if !base_name.is_empty() && !label.is_empty() {
+                format!("{}{}", base_name, label)
+            } else if !base_name.is_empty() {
+                base_name.to_string()
+            } else {
+                label.to_string()
             }
         };
 
         let mangle_name = |name: &str| -> String {
-            name.trim_matches('_').to_string()
+            let n = if let Some(pos) = name.rfind('!') {
+                &name[pos + 1..]
+            } else {
+                name
+            };
+            n.trim_matches('_').to_string()
         };
 
         let get_members = |vertices: &[&GraphObject]| -> Vec<MemberDeclaration> {

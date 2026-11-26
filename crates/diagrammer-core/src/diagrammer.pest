@@ -39,7 +39,7 @@ EVENT = @{
   | LINE_CHAR+
 }
 
-NAME = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* ~ (":" ~ !COMPASS_DIR ~ (ASCII_ALPHANUMERIC | "_")*)? }
+NAME = @{ (ASCII_ALPHA | "!") ~ (ASCII_ALPHANUMERIC | "_" | "!")* ~ (":" ~ !COMPASS_DIR ~ (ASCII_ALPHANUMERIC | "_" | "!")*)? }
 
 color_or_variable = { COLOR | VARIABLE }
 shape_or_variable = { SHAPES | VARIABLE }
@@ -142,7 +142,7 @@ custom_type = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 
 SAME_LINE_SPACE = _{ " " | "\t" }
 GROUP_KW = @{ ^"group" ~ !(ASCII_ALPHANUMERIC | "_") }
-group_start = ${ (GROUP_KW | "{") ~ SAME_LINE_SPACE* ~ NAME? ~ SAME_LINE_SPACE* ~ color_or_variable? ~ SAME_LINE_SPACE* ~ LABEL? }
+group_start = ${ (GROUP_KW | "{") ~ SAME_LINE_SPACE* ~ "!"? ~ SAME_LINE_SPACE* ~ NAME? ~ SAME_LINE_SPACE* ~ color_or_variable? ~ SAME_LINE_SPACE* ~ LABEL? }
 group_end = { GROUP_KW ~ ^"end" | "}" }
 
 vertex_name_spec = ${

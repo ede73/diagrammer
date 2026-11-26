@@ -1,11 +1,11 @@
-eka$(red:#ff0000)
-eka#00ff00;my name is
-eka$(blue:#0000ff);slim shady and blue
+first$(red:#ff0000)
+first#00ff00;Primary node
+first$(blue:#0000ff);Configured as blue
 
-toinen$(blue);On nimeltaan
-toinen;Punainen itseasiassa
-toinen$(red)
+second$(blue);Target node
+second;Overridden to red
+second$(red)
 
-eka>#111111toinen
+first>#111111second
 
-eka>$(red)toinen
+first>$(red)second

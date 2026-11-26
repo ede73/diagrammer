@@ -160,7 +160,8 @@ const _visualizations = [
     new Visualization('ast_record', 'AST: Record Visualizer', 'ast_record', async (g) => {
         await visualizeGraphviz(g, 'dot');
     }, undefined, { family: 'AST', engine: 'Graphviz Dot', description: 'Abstract Syntax Tree structure rendered as Graphviz records' }),
-    new Visualization('ast', 'AST: JSON Only', 'ast', undefined, undefined, { family: 'AST', engine: 'Raw JSON', description: 'Abstract Syntax Tree JSON' })
+    new Visualization('ast', 'AST: JSON Only', 'ast', undefined, undefined, { family: 'AST', engine: 'Raw JSON', description: 'Abstract Syntax Tree JSON' }),
+    new Visualization('diagrammer', 'Diagrammer: DSL Code [WASM]', 'diagrammer', undefined, undefined, { family: 'Diagrammer Native', engine: 'Canonical DSL Formatter', description: 'Canonical Diagrammer DSL code generated from AST' })
 ];
 export let visualizations = _visualizations;
 export function setVisualizationsForTests(testVisualizations) {

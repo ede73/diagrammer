@@ -100,6 +100,7 @@ pub struct StateGraph {
     pub default_node_color: Option<String>,
     pub default_edge_color: Option<String>,
     pub type_registry: crate::ast::TypeRegistry,
+    pub debug_bounding_boxes: Option<String>,
 }
 
 impl StateGraph {
@@ -390,28 +391,93 @@ impl StateGraph {
             }
         }
 
-        // Determine Start node
-        let start_node_id = nodes
-            .values()
-            .find(|n| n.is_start)
-            .map(|n| n.id.clone())
-            .or_else(|| nodes.keys().next().cloned());
+        // Cycle breaking: Extract DAG adjacency via DFS to support cyclic state machines
+        let mut state_mark: HashMap<String, u8> = HashMap::new(); // 0: unvisited, 1: visiting (stack), 2: visited
+        let mut dag_adj: HashMap<String, Vec<String>> = HashMap::new();
 
-        if let Some(ref root) = start_node_id {
-            let mut visited = HashSet::new();
-            let mut queue = std::collections::VecDeque::new();
-            queue.push_back((root.clone(), 0usize));
-            visited.insert(root.clone());
+        let mut raw_in_degree: HashMap<String, usize> = HashMap::new();
+        for id in nodes.keys() {
+            raw_in_degree.entry(id.clone()).or_insert(0);
+        }
+        for succs in forward_adj.values() {
+            for s in succs {
+                *raw_in_degree.entry(s.clone()).or_default() += 1;
+            }
+        }
 
-            while let Some((curr, r)) = queue.pop_front() {
-                if let Some(node) = nodes.get_mut(&curr) {
-                    node.rank = node.rank.max(r);
+        let mut sorted_roots: Vec<String> = nodes.keys().cloned().collect();
+        let canvas_start = canvas.start.clone();
+        sorted_roots.sort_by(|a, b| {
+            let a_start = canvas_start.as_ref() == Some(a);
+            let b_start = canvas_start.as_ref() == Some(b);
+            b_start.cmp(&a_start)
+                .then_with(|| raw_in_degree.get(a).unwrap_or(&0).cmp(raw_in_degree.get(b).unwrap_or(&0)))
+                .then_with(|| a.cmp(b))
+        });
+
+        fn dfs_dag(
+            u: &str,
+            forward_adj: &HashMap<String, Vec<String>>,
+            state_mark: &mut HashMap<String, u8>,
+            dag_adj: &mut HashMap<String, Vec<String>>,
+        ) {
+            state_mark.insert(u.to_string(), 1); // visiting
+            if let Some(succs) = forward_adj.get(u) {
+                for v in succs {
+                    match state_mark.get(v).copied().unwrap_or(0) {
+                        1 => {
+                            // Back-edge (cycle): omit from dag_adj
+                        }
+                        0 => {
+                            dag_adj.entry(u.to_string()).or_default().push(v.clone());
+                            dfs_dag(v, forward_adj, state_mark, dag_adj);
+                        }
+                        2 => {
+                            // Cross/forward edge acyclic with current recursion stack
+                            dag_adj.entry(u.to_string()).or_default().push(v.clone());
+                        }
+                        _ => {}
+                    }
                 }
-                if let Some(succs) = forward_adj.get(&curr) {
-                    for s in succs {
-                        if !visited.contains(s) {
-                            visited.insert(s.clone());
-                            queue.push_back((s.clone(), r + 1));
+            }
+            state_mark.insert(u.to_string(), 2); // visited
+        }
+
+        for root in &sorted_roots {
+            if state_mark.get(root).copied().unwrap_or(0) == 0 {
+                dfs_dag(root, &forward_adj, &mut state_mark, &mut dag_adj);
+            }
+        }
+
+        // Topological Longest-Path Ranking on acyclic dag_adj
+        let mut in_degree: HashMap<String, usize> = HashMap::new();
+        for id in nodes.keys() {
+            in_degree.entry(id.clone()).or_insert(0);
+        }
+        for succs in dag_adj.values() {
+            for s in succs {
+                *in_degree.entry(s.clone()).or_default() += 1;
+            }
+        }
+
+        let mut queue = std::collections::VecDeque::new();
+        for (id, &deg) in &in_degree {
+            if deg == 0 {
+                queue.push_back(id.clone());
+            }
+        }
+
+        while let Some(curr) = queue.pop_front() {
+            let curr_rank = nodes.get(&curr).map_or(0, |n| n.rank);
+            if let Some(succs) = dag_adj.get(&curr) {
+                for s in succs {
+                    if let Some(succ_node) = nodes.get_mut(s) {
+                        succ_node.rank = succ_node.rank.max(curr_rank + 1);
+                    }
+                    if let Some(deg) = in_degree.get_mut(s) {
+                        *deg = deg.saturating_sub(1);
+                        if *deg == 0 {
+                            queue.push_back(s.clone());
                         }
                     }
                 }
@@ -447,21 +513,42 @@ impl StateGraph {
             }
         }
 
+        // Group nodes by rank
+        let mut rank_nodes: HashMap<usize, Vec<String>> = HashMap::new();
+        for (id, node) in &nodes {
+            rank_nodes.entry(node.rank).or_default().push(id.clone());
+        }
+
+        let mut sorted_ranks: Vec<usize> = rank_nodes.keys().copied().collect();
+        sorted_ranks.sort();
+
         // 5. Dynamic Non-Overlapping Coordinates Calculation
         let mut max_w_by_col: HashMap<i32, f64> = HashMap::new();
-        for node in nodes.values() {
-            let entry = max_w_by_col.entry(node.column).or_insert(110.0);
-            *entry = entry.max(node.width);
+        for r in &sorted_ranks {
+            let node_ids = rank_nodes.get(r).unwrap();
+            let mut by_col_count: HashMap<i32, Vec<String>> = HashMap::new();
+            for id in node_ids {
+                if let Some(node) = nodes.get(id) {
+                    by_col_count.entry(node.column).or_default().push(id.clone());
+                }
+            }
+            for (col, c_ids) in by_col_count {
+                let count = c_ids.len();
+                let row_w: f64 = c_ids.iter().map(|id| nodes.get(id).map_or(110.0, |n| n.width)).sum::<f64>()
+                    + (count.saturating_sub(1) as f64) * 24.0;
+                let entry = max_w_by_col.entry(col).or_insert(110.0);
+                *entry = entry.max(row_w);
+            }
         }
 
         let w_left = max_w_by_col.get(&-1).copied().unwrap_or(0.0);
-        let w_center = max_w_by_col.get(&0).copied().unwrap_or(480.0);
+        let w_center = max_w_by_col.get(&0).copied().unwrap_or(480.0).max(480.0);
         let w_right = max_w_by_col.get(&1).copied().unwrap_or(0.0);
 
         let gutter_margin = 50.0f64;
         let column_gap = 60.0f64;
 
-        // Dynamic column centers ensuring strictly non-overlapping columns
+        // Dynamic column centers ensuring non-overlapping columns and positive coordinates
         let center_x = if w_left > 0.0 {
             gutter_margin + w_left + column_gap + w_center / 2.0
         } else {
@@ -474,29 +561,36 @@ impl StateGraph {
         let rank_gap = 55.0;
         let margin_top = 50.0;
 
-        let mut rank_nodes: HashMap<usize, Vec<String>> = HashMap::new();
-        for (id, node) in &nodes {
-            rank_nodes.entry(node.rank).or_default().push(id.clone());
-        }
-
-        let mut sorted_ranks: Vec<usize> = rank_nodes.keys().copied().collect();
-        sorted_ranks.sort();
-
         let mut current_y = margin_top;
         for r in &sorted_ranks {
             let node_ids = rank_nodes.get(r).unwrap();
             let mut max_h_in_rank = 44.0f64;
 
+            // Group nodes in this rank by column to distribute horizontally
+            let mut by_col: HashMap<i32, Vec<String>> = HashMap::new();
             for id in node_ids {
-                if let Some(node) = nodes.get_mut(id) {
-                    let col_x = match node.column {
-                        -1 => left_col_x,
-                        1 => right_col_x,
-                        _ => center_x,
-                    };
-                    node.x = col_x - (node.width / 2.0);
-                    node.y = current_y;
-                    max_h_in_rank = max_h_in_rank.max(node.height);
+                if let Some(node) = nodes.get(id) {
+                    by_col.entry(node.column).or_default().push(id.clone());
+                }
+            }
+
+            for (col, c_ids) in by_col {
+                let base_x = match col {
+                    -1 => left_col_x,
+                    1 => right_col_x,
+                    _ => center_x,
+                };
+                let count = c_ids.len();
+                let total_w: f64 = c_ids.iter().map(|id| nodes.get(id).map_or(110.0, |n| n.width)).sum::<f64>()
+                    + (count.saturating_sub(1) as f64) * 24.0;
+                let mut curr_x = base_x - total_w / 2.0;
+                for id in &c_ids {
+                    if let Some(node) = nodes.get_mut(id) {
+                        node.x = curr_x;
+                        node.y = current_y;
+                        curr_x += node.width + 24.0;
+                        max_h_in_rank = max_h_in_rank.max(node.height);
+                    }
                 }
             }
             current_y += max_h_in_rank + rank_gap;
@@ -922,36 +1016,68 @@ impl StateGraph {
                         if obs.id == u.id || obs.id == v.id {
                             continue;
                         }
+                        // Skip enclosing cluster groups that contain both u and v (or either endpoint)
+                        let is_enclosing_group = groups.iter().any(|g| {
+                            g.id == obs.id && (g.member_nodes.contains(&u.id) || g.member_nodes.contains(&v.id))
+                        });
+                        if is_enclosing_group {
+                            continue;
+                        }
+
                         if obs.y < line_y_max && (obs.y + obs.height) > line_y_min {
-                            if line_x_center >= (obs.x - 5.0) && line_x_center <= (obs.x + obs.width + 5.0) {
+                            let obs_left = obs.x - 5.0;
+                            let obs_right = obs.x + obs.width + 5.0;
+                            let x_min = p_start.0.min(p_end.0);
+                            let x_max = p_start.0.max(p_end.0);
+                            if (line_x_center >= obs_left && line_x_center <= obs_right)
+                                || (x_max >= obs_left && x_min <= obs_right)
+                            {
                                 hits_obstacle = true;
                                 break;
                             }
                         }
                     }
 
+                    // Also check for intermediate nodes between u and v
+                    if !hits_obstacle {
+                        for other in nodes.values() {
+                            if other.id == u.id || other.id == v.id {
+                                continue;
+                            }
+                            if other.y < line_y_max && (other.y + other.height) > line_y_min {
+                                let other_left = other.x - 4.0;
+                                let other_right = other.x + other.width + 4.0;
+                                let x_min = p_start.0.min(p_end.0);
+                                let x_max = p_start.0.max(p_end.0);
+                                if (line_x_center >= other_left && line_x_center <= other_right)
+                                    || (x_max >= other_left && x_min <= other_right)
+                                {
+                                    hits_obstacle = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     if hits_obstacle {
-                        // Router avoids obstacle: detour via perimeter gutter
+                        // Router avoids obstacle: detour via perimeter gutter through clear channels
                         let use_right = u.column > 0 || (u.column == 0 && v.column > 0);
                         let gutter_x = if use_right { gutter_right } else { gutter_left };
 
-                        let p0 = if use_right {
-                            (u.x + u.width, u.y + u.height * 0.5)
-                        } else {
-                            (u.x, u.y + u.height * 0.5)
-                        };
-                        let p3 = if use_right {
-                            (v.x + v.width, v.y + v.height * 0.5)
-                        } else {
-                            (v.x, v.y + v.height * 0.5)
-                        };
+                        let y_out = p_start.1 + 12.0;
+                        let y_in = p_end.1 - 12.0;
 
                         path_d = format!(
-                            "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
-                            p0.0, p0.1, gutter_x, p0.1, gutter_x, p3.1, p3.0, p3.1
+                            "M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1}",
+                            p_start.0, p_start.1,
+                            p_start.0, y_out,
+                            gutter_x, y_out,
+                            gutter_x, y_in,
+                            p_end.0, y_in,
+                            p_end.0, p_end.1
                         );
                         label_x = gutter_x + if use_right { 12.0 } else { -12.0 };
-                        label_y = (p0.1 + p3.1) / 2.0;
+                        label_y = (y_out + y_in) / 2.0;
                     } else if (p_start.0 - p_end.0).abs() < 10.0 {
                         path_d = format!("M {:.1} {:.1} L {:.1} {:.1}", p_start.0, p_start.1, p_end.0, p_end.1);
                         label_x = p_start.0 + 12.0;
@@ -989,6 +1115,10 @@ impl StateGraph {
         };
         let max_h = current_y + 60.0;
 
+        let debug_bounding_boxes = canvas.debug.clone()
+            .or_else(|| canvas.layout.as_ref().and_then(|l| l.get("debug")).map(|s| s.to_string()))
+            .or_else(|| std::env::var("DEBUG_BBOX").ok());
+
         Self {
             nodes,
             groups,
@@ -999,6 +1129,7 @@ impl StateGraph {
             default_node_color: canvas.defaults.vertexcolor.clone(),
             default_edge_color: canvas.defaults.edgecolor.clone(),
             type_registry: canvas.type_registry.clone(),
+            debug_bounding_boxes,
         }
     }
 
@@ -1279,6 +1410,39 @@ impl StateGraph {
             }
             svg.push_str("  </g>\n");
         }
+
+        // Render Debug Bounding Boxes Overlay
+        let (dbg_color, dbg_display, dbg_attr) = if let Some(ref dbg_val) = self.debug_bounding_boxes {
+            let c = if dbg_val.starts_with('#') { dbg_val.as_str() } else { "#f43f5e" };
+            (c, "inline", " data-diagram-debug=\"true\"")
+        } else {
+            ("#f43f5e", "none", "")
+        };
+
+        svg.push_str(&format!(
+            "  <!-- Debug Bounding Boxes Overlay -->\n  <g class=\"diagrammer-debug-bounding-boxes ds-debug-bounding-boxes\"{attr} style=\"display: {disp}; pointer-events: none;\">\n",
+            attr = dbg_attr,
+            disp = dbg_display
+        ));
+        for grp in &self.groups {
+            svg.push_str(&format!(
+                r##"    <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="none" stroke="#ec4899" stroke-width="2.0" stroke-dasharray="6,4" />
+<text x="{:.1}" y="{:.1}" font-size="10" font-weight="700" font-family="monospace" fill="#ec4899">group: {} [{:.1}, {:.1}, {:.1}, {:.1}]</text>
+"##,
+                grp.x, grp.y, grp.width, grp.height,
+                grp.x + 6.0, grp.y + 14.0, grp.id, grp.x, grp.y, grp.width, grp.height
+            ));
+        }
+        for node in self.nodes.values() {
+            svg.push_str(&format!(
+                r##"    <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="none" stroke="{}" stroke-width="1.5" stroke-dasharray="4,3" />
+<text x="{:.1}" y="{:.1}" font-size="9" font-weight="600" font-family="monospace" fill="{}">node: {} [{:.1}, {:.1}, {:.1}, {:.1}]</text>
+"##,
+                node.x, node.y, node.width, node.height, dbg_color,
+                node.x + 4.0, (node.y - 4.0).max(10.0), dbg_color, node.id, node.x, node.y, node.width, node.height
+            ));
+        }
+        svg.push_str("  </g>\n\n");
 
         svg.push_str("</svg>\n");
         svg

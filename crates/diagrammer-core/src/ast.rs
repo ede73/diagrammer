@@ -356,12 +356,18 @@ pub struct GraphGroup {
     pub exitvertex: Option<usize>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub conditional: Option<String>,
+    #[serde(rename = "_conditionalEntryEdge", skip_serializing_if = "Option::is_none")]
+    pub conditional_entry_edge: Option<String>,
+    #[serde(rename = "_conditionalExitEdge", skip_serializing_if = "Option::is_none")]
+    pub conditional_exit_edge: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub textcolor: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub visualizer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub debug: Option<String>,
     #[serde(skip)]
     pub chain_terminals: Vec<String>,
     #[serde(skip)]
@@ -381,9 +387,12 @@ impl GraphGroup {
             is_inner_graph: false,
             exitvertex: None,
             conditional: None,
+            conditional_entry_edge: None,
+            conditional_exit_edge: None,
             color: None,
             textcolor: None,
             visualizer: None,
+            debug: None,
             chain_terminals: Vec::new(),
             is_scoped: false,
         }
@@ -680,6 +689,8 @@ pub struct GraphCanvas {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub visualizer: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub debug: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub direction: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub start: Option<String>,
@@ -707,6 +718,7 @@ impl Default for GraphCanvas {
             equal: Vec::new(),
             objects: Vec::new(),
             visualizer: None,
+            debug: None,
             direction: None,
             start: None,
             shape: None,

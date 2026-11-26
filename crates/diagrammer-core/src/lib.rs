@@ -31,7 +31,7 @@ pub fn parse_and_generate_with_files(
     };
 
     if visualizer == "ast" {
-        serde_json::to_string(&canvas)
+        serde_json::to_string_pretty(&canvas)
             .map_err(|e| format!("Serialization error: {}", e))
     } else if let Some(generator) = generators::make_generator(visualizer) {
         Ok(generator.generate(&canvas))

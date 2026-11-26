@@ -1,3 +1,5 @@
+visualizer state
+
 START xstart
 VERTEX COLOR #7473b3
 

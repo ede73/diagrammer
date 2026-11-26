@@ -48,6 +48,8 @@ landscape = @{ (^"landscape" | ^"horizontal" | ^"lr") ~ !(ASCII_ALPHANUMERIC | "
 portrait = @{ (^"portrait" | ^"vertical" | ^"td") ~ !(ASCII_ALPHANUMERIC | "_") }
 VISUALIZER_KW = @{ ^"visualizer" ~ !(ASCII_ALPHANUMERIC | "_") }
 visualizer = { VISUALIZER_KW ~ NAME }
+DEBUG_KW = @{ ^"debug" ~ !(ASCII_ALPHANUMERIC | "_") }
+debug_stmt = @{ DEBUG_KW ~ ( (":" | "=" | " " | "\t")* ~ (ASCII_ALPHANUMERIC | "_" | "-" | "#")+ )? ~ ";"? }
 START_KW = @{ ^"start" ~ !(ASCII_ALPHANUMERIC | "_") }
 start = { START_KW ~ NAME }
 EQUAL_KW = @{ ^"equal" ~ !(ASCII_ALPHANUMERIC | "_") }
@@ -119,7 +121,7 @@ op_type_kw = @{ (^"bidirectional" | ^"directed" | ^"undirected" | ^"double" | ^"
 op_style_kw = @{ (^"solid" | ^"dashed" | ^"dotted" | ^"bold" | ^"double" | ^"invis") ~ !(ASCII_ALPHANUMERIC | "_") }
 arrowhead_kw = @{ ^"arrowhead" ~ !(ASCII_ALPHANUMERIC | "_") }
 
-arrowhead_entry = { arrowhead_kw ~ define_params? ~ ":" ~ (SHAPES | custom_type) ~ ("(" ~ geom_args ~ ")")? ~ ";"? }
+arrowhead_entry = { arrowhead_kw ~ define_params? ~ ":" ~ (SHAPES | custom_shape | custom_type) ~ ("(" ~ geom_args ~ ")")? ~ ";"? }
 op_type_entry = { ^"type" ~ ":" ~ op_type_kw ~ ";"? }
 op_style_entry = { ^"style" ~ ":" ~ op_style_kw ~ ";"? }
 op_color_entry = { ^"color" ~ ":" ~ color_or_variable ~ ";"? }
@@ -139,6 +141,7 @@ define_operator_block = {
 }
 
 custom_type = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+custom_shape = @{ "__custom_shape__" ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 
 SAME_LINE_SPACE = _{ " " | "\t" }
 GROUP_KW = @{ ^"group" ~ !(ASCII_ALPHANUMERIC | "_") }
@@ -146,9 +149,9 @@ group_start = ${ (GROUP_KW | "{") ~ SAME_LINE_SPACE* ~ "!"? ~ SAME_LINE_SPACE* ~
 group_end = { GROUP_KW ~ ^"end" | "}" }
 
 vertex_name_spec = ${
-    STYLES ~ SAME_LINE_SPACE+ ~ (SHAPES | custom_type) ~ SAME_LINE_SPACE+ ~ NAME
+    STYLES ~ SAME_LINE_SPACE+ ~ (SHAPES | custom_shape) ~ SAME_LINE_SPACE+ ~ NAME
   | STYLES ~ SAME_LINE_SPACE+ ~ NAME
-  | (SHAPES | custom_type) ~ SAME_LINE_SPACE+ ~ NAME
+  | (SHAPES | custom_shape) ~ SAME_LINE_SPACE+ ~ NAME
   | SHAPES
   | NAME
 }
@@ -181,6 +184,7 @@ statement = {
     landscape
   | portrait
   | visualizer
+  | debug_stmt
   | start
   | equal
   | shape_decl

@@ -35,4 +35,7 @@ withdraw;+(amount: Currency)
 }
 
 Student,Professor>Person
-Course.Professor
+Course!professor1>Professor!teach
+Course!students>Student!classes
+Course!name>Person!name
+BankAccount!owner>Person!name

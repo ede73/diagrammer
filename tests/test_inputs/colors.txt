@@ -1,3 +1,5 @@
+visualizer dot
+
 EDGE COLOR #ff0000
 EDGE TEXT COLOR #00ff00
 group ColoR #0000ff

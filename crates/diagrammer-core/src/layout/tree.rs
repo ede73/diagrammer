@@ -242,9 +242,9 @@ impl TreeGraph {
             let mut computed_x: HashMap<String, f64> = HashMap::new();
             compute_x(&root, &tree_children, &leaf_x, &mut computed_x);
 
-            let max_x = computed_x.values().copied().fold(300.0, f64::max);
-            total_w = max_x + margin + 60.0;
-            total_h = margin * 2.0 + (max_depth as f64) * level_h + 50.0;
+            let max_x = computed_x.values().copied().fold(0.0, f64::max);
+            total_w = (max_x + margin + 40.0).max(120.0);
+            total_h = (margin * 2.0 + (max_depth as f64) * level_h + 30.0).max(80.0);
 
             for (id, lbl) in &node_labels {
                 let d = depths.get(id).copied().unwrap_or(0);

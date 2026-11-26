@@ -341,11 +341,16 @@ export function applyPerceptualColorTheme(isDark = null) {
         // --- STROKE ---
         const currStroke = el.getAttribute('stroke');
         if (currStroke && currStroke !== 'none' && currStroke !== 'transparent') {
-            if (!el.hasAttribute('data-orig-stroke')) {
-                el.setAttribute('data-orig-stroke', currStroke);
+            if (isText) {
+                // Text stroke is a protective contrast halo: must stay dark in dark mode, light in light mode
+                el.setAttribute('stroke', isDark ? '#090d16' : '#ffffff');
+            } else {
+                if (!el.hasAttribute('data-orig-stroke')) {
+                    el.setAttribute('data-orig-stroke', currStroke);
+                }
+                const orig = el.getAttribute('data-orig-stroke');
+                el.setAttribute('stroke', isDark ? adaptColorForDark(orig, true) : adaptColorForLight(orig, true));
             }
-            const orig = el.getAttribute('data-orig-stroke');
-            el.setAttribute('stroke', isDark ? adaptColorForDark(orig, true) : adaptColorForLight(orig, true));
         }
 
         // --- FILL ---

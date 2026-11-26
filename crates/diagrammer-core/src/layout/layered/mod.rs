@@ -51,6 +51,8 @@ pub struct LayeredEdge {
     pub is_cross_boundary: bool,
     pub from_member: Option<String>,
     pub to_member: Option<String>,
+    pub lcompass: Option<String>,
+    pub rcompass: Option<String>,
 }
 
 /// A visual cluster container grouping multiple layered nodes
@@ -80,6 +82,126 @@ pub struct LayeredGraph {
     pub default_node_color: Option<String>,
     pub default_edge_color: Option<String>,
     pub type_registry: crate::ast::TypeRegistry,
+    pub debug_bounding_boxes: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+struct RectObstacle {
+    id: String,
+    x: f64,
+    y: f64,
+    width: f64,
+    height: f64,
+}
+
+impl RectObstacle {
+    fn intersects_segment(&self, p1: (f64, f64), p2: (f64, f64)) -> bool {
+        let pad = 2.0;
+        let left = self.x + pad;
+        let right = self.x + self.width - pad;
+        let top = self.y + pad;
+        let bottom = self.y + self.height - pad;
+
+        if left >= right || top >= bottom {
+            return false;
+        }
+
+        // Horizontal segment
+        if (p1.1 - p2.1).abs() < 0.001 {
+            let y = p1.1;
+            if y > top && y < bottom {
+                let min_x = p1.0.min(p2.0);
+                let max_x = p1.0.max(p2.0);
+                return max_x > left && min_x < right;
+            }
+            return false;
+        }
+
+        // Vertical segment
+        if (p1.0 - p2.0).abs() < 0.001 {
+            let x = p1.0;
+            if x > left && x < right {
+                let min_y = p1.1.min(p2.1);
+                let max_y = p1.1.max(p2.1);
+                return max_y > top && min_y < bottom;
+            }
+            return false;
+        }
+
+        // General segment AABB overlap
+        let min_x = p1.0.min(p2.0);
+        let max_x = p1.0.max(p2.0);
+        let min_y = p1.1.min(p2.1);
+        let max_y = p1.1.max(p2.1);
+
+        max_x > left && min_x < right && max_y > top && min_y < bottom
+    }
+}
+
+fn count_path_collisions(
+    points: &[(f64, f64)],
+    obstacles: &[RectObstacle],
+    source_id: &str,
+    target_id: &str,
+) -> usize {
+    let mut count = 0;
+    if points.len() < 2 {
+        return 0;
+    }
+    for i in 0..points.len() - 1 {
+        let p1 = points[i];
+        let p2 = points[i + 1];
+        let is_first = i == 0;
+        let is_last = i + 1 == points.len() - 1;
+
+        for obs in obstacles {
+            if is_first && obs.id == source_id {
+                continue;
+            }
+            if is_last && obs.id == target_id {
+                continue;
+            }
+            if obs.id == source_id || obs.id == target_id {
+                continue;
+            }
+            if obs.intersects_segment(p1, p2) {
+                count += 1;
+            }
+        }
+    }
+    count
+}
+
+fn simplify_orthogonal_points(pts: Vec<(f64, f64)>) -> Vec<(f64, f64)> {
+    if pts.len() <= 2 {
+        return pts;
+    }
+    let mut res: Vec<(f64, f64)> = Vec::new();
+    res.push(pts[0]);
+    for i in 1..pts.len() - 1 {
+        let prev = *res.last().unwrap();
+        let curr = pts[i];
+        let next = pts[i + 1];
+
+        if (curr.0 - prev.0).abs() < 0.1 && (curr.1 - prev.1).abs() < 0.1 {
+            continue;
+        }
+
+        let collinear_x = (prev.0 - curr.0).abs() < 0.1 && (curr.0 - next.0).abs() < 0.1;
+        let collinear_y = (prev.1 - curr.1).abs() < 0.1 && (curr.1 - next.1).abs() < 0.1;
+        if !collinear_x && !collinear_y {
+            res.push(curr);
+        }
+    }
+    let last = *pts.last().unwrap();
+    if let Some(&prev) = res.last() {
+        if (last.0 - prev.0).abs() >= 0.1 || (last.1 - prev.1).abs() >= 0.1 {
+            res.push(last);
+        }
+    } else {
+        res.push(last);
+    }
+    res
 }
 
 fn create_layered_node_from_obj(
@@ -175,13 +297,15 @@ fn is_uml_group(grp: &crate::ast::GraphGroup, canvas: &GraphCanvas) -> bool {
         return true;
     }
     let vertices: Vec<&GraphObject> = grp.objects.iter().filter(|o| o.is_vertex()).collect();
-    if vertices.len() >= 2
-        && vertices.iter().all(|v| {
+    if !vertices.is_empty()
+        && vertices.iter().any(|v| {
             let lbl = v.get_label().unwrap_or_else(|| v.get_name());
             lbl.starts_with('+')
                 || lbl.starts_with('-')
                 || lbl.starts_with('#')
                 || lbl.starts_with('~')
+                || lbl.starts_with('_')
+                || lbl.starts_with('/')
                 || lbl.contains("()")
                 || lbl.contains(':')
         })
@@ -542,6 +666,8 @@ impl LayeredGraph {
                 is_cross_boundary: false,
                 from_member,
                 to_member,
+                lcompass: edge.lcompass.clone(),
+                rcompass: edge.rcompass.clone(),
             });
         }
 
@@ -755,6 +881,19 @@ impl LayeredGraph {
                         } else {
                             (u.x + u.width, u.y + u.height / 2.0)
                         }
+                    } else if let Some(ref comp) = edge.lcompass {
+                        let c = comp.trim_start_matches(':').to_lowercase();
+                        match c.as_str() {
+                            "n" => (u.x + u.width / 2.0, u.y),
+                            "ne" => (u.x + u.width, u.y),
+                            "e" => (u.x + u.width, u.y + u.height / 2.0),
+                            "se" => (u.x + u.width, u.y + u.height),
+                            "s" => (u.x + u.width / 2.0, u.y + u.height),
+                            "sw" => (u.x, u.y + u.height),
+                            "w" => (u.x, u.y + u.height / 2.0),
+                            "nw" => (u.x, u.y),
+                            _ => (u.x + u.width / 2.0, u.y + u.height),
+                        }
                     } else if !is_lr {
                         let frac = (i as f64 + 1.0) / (count as f64 + 1.0);
                         (u.x + u.width * frac, u.y + u.height)
@@ -789,6 +928,19 @@ impl LayeredGraph {
                             (v.x, member_y)
                         } else {
                             (v.x, v.y + v.height / 2.0)
+                        }
+                    } else if let Some(ref comp) = edge.rcompass {
+                        let c = comp.trim_start_matches(':').to_lowercase();
+                        match c.as_str() {
+                            "n" => (v.x + v.width / 2.0, v.y),
+                            "ne" => (v.x + v.width, v.y),
+                            "e" => (v.x + v.width, v.y + v.height / 2.0),
+                            "se" => (v.x + v.width, v.y + v.height),
+                            "s" => (v.x + v.width / 2.0, v.y + v.height),
+                            "sw" => (v.x, v.y + v.height),
+                            "w" => (v.x, v.y + v.height / 2.0),
+                            "nw" => (v.x, v.y),
+                            _ => (v.x + v.width / 2.0, v.y),
                         }
                     } else if !is_lr {
                         let frac = (j as f64 + 1.0) / (count as f64 + 1.0);
@@ -839,35 +991,297 @@ impl LayeredGraph {
             }
         }
 
+        let obstacles: Vec<RectObstacle> = nodes.values().map(|n| RectObstacle {
+            id: n.id.clone(),
+            x: n.x,
+            y: n.y,
+            width: n.width,
+            height: n.height,
+        }).collect();
+
+        let min_all_x = nodes.values().map(|n| n.x).fold(f64::INFINITY, f64::min);
+        let max_all_x = nodes.values().map(|n| n.x + n.width).fold(f64::NEG_INFINITY, f64::max);
+        let min_all_y = nodes.values().map(|n| n.y).fold(f64::INFINITY, f64::min);
+        let max_all_y = nodes.values().map(|n| n.y + n.height).fold(f64::NEG_INFINITY, f64::max);
+
         // 6d. Build final routing points
         for (idx, e) in edges.iter_mut().enumerate() {
-            if let (Some(&exit), Some(&entry)) = (exit_ports.get(&idx), entry_ports.get(&idx)) {
+            if e.from_member.is_some() || e.to_member.is_some() {
                 let track_offset = edge_track_offsets.get(&idx).copied().unwrap_or(0.0);
-                if e.from_member.is_some() || e.to_member.is_some() {
-                    let mid_x = (exit.0 + entry.0) / 2.0 + track_offset;
-                    if exit.0 < entry.0 {
-                        e.points = vec![exit, (mid_x, exit.1), (mid_x, entry.1), entry];
+                if let (Some(u), Some(v)) = (nodes.get(&e.from), nodes.get(&e.to)) {
+                    // Compute source port on u (or member in u)
+                    let (u_m_left, u_m_right, u_m_y) = if let Some(ref m_id) = e.from_member {
+                        if let Some((idx_m, m)) = u.members.iter().enumerate().find(|(_, m)| &m.id == m_id) {
+                            let my = u.y + 32.0 + 11.0 + (idx_m as f64) * 22.0;
+                            let mx = u.x + 8.0;
+                            let mw = ((m.label.len() as f64) * 7.5 + 14.0).max(48.0);
+                            (mx, mx + mw, my)
+                        } else {
+                            (u.x, u.x + u.width, u.y + u.height / 2.0)
+                        }
                     } else {
-                        let gutter = exit.0.max(entry.0) + 30.0 + track_offset.abs();
-                        e.points = vec![exit, (gutter, exit.1), (gutter, entry.1), entry];
+                        (u.x, u.x + u.width, u.y + u.height / 2.0)
+                    };
+
+                    // Compute target port on v (or member in v)
+                    let (v_m_left, v_m_right, v_m_y) = if let Some(ref m_id) = e.to_member {
+                        if let Some((idx_m, m)) = v.members.iter().enumerate().find(|(_, m)| &m.id == m_id) {
+                            let my = v.y + 32.0 + 11.0 + (idx_m as f64) * 22.0;
+                            let mx = v.x + 8.0;
+                            let mw = ((m.label.len() as f64) * 7.5 + 14.0).max(48.0);
+                            (mx, mx + mw, my)
+                        } else {
+                            (v.x, v.x + v.width, v.y + v.height / 2.0)
+                        }
+                    } else {
+                        (v.x, v.x + v.width, v.y + v.height / 2.0)
+                    };
+
+                    let min_all_x = nodes.values().map(|n| n.x).fold(f64::INFINITY, f64::min);
+                    let max_all_x = nodes.values().map(|n| n.x + n.width).fold(f64::NEG_INFINITY, f64::max);
+                    let gutter_l = (min_all_x - 24.0).max(16.0) - (track_offset.abs() % 30.0);
+                    let gutter_r = max_all_x + 24.0 + (track_offset.abs() % 30.0);
+
+                    let u_layer = u.layer;
+                    let v_layer = v.layer;
+                    let y_channel = if u_layer != v_layer {
+                        let min_l = u_layer.min(v_layer);
+                        let max_l = u_layer.max(v_layer);
+                        let l_bot = nodes.values().filter(|n| n.layer == min_l).map(|n| n.y + n.height).fold(0.0, f64::max);
+                        let l_top = nodes.values().filter(|n| n.layer > min_l && n.layer <= max_l).map(|n| n.y).fold(f64::INFINITY, f64::min);
+                        if l_top > l_bot { (l_bot + l_top) / 2.0 } else { l_bot + 24.0 }
+                    } else {
+                        u.y + u.height + 24.0
+                    };
+
+                    // Compute side gaps around u and v
+                    let left_nb_u = nodes.values().filter(|n| n.layer == u.layer && n.x + n.width <= u.x).max_by(|a, b| (a.x + a.width).partial_cmp(&(b.x + b.width)).unwrap());
+                    let right_nb_u = nodes.values().filter(|n| n.layer == u.layer && n.x >= u.x + u.width).min_by(|a, b| a.x.partial_cmp(&b.x).unwrap());
+                    let x_gap_u_l = if let Some(nb) = left_nb_u { (nb.x + nb.width + u.x) / 2.0 } else { u.x - 20.0 };
+                    let x_gap_u_r = if let Some(nb) = right_nb_u { (u.x + u.width + nb.x) / 2.0 } else { u.x + u.width + 20.0 };
+
+                    let left_nb_v = nodes.values().filter(|n| n.layer == v.layer && n.x + n.width <= v.x).max_by(|a, b| (a.x + a.width).partial_cmp(&(b.x + b.width)).unwrap());
+                    let right_nb_v = nodes.values().filter(|n| n.layer == v.layer && n.x >= v.x + v.width).min_by(|a, b| a.x.partial_cmp(&b.x).unwrap());
+                    let x_gap_v_l = if let Some(nb) = left_nb_v { (nb.x + nb.width + v.x) / 2.0 } else { v.x - 20.0 };
+                    let x_gap_v_r = if let Some(nb) = right_nb_v { (v.x + v.width + nb.x) / 2.0 } else { v.x + v.width + 20.0 };
+
+                    let mut candidates: Vec<Vec<(f64, f64)>> = Vec::new();
+
+                    // C1: Left gutter
+                    candidates.push(vec![
+                        (u_m_left, u_m_y),
+                        (u.x, u_m_y),
+                        (gutter_l, u_m_y),
+                        (gutter_l, v_m_y),
+                        (v.x, v_m_y),
+                        (v_m_left, v_m_y),
+                    ]);
+
+                    // C2: Right gutter
+                    candidates.push(vec![
+                        (u_m_right, u_m_y),
+                        (u.x + u.width, u_m_y),
+                        (gutter_r, u_m_y),
+                        (gutter_r, v_m_y),
+                        (v.x + v.width, v_m_y),
+                        (v_m_right, v_m_y),
+                    ]);
+
+                    // C3: Direct corridor if u is left of v
+                    if u.x + u.width < v.x {
+                        let mid_x = (u.x + u.width + v.x) / 2.0 + track_offset;
+                        candidates.push(vec![
+                            (u_m_right, u_m_y),
+                            (u.x + u.width, u_m_y),
+                            (mid_x, u_m_y),
+                            (mid_x, v_m_y),
+                            (v.x, v_m_y),
+                            (v_m_left, v_m_y),
+                        ]);
                     }
-                } else if !is_lr {
-                    if (exit.0 - entry.0).abs() < 1.0 && track_offset.abs() < 0.1 {
-                        e.points = vec![exit, entry];
-                    } else {
+
+                    // C4: Direct corridor if u is right of v
+                    if v.x + v.width < u.x {
+                        let mid_x = (v.x + v.width + u.x) / 2.0 + track_offset;
+                        candidates.push(vec![
+                            (u_m_left, u_m_y),
+                            (u.x, u_m_y),
+                            (mid_x, u_m_y),
+                            (mid_x, v_m_y),
+                            (v.x + v.width, v_m_y),
+                            (v_m_right, v_m_y),
+                        ]);
+                    }
+
+                    // C5: Inter-layer channel (exit U left -> channel -> enter V right)
+                    candidates.push(vec![
+                        (u_m_left, u_m_y),
+                        (u.x, u_m_y),
+                        (x_gap_u_l, u_m_y),
+                        (x_gap_u_l, y_channel),
+                        (x_gap_v_r, y_channel),
+                        (x_gap_v_r, v_m_y),
+                        (v.x + v.width, v_m_y),
+                        (v_m_right, v_m_y),
+                    ]);
+
+                    // C6: Inter-layer channel (exit U left -> channel -> enter V left)
+                    candidates.push(vec![
+                        (u_m_left, u_m_y),
+                        (u.x, u_m_y),
+                        (x_gap_u_l, u_m_y),
+                        (x_gap_u_l, y_channel),
+                        (x_gap_v_l, y_channel),
+                        (x_gap_v_l, v_m_y),
+                        (v.x, v_m_y),
+                        (v_m_left, v_m_y),
+                    ]);
+
+                    // C7: Inter-layer channel (exit U right -> channel -> enter V left)
+                    candidates.push(vec![
+                        (u_m_right, u_m_y),
+                        (u.x + u.width, u_m_y),
+                        (x_gap_u_r, u_m_y),
+                        (x_gap_u_r, y_channel),
+                        (x_gap_v_l, y_channel),
+                        (x_gap_v_l, v_m_y),
+                        (v.x, v_m_y),
+                        (v_m_left, v_m_y),
+                    ]);
+
+                    // C8: Inter-layer channel (exit U right -> channel -> enter V right)
+                    candidates.push(vec![
+                        (u_m_right, u_m_y),
+                        (u.x + u.width, u_m_y),
+                        (x_gap_u_r, u_m_y),
+                        (x_gap_u_r, y_channel),
+                        (x_gap_v_r, y_channel),
+                        (x_gap_v_r, v_m_y),
+                        (v.x + v.width, v_m_y),
+                        (v_m_right, v_m_y),
+                    ]);
+
+                    let mut scored: Vec<(usize, f64, Vec<(f64, f64)>)> = Vec::new();
+                    for cand in candidates {
+                        let pts = simplify_orthogonal_points(cand);
+                        let collisions = count_path_collisions(&pts, &obstacles, &u.id, &v.id);
+                        let length: f64 = pts.windows(2).map(|w| (w[1].0 - w[0].0).abs() + (w[1].1 - w[0].1).abs()).sum();
+                        scored.push((collisions, length, pts));
+                    }
+
+                    scored.sort_by(|a, b| {
+                        a.0.cmp(&b.0).then_with(|| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))
+                    });
+
+                    e.points = scored.into_iter().next().unwrap().2;
+                }
+            } else if let (Some(&exit), Some(&entry)) = (exit_ports.get(&idx), entry_ports.get(&idx)) {
+                let track_offset = edge_track_offsets.get(&idx).copied().unwrap_or(0.0);
+                if let (Some(u), Some(v)) = (nodes.get(&e.from), nodes.get(&e.to)) {
+                    let mut candidates: Vec<Vec<(f64, f64)>> = Vec::new();
+                    let gutter_l = (min_all_x - 24.0).max(16.0) - (track_offset.abs() % 30.0);
+                    let gutter_r = max_all_x + 24.0 + (track_offset.abs() % 30.0);
+                    let gutter_t = (min_all_y - 24.0).max(16.0) - (track_offset.abs() % 30.0);
+                    let gutter_b = max_all_y + 24.0 + (track_offset.abs() % 30.0);
+
+                    if !is_lr {
+                        if (exit.0 - entry.0).abs() < 1.0 && track_offset.abs() < 0.1 {
+                            candidates.push(vec![exit, entry]);
+                        }
+
                         let max_offset = ((entry.1 - exit.1).abs() / 2.0 - 10.0).max(0.0);
                         let clamped_offset = track_offset.clamp(-max_offset, max_offset);
                         let mid_y = (exit.1 + entry.1) / 2.0 + clamped_offset;
-                        e.points = vec![exit, (exit.0, mid_y), (entry.0, mid_y), entry];
-                    }
-                } else {
-                    if (exit.1 - entry.1).abs() < 1.0 && track_offset.abs() < 0.1 {
-                        e.points = vec![exit, entry];
+                        candidates.push(vec![exit, (exit.0, mid_y), (entry.0, mid_y), entry]);
+
+                        if u.layer != v.layer {
+                            let min_l = u.layer.min(v.layer);
+                            let max_l = u.layer.max(v.layer);
+
+                            for l in min_l..max_l {
+                                let l_bot = nodes.values().filter(|n| n.layer == l).map(|n| n.y + n.height).fold(0.0, f64::max);
+                                let l_top = nodes.values().filter(|n| n.layer == l + 1).map(|n| n.y).fold(f64::INFINITY, f64::min);
+                                let ch_y = if l_top > l_bot { (l_bot + l_top) / 2.0 } else { l_bot + 24.0 } + clamped_offset;
+
+                                candidates.push(vec![exit, (exit.0, ch_y), (entry.0, ch_y), entry]);
+                            }
+
+                            let top_ch = {
+                                let l_bot = nodes.values().filter(|n| n.layer == min_l).map(|n| n.y + n.height).fold(0.0, f64::max);
+                                let l_top = nodes.values().filter(|n| n.layer == min_l + 1).map(|n| n.y).fold(f64::INFINITY, f64::min);
+                                if l_top > l_bot { (l_bot + l_top) / 2.0 } else { l_bot + 24.0 }
+                            };
+                            let bot_ch = {
+                                let l_bot = nodes.values().filter(|n| n.layer == max_l - 1).map(|n| n.y + n.height).fold(0.0, f64::max);
+                                let l_top = nodes.values().filter(|n| n.layer == max_l).map(|n| n.y).fold(f64::INFINITY, f64::min);
+                                if l_top > l_bot { (l_bot + l_top) / 2.0 } else { l_bot + 24.0 }
+                            };
+
+                            candidates.push(vec![exit, (exit.0, top_ch), (gutter_l, top_ch), (gutter_l, bot_ch), (entry.0, bot_ch), entry]);
+                            candidates.push(vec![exit, (exit.0, top_ch), (gutter_r, top_ch), (gutter_r, bot_ch), (entry.0, bot_ch), entry]);
+                        } else {
+                            let y_below = (u.y + u.height).max(v.y + v.height) + 24.0 + clamped_offset.abs();
+                            let y_above = (u.y.min(v.y) - 24.0 - clamped_offset.abs()).max(16.0);
+                            candidates.push(vec![exit, (exit.0, y_below), (entry.0, y_below), entry]);
+                            candidates.push(vec![exit, (exit.0, y_above), (entry.0, y_above), entry]);
+                        }
                     } else {
+                        if (exit.1 - entry.1).abs() < 1.0 && track_offset.abs() < 0.1 {
+                            candidates.push(vec![exit, entry]);
+                        }
+
                         let max_offset = ((entry.0 - exit.0).abs() / 2.0 - 10.0).max(0.0);
                         let clamped_offset = track_offset.clamp(-max_offset, max_offset);
                         let mid_x = (exit.0 + entry.0) / 2.0 + clamped_offset;
-                        e.points = vec![exit, (mid_x, exit.1), (mid_x, entry.1), entry];
+                        candidates.push(vec![exit, (mid_x, exit.1), (mid_x, entry.1), entry]);
+
+                        if u.layer != v.layer {
+                            let min_l = u.layer.min(v.layer);
+                            let max_l = u.layer.max(v.layer);
+
+                            for l in min_l..max_l {
+                                let l_right = nodes.values().filter(|n| n.layer == l).map(|n| n.x + n.width).fold(0.0, f64::max);
+                                let l_left = nodes.values().filter(|n| n.layer == l + 1).map(|n| n.x).fold(f64::INFINITY, f64::min);
+                                let ch_x = if l_left > l_right { (l_right + l_left) / 2.0 } else { l_right + 24.0 } + clamped_offset;
+
+                                candidates.push(vec![exit, (ch_x, exit.1), (ch_x, entry.1), entry]);
+                            }
+
+                            let left_ch = {
+                                let l_right = nodes.values().filter(|n| n.layer == min_l).map(|n| n.x + n.width).fold(0.0, f64::max);
+                                let l_left = nodes.values().filter(|n| n.layer == min_l + 1).map(|n| n.x).fold(f64::INFINITY, f64::min);
+                                if l_left > l_right { (l_right + l_left) / 2.0 } else { l_right + 24.0 }
+                            };
+                            let right_ch = {
+                                let l_right = nodes.values().filter(|n| n.layer == max_l - 1).map(|n| n.x + n.width).fold(0.0, f64::max);
+                                let l_left = nodes.values().filter(|n| n.layer == max_l).map(|n| n.x).fold(f64::INFINITY, f64::min);
+                                if l_left > l_right { (l_right + l_left) / 2.0 } else { l_right + 24.0 }
+                            };
+
+                            candidates.push(vec![exit, (left_ch, exit.1), (left_ch, gutter_t), (right_ch, gutter_t), (right_ch, entry.1), entry]);
+                            candidates.push(vec![exit, (left_ch, exit.1), (left_ch, gutter_b), (right_ch, gutter_b), (right_ch, entry.1), entry]);
+                        } else {
+                            let x_right = (u.x + u.width).max(v.x + v.width) + 24.0 + clamped_offset.abs();
+                            let x_left = (u.x.min(v.x) - 24.0 - clamped_offset.abs()).max(16.0);
+                            candidates.push(vec![exit, (x_right, exit.1), (x_right, entry.1), entry]);
+                            candidates.push(vec![exit, (x_left, exit.1), (x_left, entry.1), entry]);
+                        }
+                    }
+
+                    let mut scored: Vec<(usize, f64, Vec<(f64, f64)>)> = Vec::new();
+                    for cand in candidates {
+                        let pts = simplify_orthogonal_points(cand);
+                        let collisions = count_path_collisions(&pts, &obstacles, &u.id, &v.id);
+                        let length: f64 = pts.windows(2).map(|w| (w[1].0 - w[0].0).abs() + (w[1].1 - w[0].1).abs()).sum();
+                        scored.push((collisions, length, pts));
+                    }
+
+                    scored.sort_by(|a, b| {
+                        a.0.cmp(&b.0).then_with(|| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))
+                    });
+
+                    if let Some(best) = scored.into_iter().next() {
+                        e.points = best.2;
                     }
                 }
             }
@@ -1184,6 +1598,8 @@ impl LayeredGraph {
                 is_cross_boundary: true,
                 from_member: None,
                 to_member: None,
+                lcompass: e.lcompass.clone(),
+                rcompass: e.rcompass.clone(),
             });
         }
 
@@ -1207,11 +1623,13 @@ impl LayeredGraph {
         // Calculate total canvas bounds
         let max_node_x = nodes.values().map(|n| n.x + n.width).fold(300.0, f64::max);
         let max_grp_x = groups.iter().map(|g| g.x + g.width).fold(300.0, f64::max);
-        let max_x = max_node_x.max(max_grp_x);
+        let max_edge_x = edges.iter().flat_map(|e| e.points.iter().map(|p| p.0)).fold(0.0, f64::max);
+        let max_x = max_node_x.max(max_grp_x).max(max_edge_x);
 
         let max_node_y = nodes.values().map(|n| n.y + n.height).fold(200.0, f64::max);
         let max_grp_y = groups.iter().map(|g| g.y + g.height).fold(200.0, f64::max);
-        let max_y = max_node_y.max(max_grp_y);
+        let max_edge_y = edges.iter().flat_map(|e| e.points.iter().map(|p| p.1)).fold(0.0, f64::max);
+        let max_y = max_node_y.max(max_grp_y).max(max_edge_y);
 
         let max_gutter_x = if cross_boundary_idx > 0 {
             gutter_right + 60.0 + (cross_boundary_idx as f64) * 16.0
@@ -1220,6 +1638,10 @@ impl LayeredGraph {
         };
         let total_w = max_x.max(max_gutter_x) + margin_x;
         let total_h = max_y + margin_y;
+
+        let debug_bounding_boxes = canvas.debug.clone()
+            .or_else(|| canvas.layout.as_ref().and_then(|l| l.get("debug")).map(|s| s.to_string()))
+            .or_else(|| std::env::var("DEBUG_BBOX").ok());
 
         Self {
             nodes,
@@ -1232,6 +1654,7 @@ impl LayeredGraph {
             default_node_color: canvas.defaults.vertexcolor.clone(),
             default_edge_color: canvas.defaults.edgecolor.clone(),
             type_registry: canvas.type_registry.clone(),
+            debug_bounding_boxes,
         }
     }
 
@@ -1356,6 +1779,13 @@ impl LayeredGraph {
       stroke-width: 1.8;
       stroke-linecap: round;
       stroke-linejoin: round;
+      cursor: pointer;
+      transition: stroke-width 0.2s ease, stroke 0.2s ease;
+    }}
+    .dl-edge-path:hover {{
+      stroke-width: 3.5px !important;
+      stroke: #38bdf8 !important;
+      marker-end: url(#dl-arrow-active) !important;
     }}
     .dl-edge-label {{
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -1402,12 +1832,7 @@ impl LayeredGraph {
             svg.push_str("  </g>\n\n");
         }
 
-        // 1. Render Edges
-        svg.push_str("  <!-- Edges -->\n  <g class=\"dl-edges-group\">\n");
-        for edge in &self.edges {
-            if edge.is_cross_boundary || edge.points.len() < 2 {
-                continue;
-            }
+        let render_edge_fn = |edge: &LayeredEdge, out: &mut String| {
             let edge_color = edge.color.as_deref().unwrap_or(default_edge_stroke);
             let mut path_d = String::new();
             for (i, pt) in edge.points.iter().enumerate() {
@@ -1470,14 +1895,23 @@ impl LayeredGraph {
                 ""
             };
 
-            svg.push_str(&format!(
+            out.push_str(&format!(
                 r#"    <path d="{}" class="dl-edge-path" stroke="{}"{}{}{}{} />
 "#,
                 path_d, edge_color, marker_start_attr, marker_end_attr, dash_attr, stroke_width_attr
             ));
 
             // Render Edge Label if present (borderless with SVG halo, floating cleanly on the track)
-            styler.render_edge_label(edge, &mut svg);
+            styler.render_edge_label(edge, out);
+        };
+
+        // 1. Render Edges (excluding member edges and cross-boundary edges)
+        svg.push_str("  <!-- Edges -->\n  <g class=\"dl-edges-group\">\n");
+        for edge in &self.edges {
+            if edge.is_cross_boundary || edge.from_member.is_some() || edge.to_member.is_some() || edge.points.len() < 2 {
+                continue;
+            }
+            render_edge_fn(edge, &mut svg);
         }
         svg.push_str("  </g>\n\n");
 
@@ -1490,6 +1924,23 @@ impl LayeredGraph {
             styler.render_node(node, default_node_fill, Some(&self.type_registry), &mut svg);
         }
         svg.push_str("  </g>\n\n");
+
+        // 3. Render Member Edges (on top layer so lines & arrowheads entering class boxes are crisp and visible)
+        let member_edges: Vec<&LayeredEdge> = self
+            .edges
+            .iter()
+            .filter(|e| (e.from_member.is_some() || e.to_member.is_some()) && !e.is_cross_boundary)
+            .collect();
+        if !member_edges.is_empty() {
+            svg.push_str("  <!-- Scoped UML Member Edges -->\n  <g class=\"dl-member-edges\">\n");
+            for edge in member_edges {
+                if edge.points.len() < 2 {
+                    continue;
+                }
+                render_edge_fn(edge, &mut svg);
+            }
+            svg.push_str("  </g>\n\n");
+        }
 
         // 3. Render Cross-Boundary Inter-Group Edges (on top layer so lines & arrowheads entering containers are crisp)
         let cross_edges: Vec<&LayeredEdge> = self.edges.iter().filter(|e| e.is_cross_boundary).collect();
@@ -1531,6 +1982,59 @@ impl LayeredGraph {
             }
             svg.push_str("  </g>\n\n");
         }
+
+        // Render Debug Bounding Boxes Overlay
+        let (dbg_color, dbg_display, dbg_attr) = if let Some(ref dbg_val) = self.debug_bounding_boxes {
+            let c = if dbg_val.starts_with('#') { dbg_val.as_str() } else { "#f43f5e" };
+            (c, "inline", " data-diagram-debug=\"true\"")
+        } else {
+            ("#f43f5e", "none", "")
+        };
+
+        svg.push_str(&format!(
+            "  <!-- Debug Bounding Boxes Overlay -->\n  <g class=\"diagrammer-debug-bounding-boxes dl-debug-bounding-boxes\"{attr} style=\"display: {disp}; pointer-events: none;\">\n",
+            attr = dbg_attr,
+            disp = dbg_display
+        ));
+
+        // 1. Groups
+        for grp in &self.groups {
+            svg.push_str(&format!(
+                r##"    <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="none" stroke="#ec4899" stroke-width="2.0" stroke-dasharray="6,4" />
+<text x="{:.1}" y="{:.1}" font-size="10" font-weight="700" font-family="monospace" fill="#ec4899">group: {} [{:.1}, {:.1}, {:.1}, {:.1}]</text>
+"##,
+                grp.x, grp.y, grp.width, grp.height,
+                grp.x + 6.0, grp.y + 14.0, grp.name, grp.x, grp.y, grp.width, grp.height
+            ));
+        }
+
+        // 2. Nodes
+        for node in self.nodes.values() {
+            svg.push_str(&format!(
+                r##"    <rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="none" stroke="{}" stroke-width="1.5" stroke-dasharray="4,3" />
+<text x="{:.1}" y="{:.1}" font-size="9" font-weight="600" font-family="monospace" fill="{}">node: {} [{:.1}, {:.1}, {:.1}, {:.1}]</text>
+"##,
+                node.x, node.y, node.width, node.height, dbg_color,
+                node.x + 4.0, (node.y - 4.0).max(10.0), dbg_color, node.id, node.x, node.y, node.width, node.height
+            ));
+
+            // 3. Class Members
+            for (idx_m, m) in node.members.iter().enumerate() {
+                let my = node.y + 32.0 + 11.0 + (idx_m as f64) * 22.0;
+                let mx = node.x + 8.0;
+                let mw = ((m.label.len() as f64) * 7.5 + 14.0).max(48.0);
+                svg.push_str(&format!(
+                    r##"    <rect x="{:.1}" y="{:.1}" width="{:.1}" height="20.0" fill="none" stroke="#10b981" stroke-width="1.0" stroke-dasharray="2,2" />
+<text x="{:.1}" y="{:.1}" font-size="8" font-family="monospace" fill="#10b981">port: {}</text>
+"##,
+                    mx, my - 10.0, mw,
+                    mx + 2.0, my - 2.0, m.id
+                ));
+            }
+        }
+
+        svg.push_str("  </g>\n\n");
+
         svg.push_str("</svg>\n");
 
         svg

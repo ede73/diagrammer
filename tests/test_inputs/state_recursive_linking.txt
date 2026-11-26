@@ -1,3 +1,5 @@
+visualizer layered
+
 //Should produce a trail of vertices from a-b
 //to that B has a common link to C and F
 //where as C and F have individual trails

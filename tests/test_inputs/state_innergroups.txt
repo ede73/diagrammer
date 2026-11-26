@@ -1,3 +1,5 @@
+visualizer dot
+
 vertex color #ff0000
 outside1;Group to node(MUST BE RED)
 outside3;Inner group to node(MUST BE RED)

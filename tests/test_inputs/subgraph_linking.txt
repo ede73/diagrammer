@@ -1,3 +1,5 @@
+visualizer layered
+
 // Multi-entrance and multi-exit subgraph auto-linking
 b > (
   c > d > e

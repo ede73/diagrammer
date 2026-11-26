@@ -16,6 +16,7 @@ struct ParsedVertex {
     edge_label: Option<String>,
     textcolor: Option<String>,
     url: Option<String>,
+    compass: Option<String>,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -35,12 +36,136 @@ pub struct AstBuilder {
     logical_files: std::collections::HashMap<String, String>,
     explicit_vertex_colors: HashSet<String>,
     explicit_vertex_textcolors: HashSet<String>,
+    last_seen_vertex: Option<String>,
+    pending_endif_group: Option<String>,
+    has_inline_theme: bool,
 }
 
 impl Default for AstBuilder {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn preprocess_custom_shapes(input: &str) -> String {
+    let mut custom_shapes = HashSet::new();
+    for line in input.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("define ") {
+            let rest = trimmed["define ".len()..].trim_start();
+            if !rest.starts_with("operator ") && !rest.starts_with("operator{") && !rest.starts_with("operator(") {
+                let name: String = rest
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '_')
+                    .collect();
+                if !name.is_empty() {
+                    custom_shapes.insert(name);
+                }
+            }
+        }
+    }
+
+    if custom_shapes.is_empty() {
+        return input.to_string();
+    }
+
+    let mut output = String::with_capacity(input.len());
+    let mut in_define_block = false;
+    for line in input.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("define ") {
+            in_define_block = true;
+        }
+        if in_define_block {
+            output.push_str(line);
+            output.push('\n');
+            if trimmed.contains('}') {
+                in_define_block = false;
+            }
+            continue;
+        }
+
+        let modified_line = rewrite_custom_shapes_in_line(line, &custom_shapes);
+        output.push_str(&modified_line);
+        output.push('\n');
+    }
+
+    output
+}
+
+fn rewrite_custom_shapes_in_line(line: &str, custom_shapes: &HashSet<String>) -> String {
+    let mut result = String::with_capacity(line.len() + 16);
+    let bytes = line.as_bytes();
+    let len = bytes.len();
+    let mut i = 0;
+    let mut in_quote: Option<u8> = None;
+
+    while i < len {
+        let b = bytes[i];
+
+        // Handle escape characters inside quotes
+        if in_quote.is_some() && b == b'\\' && i + 1 < len {
+            result.push(b as char);
+            result.push(bytes[i + 1] as char);
+            i += 2;
+            continue;
+        }
+
+        // Handle quote transitions
+        if in_quote.is_none() && (b == b'"' || b == b'\'') {
+            in_quote = Some(b);
+            result.push(b as char);
+            i += 1;
+            continue;
+        } else if in_quote == Some(b) {
+            in_quote = None;
+            result.push(b as char);
+            i += 1;
+            continue;
+        }
+
+        // If inside quote, keep character verbatim without shape replacement
+        if in_quote.is_some() {
+            result.push(b as char);
+            i += 1;
+            continue;
+        }
+
+        // Comment check: if "//" outside quotes, the rest of line is comment
+        if b == b'/' && i + 1 < len && bytes[i + 1] == b'/' {
+            result.push_str(&line[i..]);
+            break;
+        }
+
+        // Word start boundary check
+        let is_word_start = i == 0 || (!bytes[i - 1].is_ascii_alphanumeric() && bytes[i - 1] != b'_');
+        if is_word_start {
+            let mut matched_shape = None;
+            for shape in custom_shapes {
+                let slen = shape.len();
+                if i + slen <= len && &line[i..i + slen] == shape.as_str() {
+                    // Check word end boundary: followed by whitespace, '{', or '('
+                    let after = if i + slen < len { bytes[i + slen] } else { b' ' };
+                    if after.is_ascii_whitespace() || after == b'{' || after == b'(' {
+                        matched_shape = Some(shape.as_str());
+                        break;
+                    }
+                }
+            }
+
+            if let Some(shape) = matched_shape {
+                result.push_str("__custom_shape__");
+                result.push_str(shape);
+                i += shape.len();
+                continue;
+            }
+        }
+
+        result.push(b as char);
+        i += 1;
+    }
+
+    result
 }
 
 impl AstBuilder {
@@ -61,6 +186,9 @@ impl AstBuilder {
             logical_files: std::collections::HashMap::new(),
             explicit_vertex_colors: HashSet::new(),
             explicit_vertex_textcolors: HashSet::new(),
+            last_seen_vertex: None,
+            pending_endif_group: None,
+            has_inline_theme: false,
         }
     }
 
@@ -75,7 +203,8 @@ impl AstBuilder {
     }
 
     pub fn parse_and_process(&mut self, input: &str) -> Result<(), String> {
-        let pairs = DiagrammerParser::parse(Rule::diagram, input).map_err(|e| {
+        let preprocessed = preprocess_custom_shapes(input);
+        let pairs = DiagrammerParser::parse(Rule::diagram, &preprocessed).map_err(|e| {
             let (mut line, col) = match e.line_col {
                 pest::error::LineColLocation::Pos((l, c)) => (l, c),
                 pest::error::LineColLocation::Span((l, c), _) => (l, c),
@@ -135,6 +264,9 @@ impl AstBuilder {
     }
 
     fn apply_theme_defaults_to_canvas(&mut self) {
+        if !self.has_inline_theme {
+            return;
+        }
         let default_vc = self.canvas.defaults.vertexcolor.clone();
         let default_vtc = self.canvas.defaults.vertextextcolor.clone();
         let default_ec = self.canvas.defaults.edgecolor.clone();
@@ -473,6 +605,41 @@ impl AstBuilder {
         prefix
     }
 
+    fn record_vertex_seen(&mut self, name: &str) {
+        if let Some(endif_name) = self.pending_endif_group.take() {
+            self.set_group_conditional_exit_edge(&endif_name, name);
+        }
+        self.last_seen_vertex = Some(name.to_string());
+    }
+
+    fn set_group_conditional_exit_edge(&mut self, group_name: &str, exit_node: &str) {
+        fn set_in_objects(objects: &mut [GraphObject], group_name: &str, exit_node: &str) -> bool {
+            for obj in objects {
+                if let GraphObject::Group(grp) = obj {
+                    if grp.name == group_name {
+                        grp.conditional_exit_edge = Some(exit_node.to_string());
+                        return true;
+                    }
+                    if set_in_objects(&mut grp.objects, group_name, exit_node) {
+                        return true;
+                    }
+                }
+            }
+            false
+        }
+
+        for grp in self.group_stack.iter_mut().rev() {
+            if grp.name == group_name {
+                grp.conditional_exit_edge = Some(exit_node.to_string());
+                return;
+            }
+            if set_in_objects(&mut grp.objects, group_name, exit_node) {
+                return;
+            }
+        }
+        set_in_objects(&mut self.canvas.objects, group_name, exit_node);
+    }
+
     fn ensure_vertex_exists(&mut self, name: &str) {
         if !self.object_exists(name) {
             self.noedges.insert(name.to_string());
@@ -536,6 +703,18 @@ impl AstBuilder {
                     }
                 }
             }
+            Rule::debug_stmt => {
+                let raw = pair.as_str();
+                let val = raw.strip_prefix("debug").or_else(|| raw.strip_prefix("DEBUG"))
+                    .unwrap_or(raw)
+                    .trim_matches(|c: char| c.is_whitespace() || c == ':' || c == '=' || c == ';')
+                    .trim();
+                let dbg_val = if val.is_empty() { "true".to_string() } else { val.to_string() };
+                if let Some(grp) = self.group_stack.last_mut() {
+                    grp.debug = Some(dbg_val.clone());
+                }
+                self.canvas.debug = Some(dbg_val);
+            }
             Rule::start => {
                 if let Some(p) = pair.into_inner().find(|p| p.as_rule() == Rule::NAME) {
                     self.canvas.start = Some(p.as_str().trim().to_string());
@@ -589,6 +768,7 @@ impl AstBuilder {
                 }
             }
             Rule::theme_block => {
+                self.has_inline_theme = true;
                 let mut theme = self.canvas.theme.take().unwrap_or_default();
                 for entry in pair.into_inner() {
                     if entry.as_rule() == Rule::theme_entry {
@@ -673,6 +853,9 @@ impl AstBuilder {
                 if let Some(eng) = layout.get("engine") {
                     self.canvas.visualizer = Some(eng.to_string());
                 }
+                if let Some(dbg) = layout.get("debug") {
+                    self.canvas.debug = Some(dbg.to_string());
+                }
                 self.canvas.layout = Some(layout);
             }
             Rule::include_stmt => {
@@ -715,6 +898,7 @@ impl AstBuilder {
                     for pv in targets {
                         self.ensure_vertex_exists(&pv.name);
                         self.update_vertex_attrs(&pv);
+                        self.record_vertex_seen(&pv.name);
                     }
                 }
             }
@@ -751,6 +935,7 @@ impl AstBuilder {
                 let mut group = GraphGroup::new(&id.to_string());
                 group.pseudo_type = "GraphConditional".to_string();
                 group.conditional = Some("if".to_string());
+                group.conditional_entry_edge = self.last_seen_vertex.clone();
                 group.label = Some(label.to_string());
                 let exit_id = self.context.container_exit.unwrap_or(1);
                 group.exitvertex = Some(exit_id);
@@ -801,6 +986,8 @@ impl AstBuilder {
                 let exit_id = self.context.container_exit.unwrap_or(1);
                 endif_group.exitvertex = Some(exit_id);
                 self.context.container_exit = Some(exit_id + 1);
+                let endif_name = endif_group.name.clone();
+                self.pending_endif_group = Some(endif_name);
                 if let Some(parent) = self.group_stack.last_mut() {
                     parent.objects.push(GraphObject::Group(Box::new(endif_group)));
                 } else {
@@ -1053,8 +1240,9 @@ impl AstBuilder {
                                                 }
                                             }
                                         }
-                                        Rule::SHAPES | Rule::custom_type => {
-                                            ah_shape = ah_part.as_str().trim().to_string();
+                                        Rule::SHAPES | Rule::custom_type | Rule::custom_shape => {
+                                            let raw = ah_part.as_str().trim();
+                                            ah_shape = raw.strip_prefix("__custom_shape__").unwrap_or(raw).to_string();
                                         }
                                         Rule::geom_args => {
                                             let s = ah_part.as_str().trim();
@@ -1218,7 +1406,10 @@ impl AstBuilder {
                 for p in pair.into_inner() {
                     match p.as_rule() {
                         Rule::NAME => found_name = Some(p.as_str().trim().to_string()),
-                        Rule::custom_type => found_custom_type = Some(p.as_str().trim().to_string()),
+                        Rule::custom_type | Rule::custom_shape => {
+                            let raw = p.as_str().trim();
+                            found_custom_type = Some(raw.strip_prefix("__custom_shape__").unwrap_or(raw).to_string());
+                        }
                         Rule::SHAPES => found_shape = Some(p.as_str().trim().to_string()),
                         _ => {}
                     }
@@ -1345,8 +1536,9 @@ impl AstBuilder {
                     }
                     pv.shape = Some(s.to_string());
                 }
-                Rule::custom_type => {
-                    let ct = p.as_str().trim().to_string();
+                Rule::custom_type | Rule::custom_shape => {
+                    let raw = p.as_str().trim();
+                    let ct = raw.strip_prefix("__custom_shape__").unwrap_or(raw).to_string();
                     *custom_type_name = Some(ct);
                 }
                 Rule::NAME => {
@@ -1373,6 +1565,9 @@ impl AstBuilder {
                         .and_then(|x| x.strip_suffix('"'))
                         .unwrap_or(s);
                     pv.image = Some(unquoted.to_string());
+                }
+                Rule::COMPASS => {
+                    pv.compass = Some(p.as_str().trim().to_string());
                 }
                 Rule::vertex_name_spec => {
                     self.extract_vertex_attrs_inner(p, pv, custom_type_name, parsed_name);
@@ -1542,16 +1737,34 @@ impl AstBuilder {
             })
             .collect();
 
-        let entrances = if !root_names.is_empty() {
-            root_names.clone()
-        } else {
-            all_inner_vertices.clone()
+        let entrances = {
+            let list: Vec<String> = all_inner_vertices
+                .iter()
+                .filter(|n| !has_incoming.contains(*n))
+                .cloned()
+                .collect();
+            if !list.is_empty() {
+                list
+            } else if !root_names.is_empty() {
+                root_names.clone()
+            } else {
+                all_inner_vertices.clone()
+            }
         };
 
-        let exits = if !finished_inner.chain_terminals.is_empty() {
-            finished_inner.chain_terminals.clone()
-        } else {
-            root_names
+        let exits = {
+            let list: Vec<String> = all_inner_vertices
+                .iter()
+                .filter(|n| !has_outgoing.contains(*n))
+                .cloned()
+                .collect();
+            if !list.is_empty() {
+                list
+            } else if !finished_inner.chain_terminals.is_empty() {
+                finished_inner.chain_terminals.clone()
+            } else {
+                root_names
+            }
         };
 
         self.push_object(GraphObject::Group(Box::new(finished_inner)));
@@ -1572,7 +1785,7 @@ impl AstBuilder {
         #[derive(Default, Clone)]
         struct ChainNode {
             incoming: Vec<ParsedVertex>,
-            outgoing: Vec<String>,
+            outgoing: Vec<ParsedVertex>,
             connector: Option<ConnectorData>,
             inner_id: Option<String>,
             inner_edges: Vec<GraphObject>,
@@ -1580,7 +1793,7 @@ impl AstBuilder {
 
         let mut elements: Vec<ChainNode> = Vec::new();
         let mut current_incoming: Vec<ParsedVertex> = Vec::new();
-        let mut current_outgoing = Vec::new();
+        let mut current_outgoing: Vec<ParsedVertex> = Vec::new();
         let mut current_inner_id = None;
         let mut current_inner_edges = Vec::new();
         let mut common_chain_label: Option<String> = None;
@@ -1596,7 +1809,13 @@ impl AstBuilder {
                             ..Default::default()
                         })
                         .collect();
-                    current_outgoing = exits;
+                    current_outgoing = exits
+                        .iter()
+                        .map(|n| ParsedVertex {
+                            name: n.clone(),
+                            ..Default::default()
+                        })
+                        .collect();
                     current_inner_id = Some(id);
                     current_inner_edges = inner_edges;
                 }
@@ -1620,19 +1839,24 @@ impl AstBuilder {
                                 ..Default::default()
                             })
                             .collect();
-                        current_outgoing = exits;
+                        current_outgoing = exits
+                            .iter()
+                            .map(|n| ParsedVertex {
+                                name: n.clone(),
+                                ..Default::default()
+                            })
+                            .collect();
                         current_inner_id = Some(id);
                         current_inner_edges = inner_edges;
                     } else {
                         let targets = self.collect_vertex_targets(item);
-                        let mut names = Vec::new();
                         for pv in &targets {
                             self.ensure_vertex_exists(&pv.name);
                             self.update_vertex_attrs(pv);
-                            names.push(pv.name.clone());
+                            self.record_vertex_seen(&pv.name);
                         }
+                        current_outgoing = targets.clone();
                         current_incoming = targets;
-                        current_outgoing = names;
                     }
                 }
                 Rule::edge_connector => {
@@ -1734,7 +1958,7 @@ impl AstBuilder {
                 for rhs in rhs_targets {
                     let mut edge = EdgeRef::new(
                         conn.event_type.clone(),
-                        lhs.clone(),
+                        lhs.name.clone(),
                         rhs.name.clone(),
                     );
                     if let Some(ref c) = conn.color {
@@ -1743,8 +1967,8 @@ impl AstBuilder {
                     } else {
                         edge.color = self.find_default_edgecolor();
                     }
-                    edge.lcompass = conn.lcompass.clone();
-                    edge.rcompass = conn.rcompass.clone();
+                    edge.lcompass = conn.lcompass.clone().or_else(|| lhs.compass.clone());
+                    edge.rcompass = conn.rcompass.clone().or_else(|| rhs.compass.clone());
                     let edge_label = if self.is_group(&rhs.name) {
                         None
                     } else {
@@ -1785,7 +2009,7 @@ impl AstBuilder {
 
                     self.canvas.objects.push(GraphObject::Edge { edge });
                     self.maybe_remove_from_root_vertices(&rhs.name);
-                    self.noedges.remove(lhs);
+                    self.noedges.remove(&lhs.name);
                     self.noedges.remove(&rhs.name);
                 }
             }
@@ -1800,8 +2024,8 @@ impl AstBuilder {
         if let Some(grp) = self.group_stack.last_mut() {
             if let Some(last_elem) = elements.last() {
                 for node in &last_elem.outgoing {
-                    if !grp.chain_terminals.contains(node) {
-                        grp.chain_terminals.push(node.clone());
+                    if !grp.chain_terminals.contains(&node.name) {
+                        grp.chain_terminals.push(node.name.clone());
                     }
                 }
             }
@@ -2260,5 +2484,47 @@ Admin > Org!Meta!name
         let edges = canvas.get_edges();
         assert!(edges.iter().any(|e| e.left == "User" && e.right == "Person!name"), "Edge User > Person!name must exist");
         assert!(edges.iter().any(|e| e.left == "Admin" && e.right == "Org!Meta!name"), "Edge Admin > Org!Meta!name must exist");
+    }
+
+    #[test]
+    fn test_bare_debug_and_debug_values() {
+        // 1. Bare debug statement
+        let canvas1 = AstBuilder::new().build("debug\na>b").expect("Bare debug should parse");
+        assert_eq!(canvas1.debug.as_deref(), Some("true"));
+
+        // 2. Bare debug with semicolon
+        let canvas2 = AstBuilder::new().build("debug;\na>b").expect("Debug with semicolon should parse");
+        assert_eq!(canvas2.debug.as_deref(), Some("true"));
+
+        // 3. Debug with bounding_boxes
+        let canvas3 = AstBuilder::new().build("debug bounding_boxes\na>b").expect("Debug bounding_boxes should parse");
+        assert_eq!(canvas3.debug.as_deref(), Some("bounding_boxes"));
+
+        // 4. Debug with hex color
+        let canvas4 = AstBuilder::new().build("debug: #ec4899\na>b").expect("Debug hex color should parse");
+        assert_eq!(canvas4.debug.as_deref(), Some("#ec4899"));
+    }
+
+    #[test]
+    fn test_custom_shape_preserves_quoted_labels() {
+        let input = r#"
+define auto {
+  rectangle(x=0, y=8, w=60, h=18, rx=4)
+}
+
+node1; "Calls auto again"
+node2; "auto mode enabled"
+// auto in comments should not be touched
+auto real_auto_node
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Custom shape with quoted text should parse");
+        let node1 = canvas.objects.iter().find(|o| o.get_name() == "node1").expect("node1 must exist");
+        assert_eq!(node1.get_label().as_deref(), Some("Calls auto again"));
+
+        let node2 = canvas.objects.iter().find(|o| o.get_name() == "node2").expect("node2 must exist");
+        assert_eq!(node2.get_label().as_deref(), Some("auto mode enabled"));
+
+        let real_node = canvas.objects.iter().find(|o| o.get_name() == "real_auto_node").expect("real_auto_node must exist");
+        assert_eq!(real_node.get_shape().as_deref(), Some("auto"));
     }
 }

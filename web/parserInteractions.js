@@ -26,17 +26,16 @@ async function loadWasm() {
 if (typeof window !== 'undefined') {
     loadWasm().catch(() => { });
 }
+
 function extractScriptVisualizer(diagrammerCode) {
     const match = diagrammerCode.match(/(?:^|\n)\s*(?:generator|visualizer)\s+([A-Za-z0-9_]+)/i);
     return match ? match[1].toLowerCase() : null;
 }
-export function parse(diagrammerCode, successCallback, failureCallback, preferScriptSpecifiedVisualizer = false) {
+export function parse(diagrammerCode, successCallback, failureCallback, preferScriptSpecifiedVisualizer = false, filename = null) {
     if (preferScriptSpecifiedVisualizer && !isLockHintsEnabled()) {
-        const scriptVisualizer = extractScriptVisualizer(diagrammerCode);
-        if (scriptVisualizer) {
-            setVisualizer(scriptVisualizer);
-            console.debug(`  .. changed visualizer to script visualizer: ${scriptVisualizer}`);
-        }
+        const scriptVisualizer = extractScriptVisualizer(diagrammerCode) || 'layered';
+        setVisualizer(scriptVisualizer);
+        console.debug(`  .. changed visualizer to: ${scriptVisualizer}`);
     }
     const visualizer = getSelectedVisualizer();
     console.debug(`parse(${visualizer} ${preferScriptSpecifiedVisualizer ? 'preferScriptSpecifiedVisualizer' : ''})`);

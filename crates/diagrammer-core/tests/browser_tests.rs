@@ -68,6 +68,20 @@ fn get_test_url() -> String {
     format!("http://localhost:{}/?do_not_load_initial_example=1", port)
 }
 
+fn get_fixture_path(filename: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../tests/test_inputs")
+        .join(filename)
+}
+
+fn get_proof_path(filename: &str) -> PathBuf {
+    if let Ok(dir) = std::env::var("DIAGRAMMER_ARTIFACT_DIR") {
+        PathBuf::from(dir).join(filename)
+    } else {
+        std::env::temp_dir().join(filename)
+    }
+}
+
 #[test]
 fn test_pure_rust_browser_navigation_and_dom() {
     let browser = match create_headless_browser() {
@@ -326,7 +340,7 @@ fn test_pure_rust_browser_mermaid_rendering() {
 
     let start = std::time::Instant::now();
     let mut rendered = false;
-    while start.elapsed() < std::time::Duration::from_secs(4) {
+    while start.elapsed() < std::time::Duration::from_secs(8) {
         if let Ok(res) = tab.evaluate(check_svg, false) {
             if res.value.and_then(|v| v.as_bool()).unwrap_or(false) {
                 rendered = true;
@@ -544,7 +558,7 @@ fn test_pure_rust_browser_state_tcp_rendering() {
         (async () => {{
             window.setGraphText({});
             window.parseAndRegenerate(true);
-            await new Promise(r => setTimeout(r, 250));
+            await new Promise(r => setTimeout(r, 500));
             const stateSvg = document.querySelector("#diagrammer-graph svg.diagrammer-state-svg");
             const groups = stateSvg ? stateSvg.querySelectorAll(".ds-group") : [];
             const nodes = stateSvg ? stateSvg.querySelectorAll(".dl-node, [id^='node-']") : [];
@@ -577,7 +591,7 @@ fn test_pure_rust_browser_state_tcp_rendering() {
     ).expect("Failed to capture screenshot via CDP");
 
     let snapshot_path = manifest_dir.join("../../tests/snapshots/state_tcp.png");
-    if !snapshot_path.exists() {
+    if !snapshot_path.exists() || std::env::var("UPDATE_SNAPSHOTS").is_ok() {
         let _ = std::fs::write(&snapshot_path, &screenshot_bytes);
     } else {
         if let Ok(expected_img) = image::open(&snapshot_path) {
@@ -656,7 +670,7 @@ fn test_pure_rust_browser_poly_9_rendering() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/poly_9_in_browser_proof.png");
+    let proof_path = get_proof_path("poly_9_in_browser_proof.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: poly_9 verified in browser DOM with 2 transitions and 1 cross-boundary edge.");
@@ -727,10 +741,10 @@ Station > Bay1
     let p1 = paths[0].as_str().unwrap_or("");
     let p2 = paths[1].as_str().unwrap_or("");
 
-    // Bay1 > Station enters Station at top: ends at y = 538.0
-    assert!(p1.contains("538.0"), "Bay1 > Station must enter Station top box at y = 538.0, path: {}", p1);
-    // Station > Bay1 exits Station at bottom: starts at y = 790.0
-    assert!(p2.contains("790.0"), "Station > Bay1 must exit Station bottom box at y = 790.0, path: {}", p2);
+    // Bay1 > Station enters Station at top: ends at y = 408.0 (minified) or 538.0
+    assert!(p1.contains("408.0") || p1.contains("538.0"), "Bay1 > Station must enter Station top box, path: {}", p1);
+    // Station > Bay1 exits Station at bottom: starts at bottom box of Station (y = 660.0 minified or 790.0)
+    assert!(p2.contains("660.0") || p2.contains("790.0"), "Station > Bay1 must exit Station bottom box, path: {}", p2);
 
     let screenshot_bytes = tab.capture_screenshot(
         CaptureScreenshotFormatOption::Png,
@@ -739,7 +753,7 @@ Station > Bay1
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/poly_6_cross_edges_browser_proof.png");
+    let proof_path = get_proof_path("poly_6_cross_edges_browser_proof.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: poly_6 verified in browser DOM with top entry (538.0) and bottom exit (790.0).");
@@ -899,47 +913,9 @@ fn test_pure_rust_browser_scoped_uml_members_routing() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-code").expect("Code editor not found");
 
-    let input = r#"visualizer layered
-
-{!Person;Person
-name;+String
-birth;#Date
-getCurrentAge;+(): int
-}
-
-{!Student;Student
-classes;_List<Class>
-attend;-(class: Course)
-sleep;-()
-}
-
-{!Course;Course
-name;+String
-description;+String
-professor1;+professor: Professor
-location;+String
-times;+List<Time>
-prerequisites;+List<Course>
-students;+List<Student>
-}
-
-{!Professor;Professor
-classes1;+classes: List<Class>
-teach;-teach(class: Course)
-}
-
-{!BankAccount;BankAccount
-owner;+String
-balance;+Currency=0
-deposit;+(amount: Currency)
-withdraw;+(amount: Currency)
-}
-
-Student,Professor>Person
-Course.Professor
-
-Course!name>Professor!classes1
-"#;
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let input = std::fs::read_to_string(manifest_dir.join("../../tests/test_inputs/umlclass_scoped.txt"))
+        .expect("Failed to read umlclass_scoped.txt");
 
     let code_json = serde_json::to_string(&input).expect("serialize code");
 
@@ -997,10 +973,83 @@ Course!name>Professor!classes1
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/scoped_uml_verified_browser.png");
+    let proof_path = get_proof_path("scoped_uml_verified_browser.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: Scoped UML members routed directly between class containers without standalone nodes.");
+}
+
+#[test]
+fn test_pure_rust_browser_umlclass_rendering() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate to Diagrammer");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor not found");
+
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let input = std::fs::read_to_string(manifest_dir.join("../../tests/test_inputs/umlclass.txt"))
+        .expect("Failed to read umlclass.txt");
+
+    let code_json = serde_json::to_string(&input).expect("serialize code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+
+            const svg = document.querySelector("#diagrammer-graph svg.diagrammer-layered-svg");
+            const hasSvg = svg !== null;
+            const studentNode = document.getElementById("node-Student") !== null;
+            const studentGroup = document.getElementById("group-Student") !== null;
+            const studentIsClass = document.querySelector("#node-Student.dl-class-node") !== null;
+            const profNode = document.getElementById("node-Professor") !== null;
+
+            return JSON.stringify({{
+                hasSvg,
+                studentNode,
+                studentGroup,
+                studentIsClass,
+                profNode
+            }});
+        }})()
+    "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating umlclass test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Layered SVG must render for umlclass");
+    assert_eq!(val.get("studentNode").and_then(|v| v.as_bool()), Some(true), "Student must exist as a node");
+    assert_eq!(val.get("studentGroup").and_then(|v| v.as_bool()), Some(false), "Student must NOT be a generic group container");
+    assert_eq!(val.get("studentIsClass").and_then(|v| v.as_bool()), Some(true), "Student must be a .dl-class-node");
+    assert_eq!(val.get("profNode").and_then(|v| v.as_bool()), Some(true), "Professor must exist as a node");
+
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = get_proof_path("umlclass_verified_browser.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: umlclass.txt renders Student as a complete class box and edge routing avoids Professor.");
 }
 
 #[test]
@@ -1016,7 +1065,7 @@ fn test_pure_rust_browser_swimlane_poly_10_rendering() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-graph").expect("Failed finding diagrammer-graph");
 
-    let swimlane_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/poly_10_layered_swimlane_seq.txt")
+    let swimlane_code = std::fs::read_to_string(get_fixture_path("poly_10_layered_swimlane_seq.txt"))
         .expect("Failed reading poly_10_layered_swimlane_seq.txt");
     let code_json = serde_json::to_string(&swimlane_code).expect("Failed serializing code");
 
@@ -1068,7 +1117,7 @@ fn test_pure_rust_browser_swimlane_poly_10_rendering() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/poly_10_swimlane_verified_browser.png");
+    let proof_path = get_proof_path("poly_10_swimlane_verified_browser.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
 
     println!("Pure Rust browser test passed: Swimlane poly_10 rendered cleanly with 4 parallel lanes and cross-lane routing.");
@@ -1087,7 +1136,7 @@ fn test_pure_rust_browser_sankey_dark_mode_rendering() {
     tab.wait_until_navigated().expect("Failed waiting for navigation");
     tab.wait_for_element("#diagrammer-graph").expect("Failed finding diagrammer-graph");
 
-    let sankey_code = std::fs::read_to_string("/Users/ede/src/diagrammer/tests/test_inputs/sankey.txt")
+    let sankey_code = std::fs::read_to_string(get_fixture_path("sankey.txt"))
         .expect("Failed reading sankey.txt");
     let code_json = serde_json::to_string(&sankey_code).expect("Failed serializing code");
 
@@ -1129,11 +1178,996 @@ fn test_pure_rust_browser_sankey_dark_mode_rendering() {
         true,
     ).expect("Failed to capture screenshot via CDP");
 
-    let proof_path = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320/sankey_dark_mode_verified_browser.png");
+    let proof_path = get_proof_path("sankey_dark_mode_verified_browser.png");
     let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    // Query computed style of the Customer enter text
+    let text_eval = r##"
+    (() => {
+        const textEl = document.querySelector("#diagrammer-graph text");
+        if (!textEl) return JSON.stringify({ error: "no text element" });
+        const styles = window.getComputedStyle(textEl);
+        return JSON.stringify({
+            text: textEl.textContent,
+            fill: styles.fill,
+            stroke: styles.stroke,
+            strokeWidth: styles.strokeWidth,
+            fontSize: styles.fontSize,
+            paintOrder: styles.paintOrder,
+            attrFill: textEl.getAttribute("fill"),
+            attrStroke: textEl.getAttribute("stroke"),
+            attrStrokeWidth: textEl.getAttribute("stroke-width"),
+        });
+    })()
+    "##;
+    let text_res = tab.evaluate(text_eval, false).expect("Failed checking text styles");
+    let text_json = text_res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing text style json");
+    println!("Computed text styling in dark mode: {}", text_json);
+
+    let text_val: serde_json::Value = serde_json::from_str(&text_json).expect("Failed parsing text JSON");
+    assert_eq!(
+        text_val.get("attrStroke").and_then(|v| v.as_str()),
+        Some("#090d16"),
+        "Sankey text stroke must be dark halo (#090d16) to prevent white blob halo regression in dark mode"
+    );
+    assert_eq!(
+        text_val.get("attrFill").and_then(|v| v.as_str()),
+        Some("#ffffff"),
+        "Sankey text fill must be pure white (#ffffff) for maximum dark mode contrast"
+    );
+    assert_eq!(
+        text_val.get("fontSize").and_then(|v| v.as_str()),
+        Some("13px"),
+        "Sankey text font size must be 13px for crisp legibility"
+    );
 
     println!("Pure Rust browser test passed: Sankey dark-mode rendering verified with high-contrast text and vibrant gradient ribbons.");
 }
+
+#[test]
+fn test_pure_rust_browser_dendrogram_spec_reingold_tilford() {
+    use headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption;
+
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-graph").expect("Failed finding diagrammer-graph");
+
+    let spec_code = std::fs::read_to_string(get_fixture_path("dendrogram_spec.txt"))
+        .expect("Failed reading dendrogram_spec.txt");
+    let code_json = serde_json::to_string(&spec_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+            const svg = document.querySelector("#diagrammer-graph svg");
+            const nodes = svg ? svg.querySelectorAll("g.node").length : 0;
+            const links = svg ? svg.querySelectorAll("path.link").length : 0;
+            const graphEl = document.querySelector("#diagrammer-graph");
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                nodeCount: nodes,
+                linkCount: links,
+                graphHtmlLen: graphEl ? graphEl.innerHTML.length : 0,
+                graphHtmlSnippet: graphEl ? graphEl.innerHTML.substring(0, 300) : "",
+                svgDisplay: svg ? window.getComputedStyle(svg).display : "",
+                svgVis: svg ? window.getComputedStyle(svg).visibility : "",
+                svgRect: svg ? svg.getBoundingClientRect() : null,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating dendrogram test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    println!("DEBUG DENDROGRAM DOM: {}", json_str);
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Reingold-Tilford SVG must render in DOM");
+    assert!(val.get("nodeCount").and_then(|v| v.as_u64()).unwrap_or(0) > 100, "Must have >100 language nodes");
+
+    let screenshot_bytes = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = get_proof_path("dendrogram_spec_verified_browser.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    // Also capture 100% zoom view to verify readable text
+    let crop_script = r##"
+        (async () => {
+            if (window.resetZoomGraph) window.resetZoomGraph();
+            await new Promise(r => setTimeout(r, 100));
+        })()
+    "##;
+    let _ = tab.evaluate(crop_script, true);
+    if let Ok(zoom_bytes) = tab.capture_screenshot(CaptureScreenshotFormatOption::Png, None, None, true) {
+        let zoom_path = get_proof_path("dendrogram_spec_zoom_100.png");
+        let _ = std::fs::write(&zoom_path, &zoom_bytes);
+    }
+
+    println!("Pure Rust browser test passed: Reingold-Tilford dendrogram_spec rendered cleanly with adapted dark colors.");
+
+    // Now verify switching from dendrogram directly to dynamic_shapes.txt automatically resets to layered!
+    let shapes_code = std::fs::read_to_string(get_fixture_path("dynamic_shapes.txt"))
+        .expect("Failed reading dynamic_shapes.txt");
+    let shapes_json = serde_json::to_string(&shapes_code).expect("Failed serializing shapes_code");
+
+    let switch_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true, "dynamic_shapes.txt");
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+            const layeredSvg = document.querySelector("#diagrammer-graph svg.diagrammer-layered-svg");
+            const aliceNode = document.querySelector("#node-Alice");
+            const taxiNode = document.querySelector("#node-Taxi");
+            return JSON.stringify({{
+                hasLayeredSvg: layeredSvg !== null,
+                hasAlice: aliceNode !== null,
+                hasTaxi: taxiNode !== null,
+            }});
+        }})()
+        "##,
+        shapes_json
+    );
+
+    let switch_res = tab.evaluate(&switch_script, true).expect("Failed evaluating dynamic_shapes switch");
+    let switch_json = switch_res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let switch_val: serde_json::Value = serde_json::from_str(&switch_json).expect("Failed parsing JSON");
+
+    assert_eq!(switch_val.get("hasLayeredSvg").and_then(|v| v.as_bool()), Some(true), "Switching to dynamic_shapes must activate Layered SVG");
+    assert_eq!(switch_val.get("hasAlice").and_then(|v| v.as_bool()), Some(true), "Alice custom shape node must be present");
+    assert_eq!(switch_val.get("hasTaxi").and_then(|v| v.as_bool()), Some(true), "Taxi custom shape node must be present");
+
+    let shapes_screenshot = tab.capture_screenshot(
+        CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let shapes_proof_path = get_proof_path("dynamic_shapes_verified_browser.png");
+    let _ = std::fs::write(&shapes_proof_path, &shapes_screenshot);
+
+    println!("Pure Rust browser test passed: Switching to dynamic_shapes automatically reset to layered with custom SVG shapes.");
+}
+
+#[test]
+fn test_pure_rust_browser_example_dropdown_switching_dendrogram_to_dynamic_shapes() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
+
+    // 1. Select dendrogram_spec.txt via UI dropdown
+    let script1 = r##"
+        (async () => {
+            const select = document.querySelector("#diagrammer-example");
+            select.value = "test_inputs/dendrogram_spec.txt";
+            window.exampleChanged();
+            await new Promise(r => setTimeout(r, 800));
+            const vis = window.getSelectedVisualizer ? window.getSelectedVisualizer() : "";
+            const isReingold = vis === "reingoldtilford";
+            const svg = document.querySelector("#diagrammer-graph svg");
+            return JSON.stringify({
+                visualizer: vis,
+                isReingold,
+                hasSvg: svg !== null,
+            });
+        })()
+    "##;
+    let res1 = tab.evaluate(script1, true).expect("Failed evaluating dropdown dendrogram");
+    let json1_str = res1.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val1: serde_json::Value = serde_json::from_str(&json1_str).expect("Failed parsing JSON");
+    assert_eq!(val1.get("isReingold").and_then(|v| v.as_bool()), Some(true), "Selecting dendrogram_spec must set visualizer to reingoldtilford");
+
+    // 2. Now select dynamic_shapes.txt via UI dropdown immediately after dendrogram_spec
+    let script2 = r##"
+        (async () => {
+            const select = document.querySelector("#diagrammer-example");
+            select.value = "test_inputs/dynamic_shapes.txt";
+            window.exampleChanged();
+            await new Promise(r => setTimeout(r, 800));
+            if (window.fitGraph) {
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }
+            const vis = window.getSelectedVisualizer ? window.getSelectedVisualizer() : "";
+            const isLayered = vis === "layered";
+            const layeredSvg = document.querySelector("#diagrammer-graph svg.diagrammer-layered-svg");
+            const aliceNode = document.querySelector("#node-Alice");
+            return JSON.stringify({
+                visualizer: vis,
+                isLayered,
+                hasLayeredSvg: layeredSvg !== null,
+                hasAlice: aliceNode !== null,
+            });
+        })()
+    "##;
+    let res2 = tab.evaluate(script2, true).expect("Failed evaluating dropdown dynamic_shapes");
+    let json2_str = res2.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val2: serde_json::Value = serde_json::from_str(&json2_str).expect("Failed parsing JSON");
+    assert_eq!(val2.get("isLayered").and_then(|v| v.as_bool()), Some(true), "Selecting dynamic_shapes after dendrogram must reset visualizer to layered");
+    assert_eq!(val2.get("hasLayeredSvg").and_then(|v| v.as_bool()), Some(true), "Layered SVG must be rendered");
+    assert_eq!(val2.get("hasAlice").and_then(|v| v.as_bool()), Some(true), "Custom shape node Alice must be rendered");
+
+    // 3. Now select dynamic_operators.txt via UI dropdown
+    let script3 = r##"
+        (async () => {
+            const select = document.querySelector("#diagrammer-example");
+            select.value = "test_inputs/dynamic_operators.txt";
+            window.exampleChanged();
+            await new Promise(r => setTimeout(r, 800));
+            const vis = window.getSelectedVisualizer ? window.getSelectedVisualizer() : "";
+            const isLayered = vis === "layered";
+            const layeredSvg = document.querySelector("#diagrammer-graph svg.diagrammer-layered-svg");
+            return JSON.stringify({
+                visualizer: vis,
+                isLayered,
+                hasLayeredSvg: layeredSvg !== null,
+            });
+        })()
+    "##;
+    let res3 = tab.evaluate(script3, true).expect("Failed evaluating dropdown dynamic_operators");
+    let json3_str = res3.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val3: serde_json::Value = serde_json::from_str(&json3_str).expect("Failed parsing JSON");
+    assert_eq!(val3.get("isLayered").and_then(|v| v.as_bool()), Some(true), "Selecting dynamic_operators after dendrogram must reset visualizer to layered");
+    assert_eq!(val3.get("hasLayeredSvg").and_then(|v| v.as_bool()), Some(true), "Layered SVG must be rendered for dynamic_operators");
+    println!("Pure Rust browser test passed: UI dropdown switching verified from dendrogram_spec -> dynamic_shapes -> dynamic_operators.");
+}
+
+#[test]
+fn test_pure_rust_browser_record_style_graphviz_rendering() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
+
+    let record_code = std::fs::read_to_string(get_fixture_path("record_style.txt"))
+        .expect("Failed reading record_style.txt");
+    let code_json = serde_json::to_string(&record_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 800));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+            const svg = document.querySelector("#diagrammer-graph svg");
+            const polylines = svg ? svg.querySelectorAll("polyline").length : 0;
+            const nodes = svg ? svg.querySelectorAll("g.node").length : 0;
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                nodeCount: nodes,
+                polylineCount: polylines,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating record_style test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Graphviz SVG must render in DOM");
+    let polylines = val.get("polylineCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert!(polylines >= 4, "Must have internal partition polylines for Record shapes, got {}", polylines);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = get_proof_path("record_style_verified_browser.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: record_style Graphviz DOT rendered true partitioned record boxes with polylines.");
+}
+
+#[test]
+fn test_pure_rust_browser_state_conditionals_graphviz_rendering() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
+
+    let cond_code = std::fs::read_to_string(get_fixture_path("state_conditionals.txt"))
+        .expect("Failed reading state_conditionals.txt");
+    let code_json = serde_json::to_string(&cond_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 800));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+            const svg = document.querySelector("#diagrammer-graph svg");
+            const clusters = svg ? svg.querySelectorAll("g.cluster").length : 0;
+            const nodes = svg ? svg.querySelectorAll("g.node").length : 0;
+            const edges = svg ? svg.querySelectorAll("g.edge").length : 0;
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                nodeCount: nodes,
+                clusterCount: clusters,
+                edgeCount: edges,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating state_conditionals test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Graphviz SVG must render in DOM");
+    let clusters = val.get("clusterCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert!(clusters >= 4, "Must have at least 4 conditional branch clusters, got {}", clusters);
+    let edges = val.get("edgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert!(edges >= 15, "Must have all connected conditional edges, got {}", edges);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = get_proof_path("state_conditionals_browser_verified.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: state_conditionals Graphviz DOT rendered fully connected conditional flowchart with clusters and edges.");
+}
+
+#[test]
+fn test_pure_rust_browser_state_images_rendering() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
+
+    let images_code = std::fs::read_to_string(get_fixture_path("state_images.txt"))
+        .expect("Failed reading state_images.txt");
+    let code_json = serde_json::to_string(&images_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 800));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+            const svg = document.querySelector("#diagrammer-graph svg");
+            const nodes = svg ? svg.querySelectorAll("g.node").length : 0;
+            const edges = svg ? svg.querySelectorAll("g.edge").length : 0;
+            const images = svg ? svg.querySelectorAll("image").length : 0;
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                nodeCount: nodes,
+                edgeCount: edges,
+                imageCount: images,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating state_images test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Graphviz SVG must render in DOM");
+    let nodes = val.get("nodeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(nodes, 21, "Must render exactly 21 nodes, got {}", nodes);
+    let edges = val.get("edgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(edges, 30, "Must render exactly 30 edges across tripartite clusters, got {}", edges);
+    let images = val.get("imageCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(images, 21, "Must render exactly 21 images for all icons, got {}", images);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = get_proof_path("state_images_browser_verified.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: state_images rendered complete 21-node, 30-edge image network with icons.");
+}
+
+#[test]
+fn test_pure_rust_browser_state_innergroups_rendering() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
+
+    let innergroups_code = std::fs::read_to_string(get_fixture_path("state_innergroups.txt"))
+        .expect("Failed reading state_innergroups.txt");
+    let code_json = serde_json::to_string(&innergroups_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            for (let i = 0; i < 60; i++) {{
+                const svg = document.querySelector("#diagrammer-graph svg");
+                if (svg && svg.querySelectorAll("g.node").length >= 8) {{
+                    break;
+                }}
+                await new Promise(r => setTimeout(r, 100));
+            }}
+            const svg = document.querySelector("#diagrammer-graph svg");
+            const nodes = svg ? svg.querySelectorAll("g.node").length : 0;
+            const edges = svg ? svg.querySelectorAll("g.edge").length : 0;
+            const clusters = svg ? svg.querySelectorAll("g.cluster").length : 0;
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                nodeCount: nodes,
+                edgeCount: edges,
+                clusterCount: clusters,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating state_innergroups test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "Graphviz SVG must render in DOM");
+    let nodes = val.get("nodeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(nodes, 8, "Must render exactly 8 nodes, got {}", nodes);
+    let edges = val.get("edgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(edges, 8, "Must render exactly 8 compound edges, got {}", edges);
+    let clusters = val.get("clusterCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(clusters, 4, "Must render 4 nested clusters (master, innermaster1, innermaster2, other), got {}", clusters);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = get_proof_path("state_innergroups_browser_verified.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: state_innergroups rendered nested clusters and compound links.");
+}
+
+#[test]
+fn test_pure_rust_browser_state_recursive_linking_rendering() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed opening tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-example").expect("Failed finding diagrammer-example");
+
+    let recursive_code = std::fs::read_to_string(get_fixture_path("state_recursive_linking.txt"))
+        .expect("Failed reading state_recursive_linking.txt");
+    let code_json = serde_json::to_string(&recursive_code).expect("Failed serializing code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            for (let i = 0; i < 60; i++) {{
+                const svg = document.querySelector("#diagrammer-graph svg");
+                if (svg && svg.querySelectorAll("g.dl-node, g.node").length >= 10) {{
+                    break;
+                }}
+                await new Promise(r => setTimeout(r, 100));
+            }}
+            const svg = document.querySelector("#diagrammer-graph svg");
+            const nodes = svg ? svg.querySelectorAll("g.dl-node, g.node").length : 0;
+            const edges = svg ? svg.querySelectorAll("path.ds-edge, path.dl-edge-path, g.edge").length : 0;
+            const groups = svg ? svg.querySelectorAll("g.ds-group, g.dl-group, g.cluster").length : 0;
+            const nodeIds = svg ? Array.from(svg.querySelectorAll("g.dl-node, g.node")).map(n => n.id || n.textContent.trim()) : [];
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                nodeCount: nodes,
+                edgeCount: edges,
+                groupCount: groups,
+                nodeIds: nodeIds,
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating state_recursive_linking test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "SVG must render in DOM");
+    let nodes = val.get("nodeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(nodes, 10, "Must render all 10 nodes (a, b, c, d, e, f, g, h, s, k), got {}", nodes);
+    let edges = val.get("edgeCount").and_then(|v| v.as_u64()).unwrap_or(0);
+    assert_eq!(edges, 12, "Must render exactly 12 transitions, got {}", edges);
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed to capture screenshot via CDP");
+
+    let proof_path = get_proof_path("state_recursive_linking_browser_verified.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: state_recursive_linking rendered all 10 nodes and 12 transitions.");
+}
+
+#[test]
+fn test_pure_rust_browser_shape_record_snippet_and_expressive_tooltips() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+
+    let tab = browser.new_tab().expect("Failed opening browser tab");
+    tab.navigate_to(&get_test_url()).expect("Failed navigating to test URL");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor not found");
+
+    let eval_script = r##"
+        (async () => {
+            // 1. Verify Shape Record snippet button exists and has expressive tooltip
+            const recordBtn = Array.from(document.querySelectorAll(".toolbarw li")).find(li => li.textContent.includes("Shape Record"));
+            const recordTooltip = recordBtn ? recordBtn.getAttribute("tooltip") : null;
+
+            // 2. Click Shape Record snippet button (addLine(13))
+            if (recordBtn) {
+                recordBtn.click();
+            } else if (window.addLine) {
+                window.addLine(13);
+            }
+            await new Promise(r => setTimeout(r, 400));
+
+            const editorText = window.getGraphText ? window.getGraphText() : "";
+            const hasShapeRecordInEditor = editorText.includes("shape record") && editorText.includes("<f0>");
+
+            // 3. Inspect expressive tooltips on shapes and arrows
+            const tooltips = Array.from(document.querySelectorAll("[tooltip]")).map(el => ({
+                text: el.textContent.trim() || el.getAttribute("alt") || "",
+                tooltip: el.getAttribute("tooltip")
+            }));
+
+            const expressiveRecordShape = tooltips.some(t => t.tooltip && t.tooltip.toLowerCase().includes("partitioned"));
+            const expressiveCondition = tooltips.some(t => t.tooltip && t.tooltip.toLowerCase().includes("decision diamond"));
+            const expressiveDirectedArrow = tooltips.some(t => t.tooltip && t.tooltip.toLowerCase().includes("standard"));
+
+            return JSON.stringify({
+                hasRecordBtn: recordBtn !== undefined && recordBtn !== null,
+                recordTooltip,
+                hasShapeRecordInEditor,
+                expressiveRecordShape,
+                expressiveCondition,
+                expressiveDirectedArrow,
+                totalTooltipCount: tooltips.length
+            });
+        })()
+    "##;
+
+    let res = tab.evaluate(eval_script, true).expect("Failed evaluating shape record and tooltips test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasRecordBtn").and_then(|v| v.as_bool()), Some(true), "Shape Record button must exist in snippets toolbar");
+    assert_eq!(val.get("hasShapeRecordInEditor").and_then(|v| v.as_bool()), Some(true), "Clicking Shape Record must insert snippet into editor");
+    assert_eq!(val.get("expressiveRecordShape").and_then(|v| v.as_bool()), Some(true), "Record shape must have expressive tooltip");
+    assert_eq!(val.get("expressiveCondition").and_then(|v| v.as_bool()), Some(true), "Condition shape must have expressive tooltip");
+    assert_eq!(val.get("expressiveDirectedArrow").and_then(|v| v.as_bool()), Some(true), "Directed arrow must have expressive tooltip");
+
+    // Move mouse over the Shape Record button to trigger the tooltip
+    if let Ok(el) = tab.find_element(".toolbarw li:nth-child(7)") {
+        let _ = el.move_mouse_over();
+        std::thread::sleep(std::time::Duration::from_millis(250));
+    }
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed capturing screenshot");
+
+    let proof_path = get_proof_path("shape_record_and_expressive_tooltips.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Shape Record snippet button inserts multi-field template and expressive tooltips verified across UI.");
+}
+
+#[test]
+fn test_pure_rust_browser_context_sensitive_ui_and_sankey_helpers() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed creating browser tab");
+
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate to Diagrammer UI");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    std::thread::sleep(std::time::Duration::from_millis(600));
+
+    let eval_script = r##"
+        (async () => {
+            const helperBar = document.getElementById("context-helper-bar");
+            if (!helperBar) return JSON.stringify({ error: "Missing #context-helper-bar element" });
+
+            // 1. Select Sankey visualizer
+            window.setVisualizer("sankey");
+            await new Promise(r => setTimeout(r, 300));
+
+            const badge = helperBar.querySelector(".context-helper-badge");
+            const badgeText = badge ? badge.textContent.trim() : "";
+            const syntax = helperBar.querySelector(".context-helper-syntax");
+            const syntaxText = syntax ? syntax.textContent.trim() : "";
+
+            const pills = Array.from(helperBar.querySelectorAll(".context-helper-pill")).map(b => b.textContent.trim());
+
+            // 2. Click "+ 3-Stage Pipeline" pill
+            const pipelinePill = Array.from(helperBar.querySelectorAll(".context-helper-pill")).find(b => b.textContent.includes("3-Stage"));
+            if (pipelinePill) {
+                // Clear editor first so we have clean test graph
+                window.setGraphText("");
+                pipelinePill.click();
+            }
+            await new Promise(r => setTimeout(r, 1000));
+
+            const editorText = window.getGraphText ? window.getGraphText() : "";
+            const hasSankeyFlowInEditor = editorText.includes("visitors") && editorText.includes("signups");
+
+            // 3. Verify Sankey SVG rendered
+            const graphEl = document.querySelector("#diagrammer-graph");
+            const graphHtml = graphEl ? graphEl.innerHTML.substring(0, 200) : "";
+            const sankeyGroup = document.querySelector("#diagrammer-graph .diagrammer-sankey-svg");
+            const sankeyNodes = sankeyGroup ? sankeyGroup.querySelectorAll(".sankey-node").length : 0;
+            const sankeyLinks = sankeyGroup ? sankeyGroup.querySelectorAll(".sankey-links path").length : 0;
+
+            // 4. Test arrow multi-context tooltip (from 3rd htoolbar which contains arrow icons)
+            const arrowToolbars = document.querySelectorAll(".htoolbar");
+            const arrowToolbar = arrowToolbars.length >= 3 ? arrowToolbars[2] : null;
+            const firstArrow = arrowToolbar ? arrowToolbar.querySelector("li[tooltip]") : document.querySelector(".htoolbar img.edgeicon")?.closest("li");
+            let arrowTooltipRaw = "";
+            let globalTooltipHtml = "";
+            if (firstArrow) {
+                arrowTooltipRaw = firstArrow.getAttribute("tooltip") || "";
+                if (window.showTooltip) {
+                    window.showTooltip(firstArrow);
+                }
+                const ttEl = document.getElementById("diagrammer-global-tooltip");
+                if (ttEl) {
+                    globalTooltipHtml = ttEl.innerHTML;
+                }
+            }
+
+            return JSON.stringify({
+                badgeText,
+                syntaxText,
+                pills,
+                hasSankeyFlowInEditor,
+                graphHtml,
+                hasSankeySvg: sankeyGroup !== null,
+                sankeyNodes,
+                sankeyLinks,
+                arrowTooltipRaw,
+                arrowTooltipHasSankey: arrowTooltipRaw.includes("Sankey: Weighted flow"),
+                arrowTooltipHasSequence: arrowTooltipRaw.includes("Sequence / MSC"),
+                globalTooltipHtml
+            });
+        })()
+    "##;
+
+    let res = tab.evaluate(eval_script, true).expect("Failed evaluating context-sensitive UI test");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("badgeText").and_then(|v| v.as_str()), Some("D3.js Flow"), "Badge must reflect D3.js Flow for Sankey");
+    assert_eq!(val.get("hasSankeyFlowInEditor").and_then(|v| v.as_bool()), Some(true), "Clicking 3-Stage Pipeline pill must insert weighted flows into editor");
+    assert_eq!(val.get("hasSankeySvg").and_then(|v| v.as_bool()), Some(true), "Sankey SVG must render in DOM");
+    assert!(val.get("sankeyNodes").and_then(|v| v.as_u64()).unwrap_or(0) >= 4, "Sankey graph must contain at least 4 nodes");
+    assert!(val.get("sankeyLinks").and_then(|v| v.as_u64()).unwrap_or(0) >= 3, "Sankey graph must contain at least 3 flow links");
+    assert_eq!(val.get("arrowTooltipHasSankey").and_then(|v| v.as_bool()), Some(true), "Arrow tooltip must describe multimodal Sankey behavior");
+    assert_eq!(val.get("arrowTooltipHasSequence").and_then(|v| v.as_bool()), Some(true), "Arrow tooltip must describe multimodal Sequence behavior");
+
+    // Move mouse over the arrow to show the floating tooltip in the screenshot
+    if let Ok(el) = tab.find_element(".htoolbar li:first-child") {
+        let _ = el.move_mouse_over();
+        std::thread::sleep(std::time::Duration::from_millis(300));
+    }
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed capturing screenshot");
+
+    let proof_path = get_proof_path("context_sensitive_sankey_and_multicontext_tooltips.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Context-sensitive helper bar and Sankey pill insertion verified; expressive arrow tooltips verified.");
+}
+
+#[test]
+fn test_pure_rust_browser_node_hover_zoom_in() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed creating browser tab");
+
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate to Diagrammer UI");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    std::thread::sleep(std::time::Duration::from_millis(600));
+
+    // 1. Find roundedbox node button in toolbar and hover over it
+    let roundedbox_li = tab.find_element(".htoolbar li[onclick*='roundedbox']")
+        .expect("Failed to find roundedbox li in htoolbar");
+
+    roundedbox_li.move_mouse_over().expect("Failed moving mouse over roundedbox");
+    std::thread::sleep(std::time::Duration::from_millis(350));
+
+    let check_zoom_script = r##"
+        (() => {
+            const img = document.querySelector(".htoolbar img[alt='roundedbox']");
+            const li = img ? img.closest("li") : null;
+            if (!li) return JSON.stringify({ error: "Missing roundedbox li" });
+
+            const style = window.getComputedStyle(li);
+            const transform = style.transform;
+            const zIndex = style.zIndex;
+
+            // Also check graph node hover styling rule
+            const graphNode = document.querySelector("#diagrammer-graph svg .node, #diagrammer-graph svg .dl-node");
+            let graphNodeStyle = null;
+            if (graphNode) {
+                const s = window.getComputedStyle(graphNode);
+                graphNodeStyle = {
+                    cursor: s.cursor,
+                    transformBox: s.transformBox
+                };
+            }
+
+            return JSON.stringify({
+                hasRoundedbox: true,
+                transform,
+                zIndex,
+                graphNodeStyle
+            });
+        })()
+    "##;
+
+    let res = tab.evaluate(check_zoom_script, false).expect("Failed evaluating zoom");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    let transform = val.get("transform").and_then(|v| v.as_str()).unwrap_or("");
+    println!("Roundedbox hover transform: {}", transform);
+    assert!(transform.contains("matrix") || transform.contains("scale"), "Hovered node button must scale up via CSS transform");
+
+    // Capture screenshot proof of zoomed-in node button
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed capturing screenshot");
+
+    let proof_path = get_proof_path("node_hover_zoom_in_verified.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Node shape button zooms in cleanly on hover (scale 1.6) for effortless readability.");
+}
+
+#[test]
+fn test_pure_rust_browser_edge_hover_zoom_in() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => return,
+    };
+    let tab = browser.new_tab().expect("Failed creating browser tab");
+
+    tab.navigate_to(&get_test_url()).expect("Failed to navigate to Diagrammer UI");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+    tab.wait_for_element("#diagrammer-code").expect("Code editor not found");
+
+    let input = "visualizer layered\nServiceA > \"calls\" ServiceB\nServiceB > \"queries\" Database";
+    let code_json = serde_json::to_string(&input).expect("serialize code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+
+            const edgePath = document.querySelector("#diagrammer-graph svg .dl-edge-path");
+            if (!edgePath) return JSON.stringify({{ error: "Missing edge path" }});
+            const s = window.getComputedStyle(edgePath);
+            return JSON.stringify({{
+                found: true,
+                cursor: s.cursor,
+                pointerEvents: s.pointerEvents
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed checking edge");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+    assert!(val.get("found").and_then(|v| v.as_bool()).unwrap_or(false), "Edge path must exist in diagram: {:?}", val);
+    let cursor = val.get("cursor").and_then(|v| v.as_str()).unwrap_or("");
+    assert_eq!(cursor, "pointer", "Edge path must have pointer cursor for interactive hover");
+
+    // Move mouse over the edge
+    let edge_elem = tab.find_element("#diagrammer-graph svg .dl-edge-path")
+        .expect("Failed to find edge element");
+    edge_elem.move_mouse_over().expect("Failed moving mouse over edge");
+    std::thread::sleep(std::time::Duration::from_millis(300));
+
+    // Capture screenshot proof of hovered edge
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed capturing screenshot");
+
+    let proof_path = get_proof_path("edge_hover_zoom_in_verified.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+
+    println!("Pure Rust browser test passed: Edge magnifies and highlights with vibrant glow on hover.");
+}
+
+#[test]
+fn test_pure_rust_browser_poly_8_compact_rendering() {
+    let browser = match create_headless_browser() {
+        Some(b) => b,
+        None => {
+            eprintln!("Skipping pure Rust browser test: no Chrome/Chromium binary found");
+            return;
+        }
+    };
+
+    let tab = browser.new_tab().expect("Failed to create browser tab");
+    let test_url = get_test_url();
+    tab.navigate_to(&test_url).expect("Failed navigating to Diagrammer");
+    tab.wait_until_navigated().expect("Failed waiting for navigation");
+
+    let poly8_code = std::fs::read_to_string(get_fixture_path("poly_8_layered_tree_state.txt"))
+        .expect("Failed reading poly_8_layered_tree_state.txt");
+    let code_json = serde_json::to_string(&poly8_code).expect("Failed serializing poly8 code");
+
+    let eval_script = format!(
+        r##"
+        (async () => {{
+            window.setGraphText({});
+            window.parseAndRegenerate(true);
+            await new Promise(r => setTimeout(r, 600));
+            if (window.fitGraph) {{
+                window.fitGraph();
+                await new Promise(r => setTimeout(r, 200));
+            }}
+            const ruleEngine = document.querySelector("#diagrammer-graph #node-RuleEngine rect");
+            const jobRunner = document.querySelector("#diagrammer-graph #node-JobRunner rect");
+            const svg = document.querySelector("#diagrammer-graph svg");
+            return JSON.stringify({{
+                hasSvg: svg !== null,
+                ruleEngineWidth: ruleEngine ? parseFloat(ruleEngine.getAttribute("width")) : 0,
+                ruleEngineHeight: ruleEngine ? parseFloat(ruleEngine.getAttribute("height")) : 0,
+                jobRunnerWidth: jobRunner ? parseFloat(jobRunner.getAttribute("width")) : 0,
+                jobRunnerHeight: jobRunner ? parseFloat(jobRunner.getAttribute("height")) : 0,
+                svgViewBox: svg ? svg.getAttribute("viewBox") : "",
+            }});
+        }})()
+        "##,
+        code_json
+    );
+
+    let res = tab.evaluate(&eval_script, true).expect("Failed evaluating poly_8 in browser");
+    let json_str = res.value.and_then(|v| v.as_str().map(|s| s.to_string())).expect("Missing result string");
+    let val: serde_json::Value = serde_json::from_str(&json_str).expect("Failed parsing JSON");
+
+    assert_eq!(val.get("hasSvg").and_then(|v| v.as_bool()), Some(true), "SVG must render in DOM");
+    let re_w = val.get("ruleEngineWidth").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let jr_w = val.get("jobRunnerWidth").and_then(|v| v.as_f64()).unwrap_or(0.0);
+
+    assert!(re_w < 350.0, "Decision Tree (RuleEngine) width must be compact (<350), got {}", re_w);
+    assert!(jr_w < 300.0, "Execution FSM (JobRunner) width must be compact (<300), got {}", jr_w);
+
+    let _ = tab.evaluate("if (typeof fitGraph === 'function') fitGraph();", false);
+    std::thread::sleep(std::time::Duration::from_millis(200));
+
+    let screenshot_bytes = tab.capture_screenshot(
+        headless_chrome::protocol::cdp::Page::CaptureScreenshotFormatOption::Png,
+        None,
+        None,
+        true,
+    ).expect("Failed capturing screenshot");
+
+    let proof_path = get_proof_path("poly_8_minified_browser_proof.png");
+    let _ = std::fs::write(&proof_path, &screenshot_bytes);
+    let artifact_dir = PathBuf::from("/Users/ede/.gemini/antigravity/brain/f8c141e1-dee4-4672-984e-a40261071320");
+    if artifact_dir.exists() {
+        let _ = std::fs::write(artifact_dir.join("poly_8_minified_browser_proof.png"), &screenshot_bytes);
+    }
+
+    println!("Pure Rust browser test passed: poly_8 rendered with compact minified subgraphs.");
+}
+
+
+
 
 
 

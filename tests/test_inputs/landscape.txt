@@ -1,3 +1,5 @@
+visualizer dot
+
 LANDSCAPE
 a/wifi.png>#ff0000b
 a.>#00ff00b

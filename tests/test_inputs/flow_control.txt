@@ -1,4 +1,4 @@
-visualizer dot
+visualizer state
 
 while happy
  clap

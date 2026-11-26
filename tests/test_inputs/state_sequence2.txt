@@ -1,3 +1,5 @@
+visualizer native_sequence
+
 b;browser
 d;database
 w;webserver

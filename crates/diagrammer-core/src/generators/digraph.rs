@@ -23,9 +23,10 @@ impl Generator for DiGraph {
         if let Some(ref start) = canvas.start {
             // Find start vertex or forward declare
             let mut found = false;
+            let default_shape = canvas.shape.as_deref();
             for obj in canvas.get_objects(false) {
                 if obj.get_name() == start {
-                    process_a_vertex(&mut formatter, obj);
+                    process_a_vertex(&mut formatter, obj, default_shape);
                     found = true;
                     break;
                 }
@@ -49,21 +50,25 @@ impl Generator for DiGraph {
             formatter.lout("}", Some(false));
         }
 
+        let default_shape = canvas.shape.as_deref();
+        let mut cond_state = ConditionalState::default();
         for obj in canvas.get_objects(false) {
-            traverse_object(&mut formatter, obj);
+            traverse_object(&mut formatter, obj, default_shape, canvas, &mut cond_state);
         }
 
         formatter.lout("//links start", None);
 
-        // Pre-compute group mappings
-        let groups: BTreeMap<&str, &GraphGroup> = canvas
-            .objects
-            .iter()
-            .filter_map(|obj| match obj {
-                GraphObject::Group(g) => Some((g.name.as_str(), g.as_ref())),
-                _ => None,
-            })
-            .collect();
+        // Pre-compute group mappings recursively
+        fn collect_groups<'a>(objs: &'a [GraphObject], map: &mut BTreeMap<&'a str, &'a GraphGroup>) {
+            for obj in objs {
+                if let GraphObject::Group(g) = obj {
+                    map.insert(g.name.as_str(), g.as_ref());
+                    collect_groups(&g.objects, map);
+                }
+            }
+        }
+        let mut groups: BTreeMap<&str, &GraphGroup> = BTreeMap::new();
+        collect_groups(&canvas.objects, &mut groups);
 
         for edge in canvas.get_edges() {
             let mut attrs: Vec<String> = Vec::new();
@@ -141,7 +146,7 @@ impl Generator for DiGraph {
                 if !grp.is_inner_graph {
                     attrs.push(format!(" lhead=cluster_{}", grp.name));
                 }
-                if let Some(first_obj) = grp.get_objects(false).first() {
+                if let Some(first_obj) = grp.get_flattened_vertices().first().copied().or_else(|| grp.get_objects(false).first().copied()) {
                     rhs_name = first_obj.get_name().to_string();
                 }
             }
@@ -150,7 +155,7 @@ impl Generator for DiGraph {
                 if !grp.is_inner_graph {
                     attrs.push(format!(" ltail=cluster_{}", grp.name));
                 }
-                if let Some(first_obj) = grp.get_objects(false).first() {
+                if let Some(first_obj) = grp.get_flattened_vertices().first().copied().or_else(|| grp.get_objects(false).first().copied()) {
                     lhs_name = first_obj.get_name().to_string();
                 }
             }
@@ -163,8 +168,14 @@ impl Generator for DiGraph {
 
             let lcompass = edge.lcompass.as_deref().unwrap_or("").trim();
             let rcompass = edge.rcompass.as_deref().unwrap_or("").trim();
+            let ldir = if !lcompass.is_empty() {
+                if lcompass.starts_with(':') { lcompass.to_string() } else { format!(":{}", lcompass) }
+            } else { String::new() };
+            let rdir = if !rcompass.is_empty() {
+                if rcompass.starts_with(':') { rcompass.to_string() } else { format!(":{}", rcompass) }
+            } else { String::new() };
 
-            formatter.lout(&format!("{}{ldir}->{}{rdir}{t};", lhs_name, rhs_name, ldir = lcompass, rdir = rcompass, t = t), None);
+            formatter.lout(&format!("{}{ldir}->{}{rdir}{t};", lhs_name, rhs_name, ldir = ldir, rdir = rdir, t = t), None);
         }
 
         formatter.lout("}", Some(false));
@@ -172,14 +183,61 @@ impl Generator for DiGraph {
     }
 }
 
-fn traverse_object(formatter: &mut OutputFormatter, obj: &GraphObject) {
+#[derive(Default, Debug, Clone)]
+struct ConditionalFrame {
+    lastexit: Option<String>,
+    lastendif: Option<String>,
+}
+
+#[derive(Default, Debug)]
+struct ConditionalState {
+    stack: Vec<ConditionalFrame>,
+}
+
+fn traverse_object(
+    formatter: &mut OutputFormatter,
+    obj: &GraphObject,
+    default_shape: Option<&str>,
+    canvas: &GraphCanvas,
+    cond_state: &mut ConditionalState,
+) {
     match obj {
-        GraphObject::Group(grp) => process_a_group(formatter, grp),
-        _ => process_a_vertex(formatter, obj),
+        GraphObject::Group(grp) => process_a_group(formatter, grp, default_shape, canvas, cond_state),
+        _ => process_a_vertex(formatter, obj, default_shape),
     }
 }
 
-fn process_a_group(formatter: &mut OutputFormatter, grp: &GraphGroup) {
+fn get_first_lhs_referred_node_from_group(canvas: &GraphCanvas, grp: &GraphGroup) -> Option<String> {
+    let grp_objs: std::collections::HashSet<String> = grp.get_objects(true).iter().map(|o| o.get_name().to_string()).collect();
+    for edge in canvas.get_edges() {
+        if grp_objs.contains(&edge.left) {
+            return Some(edge.left.clone());
+        }
+    }
+    grp.get_objects(false).first().map(|o| o.get_name().to_string())
+}
+
+fn get_last_lhs_or_rhs_referred_node_in_group(canvas: &GraphCanvas, grp: &GraphGroup) -> Option<String> {
+    let grp_objs: std::collections::HashSet<String> = grp.get_objects(true).iter().map(|o| o.get_name().to_string()).collect();
+    let mut last_node = None;
+    for edge in canvas.get_edges() {
+        if grp_objs.contains(&edge.left) {
+            last_node = Some(edge.left.clone());
+        }
+        if grp_objs.contains(&edge.right) {
+            last_node = Some(edge.right.clone());
+        }
+    }
+    last_node.or_else(|| grp.get_objects(false).last().map(|o| o.get_name().to_string()))
+}
+
+fn process_a_group(
+    formatter: &mut OutputFormatter,
+    grp: &GraphGroup,
+    default_shape: Option<&str>,
+    canvas: &GraphCanvas,
+    cond_state: &mut ConditionalState,
+) {
     formatter.lout(&format!("subgraph cluster_{} {{", grp.name), Some(true));
 
     if grp.is_inner_graph {
@@ -194,7 +252,7 @@ fn process_a_group(formatter: &mut OutputFormatter, grp: &GraphGroup) {
     }
 
     for inner in grp.get_objects(false) {
-        traverse_object(formatter, inner);
+        traverse_object(formatter, inner, default_shape, canvas, cond_state);
     }
 
     let cond_str = grp.conditional.as_deref().unwrap_or("");
@@ -202,34 +260,69 @@ fn process_a_group(formatter: &mut OutputFormatter, grp: &GraphGroup) {
 
     if let Some(ref cond) = grp.conditional {
         formatter.lout(&format!("//COND {} {}", grp.name, cond), None);
-        let exit_idx = grp.exitvertex.unwrap_or(1);
-        let exit_vertex_in_conditional = format!("conditional_{}_{}", cond, exit_idx);
-        let last_endif = format!("conditional_endif_{}", exit_idx);
+        if cond == "endif" {
+            if let Some(frame) = cond_state.stack.pop() {
+                if let Some(ref exit_edge) = grp.conditional_exit_edge {
+                    if let (Some(lexit), Some(lendif)) = (&frame.lastexit, &frame.lastendif) {
+                        formatter.lout(&format!("{}->{}[ color=red ];", lexit, lendif), None);
+                        formatter.lout(&format!("{}->{};", lendif, exit_edge), None);
+                    }
+                }
+            }
+        } else {
+            if cond == "if" {
+                cond_state.stack.push(ConditionalFrame::default());
+            }
 
-        formatter.lout(&format!("{}[ shape=circle, label=\"\", width=0.01, height=0.01 ];", last_endif), None);
-        let grp_lbl = grp.label.as_deref().unwrap_or("");
-        formatter.lout(&format!("{}[ shape=diamond, fixedsize=true, width=1, height=1, label=\"{}\" ];", exit_vertex_in_conditional, grp_lbl), None);
+            let exit_idx = grp.exitvertex.unwrap_or(1);
+            let exit_vertex_in_conditional = format!("conditional_{}_{}", cond, exit_idx);
 
-        if let Some(first_obj) = grp.get_objects(false).first() {
-            formatter.lout(
-                &format!("{exit}->{node}[ label=\"YES\", color=green, lhead=cluster_{gname} ];",
-                    exit = exit_vertex_in_conditional,
-                    node = first_obj.get_name(),
-                    gname = grp.name
-                ),
-                None
-            );
-        }
-        if let Some(last_obj) = grp.get_objects(false).last() {
-            formatter.lout(
-                &format!("{}->{}[ label=\"\" ];", last_obj.get_name(), last_endif),
-                None
-            );
+            if cond_state.stack.is_empty() {
+                cond_state.stack.push(ConditionalFrame::default());
+            }
+
+            let frame = cond_state.stack.last_mut().unwrap();
+
+            if frame.lastendif.is_none() {
+                let last_endif = format!("conditional_endif_{}", exit_idx);
+                formatter.lout(&format!("{}[ shape=circle, label=\"\", width=0.01, height=0.01 ];", last_endif), None);
+                frame.lastendif = Some(last_endif);
+            }
+            let grp_lbl = grp.label.as_deref().unwrap_or("");
+            formatter.lout(&format!("{}[ shape=diamond, fixedsize=true, width=1, height=1, label=\"{}\" ];", exit_vertex_in_conditional, grp_lbl), None);
+
+            if cond == "if" {
+                if let Some(ref entry) = grp.conditional_entry_edge {
+                    formatter.lout(&format!("{}->{};", entry, exit_vertex_in_conditional), None);
+                }
+            }
+
+            if let Some(ref prev_exit) = frame.lastexit {
+                formatter.lout(&format!("{}->{}[ label=\"NO\", color=red ];", prev_exit, exit_vertex_in_conditional), None);
+            }
+
+            let first_node = get_first_lhs_referred_node_from_group(canvas, grp);
+            let last_node = get_last_lhs_or_rhs_referred_node_in_group(canvas, grp);
+
+            if let Some(ref first) = first_node {
+                formatter.lout(
+                    &format!("{exit}->{node}[ label=\"YES\", color=green, lhead=cluster_{gname} ];",
+                        exit = exit_vertex_in_conditional,
+                        node = first,
+                        gname = grp.name
+                    ),
+                    None
+                );
+            }
+            if let (Some(ref last), Some(lendif)) = (last_node, &frame.lastendif) {
+                formatter.lout(&format!("{}->{}[ label=\"\" ];", last, lendif), None);
+            }
+            frame.lastexit = Some(exit_vertex_in_conditional);
         }
     }
 }
 
-fn process_a_vertex(formatter: &mut OutputFormatter, obj: &GraphObject) {
+fn process_a_vertex(formatter: &mut OutputFormatter, obj: &GraphObject, default_shape: Option<&str>) {
     let mut nattrs: Vec<String> = Vec::new();
     let mut styles: Vec<String> = Vec::new();
 
@@ -267,7 +360,8 @@ fn process_a_vertex(formatter: &mut OutputFormatter, obj: &GraphObject) {
         nattrs.push("penwidth=0".to_string());
     }
 
-    if let Some(shape) = obj.get_shape() {
+    let shape_opt = obj.get_shape().or(default_shape);
+    if let Some(shape) = shape_opt {
         let (mapped, extras) = get_digraph_shape(shape);
         nattrs.push(format!("shape=\"{}\"", mapped));
         for (k, v) in extras {
@@ -319,5 +413,57 @@ fn get_digraph_shape(shape: &str) -> (&'static str, Vec<(&'static str, &'static 
         "square" => ("square", vec![]),
         "subroutine" => ("rect", vec![("peripheries", "2")]),
         _ => ("box", vec![]),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::builder::AstBuilder;
+
+    #[test]
+    fn test_nested_conditionals_scoped_state() {
+        let input = r#"
+visualizer dot
+start_node > q
+if outer_cond then
+  if inner_cond then
+    a > b
+  else
+    c > d
+  endif
+elseif outer_cond_2 then
+  e > f
+else
+  g > h
+endif
+q > end_node
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST with nested conditionals");
+        let dot = DiGraph.generate(&canvas);
+
+        // Verify outer conditional routing to outer_cond_2 is preserved and not clobbered by inner endif
+        assert!(dot.contains("conditional_if_1"), "Outer diamond if must exist: {}", dot);
+        assert!(dot.contains("conditional_if_2"), "Inner diamond if must exist: {}", dot);
+        assert!(dot.contains("conditional_elseif_5"), "Outer elseif diamond must exist: {}", dot);
+        assert!(dot.contains("conditional_else_6"), "Outer else diamond must exist: {}", dot);
+        // Outer NO transition must link outer if to outer elseif
+        assert!(dot.contains("conditional_if_1->conditional_elseif_5[ label=\"NO\", color=red ];"), "Outer NO link must connect to outer elseif: {}", dot);
+    }
+
+    #[test]
+    fn test_compass_ports_parsing_and_dot_generation() {
+        let input = r#"
+visualizer dot
+a:se.>b:s,c:se
+q:ne>b:n
+q:e>c:ne
+"#;
+        let canvas = AstBuilder::new().build(input).expect("Failed to build AST with compass directions");
+        let dot = DiGraph.generate(&canvas);
+        assert!(dot.contains("a:se->b:s[ style=\"dotted\" ];"), "Must include compass ports for dotted chain: {}", dot);
+        assert!(dot.contains("a:se->c:se[ style=\"dotted\" ];"), "Must include compass ports for dotted chain 2: {}", dot);
+        assert!(dot.contains("q:ne->b:n;"), "Must include compass ports for q:ne->b:n: {}", dot);
+        assert!(dot.contains("q:e->c:ne;"), "Must include compass ports for q:e->c:ne: {}", dot);
     }
 }

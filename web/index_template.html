@@ -376,21 +376,35 @@
         },
         readOnly: false
       });
-      aceEditor.commands.addCommand({
-        name: 'embeddedPaste',
-        bindKey: { win: 'Ctrl-V', mac: 'Command-V' },
-        exec: (ed) => {
-          if (navigator.clipboard && navigator.clipboard.readText) {
-            navigator.clipboard.readText().then(text => {
-              if (text) {
-                ed.insert(text);
-              }
-            }).catch(() => {});
-          }
-        },
-        readOnly: false
-      });
     }
+
+    // Fast Reload AAA.txt scratch fixture
+    async function reloadAaaScratch() {
+      try {
+        const resp = await fetch('test_inputs/AAA.txt?t=' + Date.now());
+        if (resp.ok) {
+          const text = await resp.text();
+          setGraphText(text);
+          if (window.parseAndRegenerate) {
+            window.parseAndRegenerate(true);
+          }
+          const sel = document.getElementById('diagrammer-example');
+          if (sel) sel.value = 'test_inputs/AAA.txt';
+        }
+      } catch (err) {
+        console.error('Failed to reload AAA.txt:', err);
+      }
+    }
+    window.reloadAaaScratch = reloadAaaScratch;
+
+    window.addEventListener('keydown', (e) => {
+      // Option + R on Mac (e.code === 'KeyR' with altKey), or Cmd + Shift + R, or Alt + R on Linux/Windows
+      const isR = e.code === 'KeyR' || e.key === 'r' || e.key === 'R' || e.key === '®';
+      if ((e.altKey && isR) || (e.metaKey && e.shiftKey && isR)) {
+        e.preventDefault();
+        reloadAaaScratch();
+      }
+    });
 
     if (editor) {
       setupEmbeddedClipboard(editor);
@@ -420,13 +434,6 @@
             try {
               await navigator.clipboard.writeText(selectedText);
               ed.insert('');
-            } catch (_) {}
-          }
-        } else if (key === 'v') {
-          if (navigator.clipboard && navigator.clipboard.readText) {
-            try {
-              const text = await navigator.clipboard.readText();
-              if (text) ed.insert(text);
             } catch (_) {}
           }
         }
@@ -530,12 +537,55 @@
         resetZoomGraph();
         return;
       }
-      const childW = child.scrollWidth || child.clientWidth || 300;
-      const childH = child.scrollHeight || child.clientHeight || 300;
+      let childW = 0;
+      let childH = 0;
+      if (child.nodeName && child.nodeName.toLowerCase() === 'svg') {
+        const vb = child.viewBox && child.viewBox.baseVal;
+        if (vb && vb.width > 0 && vb.height > 0) {
+          childW = vb.width;
+          childH = vb.height;
+        } else {
+          const attrW = parseFloat(child.getAttribute('width'));
+          const attrH = parseFloat(child.getAttribute('height'));
+          if (!isNaN(attrW) && !isNaN(attrH) && attrW > 0 && attrH > 0) {
+            childW = attrW;
+            childH = attrH;
+          }
+        }
+      }
+      if (!childW || !childH) {
+        const rect = child.getBoundingClientRect();
+        if (currentZoom > 0 && currentZoom !== 1) {
+          childW = rect.width / currentZoom;
+          childH = rect.height / currentZoom;
+        } else {
+          childW = rect.width;
+          childH = rect.height;
+        }
+      }
+      if (!childW || !childH) {
+        childW = child.scrollWidth || child.clientWidth || 300;
+        childH = child.scrollHeight || child.clientHeight || 300;
+      }
       const scaleX = (viewport.clientWidth - 40) / childW;
       const scaleY = (viewport.clientHeight - 40) / childH;
-      currentZoom = Math.min(1, Math.min(scaleX, scaleY));
+      currentZoom = Math.min(1.0, Math.min(scaleX, scaleY));
+      if (currentZoom < 0.05) currentZoom = 0.05;
       applyZoom();
+    }
+
+    if (window.ResizeObserver) {
+      const vp = document.getElementById('diagrammer-graph-viewport');
+      if (vp) {
+        let fitTimer = null;
+        const roVp = new ResizeObserver(() => {
+          if (fitTimer) clearTimeout(fitTimer);
+          fitTimer = setTimeout(() => {
+            if (window.fitGraph) window.fitGraph();
+          }, 60);
+        });
+        roVp.observe(vp);
+      }
     }
 
     window.zoomGraph = zoomGraph;

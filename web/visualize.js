@@ -93,6 +93,11 @@ export function visualize(visualizer) {
         Promise.resolve(vizClass.visualization(generatedResult))
             .then(() => {
                 applyPerceptualColorTheme();
+                if (typeof window !== 'undefined' && window.fitGraph) {
+                    requestAnimationFrame(() => {
+                        window.fitGraph();
+                    });
+                }
             })
             .catch(rej => { });
     }
@@ -100,6 +105,11 @@ export function visualize(visualizer) {
         const visualizeUrl = `/visualize?visualizer=${visualizer}`;
         makeHTTPPost(visualizeUrl, generatedResult, (pngBase64) => {
             _makeNewImageHolder(pngBase64);
+            if (typeof window !== 'undefined' && window.fitGraph) {
+                requestAnimationFrame(() => {
+                    window.fitGraph();
+                });
+            }
         }, (statusCode, statusText, responseText) => {
             alert(`Visualize failed, error: ${responseText} status: ${statusText}`);
         });

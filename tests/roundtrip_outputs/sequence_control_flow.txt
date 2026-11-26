@@ -1,8 +1,8 @@
 visualizer native_sequence
 
 Client > AuthServer; LoginRequest
-{Group_1; valid_credentials
-    {Group_2; while poll_job_status do
+{; valid_credentials
+    {; while poll_job_status do
         Client > Worker; CheckProgress
         Worker > Client; ProgressReport
     }
@@ -11,10 +11,10 @@ Client > AuthServer; LoginRequest
     Client > APIGateway; FetchData(token)
 }
 
-{Group_3; else
+{; else
     AuthServer > Client; Error401(Unauthorized)
 }
 
-{Group_4; endif
+{; endif
 }
 

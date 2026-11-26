@@ -1,24 +1,24 @@
 visualizer swimlane
 
-{Customer; Customer (Storefront)
-    Customer!cart; View Cart
-    Customer!checkout; Click Checkout
-    Customer!notify; Receive Confirmation
+{!Customer; Customer (Storefront)
+    cart; View Cart
+    checkout; Click Checkout
+    notify; Receive Confirmation
 }
 
-{Gateway; API Gateway & Security
-    Gateway!rate_limit; Rate Limit Check
-    Gateway!auth_token; Validate Session Token
+{!Gateway; API Gateway & Security
+    rate_limit; Rate Limit Check
+    auth_token; Validate Session Token
 }
 
-{Fulfillment; Order Management
-    Fulfillment!reserve_stock; Reserve Warehouse Stock
-    Fulfillment!pack_ship; Pack & Dispatch
+{!Fulfillment; Order Management
+    reserve_stock; Reserve Warehouse Stock
+    pack_ship; Pack & Dispatch
 }
 
-{Payment; Payment Provider (Stripe/Bank)
-    Payment!fraud_check; Fraud Evaluation
-    Payment!capture_funds; Capture Funds
+{!Payment; Payment Provider (Stripe/Bank)
+    fraud_check; Fraud Evaluation
+    capture_funds; Capture Funds
 }
 
 Customer!cart > Customer!checkout

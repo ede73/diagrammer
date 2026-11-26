@@ -1,20 +1,20 @@
 visualizer layered
 
-{Group_1
+(
     b > c
     b > d
     b > f
     b > h
     d > e
     f > g
-}
+)
 
-{Group_2
+(
     c > s
     e > s
     g > s
     h > s
     s > k
-}
+)
 
 a > b

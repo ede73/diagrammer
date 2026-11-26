@@ -1,6 +1,6 @@
 visualizer layered
 
-{GraphObject; GraphObject
+{GraphObject
     label; +string
     name; +string
     color_; +string
@@ -8,14 +8,14 @@ visualizer layered
     url; +string
 }
 
-{GraphConnectable; GraphConnectable
+{GraphConnectable
     noedges; +boolean
     edgelabel; +string
     getEdgeLabel; +():string
     setEdgeLabel; +(edgeLabel:string)
 }
 
-{GraphContainer; GraphContainer
+{GraphContainer
     OBJECTS; +List<GraphConnectable>
     ROOTVERTICES; +List<GraphConnectable>
     equal_; +List<GraphConnectable>
@@ -23,7 +23,7 @@ visualizer layered
     setEqual; +(List<GraphConnectable>)
 }
 
-{GraphGroup; GraphGroup
+{GraphGroup
     exitvertex; +string
     entryedge; +string
     entrance; +GraphConnectable|GraphConnectable[]
@@ -31,14 +31,14 @@ visualizer layered
     getDefault; +(key:string):string
 }
 
-{GraphInner; GraphInner
+{GraphInner
     isInnerGraph; +boolean=true
     exit; +GraphConnectable
     getEntrance; +():GraphConnectable|List<GraphConnectable>
     setEntrance; +(GraphConnectable|List<GraphConnectable>)
 }
 
-{GraphEdge; GraphEdge
+{GraphEdge
     edgeType; +string
     xleft; +GraphConnectable
     xrigth; +GraphConnectable
@@ -56,7 +56,7 @@ visualizer layered
     isRightPointingEdge; +()
 }
 
-{GraphVertex; GraphVertex
+{GraphVertex
     shape_; +string
     image; +string
     style; +string
@@ -65,7 +65,7 @@ visualizer layered
     setImage; +()
 }
 
-{GraphCanvas; GraphCanvas
+{GraphCanvas
     EDGES; +List<GraphEdge>
     generator_; +string
     visualizer_; +string

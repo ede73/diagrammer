@@ -1,10 +1,10 @@
 visualizer state
 
-{Group_1; while happy
+{; while happy
     clap
 }
 
-{Group_2; until exhausted
+{; until exhausted
     clapmore
 }
 

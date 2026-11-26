@@ -1,9 +1,14 @@
 visualizer native_sequence
+$(auth:#a855f7)
+$(be:#ec4899)
+$(db:#34d399)
+$(gw:#f59e0b)
+$(user:#38bdf8)
 
-User #38bdf8
-AuthServer #a855f7
+User $(user)
+AuthServer $(auth)
 User > AuthServer; Login request :: HTTP POST /auth
-UserDB #34d399
+UserDB $(db)
 AuthServer > UserDB; Lookup credentials
 UserDB > AuthServer; Credentials record
 AuthServer . AuthServer; Validate password hash
@@ -11,11 +16,11 @@ AuthServer . AuthServer; Validate password hash
     AuthServer > User; Issue JWT token :: HMAC-SHA256
 }
 
-APIGateway #f59e0b
+APIGateway $(gw)
 User > APIGateway; Fetch profile data
 APIGateway - APIGateway; Phase 2: Data retrieval
 {loop_retry; loop Retry 3 times
-    Backend #ec4899
+    Backend $(be)
     APIGateway > Backend; Query microservice
     Backend > APIGateway; Service response
 }

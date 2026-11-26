@@ -1,9 +1,9 @@
 visualizer dot
-shape ellipse
+SHAPE ellipse
 
 diamond xstart; start
 square end
-{Group_1; process222
+{; process222
     RoundED a0
     solid a3
     a0 .> a1
@@ -11,12 +11,12 @@ square end
     a2 <> a3
 }
 
-{Group_2; process 2
+{; process 2
     DASHeD b2
     INVIS b3
-    b0 > #ff0000 b1; b2 b3 link
-    b1 > b2; b2 b3 link
-    b2 > #00ff00 b3; b2 b3 link
+    b0 > #ff0000 b1; #ff0000b2 b3 link
+    b1 > b2; #ff0000b2 b3 link
+    b2 > #00ff00 b3; #ff0000b2 b3 link
 }
 
 xstart > a0

@@ -1,8 +1,8 @@
 visualizer layered
-landscape
-edge color #38bdf8
-vertex color #0284c7
-vertex textcolor #ffffff
+LANDSCAPE
+EDGE COLOR #38bdf8
+VERTEX COLOR #0284c7
+VERTEX TEXTCOLOR #ffffff
 
 theme {
     background: #0f172a;

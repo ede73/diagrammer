@@ -3,7 +3,6 @@ visualizer layered
 WarehouseGrid > DispatchProtocol
 {WarehouseGrid; Storage Bays
     visualizer grid
-    Bay1
     Bay2
     Bay3
     Bay4

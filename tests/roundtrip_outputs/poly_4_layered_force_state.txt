@@ -3,12 +3,7 @@ visualizer layered
 TopologyDiscovery > LifecycleManager
 {TopologyDiscovery; Mesh Swarm
     visualizer force
-    Hub
-    {Group_1
-        Hub > Node1
-        Hub > Node2
-    }
-
+    Hub > (Node1, Node2)
     Node1 > Node2
 }
 

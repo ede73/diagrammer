@@ -1,8 +1,7 @@
 visualizer network_bus
+EQUAL web01, web02, db01
 
 {dmz; y
-    web01
-    web02
 }
 
 {internal; x

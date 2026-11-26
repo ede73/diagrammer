@@ -1,37 +1,37 @@
 visualizer layered
 
-{Person; Person
-    Person!name; +String
-    Person!birth; #Date
-    Person!getCurrentAge; +(): int
+{!Person
+    name; +String
+    birth; #Date
+    getCurrentAge; +(): int
 }
 
-{Student; Student
-    Student!classes; _List<Class>
-    Student!attend; -(class: Course)
-    Student!sleep; -()
+{!Student
+    classes; _List<Class>
+    attend; -(class: Course)
+    sleep; -()
 }
 
-{Course; Course
-    Course!name; +String
-    Course!description; +String
-    Course!professor1; +professor: Professor
-    Course!location; +String
-    Course!times; +List<Time>
-    Course!prerequisites; +List<Course>
-    Course!students; +List<Student>
+{!Course
+    name; +String
+    description; +String
+    professor1; +professor: Professor
+    location; +String
+    times; +List<Time>
+    prerequisites; +List<Course>
+    students; +List<Student>
 }
 
-{Professor; Professor
-    Professor!classes1; +classes: List<Class>
-    Professor!teach; -teach(class: Course)
+{!Professor
+    classes1; +classes: List<Class>
+    teach; -teach(class: Course)
 }
 
-{BankAccount; BankAccount
-    BankAccount!owner; +String
-    BankAccount!balance; +Currency=0
-    BankAccount!deposit; +(amount: Currency)
-    BankAccount!withdraw; +(amount: Currency)
+{!BankAccount
+    owner; +String
+    balance; +Currency=0
+    deposit; +(amount: Currency)
+    withdraw; +(amount: Currency)
 }
 
 Student > Person

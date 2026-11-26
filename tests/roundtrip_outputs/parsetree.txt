@@ -1,6 +1,6 @@
 visualizer tree
 
-Sentence; Sentence
+Sentence
 Sentence > NP1
 Sentence > VP1
 dot1; .

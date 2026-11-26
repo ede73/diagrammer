@@ -12,16 +12,7 @@ DataProcessingTree > FinishNode
 
 {DataProcessingTree; Decision & Routing Hierarchy
     visualizer tree
-    Router
-    {Group_1
-        Router > FastPath
-        Router > DeepInspection
-    }
-
-    {Group_2
-        DeepInspection > PayloadScanner
-        DeepInspection > Quarantine
-    }
-
+    Router > (FastPath, DeepInspection)
+    DeepInspection > (PayloadScanner, Quarantine)
 }
 

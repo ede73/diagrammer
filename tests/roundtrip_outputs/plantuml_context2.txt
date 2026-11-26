@@ -1,6 +1,6 @@
 visualizer native_sequence
 
-{Group_1
+(
     User > A; 1DoWork
     A > B; createRequest
     B > A; back call
@@ -8,6 +8,6 @@ visualizer native_sequence
     B > C; 2DoWork
     C > B; WorkDone
     B > A; RequestCreated
-}
+)
 
 A > User; Done

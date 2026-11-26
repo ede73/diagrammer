@@ -1,23 +1,24 @@
 visualizer native_sequence
+$(b:#0000ff)
+$(r:#ff0000)
 
 a <> a; A initiated broadcast
 b <> b; B initiated broadcast
 a <> b; Auto return edge
 b <> c; Auto return edge
-a - #0000ff a; jotain kay tassanain
-a . #ff0000 a; ja aikaa palaa
+a - $(b) a; jotain kay tassanain
+a . $(r) a; ja aikaa palaa
 a /> b; lost signal
 a </ b; lost signal
-a > b; signal::and a big\nlined\nnote
 a > b; signal::and a big\nlined\nnote
 a > b; ab()
 b > c; bc(TRUE)
 c > c; process(1)
 c > c; process(2)
-c > #0000ff c; process(n)
+c > $(b) c; process(n)
 c > c; process(END)
 a < c; callback()
-a > #ff0000 a; next()
+a > $(r) a; next()
 a > a; ac1()\nac2()
 b < c; cb(TRUE)
 b > b; stalled(...)

@@ -1,7 +1,8 @@
 visualizer dot
-edge color #ff0000
+EDGE COLOR $(r)
+$(r:#ff0000)
 
-a #ff0000
+a $(r)
 a:se .>:s #0000ff b
 a:se .>:se #0000ff c
 a:se .>:w #0000ff d
@@ -11,11 +12,11 @@ a:se .>:nw #0000ff g
 a:se .>:e #0000ff h
 a:se .>:sw #0000ff i
 q #0000ff
-q:ne >:n #ff0000 b
-q:e >:ne #ff0000 c
-q:se >:e #ff0000 d
-q:s >:se #ff0000 e
-q:sw >:s #ff0000 f
-q:w >:sw #ff0000 g
-q:nw >:w #ff0000 h
-q:n >:nw #ff0000 i
+q:ne >:n b
+q:e >:ne c
+q:se >:e d
+q:s >:se e
+q:sw >:s f
+q:w >:sw g
+q:nw >:w h
+q:n >:nw i

@@ -1,6 +1,6 @@
 visualizer state
 
-{Group_1
+{
     notgroupA1
     notgroupB1
 }
@@ -25,7 +25,7 @@ visualizer state
     notgroupB6
 }
 
-{Group_2; rgsergset
+{; rgsergset
     notgroupA6
 }
 

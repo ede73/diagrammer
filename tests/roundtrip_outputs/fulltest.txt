@@ -1,16 +1,18 @@
 visualizer dot
+$(green:#0000ff)
+$(red:#ff0000)
 
-dashed rect a #ff0000; dashed red rectangle
-bold circle b #ff0000; bold red circle
+dashed rect a $(red); dashed red rectangle
+bold circle b $(red); bold red circle
 bold c; bold c
 bold diamond d; Diamond d
 rounded diamond e #00ff00; green Diamond e
 diagonals f; diagonals
 invis g; invis
-dashed a1 #ff0000; Red dashed a1 with green link
-dotted green #ff0000
-rounded b1 #0000ff
-green .> #00ff00 b1; dotted red node named green\nAnd green dotted link to rounded b1 node, that is blue\nRed label
+dashed a1 $(red); #00ff00Red dashed a1 with green link
+dotted green $(red)
+rounded b1 $(green)
+green .> #00ff00 b1; $(red)dotted red node named green\nAnd green dotted link to rounded b1 node, that is blue\nRed label
 rounded v
 dashed n
 q > r
@@ -31,7 +33,7 @@ x > v
 c > n
 v > n
 dashed l
-dotted k #ff0000
+dotted k $(red)
 l > k; dashed l links to k
 k > j; red k to 'j'
 j > h; last link text

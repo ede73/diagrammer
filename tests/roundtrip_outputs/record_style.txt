@@ -1,5 +1,5 @@
 visualizer dot
-shape record
+SHAPE record
 
 a1; <f0> foo | x | <f1> bar
 b1; a | { <f0> foo | x | <f1> bar } | b

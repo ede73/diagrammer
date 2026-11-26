@@ -1,5 +1,6 @@
 visualizer dot
-portrait
+PORTRAIT
+EQUAL q1, w1, w3
 
 z1 #ff0000
 z2 #00ff00

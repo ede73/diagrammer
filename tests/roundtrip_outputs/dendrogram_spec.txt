@@ -1,130 +1,70 @@
 visualizer reingoldtilford
-vertex color #FF00FF
+VERTEX COLOR $(Dead)
+$(Dead:#FF00FF)
+$(Living:#00FF00)
+$(ProtoLanguage:#a16a6a)
 
-protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-Uralic_languages
-{Group_1
-    uralic #a16a6a; Uralic::https://en.wikipedia.org/wiki/Uralic_languages
-    {Group_2
-        edge color #ff0000
-        finnovolgaic #a16a6a; Finno-Volgaic::https://en.wikipedia.org/wiki/Finno-Volgaic_languages
-        {Group_3
-            mordvinic #a16a6a; Mordvinic::https://en.wikipedia.org/wiki/Mordvinic_languages
-            {Group_4
-                erzya #00FF00; Erzya::https://en.wikipedia.org/wiki/Erzya_language
-                moksha #00FF00; Moksha::https://en.wikipedia.org/wiki/Moksha_language
-                mordvinic > #ff0000 erzya
-                mordvinic > #ff0000 moksha
-            }
-
+protoindouralic $(ProtoLanguage); Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-Uralic_languages
+(
+    uralic $(ProtoLanguage); Uralic::https://en.wikipedia.org/wiki/Uralic_languages
+    (
+        finnovolgaic $(ProtoLanguage); Finno-Volgaic::https://en.wikipedia.org/wiki/Finno-Volgaic_languages
+        (
+            mordvinic $(ProtoLanguage); Mordvinic::https://en.wikipedia.org/wiki/Mordvinic_languages
+            mordvinic > #ff0000 (erzya, moksha)
             finnovolgaic > #ff0000 mordvinic
-        }
+        )
 
-        finnougric #a16a6a; Finno-Ugric::https://en.wikipedia.org/wiki/Finno-Ugric_languages
-        {Group_5
-            finnopermic #a16a6a
-            {Group_6
-                mari #00FF00
-                permic #a16a6a; Permic::https://en.wikipedia.org/wiki/Permic_languages
-                {Group_7
-                    vertex color #00FF00
-                    komi #00FF00; Komi::https://en.wikipedia.org/wiki/Komi_language
-                    udmurt #00FF00; Udmurt::https://en.wikipedia.org/wiki/Udmurt_language
-                    permic > #ff0000 komi
-                    permic > #ff0000 udmurt
-                }
-
-                samic #a16a6a; Samic Protolanguage::https://en.wikipedia.org/wiki/Proto-Samic_language
-                {Group_8
-                    vertex color #00FF00
-                    northernsami #00FF00; Northern Sami::https://en.wikipedia.org/wiki/Northern_S%C3%A1mi
-                    inarisami #00FF00; Inari Sami::https://en.wikipedia.org/wiki/Inari_S%C3%A1mi
-                    samic > #ff0000 northernsami
-                    samic > #ff0000 inarisami
-                }
-
-                finnic #a16a6a; ::https://en.wikipedia.org/wiki/Proto-Finnic_language
-                {Group_9
-                    vertex color #00FF00
-                    northernfinnic #00FF00
-                    {Group_10
-                        meankieli #00FF00; Meänkieli::https://en.wikipedia.org/wiki/Me%C3%A4nkieli
-                        kven #00FF00; Kven::https://en.wikipedia.org/wiki/Kven_language
-                        karelian #00FF00; ::https://en.wikipedia.org/wiki/Karelian_language
-                        ingrian #00FF00; Ingrian::https://en.wikipedia.org/wiki/Ingrian_language
-                        veps #00FF00; ::https://en.wikipedia.org/wiki/Veps_language
-                        ludic #00FF00; ::https://en.wikipedia.org/wiki/Ludic_language
-                        finnish #00FF00; Finnish::https://en.wikipedia.org/wiki/Finnish_language
-                        northernfinnic > #ff0000 meankieli
-                        northernfinnic > #ff0000 kven
-                        northernfinnic > #ff0000 karelian
-                        northernfinnic > #ff0000 ingrian
-                        northernfinnic > #ff0000 veps
-                        northernfinnic > #ff0000 ludic
-                        northernfinnic > #ff0000 finnish
-                    }
-
-                    southernfinnic #a16a6a
-                    {Group_11
-                        livonian #00FF00; Livonian::https://en.wikipedia.org/wiki/Livonian_language
-                        votic #00FF00; ::https://en.wikipedia.org/wiki/Votic_language
-                        estonian #00FF00; Estonian::https://en.wikipedia.org/wiki/Estonian_language
-                        voro #00FF00; Voro::https://en.wikipedia.org/wiki/V%C3%B5ro_language
-                        southernfinnic > #ff0000 livonian
-                        southernfinnic > #ff0000 votic
-                        southernfinnic > #ff0000 estonian
-                        southernfinnic > #ff0000 voro
-                    }
-
-                    meryan #00FF00
+        finnougric $(ProtoLanguage); Finno-Ugric::https://en.wikipedia.org/wiki/Finno-Ugric_languages
+        (
+            finnopermic $(ProtoLanguage)
+            (
+                mari $(Living)
+                permic $(ProtoLanguage); Permic::https://en.wikipedia.org/wiki/Permic_languages
+                permic > #ff0000 (komi, udmurt)
+                samic $(ProtoLanguage); Samic Protolanguage::https://en.wikipedia.org/wiki/Proto-Samic_language
+                samic > #ff0000 (northernsami, inarisami)
+                finnic $(ProtoLanguage); ::https://en.wikipedia.org/wiki/Proto-Finnic_language
+                (
+                    northernfinnic $(Living)
+                    northernfinnic > #ff0000 (meankieli, kven, karelian, ingrian, veps, ludic, finnish)
+                    southernfinnic $(ProtoLanguage)
+                    southernfinnic > #ff0000 (livonian, votic, estonian, voro)
+                    meryan $(Living)
                     finnic > #ff0000 northernfinnic
                     finnic > #ff0000 southernfinnic
                     finnic > #ff0000 meryan
-                }
+                )
 
                 finnopermic > #ff0000 mari
                 finnopermic > #ff0000 permic
                 finnopermic > #ff0000 samic
                 finnopermic > #ff0000 finnic
-            }
+            )
 
-            ugric #a16a6a; Ugric::https://en.wikipedia.org/wiki/Ugric_languages
-            {Group_12
-                obugric #a16a6a; Ob-Ugric::https://en.wikipedia.org/wiki/Ob-Ugric_languages
-                {Group_13
-                    vertex color #00FF00
-                    khanty #00FF00; Khanty::https://en.wikipedia.org/wiki/Khanty_language
-                    mansi #00FF00; Mansi::https://en.wikipedia.org/wiki/Mansi_language
-                    obugric > #ff0000 khanty
-                    obugric > #ff0000 mansi
-                }
-
-                hungarian #00FF00; Hungarian::https://en.wikipedia.org/wiki/Hungarian_language
+            ugric $(ProtoLanguage); Ugric::https://en.wikipedia.org/wiki/Ugric_languages
+            (
+                obugric $(ProtoLanguage); Ob-Ugric::https://en.wikipedia.org/wiki/Ob-Ugric_languages
+                obugric > #ff0000 (khanty, mansi)
+                hungarian $(Living); Hungarian::https://en.wikipedia.org/wiki/Hungarian_language
                 ugric > #ff0000 obugric
                 ugric > #ff0000 hungarian
-            }
+            )
 
             finnougric > #ff0000 finnopermic
             finnougric > #ff0000 ugric
-        }
+        )
 
-        samoyedic #a16a6a
+        samoyedic $(ProtoLanguage)
         uralic > finnovolgaic
         uralic > finnougric
         uralic > samoyedic
-    }
+    )
 
-    protoindoeuropean #a16a6a; Proto Indo-European::https://en.wikipedia.org/wiki/Proto-Indo-European_language
-    {Group_14
-        anatolian #a16a6a; Anatolian::https://en.wikipedia.org/wiki/Anatolian_languages
-        {Group_15
-            edge color #ff3388
-            luwian #FF00FF
-            lycian #FF00FF
-            hittite #FF00FF
-            carian #FF00FF
-            lydian #FF00FF
-            palaic #FF00FF
-            pisidian #FF00FF
+    protoindoeuropean $(ProtoLanguage); Proto Indo-European::https://en.wikipedia.org/wiki/Proto-Indo-European_language
+    (
+        anatolian $(ProtoLanguage); Anatolian::https://en.wikipedia.org/wiki/Anatolian_languages
+        (
             anatolian > luwian
             anatolian > hittite
             anatolian > carian
@@ -132,49 +72,30 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
             carian > #ff3388 lydian
             lydian > #ff3388 palaic
             palaic > #ff3388 pisidian
-        }
+        )
 
-        hellenic #a16a6a; Hellenic::https://en.wikipedia.org/wiki/Hellenic_languages
-        {Group_16
-            edge color #22ff99
-            dorian #a16a6a
-            doric #FF00FF
-            {Group_17
-                tsakonian #00FF00
-                northwestgreek #FF00FF
-                doric > #22ff99 tsakonian
-                doric > #22ff99 northwestgreek
-            }
-
-            mycenaean #FF00FF
-            {Group_18
-                attic #FF00FF
-                {Group_19
-                    ionic #FF00FF
-                    epicgreek #FF00FF
-                    classicalgreek #FF00FF
-                    greek #00FF00
-                    koinegreek #FF00FF
+        hellenic $(ProtoLanguage); Hellenic::https://en.wikipedia.org/wiki/Hellenic_languages
+        (
+            dorian $(ProtoLanguage)
+            doric > #22ff99 (tsakonian, northwestgreek)
+            (
+                (
+                    greek $(Living)
                     attic > #22ff99 ionic
                     attic > #22ff99 epicgreek
                     attic > #22ff99 classicalgreek
                     attic > #22ff99 koinegreek
                     classicalgreek > #22ff99 greek
-                }
+                )
 
-                achaean #a16a6a
-                arcado #FF00FF
-                cypriot #FF00FF
+                achaean $(ProtoLanguage)
                 mycenaean > #22ff99 attic
                 mycenaean > #22ff99 achaean
                 achaean > #22ff99 arcado
                 arcado > #22ff99 cypriot
-            }
+            )
 
-            aeolic #a16a6a
-            aegean #FF00FF
-            beotian #FF00FF
-            thessalian #FF00FF
+            aeolic $(ProtoLanguage)
             hellenic > dorian
             hellenic > mycenaean
             hellenic > aeolic
@@ -182,34 +103,27 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
             aeolic > #22ff99 aegean
             aegean > #22ff99 beotian
             beotian > #22ff99 thessalian
-        }
+        )
 
-        indoiranian #a16a6a; Indo-Iranian::https://en.wikipedia.org/wiki/Indo-Iranian_languages
-        {Group_20
-            edge color #ffff00
-            indoaryan #a16a6a; Indo-Aryan::https://en.wikipedia.org/wiki/Indo-Aryan_languages
-            {Group_21
-                vedicsanskrit #FF00FF
-                sanskrit #00FF00
-                gandhari #FF00FF
-                niya #FF00FF
-                paisaci #FF00FF
-                pali #00FF00
-                shauraseni #FF00FF
-                {Group_22
-                    vertex color #00FF00
-                    nwnindic #a16a6a
-                    lahnda #00FF00
-                    potwari #00FF00
-                    punjabi #00FF00
-                    sindhi #00FF00
-                    westernindic #a16a6a
-                    bhil #00FF00
-                    domari #00FF00
-                    gujarati #00FF00
-                    rajasthani #00FF00
-                    romani #00FF00
-                    centralindic #a16a6a
+        indoiranian $(ProtoLanguage); Indo-Iranian::https://en.wikipedia.org/wiki/Indo-Iranian_languages
+        (
+            indoaryan $(ProtoLanguage); Indo-Aryan::https://en.wikipedia.org/wiki/Indo-Aryan_languages
+            (
+                sanskrit $(Living)
+                pali $(Living)
+                (
+                    nwnindic $(ProtoLanguage)
+                    lahnda $(Living)
+                    potwari $(Living)
+                    punjabi $(Living)
+                    sindhi $(Living)
+                    westernindic $(ProtoLanguage)
+                    bhil $(Living)
+                    domari $(Living)
+                    gujarati $(Living)
+                    rajasthani $(Living)
+                    romani $(Living)
+                    centralindic $(ProtoLanguage)
                     shauraseni > #ffff00 nwnindic
                     shauraseni > #ffff00 westernindic
                     shauraseni > #ffff00 centralindic
@@ -222,25 +136,23 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                     domari > #ffff00 gujarati
                     gujarati > #ffff00 rajasthani
                     rajasthani > #ffff00 romani
-                }
+                )
 
-                dardic #a16a6a
-                kashmiri #00FF00
-                pashayi #00FF00
-                shina #00FF00
-                magadhi #FF00FF
-                easnindic #a16a6a
-                {Group_23
-                    vertex color #00FF00
-                    assamese #00FF00
-                    bengali #00FF00
-                    chittagonian #00FF00
-                    oriya #00FF00
-                    halbi #00FF00
-                    bihari #a16a6a
-                    bhojpuri #00FF00
-                    magahi #00FF00
-                    maithili #00FF00
+                dardic $(ProtoLanguage)
+                kashmiri $(Living)
+                pashayi $(Living)
+                shina $(Living)
+                easnindic $(ProtoLanguage)
+                (
+                    assamese $(Living)
+                    bengali $(Living)
+                    chittagonian $(Living)
+                    oriya $(Living)
+                    halbi $(Living)
+                    bihari $(ProtoLanguage)
+                    bhojpuri $(Living)
+                    magahi $(Living)
+                    maithili $(Living)
                     easnindic > #ffff00 assamese
                     easnindic > #ffff00 bihari
                     assamese > #ffff00 bengali
@@ -250,27 +162,19 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                     bihari > #ffff00 bhojpuri
                     bhojpuri > #ffff00 magahi
                     magahi > #ffff00 maithili
-                }
+                )
 
-                maharahstri #FF00FF
-                southnindic #a16a6a
-                konkani #FF00FF
-                marathi #FF00FF
-                eluprakrit #FF00FF
-                insularindic #a16a6a
-                dhivehi #FF00FF
-                sinhalese #FF00FF
-                vedda #FF00FF
-                pahari #a16a6a
-                {Group_24
-                    vertex color #00FF00
-                    dogri #00FF00
-                    westernpahari #a16a6a
-                    garhwali #00FF00
-                    kumaoni #00FF00
-                    easternpahari #a16a6a
-                    nepali #00FF00
-                    palpa #00FF00
+                southnindic $(ProtoLanguage)
+                insularindic $(ProtoLanguage)
+                pahari $(ProtoLanguage)
+                (
+                    dogri $(Living)
+                    westernpahari $(ProtoLanguage)
+                    garhwali $(Living)
+                    kumaoni $(Living)
+                    easternpahari $(ProtoLanguage)
+                    nepali $(Living)
+                    palpa $(Living)
                     pahari > #ffff00 dogri
                     pahari > #ffff00 westernpahari
                     pahari > #ffff00 easternpahari
@@ -278,7 +182,7 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                     garhwali > #ffff00 kumaoni
                     easternpahari > #ffff00 nepali
                     nepali > #ffff00 palpa
-                }
+                )
 
                 indoaryan > #ffff00 vedicsanskrit
                 indoaryan > #ffff00 gandhari
@@ -303,50 +207,32 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                 insularindic > #ffff00 dhivehi
                 dhivehi > #ffff00 sinhalese
                 sinhalese > #ffff00 vedda
-            }
+            )
 
-            nuristani #a16a6a
-            kamkatavari #00FF00
-            askunu #00FF00
-            waigali #00FF00
-            iraninan #a16a6a; Iranian::https://en.wikipedia.org/wiki/Iranian_languages
-            {Group_25
-                easterniranian #FF00FF
-                {Group_26
-                    easterniraniansouth #FF00FF
-                    {Group_27
-                        pamiri #FF00FF
-                        sarikoli #FF00FF
-                        {Group_28
-                            vanji #FF00FF
-                            yighda #FF00FF
-                            shugni #FF00FF
-                            yazgulami #FF00FF
+            nuristani $(ProtoLanguage)
+            kamkatavari $(Living)
+            askunu $(Living)
+            waigali $(Living)
+            iraninan $(ProtoLanguage); Iranian::https://en.wikipedia.org/wiki/Iranian_languages
+            (
+                (
+                    (
+                        (
                             sarikoli > #ffff00 vanji
                             sarikoli > #ffff00 shugni
                             vanji > #ffff00 yighda
                             shugni > #ffff00 yazgulami
-                        }
+                        )
 
-                        pashto #FF00FF
-                        waziri #FF00FF
                         easterniraniansouth > #ffff00 pamiri
                         easterniraniansouth > #ffff00 pashto
                         pamiri > #ffff00 sarikoli
                         pashto > #ffff00 waziri
-                    }
+                    )
 
-                    easterniraniannorth #FF00FF
-                    {Group_29
-                        scythian #FF00FF
-                        ossetian #00FF00
-                        saka #FF00FF
-                        sarmatian #FF00FF
-                        bactrian #FF00FF
-                        khotanese #FF00FF
-                        khwarezmian #FF00FF
-                        sogdian #FF00FF
-                        yaghnobi #00FF00
+                    (
+                        ossetian $(Living)
+                        yaghnobi $(Living)
                         easterniraniannorth > #ffff00 scythian
                         easterniraniannorth > #ffff00 bactrian
                         easterniraniannorth > #ffff00 sogdian
@@ -356,73 +242,62 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                         bactrian > #ffff00 khotanese
                         khotanese > #ffff00 khwarezmian
                         sogdian > #ffff00 yaghnobi
-                    }
+                    )
 
                     easterniranian > #ffff00 easterniraniansouth
                     easterniranian > #ffff00 easterniraniannorth
-                }
+                )
 
-                avestan #FF00FF
-                westerniranian #a16a6a
-                {Group_30
-                    westerniraniansouth #a16a6a
-                    {Group_31
-                        oldpersian #FF00FF
-                        {Group_32
-                            middepersian #FF00FF
-                            bukhori #00FF00
-                            dari #00FF00
-                            {Group_33
-                                vertex color #00FF00
-                                persian #00FF00
-                                hazaragi #00FF00
-                                tajik #00FF00
-                                tat #00FF00
-                                juhuru #00FF00
+                westerniranian $(ProtoLanguage)
+                (
+                    westerniraniansouth $(ProtoLanguage)
+                    (
+                        (
+                            bukhori $(Living)
+                            dari $(Living)
+                            (
+                                persian $(Living)
+                                hazaragi $(Living)
+                                tajik $(Living)
+                                tat $(Living)
+                                juhuru $(Living)
                                 dari > #ffff00 persian
                                 dari > #ffff00 tat
                                 persian > #ffff00 hazaragi
                                 hazaragi > #ffff00 tajik
                                 tat > #ffff00 juhuru
-                            }
+                            )
 
-                            lurish #FF00FF
-                            bakhtiari #FF00FF
-                            kumzari #FF00FF
                             oldpersian > #ffff00 middepersian
                             oldpersian > #ffff00 lurish
                             middepersian > #ffff00 bukhori
                             bukhori > #ffff00 dari
                             lurish > #ffff00 bakhtiari
                             bakhtiari > #ffff00 kumzari
-                        }
+                        )
 
                         westerniraniansouth > #ffff00 oldpersian
-                    }
+                    )
 
-                    westerniraniannorth #a16a6a
-                    {Group_34
-                        caspian #a16a6a
-                        deilami #00FF00
-                        gilaki #00FF00
-                        mazanderani #00FF00
-                        shahmirzadi #FF00FF
-                        talysh #00FF00
-                        median #FF00FF
-                        {Group_35
-                            parthian #FF00FF
-                            balochi #00FF00
-                            kurdish #00FF00
-                            zazagorani #FF00FF
-                            gorani #00FF00
-                            zazaki #00FF00
+                    westerniraniannorth $(ProtoLanguage)
+                    (
+                        caspian $(ProtoLanguage)
+                        deilami $(Living)
+                        gilaki $(Living)
+                        mazanderani $(Living)
+                        talysh $(Living)
+                        (
+                            balochi $(Living)
+                            kurdish $(Living)
+                            gorani $(Living)
+                            zazaki $(Living)
                             median > #ffff00 parthian
                             median > #ffff00 zazagorani
                             parthian > #ffff00 balochi
                             balochi > #ffff00 kurdish
                             zazagorani > #ffff00 gorani
                             gorani > #ffff00 zazaki
-                        }
+                        )
 
                         westerniraniannorth > #ffff00 caspian
                         westerniraniannorth > #ffff00 median
@@ -431,16 +306,16 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                         gilaki > #ffff00 mazanderani
                         mazanderani > #ffff00 shahmirzadi
                         shahmirzadi > #ffff00 talysh
-                    }
+                    )
 
                     westerniranian > #ffff00 westerniraniansouth
                     westerniranian > #ffff00 westerniraniannorth
-                }
+                )
 
                 iraninan > #ffff00 easterniranian
                 iraninan > #ffff00 avestan
                 iraninan > #ffff00 westerniranian
-            }
+            )
 
             indoiranian > indoaryan
             indoiranian > nuristani
@@ -448,60 +323,49 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
             nuristani > #ffff00 kamkatavari
             kamkatavari > #ffff00 askunu
             askunu > #ffff00 waigali
-        }
+        )
 
-        italic #a16a6a; Italic::https://en.wikipedia.org/wiki/Italic_languages
-        {Group_36
-            edge color #0000ff
-            latinofaliscan #a16a6a
-            faliscan #FF00FF
-            latin #FF00FF
-            {Group_37
-                classiclatin #FF00FF
-                ecclesiasticallatin #00FF00
-                vulgarlatin #FF00FF
-                romance #a16a6a; Romance::https://en.wikipedia.org/wiki/Romance_languages
-                {Group_38
-                    sardinian #00FF00
-                    logudorse #00FF00
-                    campidanase #00FF00
-                    easternromance #a16a6a
-                    aromanian #00FF00
-                    istroromanian #00FF00
-                    meglenoromanian #00FF00
-                    romanian #00FF00
-                    italowestern #a16a6a
-                    {Group_39
-                        italodalmatian #a16a6a
-                        corsican #00FF00
-                        dalmatian #FF00FF
-                        istriot #00FF00
-                        italian #00FF00
-                        neapolitan #00FF00
-                        saccarese #00FF00
-                        sicilian #00FF00
-                        galloiberian #a16a6a
-                        {Group_40
-                            iberian #a16a6a
-                            {Group_41
-                                aragonese #00FF00
-                                {Group_42
-                                    asturleonese #FF00FF
-                                    asturian #00FF00
-                                    extremaduran #00FF00
-                                    leonese #00FF00
-                                    mirandese #00FF00
-                                    galicianportuguese #FF00FF
-                                    {Group_43
-                                        vertex color #00FF00
-                                        eonavian #00FF00
-                                        fala #00FF00
-                                        galician #00FF00
-                                        portuguese #00FF00
-                                        mozarabic #FF00FF
-                                        oldspanish #FF00FF
-                                        ladino #00FF00
-                                        spanish #00FF00
+        italic $(ProtoLanguage); Italic::https://en.wikipedia.org/wiki/Italic_languages
+        (
+            latinofaliscan $(ProtoLanguage)
+            (
+                ecclesiasticallatin $(Living)
+                romance $(ProtoLanguage); Romance::https://en.wikipedia.org/wiki/Romance_languages
+                (
+                    sardinian $(Living)
+                    logudorse $(Living)
+                    campidanase $(Living)
+                    easternromance $(ProtoLanguage)
+                    aromanian $(Living)
+                    istroromanian $(Living)
+                    meglenoromanian $(Living)
+                    romanian $(Living)
+                    italowestern $(ProtoLanguage)
+                    (
+                        italodalmatian $(ProtoLanguage)
+                        corsican $(Living)
+                        istriot $(Living)
+                        italian $(Living)
+                        neapolitan $(Living)
+                        saccarese $(Living)
+                        sicilian $(Living)
+                        galloiberian $(ProtoLanguage)
+                        (
+                            iberian $(ProtoLanguage)
+                            (
+                                aragonese $(Living)
+                                (
+                                    asturian $(Living)
+                                    extremaduran $(Living)
+                                    leonese $(Living)
+                                    mirandese $(Living)
+                                    (
+                                        eonavian $(Living)
+                                        fala $(Living)
+                                        galician $(Living)
+                                        portuguese $(Living)
+                                        ladino $(Living)
+                                        spanish $(Living)
                                         galicianportuguese > #0000ff eonavian
                                         galicianportuguese > #0000ff mozarabic
                                         eonavian > #0000ff fala
@@ -510,7 +374,7 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                                         mozarabic > #0000ff oldspanish
                                         oldspanish > #0000ff ladino
                                         ladino > #0000ff spanish
-                                    }
+                                    )
 
                                     aragonese > #0000ff asturleonese
                                     aragonese > #0000ff galicianportuguese
@@ -518,32 +382,30 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                                     asturian > #0000ff extremaduran
                                     extremaduran > #0000ff leonese
                                     leonese > #0000ff mirandese
-                                }
+                                )
 
                                 iberian > #0000ff aragonese
-                            }
+                            )
 
-                            gallic #a16a6a
-                            {Group_44
-                                vertex color #00FF00
-                                cisalpine #a16a6a
-                                emilian #00FF00
-                                ligurian #00FF00
-                                lombard #00FF00
-                                piedmontese #00FF00
-                                venetian #00FF00
-                                languedoil #a16a6a
-                                french #00FF00
-                                gallo #00FF00
-                                norman #00FF00
-                                walloon #00FF00
-                                protooccitan #a16a6a
-                                catalan #00FF00
-                                occitan #00FF00
-                                rhaetian #FF00FF
-                                friulian #00FF00
-                                ladin #00FF00
-                                romansh #00FF00
+                            gallic $(ProtoLanguage)
+                            (
+                                cisalpine $(ProtoLanguage)
+                                emilian $(Living)
+                                ligurian $(Living)
+                                lombard $(Living)
+                                piedmontese $(Living)
+                                venetian $(Living)
+                                languedoil $(ProtoLanguage)
+                                french $(Living)
+                                gallo $(Living)
+                                norman $(Living)
+                                walloon $(Living)
+                                protooccitan $(ProtoLanguage)
+                                catalan $(Living)
+                                occitan $(Living)
+                                friulian $(Living)
+                                ladin $(Living)
+                                romansh $(Living)
                                 gallic > #0000ff cisalpine
                                 gallic > #0000ff languedoil
                                 gallic > #0000ff protooccitan
@@ -562,11 +424,11 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                                 rhaetian > #0000ff friulian
                                 friulian > #0000ff ladin
                                 ladin > #0000ff romansh
-                            }
+                            )
 
                             galloiberian > #0000ff iberian
                             galloiberian > #0000ff gallic
-                        }
+                        )
 
                         italowestern > #0000ff italodalmatian
                         italowestern > #0000ff galloiberian
@@ -577,7 +439,7 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                         italian > #0000ff neapolitan
                         neapolitan > #0000ff saccarese
                         saccarese > #0000ff sicilian
-                    }
+                    )
 
                     romance > #0000ff sardinian
                     romance > #0000ff easternromance
@@ -588,20 +450,15 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                     aromanian > #0000ff istroromanian
                     istroromanian > #0000ff meglenoromanian
                     meglenoromanian > #0000ff romanian
-                }
+                )
 
                 latin > #0000ff classiclatin
                 latin > #0000ff vulgarlatin
                 classiclatin > #0000ff ecclesiasticallatin
                 vulgarlatin > #0000ff romance
-            }
+            )
 
-            sabellic #a16a6a
-            oscan #FF00FF
-            umbrian #FF00FF
-            aequian #FF00FF
-            marsian #FF00FF
-            volscian #FF00FF
+            sabellic $(ProtoLanguage)
             italic > latinofaliscan
             italic > sabellic
             latinofaliscan > #0000ff faliscan
@@ -611,73 +468,56 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
             umbrian > #0000ff aequian
             aequian > #0000ff marsian
             marsian > #0000ff volscian
-        }
+        )
 
-        celtic #a16a6a; Celtic::https://en.wikipedia.org/wiki/Celtic_languages
-        {Group_45
-            edge color #ff00ff
-            continental #a16a6a
-            celtiberian #FF00FF
-            galatian #FF00FF
-            gaulish #FF00FF
-            lepontic #FF00FF
-            noric #FF00FF
-            insular #a16a6a
-            {Group_46
-                goidelic #a16a6a
-                irish #00FF00
-                manx #00FF00
-                scottishgaelic #00FF00
-                brythonic #a16a6a
-                {Group_47
-                    commonbritonic #FF00FF
-                    breton #00FF00
-                    cornish #00FF00
-                    cumbric #FF00FF
-                    welsh #00FF00
-                    ivernic #FF00FF
-                    pictish #FF00FF
-                    brythonic > #ff00ff commonbritonic
-                    brythonic > #ff00ff ivernic
-                    brythonic > #ff00ff pictish
-                    commonbritonic > #ff00ff breton
-                    breton > #ff00ff cornish
-                    cornish > #ff00ff cumbric
-                    cumbric > #ff00ff welsh
-                }
+        celtic $(ProtoLanguage); Celtic::https://en.wikipedia.org/wiki/Celtic_languages
+        (
+            continental $(ProtoLanguage)
+            insular $(ProtoLanguage)
+            (
+                goidelic $(ProtoLanguage)
+                irish $(Living)
+                manx $(Living)
+                scottishgaelic $(Living)
+                brythonic $(ProtoLanguage)
+                (
+                    breton $(Living)
+                    cornish $(Living)
+                    welsh $(Living)
+                    brythonic > $(Dead) commonbritonic
+                    brythonic > $(Dead) ivernic
+                    brythonic > $(Dead) pictish
+                    commonbritonic > $(Dead) breton
+                    breton > $(Dead) cornish
+                    cornish > $(Dead) cumbric
+                    cumbric > $(Dead) welsh
+                )
 
-                insular > #ff00ff goidelic
-                insular > #ff00ff brythonic
-                goidelic > #ff00ff irish
-                irish > #ff00ff manx
-                manx > #ff00ff scottishgaelic
-            }
+                insular > $(Dead) goidelic
+                insular > $(Dead) brythonic
+                goidelic > $(Dead) irish
+                irish > $(Dead) manx
+                manx > $(Dead) scottishgaelic
+            )
 
             celtic > continental
             celtic > insular
-            continental > #ff00ff celtiberian
-            celtiberian > #ff00ff galatian
-            galatian > #ff00ff gaulish
-            gaulish > #ff00ff lepontic
-            lepontic > #ff00ff noric
-        }
+            continental > $(Dead) celtiberian
+            celtiberian > $(Dead) galatian
+            galatian > $(Dead) gaulish
+            gaulish > $(Dead) lepontic
+            lepontic > $(Dead) noric
+        )
 
-        germanic #a16a6a; Germanic::https://en.wikipedia.org/wiki/Germanic_languages
-        {Group_48
-            edge color #00ffff
-            oldnorse #FF00FF
-            {Group_49
-                oldwestnorse #FF00FF
-                faroese #00FF00
-                greenlandicnorse #FF00FF
-                icelandic #00FF00
-                norn #FF00FF
-                norwegian #00FF00
-                oldeastnorse #FF00FF
-                danish #00FF00
-                swedish #00FF00
-                elfdalian #00FF00
-                oldgutnish #FF00FF
+        germanic $(ProtoLanguage); Germanic::https://en.wikipedia.org/wiki/Germanic_languages
+        (
+            (
+                faroese $(Living)
+                icelandic $(Living)
+                norwegian $(Living)
+                danish $(Living)
+                swedish $(Living)
+                elfdalian $(Living)
                 oldnorse > #00ffff oldwestnorse
                 oldnorse > #00ffff oldeastnorse
                 oldnorse > #00ffff elfdalian
@@ -689,78 +529,62 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                 oldeastnorse > #00ffff danish
                 danish > #00ffff swedish
                 elfdalian > #00ffff oldgutnish
-            }
+            )
 
-            westgermanic #a16a6a
-            {Group_50
-                lowfranconian #a16a6a
-                {Group_51
-                    eastfranconian #a16a6a
-                    oldloweastfranconian #FF00FF
-                    limburgish #00FF00
-                    westfranconian #a16a6a
-                    olddutch #FF00FF
-                    dutch #00FF00
-                    {Group_52
-                        afrikaans #00FF00
-                        flemish #00FF00
-                        dutch > #00ffff afrikaans
-                        dutch > #00ffff flemish
-                    }
-
+            westgermanic $(ProtoLanguage)
+            (
+                lowfranconian $(ProtoLanguage)
+                (
+                    eastfranconian $(ProtoLanguage)
+                    limburgish $(Living)
+                    westfranconian $(ProtoLanguage)
+                    dutch $(Living)
+                    dutch > #00ffff (afrikaans, flemish)
                     lowfranconian > #00ffff eastfranconian
                     lowfranconian > #00ffff westfranconian
                     eastfranconian > #00ffff oldloweastfranconian
                     oldloweastfranconian > #00ffff limburgish
                     westfranconian > #00ffff olddutch
                     olddutch > #00ffff dutch
-                }
+                )
 
-                oldhighgerman #FF00FF
-                {Group_53
-                    yiddish #00FF00
-                    centralgerman #FF00FF
-                    {Group_54
-                        vertex color #00FF00
-                        luxembourgish #00FF00
-                        ripuarian #00FF00
-                        thuringian #00FF00
-                        standardgerman #00FF00
+                (
+                    yiddish $(Living)
+                    (
+                        luxembourgish $(Living)
+                        ripuarian $(Living)
+                        thuringian $(Living)
+                        standardgerman $(Living)
                         centralgerman > #00ffff luxembourgish
                         centralgerman > #00ffff standardgerman
                         luxembourgish > #00ffff ripuarian
                         ripuarian > #00ffff thuringian
-                    }
+                    )
 
-                    uppergerman #a16a6a
-                    alemannic #00FF00
-                    {Group_55
-                        vertex color #00FF00
-                        swissgerman #00FF00
-                        austrobavarian #00FF00
-                        cimbrian #00FF00
+                    uppergerman $(ProtoLanguage)
+                    alemannic $(Living)
+                    (
+                        swissgerman $(Living)
+                        austrobavarian $(Living)
+                        cimbrian $(Living)
                         alemannic > #00ffff swissgerman
                         alemannic > #00ffff austrobavarian
                         austrobavarian > #00ffff cimbrian
-                    }
+                    )
 
                     oldhighgerman > #00ffff yiddish
                     oldhighgerman > #00ffff centralgerman
                     oldhighgerman > #00ffff uppergerman
                     uppergerman > #00ffff alemannic
-                }
+                )
 
-                anglofrisian #FF00FF
-                {Group_56
-                    vertex color #00FF00
-                    oldfrisian #FF00FF
-                    northfrisian #00FF00
-                    saterlandfrisian #00FF00
-                    westfrisian #00FF00
-                    oldenglish #FF00FF
-                    english #00FF00
-                    scots #00FF00
-                    yola #00FF00
+                (
+                    northfrisian $(Living)
+                    saterlandfrisian $(Living)
+                    westfrisian $(Living)
+                    english $(Living)
+                    scots $(Living)
+                    yola $(Living)
                     anglofrisian > #00ffff oldfrisian
                     anglofrisian > #00ffff oldenglish
                     oldfrisian > #00ffff northfrisian
@@ -769,22 +593,17 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                     oldenglish > #00ffff english
                     english > #00ffff scots
                     scots > #00ffff yola
-                }
+                )
 
-                oldsaxon #FF00FF
-                lowgerman #00FF00
+                lowgerman $(Living)
                 westgermanic > #00ffff lowfranconian
                 westgermanic > #00ffff oldhighgerman
                 westgermanic > #00ffff anglofrisian
                 westgermanic > #00ffff oldsaxon
                 oldsaxon > #00ffff lowgerman
-            }
+            )
 
-            eastgermanic #a16a6a
-            burgundian #FF00FF
-            crimeangothic #FF00FF
-            gothic #FF00FF
-            vandalic #FF00FF
+            eastgermanic $(ProtoLanguage)
             germanic > oldnorse
             germanic > westgermanic
             germanic > eastgermanic
@@ -792,25 +611,17 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
             burgundian > #00ffff crimeangothic
             crimeangothic > #00ffff gothic
             gothic > #00ffff vandalic
-        }
+        )
 
-        tocharian #a16a6a
-        kuchean #FF00FF
-        turfanian #FF00FF
-        baltoslavic #a16a6a; Balto-Slavic::https://en.wikipedia.org/wiki/Balto-Slavic_languages
-        {Group_57
-            edge color #777777
-            baltic #a16a6a
-            {Group_58
-                westbaltic #a16a6a
-                galindan #FF00FF
-                prussian #FF00FF
-                sudovian #FF00FF
-                eastbaltic #a16a6a
-                latvian #00FF00
-                lithuanian #00FF00
-                selonian #FF00FF
-                semigallian #FF00FF
+        tocharian $(ProtoLanguage)
+        baltoslavic $(ProtoLanguage); Balto-Slavic::https://en.wikipedia.org/wiki/Balto-Slavic_languages
+        (
+            baltic $(ProtoLanguage)
+            (
+                westbaltic $(ProtoLanguage)
+                eastbaltic $(ProtoLanguage)
+                latvian $(Living)
+                lithuanian $(Living)
                 baltic > #777777 westbaltic
                 baltic > #777777 eastbaltic
                 westbaltic > #777777 galindan
@@ -820,19 +631,15 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                 latvian > #777777 lithuanian
                 lithuanian > #777777 selonian
                 selonian > #777777 semigallian
-            }
+            )
 
-            slavic #a16a6a
-            {Group_59
-                eastslavic #a16a6a
-                {Group_60
-                    oldnovgorod #FF00FF
-                    oldeastslavic #FF00FF
-                    russian #00FF00
-                    ruthenian #FF00FF
-                    belorussian #00FF00
-                    rusyn #FF00FF
-                    ukraininan #00FF00
+            slavic $(ProtoLanguage)
+            (
+                eastslavic $(ProtoLanguage)
+                (
+                    russian $(Living)
+                    belorussian $(Living)
+                    ukraininan $(Living)
                     eastslavic > #777777 oldnovgorod
                     eastslavic > #777777 oldeastslavic
                     eastslavic > #777777 ruthenian
@@ -840,82 +647,74 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
                     ruthenian > #777777 belorussian
                     belorussian > #777777 rusyn
                     rusyn > #777777 ukraininan
-                }
+                )
 
-                westslavic #a16a6a
-                {Group_61
-                    oldwestslavic #FF00FF
-                    {Group_62
-                        lechitic #a16a6a
-                        {Group_63
-                            oldpolish #FF00FF
-                            {Group_64
-                                polabian #FF00FF
-                                pomeraninan #FF00FF
-                                polish #00FF00
-                                silesian #00FF00
+                westslavic $(ProtoLanguage)
+                (
+                    (
+                        lechitic $(ProtoLanguage)
+                        (
+                            (
+                                polish $(Living)
+                                silesian $(Living)
                                 oldpolish > #777777 polabian
                                 oldpolish > #777777 polish
                                 polabian > #777777 pomeraninan
                                 polish > #777777 silesian
-                            }
+                            )
 
                             lechitic > #777777 oldpolish
-                        }
+                        )
 
-                        czechslovak #FF00FF
-                        knaanic #FF00FF
-                        sorbian #00FF00
+                        sorbian $(Living)
                         oldwestslavic > #777777 lechitic
                         oldwestslavic > #777777 czechslovak
                         czechslovak > #777777 knaanic
                         knaanic > #777777 sorbian
-                    }
+                    )
 
                     westslavic > #777777 oldwestslavic
-                }
+                )
 
-                southslavic #a16a6a
-                {Group_65
-                    westernsouthslavic #a16a6a
-                    {Group_66
-                        vertex color #00FF00
-                        slovene #00FF00
-                        serbocroatian #00FF00
-                        bosnian #00FF00
-                        croatian #00FF00
-                        serbian #00FF00
+                southslavic $(ProtoLanguage)
+                (
+                    westernsouthslavic $(ProtoLanguage)
+                    (
+                        slovene $(Living)
+                        serbocroatian $(Living)
+                        bosnian $(Living)
+                        croatian $(Living)
+                        serbian $(Living)
                         westernsouthslavic > #777777 slovene
                         westernsouthslavic > #777777 serbocroatian
                         serbocroatian > #777777 bosnian
                         bosnian > #777777 croatian
                         croatian > #777777 serbian
-                    }
+                    )
 
-                    eastsouthslavic #a16a6a
-                    oldchurchslavonic #FF00FF
-                    bulgarian #00FF00
-                    churchslavonic #00FF00
-                    macedonian #00FF00
+                    eastsouthslavic $(ProtoLanguage)
+                    bulgarian $(Living)
+                    churchslavonic $(Living)
+                    macedonian $(Living)
                     southslavic > #777777 westernsouthslavic
                     southslavic > #777777 eastsouthslavic
                     eastsouthslavic > #777777 oldchurchslavonic
                     oldchurchslavonic > #777777 bulgarian
                     bulgarian > #777777 churchslavonic
                     churchslavonic > #777777 macedonian
-                }
+                )
 
                 slavic > #777777 eastslavic
                 slavic > #777777 westslavic
                 slavic > #777777 southslavic
-            }
+            )
 
             baltoslavic > baltic
             baltoslavic > slavic
-        }
+        )
 
-        protoalbanian #a16a6a
-        albanian #00FF00
+        protoalbanian $(ProtoLanguage)
+        albanian $(Living)
         protoindoeuropean > anatolian
         protoindoeuropean > hellenic
         protoindoeuropean > indoiranian
@@ -928,9 +727,9 @@ protoindouralic #a16a6a; Proto Indo-Uralic::https://en.wikipedia.org/wiki/Indo-U
         tocharian > kuchean
         kuchean > turfanian
         protoalbanian > albanian
-    }
+    )
 
     protoindouralic > uralic
     protoindouralic > protoindoeuropean
-}
+)
 

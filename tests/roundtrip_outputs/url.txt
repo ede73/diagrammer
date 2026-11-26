@@ -1,5 +1,5 @@
 visualizer dot
 
-node1; This Is Label::And This Is NOT XLabel, click on node for google
-node2; THis node leads to mtv3
-node1 - node2; THis is edge label::and edge XLabel, this edge leads to nelonen
+node1; #ff0000This Is Label::And This Is NOT XLabel, click on node for google[http://www.google.com/]
+node2; #ccffccTHis node leads to mtv3[http://www.mtv3.fi/]
+node1 - node2; THis is edge label::and edge XLabel, this edge leads to nelonen[http://www.nelonen.fi/]

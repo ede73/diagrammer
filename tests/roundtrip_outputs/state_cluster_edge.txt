@@ -1,12 +1,9 @@
 visualizer dot
 
 {ClusterA #ff0000; Cluster A
-    ClusterA1
-    ClusterA2
 }
 
 {ClusterB #00ff00; Cluster B
-    ClusterB1
     ClusterB2
 }
 

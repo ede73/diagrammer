@@ -3,12 +3,7 @@ visualizer layered
 RuleEngine > JobRunner
 {RuleEngine; Decision Tree
     visualizer tree
-    Input Input
-    {Group_1
-        Input > Pass
-        Input > Fail
-    }
-
+    Input > (Pass, Fail)
 }
 
 {JobRunner; Execution FSM

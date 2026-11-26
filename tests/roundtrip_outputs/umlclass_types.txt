@@ -3,7 +3,7 @@ visualizer layered
 {Person; Person - generalization
 }
 
-{Student; Student
+{Student
 }
 
 Student > Person; open triangle\ncont line
@@ -14,14 +14,14 @@ Person -> ISerializable; open triangle\ndashed line
 {Direcrtory; Folder - composition
 }
 
-{File; File
+{File
 }
 
 File >> Directory; n:1:filled diamond\ncont line
 {Wheel; Wheel - Aggregation
 }
 
-{Car; Car
+{Car
 }
 
 Car >> Wheel; open diamond\ncont line

@@ -1,18 +1,18 @@
 visualizer layered
 
-{Person; Person
+{Person
     name; +String
     birth; #Date
     getCurrentAge; +(): int
 }
 
-{Student; Student
+{Student
     classes; _List<Class>
     attend; -(class: Course)
     sleep; -()
 }
 
-{Course; Course
+{Course
     description; +String
     professor1; +professor: Professor
     location; +String
@@ -21,12 +21,12 @@ visualizer layered
     students; +List<Student>
 }
 
-{Professor; Professor
+{Professor
     classes1; +classes: List<Class>
     teach; -teach(class: Course)
 }
 
-{BankAccount; BankAccount
+{BankAccount
     owner; +String
     balance; +Currency=0
     deposit; +(amount: Currency)

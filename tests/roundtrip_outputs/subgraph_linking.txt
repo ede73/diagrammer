@@ -1,14 +1,13 @@
 visualizer layered
 
-b
-{Group_1
+(
     b > c
     b > f
     c > d
     d > e
     f > g
     g > h
-}
+)
 
 e > z; merged
 h > z; merged

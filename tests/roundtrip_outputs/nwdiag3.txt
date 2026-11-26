@@ -1,15 +1,17 @@
 visualizer network_bus
-vertex color #ffff00
-group color #33FF33
+VERTEX COLOR #ffff00
+GROUP COLOR #33FF33
 
-{Sample_front #33FF33; 192.168.10.0/24
-    web01 #ffff00; .1
-    web02 #ffff00; .2
+{Sample_front; 192.168.10.0/24
+    EQUAL web01, web02
+    web01; .1
+    web02; .2
 }
 
-{Sample_back #33FF33; 192.168.20.0/24
-    db01 #ffff00; .101
-    db02 #ffff00; .102
+{Sample_back; 192.168.20.0/24
+    EQUAL db01, db02
+    db01; .101
+    db02; .102
 }
 
 web01 - Sample_front; .1

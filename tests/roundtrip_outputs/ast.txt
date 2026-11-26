@@ -1,21 +1,23 @@
 visualizer ast_record
-portrait
-edge color #ff0000
+PORTRAIT
+EDGE COLOR #ff0000
+$(gen:#ccffcc)
+$(par:#ccccff)
 
-{GraphObject; GraphObject
-    name #ccccff
-    color #ccccff
-    textColor #ccccff
-    label #ccccff; label\nspecial syntax with :: for links\n(label::xlabel)
+{GraphObject
+    name $(par)
+    color $(par)
+    textColor $(par)
+    label $(par); #ff0000label\nspecial syntax with :: for links\n(label::xlabel)
 }
 
 {GraphRoot; GraphRoot:GraphObject
     database OBJECTS1; OBJECTS
-    xGenerator #ccffcc; generator
-    xVisualizer #ccffcc; visualizer
-    direction #ccffcc
-    xStart #ccffcc; start
-    xEqual #ccffcc; equal
+    xGenerator $(gen); generator
+    xVisualizer $(gen); visualizer
+    direction $(gen)
+    xStart $(gen); start
+    xEqual $(gen); equal
     currentShape
     default2; default\nnodecolor\ngroupcolor\nlinkcolor
 }
@@ -33,8 +35,6 @@ edge color #ff0000
 
 {Link; Link:GraphObject
     linkType
-    xleft
-    xright
 }
 
 GraphObject .> #0000ff GraphRoot; extends(GraphObject->GraphRoot)
@@ -45,7 +45,7 @@ xleft <-> #00ff00 GNode; links
 xleft <-> #00ff00 xGroup; links
 xright <-> #00ff00 xGroup; links
 xright <-> #00ff00 GNode; links
-OBJECTS1 > #ff0000 GNode; contains
-OBJECTS1 > #ff0000 xGroup; contains
-OBJECTS2 > #ff0000 GNode; contains
-OBJECTS2 > #ff0000 xGroup; contains
+OBJECTS1 > GNode; contains
+OBJECTS1 > xGroup; contains
+OBJECTS2 > GNode; contains
+OBJECTS2 > xGroup; contains

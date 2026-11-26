@@ -1,14 +1,14 @@
 visualizer dot
-shape ellipse
-group color #bbbbbb
+SHAPE ellipse
+GROUP COLOR #bbbbbb
 
-{Group_1 #ff0000; process #1
+{#ff0000; process #1
     a0 > a1
     a1 > a2
     a2 > a3
 }
 
-{Group_2 #00ff00; process #2
+{#00ff00; process #2
     b0 > b1
     b1 > b2
     b2 > b3

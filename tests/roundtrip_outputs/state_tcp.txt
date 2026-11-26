@@ -1,22 +1,27 @@
 visualizer state
-shape rect
+SHAPE rect
+$(blue:#0000ff)
+$(grey:#888888)
+$(lightblue:#afeeee)
+$(red:#ff0000)
+$(yellow:#ffff00)
 
-closed #ff0000; CLOSED
-closed_end #ff0000; closed\nBack to start
-listen #ffff00; LISTEN
-syn_received #888888; SYN\nRECEIVED
-syn_sent #888888; SYN\nSENT
+closed $(red); CLOSED
+closed_end $(red); closed\nBack to start
+listen $(yellow); LISTEN
+syn_received $(grey); SYN\nRECEIVED
+syn_sent $(grey); SYN\nSENT
 established #00ff00; ESTABLISHED\ndata xchange occurs
-{PassiveClose #afeeee; Passive CLOSE
-    close_wait #ffff00; CLOSE WAIT
-    last_ack #ffff00; LAST ACK
+{PassiveClose $(lightblue); Passive CLOSE
+    close_wait $(yellow); CLOSE WAIT
+    last_ack $(yellow); LAST ACK
 }
 
-{ActiveClose #afeeee; Active CLOSE
-    fin_wait1 #ffff00; FIN WAIT 1
-    closing #ffff00; CLOSING
-    fin_wait2 #ffff00; FIN WAIT 2
-    time_wait #ffff00; TIME WAIT
+{ActiveClose $(lightblue); Active CLOSE
+    fin_wait1 $(yellow); FIN WAIT 1
+    closing $(yellow); CLOSING
+    fin_wait2 $(yellow); FIN WAIT 2
+    time_wait $(yellow); TIME WAIT
 }
 
 syn_sent .> closed; CLOSE/-
@@ -28,15 +33,15 @@ syn_received .> fin_wait1; CLOSE/FIN
 fin_wait1 .> closing; FIN/ACK
 fin_wait1 .> time_wait; FIN+ACK/ACK
 closing .> time_wait
-closed > #ff0000 syn_sent; CONNECT/SYN(1/3 of 3w/hs)
-syn_sent > #ff0000 established; SYN+ACK/ACK(3/3 of 3w/hs)
-established > #ff0000 fin_wait1; CLOSE/FIN
-fin_wait1 > #ff0000 fin_wait2; ACK/-
-fin_wait2 > #ff0000 time_wait; FIN/ACK
-time_wait > #ff0000 closed_end; Timeout
-closed > #0000ff listen; LISTEN/-
-listen > #0000ff syn_received; SYN/SYN+ACK(2/3 of 3w/hs)
-syn_received > #0000ff established; ACK/-
-established > #0000ff close_wait; FIN/ACK
-close_wait > #0000ff last_ack; CLOSE/FIN
-last_ack > #0000ff closed_end
+closed > $(red) syn_sent; CONNECT/SYN(1/3 of 3w/hs)
+syn_sent > $(red) established; SYN+ACK/ACK(3/3 of 3w/hs)
+established > $(red) fin_wait1; CLOSE/FIN
+fin_wait1 > $(red) fin_wait2; ACK/-
+fin_wait2 > $(red) time_wait; FIN/ACK
+time_wait > $(red) closed_end; Timeout
+closed > $(blue) listen; LISTEN/-
+listen > $(blue) syn_received; SYN/SYN+ACK(2/3 of 3w/hs)
+syn_received > $(blue) established; ACK/-
+established > $(blue) close_wait; FIN/ACK
+close_wait > $(blue) last_ack; CLOSE/FIN
+last_ack > $(blue) closed_end

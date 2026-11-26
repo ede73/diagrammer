@@ -1,5 +1,5 @@
 visualizer dot
-vertex color #ffff00
+VERTEX COLOR #ffff00
 
 outside1 #ff0000; Group to node(MUST BE RED)
 outside3 #ff0000; Inner group to node(MUST BE RED)
@@ -15,10 +15,10 @@ outside3 #ff0000; Inner group to node(MUST BE RED)
 
 }
 
-outside2 #ffff00; Node to group(MUST BE YELLOW)
-outside4 #ffff00; Node to inner group(MUST BE YELLOW)
+outside2; Node to group(MUST BE YELLOW)
+outside4; Node to inner group(MUST BE YELLOW)
 {other; Uncolored group
-    o #ffff00; o(MUST BE YELLOW)
+    o; o(MUST BE YELLOW)
 }
 
 ma > ima1

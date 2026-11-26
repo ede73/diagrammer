@@ -4,7 +4,7 @@ DataModel > AuditSync
 AuditSync > Committed
 {DataModel; Domain Entities
     visualizer layered
-    {User; User
+    {User
         id; +UUID
         name; +String
     }

@@ -1,5 +1,5 @@
 visualizer layered
 
-node1; Google Documentation
-node2; GitHub Repository
-node1 > node2; API Webhook
+node1; #ff0000Google Documentation[http://www.google.com/]
+node2; #38bdf8GitHub Repository[https://github.com]
+node1 > node2; API Webhook[https://www.rust-lang.org]

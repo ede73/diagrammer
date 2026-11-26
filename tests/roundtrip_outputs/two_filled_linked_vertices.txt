@@ -1,6 +1,8 @@
 visualizer dot
+$(blue:#0000ff)
+$(red:#ff0000)
 
-first #0000ff; Configured as blue
-second #ff0000; Overridden to red
+first $(blue); Configured as blue
+second $(red); Overridden to red
 first > #111111 second
-first > #ff0000 second
+first > $(red) second

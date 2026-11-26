@@ -1,7 +1,6 @@
 visualizer state
-shape actor
+SHAPE actor
 
-s
 {dummy
     a > s
 }

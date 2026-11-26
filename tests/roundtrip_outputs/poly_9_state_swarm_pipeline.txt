@@ -4,12 +4,7 @@ ClusterMesh > DataPipeline
 DataPipeline > Operational
 {ClusterMesh; P2P Topology
     visualizer force
-    Leader
-    {Group_1
-        Leader > Worker1
-        Leader > Worker2
-    }
-
+    Leader > (Worker1, Worker2)
     Worker1 > Worker2
 }
 

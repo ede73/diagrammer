@@ -4,12 +4,7 @@ Taxonomy > MemoryMatrix
 MemoryMatrix > Done
 {Taxonomy; Classification Tree
     visualizer tree
-    Root
-    {Group_1
-        Root > ClassA
-        Root > ClassB
-    }
-
+    Root > (ClassA, ClassB)
 }
 
 {MemoryMatrix; 2D Tensor Grid

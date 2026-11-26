@@ -1,31 +1,35 @@
 visualizer dot
+$(var:#ff0000)
+$(var2:#0000ff)
+$(var3:#00ff00)
+$(var4:#ff0000)
 
 plainnode
 labelplainnode; WithLabel
 ImageNode /cpu.png
 labelImageNode /laptop.png; WithLabel
-NodeAndRedColor #ff0000
-LabelNodeAndRedColor #ff0000; WithLabel
-VNodeAndRedColor #ff0000
-LabelVNodeAndRedColor #ff0000; Label
+NodeAndRedColor $(var4)
+LabelNodeAndRedColor $(var4); WithLabel
+VNodeAndRedColor $(var4)
+LabelVNodeAndRedColor $(var4); Label
 circle CircularNode
 circle LabelCircularNode; Label
-circle CircularBlueNode #0000ff
-circle labelCircularBlueNode #0000ff; Label
-circle VCircularBlueNode #0000ff
-circle LabelVCircularBlueNode #0000ff; Label
+circle CircularBlueNode $(var2)
+circle labelCircularBlueNode $(var2); Label
+circle VCircularBlueNode $(var2)
+circle LabelVCircularBlueNode $(var2); Label
 bold BoldImage /actor1.png
 bold LabelBoldImage /actor2.png; Label
 bold PlainBoldNode
 bold LabelPlainBoldNode; Label
-dashed DashedGreenNode #00ff00
-dashed LabelDashedGreenNode #00ff00; Label
-dashed VDashedGreenNode #00ff00
-dashed LabelVDashedGreenNode #00ff00; Label
+dashed DashedGreenNode $(var3)
+dashed LabelDashedGreenNode $(var3); Label
+dashed VDashedGreenNode $(var3)
+dashed LabelVDashedGreenNode $(var3); Label
 dotted box
 DottedBoxNode
 LabelDottedBoxNode; Label
-DottedRedBoxNode #ff0000
-LabelDottedRedBoxNode #ff0000; Label
-VDottedRedBoxNode #ff0000
-LabelVDottedRedBoxNode #ff0000; Label
+DottedRedBoxNode $(var4)
+LabelDottedRedBoxNode $(var4); Label
+VDottedRedBoxNode $(var4)
+LabelVDottedRedBoxNode $(var4); Label

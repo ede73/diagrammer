@@ -1,18 +1,12 @@
 visualizer layered
 
-{xxx; xxx
-    a
+{xxx
 }
 
-{yyy; yyy
-    b
-    c
+{yyy
 }
 
-{zzz; zzz
-    x
-    y
-    z
+{zzz
 }
 
 a > b

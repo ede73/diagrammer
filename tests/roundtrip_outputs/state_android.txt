@@ -1,18 +1,19 @@
 visualizer dot
-shape rect
-vertex color #eeeeee
+SHAPE rect
+VERTEX COLOR #eeeeee
+$(dark:#aaaaaa)
 
-ellipse a #aaaaaa; Activity starts
-b #eeeeee; onCreate()
-c #eeeeee; onStart()
-d #eeeeee; onResume()
-ellipse e #aaaaaa; Activity is running
-f #eeeeee; Another activity\ncomes in front of the activity
-g #eeeeee; onPause()
-h #eeeeee; This activity is no longer visible
-i #eeeeee; onStop()
-j #eeeeee; onDestroy()
-ellipse k #aaaaaa; Activity is\nshut down
+ellipse a $(dark); Activity starts
+b; onCreate()
+c; onStart()
+d; onResume()
+ellipse e $(dark); Activity is running
+f; Another activity\ncomes in front of the activity
+g; onPause()
+h; This activity is no longer visible
+i; onStop()
+j; onDestroy()
+ellipse k $(dark); Activity is\nshut down
 a > b
 b > c
 c > d

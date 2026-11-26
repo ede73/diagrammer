@@ -1,5 +1,5 @@
 visualizer dot
-landscape
+LANDSCAPE
 
 a /wifi.png
 a > #ff0000 b

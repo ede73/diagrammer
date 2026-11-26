@@ -1,0 +1,22 @@
+visualizer layered
+
+{xxx; xxx
+    a
+}
+
+{yyy; yyy
+    b
+    c
+}
+
+{zzz; zzz
+    x
+    y
+    z
+}
+
+a > b
+a > c
+b > x
+c > y
+c > z

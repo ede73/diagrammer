@@ -1,0 +1,10 @@
+visualizer state
+
+{Group_1; while happy
+    clap
+}
+
+{Group_2; until exhausted
+    clapmore
+}
+

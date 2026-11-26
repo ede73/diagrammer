@@ -1,0 +1,31 @@
+visualizer dot
+
+plainnode
+labelplainnode; WithLabel
+ImageNode /cpu.png
+labelImageNode /laptop.png; WithLabel
+NodeAndRedColor #ff0000
+LabelNodeAndRedColor #ff0000; WithLabel
+VNodeAndRedColor #ff0000
+LabelVNodeAndRedColor #ff0000; Label
+circle CircularNode
+circle LabelCircularNode; Label
+circle CircularBlueNode #0000ff
+circle labelCircularBlueNode #0000ff; Label
+circle VCircularBlueNode #0000ff
+circle LabelVCircularBlueNode #0000ff; Label
+bold BoldImage /actor1.png
+bold LabelBoldImage /actor2.png; Label
+bold PlainBoldNode
+bold LabelPlainBoldNode; Label
+dashed DashedGreenNode #00ff00
+dashed LabelDashedGreenNode #00ff00; Label
+dashed VDashedGreenNode #00ff00
+dashed LabelVDashedGreenNode #00ff00; Label
+dotted box
+DottedBoxNode
+LabelDottedBoxNode; Label
+DottedRedBoxNode #ff0000
+LabelDottedRedBoxNode #ff0000; Label
+VDottedRedBoxNode #ff0000
+LabelVDottedRedBoxNode #ff0000; Label

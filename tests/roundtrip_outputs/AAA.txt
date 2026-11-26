@@ -1,0 +1,31 @@
+visualizer swimlane
+
+{Customer; Customer (Storefront)
+    Customer!cart; View Cart
+    Customer!checkout; Click Checkout
+    Customer!notify; Receive Confirmation
+}
+
+{Gateway; API Gateway & Security
+    Gateway!rate_limit; Rate Limit Check
+    Gateway!auth_token; Validate Session Token
+}
+
+{Fulfillment; Order Management
+    Fulfillment!reserve_stock; Reserve Warehouse Stock
+    Fulfillment!pack_ship; Pack & Dispatch
+}
+
+{Payment; Payment Provider (Stripe/Bank)
+    Payment!fraud_check; Fraud Evaluation
+    Payment!capture_funds; Capture Funds
+}
+
+Customer!cart > Customer!checkout
+Customer!checkout > Gateway!rate_limit
+Gateway!rate_limit > Gateway!auth_token
+Gateway!auth_token > Fulfillment!reserve_stock
+Fulfillment!reserve_stock > Payment!fraud_check
+Payment!fraud_check > Payment!capture_funds
+Payment!capture_funds > Fulfillment!pack_ship; Funds Captured
+Fulfillment!pack_ship > Customer!notify; Tracking Number

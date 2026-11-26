@@ -1,0 +1,8 @@
+visualizer state
+shape actor
+
+s
+{dummy
+    a > s
+}
+

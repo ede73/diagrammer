@@ -1,0 +1,41 @@
+visualizer dot
+
+dashed rect a #ff0000; dashed red rectangle
+bold circle b #ff0000; bold red circle
+bold c; bold c
+bold diamond d; Diamond d
+rounded diamond e #00ff00; green Diamond e
+diagonals f; diagonals
+invis g; invis
+dashed a1 #ff0000; Red dashed a1 with green link
+dotted green #ff0000
+rounded b1 #0000ff
+green .> #00ff00 b1; dotted red node named green\nAnd green dotted link to rounded b1 node, that is blue\nRed label
+rounded v
+dashed n
+q > r
+q > t
+q > y
+w > r
+w > t
+w > y
+e > r
+e > t
+e > y
+r > z
+t > z
+y > z
+z > x
+x > c
+x > v
+c > n
+v > n
+dashed l
+dotted k #ff0000
+l > k; dashed l links to k
+k > j; red k to 'j'
+j > h; last link text
+h > g; last link text
+g > f; last link text
+m1 > m2; m1 to m2
+m1 > m3; m1 to m3

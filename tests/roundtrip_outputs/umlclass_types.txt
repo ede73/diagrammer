@@ -1,0 +1,41 @@
+visualizer layered
+
+{Person; Person - generalization
+}
+
+{Student; Student
+}
+
+Student > Person; open triangle\ncont line
+{ISerializable; ISerializable - realization
+}
+
+Person -> ISerializable; open triangle\ndashed line
+{Direcrtory; Folder - composition
+}
+
+{File; File
+}
+
+File >> Directory; n:1:filled diamond\ncont line
+{Wheel; Wheel - Aggregation
+}
+
+{Car; Car
+}
+
+Car >> Wheel; open diamond\ncont line
+{SurfaceHolder; android.view::SurfaceHolder - dependency
+}
+
+{Camera; android.hardware::Camera
+}
+
+Camera -> SurfaceHolder; uses\nopen arrow\ndashed line
+{Course; Course - Association
+}
+
+{Student2; Student
+}
+
+Student2 . Course; *:1..*:takes\nassociation\nopen arrow\ncont line

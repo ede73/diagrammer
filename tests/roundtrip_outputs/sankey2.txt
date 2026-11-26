@@ -1,0 +1,27 @@
+visualizer sankey
+
+enter; Customer\nenter
+linkclick; Link on external website
+addcart; Add a product to cart
+anotherproduct; Check another product
+enter > ad; 700
+enter > search; 200
+enter > linkclick; 100
+mobile < ad; 57%
+mobile < search; 25%
+mobile < linkclick; 75%
+desktop < ad; 43%
+desktop < search; 75%
+desktop < linkclick; 25%
+desktop > browse; 75%
+desktop > exit; 25%
+mobile > browse; 75%
+mobile > exit; 25%
+browse > addcart; 10%
+browse > anotherproduct; 70%
+browse > exit; 20%
+addcart > clearcart; 8%
+addcart > timeout; 20%
+addcart > checkout; 72%
+checkout > exit; 50%
+checkout > purchase; 50%

@@ -1,0 +1,44 @@
+visualizer dot
+edge color #ff0000
+edge textcolor #00ff00
+vertex color #ffff00
+vertex textcolor #ff00ff
+group color #0000ff
+
+rect explanation #ffff00; Default colors are:\nRed edges\nGreen edge texts\nGroups are blue(filled)\nVertices are filled yellow, but having pink texs
+default_yellow1 #ffff00
+default_yellow2 #ffff00
+default_yellow1 > #ff0000 default_yellow2; red edge, green text
+not_default_black #000000
+not_default_green #00ff00
+not_default_black > #ffff00 not_default_green; Edge is yellow(#ffff00),\nbut edge color is red(#ff0000)\n(overriding defaults)
+amarant #9F2B68; Amaranth colored node from variable
+not_default_darksalmon #E9967A
+not_default_peachpuff #FFDAB9
+not_default_darksalmon > #2E8B57 not_default_peachpuff; Edge is seagreen(#2E8B57),\nbut edge color is darkviolet(#9400D3)\n(overriding defaults)
+{agroup #0000ff; Here's a default colored group,ie.blue
+    group_default_yellow1 #ffff00
+    group_default_yellow #ffff00
+    group_not_default_black #000000
+    group_not_default_green #00ff00
+    group_not_default_darksalmon #E9967A
+    group_not_default_peachpuff #FFDAB9
+    group_default_yellow1 > #ff0000 group_default_yellow; red edge, green text
+    group_not_default_black > #ffff00 group_not_default_green; Edge is yellow(#ffff00),\nbut edge color is red(#ff0000)\n(overriding defaults)
+    group_not_default_darksalmon > #2E8B57 group_not_default_peachpuff; Edge is seagreen(#2E8B57),\nbut edge color is darkviolet($(darkvioleta))\n(overriding defaults)
+}
+
+{anondefaultgroup #0000ff; Here's a group with new context defaults
+    edge color #E9967A
+    vertex color #9F2B68
+    group_default_amaranth #9F2B68
+    group_not_default_black2 #000000
+    group_not_default_green2 #00ff00
+    {reddefaultgrp #ff0000; New default red group
+        xxx #9F2B68; Amaranth(#9F2B68) colored node
+    }
+
+    group_default_amaranth > #E9967A group_default_amaranth; darksalmon(#E9967A) edge, peachpuff(#FFDAB9) text
+    group_not_default_black2 > #ffff00 group_not_default_green2; Edge is yellow(#ffff00),\nbut edge color is red(#ff0000)\n(overriding defaults)
+}
+

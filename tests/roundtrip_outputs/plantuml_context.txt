@@ -1,0 +1,13 @@
+visualizer native_sequence
+
+x > y
+q < w
+{Group_1
+    User > A; DoWork
+    A > B; createRequesr
+    B > C; DoWork
+    C > B; WorkDone
+    B > A; RequestCreated
+}
+
+A > User; Done

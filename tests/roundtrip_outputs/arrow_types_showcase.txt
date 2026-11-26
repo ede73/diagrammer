@@ -1,0 +1,45 @@
+visualizer layered
+
+a1 > b1; directed arrow
+a2 < b2; reverse directed
+a3 <> b3; bidirectional
+a4 - b4; undirected line
+c1 .> d1; dotted directed
+c2 <. d2; dotted reverse
+c3 <.> d3; dotted bidirectional
+c4 -> d4; dashed directed
+c5 <- d5; dashed reverse
+c6 <-> d6; dashed bidirectional
+e1 => f1; double directed
+e2 <= f2; double reverse
+e3 <=> f3; double bidirectional
+g1 -| h1; flat stop head
+g2 |- h2; reverse flat stop
+g3 |-| h3; dual flat stop
+r1 --> r2; dashed arrow
+r3 ..> r4; dotted arrow
+r5 ==> r6; thick double arrow
+r7 <--> r8; bidirectional dashed
+r9 |--| r10; flat endpoints
+r11 |--> r12; flat to arrow
+{Group_1
+    m1
+    m2
+}
+
+{Group_2
+    m1 > m3; grouped pairwise
+    m1 > m4; grouped pairwise
+    m2 > m3; grouped pairwise
+    m2 > m4; grouped pairwise
+}
+
+p1 > q1; parallel fan-out fan-in
+p1 > q2; parallel fan-out fan-in
+p1 > q3; parallel fan-out fan-in
+p2 > q1; parallel fan-out fan-in
+p2 > q2; parallel fan-out fan-in
+p2 > q3; parallel fan-out fan-in
+p3 > q1; parallel fan-out fan-in
+p3 > q2; parallel fan-out fan-in
+p3 > q3; parallel fan-out fan-in

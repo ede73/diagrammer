@@ -1,0 +1,23 @@
+visualizer native_sequence
+
+User #38bdf8
+AuthServer #a855f7
+User > AuthServer; Login request :: HTTP POST /auth
+UserDB #34d399
+AuthServer > UserDB; Lookup credentials
+UserDB > AuthServer; Credentials record
+AuthServer . AuthServer; Validate password hash
+{alt_auth; alt Successful Authentication
+    AuthServer > User; Issue JWT token :: HMAC-SHA256
+}
+
+APIGateway #f59e0b
+User > APIGateway; Fetch profile data
+APIGateway - APIGateway; Phase 2: Data retrieval
+{loop_retry; loop Retry 3 times
+    Backend #ec4899
+    APIGateway > Backend; Query microservice
+    Backend > APIGateway; Service response
+}
+
+APIGateway > User; Profile payload

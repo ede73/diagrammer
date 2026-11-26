@@ -1,0 +1,9 @@
+visualizer network_bus
+
+cloud inet
+inet - router
+{Group_1
+    web01
+    web02
+}
+

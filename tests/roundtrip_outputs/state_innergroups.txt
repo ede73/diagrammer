@@ -1,0 +1,31 @@
+visualizer dot
+vertex color #ffff00
+
+outside1 #ff0000; Group to node(MUST BE RED)
+outside3 #ff0000; Inner group to node(MUST BE RED)
+{master
+    ma #ff0000; ma(MUST BE RED)
+    {innermaster1 #0000ff; BLUE group
+        ima1 #ff0000; ima1(MUST BE RED)
+    }
+
+    {innermaster2 #00ff00; GREEN group
+        ima2 #ff0000; ima2(MUST BE RED)
+    }
+
+}
+
+outside2 #ffff00; Node to group(MUST BE YELLOW)
+outside4 #ffff00; Node to inner group(MUST BE YELLOW)
+{other; Uncolored group
+    o #ffff00; o(MUST BE YELLOW)
+}
+
+ma > ima1
+ma > ima2
+ima1 > o
+ima2 > o
+outside2 > master
+master > outside1
+innermaster1 > outside3
+outside4 > innermaster2

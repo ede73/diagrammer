@@ -1,0 +1,14 @@
+visualizer dot
+
+{ClusterA #ff0000; Cluster A
+    ClusterA1
+    ClusterA2
+}
+
+{ClusterB #00ff00; Cluster B
+    ClusterB1
+    ClusterB2
+}
+
+ClusterA1 > ClusterB1; node to node
+ClusterA2 > ClusterB; node to group

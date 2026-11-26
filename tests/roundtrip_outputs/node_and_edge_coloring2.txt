@@ -1,0 +1,19 @@
+visualizer dot
+
+ablack
+b; label
+cblue #0000ff
+dred #ff0000; red with label, c with blue, b has label, a without, e links to f
+eblack > fblack
+gblack > hblack; g links to h
+iblue #0000ff
+iblue > j
+klightblue #00ffff
+klightblue > l; k links to l
+myellow #ffff00
+myellow > #ff00ff n
+ogray #777777
+ogray > #ff7777 p; o p link orange
+qred #ff0000
+rblue #0000ff
+qred > #00ff00 rblue; q r link green

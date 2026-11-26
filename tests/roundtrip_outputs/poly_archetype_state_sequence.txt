@@ -1,0 +1,17 @@
+visualizer state
+
+Start > Negotiation
+Negotiation > Process
+Process > Completed
+{Negotiation; Handshake Protocol
+    visualizer native_sequence
+    Client > Server; 1. SYN
+    Server > Client; 2. SYN-ACK
+    Client > Server; 3. ACK
+}
+
+{Process; Data Processing
+    Task1 > Task2
+    Task2 > Task3
+}
+

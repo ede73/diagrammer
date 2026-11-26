@@ -1,0 +1,16 @@
+visualizer dot
+
+{z; Group1
+    x
+}
+
+{a; Group2
+    b
+}
+
+{c; Group3
+    d
+}
+
+z > a; edge1
+z > c; edge1

@@ -1,0 +1,18 @@
+visualizer layered
+landscape
+edge color #38bdf8
+vertex color #0284c7
+vertex textcolor #ffffff
+
+theme {
+    background: #0f172a;
+    vertexcolor: #0284c7;
+    vertextextcolor: #ffffff;
+    edgecolor: #38bdf8;
+}
+
+layout {
+    direction: lr;
+    nodesep: 25;
+}
+

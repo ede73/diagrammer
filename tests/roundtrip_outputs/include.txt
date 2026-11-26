@@ -1,0 +1,9 @@
+visualizer layered
+
+include "sample_theme.txt"
+
+service_a; Gateway
+service_b; Auth Service
+service_c; User Store
+service_a > service_b
+service_b > service_c

@@ -1,0 +1,85 @@
+visualizer layered
+
+{GraphObject; GraphObject
+    label; +string
+    name; +string
+    color_; +string
+    textcolor; +string
+    url; +string
+}
+
+{GraphConnectable; GraphConnectable
+    noedges; +boolean
+    edgelabel; +string
+    getEdgeLabel; +():string
+    setEdgeLabel; +(edgeLabel:string)
+}
+
+{GraphContainer; GraphContainer
+    OBJECTS; +List<GraphConnectable>
+    ROOTVERTICES; +List<GraphConnectable>
+    equal_; +List<GraphConnectable>
+    getEqual; +():List<GraphConnectable>
+    setEqual; +(List<GraphConnectable>)
+}
+
+{GraphGroup; GraphGroup
+    exitvertex; +string
+    entryedge; +string
+    entrance; +GraphConnectable|GraphConnectable[]
+    setDefault; +setDefault(key:string, value:string)
+    getDefault; +(key:string):string
+}
+
+{GraphInner; GraphInner
+    isInnerGraph; +boolean=true
+    exit; +GraphConnectable
+    getEntrance; +():GraphConnectable|List<GraphConnectable>
+    setEntrance; +(GraphConnectable|List<GraphConnectable>)
+}
+
+{GraphEdge; GraphEdge
+    edgeType; +string
+    xleft; +GraphConnectable
+    xrigth; +GraphConnectable
+    lcompass; +string
+    rcompass; +string
+    edgetextcolor; +string
+    edgecolor; +string
+    container; +GraphConnectable
+    isDotted; +()
+    isDashed; +()
+    isBroken; +()
+    isBidirectional; +()
+    isUndirected; +()
+    isLeftPointingEdge; +()
+    isRightPointingEdge; +()
+}
+
+{GraphVertex; GraphVertex
+    shape_; +string
+    image; +string
+    style; +string
+    setStyle; +()
+    setShape; +()
+    setImage; +()
+}
+
+{GraphCanvas; GraphCanvas
+    EDGES; +List<GraphEdge>
+    generator_; +string
+    visualizer_; +string
+    shape__; +string
+    direction; +string
+    start_; +string
+    parseError; +(str:string,hash:string)
+    result; +(data:string)
+}
+
+GraphInner > GraphGroup
+GraphGroup > GraphContainer
+GraphContainer > GraphConnectable
+GraphConnectable > GraphObject
+GraphCanvas > GraphContainer
+GraphVertex > GraphConnectable
+GraphEdge > GraphObject

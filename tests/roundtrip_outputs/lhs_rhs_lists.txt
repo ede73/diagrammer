@@ -1,0 +1,32 @@
+visualizer circo
+
+q1 #ffff00
+z1 #0000ff
+z2 #555555
+q1 > #3333ff z1; Multiple RHS lists
+q1 > #3333ff z2; Multiple RHS lists
+q1 > #3333ff z3; Multiple RHS lists
+q1 > #3333ff z4; Multiple RHS lists
+q2 #00ffff
+w1 #ff0000
+w2 #00ff00
+q2 > #999999 w1
+q2 > #999999 w2
+q2 > #999999 w3
+q2 > #999999 w4
+a > e
+a > f
+a > g
+a > h
+b > e
+b > f
+b > g
+b > h
+c > e
+c > f
+c > g
+c > h
+d > e
+d > f
+d > g
+d > h

@@ -1,0 +1,25 @@
+visualizer dot
+
+q; tamakin
+w; on
+q > w
+{Group_1; something would happend
+    a1 > b1
+}
+
+{Group_2; something probably would not happen
+    a2 > b2
+}
+
+{Group_3; or if i see a flying bird
+    a3 > b3
+}
+
+{Group_4; else
+    a4 > b4
+}
+
+{Group_5; endif
+}
+
+outside > end

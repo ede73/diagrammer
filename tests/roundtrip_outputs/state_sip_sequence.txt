@@ -1,0 +1,33 @@
+visualizer native_sequence
+
+Alice #ff0000
+P1 #00ff00
+Alice > P1; INVITE
+P1 > Alice; 100 Trying
+P2 #00ff00
+P1 > P2; INVITE
+P2 > P1; 100 Trying
+Bob #0000ff
+P2 > Bob; INVITE
+Bob > P2; 100 Trying
+Bob > P2; 180 Ringing
+P2 > P1; 180 Ringing
+P1 > Alice; 180 Ringing
+Alice - Alice; Alice's client plays ringing
+Alice . Alice
+Alice - Alice; Bob answers
+Bob > P2; 200 Ok
+P2 > P1; 200 Ok
+P1 > Alice; 200 Ok
+Alice > P1; ACK
+P1 > P2; ACK
+P2 > Bob; ACK
+Alice - Alice; two way media
+Alice . Alice
+Alice - Alice; Bob hangs up
+Bob > P2; BYE
+P2 > Bob; 200 Ok
+P2 > P1; BYE
+P1 > P2; 200 Ok
+P1 > Alice; BYE
+Alice > P1; 200 Ok

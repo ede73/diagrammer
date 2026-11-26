@@ -1,0 +1,15 @@
+visualizer network_bus
+
+{dmz; y
+    web01
+    web02
+}
+
+{internal; x
+    db01
+}
+
+web01 - dmz
+web02 - dmz
+web01 - internal
+web02 - internal

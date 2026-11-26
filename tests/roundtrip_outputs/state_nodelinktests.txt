@@ -1,0 +1,10 @@
+visualizer state
+
+a > b; A2B
+a > c; A2C
+r > c; R2C
+q > w; Q2WER
+q > e; Q2WER
+q > r; Q2WER
+m1 > m2; M1toM2
+m1 > m3; M1toM3

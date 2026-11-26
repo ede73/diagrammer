@@ -1,0 +1,44 @@
+visualizer tree
+
+{System; Root
+    Core
+    Modules
+    Storage
+}
+
+Root
+{Group_1
+    Root > Core
+    Root > Modules
+    Root > Storage
+}
+
+{Group_2
+    Core > Parser
+    Core > AST
+    Core > Generator
+}
+
+{Group_3
+    Modules > Auth
+    Modules > Network
+    Modules > UI
+}
+
+{Group_4
+    Storage > Disk
+    Storage > Cache
+    Storage > Files
+}
+
+{Group_5
+    Parser > Lexer
+    Parser > Grammar
+}
+
+{Group_6
+    UI > Components
+    UI > Layout
+    UI > Theme
+}
+

@@ -1,0 +1,23 @@
+visualizer native_sequence
+
+aLINE > bLINE
+anl > bnl; This is label for EVENT, NOT node bnl
+aDOT .> bDOT
+aDASHED -> bDASHED
+aDUAL <> bDUAL
+aDUALDOTTED <.> bDUALDOTTED
+aDUALDASHED <-> bDUALDASHED
+AREVERSE < bREVERSE
+AREVERSEDOTTED <. bReverseDotted
+AREVERSEDASHED <- bReverseDashed
+aDotted . bDOTTED; Indicates time passing
+aDashed - bdasHed; Creates horizontal line
+alr </ bLR; broken event
+arr /> bRR; broken event
+a1 > #ff0000 b1
+a2 > b2; event label
+a3 > #ff0000 b3; event label
+a4 > b4
+a4 > c4
+c5 > a5
+d5 > a5

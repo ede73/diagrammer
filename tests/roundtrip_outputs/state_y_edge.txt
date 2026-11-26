@@ -1,0 +1,6 @@
+visualizer dot
+
+singularity y
+r > y
+y > splita
+y > splitb

@@ -1,0 +1,20 @@
+visualizer state
+start xstart
+vertex color #7473b3
+
+dashed idle #ff0000; idle\nevent
+xstart #7473b3
+xstart > idle
+start_forward #7473b3
+dotted moving_forward #7473b3
+stop_motor #7473b3
+idle > #00ff00 start_forward; on sound
+start_forward > #00ff00 moving_forward
+moving_forward > stop_motor; on touch
+start_backward #7473b3
+rounded moving_backward #7473b3
+moving_forward > start_backward; on sound
+start_backward > moving_backward
+moving_backward > #00ff00 start_forward; on sound
+moving_backward > stop_motor; on touch
+stop_motor > idle

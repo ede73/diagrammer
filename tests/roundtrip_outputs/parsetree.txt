@@ -1,0 +1,40 @@
+visualizer tree
+
+Sentence; Sentence
+Sentence > NP1
+Sentence > VP1
+dot1; .
+Sentence > dot1
+dot2; .
+dot1 > dot2
+NP1 > DT1
+NP1 > JJa1
+NP1 > JJb1
+NP1 > NN1
+DT1 > A
+JJa1 > rare
+JJb1 > black
+NN1 > squirrel
+VP1 > VBZ2
+VP1 > VP2
+VBZ2 > has
+VP2 > VBN
+VP2 > NP3
+VBN > become
+NP3 > NP4
+NP3 > PP4
+NP4 > DT5
+NP4 > JJ5
+NP4 > NN5
+DT5 > a
+JJ5 > regular
+NN5 > visitor
+PP4 > TO6
+PP4 > NP6
+TO6 > to
+NP6 > DT7
+NP6 > JJ7
+NP6 > NN7
+DT7 > a
+JJ7 > suburban
+NN7 > garden

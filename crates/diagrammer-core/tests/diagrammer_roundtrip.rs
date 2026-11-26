@@ -86,6 +86,9 @@ fn test_roundtrip_across_all_fixtures() {
         };
 
         let generated = DiagrammerGenerator::generate_diagrammer(&ast1);
+        let out_dir = Path::new("../../tests/roundtrip_outputs");
+        let _ = fs::create_dir_all(out_dir);
+        let _ = fs::write(out_dir.join(&filename), &generated);
 
         match AstBuilder::new().build(&generated) {
             Ok(ast2) => {

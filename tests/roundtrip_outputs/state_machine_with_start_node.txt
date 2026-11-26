@@ -1,0 +1,22 @@
+visualizer dot
+landscape
+start LR_0
+shape circle
+edge color #555599
+edge textcolor #ff0000
+vertex textcolor #00aa00
+
+LR_0 > #555599 LR_2; SS(B)
+LR_0 > #555599 LR_1; SS(S)
+LR_1 > #555599 LR_3; S($end)
+LR_2 > #555599 LR_6; SS(b)
+LR_2 > #555599 LR_5; SS(a)
+LR_2 > #555599 LR_4; S(A)
+LR_5 > #555599 LR_7; S(b)
+LR_5 > #555599 LR_5; S(a)
+LR_6 > #555599 LR_6; S(b)
+LR_6 > #555599 LR_5; S(a)
+LR_7 > #555599 LR_8; S(b)
+LR_7 > #555599 LR_5; S(a)
+LR_8 > #555599 LR_6; S(b)
+LR_8 > #555599 LR_5; S(a)

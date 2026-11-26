@@ -1,0 +1,25 @@
+visualizer dot
+shape rect
+vertex color #eeeeee
+
+ellipse a #aaaaaa; Activity starts
+b #eeeeee; onCreate()
+c #eeeeee; onStart()
+d #eeeeee; onResume()
+ellipse e #aaaaaa; Activity is running
+f #eeeeee; Another activity\ncomes in front of the activity
+g #eeeeee; onPause()
+h #eeeeee; This activity is no longer visible
+i #eeeeee; onStop()
+j #eeeeee; onDestroy()
+ellipse k #aaaaaa; Activity is\nshut down
+a > b
+b > c
+c > d
+d > e
+e > f
+f > g
+g > h
+h > i
+i > j
+j > k

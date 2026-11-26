@@ -1,0 +1,30 @@
+visualizer dot
+landscape
+edge color #f59e0b
+vertex color #3b82f6
+vertex textcolor #ffffff
+
+theme {
+    font: "Helvetica";
+    fontsize: 14;
+    color: #ffffff;
+    background: #1e1e2e;
+    vertexcolor: #3b82f6;
+    vertextextcolor: #ffffff;
+    edgecolor: #f59e0b;
+}
+
+layout {
+    engine: dot;
+    direction: lr;
+    nodesep: 20;
+    ranksep: 40;
+}
+
+frontend #3b82f6; Web Client
+backend #3b82f6; API Gateway
+database db #3b82f6; PostgreSQL
+cache #3b82f6; Redis
+frontend > #f59e0b backend
+backend > #f59e0b db
+frontend > #f59e0b cache

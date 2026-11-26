@@ -1,0 +1,19 @@
+visualizer layered
+
+WarehouseGrid > DispatchProtocol
+{WarehouseGrid; Storage Bays
+    visualizer grid
+    Bay1
+    Bay2
+    Bay3
+    Bay4
+}
+
+{DispatchProtocol; Delivery Handshake
+    visualizer native_sequence
+    Robot > Station; Pickup
+    Station > Robot; Ack
+}
+
+Bay1 > Station
+Station > Bay1

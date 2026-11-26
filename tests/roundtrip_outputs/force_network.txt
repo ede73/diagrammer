@@ -1,0 +1,29 @@
+visualizer force
+
+Hub
+{Group_1
+    Hub > NodeA
+    Hub > NodeB
+    Hub > NodeC
+    Hub > NodeD
+    Hub > NodeE
+}
+
+NodeA > NodeB
+NodeB > NodeC
+NodeC > NodeD
+NodeD > NodeE
+NodeE > NodeA
+Satellite
+{Group_2
+    Satellite > NodeA
+    Satellite > NodeC
+    Satellite > NodeE
+}
+
+Gateway
+{Group_3
+    Gateway > NodeB
+    Gateway > NodeD
+}
+

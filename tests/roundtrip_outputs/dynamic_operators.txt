@@ -1,0 +1,42 @@
+visualizer layered
+
+define auto (width=60, height=32) {
+    rectangle(h=18, rx=4, w=60, x=0, y=8);
+    polygon(points=12,8 20,0 42,0 50,8);
+    circle(cx=15, cy=26, r=6);
+    circle(cx=45, cy=26, r=6);
+}
+
+define dude (width=80, height=60) {
+    <svg viewBox="0 0 80 60">
+    <circle cx="40" cy="22" r="14" fill="#38bdf8" />
+    <path d="M 16 52 C 20 34, 60 34, 64 52" stroke="#38bdf8" stroke-width="3" fill="none" />
+  </svg>
+}
+
+define operator <> {
+    type: bidirectional;
+    style: dashed;
+    action: tls-handshake;
+    arrowhead: dude;
+}
+
+define operator <~> {
+    type: bidirectional;
+    style: dotted;
+    arrowhead: diamond;
+}
+
+define operator ~> {
+    style: dashed;
+    color: #10b981;
+    arrowhead: auto;
+}
+
+dude Alice
+dude Bob
+Alice <> Bob; Peer sync
+auto Taxi
+auto Bus
+Taxi <~> Bus; Fleet link
+Alice ~> #10b981 Taxi; Hails cab

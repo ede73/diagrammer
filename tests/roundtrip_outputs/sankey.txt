@@ -1,0 +1,27 @@
+visualizer sankey
+
+enter; Customer\nenter
+linkclick; Link on external website
+addcart; Add a product to cart
+anotherproduct; Check another product
+enter > ad; 700
+enter > search; 200
+enter > linkclick; 100
+mobile < ad; 399
+mobile < search; 50
+mobile < linkclick; 75
+desktop < ad; 301
+desktop < search; 150
+desktop < linkclick; 25
+desktop > browse; 357
+desktop > exit; 119
+mobile > browse; 393
+mobile > exit; 131
+browse > addcart; 75
+browse > anotherproduct; 525
+browse > exit; 150
+addcart > clearcart; 6
+addcart > timeout; 15
+addcart > checkout; 54
+checkout > exit; 27
+checkout > purchase; 27

@@ -1,0 +1,22 @@
+visualizer dot
+landscape
+
+a /wifi.png
+a > #ff0000 b
+a .> #00ff00 b
+a -> #0000ff b
+a - #00ffff b
+a . #ff00ff b
+c /wifi.png; a
+d; b
+d < #ff0000 c
+d <. #00ff00 c
+d <- #0000ff c
+d - #00ffff c
+d . #ff00ff c
+special <> link
+special <.> link
+special <-> link
+special /> link
+sd . sd
+sd - sd

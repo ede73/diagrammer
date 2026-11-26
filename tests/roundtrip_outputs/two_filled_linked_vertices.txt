@@ -1,0 +1,6 @@
+visualizer dot
+
+first #0000ff; Configured as blue
+second #ff0000; Overridden to red
+first > #111111 second
+first > #ff0000 second

@@ -1,0 +1,20 @@
+visualizer dot
+
+a
+b #ff0000
+c; b is red
+d #00ff00; Green
+e > f
+g > #ff00ff h
+i #ffff00
+i > j
+k > l; Link with label
+za
+zb #ff0000
+zc; zb red
+zd #00ff00; Green node
+ze > #772222 f
+zg > #ff00ff h
+zi #ffff00
+zi > #aaaaaa j
+zk > #f0f0f0 l; Subnode link

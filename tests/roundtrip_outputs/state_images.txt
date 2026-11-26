@@ -1,0 +1,53 @@
+visualizer dot
+
+a /barcode.png
+b /basestation.png
+c /battery.png
+d /camera.png
+e /cpu.png
+f /documents.png
+a > d
+a > e
+a > f
+b > d
+b > e
+b > f
+c > d
+c > e
+c > f
+a1 /actor1.png
+b1 /keyboard.png
+c1 /laptop.png
+d1 /laser.png
+e1 /monitor.png
+f1 /mouse.png
+a1 > d1
+a1 > e1
+a1 > f1
+b1 > d1
+b1 > e1
+b1 > f1
+c1 > d1
+c1 > e1
+c1 > f1
+a2 /actor2.png
+b2 /printer.png
+c2 /ram.png
+d2 /satellite.png
+e2 /scanner.png
+f2 /sim.png
+a2 > d2
+a2 > e2
+a2 > f2
+b2 > d2
+b2 > e2
+b2 > f2
+c2 > d2
+c2 > e2
+c2 > f2
+a3 /actor3.png
+u /usbmemory.png
+w /wifi.png
+u > w
+a1 > a2
+a2 > a3

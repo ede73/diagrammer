@@ -1,0 +1,51 @@
+visualizer ast_record
+portrait
+edge color #ff0000
+
+{GraphObject; GraphObject
+    name #ccccff
+    color #ccccff
+    textColor #ccccff
+    label #ccccff; label\nspecial syntax with :: for links\n(label::xlabel)
+}
+
+{GraphRoot; GraphRoot:GraphObject
+    database OBJECTS1; OBJECTS
+    xGenerator #ccffcc; generator
+    xVisualizer #ccffcc; visualizer
+    direction #ccffcc
+    xStart #ccffcc; start
+    xEqual #ccffcc; equal
+    currentShape
+    default2; default\nnodecolor\ngroupcolor\nlinkcolor
+}
+
+{xGroup; Group:GraphObject
+    equal2; equal
+    database OBJECTS2; OBJECTS
+}
+
+{GNode; Node:GraphObject
+    xShape; shape
+    image
+    style
+}
+
+{Link; Link:GraphObject
+    linkType
+    xleft
+    xright
+}
+
+GraphObject .> #0000ff GraphRoot; extends(GraphObject->GraphRoot)
+GraphObject .> #0000ff GNode; extends(GraphObject->GNode)
+GraphObject .> #0000ff xGroup; extends(GraphObject->xGroup)
+GraphObject .> #0000ff Link; extends::extends(GraphObject->Link)
+xleft <-> #00ff00 GNode; links
+xleft <-> #00ff00 xGroup; links
+xright <-> #00ff00 xGroup; links
+xright <-> #00ff00 GNode; links
+OBJECTS1 > #ff0000 GNode; contains
+OBJECTS1 > #ff0000 xGroup; contains
+OBJECTS2 > #ff0000 GNode; contains
+OBJECTS2 > #ff0000 xGroup; contains

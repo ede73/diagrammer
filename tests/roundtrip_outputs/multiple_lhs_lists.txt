@@ -1,0 +1,15 @@
+visualizer dot
+portrait
+
+z1 #ff0000
+z2 #00ff00
+z4 #0000ff
+q1 #ff00ff
+z1 > q1; Multiple LHS lists
+z2 > q1; Multiple LHS lists
+z3 > q1; Multiple LHS lists
+z4 > q1; Multiple LHS lists
+w1 > #00ffff q1
+w2 > #00ffff q1
+w3 > #00ffff q1
+w4 > #00ffff q1
